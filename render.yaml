@@ -1,0 +1,16 @@
+# Render Blueprint: New > Blueprint > pick this repository.
+services:
+  - type: web
+    name: twofold
+    runtime: node
+    plan: starter            # paid tier: always on, and allows the disk below
+    buildCommand: "true"     # no dependencies, nothing to build
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATA_DIR
+        value: /data
+    disk:                    # stories are saved here and survive restarts/redeploys
+      name: stories
+      mountPath: /data
+      sizeGB: 1

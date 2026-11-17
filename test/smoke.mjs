@@ -1,0 +1,63 @@
+// Protocol-level test, no browser needed: roles, turn order, validation, turn clock.
+import { spawn } from 'node:child_process';
+import assert from 'node:assert';
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
+const PORT = 3124, base = `http://localhost:${PORT}`;
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'twofold-'));
+const srv = spawn('node', [new URL('../server.js', import.meta.url).pathname], { env: { ...process.env, PORT, DATA_DIR: dataDir }, stdio: 'inherit' });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const post = async (p, body) => { const r = await fetch(base + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, ...(await r.json()) }; };
+function listen(code, token) { // minimal SSE reader; .state is always the latest view
+  const o = { state: null, ctl: new AbortController() };
+  fetch(`${base}/api/rooms/${code}/events?token=${token}`, { signal: o.ctl.signal }).then(async (r) => {
+    let buf = ''; const dec = new TextDecoder();
+    for await (const chunk of r.body) { buf += dec.decode(chunk); let i; while ((i = buf.indexOf('\n\n')) >= 0) { const m = buf.slice(0, i); buf = buf.slice(i + 2); if (m.startsWith('data: ')) o.state = JSON.parse(m.slice(6)); } }
+  }).catch(() => {});
+  return o;
+}
+try {
+  await sleep(600);
+  const D = 'director-token-1', P = 'player-token-22', X = 'stranger-token-3';
+  const { code } = await post('/api/rooms', { token: D, name: 'Mia' });
+  const act = (token, type, data) => post(`/api/rooms/${code}/act`, { token, type, ...data });
+  assert.equal((await act(D, 'submit', { turn: 0, scene: {} })).status, 409, 'cannot start without a player');
+  assert.equal((await post(`/api/rooms/${code}/join`, { token: P, name: 'Sam' })).role, 'player');
+  assert.equal((await post(`/api/rooms/${code}/join`, { token: X })).role, 'spectator');
+  assert.equal((await post('/api/rooms/ZZZZZ/join', { token: X })).status, 404);
+  const d = listen(code, D), p = listen(code, P);
+  await sleep(300);
+  assert.equal(d.state.you, 'director'); assert.equal(p.state.you, 'player'); assert.equal(p.state.online.director, true);
+  assert.equal((await act(P, 'settings', { turnSeconds: 1 })).status, 403);
+  assert.equal((await act(X, 'end', {})).status, 403);
+  await act(D, 'settings', { turnSeconds: 1 });
+  assert.equal((await act(P, 'submit', { turn: 0, say: 'hi' })).stale, true, 'player cannot act on the director turn');
+  const scene = { backdrop: 'b:cave', mood: 'm:eerie', narration: 'x'.repeat(999), heroId: 'h', entities: [{ id: 'h', asset: 'e:🧑', x: 5, y: -3, scale: 99 }, { id: 'h', asset: 'e:🐉', say: 'Roar' }, { asset: '' }] };
+  await act(D, 'submit', { turn: 0, scene });
+  await sleep(200);
+  let s = p.state;
+  assert.equal(s.turn, 1); assert.equal(s.whose, 'player'); assert.equal(s.scene.narration.length, 240);
+  assert.equal(s.scene.entities.length, 2); assert.notEqual(s.scene.entities[1].id, 'h');
+  assert.deepEqual([s.scene.entities[0].x, s.scene.entities[0].y, s.scene.entities[0].scale], [1, 0, 5]);
+  assert(s.remainingMs > 0 && !s.paused, 'clock runs');
+  assert.equal((await act(D, 'submit', { turn: 1, scene })).stale, true);
+  await act(P, 'submit', { turn: 1, x: 0.25, y: 0.5, say: 'Hello', action: 'waves' });
+  assert.equal((await act(P, 'submit', { turn: 1, x: 0.9, y: 0.9, say: 'dup' })).stale, true, 'duplicate submit ignored');
+  await sleep(200); s = d.state;
+  assert.equal(s.turn, 2); assert.equal(s.scene.action, 'waves'); assert.equal(s.scene.entities[0].say, 'Hello'); assert.equal(s.scene.entities[0].x, 0.25);
+  assert.equal(s.scene.entities[1].say, 'Roar', 'player cannot touch other entities');
+  await sleep(1000 + 4000 + 400);                       // director lets the clock run out (1s + grace)
+  s = d.state; assert.equal(s.turn, 3, 'timed-out turn passes'); assert.equal(s.lastTimeout, true); assert.equal(s.whose, 'player');
+  p.ctl.abort(); await sleep(300);                      // player drops: clock must pause
+  s = d.state; assert.equal(s.paused, true); assert.equal(s.online.player, false);
+  const left = s.remainingMs; await sleep(1500); assert.equal(d.state.turn, 3, 'no timeout while paused');
+  const p2 = listen(code, P); await sleep(300); assert.equal(d.state.paused, false); assert(d.state.remainingMs <= left);
+  const gen = await act(D, 'generate', { kind: 'backdrop', prompt: 'purple night swamp' });
+  const img = await fetch(`${base}/api/rooms/${code}/assets/${gen.asset.id}`);
+  assert.equal(img.headers.get('content-type'), 'image/svg+xml'); assert((await img.text()).startsWith('<svg'));
+  assert.equal((await act(D, 'addAsset', { kind: 'sprite', dataUrl: 'data:text/html;base64,PHNjcmlwdD4=' })).status, 400);
+  const hist = await (await fetch(`${base}/api/rooms/${code}/history`)).json();
+  assert.equal(hist.history.length, 3);
+  await act(D, 'end', {}); await sleep(200); assert.equal(p2.state.ended, true); assert.equal(p2.state.remainingMs, null);
+  d.ctl.abort(); p2.ctl.abort();
+  console.log('SMOKE OK');
+} finally { srv.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); }
