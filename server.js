@@ -16,7 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { generateAsset } = require('./providers');
-const { botMove, botName } = require('./bots');
+const { botMove, botName, randomPlace } = require('./bots');
 
 const PORT = Number(process.env.PORT) || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
@@ -58,37 +58,105 @@ function newCode() {
 function newScene() {
   return {
     backdrop: 'b:room', mood: 'm:none', narration: '', action: '', heroId: 'hero',
-    entities: [{ id: 'hero', asset: 'e:🧑', x: 0.5, y: 0.78, scale: 1, flip: false, say: '' }],
+    entities: [{ id: 'hero', asset: 's:person', x: 0.5, y: 0.78, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' }],
+    drawing: [], weather: '',                          // persistent decoration
+    tracks: [], burst: '', sfx: '', card: '', choices: [], // the Director's one-turn extras
+    sheet: { inv: [], stats: [] },                     // inventory + stats (story-type layers)
+    target: null, use: null, roll: null,               // the Player's one-turn extras (+ dice)
   };
+}
+/* Old saved stories predate some fields. */
+function upgradeScene(sc) {
+  const d = newScene();
+  for (const k of Object.keys(d)) if (sc[k] === undefined) sc[k] = k === 'entities' ? [] : d[k];
+  sc.sheet.inv = sc.sheet.inv || []; sc.sheet.stats = sc.sheet.stats || [];
+  return sc;
+}
+
+const TYPES = { free: { inventory: false, stats: false, dice: false }, adventure: { inventory: true, stats: true, dice: true } };
+function cleanRules(r) {
+  const type = r && TYPES[r.type] ? r.type : 'free';
+  const m = (r && r.modules) || TYPES[type];
+  return { type, modules: { inventory: !!m.inventory, stats: !!m.stats, dice: !!m.dice } };
+}
+
+const HEX = /^#[0-9a-fA-F]{6}$/;
+const r3 = (v) => Math.round(v * 1000) / 1000;
+const arr = (v) => (Array.isArray(v) ? v : []);
+const rollDie = (sides) => ([6, 20].includes(sides) ? { sides, value: 1 + crypto.randomInt(sides) } : null);
+
+function cleanSheet(s) {
+  const inv = [], stats = [], seen = new Set();
+  const newId = (v) => { let id = str(v, 24) || uid(); if (seen.has(id)) id = uid(); seen.add(id); return id; };
+  for (const it of arr(s && s.inv).slice(0, 24)) {
+    if (!it || typeof it !== 'object' || !str(it.asset, 80)) continue;
+    inv.push({ id: newId(it.id), asset: str(it.asset, 80), name: str(it.name, 30) });
+  }
+  for (const st of arr(s && s.stats).slice(0, 8)) {
+    if (!st || typeof st !== 'object' || !str(st.name, 20)) continue;
+    const max = st.max == null || st.max === '' ? null : Math.round(num(st.max, 0, 9999, 0));
+    stats.push({ id: newId(st.id), name: str(st.name, 20), value: Math.round(num(st.value, -9999, 9999, 0)), max });
+  }
+  return { inv, stats };
 }
 
 function cleanScene(s, prev) {
   const seen = new Set();
   const entities = [];
-  for (const e of Array.isArray(s && s.entities) ? s.entities.slice(0, MAX_ENTITIES) : []) {
+  for (const e of arr(s && s.entities).slice(0, MAX_ENTITIES)) {
     if (!e || typeof e !== 'object') continue;
     let id = str(e.id, 24) || uid();
     if (seen.has(id)) id = uid();
-    seen.add(id);
     const asset = str(e.asset, 80);
     if (!asset) continue;
+    seen.add(id);
     entities.push({
-      id, asset, x: num(e.x, 0, 1, 0.5), y: num(e.y, 0, 1, 0.5),
-      scale: num(e.scale, 0.4, 5, 1), flip: !!e.flip, say: str(e.say, 160),
+      id, asset, x: num(e.x, 0, 1, 0.5), y: num(e.y, 0, 1, 0.5), scale: num(e.scale, 0.3, 6, 1), flip: !!e.flip,
+      rot: Math.round(num(e.rot, -360, 360, 0)), say: str(e.say, 160), fx: str(e.fx, 12), emote: str(e.emote, 16),
     });
   }
-  const heroId = seen.has(s.heroId) ? s.heroId : null;
+  const drawing = [];
+  for (const d of arr(s.drawing).slice(0, 60)) {
+    if (!d || !Array.isArray(d.pts)) continue;
+    const pts = d.pts.slice(0, 400).map((v) => r3(num(v, 0, 1, 0)));
+    if (pts.length % 2) pts.pop();
+    if (pts.length >= 4) drawing.push({ id: str(d.id, 12) || uid(), c: HEX.test(d.c) ? d.c : '#ffffff', w: num(d.w, 1, 14, 4), pts });
+  }
+  const tracks = [];   // recorded motion: flat [ms, x, y, ms, x, y, ...], at most 10 seconds
+  for (const t of arr(s.tracks).slice(0, 30)) {
+    if (!t || !seen.has(t.id) || !Array.isArray(t.pts) || tracks.some((x) => x.id === t.id)) continue;
+    const pts = []; let last = 0;
+    for (let i = 0; i + 2 < t.pts.length && i < 660; i += 3) {
+      last = Math.max(last, Math.round(num(t.pts[i], 0, 10000, 0)));
+      pts.push(last, r3(num(t.pts[i + 1], 0, 1, 0)), r3(num(t.pts[i + 2], 0, 1, 0)));
+    }
+    if (pts.length >= 6) tracks.push({ id: t.id, pts });
+  }
   return {
-    backdrop: str(s.backdrop, 80) || prev.backdrop,
-    mood: str(s.mood, 40) || 'm:none',
-    narration: str(s.narration, 240),
-    action: '',
-    heroId, entities,
+    backdrop: str(s.backdrop, 80) || prev.backdrop, mood: str(s.mood, 40) || 'm:none',
+    narration: str(s.narration, 240), action: '', heroId: seen.has(s.heroId) ? s.heroId : null, entities,
+    drawing, weather: str(s.weather, 12), tracks, burst: str(s.burst, 12), sfx: str(s.sfx, 12), card: str(s.card, 60),
+    choices: arr(s.choices).map((c) => str(c, 40)).filter(Boolean).slice(0, 4),
+    sheet: cleanSheet(s.sheet), target: null, use: null, roll: null,
   };
+}
+
+/* How long the other side will be watching this turn play out, so it is not charged to their clock. */
+function cutEstimate(sc, before) {
+  const old = new Map((before ? before.entities : []).map((e) => [e.id, e.say]));
+  let ms = 1500;
+  for (const t of sc.tracks) ms = Math.max(ms, 900 + t.pts[t.pts.length - 3]);
+  for (const e of sc.entities) if (e.say && old.get(e.id) !== e.say) ms += 900 + 45 * e.say.length;
+  if (sc.narration && !(before && before.narration === sc.narration)) ms += Math.min(4500, 900 + 40 * sc.narration.length);
+  if (sc.card) ms += 2100;
+  if (sc.roll) ms += 1700;
+  if (sc.action || sc.target || sc.use) ms += 1300;
+  return Math.min(ms, 30000);
 }
 
 /* ---------- rooms ---------- */
 function roleOf(room, token) {
+  if (room.hotseat && token && token === room.tokens.director) return room.whose;   // one person plays both sides
   if (token && token === room.tokens.director) return 'director';
   if (token && token === room.tokens.player) return 'player';
   return 'spectator';
@@ -112,6 +180,8 @@ function view(room, role) {
     paused: timed && room.deadline == null,
     scene: room.scene,
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
+    before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
+    rules: room.rules, hotseat: !!room.hotseat,
     historyLen: room.history.length, bot: room.bot || null,
     lastTimeout: room.lastTimeout,
   };
@@ -153,7 +223,10 @@ function syncClock(room) {
 
 /* Commit the current scene as a finished turn and hand over to the other side. */
 function advance(room, timeout) {
-  if (timeout) room.scene.action = room.whose === 'player' ? '' : room.scene.action;
+  if (timeout) {   // nothing new was submitted: drop every one-turn extra so it does not play twice
+    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, use: null, roll: null });
+    if (room.whose === 'player') room.scene.choices = [];
+  }
   room.history.push({ turn: room.turn, by: room.whose, at: Date.now(), timeout: !!timeout, scene: clone(room.scene) });
   if (room.history.length > MAX_HISTORY) room.history.shift();
   room.turn += 1;
@@ -161,7 +234,7 @@ function advance(room, timeout) {
   room.lastTimeout = !!timeout;
   clearTimeout(timers.get(room.code));
   room.deadline = null;
-  room.remaining = room.settings.turnSeconds > 0 ? room.settings.turnSeconds * 1000 : null;
+  room.remaining = room.settings.turnSeconds > 0 ? room.settings.turnSeconds * 1000 + cutEstimate(room.scene, room.history.length > 1 ? room.history[room.history.length - 2].scene : null) : null;
   syncClock(room);
   touch(room);
   broadcast(room);
@@ -178,7 +251,7 @@ function maybeBot(room) {
     try {
       if (room.turn !== turn || room.ended || rooms.get(room.code) !== room) return;
       room.botMemory = room.botMemory || {};
-      const move = await botMove({ role: room.bot, scene: clone(room.scene), names: room.names, turn, memory: room.botMemory, history: room.history.slice(-6) });
+      const move = await botMove({ rules: room.rules, role: room.bot, scene: clone(room.scene), names: room.names, turn, memory: room.botMemory, history: room.history.slice(-6) });
       botBusy.delete(room.code);
       if (room.turn === turn && !room.ended) await act(room, room.tokens[room.bot], { ...move, type: 'submit', turn });
     } catch (e) { console.error('Bot turn failed:', e); } finally { botBusy.delete(room.code); }
@@ -206,14 +279,23 @@ async function act(room, token, body) {
       if (role === 'director') {
         if (!room.tokens.player) throw fail(409, 'Waiting for the Player to join');
         room.scene = cleanScene(body.scene || {}, room.scene);
+        const roll = rollDie(body.roll);
+        if (roll) room.scene.roll = { by: 'director', ...roll };
       } else {
         const hero = room.scene.entities.find((e) => e.id === room.scene.heroId);
         if (hero) {
           hero.x = num(body.x, 0, 1, hero.x);
           hero.y = num(body.y, 0, 1, hero.y);
           hero.say = str(body.say, 160);
+          hero.emote = str(body.emote, 16);
         }
-        room.scene.action = str(body.action, 160);
+        const sc = room.scene;
+        sc.action = str(body.action, 160);
+        sc.target = sc.entities.some((e) => e.id === body.target && e.id !== sc.heroId) ? body.target : null;
+        sc.use = sc.sheet.inv.some((i) => i.id === body.use) ? body.use : null;
+        const roll = rollDie(body.roll);
+        sc.roll = roll ? { by: 'player', ...roll } : null;
+        sc.tracks = []; sc.burst = ''; sc.sfx = ''; sc.card = ''; sc.choices = [];   // the Director's one-turn extras are over
       }
       advance(room, false);
       return { ok: true };
@@ -221,8 +303,13 @@ async function act(room, token, body) {
     case 'settings': {
       directorOnly();
       room.settings.turnSeconds = Math.round(num(body.turnSeconds, 0, 600, room.settings.turnSeconds));
+      if (body.rules && typeof body.rules === 'object') room.rules = cleanRules(body.rules);
       touch(room); broadcast(room);
       return { ok: true };
+    }
+    case 'randomScene': {
+      directorOnly();
+      return { ok: true, place: randomPlace() };
     }
     case 'end': {
       directorOnly();
@@ -265,6 +352,9 @@ function loadRooms() {
     try {
       const room = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8'));
       if (room.deadline != null) { room.remaining = Math.max(0, room.deadline - Date.now()); room.deadline = null; }
+      upgradeScene(room.scene);
+      for (const hst of room.history) upgradeScene(hst.scene);
+      room.rules = cleanRules(room.rules);
       rooms.set(room.code, room);
     } catch (e) { console.error('Could not load', f, e.message); }
   }
@@ -346,15 +436,21 @@ async function handle(req, res) {
     if (!validToken(body.token)) throw fail(400, 'Bad token');
     if (rooms.size >= MAX_ROOMS) throw fail(503, 'Server is full, try again later');
     const role = body.role === 'player' ? 'player' : 'director';
+    const mode = body.mode === 'hotseat' ? 'hotseat' : body.mode === 'bot' || body.bot ? 'bot' : 'pair';
     const room = {
       code: newCode(), createdAt: Date.now(), updatedAt: Date.now(),
       tokens: { director: null, player: null }, names: { director: 'Director', player: 'Player' },
       settings: { turnSeconds: 60 }, turn: 0, whose: 'director', deadline: null, remaining: null,
       ended: false, lastTimeout: false, scene: newScene(), history: [], assets: [],
+      rules: cleanRules({ type: mode === 'bot' && role === 'player' ? 'adventure' : 'free' }),
     };
     room.tokens[role] = body.token;
     room.names[role] = str(body.name, 20) || room.names[role];
-    if (body.bot) {                       // solo play: the other side is an AI partner
+    if (mode === 'hotseat') {             // one person, one device, both sides
+      room.hotseat = true;
+      room.tokens.director = room.tokens.player = body.token;
+      room.names = { director: 'Director', player: 'Player' };
+    } else if (mode === 'bot') {          // solo play: the other side is an AI partner
       room.bot = role === 'director' ? 'player' : 'director';
       room.tokens[room.bot] = 'bot-' + crypto.randomBytes(16).toString('hex');
       room.names[room.bot] = botName();

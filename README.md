@@ -18,14 +18,49 @@ mount a persistent disk there if stories should survive redeploys.
 
 ## How a game goes
 
-1. One person starts a story and shares the invite link (or the 5-letter code).
-2. The Director sets the stage with no time limit and taps **Begin the story**.
-3. Turns alternate, each on a clock (1 minute by default, changeable under ⚙️ More):
-   - **Player:** tap/drag the stage to move, type something to say and/or do, end turn.
-   - **Director:** sees what the Player did, then drags things around, adds or removes
-     cast, makes characters speak, changes backdrop and music, narrates, ends turn.
+1. Start a story. With a partner: share the invite link or 5-letter code. On your own:
+   **Solo Player / Solo Director** (an AI takes the other seat) or **Play both sides**
+   (you take every turn yourself, handy for trying things out).
+2. The Director sets the stage with no time limit, picks a story type, and taps
+   **Begin the story**.
+3. Turns alternate, each on a clock (1 minute by default, changeable under ⚙️ More).
+   Every finished turn is first played back to the other side as a short cut scene
+   (things glide, recorded moves play, lines appear one by one), then they take over.
+   - **Player:** tap/drag to move, say and/or do something, pick an emote, tap an offered
+     choice, reach for a thing, use an inventory item, roll a die.
+   - **Director:** everything else — see the tabs below.
 4. If the clock runs out, the turn is sent as it stands.
-5. 📖 shows every turn so far as a flipbook, and can download the story as a file.
+5. 📖 replays the whole story and can download it as a file.
+
+### The Director's tabs
+
+| Tab | What it does |
+| --- | --- |
+| 🎭 Cast | 670+ searchable sprites in 14 categories, plus your own photos, generated assets, or any emoji. Select one on stage to make it speak, resize, rotate, flip, copy, give it a looping effect or an emote, make it the hero, or give it to the Player. |
+| 🌄 Place | 35 backdrops, plus your own. |
+| 🎵 Mood | Background music. |
+| 🎬 Animate | Record up to 10 seconds of movement by dragging characters (one after another or at the same time), preview the turn, and draw freehand on the stage. |
+| ✨ Extras | Weather, a one-off moment (shake, flash, confetti…), a sound effect, a title card, quick choices for the Player, a dice roll, a random scene, story ideas. |
+| ⚙️ More | Story type and layers, turn time, invite link, end the story. |
+
+### Story types and layers
+
+A story type is a preset of **layers**; the Director can also switch each layer on or
+off at any time.
+
+| Layer | Adds |
+| --- | --- |
+| 🎒 Inventory | The Player can reach for things on stage; the Director decides whether they get them. Items can be used on a later turn, and the Director decides whether they are used up. |
+| ❤️ Stats | Named counters (Health, Gold, anything) that the Director adjusts. |
+| 🎲 Dice | Either side can attach a d6 or d20 roll to a turn; the server rolls it. |
+
+Types so far: **Free play** (no layers) and **Adventure** (all three). To add a type,
+add a line to `TYPES` in `public/app.js` and `server.js`; to add a layer, add it to
+`MODULES` and the scene fields it needs (`newScene`/`cleanScene` in `server.js`).
+
+On a computer the stage sits on the left and the tools on the right; Ctrl+Enter ends
+the turn, and with something selected the arrow keys move it, `+`/`-` resize, `r`
+rotates, `f` flips and Delete removes.
 
 ## Built to be stable
 
@@ -42,8 +77,11 @@ mount a persistent disk there if stories should survive redeploys.
 | `server.js` | Rooms, roles, turn order, clock, validation, persistence, HTTP + SSE |
 | `providers.js` | Asset generation hook (AI goes here) |
 | `bots.js` | AI partners for solo play (scripted; language-model hook) |
-| `public/app.js` | The whole client UI |
-| `public/catalog.js` | Built-in sprites and backdrops, asset id scheme |
+| `public/app.js` | The client UI |
+| `public/stage.js` | Draws a scene; plays a turn back as a cut scene |
+| `public/catalog.js` | Built-in sprite and backdrop library, asset ids, art packs |
+| `public/packs/` | Higher-quality art that replaces the placeholders (empty by default) |
+| `tools/upgrade-sprites.js` | Fills `public/packs/` from an image service |
 | `public/audio.js` | Music moods (generative WebAudio) |
 | `test/` | `npm test` (protocol) and `npm run test:e2e` (two phones, needs Playwright) |
 
@@ -57,17 +95,20 @@ no network. To put a language model behind either seat, export `playerMove(ctx)`
 and/or `directorMove(ctx)` from a module and start with `BOT_PROVIDER=./my-bot.js`
 (the contract is documented at the top of `bots.js`).
 
-## Adding AI-generated assets
+## Art: placeholders now, real art later
 
-Scenes only store asset **ids** (`e:🧙`, `b:forest`, `c:<id>`), never pixels. The
-Director's "✨ Create" box sends a text prompt to the server, which calls one function
-and stores whatever image comes back as a custom asset of that story:
+Scenes only store asset **ids** (`s:wizard-mage`, `b:forest`, `c:<id>`), never pixels.
+Every built-in sprite currently looks like an emoji and every backdrop is a CSS
+gradient. Two hooks raise the quality without touching the game:
+
+**1. One function for an image service.** The Director's "✨ Create" box and the bulk
+tool below both call it:
 
 ```js
 // my-provider.js
 exports.generate = async ({ kind, prompt }) => {
   // kind is 'sprite' (transparent background) or 'backdrop' (4:3)
-  const png = await callYourImageModel(prompt, kind);
+  const png = await callYourImageService(prompt, kind);
   return { mime: 'image/png', data: png, name: prompt };   // or null to fall back
 };
 ```
@@ -76,5 +117,18 @@ exports.generate = async ({ kind, prompt }) => {
 ASSET_PROVIDER=./my-provider.js node server.js
 ```
 
-Without a provider, a small built-in procedural generator answers, so the whole
-pipeline works today. Music moods follow the same idea in `public/audio.js`.
+**2. Art packs for the built-in library.** Anything listed in
+`public/packs/manifest.json` replaces the placeholder with that slug everywhere,
+including in stories already told:
+
+```bash
+ASSET_PROVIDER=./my-provider.js node tools/upgrade-sprites.js --only=fantasy --limit=10 --style="pixel art, 64px"
+```
+
+Run it without `--only`/`--limit` to redo the whole library (700+ images, so check
+the service's price first). You can also drop hand-made images into `public/packs/`
+and list them in the manifest yourself.
+
+Without a provider, a small built-in procedural generator answers the "Create" box,
+so the pipeline works today. Music moods and sound effects follow the same idea in
+`public/audio.js`.

@@ -37,7 +37,7 @@ try {
   let s = p.state;
   assert.equal(s.turn, 1); assert.equal(s.whose, 'player'); assert.equal(s.scene.narration.length, 240);
   assert.equal(s.scene.entities.length, 2); assert.notEqual(s.scene.entities[1].id, 'h');
-  assert.deepEqual([s.scene.entities[0].x, s.scene.entities[0].y, s.scene.entities[0].scale], [1, 0, 5]);
+  assert.deepEqual([s.scene.entities[0].x, s.scene.entities[0].y, s.scene.entities[0].scale], [1, 0, 6]);
   assert(s.remainingMs > 0 && !s.paused, 'clock runs');
   assert.equal((await act(D, 'submit', { turn: 1, scene })).stale, true);
   await act(P, 'submit', { turn: 1, x: 0.25, y: 0.5, say: 'Hello', action: 'waves' });
@@ -45,7 +45,7 @@ try {
   await sleep(200); s = d.state;
   assert.equal(s.turn, 2); assert.equal(s.scene.action, 'waves'); assert.equal(s.scene.entities[0].say, 'Hello'); assert.equal(s.scene.entities[0].x, 0.25);
   assert.equal(s.scene.entities[1].say, 'Roar', 'player cannot touch other entities');
-  await sleep(1000 + 4000 + 400);                       // director lets the clock run out (1s + grace)
+  await sleep(1000 + 4000 + 400 + 6000);   // + cut-scene allowance                       // director lets the clock run out (1s + grace)
   s = d.state; assert.equal(s.turn, 3, 'timed-out turn passes'); assert.equal(s.lastTimeout, true); assert.equal(s.whose, 'player');
   p.ctl.abort(); await sleep(300);                      // player drops: clock must pause
   s = d.state; assert.equal(s.paused, true); assert.equal(s.online.player, false);

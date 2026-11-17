@@ -41,7 +41,34 @@ function restart() {
   }, d * 1000);
 }
 
+/* One-shot sound effects, synthesised. A pack could map these names to recordings later. */
+export const SFX = [['', '🔇 None'], ['boom', '💥 Boom'], ['knock', '🚪 Knock'], ['bell', '🔔 Bell'], ['magic', '✨ Magic'], ['fanfare', '🎺 Fanfare'], ['fail', '📉 Fail'], ['alarm', '🚨 Alarm'], ['heart', '💓 Heartbeat'], ['laser', '🔫 Zap']];
+function noise(len, vol, cutoff) {
+  const n = Math.floor(ctx.sampleRate * len), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 2;
+  const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = buf; f.type = 'lowpass'; f.frequency.value = cutoff; g.gain.value = vol;
+  src.connect(f).connect(g).connect(master); src.start();
+}
+function playSfx(name) {
+  if (!ctx || muted || ctx.state !== 'running') return;
+  const seq = (notes, step, wave, len = step * 1.6) => notes.forEach((n, i) => n != null && tone(n, len, wave, 0.7, i * step));
+  switch (name) {
+    case 'boom': noise(0.9, 3.5, 420); tone(28, 0.7, 'sine', 1.5); break;
+    case 'knock': [0, 0.17, 0.34].forEach((t) => tone(45, 0.09, 'sine', 1.6, t)); break;
+    case 'bell': tone(81, 1.6, 'sine', 0.8); tone(93, 1.2, 'sine', 0.35); break;
+    case 'magic': seq([72, 76, 79, 84, 88, 91], 0.07, 'triangle', 0.5); break;
+    case 'fanfare': seq([67, 67, 72, 76, 79], 0.13, 'square', 0.3); tone(84, 0.7, 'square', 0.7, 0.65); break;
+    case 'fail': seq([64, 60, 57, 52], 0.16, 'sawtooth', 0.35); break;
+    case 'alarm': seq([81, 76, 81, 76, 81, 76], 0.18, 'square', 0.17); break;
+    case 'heart': [0, 0.22, 0.8, 1.02].forEach((t) => tone(33, 0.16, 'sine', 1.8, t)); break;
+    case 'laser': seq([96, 91, 86, 81, 76, 71], 0.03, 'sawtooth', 0.08); break;
+    case 'dice': [0, 0.08, 0.17, 0.3].forEach((t) => tone(90 + Math.random() * 8, 0.04, 'square', 0.5, t)); break;
+  }
+}
+
 export const audio = {
+  sfx: playSfx,
   /** Must be called from a user gesture at least once (browser autoplay rules). */
   unlock() {
     try {

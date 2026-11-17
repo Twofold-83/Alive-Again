@@ -25,10 +25,10 @@ const shots = process.argv[2];
     // Director sets the stage
     await D.fill('input[type=search]', 'wizard'); await D.tap('.grid button');
     await D.fill('.seltools input', 'Welcome, traveller!');
-    await D.tap('.tabs button:nth-child(2)'); await D.tap('[data-drop="b:forest"]');
+    await D.tap('[data-tab=place]'); await D.tap('[data-mark="backdrop=b:forest"]');
     await D.fill('#foot input', 'A dark forest. Something is watching.');
     // generate + custom asset
-    await D.tap('.tabs button:nth-child(1)'); await D.tap('.chips button:last-child');
+    await D.tap('[data-tab=cast]'); await D.tap('#panel > .chips:not(.typerow) button:last-child');
     await D.fill('.maker input', 'green slime'); await D.tap('.maker .row button');
     await D.waitForSelector('.ent img.glyph');
     await D.waitForFunction(() => document.querySelector('.ent img.glyph').naturalWidth > 0);
@@ -41,6 +41,7 @@ const shots = process.argv[2];
     await D.tap('#foot button.go');
     // Player turn
     await P.waitForSelector('#foot button.go');
+    await P.waitForFunction(() => !document.querySelector('#stage').classList.contains('cut'), null, { timeout: 20000 });
     assert.equal(await P.locator('.stage .ent').count(), 3);
     assert.match(await P.textContent('.strip.narr'), /dark forest/);
     const box = await P.locator('#stage').boundingBox();
@@ -54,6 +55,7 @@ const shots = process.argv[2];
     await P.tap('#foot button.go');
     // Director sees it
     await D.waitForFunction(() => /draws a sword/.test(document.querySelector('.strip.act').textContent));
+    await D.waitForFunction(() => !document.querySelector('#stage').classList.contains('cut'), null, { timeout: 20000 });
     assert.match(await D.textContent('.bubbles'), /Who are you\?/);
     const heroLeft = await D.evaluate(() => parseFloat(document.querySelector('.ent.hero').style.left));
     assert(Math.abs(heroLeft - 20) < 3, 'hero moved: ' + heroLeft);
@@ -70,10 +72,11 @@ const shots = process.argv[2];
     await D.close();
     await P.waitForFunction(() => /offline/.test(document.querySelector('#banner').textContent) && /⏸/.test(document.querySelector('#tlabel').textContent), null, { timeout: 15000 });
     // story viewer
+    await P.waitForFunction(() => !document.querySelector('#stage').classList.contains('cut'), null, { timeout: 20000 });
     await P.tap('#top button'); await P.waitForSelector('#story:not([hidden])');
     assert.match(await P.textContent('#storyCap'), /Page 3 of 3/);
     await shot(P, '4-story');
     assert.deepEqual(errors, []);
     console.log('E2E OK', code);
-  } finally { await browser.close(); srv.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); }
+  } finally { await browser.close(); srv.kill(); await new Promise((r) => setTimeout(r, 400)); try { fs.rmSync(dataDir, { recursive: true, force: true }); } catch { /* server was still saving */ } }
 })().catch((e) => { console.error(e); process.exit(1); });

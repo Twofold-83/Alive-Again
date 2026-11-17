@@ -1,29 +1,34 @@
-import { CATEGORIES, BACKDROPS, backdropCss, assetUrl } from './catalog.js';
-import { MOODS, audio } from './audio.js';
+import { CATEGORIES, BACKDROPS, backdropCss, assetName, loadPack } from './catalog.js';
+import { MOODS, SFX, audio } from './audio.js';
+import { h, clone, clamp, norm, glyphNode, renderStage, playCut } from './stage.js';
 
-/* ---------- tiny DOM helpers ---------- */
+/* ---------- small helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
-function h(tag, props = {}, ...kids) {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) {
-    if (k === 'class') el.className = v;
-    else if (k === 'style') el.style.cssText = v;
-    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
-    else if (v === true) el.setAttribute(k, '');
-    else if (v !== false && v != null) el.setAttribute(k, v);
-  }
-  for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
-  return el;
-}
-const clone = (o) => JSON.parse(JSON.stringify(o));
 const rid = () => Math.random().toString(36).slice(2, 10);
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const r3 = (v) => Math.round(v * 1000) / 1000;
 const fmt = (ms) => { const s = Math.ceil(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 let toastTimer;
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.hidden = false;
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400);
 }
+
+/* ---------- story types: a type is just a preset of layers (modules) ---------- */
+const MODULES = [
+  { id: 'inventory', label: '🎒 Inventory', hint: 'The Player can carry things. You decide what they get.' },
+  { id: 'stats', label: '❤️ Stats', hint: 'Health, gold or anything else you want to keep count of.' },
+  { id: 'dice', label: '🎲 Dice', hint: 'Either of you can roll a die with a turn.' },
+];
+const TYPES = [
+  { id: 'free', label: '🎭 Free play', hint: 'Just the stage and your imagination.', modules: {} },
+  { id: 'adventure', label: '🗺️ Adventure', hint: 'Inventory, stats and dice.', modules: { inventory: true, stats: true, dice: true } },
+];
+const FX = [['', 'No effect'], ['bounce', 'Bounce'], ['shake', 'Shake'], ['spin', 'Spin'], ['pulse', 'Pulse'], ['float', 'Float'], ['wobble', 'Wobble'], ['blink', 'Blink'], ['glow', 'Glow'], ['ghost', 'See-through'], ['dark', 'Silhouette']];
+const EMOTES = ['😀', '😢', '😡', '😱', '😍', '🤔', '😴', '😈', '❗', '❓', '💤', '❤️'];
+const WEATHER = [['', '☀️ Clear'], ['rain', '🌧️ Rain'], ['storm', '⛈️ Storm'], ['snow', '❄️ Snow'], ['fog', '🌫️ Fog'], ['dark', '🕯️ Darkness'], ['night', '🌙 Night tint'], ['heat', '🔥 Heat'], ['sparkle', '✨ Sparkles']];
+const BURSTS = [['', 'None'], ['shake', '📳 Shake'], ['flash', '⚡ Flash'], ['hurt', '🩸 Hurt'], ['confetti', '🎉 Confetti']];
+const PENS = ['#ffffff', '#15131c', '#ff5a5a', '#ffb454', '#ffe14d', '#57d38c', '#4db8ff', '#c77dff'];
+const IDEAS = ['A stranger arrives who knows the hero’s name.', 'Something on stage is not what it seems.', 'The lights go out. When they return, one thing is missing.', 'A character reveals they have been lying.', 'A letter arrives. It is addressed to the hero.', 'The weather turns, and with it the mood.', 'An old friend appears — changed.', 'A door that was locked is now open.', 'Someone offers a deal that is too good.', 'The ground shakes. Time is running out.', 'A small animal leads the way somewhere unexpected.', 'The hero finds an object from their own past.', 'Two characters want opposite things from the hero.', 'It was all a stage set. What is behind it?', 'A countdown begins. Nobody says what happens at zero.'];
 
 /* ---------- identity ---------- */
 let token = localStorage.getItem('tf.token');
@@ -32,18 +37,24 @@ const known = () => { try { return JSON.parse(localStorage.getItem('tf.rooms') |
 const remember = (c) => localStorage.setItem('tf.rooms', JSON.stringify([c, ...known().filter((x) => x !== c)].slice(0, 20)));
 
 /* ---------- state ---------- */
-let code = null;        // current room code
+let code = null;        // current story code
 let S = null;           // last authoritative state from the server
 let draft = null;       // my local, uncommitted copy of the scene (only meaningful on my turn)
-let selId = null;       // Director: selected entity
+let selId = null, selInv = null;            // Director: selected entity / inventory item
 let tab = 'cast', catId = 'people', search = '';
 let submitting = false, autoTurn = -1, localDeadline = 0, connected = false;
 let es = null, lastMsg = 0, uiKey = '';
+let cut = null;                              // a cut scene currently playing on the main stage
+let rec = false, animAt = 0, together = false;   // motion recording
+let drawOn = false;
+const pen = { c: '#ffffff', w: 4 };
 
 const myTurn = () => S && !S.ended && S.you === S.whose;
 const other = () => (S.you === 'director' ? 'player' : 'director');
 const shown = () => (myTurn() ? draft : S.scene);
 const hero = (scene) => scene.entities.find((e) => e.id === scene.heroId);
+const mods = () => S.rules.modules;
+const directing = () => myTurn() && S.you === 'director' && !submitting;
 
 /* ---------- network ---------- */
 async function api(path, body) {
@@ -82,13 +93,23 @@ window.addEventListener('online', () => { if (code) connect(); });
 
 function onState(s) {
   const prev = S;
+  norm(s.scene); norm(s.before);
   S = s;
   localDeadline = s.remainingMs != null ? performance.now() + s.remainingMs : 0;
-  if (!prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended) {
-    submitting = false; selId = null;
+  const newTurn = !prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended;
+  if (newTurn) {
+    submitting = false; selId = null; selInv = null; rec = false; drawOn = false; animAt = 0;
     initDraft();
-    if (prev && myTurn()) { audio.blip(); if (navigator.vibrate) navigator.vibrate(120); }
-    if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose) toast('⏰ Time ran out — your turn was sent as it was');
+    if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('⏰ Time ran out — your turn was sent as it was');
+    if (cut) cut.skip();
+    if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {  // present what just happened before handing over control
+      const by = s.whose === 'director' ? 'player' : 'director';
+      cut = playCut(stage, s.before, s.scene, { ...stageOpts(), selId: null, pendingRoll: 0, by, sfx: audio.sfx }, () => {
+        cut = null;
+        if (myTurn()) { audio.blip(); if (navigator.vibrate) navigator.vibrate(120); }
+        render();
+      });
+    }
   }
   render();
 }
@@ -98,91 +119,80 @@ function initDraft() {
   if (!myTurn()) return;
   try {
     const saved = JSON.parse(sessionStorage.getItem('tf.draft') || 'null');
-    if (saved && saved.code === code && saved.turn === S.turn && saved.you === S.you) { draft = saved.draft; return; }
+    if (saved && saved.code === code && saved.turn === S.turn && saved.you === S.you) { draft = norm(saved.draft); return; }
   } catch { /* ignore */ }
-  if (S.you === 'director') {      // fresh turn: last turn's lines and narration are over
+  if (S.you === 'director') {      // fresh turn: last turn's lines, narration and one-turn extras are over
     for (const e of draft.entities) if (e.id !== draft.heroId) e.say = '';
-    draft.narration = '';
+    Object.assign(draft, { narration: '', tracks: [], burst: '', sfx: '', card: '', choices: [] });
+    if (draft.roll && draft.roll.by === 'director') draft.roll = null;
   } else {
     const me = hero(draft); if (me) me.say = '';
-    draft.action = '';
+    Object.assign(draft, { action: '', target: null, use: null });
+    if (draft.roll && draft.roll.by === 'player') draft.roll = null;
   }
+  draft.rollWant = 0;
 }
-function changed() {
-  sessionStorage.setItem('tf.draft', JSON.stringify({ code, turn: S.turn, you: S.you, draft }));
-  render();
-}
+const saveDraft = () => sessionStorage.setItem('tf.draft', JSON.stringify({ code, turn: S.turn, you: S.you, draft }));
+const paint = () => { if (!cut && S) renderStage(stage, shown(), stageOpts()); };
+function changed() { saveDraft(); render(); }                       // may rebuild the panel
+function changedQuiet() { saveDraft(); paint(); renderSheet(); }    // never rebuilds the panel (the user is typing in it)
+function rebuild() { uiKey = ''; changed(); }
 
 async function submit() {
   if (submitting || !myTurn()) return;
+  if (cut) cut.skip();
   submitting = true; render();
-  const turn = S.turn, me = hero(draft);
-  const body = S.you === 'director' ? { turn, scene: draft } : { turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', action: draft.action };
+  const turn = S.turn, me = hero(draft), roll = draft.rollWant || 0;
+  const body = S.you === 'director' ? { turn, scene: draft, roll }
+    : { turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, use: draft.use, roll };
   try { await act('submit', body, 6); } catch (e) {
     if (S && S.turn === turn) { submitting = false; toast(e.message); render(); }
   }
 }
 
-/* ---------- stage rendering (shared by the live stage and the story viewer) ---------- */
-function renderStage(root, scene, o = {}) {
-  if (!root._els) {
-    root._els = new Map();
-    root.append(h('div', { class: 'bg' }), h('div', { class: 'ents' }), h('div', { class: 'bubbles' }), h('div', { class: 'strip act' }), h('div', { class: 'strip narr' }));
-    const fit = () => root.style.setProperty('--u', root.clientWidth / 8 + 'px');
-    new ResizeObserver(fit).observe(root); fit();
-  }
-  const [bg, ents, bubbles, actEl, narrEl] = root.children;
-  const css = backdropCss(code, scene.backdrop);
-  if (bg._css !== css) { bg._css = css; bg.style.background = css; }
-
-  const live = new Set();
-  for (const e of scene.entities) {
-    live.add(e.id);
-    let el = root._els.get(e.id);
-    if (!el) { el = h('div', { class: 'ent' }); el.dataset.id = e.id; root._els.set(e.id, el); ents.append(el); }
-    if (el._asset !== e.asset) {
-      el._asset = e.asset;
-      el.replaceChildren(e.asset.startsWith('c:')
-        ? h('img', { class: 'glyph', src: assetUrl(code, e.asset), alt: '', draggable: 'false' })
-        : h('span', { class: 'glyph' }, e.asset.slice(2)));
-    }
-    el.className = 'ent' + (e.flip ? ' flip' : '') + (e.id === scene.heroId ? ' hero' : '') + (e.id === o.selId ? ' sel' : '');
-    el.style.left = e.x * 100 + '%'; el.style.top = e.y * 100 + '%';
-    el.style.fontSize = `calc(var(--u) * ${e.scale})`;
-    el.style.zIndex = Math.round(e.y * 1000) + 1;
-  }
-  for (const [id, el] of root._els) if (!live.has(id)) { el.remove(); root._els.delete(id); }
-
-  bubbles.replaceChildren(...scene.entities.filter((e) => e.say).map((e) => h('div', {
-    class: 'bubble',
-    style: `left:${clamp(e.x, 0.24, 0.76) * 100}%;bottom:min(calc(${(1 - e.y) * 100}% + var(--u) * ${e.scale * 1.22 + 0.12}),82%);z-index:${Math.round(e.y * 1000) + 2000}`,
-  }, e.say)));
-  actEl.textContent = scene.action ? `✋ ${o.playerName || 'Player'}: ${scene.action}` : '';
-  narrEl.textContent = scene.narration || '';
-}
-
 /* ---------- stage input ---------- */
 const stage = $('#stage');
+const stageOpts = () => ({ code, names: S.names, selId: directing() ? selId : null, pendingRoll: myTurn() && S.you === 'player' ? draft.rollWant : 0 });
 let drag = null;
 function stagePos(ev) {
   const r = stage.getBoundingClientRect();
   return { x: clamp((ev.clientX - r.left) / r.width, 0, 1), y: clamp((ev.clientY - r.top) / r.height, 0, 1) };
 }
+const dropTrack = (id) => { draft.tracks = draft.tracks.filter((t) => t.id !== id); };
+const tracksEnd = () => Math.max(0, ...draft.tracks.map((t) => t.pts[t.pts.length - 3]));
+
 stage.addEventListener('pointerdown', (ev) => {
+  if (cut) return void cut.skip();
   if (!myTurn() || submitting) return;
   ev.preventDefault();
-  if (document.activeElement && document.activeElement.blur && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) document.activeElement.blur();
+  if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) document.activeElement.blur();
   const p = stagePos(ev);
+  const el = ev.target.closest('.ent');
+  const hit = el && draft.entities.find((x) => x.id === el.dataset.id);
+  drag = null;
   if (S.you === 'player') {
     const me = hero(draft);
     if (!me) return toast('You have no character on stage right now — speak or act instead');
+    if (hit && hit !== me && mods().inventory) {                    // reach for a thing: the Director decides whether you get it
+      draft.target = hit.id;
+      me.x = clamp(hit.x + (me.x < hit.x ? -0.12 : 0.12), 0.04, 0.96); me.y = clamp(hit.y + 0.02, 0.08, 1);
+      return changed();
+    }
+    draft.target = null;
     drag = { e: me, dx: 0, dy: 0 };
     me.x = p.x; me.y = clamp(p.y, 0.08, 1);
+  } else if (drawOn) {
+    if (draft.drawing.length >= 60) return toast('That is a lot of drawing — clear some first');
+    drag = { stroke: { id: rid(), c: pen.c, w: pen.w, pts: [r3(p.x), r3(p.y)] } };
+    draft.drawing.push(drag.stroke);
   } else {
-    const el = ev.target.closest('.ent');
-    const e = el && draft.entities.find((x) => x.id === el.dataset.id);
-    selId = e ? e.id : null;
-    drag = e ? { e, dx: e.x - p.x, dy: e.y - p.y } : null;
+    selId = hit ? hit.id : null; selInv = null;
+    if (hit) {
+      drag = { e: hit, dx: hit.x - p.x, dy: hit.y - p.y };
+      if (rec) {
+        if (animAt >= 10000) { toast('The 10 seconds are used up — clear the moves to record again'); drag = null; } else drag.take = { t0: performance.now(), off: animAt, last: animAt, pts: [animAt, r3(hit.x), r3(hit.y)] };
+      }
+    }
   }
   if (drag) stage.setPointerCapture(ev.pointerId);
   render();
@@ -190,12 +200,47 @@ stage.addEventListener('pointerdown', (ev) => {
 stage.addEventListener('pointermove', (ev) => {
   if (!drag) return;
   const p = stagePos(ev);
+  if (drag.stroke) {
+    const s = drag.stroke.pts, n = s.length;
+    if (n < 400 && Math.hypot(p.x - s[n - 2], p.y - s[n - 1]) > 0.006) s.push(r3(p.x), r3(p.y));
+    return paint();
+  }
   drag.e.x = clamp(p.x + drag.dx, 0, 1); drag.e.y = clamp(p.y + drag.dy, 0.08, 1);
-  renderStage(stage, draft, stageOpts());
+  const tk = drag.take;
+  if (tk) {
+    const t = Math.round(tk.off + performance.now() - tk.t0);
+    if (t >= 10000) return endDrag();
+    if (t - tk.last >= 50) { tk.pts.push(t, r3(drag.e.x), r3(drag.e.y)); tk.last = t; }
+  } else if (S.you === 'director' && !drag.dropped) { drag.dropped = true; dropTrack(drag.e.id); }
+  paint();
 });
-const endDrag = () => { if (drag) { drag = null; if (myTurn()) changed(); } };
+function endDrag() {
+  if (!drag) return;
+  const d = drag; drag = null;
+  if (d.take) {                                                     // store the recorded move
+    const tk = d.take, t = Math.min(10000, Math.round(tk.off + performance.now() - tk.t0));
+    tk.pts.push(Math.max(t, tk.last + 1), r3(d.e.x), r3(d.e.y));
+    const old = draft.tracks.find((x) => x.id === d.e.id);
+    if (old && old.pts[old.pts.length - 3] <= tk.off) old.pts.push(...tk.pts); else { dropTrack(d.e.id); draft.tracks.push({ id: d.e.id, pts: tk.pts }); }
+    animAt = together ? tk.off : Math.min(10000, t);
+    uiKey = '';
+  }
+  if (d.stroke) { if (d.stroke.pts.length < 4) d.stroke.pts.push(d.stroke.pts[0], d.stroke.pts[1]); uiKey = ''; }
+  if (myTurn()) changed();
+}
 stage.addEventListener('pointerup', endDrag);
 stage.addEventListener('pointercancel', endDrag);
+
+function previewCut() {
+  if (cut) return cut.skip();
+  const start = clone(draft);
+  for (const tr of draft.tracks) { const e = start.entities.find((x) => x.id === tr.id); if (e) { e.x = tr.pts[1]; e.y = tr.pts[2]; } }
+  start.drawing = []; start.narration = '';
+  for (const e of start.entities) e.say = '';
+  audio.unlock();
+  cut = playCut(stage, start, draft, { ...stageOpts(), selId: null, by: 'director', sfx: audio.sfx }, () => { cut = null; render(); });
+  render();
+}
 
 /* ---------- chrome: top bar, banner, clock ---------- */
 function shareLink() {
@@ -206,16 +251,17 @@ function shareLink() {
 }
 function renderChrome() {
   if (!S) return;
-  const who = (role, icon) => h('span', { class: 'who' + (S.you === role ? ' me' : '') + (!S.ended && S.whose === role ? ' turn' : '') },
+  const who = (role, icon) => h('span', { class: 'who' + (S.you === role && !S.hotseat ? ' me' : '') + (!S.ended && S.whose === role ? ' turn' : '') },
     h('i', { class: 'dot' + (S.online[role] ? ' on' : '') }), (S.bot === role ? '🤖' : icon) + ' ', h('b', {}, S.joined[role] ? S.names[role] : '…'));
   $('#top').replaceChildren(
     who('director', '🎬'), who('player', '🧑'), h('span', { class: 'grow' }), h('span', { class: 'code' }, code),
-    h('button', { onclick: openStory, 'aria-label': 'Story so far' }, '📖'),
-    h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.toggleMute() ? '🔇' : '🔊'; }, 'aria-label': 'Sound' }, audio.muted ? '🔇' : '🔊'));
+    h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, '📖'),
+    h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.toggleMute() ? '🔇' : '🔊'; }, 'aria-label': 'Sound', title: 'Sound' }, audio.muted ? '🔇' : '🔊'));
 
   const b = $('#banner'); let content = null;
   if (!connected) content = ['📡 Reconnecting…'];
   else if (S.ended) content = ['🎬 The End.', h('button', { onclick: openStory }, 'Read the story')];
+  else if (S.hotseat) content = [`🎭 You play both sides — now you are the ${S.whose === 'director' ? 'Director' : 'Player'}`];
   else if (S.you === 'spectator') content = ['👀 You are watching this story.'];
   else if (!S.joined[other()]) content = [`Invite your ${other() === 'player' ? 'Player' : 'Director'} — code ${code}`, h('button', { class: 'primary', onclick: shareLink }, 'Share link')];
   else if (!S.online[other()]) content = [`⏸ ${S.names[other()]} is offline${S.paused ? ' — the clock is paused' : ''}`];
@@ -226,66 +272,160 @@ function tick() {
   if (!S || !code) return;
   const bar = $('#clock i'), lab = $('#tlabel');
   if (S.remainingMs == null || S.ended) { bar.style.width = '0'; if (lab) lab.textContent = ''; return; }
+  const full = S.settings.turnSeconds * 1000 || 1;
   const r = S.paused ? S.remainingMs : Math.max(0, localDeadline - performance.now());
-  bar.style.width = Math.min(100, (r / (S.settings.turnSeconds * 1000 || 1)) * 100) + '%';
+  bar.style.width = Math.min(100, (r / full) * 100) + '%';
   bar.className = r < 10000 ? 'low' : '';
-  if (lab) lab.textContent = ' · ' + fmt(r) + (S.paused ? ' ⏸' : '');
+  if (lab) lab.textContent = ' · ' + fmt(Math.min(r, full)) + (S.paused ? ' ⏸' : '');
   if (r <= 0 && !S.paused && myTurn() && !submitting && autoTurn !== S.turn) { autoTurn = S.turn; submit(); }
 }
 setInterval(tick, 250);
 
-/* ---------- panel + footer ---------- */
-const stageOpts = () => ({ selId: myTurn() && S.you === 'director' ? selId : null, playerName: S.names.player });
-
+/* ---------- main render ---------- */
 function render() {
   if (!S) return;
   const scene = shown();
-  renderStage(stage, scene, stageOpts());
-  stage.classList.toggle('edit', myTurn());
+  paint();
+  stage.classList.toggle('edit', myTurn() && !cut);
+  stage.classList.toggle('drawing', directing() && drawOn);
   audio.setMood(scene.mood);
   renderChrome();
-  const key = [S.you, S.turn, S.whose, S.ended, S.joined.player, S.joined.director, submitting, tab, catId, selId, S.assets.length, S.settings.turnSeconds].join('|');
+  renderSheet();
+  const key = [S.you, S.turn, S.whose, S.ended, S.joined.player, S.joined.director, submitting, tab, catId, selId, selInv, S.assets.length, S.settings.turnSeconds,
+    JSON.stringify(S.rules), rec, drawOn, together, !!cut, myTurn() && draft.target, myTurn() && draft.use].join('|');
   if (key !== uiKey) { uiKey = key; buildPanel(); buildFoot(); } else refreshMarks();
   tick();
 }
+function refreshMarks() {
+  for (const b of document.querySelectorAll('[data-mark]')) {
+    const i = b.dataset.mark.indexOf('=');
+    b.classList.toggle('on', String(draft[b.dataset.mark.slice(0, i)] ?? '') === b.dataset.mark.slice(i + 1));
+  }
+}
 
+/* ---------- character sheet bar: stats + inventory ---------- */
+function renderSheet() {
+  const el = $('#sheet'), sc = shown(), m = mods(), edit = directing(), play = myTurn() && S.you === 'player' && !submitting;
+  const kids = [];
+  if (m.stats) {
+    for (const st of sc.sheet.stats) {
+      const bump = (d) => () => { st.value = clamp(st.value + d, -9999, st.max ?? 9999); changedQuiet(); };
+      kids.push(h('span', { class: 'chip stat' },
+        edit && h('button', { onclick: bump(-1), 'aria-label': 'Less' }, '−'),
+        h('b', {}, st.name), ` ${st.value}${st.max != null ? '/' + st.max : ''}`,
+        edit && h('button', { onclick: bump(1), 'aria-label': 'More' }, '+'),
+        edit && h('button', { class: 'x', title: 'Remove', onclick: () => { sc.sheet.stats = sc.sheet.stats.filter((x) => x !== st); changedQuiet(); } }, '✕')));
+    }
+    if (edit && sc.sheet.stats.length < 8) kids.push(h('button', { class: 'chip add', onclick: () => {
+      const name = (prompt('Name of the stat (an emoji in front looks nice), e.g. “🛡️ Armor”') || '').trim().slice(0, 20);
+      if (!name) return;
+      const max = parseInt(prompt('Maximum value? Leave empty for no maximum.') || '', 10);
+      sc.sheet.stats.push({ id: rid(), name, value: Number.isFinite(max) ? max : 0, max: Number.isFinite(max) ? max : null });
+      changedQuiet();
+    } }, '+ stat'));
+  }
+  if (m.inventory) {
+    kids.push(h('span', { class: 'chip label' }, '🎒'));
+    for (const it of sc.sheet.inv) {
+      kids.push(h('button', {
+        class: 'chip item' + (sc.use === it.id || (edit && selInv === it.id) ? ' on' : ''), title: it.name || 'item',
+        disabled: !(edit || play),
+        onclick: () => { if (edit) { selInv = selInv === it.id ? null : it.id; selId = null; render(); } else { draft.use = draft.use === it.id ? null : it.id; changed(); } },
+      }, glyphNode(code, it.asset)));
+    }
+    if (!sc.sheet.inv.length) kids.push(h('span', { class: 'dim small' }, edit ? 'empty — select something on stage and tap “Give”' : 'empty'));
+  }
+  el.hidden = !kids.length;
+  el.replaceChildren(...kids.filter(Boolean));
+}
+function giveToPlayer(e) {
+  if (draft.sheet.inv.length >= 24) return toast('The inventory is full');
+  draft.sheet.inv.push({ id: rid(), asset: e.asset, name: assetName(e.asset) });
+  removeEntity(e);
+}
+function removeEntity(e) {
+  draft.entities = draft.entities.filter((x) => x !== e); dropTrack(e.id);
+  if (draft.heroId === e.id) draft.heroId = null;
+  if (draft.target === e.id) draft.target = null;
+  if (selId === e.id) selId = null;
+}
+function setRules(rules) {
+  if (rules.modules.stats && !draft.sheet.stats.length) draft.sheet.stats = [{ id: rid(), name: '❤️ Health', value: 5, max: 5 }, { id: rid(), name: '💰 Gold', value: 0, max: null }];
+  S.rules = rules; saveDraft(); render();
+  act('settings', { rules }, 3).catch((e) => toast(e.message));
+}
+
+/* ---------- panel ---------- */
 function recap(scene) {
   const lines = [];
   if (scene.narration) lines.push(h('div', {}, h('i', {}, scene.narration)));
-  for (const e of scene.entities) if (e.say) lines.push(h('div', {}, glyph(e.asset), ' “' + e.say + '”'));
-  if (scene.action) lines.push(h('div', {}, `✋ ${S.names.player} ${scene.action}`));
+  for (const e of scene.entities) if (e.say) lines.push(h('div', {}, glyphNode(code, e.asset, 'mini'), ' “' + e.say + '”'));
   return lines.length ? h('div', { class: 'card recap' }, lines) : null;
 }
-const glyph = (asset) => (asset.startsWith('c:') ? h('img', { src: assetUrl(code, asset), alt: '', style: 'height:1.2em;vertical-align:middle' }) : asset.slice(2));
+const chips = (list, key, onPick) => h('div', { class: 'chips wrap' }, list.map(([v, label]) => h('button', {
+  'data-mark': `${key}=${v}`, class: String(draft[key] ?? '') === String(v) ? 'on' : '', onclick: () => { draft[key] = v; if (onPick) onPick(v); changed(); } }, label)));
+
+function typeCard() {
+  const r = S.rules;
+  return h('div', { class: 'card' }, h('h3', {}, 'Story type'),
+    h('div', { class: 'chips wrap' }, TYPES.map((t) => h('button', { class: r.type === t.id ? 'on' : '', title: t.hint, onclick: () => setRules({ type: t.id, modules: { inventory: false, stats: false, dice: false, ...t.modules } }) }, t.label))),
+    h('p', { class: 'dim small' }, TYPES.find((t) => t.id === r.type).hint + ' Layers can be switched on and off at any time:'),
+    h('div', { class: 'chips wrap' }, MODULES.map((m) => h('button', { class: r.modules[m.id] ? 'on' : '', title: m.hint, onclick: () => setRules({ type: r.type, modules: { ...r.modules, [m.id]: !r.modules[m.id] } }) }, m.label))));
+}
 
 function buildPanel() {
   const p = $('#panel'); p.replaceChildren();
   if (S.ended) return void p.append(h('div', { class: 'card' }, h('h3', {}, 'The story has ended'), h('p', { class: 'dim' }, 'Flip through it together, or start a new one.')), recap(S.scene) || '');
   if (!myTurn() || S.you !== 'director') {
     const tips = S.you === 'spectator' ? null
-      : myTurn() ? ['Your turn', 'Tap or drag on the stage to move. Then say something, do something — or both — and end your turn.']
+      : myTurn() ? ['Your turn', `Tap or drag on the stage to move.${mods().inventory ? ' Tap a thing to reach for it, or a 🎒 item to use it.' : ''} Then say something, do something — or both — and end your turn.`]
         : S.you === 'player' ? [S.turn === 0 ? `${S.names.director} is setting the stage…` : `${S.names.director} is deciding what happens…`, 'The whole world is in their hands. Watch the stage.']
           : [`${S.names.player} is making a move…`, 'When they finish you can change anything: the cast, the place, the music, what everybody says.'];
     if (tips) p.append(h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
     const r = recap(S.scene); if (r) p.append(r);
     return;
   }
-  /* --- Director's toolbox --- */
+
+  p.append(h('div', { class: 'tabs' }, [['cast', '🎭', 'Cast'], ['place', '🌄', 'Place'], ['mood', '🎵', 'Mood'], ['anim', '🎬', 'Animate'], ['fx', '✨', 'Extras'], ['more', '⚙️', 'More']]
+    .map(([id, icon, label]) => h('button', { 'data-tab': id, class: tab === id ? 'on' : '', onclick: () => { tab = id; rec = false; drawOn = false; render(); } }, h('span', {}, icon), h('small', {}, label)))));
+  if (S.turn === 0 && tab !== 'more') p.append(h('div', { class: 'chips typerow' }, h('span', { class: 'dim small' }, 'Story type'),
+    TYPES.map((t) => h('button', { class: S.rules.type === t.id ? 'on' : '', title: t.hint, onclick: () => setRules({ type: t.id, modules: { inventory: false, stats: false, dice: false, ...t.modules } }) }, t.label))));
+
+  /* --- what the Player just asked for --- */
+  const tgt = draft.target && draft.entities.find((e) => e.id === draft.target);
+  if (tgt && mods().inventory) p.append(h('div', { class: 'card ask' }, h('b', {}, `${S.names.player} reaches for `, glyphNode(code, tgt.asset, 'mini')),
+    h('div', { class: 'row' }, h('button', { class: 'primary grow', onclick: () => { giveToPlayer(tgt); rebuild(); } }, '🎒 Let them take it'), h('button', { class: 'grow', onclick: () => { draft.target = null; rebuild(); } }, 'Not now'))));
+  const used = draft.use && draft.sheet.inv.find((i) => i.id === draft.use);
+  if (used) p.append(h('div', { class: 'card ask' }, h('b', {}, `${S.names.player} uses `, glyphNode(code, used.asset, 'mini')),
+    h('div', { class: 'row' }, h('button', { class: 'primary grow', onclick: () => { draft.sheet.inv = draft.sheet.inv.filter((i) => i !== used); draft.use = null; rebuild(); } }, 'It is used up'), h('button', { class: 'grow', onclick: () => { draft.use = null; rebuild(); } }, 'They keep it'))));
+  const item = selInv && draft.sheet.inv.find((i) => i.id === selInv);
+  if (item) p.append(h('div', { class: 'seltools' }, h('div', { class: 'row' }, h('span', { style: 'font-size:28px' }, glyphNode(code, item.asset, 'mini')),
+    h('button', { class: 'grow', onclick: () => { draft.sheet.inv = draft.sheet.inv.filter((i) => i !== item); selInv = null; addEntity(item.asset); } }, '⬆️ Put on stage'),
+    h('button', { class: 'grow danger', onclick: () => { draft.sheet.inv = draft.sheet.inv.filter((i) => i !== item); selInv = null; rebuild(); } }, '🗑️ Take away'))));
+
+  /* --- selected character or thing --- */
   const sel = draft.entities.find((e) => e.id === selId);
   if (sel) {
-    const say = h('input', { placeholder: 'What do they say?', maxlength: 160, value: sel.say, enterkeyhint: 'done', oninput: (ev) => { sel.say = ev.target.value; changedQuiet(); } });
-    const btn = (label, title, fn, on) => h('button', { title, 'aria-label': title, class: on ? 'on' : '', onclick: () => { fn(); changed(); } }, label);
+    const btn = (label, title, fn, on) => h('button', { title, 'aria-label': title, class: on ? 'on' : '', onclick: () => { fn(); rebuild(); } }, label);
+    const pick = (list, key, title) => h('select', { title, 'aria-label': title, onchange: (ev) => { sel[key] = ev.target.value; changedQuiet(); } },
+      list.map(([v, l]) => h('option', { value: v, selected: sel[key] === v }, l)));
     p.append(h('div', { class: 'seltools' },
-      h('div', { class: 'row' }, h('span', { style: 'font-size:28px' }, glyph(sel.asset)), say),
+      h('div', { class: 'row' }, h('span', { style: 'font-size:28px' }, glyphNode(code, sel.asset, 'mini')),
+        h('input', { placeholder: 'What do they say?', maxlength: 160, value: sel.say, enterkeyhint: 'done', oninput: (ev) => { sel.say = ev.target.value; changedQuiet(); } })),
       h('div', { class: 'row' },
-        btn('➖', 'Smaller', () => { sel.scale = clamp(sel.scale / 1.3, 0.4, 5); }),
-        btn('➕', 'Bigger', () => { sel.scale = clamp(sel.scale * 1.3, 0.4, 5); }),
+        btn('➖', 'Smaller', () => { sel.scale = clamp(sel.scale / 1.3, 0.3, 6); }),
+        btn('➕', 'Bigger', () => { sel.scale = clamp(sel.scale * 1.3, 0.3, 6); }),
+        btn('↺', 'Rotate left', () => { sel.rot = (sel.rot - 15) % 360; }),
+        btn('↻', 'Rotate right', () => { sel.rot = (sel.rot + 15) % 360; }),
         btn('↔️', 'Flip', () => { sel.flip = !sel.flip; }),
-        btn('🧑 Hero', "Make this the Player's character", () => { draft.heroId = draft.heroId === sel.id ? null : sel.id; uiKey = ''; }, draft.heroId === sel.id),
-        btn('🗑️', 'Remove', () => { draft.entities = draft.entities.filter((e) => e !== sel); if (draft.heroId === sel.id) draft.heroId = null; selId = null; }))));
+        btn('⧉', 'Copy', () => { const c = { ...clone(sel), id: rid(), x: clamp(sel.x + 0.08, 0, 1), say: '' }; draft.entities.push(c); selId = c.id; }),
+        btn('🗑️', 'Remove', () => removeEntity(sel))),
+      h('div', { class: 'row' },
+        pick(FX, 'fx', 'Effect'),
+        pick([['', 'No emote'], ...EMOTES.map((e) => [e, e])], 'emote', 'Emote'),
+        btn('🧑 Hero', "Make this the Player's character", () => { draft.heroId = draft.heroId === sel.id ? null : sel.id; }, draft.heroId === sel.id),
+        mods().inventory && sel.id !== draft.heroId && btn('🎒 Give', 'Put it in the Player’s inventory', () => giveToPlayer(sel)))));
   }
-  p.append(h('div', { class: 'tabs' }, [['cast', '🎭 Cast'], ['place', '🌄 Place'], ['mood', '🎵 Mood'], ['more', '⚙️ More']]
-    .map(([id, label]) => h('button', { class: tab === id ? 'on' : '', onclick: () => { tab = id; render(); } }, label))));
 
   if (tab === 'cast') {
     const grid = h('div', { class: 'grid' });
@@ -295,11 +435,11 @@ function buildPanel() {
       if (q) items = CATEGORIES.flatMap((c) => c.items).filter((i) => i.name.includes(q));
       else if (catId === 'custom') items = S.assets.filter((a) => a.kind === 'sprite').map((a) => ({ asset: 'c:' + a.id, name: a.name }));
       else items = CATEGORIES.find((c) => c.id === catId).items;
-      grid.replaceChildren(...items.map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => addEntity(i.asset) }, glyph(i.asset))));
+      grid.replaceChildren(...items.slice(0, 200).map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => addEntity(i.asset) }, glyphNode(code, i.asset))));
       if (!items.length) grid.append(h('p', { class: 'dim', style: 'grid-column:1/-1;margin:4px' }, q ? 'Nothing found — try the ✨ Custom tab to make it.' : 'Nothing here yet. Create something below.'));
     };
     p.append(
-      h('input', { type: 'search', placeholder: '🔍 Search the cast (dragon, door, key…)', value: search, enterkeyhint: 'search', oninput: (ev) => { search = ev.target.value; fill(); } }),
+      h('input', { type: 'search', placeholder: '🔍 Search 600+ sprites (dragon, door, key…)', value: search, enterkeyhint: 'search', oninput: (ev) => { search = ev.target.value; fill(); } }),
       h('div', { class: 'chips' }, [...CATEGORIES, { id: 'custom', label: '✨ Custom' }].map((c) => h('button', { class: c.id === catId ? 'on' : '', onclick: () => { catId = c.id; search = ''; render(); } }, c.label))),
       grid);
     fill();
@@ -309,41 +449,76 @@ function buildPanel() {
         h('div', { class: 'row' }, any, h('button', { onclick: () => { const v = any.value.trim(); if (v) { addEntity('e:' + v); any.value = ''; } } }, 'Add')));
     }
   } else if (tab === 'place') {
-    const drop = (id, name) => h('button', { 'data-drop': id, class: draft.backdrop === id ? 'on' : '', style: `background:${backdropCss(code, id)}`, onclick: () => { draft.backdrop = id; changed(); } }, name);
+    const drop = (id, name) => h('button', { 'data-mark': `backdrop=${id}`, class: draft.backdrop === id ? 'on' : '', style: `background:${backdropCss(code, id)}`, onclick: () => { draft.backdrop = id; changed(); } }, name);
     p.append(h('div', { class: 'grid drops' }, BACKDROPS.map((b) => drop(b.id, b.name)), S.assets.filter((a) => a.kind === 'backdrop').map((a) => drop('c:' + a.id, a.name))),
-      maker('backdrop', (id) => { draft.backdrop = 'c:' + id; changed(); }));
+      maker('backdrop', (id) => { draft.backdrop = 'c:' + id; rebuild(); }));
   } else if (tab === 'mood') {
-    p.append(h('div', { class: 'list' }, MOODS.map((m) => h('button', { 'data-mood': m.id, class: draft.mood === m.id ? 'on' : '', onclick: () => { audio.unlock(); draft.mood = m.id; changed(); } }, m.name))),
-      h('p', { class: 'dim', style: 'font-size:13px;margin:0' }, 'Both of you hear the mood once your turn is sent.'));
+    p.append(h('div', { class: 'list' }, MOODS.map((m) => h('button', { 'data-mark': `mood=${m.id}`, class: draft.mood === m.id ? 'on' : '', onclick: () => { audio.unlock(); draft.mood = m.id; changed(); } }, m.name))),
+      h('p', { class: 'dim small' }, 'Both of you hear the mood once your turn is sent.'));
+  } else if (tab === 'anim') {
+    const used = tracksEnd();
+    p.append(
+      h('div', { class: 'card' }, h('h3', {}, '🎬 Record moves (up to 10 seconds)'),
+        h('p', { class: 'dim small' }, 'Press record, then drag a character across the stage. The path and its timing are replayed for the Player before their turn. Record several, one after another or at the same time.'),
+        h('button', { id: 'recBtn', class: rec ? 'recording' : 'primary', onclick: () => { rec = !rec; drawOn = false; render(); } }, rec ? '■ Recording — drag something on the stage' : '● Record a move'),
+        h('div', { class: 'chips wrap' },
+          h('button', { class: !together ? 'on' : '', onclick: () => { together = false; animAt = tracksEnd(); render(); } }, 'Next move: after the last'),
+          h('button', { class: together ? 'on' : '', onclick: () => { together = true; animAt = 0; render(); } }, 'Next move: at the same time')),
+        h('div', { class: 'meter' }, h('i', { style: `width:${used / 100}%` })),
+        h('p', { class: 'dim small', id: 'animUsed' }, `${(used / 1000).toFixed(1)} of 10 seconds used · ${draft.tracks.length} moving`),
+        h('div', { class: 'row' },
+          h('button', { class: 'grow', id: 'previewBtn', onclick: previewCut }, cut ? '■ Stop' : '▶ Preview this turn'),
+          h('button', { class: 'grow', disabled: !draft.tracks.length, onclick: () => { draft.tracks = []; animAt = 0; rebuild(); } }, '✖ Clear moves'))),
+      h('div', { class: 'card' }, h('h3', {}, '✏️ Draw on the stage'),
+        h('button', { id: 'drawBtn', class: drawOn ? 'recording' : '', onclick: () => { drawOn = !drawOn; rec = false; render(); } }, drawOn ? '■ Drawing — use your finger on the stage' : '✏️ Start drawing'),
+        h('div', { class: 'row pens' }, PENS.map((c) => h('button', { class: 'pen' + (pen.c === c ? ' on' : ''), style: `background:${c}`, 'aria-label': 'Colour', onclick: () => { pen.c = c; drawOn = true; rec = false; uiKey = ''; render(); } }))),
+        h('div', { class: 'row' },
+          [['Thin', 2], ['Medium', 4], ['Thick', 9]].map(([l, w]) => h('button', { class: 'grow' + (pen.w === w ? ' on' : ''), onclick: () => { pen.w = w; uiKey = ''; render(); } }, l)),
+          h('button', { class: 'grow', disabled: !draft.drawing.length, onclick: () => { draft.drawing.pop(); rebuild(); } }, '↶ Undo'),
+          h('button', { class: 'grow', disabled: !draft.drawing.length, onclick: () => { draft.drawing = []; rebuild(); } }, 'Clear'))));
+  } else if (tab === 'fx') {
+    const choice = (i) => h('input', { placeholder: `Choice ${i + 1}`, maxlength: 40, value: draft.choices[i] || '', oninput: (ev) => { for (let k = 0; k < 3; k++) draft.choices[k] ||= ''; draft.choices[i] = ev.target.value; changedQuiet(); } });
+    p.append(
+      h('div', { class: 'card' }, h('h3', {}, 'Weather'), chips(WEATHER, 'weather')),
+      h('div', { class: 'card' }, h('h3', {}, 'A moment, when your turn plays'), chips(BURSTS, 'burst'), h('h3', { style: 'margin-top:10px' }, 'Sound'), chips(SFX, 'sfx', (v) => { audio.unlock(); audio.sfx(v); })),
+      h('div', { class: 'card' }, h('h3', {}, 'Title card'), h('input', { placeholder: 'e.g. “Chapter 2 — The Cave”', maxlength: 60, value: draft.card, oninput: (ev) => { draft.card = ev.target.value; changedQuiet(); } })),
+      h('div', { class: 'card' }, h('h3', {}, `Offer ${S.names.player} quick choices`), h('div', { class: 'col' }, choice(0), choice(1), choice(2)), h('p', { class: 'dim small' }, 'They can tap one, or still type anything they like.')),
+      mods().dice && h('div', { class: 'card' }, h('h3', {}, 'Roll a die with this turn'), chips([[0, 'No roll'], [6, '🎲 d6'], [20, '🎲 d20']], 'rollWant'), h('p', { class: 'dim small' }, 'The roll happens when you end the turn, so nobody can fudge it.')),
+      h('div', { class: 'card' }, h('h3', {}, 'Stuck?'), h('div', { class: 'row' },
+        h('button', { class: 'grow', onclick: randomScene }, '🎲 Random scene'),
+        h('button', { class: 'grow', onclick: () => toast('💡 ' + IDEAS[Math.floor(Math.random() * IDEAS.length)]) }, '💡 Give me an idea'))));
   } else {
     const sel2 = h('select', { onchange: (ev) => act('settings', { turnSeconds: Number(ev.target.value) }, 3).catch((e) => toast(e.message)) },
-      [[0, 'No time limit'], [30, '30 seconds'], [45, '45 seconds'], [60, '1 minute'], [90, '1½ minutes'], [120, '2 minutes'], [180, '3 minutes']]
+      [[0, 'No time limit'], [30, '30 seconds'], [45, '45 seconds'], [60, '1 minute'], [90, '1½ minutes'], [120, '2 minutes'], [180, '3 minutes'], [300, '5 minutes']]
         .map(([v, l]) => h('option', { value: v, selected: S.settings.turnSeconds === v }, l)));
     p.append(
-      h('div', { class: 'card' }, h('h3', {}, '⏱ Time per turn'), sel2, h('p', { class: 'dim', style: 'font-size:13px' }, 'Applies from the next turn. The clock pauses if either of you drops off.')),
-      h('div', { class: 'card' }, h('h3', {}, `Story code: ${code}`), h('div', { class: 'row' }, h('button', { class: 'grow', onclick: shareLink }, S.bot ? '🔗 Let someone watch' : '🔗 Share invite link'), h('button', { class: 'grow', onclick: openStory }, '📖 Story so far'))),
-      h('button', { class: 'danger', onclick: () => { if (confirm('End the story for both of you?')) act('end', {}, 3).catch((e) => toast(e.message)); } }, '🎬 End the story'),
+      typeCard(),
+      h('div', { class: 'card' }, h('h3', {}, '⏱ Time per turn'), sel2, h('p', { class: 'dim small' }, 'Applies from the next turn. The clock pauses if either of you drops off, and extra time is added while a turn is being played back.')),
+      h('div', { class: 'card' }, h('h3', {}, `Story code: ${code}`), h('div', { class: 'row' }, h('button', { class: 'grow', onclick: shareLink }, S.bot || S.hotseat ? '🔗 Let someone watch' : '🔗 Share invite link'), h('button', { class: 'grow', onclick: openStory }, '📖 Story so far'))),
+      h('button', { class: 'danger', onclick: () => { if (confirm('End the story?')) act('end', {}, 3).catch((e) => toast(e.message)); } }, '🎬 End the story'),
       h('button', { class: 'link', onclick: () => leave() }, 'Leave to the start screen'));
   }
 }
-/** A draft edit that must not rebuild the panel (the user is typing in it). */
-function changedQuiet() {
-  sessionStorage.setItem('tf.draft', JSON.stringify({ code, turn: S.turn, you: S.you, draft }));
-  renderStage(stage, draft, stageOpts());
-}
-function refreshMarks() {
-  for (const b of document.querySelectorAll('[data-drop]')) b.classList.toggle('on', draft.backdrop === b.dataset.drop);
-  for (const b of document.querySelectorAll('[data-mood]')) b.classList.toggle('on', draft.mood === b.dataset.mood);
-}
 function addEntity(asset) {
   if (draft.entities.length >= 80) return toast('The stage is full');
-  const e = { id: rid(), asset, x: 0.3 + Math.random() * 0.4, y: 0.6 + Math.random() * 0.25, scale: 1, flip: false, say: '' };
-  draft.entities.push(e); selId = e.id; changed();
+  const e = { id: rid(), asset, x: 0.3 + Math.random() * 0.4, y: 0.6 + Math.random() * 0.25, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' };
+  draft.entities.push(e); selId = e.id; selInv = null; rebuild();
+}
+async function randomScene() {
+  try {
+    const { place } = await act('randomScene', {}, 2);
+    const me = hero(draft);
+    draft.entities = [...place.entities, ...(me ? [me] : [])];
+    Object.assign(draft, { backdrop: place.backdrop, mood: place.mood, weather: place.weather, card: place.card, narration: place.narration, tracks: [], drawing: [] });
+    if (me) { me.x = 0.3; me.y = 0.82; }
+    selId = null; rebuild();
+  } catch (e) { toast(e.message); }
 }
 
 /** Upload-or-generate box. Both paths end in a custom asset stored with the story. */
 function maker(kind, onAsset) {
   const what = kind === 'backdrop' ? 'backdrop' : 'character or thing';
+  const done = (r) => { uiKey = ''; onAsset(r.asset.id); };
   const file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: async () => {
     if (!file.files[0]) return;
     try { const f = file.files[0]; done(await act('addAsset', { kind, name: f.name.replace(/\.\w+$/, ''), dataUrl: await fileToDataUrl(f, kind) })); } catch (e) { toast(e.message); }
@@ -355,7 +530,6 @@ function maker(kind, onAsset) {
     go.disabled = true; go.textContent = '…';
     try { done(await act('generate', { kind, prompt: promptEl.value })); } catch (e) { toast(e.message); go.disabled = false; go.textContent = '✨ Create'; }
   } }, '✨ Create');
-  const done = (r) => { uiKey = ''; onAsset(r.asset.id); };
   return h('div', { class: 'maker' },
     h('div', { class: 'row' }, promptEl, go),
     h('div', { class: 'row' }, h('button', { class: 'grow', onclick: () => file.click() }, '📷 Use a photo or image'), file),
@@ -376,9 +550,11 @@ async function fileToDataUrl(f, kind) {
   return c.toDataURL('image/png');
 }
 
+/* ---------- footer: what I say / narrate, and the End turn button ---------- */
 function buildFoot() {
-  const f = $('#foot'); f.replaceChildren();
+  const f = $('#foot'); f.replaceChildren(); f.classList.remove('tight');
   const tl = () => h('span', { id: 'tlabel' });
+  const side = S.hotseat ? (S.whose === 'director' ? 'Director' : 'Player') + '’s ' : '';
   if (S.ended) return void f.append(h('button', { class: 'go primary', onclick: openStory }, '📖 Read the story'), h('button', { class: 'link', onclick: () => leave() }, 'Start a new story'));
   if (S.you === 'spectator') return void f.append(h('div', { class: 'status' }, `${S.names[S.whose]}'s turn`, tl()));
   if (!myTurn()) return void f.append(h('div', { class: 'status' }, `⏳ Waiting for ${S.joined[other()] ? S.names[other()] : 'your partner'}`, tl()));
@@ -387,37 +563,70 @@ function buildFoot() {
     const ready = S.joined.player;
     f.append(
       h('input', { placeholder: '📝 Narrate… (“Suddenly, the lights go out.”)', maxlength: 240, value: draft.narration, enterkeyhint: 'done', oninput: (ev) => { draft.narration = ev.target.value; changedQuiet(); } }),
-      h('button', { class: 'go primary', disabled: !ready, onclick: submit }, ready ? (S.turn === 0 ? 'Begin the story ▶' : 'End turn ▶') : 'Waiting for your Player to join…', tl()));
+      h('button', { class: 'go primary', disabled: !ready, onclick: submit }, ready ? (S.turn === 0 ? 'Begin the story ▶' : `End ${side}turn ▶`) : 'Waiting for your Player to join…', tl()));
+    f.classList.add('tight');
   } else {
     const me = hero(draft);
+    if (draft.choices.length) f.append(h('div', { class: 'chips wrap choices' }, draft.choices.map((c) => h('button', { class: draft.action === c ? 'on' : '', onclick: () => { draft.action = draft.action === c ? '' : c; rebuild(); } }, c))));
+    if (me) f.append(h('div', { class: 'chips emotes' }, EMOTES.slice(0, 8).map((e) => h('button', { class: me.emote === e ? 'on' : '', 'aria-label': 'Emote ' + e, onclick: () => { me.emote = me.emote === e ? '' : e; rebuild(); } }, e))));
     f.append(
       h('input', { placeholder: '💬 Say something…', maxlength: 160, value: me ? me.say : '', disabled: !me, enterkeyhint: 'next', oninput: (ev) => { me.say = ev.target.value; changedQuiet(); } }),
       h('input', { placeholder: '✋ Do something… (“open the drawer”)', maxlength: 160, value: draft.action, enterkeyhint: 'done', oninput: (ev) => { draft.action = ev.target.value; changedQuiet(); } }),
-      h('button', { class: 'go primary', onclick: submit }, 'End turn ▶', tl()));
+      h('div', { class: 'row' },
+        mods().dice && h('button', { class: 'dice' + (draft.rollWant ? ' on' : ''), title: 'Roll a die with this turn', onclick: () => { draft.rollWant = draft.rollWant === 0 ? 6 : draft.rollWant === 6 ? 20 : 0; rebuild(); } }, draft.rollWant ? `🎲 d${draft.rollWant}` : '🎲'),
+        h('button', { class: 'go primary grow', onclick: submit }, `End ${side}turn ▶`, tl())));
   }
 }
 
+/* ---------- keyboard (computers) ---------- */
+document.addEventListener('keydown', (ev) => {
+  if (!S || !code || !$('#story').hidden) return;
+  const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName);
+  if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); submit(); } else if (ev.key === 'Escape' && cut) cut.skip();
+  else if (!typing && directing() && selId) {
+    const sel = draft.entities.find((e) => e.id === selId); if (!sel) return;
+    const step = ev.shiftKey ? 0.05 : 0.01;
+    const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+    if (moves[ev.key]) { sel.x = clamp(sel.x + moves[ev.key][0], 0, 1); sel.y = clamp(sel.y + moves[ev.key][1], 0.08, 1); dropTrack(sel.id); }
+    else if (ev.key === 'Delete' || ev.key === 'Backspace') removeEntity(sel);
+    else if (ev.key === '+' || ev.key === '=') sel.scale = clamp(sel.scale * 1.15, 0.3, 6);
+    else if (ev.key === '-') sel.scale = clamp(sel.scale / 1.15, 0.3, 6);
+    else if (ev.key === 'r') sel.rot = (sel.rot + 15) % 360;
+    else if (ev.key === 'f') sel.flip = !sel.flip;
+    else return;
+    ev.preventDefault(); rebuild();
+  }
+});
+
 /* ---------- story viewer (flipbook of every committed turn) ---------- */
-let story = null, storyAt = 0, storyTimer = null;
+let story = null, storyAt = 0, storyCut = null, playing = false;
+const storyOpts = () => ({ code, names: story.names });
+const caption = (i) => { const fr = story.history[i]; return `Page ${i + 1} of ${story.history.length} · ${fr.by === 'director' ? '🎬 ' + story.names.director : '🧑 ' + story.names.player}${fr.timeout ? ' (ran out of time)' : ''}`; };
 async function openStory() {
   try { story = await api(`/api/rooms/${code}/history`); } catch (e) { return toast(e.message); }
   if (!story.history.length) return toast('The story has not begun yet');
+  story.history.forEach((x) => norm(x.scene));
   storyAt = story.history.length - 1;
   $('#story').hidden = false; showFrame();
 }
 function showFrame() {
-  const fr = story.history[storyAt];
-  renderStage($('#storyStage'), fr.scene, { playerName: story.names.player });
-  $('#storyCap').textContent = `Page ${storyAt + 1} of ${story.history.length} · ${fr.by === 'director' ? '🎬 ' + story.names.director : '🧑 ' + story.names.player}${fr.timeout ? ' (ran out of time)' : ''}`;
+  renderStage($('#storyStage'), story.history[storyAt].scene, storyOpts());
+  $('#storyCap').textContent = caption(storyAt);
 }
-function stopPlay() { clearInterval(storyTimer); storyTimer = null; $('#storyPlay').textContent = '▶ Play'; }
+function stopPlay() { playing = false; if (storyCut) storyCut.skip(); storyCut = null; $('#storyPlay').textContent = '▶ Play'; }
+function playFrom(i) {
+  if (!playing || i >= story.history.length) return stopPlay();
+  storyAt = i;
+  $('#storyCap').textContent = caption(i);
+  storyCut = playCut($('#storyStage'), i ? story.history[i - 1].scene : null, story.history[i].scene, { ...storyOpts(), by: story.history[i].by, sfx: audio.sfx },
+    () => { storyCut = null; if (playing) setTimeout(() => playFrom(i + 1), 700); });
+}
 $('#storyPrev').onclick = () => { stopPlay(); storyAt = Math.max(0, storyAt - 1); showFrame(); };
 $('#storyNext').onclick = () => { stopPlay(); storyAt = Math.min(story.history.length - 1, storyAt + 1); showFrame(); };
 $('#storyPlay').onclick = () => {
-  if (storyTimer) return stopPlay();
-  if (storyAt >= story.history.length - 1) storyAt = 0;
-  showFrame(); $('#storyPlay').textContent = '⏸ Pause';
-  storyTimer = setInterval(() => { if (storyAt >= story.history.length - 1) return stopPlay(); storyAt++; showFrame(); }, 3000);
+  if (playing) { stopPlay(); return showFrame(); }
+  playing = true; $('#storyPlay').textContent = '⏸ Pause';
+  playFrom(storyAt >= story.history.length - 1 ? 0 : storyAt);
 };
 $('#storyClose').onclick = () => { stopPlay(); $('#story').hidden = true; };
 $('#storySave').onclick = () => {
@@ -438,6 +647,7 @@ function enter(c) {
 }
 function leave(msg) {
   if (es) es.close();
+  if (cut) cut.skip();
   es = null; code = null; S = null;
   audio.setMood('m:none');
   history.replaceState(null, '', location.pathname);
@@ -445,9 +655,9 @@ function leave(msg) {
   $('#invite').hidden = true; $('#newBtns').hidden = false; codeEl.value = '';
   errEl.textContent = msg || '';
 }
-async function create(role, bot) {
+async function create(role, mode) {
   errEl.textContent = '';
-  try { enter((await api('/api/rooms', { token, name: myName(), role, bot: !!bot })).code); } catch (e) { errEl.textContent = e.message; }
+  try { enter((await api('/api/rooms', { token, name: myName(), role, mode })).code); } catch (e) { errEl.textContent = e.message; }
 }
 async function join(c, quiet) {
   c = (c || '').trim().toUpperCase();
@@ -458,10 +668,11 @@ async function join(c, quiet) {
     if (quiet) leave(errEl.textContent);
   }
 }
-$('#newDirector').onclick = () => create('director');
-$('#newPlayer').onclick = () => create('player');
-$('#soloPlayer').onclick = () => create('player', true);
-$('#soloDirector').onclick = () => create('director', true);
+$('#newDirector').onclick = () => create('director', 'pair');
+$('#newPlayer').onclick = () => create('player', 'pair');
+$('#soloPlayer').onclick = () => create('player', 'bot');
+$('#soloDirector').onclick = () => create('director', 'bot');
+$('#hotseat').onclick = () => create('director', 'hotseat');
 $('#joinBtn').onclick = () => join(codeEl.value);
 codeEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') join(codeEl.value); });
 
@@ -477,4 +688,4 @@ function boot() {
 }
 window.addEventListener('hashchange', boot);
 document.addEventListener('pointerdown', () => audio.unlock(), { capture: true });
-boot();
+loadPack().then(boot);
