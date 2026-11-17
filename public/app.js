@@ -1,6 +1,8 @@
 import { CATEGORIES, BACKDROPS, backdropCss, assetName, loadPack } from './catalog.js';
 import { MOODS, SFX, audio } from './audio.js';
 import { h, clone, clamp, norm, glyphNode, renderStage, playCut } from './stage.js';
+import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
+import { G, resetGuided, guidedKey, guidedPick, buildGuided } from './guided.js';
 
 /* ---------- small helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -23,10 +25,6 @@ const TYPES = [
   { id: 'free', label: '🎭 Free play', hint: 'Just the stage and your imagination.', modules: {} },
   { id: 'adventure', label: '🗺️ Adventure', hint: 'Inventory, stats and dice.', modules: { inventory: true, stats: true, dice: true } },
 ];
-const FX = [['', 'No effect'], ['bounce', 'Bounce'], ['shake', 'Shake'], ['spin', 'Spin'], ['pulse', 'Pulse'], ['float', 'Float'], ['wobble', 'Wobble'], ['blink', 'Blink'], ['glow', 'Glow'], ['ghost', 'See-through'], ['dark', 'Silhouette']];
-const EMOTES = ['😀', '😢', '😡', '😱', '😍', '🤔', '😴', '😈', '❗', '❓', '💤', '❤️'];
-const WEATHER = [['', '☀️ Clear'], ['rain', '🌧️ Rain'], ['storm', '⛈️ Storm'], ['snow', '❄️ Snow'], ['fog', '🌫️ Fog'], ['dark', '🕯️ Darkness'], ['night', '🌙 Night tint'], ['heat', '🔥 Heat'], ['sparkle', '✨ Sparkles']];
-const BURSTS = [['', 'None'], ['shake', '📳 Shake'], ['flash', '⚡ Flash'], ['hurt', '🩸 Hurt'], ['confetti', '🎉 Confetti']];
 const PENS = ['#ffffff', '#15131c', '#ff5a5a', '#ffb454', '#ffe14d', '#57d38c', '#4db8ff', '#c77dff'];
 const IDEAS = ['A stranger arrives who knows the hero’s name.', 'Something on stage is not what it seems.', 'The lights go out. When they return, one thing is missing.', 'A character reveals they have been lying.', 'A letter arrives. It is addressed to the hero.', 'The weather turns, and with it the mood.', 'An old friend appears — changed.', 'A door that was locked is now open.', 'Someone offers a deal that is too good.', 'The ground shakes. Time is running out.', 'A small animal leads the way somewhere unexpected.', 'The hero finds an object from their own past.', 'Two characters want opposite things from the hero.', 'It was all a stage set. What is behind it?', 'A countdown begins. Nobody says what happens at zero.'];
 
@@ -47,6 +45,7 @@ let es = null, lastMsg = 0, uiKey = '';
 let cut = null;                              // a cut scene currently playing on the main stage
 let rec = false, animAt = 0, together = false;   // motion recording
 let drawOn = false;
+let dmode = localStorage.getItem('tf.dmode') === 'studio' ? 'studio' : 'guided';   // how the Director works: step by step, or all tools
 const pen = { c: '#ffffff', w: 4 };
 
 const myTurn = () => S && !S.ended && S.you === S.whose;
@@ -98,7 +97,7 @@ function onState(s) {
   localDeadline = s.remainingMs != null ? performance.now() + s.remainingMs : 0;
   const newTurn = !prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended;
   if (newTurn) {
-    submitting = false; selId = null; selInv = null; rec = false; drawOn = false; animAt = 0;
+    submitting = false; selId = null; selInv = null; rec = false; drawOn = false; animAt = 0; resetGuided();
     initDraft();
     if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('⏰ Time ran out — your turn was sent as it was');
     if (cut) cut.skip();
@@ -187,6 +186,7 @@ stage.addEventListener('pointerdown', (ev) => {
     draft.drawing.push(drag.stroke);
   } else {
     selId = hit ? hit.id : null; selInv = null;
+    if (hit && dmode === 'guided' && guidedPick(hit.id)) uiKey = '';
     if (hit) {
       drag = { e: hit, dx: hit.x - p.x, dy: hit.y - p.y };
       if (rec) {
@@ -220,13 +220,30 @@ function endDrag() {
   if (d.take) {                                                     // store the recorded move
     const tk = d.take, t = Math.min(10000, Math.round(tk.off + performance.now() - tk.t0));
     tk.pts.push(Math.max(t, tk.last + 1), r3(d.e.x), r3(d.e.y));
-    const old = draft.tracks.find((x) => x.id === d.e.id);
-    if (old && old.pts[old.pts.length - 3] <= tk.off) old.pts.push(...tk.pts); else { dropTrack(d.e.id); draft.tracks.push({ id: d.e.id, pts: tk.pts }); }
+    storeTrack(d.e.id, tk.off, tk.pts);
     animAt = together ? tk.off : Math.min(10000, t);
     uiKey = '';
   }
   if (d.stroke) { if (d.stroke.pts.length < 4) d.stroke.pts.push(d.stroke.pts[0], d.stroke.pts[1]); uiKey = ''; }
   if (myTurn()) changed();
+}
+function storeTrack(id, off, pts) {
+  const old = draft.tracks.find((x) => x.id === id);
+  if (old && old.pts[old.pts.length - 3] <= off) old.pts.push(...pts); else { dropTrack(id); draft.tracks.push({ id, pts }); }
+}
+/** A ready-made move: steps are [milliseconds, x, y], played after whatever is already recorded. */
+function autoTrack(e, steps) {
+  const off = tracksEnd(); let t = off;
+  const pts = [off, r3(e.x), r3(e.y)];
+  for (const [dt, x, y] of steps) {
+    t += dt;
+    if (t > 10000) break;
+    pts.push(Math.round(t), r3(clamp(x, 0, 1)), r3(clamp(y, 0.08, 1)));
+  }
+  if (pts.length < 6) { toast('The 10 seconds of animation for this turn are used up'); return false; }
+  storeTrack(e.id, off, pts);
+  e.x = pts[pts.length - 2]; e.y = pts[pts.length - 1]; animAt = pts[pts.length - 3];
+  return true;
 }
 stage.addEventListener('pointerup', endDrag);
 stage.addEventListener('pointercancel', endDrag);
@@ -292,7 +309,7 @@ function render() {
   renderChrome();
   renderSheet();
   const key = [S.you, S.turn, S.whose, S.ended, S.joined.player, S.joined.director, submitting, tab, catId, selId, selInv, S.assets.length, S.settings.turnSeconds,
-    JSON.stringify(S.rules), rec, drawOn, together, !!cut, myTurn() && draft.target, myTurn() && draft.use].join('|');
+    JSON.stringify(S.rules), rec, drawOn, together, !!cut, myTurn() && draft.target, myTurn() && draft.use, dmode, guidedKey()].join('|');
   if (key !== uiKey) { uiKey = key; buildPanel(); buildFoot(); } else refreshMarks();
   tick();
 }
@@ -386,6 +403,13 @@ function buildPanel() {
     return;
   }
 
+  const setMode = (m) => { dmode = m; localStorage.setItem('tf.dmode', m); if (G.path.length && G.snap) draft = G.snap; resetGuided(); rec = false; drawOn = false; selId = null; rebuild(); };
+  p.append(h('div', { class: 'modesw' }, h('button', { 'data-mode': 'guided', class: dmode === 'guided' ? 'on' : '', onclick: () => setMode('guided') }, '🧭 Step by step'), h('button', { 'data-mode': 'studio', class: dmode === 'studio' ? 'on' : '', onclick: () => setMode('studio') }, '🎛️ All tools')));
+  if (dmode === 'guided') {
+    if (S.turn === 0 && !G.path.length) p.append(h('div', { class: 'chips typerow' }, h('span', { class: 'dim small' }, 'Story type'),
+      TYPES.map((t) => h('button', { class: S.rules.type === t.id ? 'on' : '', title: t.hint, onclick: () => setRules({ type: t.id, modules: { inventory: false, stats: false, dice: false, ...t.modules } }) }, t.label))));
+    return buildGuided(p, guidedCtx);
+  }
   p.append(h('div', { class: 'tabs' }, [['cast', '🎭', 'Cast'], ['place', '🌄', 'Place'], ['mood', '🎵', 'Mood'], ['anim', '🎬', 'Animate'], ['fx', '✨', 'Extras'], ['more', '⚙️', 'More']]
     .map(([id, icon, label]) => h('button', { 'data-tab': id, class: tab === id ? 'on' : '', onclick: () => { tab = id; rec = false; drawOn = false; render(); } }, h('span', {}, icon), h('small', {}, label)))));
   if (S.turn === 0 && tab !== 'more') p.append(h('div', { class: 'chips typerow' }, h('span', { class: 'dim small' }, 'Story type'),
@@ -499,10 +523,26 @@ function buildPanel() {
       h('button', { class: 'link', onclick: () => leave() }, 'Leave to the start screen'));
   }
 }
+const guidedCtx = {
+  get draft() { return draft; }, get S() { return S; }, get code() { return code; },
+  setDraft(d) { draft = d; saveDraft(); },
+  select(id) { selId = id || null; }, setRec(on) { rec = !!on; drawOn = false; if (on) { together = false; animAt = tracksEnd(); } },
+  cutting: () => !!cut, preview: () => previewCut(), mods: () => mods(), tracksEnd: () => tracksEnd(),
+  toast, act, audio, rebuild: () => rebuild(), changed: () => changed(), changedQuiet: () => changedQuiet(),
+  addEntity: (a) => addEntity(a), removeEntity: (e) => removeEntity(e), giveToPlayer: (e) => giveToPlayer(e), autoTrack: (e, s) => autoTrack(e, s),
+  maker: (k, f) => maker(k, f), randomScene: () => randomScene(),
+};
 function addEntity(asset) {
-  if (draft.entities.length >= 80) return toast('The stage is full');
-  const e = { id: rid(), asset, x: 0.3 + Math.random() * 0.4, y: 0.6 + Math.random() * 0.25, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' };
+  if (draft.entities.length >= 80) return void toast('The stage is full');
+  let best = null;                                   // drop it on the freest spot of the ground, not on top of someone
+  for (let i = 0; i < 24; i++) {
+    const x = 0.1 + Math.random() * 0.8, y = 0.62 + Math.random() * 0.3;
+    const gap = Math.min(9, ...draft.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75)));
+    if (!best || gap > best.gap) best = { x, y, gap };
+  }
+  const e = { id: rid(), asset, x: best.x, y: best.y, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' };
   draft.entities.push(e); selId = e.id; selInv = null; rebuild();
+  return e;
 }
 async function randomScene() {
   try {
@@ -512,7 +552,8 @@ async function randomScene() {
     Object.assign(draft, { backdrop: place.backdrop, mood: place.mood, weather: place.weather, card: place.card, narration: place.narration, tracks: [], drawing: [] });
     if (me) { me.x = 0.3; me.y = 0.82; }
     selId = null; rebuild();
-  } catch (e) { toast(e.message); }
+    return true;
+  } catch (e) { toast(e.message); return false; }
 }
 
 /** Upload-or-generate box. Both paths end in a custom asset stored with the story. */
@@ -561,9 +602,9 @@ function buildFoot() {
   if (submitting) return void f.append(h('div', { class: 'status' }, 'Sending…'));
   if (S.you === 'director') {
     const ready = S.joined.player;
+    if (dmode !== 'guided') f.append(h('input', { placeholder: '📝 Narrate… (“Suddenly, the lights go out.”)', maxlength: 240, value: draft.narration, enterkeyhint: 'done', oninput: (ev) => { draft.narration = ev.target.value; changedQuiet(); } }));
     f.append(
-      h('input', { placeholder: '📝 Narrate… (“Suddenly, the lights go out.”)', maxlength: 240, value: draft.narration, enterkeyhint: 'done', oninput: (ev) => { draft.narration = ev.target.value; changedQuiet(); } }),
-      h('button', { class: 'go primary', disabled: !ready, onclick: submit }, ready ? (S.turn === 0 ? 'Begin the story ▶' : `End ${side}turn ▶`) : 'Waiting for your Player to join…', tl()));
+      h('button', { class: 'go primary', disabled: !ready || (dmode === 'guided' && G.path.length > 0), onclick: submit }, ready ? (S.turn === 0 ? 'Begin the story ▶' : `End ${side}turn ▶`) : 'Waiting for your Player to join…', tl()));
     f.classList.add('tight');
   } else {
     const me = hero(draft);

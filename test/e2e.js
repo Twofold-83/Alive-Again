@@ -12,7 +12,7 @@ const shots = process.argv[2];
   await new Promise((r) => setTimeout(r, 700));
   const browser = await chromium.launch();
   const errors = [];
-  const phone = async () => { const c = await browser.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage(); p.on('pageerror', (e) => errors.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/ERR_|Failed to load/.test(m.text())) errors.push(m.text()); }); return p; };
+  const phone = async () => { const c = await browser.newContext({ ...devices['iPhone 13'] }); await c.addInitScript(() => localStorage.setItem('tf.dmode', 'studio')); const p = await c.newPage(); p.on('pageerror', (e) => errors.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/ERR_|Failed to load/.test(m.text())) errors.push(m.text()); }); return p; };
   const shot = async (p, n) => { if (shots) await p.screenshot({ path: path.join(shots, n + '.png') }); };
   const D = await phone(), P = await phone();
   try {

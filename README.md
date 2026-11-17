@@ -10,7 +10,8 @@ the place, the music, what every other character says and what happens next.
 node server.js
 ```
 
-Open http://localhost:3000. No dependencies, no build step (Node 18+).
+Open http://localhost:3000. The game itself has no dependencies and no build step
+(Node 18+); `npm install` is only needed for the optional "Tell Claude" feature.
 To play over the internet, put it on any host that runs Node or Docker
 (Render, Railway, Fly.io, a VPS…): the start command is `node server.js`, it listens
 on `$PORT`, and stories are saved as JSON files in `$DATA_DIR` (default `./data`) —
@@ -32,7 +33,27 @@ mount a persistent disk there if stories should survive redeploys.
 4. If the clock runs out, the turn is sent as it stands.
 5. 📖 replays the whole story and can download it as a file.
 
-### The Director's tabs
+### Two ways to direct
+
+The Director's panel has a switch at the top.
+
+**🧭 Step by step** (the default) asks one question at a time. It first shows what the
+Player just did, then "What happens next?" with a handful of broad choices — someone
+speaks, move or animate, add something, change something, change the scene, narrate,
+the Player's sheet, tell Claude — each of which narrows down in one or two more taps.
+A finished path is one *event*; a turn holds up to five, listed with an undo. Moves
+are built in: walk to the hero, cross the stage, jump, tremble, or record a path.
+
+**🤖 Tell Claude** (inside Step by step) lets the Director describe the turn in plain
+words; Claude turns it into stage operations (add, move, speak, scene changes, items,
+stats) on the Director's draft, which they can still adjust before ending the turn.
+It needs an Anthropic API key on the server: set `ANTHROPIC_API_KEY` and run
+`npm install`. Without a key the rest of the game works and the option says so.
+`CLAUDE_MODEL` picks the model (default `claude-opus-5-5`), `CLAUDE_MAX_PER_STORY`
+caps requests per story (default 150). See `director-ai.js`.
+
+**🎛️ All tools** is the full toolbox, in tabs:
+
 
 | Tab | What it does |
 | --- | --- |
@@ -77,6 +98,8 @@ rotates, `f` flips and Delete removes.
 | `server.js` | Rooms, roles, turn order, clock, validation, persistence, HTTP + SSE |
 | `providers.js` | Asset generation hook (AI goes here) |
 | `bots.js` | AI partners for solo play (scripted; language-model hook) |
+| `director-ai.js` | "Tell Claude": the Claude call and the stage operations it may use |
+| `public/guided.js` | The step-by-step Director flow |
 | `public/app.js` | The client UI |
 | `public/stage.js` | Draws a scene; plays a turn back as a cut scene |
 | `public/catalog.js` | Built-in sprite and backdrop library, asset ids, art packs |

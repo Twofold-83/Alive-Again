@@ -17,6 +17,8 @@ const path = require('path');
 const crypto = require('crypto');
 const { generateAsset } = require('./providers');
 const { botMove, botName, randomPlace } = require('./bots');
+const directorAI = require('./director-ai');
+const MAX_AI_CALLS = Number(process.env.CLAUDE_MAX_PER_STORY) || 150;   // per story, to keep API spending bounded
 
 const PORT = Number(process.env.PORT) || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
@@ -181,7 +183,7 @@ function view(room, role) {
     scene: room.scene,
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
     before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
-    rules: room.rules, hotseat: !!room.hotseat,
+    rules: room.rules, hotseat: !!room.hotseat, claude: directorAI.available(),
     historyLen: room.history.length, bot: room.bot || null,
     lastTimeout: room.lastTimeout,
   };
@@ -306,6 +308,22 @@ async function act(room, token, body) {
       if (body.rules && typeof body.rules === 'object') room.rules = cleanRules(body.rules);
       touch(room); broadcast(room);
       return { ok: true };
+    }
+    case 'claude': {                    // "tell Claude what happens": returns a new draft scene, commits nothing
+      directorOnly();
+      const text = str(body.text, 600);
+      if (!text) throw fail(400, 'Describe what should happen first');
+      if ((room.aiCalls || 0) >= MAX_AI_CALLS) throw fail(429, 'This story has used up its Claude requests');
+      if (room.aiBusy) throw fail(429, 'Claude is still working on your last request');
+      const raw = body.scene && typeof body.scene === 'object' ? body.scene : {};
+      const scene = cleanScene(raw, room.scene);
+      const said = { action: str(raw.action, 160), target: raw.target, use: raw.use, roll: room.scene.roll };
+      room.aiBusy = true;
+      try {
+        const out = await directorAI.interpret(directorAI.describe({ text, scene, raw: said, rules: room.rules, names: room.names }));
+        room.aiCalls = (room.aiCalls || 0) + 1; touch(room);
+        return { ok: true, note: str(out && out.note, 300), scene: cleanScene(directorAI.applyOps(scene, out && out.ops, room.rules), room.scene) };
+      } finally { room.aiBusy = false; }
     }
     case 'randomScene': {
       directorOnly();

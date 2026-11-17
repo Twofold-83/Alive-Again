@@ -11,7 +11,7 @@ const shots = process.argv[2];
   await new Promise((r) => setTimeout(r, 700));
   const browser = await chromium.launch();
   const errors = [];
-  const open = async (opts) => { const c = await browser.newContext(opts); const p = await c.newPage(); p.on('pageerror', (e) => errors.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/ERR_|Failed to load/.test(m.text())) errors.push(m.text()); }); return p; };
+  const open = async (opts) => { const c = await browser.newContext(opts); await c.addInitScript(() => localStorage.setItem('tf.dmode', 'studio')); const p = await c.newPage(); p.on('pageerror', (e) => errors.push(e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/ERR_|Failed to load/.test(m.text())) errors.push(m.text()); }); return p; };
   const shot = async (p, n) => { if (shots) await p.screenshot({ path: path.join(shots, n + '.png') }); };
   const cutDone = (p) => p.waitForFunction(() => !document.querySelector('#stage').classList.contains('cut'), null, { timeout: 30000 });
   const S = (p) => p.evaluate(async () => (await (await fetch(`/api/rooms/${location.hash.slice(1)}/history`)).json()).history.at(-1).scene);
@@ -26,16 +26,17 @@ const shots = process.argv[2];
     await p.waitForSelector('#sheet .chip.stat');
     assert.equal(await p.locator('#sheet .chip.stat').count(), 2);
     // cast: a key and a wizard
-    await p.fill('input[type=search]', 'old key'); await p.tap('.grid button');
-    await p.fill('input[type=search]', 'wizard'); await p.tap('.grid button');
-    await p.fill('.seltools input', 'Take the key. You will need it.');
-    await p.selectOption('.seltools select >> nth=0', 'float');
-    // record a move for the wizard
     const box = await p.locator('#stage').boundingBox();
     const cdp = await p.context().newCDPSession(p);
     const touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
     const swipe = async (x0, y0, x1, y1, ms = 500) => { await touch('touchStart', x0, y0); for (let i = 1; i <= 10; i++) { await p.waitForTimeout(ms / 10); await touch('touchMove', x0 + (x1 - x0) * i / 10, y0 + (y1 - y0) * i / 10); } await touch('touchEnd'); await p.waitForTimeout(100); };
     const centre = async (sel) => { const b = await p.locator(sel).boundingBox(); return [b.x + b.width / 2, b.y + b.height / 2]; };
+    await p.fill('input[type=search]', 'old key'); await p.tap('.grid button');
+    await swipe(...await centre('.ent.sel'), box.x + box.width * 0.15, box.y + box.height * 0.88, 700);   // key to a corner, clear of the hero
+    await p.fill('input[type=search]', 'wizard'); await p.tap('.grid button');
+    await p.fill('.seltools input', 'Take the key. You will need it.');
+    await p.selectOption('.seltools select >> nth=0', 'float');
+    // record a move for the wizard
     await swipe(...await centre('.ent.sel'), box.x + box.width * 0.3, box.y + box.height * 0.45, 700);   // wizard up and left, clear of the others
     await p.tap('[data-tab=anim]'); await p.tap('#recBtn');
     await swipe(...await centre('.ent.sel'), box.x + box.width * 0.85, box.y + box.height * 0.5, 600);

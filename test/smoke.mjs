@@ -60,12 +60,12 @@ try {
   await act(D, 'end', {}); await sleep(200); assert.equal(p2.state.ended, true); assert.equal(p2.state.remainingMs, null);
   d.ctl.abort(); p2.ctl.abort();
   console.log('SMOKE OK');
-} finally { srv.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); }
+} finally { srv.kill(); await sleep(400); try { fs.rmSync(dataDir, { recursive: true, force: true }); } catch { /* still saving */ } }
 
 // ---- solo play against the built-in bots ----
 {
   const dataDir2 = fs.mkdtempSync(path.join(os.tmpdir(), 'twofold-'));
-  const srv2 = spawn('node', [new URL('../server.js', import.meta.url).pathname], { env: { ...process.env, PORT, DATA_DIR: dataDir2, BOT_DELAY_MS: '20' }, stdio: 'inherit' });
+  const srv2 = spawn('node', [new URL('../server.js', import.meta.url).pathname], { env: { ...process.env, PORT, DATA_DIR: dataDir2, BOT_DELAY_MS: '20', DIRECTOR_AI: new URL('./fake-ai.js', import.meta.url).pathname }, stdio: 'inherit' });
   try {
     await sleep(600);
     // human Player, bot Director
@@ -97,7 +97,22 @@ try {
       const h = me.state.scene.entities.find((e) => e.id === 'hero');
       assert(h.say || me.state.scene.action, 'bot player did something');
     }
+    // "Tell Claude": a stand-in AI returns operations; the server applies and sanitises them, commits nothing
+    await post(`/api/rooms/${code}/act`, { token: 'solo-human-0002', type: 'settings', rules: { type: 'adventure' } });
+    const base2 = structuredClone(me.state.scene); base2.sheet.stats = [{ id: 'hp', name: '❤️ Health', value: 5, max: 5 }];
+    const t0 = me.state.turn;
+    let ai = await post(`/api/rooms/${code}/act`, { token: 'solo-human-0002', type: 'claude', text: 'A dragon bursts in', scene: base2 });
+    assert.equal(ai.status, 200); assert.match(ai.note, /dragon bursts in/);
+    const dr = ai.scene.entities.find((e) => e.asset === 'e:🐉');
+    assert(dr && dr.say === 'ROAR!' && dr.fx === 'shake' && dr.scale === 2); assert.deepEqual([dr.x, dr.y], [0.6, 0.8]);
+    assert.equal(ai.scene.tracks.length, 1); assert.deepEqual(ai.scene.tracks[0].pts, [0, 0.9, 0.7, 1000, 0.7, 0.75, 2000, 0.6, 0.8]);
+    assert.equal(ai.scene.backdrop, 'b:cave'); assert.equal(ai.scene.burst, 'shake'); assert.equal(ai.scene.sfx, 'boom'); assert.equal(ai.scene.narration, 'The wall explodes.');
+    assert.deepEqual(ai.scene.choices, ['Fight', 'Run', 'Hide']); assert.equal(ai.scene.sheet.stats[0].value, 3);
+    assert(ai.scene.entities.some((e) => e.id === 'hero'), 'the hero cannot be removed by the AI');
+    assert.equal(me.state.turn, t0, 'nothing was committed');
+    assert.equal((await post(`/api/rooms/${code}/act`, { token: 'solo-human-0002', type: 'claude', text: 'refuse this', scene: base2 })).status, 422);
+    assert.equal((await post(`/api/rooms/${code}/act`, { token: 'someone-else-9', type: 'claude', text: 'x', scene: base2 })).status, 403);
     me.ctl.abort();
     console.log('SOLO OK');
-  } finally { srv2.kill(); fs.rmSync(dataDir2, { recursive: true, force: true }); }
+  } finally { srv2.kill(); await sleep(400); try { fs.rmSync(dataDir2, { recursive: true, force: true }); } catch { /* still saving */ } }
 }

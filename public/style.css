@@ -231,3 +231,34 @@ button.on { background: var(--accent); color: var(--accent-ink); border-color: t
   #sheet { border-top: 1px solid var(--line); border-bottom: 0; }
   ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-thumb { background: #3a3550; border-radius: 5px; }
 }
+
+/* ---- Director: mode switch and the guided step-by-step flow ---- */
+.modesw { display: flex; gap: 4px; background: #100e16; border-radius: 12px; padding: 3px; }
+.modesw button { flex: 1; min-height: 34px; padding: 4px; border: 0; background: none; font-size: 14px; border-radius: 9px; }
+.modesw button.on { background: var(--panel); color: var(--text); outline: 1px solid var(--accent); }
+.gtitle { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 2px 2px 0; }
+.gtitle b { font-size: 18px; }
+.gopts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.gopt { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px; min-height: 60px; }
+.gopt .gi { font-size: 26px; line-height: 1; flex: none; }
+.gopt .gl { display: flex; flex-direction: column; min-width: 0; }
+.gopt b { font-size: 15px; }
+.gopt small { color: var(--dim); font-size: 12px; line-height: 1.2; }
+.ghead { display: flex; align-items: center; gap: 10px; position: sticky; top: -8px; z-index: 5; background: var(--bg); padding: 8px 0 4px; margin-top: -8px; }
+.ghead > div { display: flex; flex-direction: column; min-width: 0; }
+.ghead b { font-size: 17px; }
+.ghead small { color: var(--dim); font-size: 13px; }
+.gback { flex: none; min-height: 40px; padding: 6px 12px; }
+.gdone { font-size: 17px; padding: 12px; }
+.card.told { gap: 2px; font-size: 15px; }
+.gevents { gap: 3px; font-size: 14px; }
+.gevents .row { margin-top: 6px; }
+.grid button.heroopt { outline: 2px solid var(--accent); }
+.statrow button { min-width: 44px; }
+textarea { resize: vertical; font: inherit; line-height: 1.35; }
+@media (max-width: 520px) {
+  .gopts { gap: 6px; }
+  .gopt { min-height: 50px; padding: 6px 10px; }
+  .gopt small { display: none; }
+  .gtitle small { font-size: 12px; text-align: right; }
+}
