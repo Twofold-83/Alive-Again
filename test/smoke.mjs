@@ -61,3 +61,43 @@ try {
   d.ctl.abort(); p2.ctl.abort();
   console.log('SMOKE OK');
 } finally { srv.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); }
+
+// ---- solo play against the built-in bots ----
+{
+  const dataDir2 = fs.mkdtempSync(path.join(os.tmpdir(), 'twofold-'));
+  const srv2 = spawn('node', [new URL('../server.js', import.meta.url).pathname], { env: { ...process.env, PORT, DATA_DIR: dataDir2, BOT_DELAY_MS: '20' }, stdio: 'inherit' });
+  try {
+    await sleep(600);
+    // human Player, bot Director
+    let { code } = await post('/api/rooms', { token: 'solo-human-0001', name: 'Sam', role: 'player', bot: true });
+    let me = listen(code, 'solo-human-0001'); await sleep(400);
+    assert.equal(me.state.bot, 'director'); assert.equal(me.state.whose, 'player'); assert.equal(me.state.turn, 1);
+    assert(me.state.scene.narration && me.state.scene.entities.length > 2, 'bot director set a scene');
+    const lines = ['Hello, who are you?', '', 'Why?', 'no', 'thanks'], acts = ['', 'open the box', 'look around', 'attack', 'run away', 'take it', 'sleep', 'dance', 'juggles'];
+    for (let i = 0; i < 40; i++) {
+      const t = me.state.turn;
+      await post(`/api/rooms/${code}/act`, { token: 'solo-human-0001', type: 'submit', turn: t, x: Math.random(), y: 0.8, say: lines[i % lines.length], action: acts[i % acts.length] });
+      await sleep(120);
+      assert.equal(me.state.turn, t + 2, 'bot director answered turn ' + t);
+      assert(me.state.scene.entities.some((e) => e.id === me.state.scene.heroId), 'hero survives');
+      assert(me.state.scene.narration || me.state.scene.entities.some((e) => e.say && e.id !== me.state.scene.heroId), 'director reacted at turn ' + t);
+    }
+    assert.equal((await post(`/api/rooms/${code}/act`, { token: 'bot', type: 'submit', turn: me.state.turn })).stale, true);
+    me.ctl.abort();
+    // human Director, bot Player
+    ({ code } = await post('/api/rooms', { token: 'solo-human-0002', name: 'Mia', role: 'director', bot: true }));
+    me = listen(code, 'solo-human-0002'); await sleep(300);
+    assert.equal(me.state.bot, 'player'); assert.equal(me.state.joined.player, true); assert.equal(me.state.online.player, true);
+    for (let i = 0; i < 10; i++) {
+      const t = me.state.turn, scene = structuredClone(me.state.scene);
+      scene.entities.push({ id: 'w' + i, asset: 'e:🧙', x: 0.7, y: 0.8, say: i % 2 ? 'Will you help me?' : 'Welcome.' });
+      await post(`/api/rooms/${code}/act`, { token: 'solo-human-0002', type: 'submit', turn: t, scene });
+      await sleep(120);
+      assert.equal(me.state.turn, t + 2, 'bot player moved');
+      const h = me.state.scene.entities.find((e) => e.id === 'hero');
+      assert(h.say || me.state.scene.action, 'bot player did something');
+    }
+    me.ctl.abort();
+    console.log('SOLO OK');
+  } finally { srv2.kill(); fs.rmSync(dataDir2, { recursive: true, force: true }); }
+}

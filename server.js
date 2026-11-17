@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { generateAsset } = require('./providers');
+const { botMove, botName } = require('./bots');
 
 const PORT = Number(process.env.PORT) || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
@@ -35,6 +36,8 @@ const rooms = new Map();   // code -> room
 const streams = new Map(); // code -> Set<{res, token}>
 const timers = new Map();  // code -> timeout handle
 const dirty = new Set();
+const botBusy = new Set(); // codes of rooms whose bot is currently "thinking"
+const BOT_DELAY_MS = process.env.BOT_DELAY_MS != null ? Number(process.env.BOT_DELAY_MS) : null;
 
 /* ---------- helpers ---------- */
 const uid = () => crypto.randomBytes(6).toString('hex');
@@ -91,6 +94,7 @@ function roleOf(room, token) {
   return 'spectator';
 }
 function online(room, role) {
+  if (room.bot === role) return true;   // an AI partner never drops off
   const set = streams.get(room.code);
   if (!set) return false;
   for (const s of set) if (s.token === room.tokens[role]) return true;
@@ -108,7 +112,7 @@ function view(room, role) {
     paused: timed && room.deadline == null,
     scene: room.scene,
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
-    historyLen: room.history.length,
+    historyLen: room.history.length, bot: room.bot || null,
     lastTimeout: room.lastTimeout,
   };
 }
@@ -161,6 +165,24 @@ function advance(room, timeout) {
   syncClock(room);
   touch(room);
   broadcast(room);
+  maybeBot(room);
+}
+
+/* If an AI partner holds the current turn, let it "think" for a human-ish moment and then play. */
+function maybeBot(room) {
+  if (!room.bot || room.ended || room.whose !== room.bot || botBusy.has(room.code)) return;
+  botBusy.add(room.code);
+  const turn = room.turn;
+  const delay = BOT_DELAY_MS != null ? BOT_DELAY_MS : room.turn === 0 ? 1200 : 2500 + Math.random() * 3500;
+  setTimeout(async () => {
+    try {
+      if (room.turn !== turn || room.ended || rooms.get(room.code) !== room) return;
+      room.botMemory = room.botMemory || {};
+      const move = await botMove({ role: room.bot, scene: clone(room.scene), names: room.names, turn, memory: room.botMemory, history: room.history.slice(-6) });
+      botBusy.delete(room.code);
+      if (room.turn === turn && !room.ended) await act(room, room.tokens[room.bot], { ...move, type: 'submit', turn });
+    } catch (e) { console.error('Bot turn failed:', e); } finally { botBusy.delete(room.code); }
+  }, delay);
 }
 
 function storeAsset(room, kind, name, mime, data) {
@@ -301,6 +323,7 @@ function openStream(req, res, room, token) {
   streams.get(room.code).add(s);
   syncClock(room);
   broadcast(room);
+  maybeBot(room);
   req.on('close', () => {
     const set = streams.get(room.code);
     if (set) { set.delete(s); if (!set.size) streams.delete(room.code); }
@@ -331,7 +354,13 @@ async function handle(req, res) {
     };
     room.tokens[role] = body.token;
     room.names[role] = str(body.name, 20) || room.names[role];
+    if (body.bot) {                       // solo play: the other side is an AI partner
+      room.bot = role === 'director' ? 'player' : 'director';
+      room.tokens[room.bot] = 'bot-' + crypto.randomBytes(16).toString('hex');
+      room.names[room.bot] = botName();
+    }
     rooms.set(room.code, room); touch(room);
+    maybeBot(room);
     return json(res, 200, { code: room.code, role });
   }
 

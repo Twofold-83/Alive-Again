@@ -41,10 +41,21 @@ mount a persistent disk there if stories should survive redeploys.
 | --- | --- |
 | `server.js` | Rooms, roles, turn order, clock, validation, persistence, HTTP + SSE |
 | `providers.js` | Asset generation hook (AI goes here) |
+| `bots.js` | AI partners for solo play (scripted; language-model hook) |
 | `public/app.js` | The whole client UI |
 | `public/catalog.js` | Built-in sprites and backdrops, asset id scheme |
 | `public/audio.js` | Music moods (generative WebAudio) |
 | `test/` | `npm test` (protocol) and `npm run test:e2e` (two phones, needs Playwright) |
+
+## Solo play
+
+"Solo as Player" and "Solo as Director" on the start screen fill the other seat with
+a built-in bot. The bots are scripted: the Director bot picks one of a few opening
+scenes and reacts to keywords in what the Player says and does; the Player bot
+answers questions, walks up to things and pokes at them. They cost nothing and need
+no network. To put a language model behind either seat, export `playerMove(ctx)`
+and/or `directorMove(ctx)` from a module and start with `BOT_PROVIDER=./my-bot.js`
+(the contract is documented at the top of `bots.js`).
 
 ## Adding AI-generated assets
 

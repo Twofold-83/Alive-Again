@@ -207,7 +207,7 @@ function shareLink() {
 function renderChrome() {
   if (!S) return;
   const who = (role, icon) => h('span', { class: 'who' + (S.you === role ? ' me' : '') + (!S.ended && S.whose === role ? ' turn' : '') },
-    h('i', { class: 'dot' + (S.online[role] ? ' on' : '') }), icon + ' ', h('b', {}, S.joined[role] ? S.names[role] : '…'));
+    h('i', { class: 'dot' + (S.online[role] ? ' on' : '') }), (S.bot === role ? '🤖' : icon) + ' ', h('b', {}, S.joined[role] ? S.names[role] : '…'));
   $('#top').replaceChildren(
     who('director', '🎬'), who('player', '🧑'), h('span', { class: 'grow' }), h('span', { class: 'code' }, code),
     h('button', { onclick: openStory, 'aria-label': 'Story so far' }, '📖'),
@@ -321,7 +321,7 @@ function buildPanel() {
         .map(([v, l]) => h('option', { value: v, selected: S.settings.turnSeconds === v }, l)));
     p.append(
       h('div', { class: 'card' }, h('h3', {}, '⏱ Time per turn'), sel2, h('p', { class: 'dim', style: 'font-size:13px' }, 'Applies from the next turn. The clock pauses if either of you drops off.')),
-      h('div', { class: 'card' }, h('h3', {}, `Story code: ${code}`), h('div', { class: 'row' }, h('button', { class: 'grow', onclick: shareLink }, '🔗 Share invite link'), h('button', { class: 'grow', onclick: openStory }, '📖 Story so far'))),
+      h('div', { class: 'card' }, h('h3', {}, `Story code: ${code}`), h('div', { class: 'row' }, h('button', { class: 'grow', onclick: shareLink }, S.bot ? '🔗 Let someone watch' : '🔗 Share invite link'), h('button', { class: 'grow', onclick: openStory }, '📖 Story so far'))),
       h('button', { class: 'danger', onclick: () => { if (confirm('End the story for both of you?')) act('end', {}, 3).catch((e) => toast(e.message)); } }, '🎬 End the story'),
       h('button', { class: 'link', onclick: () => leave() }, 'Leave to the start screen'));
   }
@@ -445,9 +445,9 @@ function leave(msg) {
   $('#invite').hidden = true; $('#newBtns').hidden = false; codeEl.value = '';
   errEl.textContent = msg || '';
 }
-async function create(role) {
+async function create(role, bot) {
   errEl.textContent = '';
-  try { enter((await api('/api/rooms', { token, name: myName(), role })).code); } catch (e) { errEl.textContent = e.message; }
+  try { enter((await api('/api/rooms', { token, name: myName(), role, bot: !!bot })).code); } catch (e) { errEl.textContent = e.message; }
 }
 async function join(c, quiet) {
   c = (c || '').trim().toUpperCase();
@@ -460,6 +460,8 @@ async function join(c, quiet) {
 }
 $('#newDirector').onclick = () => create('director');
 $('#newPlayer').onclick = () => create('player');
+$('#soloPlayer').onclick = () => create('player', true);
+$('#soloDirector').onclick = () => create('director', true);
 $('#joinBtn').onclick = () => join(codeEl.value);
 codeEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') join(codeEl.value); });
 
