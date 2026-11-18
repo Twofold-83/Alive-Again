@@ -26,7 +26,11 @@ const { setup } = require('./lib');
     await P.p.waitForSelector('#foot button.go'); await P.cutDone();
     assert.equal(await P.p.locator('#stage .ent').count(), 2);
     assert.match(await P.p.textContent('.strip.narr'), /dark forest/);
-    await P.dragHero(-0.25);
+    const [hx] = await P.heroPos();
+    await P.p.mouse.click(600, 400); assert.equal((await P.heroPos())[0], hx, 'clicking the stage alone does not move the hero');
+    await P.walk(0.2, 0.7);                                                              // press Walk, point, and the hero walks there
+    const [wx, wy] = await P.heroPos(); assert(Math.abs(wx - 0.2) < 0.02 && Math.abs(wy - 0.7) < 0.02, `walked to the spot (${wx}, ${wy})`);
+    assert.equal(await P.p.textContent('#walkBtn'), '↶ Take the walk back', 'one walk per turn');
     await P.p.fill('#foot input >> nth=0', 'Who are you?'); await P.p.fill('#foot input >> nth=1', 'draws a sword');
     await P.p.reload(); await P.p.waitForSelector('#foot button.go');                    // a reload mid-turn keeps the draft
     assert.equal(await P.p.inputValue('#foot input >> nth=1'), 'draws a sword');
@@ -34,6 +38,7 @@ const { setup } = require('./lib');
     // the Director: the Player's line is reported, not left hanging over the hero
     await D.p.waitForSelector('.stepbar'); await D.cutDone();
     assert.match(await D.p.textContent('.card.told'), /Who are you\?.*draws a sword/s);
+    { const sc = await D.last(); assert.equal(sc.tracks.length, 1, 'the walk was sent to the Director'); assert.equal(sc.tracks[0].id, sc.heroId); const t = sc.tracks[0].pts; assert(t[t.length - 3] > 1000, 'at walking pace: ' + t[t.length - 3] + ' ms'); }
     assert.match(await D.p.textContent('.strip.act'), /Who are you\?.*draws a sword/s);
     assert.equal(await D.p.textContent('#stage .bubbles'), '', 'no speech bubble left on stage at the start of the Director’s turn');
     // step 1: a line, a shake and a boom together

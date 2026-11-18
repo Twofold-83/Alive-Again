@@ -83,7 +83,7 @@ const TYPES = { free: { inventory: false, stats: false, dice: false }, adventure
  *   tell     the Player only writes what they want to do; the Director stages it
  *   free     the Player moves, animates and speaks for their hero
  *   limited  the Player must pick one of the options the Director offered
- * moveRange (free only): how far the hero may walk per turn, as a fraction of the stage width; 0 = anywhere. */
+ * With free or limited will the hero may walk once per turn (click a destination); the walk is sent as a track. */
 const PLAYER_MODES = ['free', 'limited', 'tell'];
 function cleanRules(r) {
   const type = r && TYPES[r.type] ? r.type : 'free';
@@ -91,7 +91,6 @@ function cleanRules(r) {
   return {
     type, modules: { inventory: !!m.inventory, stats: !!m.stats, dice: !!m.dice },
     player: r && PLAYER_MODES.includes(r.player) ? r.player : 'free',
-    moveRange: r ? r3(num(r.moveRange, 0, 1, 0)) : 0,
   };
 }
 /* A level is a 16 x 12 grid of tiles over the backdrop. pal lists the tiles in use
@@ -232,6 +231,7 @@ function view(room, role) {
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
     before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
     rules: room.rules, hotseat: !!room.hotseat, claude: directorAI.available(),
+    scenes: role === 'director' || room.hotseat ? room.scenes || [] : undefined,
     historyLen: room.history.length, bot: room.bot || null,
     lastTimeout: room.lastTimeout,
   };
@@ -332,7 +332,7 @@ async function act(room, token, body) {
         const roll = rollDie(body.roll);
         if (roll) room.scene.roll = { by: 'director', ...roll };
       } else {
-        const sc = room.scene, mode = room.rules.player, range = room.rules.moveRange;
+        const sc = room.scene, mode = room.rules.player;
         const hero = sc.entities.find((e) => e.id === sc.heroId);
         let action = str(body.action, mode === 'tell' ? 300 : 160);
         if (mode === 'limited' && sc.choices.length && !sc.choices.includes(action)) throw fail(400, 'Pick one of the Director’s options first');
@@ -345,10 +345,7 @@ async function act(room, token, body) {
           let x = num(body.x, 0, 1, hero.x), y = num(body.y, 0, 1, hero.y);
           let track = Array.isArray(body.track) ? cleanTrackPts(body.track) : [];
           for (let i = 0; i < track.length; i += 3) if (!walkable(sc, track[i + 1], track[i + 2])) { track = []; break; }
-          if (range > 0) {                                    // game movement: only so far per turn
-            const d = stageDist(x, y, hero.x, hero.y);
-            if (d > range) { x = hero.x + ((x - hero.x) * range) / d; y = hero.y + ((y - hero.y) * range) / d; }
-          } else if (track.length >= 6) sc.tracks = [{ id: hero.id, pts: track }];   // the Player recorded how their hero moves
+          if (track.length >= 6) sc.tracks = [{ id: hero.id, pts: track }];   // the Player recorded how their hero moves
           if (walkable(sc, x, y)) { hero.x = r3(x); hero.y = r3(y); } else sc.tracks = [];   // walls and solid things stop the hero
         }
         if (mode !== 'tell') {
@@ -385,6 +382,16 @@ async function act(room, token, body) {
         room.aiCalls = (room.aiCalls || 0) + 1; touch(room);
         return { ok: true, note: str(out && out.note, 300), scene: cleanScene(directorAI.applyOps(scene, out && out.ops, room.rules), room.scene) };
       } finally { room.aiBusy = false; }
+    }
+    case 'saveScenes': {                // the Director's prepared scenes (the scene workshop)
+      directorOnly();
+      const seen = new Set();
+      room.scenes = arr(body.scenes).slice(0, 40).filter((x) => x && typeof x === 'object' && x.scene && typeof x.scene === 'object').map((x) => {
+        let id = str(x.id, 24) || uid(); if (seen.has(id)) id = uid(); seen.add(id);
+        return { id, name: str(x.name, 40) || 'Untitled scene', scene: cleanScene(x.scene, newScene(), true) };
+      });
+      touch(room); broadcast(room);
+      return { ok: true };
     }
     case 'randomScene': {
       directorOnly();

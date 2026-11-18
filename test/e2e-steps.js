@@ -70,63 +70,100 @@ const { setup } = require('./lib');
     let sc = await x.last();
     assert.equal(sc.steps.length, 8); assert.deepEqual(sc.steps.map((f) => f.narration), lines); assert.equal(sc.steps[0].weather, 'rain');
 
-    /* ---- limited will, with walking and game movement ---- */
+    /* ---- limited will: must choose, may walk once ---- */
     await p.fill('#tellBox', 'I wait.'); await toDirector();
-    await settings('[data-pmode=limited]', '[data-range="0.15"]');
+    await settings('[data-pmode=limited]');
+    assert.equal(await p.locator('[data-range]').count(), 0, 'no walking-distance options any more');
     await p.click('.card.ask button.primary');
     await p.fill('input[placeholder="Choice 1"]', 'Follow the river'); await p.fill('input[placeholder="Choice 2"]', 'Go back'); await x.done();
     await toPlayer();
     assert(await p.isDisabled('#foot button.go'), 'cannot end the turn before choosing');
-    await p.waitForFunction(() => getComputedStyle(document.querySelector('#stage .range')).display === 'block');
-    const [xa] = await x.heroPos(); await x.dragHero(0.45); const [xb] = await x.heroPos();
-    assert(xb - xa > 0.1 && xb - xa <= 0.151, `limited will: the hero walks, but only within range (${xb - xa})`);
+    await x.walk(0.8, 0.6);
+    const [lx] = await x.heroPos(); assert(Math.abs(lx - 0.8) < 0.02, 'limited will: the hero can walk');
+    await p.click('#walkBtn'); assert(Math.abs((await x.heroPos())[0] - lx) > 0.1, 'taking the walk back returns the hero');
+    await x.walk(0.7, 0.6);
     await p.click('#foot .choices button:has-text("Go back")'); await p.fill('#foot input', 'No thanks.');
-    await x.shot('s-2-limited-range');
     await toDirector();
-    sc = await x.last(); assert.equal(sc.action, 'Go back'); assert(Math.abs(sc.entities.find((e) => e.id === sc.heroId).x - xb) < 0.01);
+    sc = await x.last(); assert.equal(sc.action, 'Go back'); assert(Math.abs(sc.entities.find((e) => e.id === sc.heroId).x - 0.7) < 0.02);
 
-    /* ---- Adventure: build a level; floors, walls and solid things ---- */
-    await settings('.card .chips button:has-text("Adventure")', '[data-pmode=free]', '[data-range="0"]');
-    await x.opt('Build the level');
-    await p.click('#fillAll');                                                    // floor everywhere
-    await p.click('[data-kind=w]'); await p.click('#panel .grid button >> nth=12');
-    const st = await stage(), cw = st.width / 16, ch = st.height / 12;
-    await p.mouse.move(st.x + cw * 10.5, st.y + ch * 0.5); await p.mouse.down();      // a wall down column 10, with a gap in row 11
-    await p.mouse.move(st.x + cw * 10.5, st.y + ch * 10.5, { steps: 30 }); await p.mouse.up();
-    assert.equal(await p.locator('#stage .level i.wall').count(), 11);
-    await x.shot('s-3-level');
-    await x.done();
-    // put the hero left of the wall and a solid crate in its way further left
-    const dragTo = async (sel, fx, fy) => { const b = await p.locator(sel).boundingBox(); await p.mouse.move(b.x + b.width / 2, b.y + b.height - 3); await p.mouse.down(); await p.mouse.move(st.x + st.width * fx, st.y + st.height * fy, { steps: 12 }); await p.mouse.up(); };
-    await dragTo('.ent.hero', 0.4, 0.5); await x.done();
-    await x.add('crate'); await p.click('.thingbtns button:has-text("Solid")'); await dragTo('.ent.sel', 0.2, 0.5); await x.done();
+    /* ---- the scene workshop: build a level, prepare scenes, use them ---- */
+    await settings('.card .chips button:has-text("Adventure")', '[data-pmode=free]');
+    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
+    assert.match(await p.textContent('.wslist'), /in the story right now/);
+    const ws = await p.locator('#wsStage').boundingBox(), cw = ws.width / 16, ch = ws.height / 12;
+    const cell = (cx, cy) => [ws.x + cw * (cx + 0.5), ws.y + ch * (cy + 0.5)];
+    const tileBtn = (kind) => ({ click: async () => { await p.click(`.grid.tiles button >> nth=${kind === 'wall' ? 12 : 0}`); await p.click(`[data-kind=${kind === 'wall' ? 'w' : 'f'}]`); } });
+    // a new prepared scene: floor everywhere, a wall across with a gap at the bottom, a solid crate
+    await p.click('#wsNew');
+    await tileBtn('floor').click(); await p.click('#wsFillAll');
+    assert.match(await p.textContent('#wsCount'), /192 floor · 0 wall/);
+    await tileBtn('wall').click(); await p.click('[data-tool=rect]');
+    await p.mouse.move(...cell(10, 0)); await p.mouse.down(); await p.mouse.move(...cell(10, 5), { steps: 6 }); await p.mouse.move(...cell(10, 9), { steps: 6 }); await p.mouse.up();
+    assert.match(await p.textContent('#wsCount'), /182 floor · 10 wall/);
+    await p.keyboard.press('Control+z'); assert.match(await p.textContent('#wsCount'), /192 floor · 0 wall/);
+    await p.keyboard.press('Control+y'); assert.match(await p.textContent('#wsCount'), /182 floor · 10 wall/);
+    await p.click('[data-tool=pick]'); await p.mouse.click(...cell(10, 3)); assert(await p.locator('[data-kind=w].on').count(), 'picking a wall tile selects the wall brush');
+    await p.click('[data-wtab=objects]'); await p.fill('.wstools input[type=search]', 'crate'); await p.click('.wstools .grid button');
+    await p.click('.seltools button:has-text("Solid")');
+    const dragWs = async (sel, cx, cy) => { const b = await p.locator(sel).boundingBox(); await p.mouse.move(b.x + b.width / 2, b.y + b.height - 3); await p.mouse.down(); await p.mouse.move(...cell(cx, cy), { steps: 10 }); await p.mouse.up(); };
+    await dragWs('#wsStage .ent.sel', 3, 5.4); await dragWs('#wsStage .ent.hero', 6, 5.4);
+    await p.click('[data-wtab=scene]'); await p.fill('#wsName', 'The river crossing'); await p.click('.wstools .grid.drops button >> nth=3');
+    await x.shot('s-3-workshop');
+    // a second prepared scene, by duplicating; the library is saved with the story
+    await p.click('#wsDup'); assert.equal(await p.locator('.wsdoc').count(), 3);
+    await p.click('.wsdoc:has-text("The river crossing") >> nth=0');
+    await p.click('#wsUse');                                                        // bring the prepared scene on stage, in this step
+    await p.waitForSelector('#workshop', { state: 'hidden' });
+    assert.equal(await p.locator('#stage .level i').count(), 192); assert.equal(await p.locator('#stage .ent').count(), 2);
+    let saved = await p.evaluate(async () => { const r = await fetch(`/api/rooms/${location.hash.slice(1)}/events?token=${localStorage.getItem('tf.token')}`); const rd = r.body.getReader(); let b = ''; for (;;) { const { value } = await rd.read(); b += new TextDecoder().decode(value); const i = b.indexOf('data: '); const e = b.indexOf('\n\n', i); if (i >= 0 && e > i) { rd.cancel(); return JSON.parse(b.slice(i + 6, e)).scenes; } } });
+    assert.equal(saved.length, 2); assert.equal(saved[0].name, 'The river crossing'); assert(saved[0].scene.level && saved[0].scene.entities.some((e) => e.solid));
+    await x.opt('Change the scene'); assert.match(await p.textContent('.gopt:has-text("A prepared scene")'), /2 ready/); await p.click('.gback');
     await toPlayer();
-    assert.equal(await p.locator('#stage .level i').count(), 192);
-    let [px, py] = await x.heroPos();
-    await x.dragHero(0.5);                                                         // right, into the wall
-    let [qx] = await x.heroPos();
-    assert(qx > px + 0.1 && qx < 10 / 16, `the hero stops at the wall (x=${qx})`);
-    await x.dragHero(-0.7);                                                        // left, into the solid crate
-    [qx] = await x.heroPos();
-    assert(qx > 0.2 + 0.03 && qx < 0.35, `the hero bumps into the solid crate (x=${qx})`);
-    await x.shot('s-4-bump');
+    const [px, py] = await x.heroPos(); assert(Math.abs(px - 6.5 / 16) < 0.03, `the hero starts where the prepared scene says (${px})`);
+    // pointing past the wall: the hero finds the gap and walks around
+    await x.walk(13.5 / 16, 5.5 / 12);
+    let [qx, qy] = await x.heroPos(); assert(Math.abs(qx - 13.5 / 16) < 0.03 && Math.abs(qy - 5.5 / 12) < 0.03, `the hero walked around the wall (${qx}, ${qy})`);
+    await x.shot('s-4-walked-around');
     await toDirector();
     sc = await x.last();
-    assert(sc.level && sc.level.cells.length === 192); assert(Math.abs(sc.entities.find((e) => e.id === sc.heroId).x - qx) < 0.01);
-    assert(sc.entities.some((e) => e.solid));
+    let tr = sc.tracks[0].pts; assert(tr.length >= 12, 'the walk has corners: ' + tr.length / 3 + ' points');
+    let low = 0; for (let i = 0; i < tr.length; i += 3) low = Math.max(low, tr[i + 2]); assert(low > 10 / 12, `it went through the gap at the bottom (lowest point ${low})`);
+    for (let i = 0; i < tr.length; i += 3) assert(!(Math.floor(tr[i + 1] * 16) === 10 && tr[i + 2] < 10 / 12), 'no point of the walk is inside the wall');
+    // close the gap in the workshop (editing the live scene), then the hero cannot cross; a solid thing cannot be entered
+    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
+    await tileBtn('wall').click(); await p.click('[data-tool=brush]');
+    await p.mouse.move(...cell(10, 10)); await p.mouse.down(); await p.mouse.move(...cell(10, 11), { steps: 4 }); await p.mouse.up();
+    await p.click('#wsUse'); await p.waitForSelector('#workshop', { state: 'hidden' });
+    assert.equal(await p.locator('#stage .ent').count(), 2, 'editing the live scene keeps what is on stage');
+    await toPlayer();
+    await x.walk(3.5 / 16, 5.5 / 12);                                               // back to the left side
+    [qx] = await x.heroPos(); assert(qx > 11 / 16, `walled in: the hero stays on its side, as near as it can get (${qx})`);
+    await p.click('#walkBtn');
+    await toDirector();
+    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
+    await p.click('[data-tool=erase]'); await p.mouse.click(...cell(10, 10));                 // an erased tile is a hole: still not walkable
+    await tileBtn('floor').click(); await p.mouse.click(...cell(10, 11));                      // a floor tile reopens the way
+    await p.click('#wsUse'); await p.waitForSelector('#workshop', { state: 'hidden' });
+    await toPlayer();
+    await x.walk(3.5 / 16, 5.5 / 12);                                               // straight at the solid crate
+    [qx, qy] = await x.heroPos();
+    assert(Math.hypot(qx - 3.5 / 16, (qy - 5.9 / 12) * 0.75) > 0.03 && qx < 6 / 16, `the hero stops beside the solid crate (${qx}, ${qy})`);
+    await toDirector();
+    sc = await x.last(); assert(Math.abs(sc.entities.find((e) => e.id === sc.heroId).x - qx) < 0.01);
     // the server refuses a position inside a wall
     const code = await p.evaluate(() => location.hash.slice(1)), token = await p.evaluate(() => localStorage.getItem('tf.token'));
     await x.end(); await side('Player'); await x.cutDone();
     const turn = (await p.evaluate(async () => (await (await fetch(`/api/rooms/${location.hash.slice(1)}/history`)).json()).history.length));
-    await p.evaluate(async ([c, tk, tn]) => { await fetch(`/api/rooms/${c}/act`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: tk, type: 'submit', turn: tn, x: 10.5 / 16, y: 0.5, say: 'cheat' }) }); }, [code, token, turn]);
+    await p.evaluate(async ([c, tk, tn]) => { await fetch(`/api/rooms/${c}/act`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: tk, type: 'submit', turn: tn, x: 10.5 / 16, y: 0.3, say: 'cheat' }) }); }, [code, token, turn]);
     await side('Director'); await x.cutDone();
     sc = await x.last(); assert.equal(sc.entities.find((e) => e.id === sc.heroId).say, 'cheat'); assert(Math.abs(sc.entities.find((e) => e.id === sc.heroId).x - qx) < 0.01, 'the hero was not moved into the wall');
+    const st = await stage();
 
     /* ---- Claude (stand-in) fills a step; reaching for a thing and getting it ---- */
     await x.opt('Tell Claude'); await p.fill('#panel textarea', 'A dragon bursts in'); await x.done();
     await p.waitForSelector('.gevents:has-text("A dragon bursts in")');
-    assert.equal(await p.locator('#stage .ent').count(), 4);
-    await p.click('#resetStep'); assert.equal(await p.locator('#stage .ent').count(), 3, 'reset step undoes what Claude staged');
+    assert.equal(await p.locator('#stage .ent').count(), 3);
+    await p.click('#resetStep'); assert.equal(await p.locator('#stage .ent').count(), 2, 'reset step undoes what Claude staged');
     await x.add('gold key'); const [kx, ky] = await p.evaluate(() => { const s = document.querySelector('.ent.sel').style; return [parseFloat(s.left) / 100, parseFloat(s.top) / 100]; }); await x.done();
     await toPlayer();
     await p.mouse.click(st.x + st.width * kx, st.y + st.height * ky - 10);

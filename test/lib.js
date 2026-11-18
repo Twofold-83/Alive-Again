@@ -27,13 +27,14 @@ exports.setup = async (port, env = {}) => {
       /** Record what the stage shows over time (for checking playback order). */
       watch: () => p.evaluate(() => { window.__seq = []; clearInterval(window.__w); window.__w = setInterval(() => { const st = document.querySelector('#stage'); const k = [st.querySelector('.weather').className.replace('weather', '').trim(), st.querySelector('.strip.narr').textContent, st.querySelector('.bubbles').textContent, st.querySelector('.strip.act').textContent, st.className.includes('b-shake') ? 'shake' : ''].join('|'); if (window.__seq.at(-1) !== k) window.__seq.push(k); }, 30); }),
       seen: () => p.evaluate(() => window.__seq),
-      /** Drag the hero by a fraction of the stage size, slowly enough to be recorded as a walk. */
-      dragHero: async (dx, dy = 0) => {
-        const b = await p.locator('.ent.hero').boundingBox(), st = await p.locator('#stage').boundingBox();
-        const x0 = b.x + b.width / 2, y0 = b.y + b.height - 3;
-        await p.mouse.move(x0, y0); await p.mouse.down();
-        for (let i = 1; i <= 14; i++) { await p.mouse.move(x0 + (st.width * dx * i) / 14, y0 + (st.height * dy * i) / 14); await p.waitForTimeout(70); }
-        await p.mouse.up();
+      /** Press Walk and click the stage at (fx, fy) (fractions of the stage); waits until the hero has arrived. */
+      walk: async (fx, fy) => {
+        const st = await p.locator('#stage').boundingBox();
+        await p.click('#walkBtn'); await p.mouse.click(st.x + st.width * fx, st.y + st.height * fy);
+        await p.waitForFunction(() => /back/.test(document.querySelector('#walkBtn').textContent));
+        let prev = '';
+        for (let i = 0; i < 80; i++) { const cur = String(await x.heroPos()); if (cur === prev) return; prev = cur; await p.waitForTimeout(250); }
+        throw new Error('the hero never stopped walking');
       },
       /** Add the first sprite found by name; leaves its tool screen open. */
       add: async (name) => { await x.opt('Add something'); await x.opt('Search by name'); await p.fill('input[type=search]', name); await p.click('.grid button'); await p.waitForSelector('.thingbtns'); },

@@ -99,7 +99,7 @@ export async function loadPixel() {
     const r = await fetch('px/index.json', { cache: 'no-cache' });
     if (!r.ok) return;
     for (const c of (await r.json()).categories) {
-      const items = c.items.map((i) => { const it = { name: i.name, asset: 'p:' + i.slug }; PX.set(i.slug, it); return it; });
+      const items = c.items.map((i) => { const it = { name: i.name, asset: 'p:' + i.slug, kind: i.kind, solid: !!i.solid }; PX.set(i.slug, it); return it; });
       PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items });
     }
   } catch { /* no pixel pack: the emoji library is used */ }
@@ -135,6 +135,8 @@ export function assetLabel(asset, name) {
   const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;
   return name || (it ? 'the ' + it.name.split(' ').slice(0, 3).join(' ') : 'it');
 }
+/** Catalog facts about a pixel sprite: { kind: 'floor'|'wall' } for tiles, { solid } for props. */
+export const pixelInfo = (asset) => (asset.startsWith('p:') && PX.get(asset.slice(2))) || {};
 export const assetName = (asset) => { const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null; return it ? it.name.split(' ').slice(0, 2).join(' ') : ''; };
 
 export function backdropCss(code, id) {

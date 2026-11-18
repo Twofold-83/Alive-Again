@@ -14,15 +14,15 @@
  */
 import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetLabel } from './catalog.js';
 import { MOODS, SFX } from './audio.js';
-import { h, clone, clamp, glyphNode, actionText, EMPTY_CELLS, LEVEL_W, LEVEL_H } from './stage.js';
+import { h, clone, clamp, glyphNode, actionText } from './stage.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
 
 export const G = { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', ask: '' };
 export function resetGuided() { Object.assign(G, { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '' }); }
 export const guidedKey = () => [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat].join('~');
 
-/** Which stage tool the open screen needs: dragging records a path, draws, or paints level tiles. */
-export const guidedTool = () => { const top = G.path[G.path.length - 1]; return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : top === 'level' ? 'level' : ''; };
+/** Which stage tool the open screen needs: dragging records a path, or draws. */
+export const guidedTool = () => { const top = G.path[G.path.length - 1]; return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : ''; };
 
 const PICKERS = ['speak', 'move', 'give'];   // questions that start with "which one?"
 /** A tap on something on the stage: answers an open "which one?", otherwise opens that thing's own tools. */
@@ -138,7 +138,7 @@ export function buildGuided(p, c) {
       opt('💥', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
       opt('🌄', 'Change the scene', 'Place, weather, music, title', () => enter('scene')),
       opt('✏️', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
-      S.rules.type === 'adventure' && opt('🧱', 'Build the level', 'Floors, walls, solid things', () => enter('level')),
+      opt('🛠️', 'Scene workshop', 'Build levels, prepare scenes', () => c.workshop()),
       sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
       opt('❓', 'Offer choices', `Options for ${S.names.player}`, () => enter('choices')),
       opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
@@ -250,12 +250,20 @@ export function buildGuided(p, c) {
   if (top === 'scene') {
     head('Change what about the scene?');
     p.append(h('div', { class: 'gopts' },
+      opt('📚', 'A prepared scene', `${(S.scenes || []).length} ready in the workshop`, () => enter('scene:prepared')),
       opt('🌄', 'The place', 'A new backdrop', () => enter('scene:place')),
       opt('🌦️', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
       opt('🎵', 'The music', '', () => enter('scene:music')),
       opt('🎬', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
       opt('🎲', 'A surprise scene', 'A ready-made place and cast', async () => { if (await c.randomScene()) done('A whole new scene'); }),
       opt('💡', 'Give me an idea', 'A random story twist', () => c.idea())));
+    return;
+  }
+  if (top === 'scene:prepared') {
+    head('Bring in a prepared scene', 'It replaces the place, the level and everything on stage except the hero.');
+    const list = S.scenes || [];
+    p.append(list.length ? h('div', { class: 'col' }, list.map((sc) => h('button', { class: 'prep', onclick: () => { c.useScene(sc); done(`The scene changes to “${sc.name}”`); } }, h('b', {}, sc.name), h('small', { class: 'dim' }, `${sc.scene.entities.length - 1} things${sc.scene.level ? ' · has a level' : ''}`))))
+      : h('p', { class: 'dim' }, 'No prepared scenes yet.'), h('button', { onclick: () => c.workshop() }, '🛠️ Open the scene workshop'));
     return;
   }
   if (top === 'scene:place') {
@@ -302,26 +310,6 @@ export function buildGuided(p, c) {
         h('button', { class: 'grow', disabled: !d.drawing.length, onclick: () => { d.drawing.pop(); c.rebuild(); } }, '↶ Undo'),
         h('button', { class: 'grow', disabled: !d.drawing.length, onclick: () => { d.drawing = []; c.rebuild(); } }, 'Clear')),
       doneBtn(() => (d.drawing.length ? 'A drawing' : '')));
-    return;
-  }
-
-  /* ================= 🧱 level ================= */
-  if (top === 'level') {
-    head('Build the level', `${S.names.player}’s hero can only walk on floor tiles, and solid things block the way.`);
-    const tiles = PIXEL.filter((x) => x.group === 'tile').flatMap((x) => x.items);
-    if (!c.brush.a && tiles.length) c.brush.a = tiles[0].asset;
-    const kind = (k, label) => h('button', { 'data-kind': k || 'erase', class: 'grow' + (c.brush.k === k ? ' on' : ''), onclick: () => { c.brush.k = k; c.rebuild(); } }, label);
-    const fill = (fn) => { const lv = d.level || { pal: [], cells: EMPTY_CELLS }; let i = lv.pal.findIndex((t) => t.a === c.brush.a && t.k === c.brush.k); if (i < 0) { lv.pal.push({ a: c.brush.a, k: c.brush.k }); i = lv.pal.length - 1; } const ch = (i + 1).toString(36); lv.cells = [...lv.cells].map((old, n) => (fn(n % LEVEL_W, Math.floor(n / LEVEL_W), old) ? ch : old)).join(''); d.level = lv; c.rebuild(); };
-    p.append(h('small', { class: 'dim' }, 'Paint with'), h('div', { class: 'row' }, kind('f', '🟩 Floor'), kind('w', '🧱 Wall'), kind('', '⌫ Erase')),
-      c.brush.k && h('div', { class: 'grid' }, tiles.map((t) => h('button', { title: t.name, class: c.brush.a === t.asset ? 'on' : '', onclick: () => { c.brush.a = t.asset; c.rebuild(); } }, glyphNode(code, t.asset)))),
-      h('p', { class: 'dim small' }, c.brush.k ? `Drag on the stage to paint ${c.brush.k === 'f' ? 'floor (walkable)' : 'wall (blocks the hero)'}. Walls are marked with a red edge while you build.` : 'Drag on the stage to remove tiles.'),
-      c.brush.k && h('div', { class: 'row' },
-        h('button', { class: 'grow', id: 'fillAll', onclick: () => fill(() => true) }, 'Fill everything'),
-        h('button', { class: 'grow', id: 'fillEdge', onclick: () => fill((x, y) => x === 0 || y === 0 || x === LEVEL_W - 1 || y === LEVEL_H - 1) }, 'Around the edge'),
-        h('button', { class: 'grow', onclick: () => fill((x, y, old) => old === '0') }, 'Empty tiles only')),
-      h('button', { disabled: !d.level, onclick: () => { d.level = null; c.rebuild(); } }, '🗑 Remove the whole level'),
-      h('p', { class: 'dim small' }, 'To make a thing solid (a table, a rock, a guard), click it on the stage and switch on “Solid”.'),
-      doneBtn(() => (d.level ? 'The level changes' : '')));
     return;
   }
 

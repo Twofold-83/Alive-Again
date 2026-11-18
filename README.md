@@ -52,9 +52,9 @@ choice → narrower choices.
 | 🚶 Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, cross the stage, jump, tremble. Different things move together; one thing's moves follow each other. |
 | 📝 Narrate | One narration per step. |
 | 💥 Moment and sound | Shake, flash, confetti; boom, bell, magic and other sounds. |
-| 🌄 Change the scene | Backdrop, weather, music, a title card, a ready-made scene, story ideas. |
+| 🌄 Change the scene | A prepared scene, backdrop, weather, music, a title card, a random scene, story ideas. |
 | ✏️ Draw on the stage | Freehand lines that draw themselves in playback. |
-| 🧱 Build the level | Adventure only, see below. |
+| 🛠️ Scene workshop | Levels and prepared scenes, see below. |
 | 🎒 The Player's sheet | Items, stats, a dice roll. |
 | ❓ Offer choices | Up to three options for the Player. |
 | 🤖 Tell Claude | Describe the step in words; Claude stages it (needs `ANTHROPIC_API_KEY` and `npm install`; `CLAUDE_MODEL`, `CLAUDE_MAX_PER_STORY`; see `director-ai.js`). |
@@ -64,13 +64,28 @@ Clicking anything on the stage opens its own tools (line, size, rotation, effect
 emote, move, turn into something else, copy, solid, give to the Player, remove);
 dragging moves it.
 
-### Levels (Adventure)
+### The scene workshop
 
-"Build the level" paints a 16 × 12 tile grid over the backdrop: **floor** tiles the
-hero can walk on and **wall** tiles it cannot (any tile picture can be either).
-Things on stage can be switched to **solid**. Once a level exists the Player's hero
-can only stand on floor, slides along walls, and bumps into solid things; the server
-enforces the same rule.
+"Scene workshop" opens a full-screen editor that is separate from the turn. The
+Director can use it during setup, during their own turn, and while waiting for the
+Player.
+
+- **Level:** a 16 × 12 tile grid over the backdrop, painted with brush (1–3 tiles
+  wide), box, fill, erase and pick tools. Every tile is either **floor** (the hero can
+  walk on it) or **wall** (it cannot). Undo/redo with Ctrl+Z / Ctrl+Y.
+- **Objects:** place any sprite, move, resize, rotate, flip, snap to the grid, copy,
+  and switch **solid** on for things the hero must walk around. The hero marker sets
+  where the Player starts.
+- **Scene:** name, backdrop, weather, music.
+- **Prepared scenes:** any number of scenes can be built in advance. They are saved
+  with the story, can be exported to a file and imported into another story, and are
+  brought on stage during a turn with "Change the scene → A prepared scene" (or
+  "Use this scene in the story now" in the workshop).
+- On the Director's own turn the list also contains the scene that is on stage, so
+  the same editor changes the live level.
+
+Where a level exists the hero can only stand on floor tiles, and solid things block
+it; the server enforces the same rule.
 
 ### How the Player plays
 
@@ -80,12 +95,13 @@ change it at any time:
 | Mode | The Player… |
 | --- | --- |
 | 📝 Narration | only writes what they want to do. Nothing on stage moves until the Director stages it; the Player then watches it as a cut scene. |
-| 🕹️ Free will | drags their hero (the path they draw is replayed for the Director), speaks, picks an emote, types an action, reaches for things. |
+| 🕹️ Free will | walks their hero, speaks, picks an emote, types an action, reaches for things. |
 | 🎯 Limited will | must pick one of the options the Director offered for this turn; may also walk and add a line of speech. |
 
-With free or limited will, **game movement** limits how far the hero can
-walk per turn (a few steps, half the stage, most of the stage); the Player sees the
-range as a circle.
+**Walking** (free and limited will): the Player presses "Walk" and clicks where the
+hero should go. The hero finds its own way around walls and solid things and walks
+there at an easy pace; the same walk is replayed for the Director. One walk per turn
+(it can be taken back before the turn ends).
 
 ### Story types and layers
 
@@ -124,6 +140,7 @@ rotates, `f` flips and Delete removes.
 | `bots.js` | AI partners for solo play (scripted; language-model hook) |
 | `director-ai.js` | "Tell Claude": the Claude call and the stage operations it may use |
 | `public/guided.js` | The Director's panel: step bar and the question flow |
+| `public/workshop.js` | The scene workshop: level editor and prepared scenes |
 | `public/app.js` | The client UI |
 | `public/stage.js` | Draws a scene; plays a turn back as a cut scene |
 | `public/catalog.js` | Built-in sprite and backdrop library, asset ids, art packs |
