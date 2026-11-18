@@ -68,6 +68,12 @@ function newScene() {
     sheet: { inv: [], stats: [] },                     // inventory + stats (story-type layers)
     target: null, use: null, roll: null,               // the Player's one-turn extras (+ dice)
     level: null,                                       // tile grid: floors, walls (see cleanLevel)
+    ask: null,                                         // what the Director asks of the Player this turn (see cleanAsk)
+    answer: null, verb: '', exit: null,                // the Player's reply, the verb used on an active object, the exit headed for
+    exits: [], sceneId: '',                            // ways out to other prepared scenes; which prepared scene this is
+    cam: null,                                         // camera: { x, y, z } zoom on a point
+    travel: '', award: null, floats: [],               // one step: travel title, points award, floating numbers
+    battle: null,                                      // { round } while a battle is on
   };
 }
 /* Old saved stories predate some fields. */
@@ -89,7 +95,7 @@ function cleanRules(r) {
   const type = r && TYPES[r.type] ? r.type : 'free';
   const m = (r && r.modules) || TYPES[type];
   return {
-    type, modules: { inventory: !!m.inventory, stats: !!m.stats, dice: !!m.dice },
+    type, modules: { inventory: !!m.inventory, stats: !!m.stats, dice: !!m.dice, points: !!m.points },
     player: r && PLAYER_MODES.includes(r.player) ? r.player : 'free',
   };
 }
@@ -122,7 +128,7 @@ function cleanTrackPts(raw) {
   const pts = []; let last = 0;
   for (let i = 0; i + 2 < raw.length && i < 660; i += 3) {
     last = Math.max(last, Math.round(num(raw[i], 0, 10000, 0)));
-    pts.push(last, r3(num(raw[i + 1], 0, 1, 0)), r3(num(raw[i + 2], 0, 1, 0)));
+    pts.push(last, r3(num(raw[i + 1], -0.3, 1.3, 0)), r3(num(raw[i + 2], -0.3, 1.3, 0)));   // a little beyond the edges: things may enter from outside
   }
   return pts;
 }
@@ -132,6 +138,20 @@ const r3 = (v) => Math.round(v * 1000) / 1000;
 const arr = (v) => (Array.isArray(v) ? v : []);
 const rollDie = (sides) => ([6, 20].includes(sides) ? { sides, value: 1 + crypto.randomInt(sides) } : null);
 
+/* What the Director asks of the Player for their next turn. kind:
+ *   roll     roll a die (sides 6|20; dc = the number to reach, 0 for none)
+ *   discard  give up one inventory item
+ *   place    walk to one of the marked places [{ label, x, y }]
+ *   target   pick one of the listed characters or things (verb: "Attack", "Talk to", ...)
+ *   battle   a battle move: attack an enemy, defend, or flee */
+function cleanAsk(a, ids) {
+  if (!a || typeof a !== 'object' || !['roll', 'discard', 'place', 'target', 'battle'].includes(a.kind)) return null;
+  return {
+    kind: a.kind, text: str(a.text, 120), sides: a.sides === 20 ? 20 : 6, dc: Math.round(num(a.dc, 0, 20, 0)), verb: str(a.verb, 20),
+    places: arr(a.places).slice(0, 6).filter((p) => p && typeof p === 'object').map((p) => ({ label: str(p.label, 30) || 'Here', x: r3(num(p.x, 0, 1, 0.5)), y: r3(num(p.y, 0.08, 1, 0.5)) })),
+    targets: arr(a.targets).filter((id) => ids.has(id)).slice(0, 12),
+  };
+}
 function cleanSheet(s) {
   const inv = [], stats = [], seen = new Set();
   const newId = (v) => { let id = str(v, 24) || uid(); if (seen.has(id)) id = uid(); seen.add(id); return id; };
@@ -144,7 +164,7 @@ function cleanSheet(s) {
     const max = st.max == null || st.max === '' ? null : Math.round(num(st.max, 0, 9999, 0));
     stats.push({ id: newId(st.id), name: str(st.name, 20), value: Math.round(num(st.value, -9999, 9999, 0)), max });
   }
-  return { inv, stats };
+  return { inv, stats, points: Math.round(num(s && s.points, -99999, 99999, 0)) };
 }
 
 function cleanScene(s, prev, inner) {
@@ -160,6 +180,10 @@ function cleanScene(s, prev, inner) {
     entities.push({
       id, asset, x: num(e.x, 0, 1, 0.5), y: num(e.y, 0, 1, 0.5), scale: num(e.scale, 0.3, 6, 1), flip: !!e.flip,
       rot: Math.round(num(e.rot, -360, 360, 0)), say: str(e.say, 160), fx: str(e.fx, 12), emote: str(e.emote, 16), solid: !!e.solid,
+      active: e.active && typeof e.active === 'object' && str(e.active.name, 40) ? { name: str(e.active.name, 40), verbs: arr(e.active.verbs).map((v) => str(v, 16)).filter(Boolean).slice(0, 6) } : null,
+      tie: e.tie && typeof e.tie === 'object' && typeof e.tie.to === 'string' ? { to: str(e.tie.to, 24), dx: r3(num(e.tie.dx, -1, 1, 0)), dy: r3(num(e.tie.dy, -1, 1, 0)), front: e.tie.front !== false } : null,
+      hp: e.hp == null ? null : Math.round(num(e.hp, 0, 9999, 1)), maxHp: e.hp == null ? null : Math.round(num(e.maxHp, 1, 9999, 1)),
+      once: str(e.once, 12), temp: !!e.temp,
     });
   }
   const drawing = [];
@@ -182,6 +206,14 @@ function cleanScene(s, prev, inner) {
     choices: arr(s.choices).map((c) => str(c, 40)).filter(Boolean).slice(0, 4),
     sheet: cleanSheet(s.sheet), target: null, use: null, roll: null,
     level: cleanLevel(s.level),
+    ask: cleanAsk(s.ask, seen), answer: null, verb: '', exit: null,
+    exits: arr(s.exits).slice(0, 12).filter((x) => x && typeof x === 'object').map((x) => ({ id: str(x.id, 24) || uid(), to: str(x.to, 24), label: str(x.label, 40) || 'Exit', x: r3(num(x.x, 0, 1, 0.5)), y: r3(num(x.y, 0, 1, 0.5)), locked: !!x.locked })),
+    sceneId: str(s.sceneId, 24),
+    cam: s.cam && typeof s.cam === 'object' && num(s.cam.z, 1, 4, 1) > 1 ? { x: r3(num(s.cam.x, 0, 1, 0.5)), y: r3(num(s.cam.y, 0, 1, 0.5)), z: r3(num(s.cam.z, 1, 4, 1)) } : null,
+    travel: str(s.travel, 60),
+    award: s.award && typeof s.award === 'object' ? { n: Math.round(num(s.award.n, -9999, 9999, 0)), text: str(s.award.text, 60) } : null,
+    floats: arr(s.floats).slice(0, 12).filter((f) => f && seen.has(f.id)).map((f) => ({ id: f.id, text: str(f.text, 12), c: HEX.test(f.c) ? f.c : '#ffffff' })),
+    battle: s.battle && typeof s.battle === 'object' ? { round: Math.round(num(s.battle.round, 1, 999, 1)) } : null,
     steps: inner ? [] : arr(s.steps).slice(0, 80).filter((f) => f && typeof f === 'object').map((f) => cleanScene(f, prev, true)),
   };
 }
@@ -196,6 +228,8 @@ function cutEstimate(scene, before) {
     for (const e of sc.entities) if (e.say && old.get(e.id) !== e.say) ms += 900 + 45 * e.say.length;
     if (sc.narration && !(prev && prev.narration === sc.narration)) ms += Math.min(4500, 900 + 40 * sc.narration.length);
     if (sc.card) ms += 2100;
+    if (sc.travel) ms += 2400;
+    if (sc.award) ms += 1700;
     if (sc.roll) ms += 1700;
     if (sc.action || sc.target || sc.use) ms += 1300;
     total += ms; prev = sc;
@@ -274,7 +308,7 @@ function syncClock(room) {
 /* Commit the current scene as a finished turn and hand over to the other side. */
 function advance(room, timeout) {
   if (timeout) {   // nothing new was submitted: drop every one-turn extra so it does not play twice
-    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, use: null, roll: null, steps: [] });
+    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, use: null, roll: null, steps: [], travel: '', award: null, floats: [], answer: null, verb: '', exit: null });
     if (room.whose === 'player') room.scene.choices = [];
   }
   room.history.push({ turn: room.turn, by: room.whose, at: Date.now(), timeout: !!timeout, scene: clone(room.scene) });
@@ -336,26 +370,48 @@ async function act(room, token, body) {
         const hero = sc.entities.find((e) => e.id === sc.heroId);
         let action = str(body.action, mode === 'tell' ? 300 : 160);
         if (mode === 'limited' && sc.choices.length && !sc.choices.includes(action)) throw fail(400, 'Pick one of the Director’s options first');
-        Object.assign(sc, { tracks: [], burst: '', sfx: '', card: '', steps: [], target: null, use: null });   // the Director's one-turn extras are over
+        // the reply to what the Director asked
+        const ask = sc.ask, ans = body.answer && typeof body.answer === 'object' ? body.answer : null;
+        let answer = null, askRoll = 0, askTarget = null;
+        if (ask && ans) {
+          if (ask.kind === 'roll' && ans.roll) { askRoll = ask.sides; answer = { kind: 'roll', dc: ask.dc }; }
+          else if (ask.kind === 'discard') { const it = sc.sheet.inv.find((i) => i.id === ans.id); if (it) { sc.sheet.inv = sc.sheet.inv.filter((i) => i !== it); answer = { kind: 'discard', asset: it.asset, name: it.name }; } }
+          else if (ask.kind === 'place' && ask.places[ans.index]) answer = { kind: 'place', label: ask.places[ans.index].label };
+          else if (ask.kind === 'target' && ask.targets.includes(ans.id)) { askTarget = ans.id; answer = { kind: 'target', verb: ask.verb || 'chooses' }; }
+          else if (ask.kind === 'battle' && ['attack', 'defend', 'flee'].includes(ans.move)) {
+            const foe = sc.entities.find((e) => e.id === ans.id && e.hp != null && e.id !== sc.heroId);
+            if (ans.move !== 'attack' || foe) { answer = { kind: 'battle', move: ans.move }; askTarget = foe && ans.move === 'attack' ? foe.id : null; }
+          }
+        }
+        if (mode === 'limited' && ask && ask.kind !== 'battle' && !answer) throw fail(400, 'Do what the Director asked first');
+        Object.assign(sc, { tracks: [], burst: '', sfx: '', card: '', steps: [], target: null, use: null, travel: '', award: null, floats: [], verb: '', exit: null });   // the Director's one-turn extras are over
+        for (const e of sc.entities) { if (e.id !== sc.heroId) e.say = ''; e.once = ''; }      // lines already heard do not hang around
+        sc.entities = sc.entities.filter((e) => !e.temp);
         if (hero && mode !== 'tell') {
           hero.say = str(body.say, 160);
           hero.emote = str(body.emote, 16);
         }
         if (hero && mode !== 'tell') {                        // free and limited will: the hero may walk
           let x = num(body.x, 0, 1, hero.x), y = num(body.y, 0, 1, hero.y);
-          let track = Array.isArray(body.track) ? cleanTrackPts(body.track) : [];
+          let track = Array.isArray(body.track) ? cleanTrackPts(body.track).map((v, i) => (i % 3 ? Math.min(1, Math.max(0, v)) : v)) : [];
           for (let i = 0; i < track.length; i += 3) if (!walkable(sc, track[i + 1], track[i + 2])) { track = []; break; }
           if (track.length >= 6) sc.tracks = [{ id: hero.id, pts: track }];   // the Player recorded how their hero moves
           if (walkable(sc, x, y)) { hero.x = r3(x); hero.y = r3(y); } else sc.tracks = [];   // walls and solid things stop the hero
         }
         if (mode !== 'tell') {
-          sc.target = mode === 'free' && sc.entities.some((e) => e.id === body.target && e.id !== sc.heroId) ? body.target : null;
           sc.use = sc.sheet.inv.some((i) => i.id === body.use) ? body.use : null;
+          const thing = sc.entities.find((e) => e.id === body.target && e.id !== sc.heroId);
+          if (thing && (mode === 'free' || sc.use)) sc.target = thing.id;                     // reach for it, or use an item on it
+          const act = body.act && typeof body.act === 'object' ? sc.entities.find((e) => e.id === body.act.id && e.active && e.active.verbs.includes(body.act.verb)) : null;
+          if (act) { sc.target = act.id; sc.verb = body.act.verb; }                           // a verb on an active object
+          const ex = sc.exits.find((x) => x.id === body.exit && !x.locked);
+          if (ex) sc.exit = ex.id;
+          if (askTarget) sc.target = askTarget;
         }
-        sc.action = action;
-        const roll = rollDie(body.roll);
+        sc.action = action; sc.answer = answer;
+        const roll = rollDie(askRoll || body.roll);
         sc.roll = roll ? { by: 'player', ...roll } : null;
-        sc.choices = [];
+        sc.choices = []; sc.ask = null;
       }
       advance(room, false);
       return { ok: true };
@@ -388,7 +444,7 @@ async function act(room, token, body) {
       const seen = new Set();
       room.scenes = arr(body.scenes).slice(0, 40).filter((x) => x && typeof x === 'object' && x.scene && typeof x.scene === 'object').map((x) => {
         let id = str(x.id, 24) || uid(); if (seen.has(id)) id = uid(); seen.add(id);
-        return { id, name: str(x.name, 40) || 'Untitled scene', scene: cleanScene(x.scene, newScene(), true) };
+        return { id, name: str(x.name, 40) || 'Untitled scene', mx: r3(num(x.mx, 0, 1, 0.5)), my: r3(num(x.my, 0, 1, 0.5)), scene: cleanScene(x.scene, newScene(), true) };
       });
       touch(room); broadcast(room);
       return { ok: true };

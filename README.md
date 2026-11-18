@@ -64,6 +64,23 @@ Clicking anything on the stage opens its own tools (line, size, rotation, effect
 emote, move, turn into something else, copy, solid, give to the Player, remove);
 dragging moves it.
 
+### Adventure tools
+
+| Tool | What it does |
+| --- | --- |
+| ❓ Ask the Player | The Director decides exactly what the Player may do next turn: pick one of up to three choices, roll a d6/d20 (optionally against a number to reach), go to one of several marked places, pick a target ("Attack", "Talk to"…), or give up an item. In limited will the Player must do it; in free will it is offered. |
+| ⭐ Active objects | Any thing can be given a name and a set of actions (Look at, Use, Open, Talk to, your own…). The Player sees the name when pointing at it and picks an action by clicking it. |
+| Use item on | The Player selects an inventory item, then clicks something on stage: "uses the key on Old chest". |
+| 🔗 Tie | A thing can be tied to another (a sword to a character), in front of or behind it. It follows its holder everywhere, including walks, moves and travel. |
+| 🎥 Camera | Zoom 1.5×, 2× or 3× onto a thing or a corner; the camera moves there when the step plays. The Director sees the framing as a yellow frame. |
+| ➡️ Enter | "Move or animate → Enter from the left/right" brings a character in from outside the screen. |
+| ⭐ Points | A layer; the Director awards points with a reason, shown to the Player as the step plays. |
+| 🚪 Exits and the map | Scenes can have exits that lead to other prepared scenes, locked or open. The workshop's 🗺️ Map connects scenes with a click. When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story continues in that scene, with the hero arriving at the way back. |
+| ⚔️ Battle | The Director picks enemies and their health. The Player then chooses Attack, Defend or Flee each turn. The battle tools resolve hits with damage numbers, health bars, sounds and ready-made attack animations (strike, sword swing, shoot, magic, roar), and can ask for a d20 skill check. |
+
+Speech bubbles belong to the step they were said in: a new step starts without them,
+and no line survives into the other side's turn.
+
 ### The scene workshop
 
 "Scene workshop" opens a full-screen editor that is separate from the turn. The

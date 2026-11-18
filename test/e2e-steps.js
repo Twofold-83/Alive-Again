@@ -74,7 +74,7 @@ const { setup } = require('./lib');
     await p.fill('#tellBox', 'I wait.'); await toDirector();
     await settings('[data-pmode=limited]');
     assert.equal(await p.locator('[data-range]').count(), 0, 'no walking-distance options any more');
-    await p.click('.card.ask button.primary');
+    await p.click('.card.ask button.primary'); await x.opt('Pick one of these');
     await p.fill('input[placeholder="Choice 1"]', 'Follow the river'); await p.fill('input[placeholder="Choice 2"]', 'Go back'); await x.done();
     await toPlayer();
     assert(await p.isDisabled('#foot button.go'), 'cannot end the turn before choosing');

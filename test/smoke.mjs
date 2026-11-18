@@ -44,7 +44,7 @@ try {
   assert.equal((await act(P, 'submit', { turn: 1, x: 0.9, y: 0.9, say: 'dup' })).stale, true, 'duplicate submit ignored');
   await sleep(200); s = d.state;
   assert.equal(s.turn, 2); assert.equal(s.scene.action, 'waves'); assert.equal(s.scene.entities[0].say, 'Hello'); assert.equal(s.scene.entities[0].x, 0.25);
-  assert.equal(s.scene.entities[1].say, 'Roar', 'player cannot touch other entities');
+  assert.equal(s.scene.entities[1].asset, 'e:🐉', 'player cannot touch other entities'); assert.equal(s.scene.entities[1].say, '', 'lines already heard are cleared when the turn changes');
   await sleep(1000 + 4000 + 400 + 6000);   // + cut-scene allowance                       // director lets the clock run out (1s + grace)
   s = d.state; assert.equal(s.turn, 3, 'timed-out turn passes'); assert.equal(s.lastTimeout, true); assert.equal(s.whose, 'player');
   p.ctl.abort(); await sleep(300);                      // player drops: clock must pause

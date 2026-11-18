@@ -24,20 +24,23 @@ const blankScene = () => norm({
   backdrop: 'b:meadow', mood: 'm:none', narration: '', action: '', heroId: 'hero', entities: [W.c.blankHero()], drawing: [], weather: '',
   tracks: [], burst: '', sfx: '', card: '', choices: [], steps: [], sheet: { inv: [], stats: [] }, target: null, use: null, roll: null, level: null,
 });
-const library = () => W.list.filter((d) => !d.live).map((d) => ({ id: d.id, name: d.name, scene: d.scene }));
+const library = () => W.list.filter((d) => !d.live).map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene }));
+const docs = () => W.list.filter((d) => !d.live);
 const tileCats = () => PIXEL.filter((c) => c.group === 'tile');
 const objectCats = () => [...PIXEL.filter((c) => c.group !== 'tile'), ...PIXEL.filter((c) => c.group === 'tile').map((c) => ({ ...c, label: c.label + ' (as a piece)' })), ...CATEGORIES.map((c) => ({ ...c, label: '😀 ' + c.label }))];
 
 export function openWorkshop(c) {
-  W.c = c; W.open = true; W.sel = null; W.undo = []; W.redo = []; W.liveDirty = false; W.tab = 'tiles'; W.tool = 'brush'; W.q = '';
+  W.c = c; W.open = true; W.sel = null; W.undo = []; W.redo = []; W.liveDirty = false; W.tab = 'tiles'; W.tool = 'brush'; W.q = ''; W.map = false; W.node = null;
   W.list = [...(c.live ? [c.live] : []), ...c.scenes.map((s) => ({ ...s, scene: norm(s.scene) }))];
   if (!W.list.length) W.list.push({ id: rid(), name: 'Scene 1', scene: blankScene() });
+  docs().forEach((d, i) => { if (d.mx == null || (d.mx === 0.5 && d.my === 0.5 && docs().length > 1 && i > 0)) { d.mx = ((i % 4) + 0.5) / 4; d.my = (Math.floor(i / 4) % 3 + 0.5) / 3; } });
   W.cur = W.list[0];
   if (!W.a) { const t = tileCats()[0]; if (t) { W.a = t.items[0].asset; W.k = t.items[0].kind === 'wall' ? 'w' : 'f'; } }
   const root = $root();
   const stage = h('div', { class: 'stage', id: 'wsStage' });
   W.el = { bar: h('header', {}), list: h('aside', { class: 'wslist' }), stage, tools: h('aside', { class: 'wstools' }) };
-  root.replaceChildren(W.el.bar, h('div', { class: 'wsbody' }, W.el.list, h('div', { class: 'wsmid' }, stage, h('p', { class: 'dim small', id: 'wsHint' })), W.el.tools));
+  W.el.map = h('div', { class: 'wsmap', hidden: true });
+  root.replaceChildren(W.el.bar, h('div', { class: 'wsbody' }, W.el.list, h('div', { class: 'wsmid' }, stage, W.el.map, h('p', { class: 'dim small', id: 'wsHint' })), W.el.tools));
   stage.addEventListener('pointerdown', down); stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
   document.addEventListener('keydown', keys);
   root.hidden = false;
@@ -69,8 +72,8 @@ function keys(ev) {
 
 /* ---------- drawing the workshop ---------- */
 const paintStage = () => renderStage(W.el.stage, W.cur.scene, { code: W.c.code, names: W.c.names, selId: W.sel, showKinds: W.walls });
-function draw() { paintStage(); drawBar(); drawList(); drawTools(); }
-function pick(doc) { flush(); W.cur = doc; W.sel = null; W.undo = []; W.redo = []; draw(); }
+function draw() { W.el.stage.hidden = W.map; W.el.map.hidden = !W.map; if (W.map) drawMap(); else paintStage(); drawBar(); drawList(); drawTools(); }
+function pick(doc) { flush(); W.cur = doc; W.sel = null; W.undo = []; W.redo = []; W.map = false; draw(); }
 
 function drawBar() {
   const cur = W.cur, can = !!W.c.use;
@@ -78,6 +81,7 @@ function drawBar() {
     h('b', {}, '🛠️ Scene workshop'),
     h('span', { class: 'dim' }, cur.live ? 'editing the scene on stage' : `editing “${cur.name}”`),
     h('span', { class: 'grow' }),
+    W.c.adventure && h('button', { id: 'wsMap', class: W.map ? 'on' : '', title: 'How the prepared scenes connect', onclick: () => { W.map = !W.map; W.node = null; draw(); } }, '🗺️ Map'),
     h('button', { title: 'Undo (Ctrl+Z)', disabled: !W.undo.length, onclick: () => undo(-1) }, '↶ Undo'),
     h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.redo.length, onclick: () => undo(1) }, '↷ Redo'),
     h('button', { class: W.walls ? 'on' : '', title: 'Mark walls and solid things in red', onclick: () => { W.walls = !W.walls; draw(); } }, '▦ Show what blocks'),
@@ -89,7 +93,7 @@ function drawBar() {
 
 function drawList() {
   const cur = W.cur;
-  const add = (doc) => { W.list.push(doc); changed(); W.c.save(library()); pick(doc); };
+  const add = (doc) => { const n = docs().length; doc.mx = ((n % 4) + 0.5) / 4; doc.my = (Math.floor(n / 4) % 3 + 0.5) / 3; W.list.push(doc); changed(); W.c.save(library()); pick(doc); };
   const file = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async () => {
     try {
       const j = JSON.parse(await file.files[0].text()), got = Array.isArray(j) ? j : j.scenes;
@@ -112,7 +116,64 @@ function drawList() {
     h('p', { class: 'dim small' }, 'Prepared scenes are kept with this story. Save them to a file to reuse them in another one.'));
 }
 
+/* ---------- the map: how prepared scenes connect through exits ---------- */
+const linked = (a, b) => a.scene.exits.some((x) => x.to === b.id);
+function connect(a, b) {
+  const dx = b.mx - a.mx, dy = b.my - a.my, side = Math.abs(dx) >= Math.abs(dy);
+  const at = (far) => (side ? { x: far ? 0.94 : 0.06, y: 0.6 } : { x: 0.5, y: far ? 0.95 : 0.16 });
+  if (!linked(a, b)) a.scene.exits.push({ id: rid(), to: b.id, label: b.name, locked: false, ...at(side ? dx > 0 : dy > 0) });
+  if (!linked(b, a)) b.scene.exits.push({ id: rid(), to: a.id, label: a.name, locked: false, ...at(side ? dx <= 0 : dy <= 0) });
+}
+function drawMap() {
+  const m = W.el.map, list = docs();
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none');
+  for (const a of list) for (const b of list) if (a.id < b.id && (linked(a, b) || linked(b, a))) {
+    const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'), locked = [...a.scene.exits.filter((x) => x.to === b.id), ...b.scene.exits.filter((x) => x.to === a.id)].some((x) => x.locked);
+    ln.setAttribute('x1', a.mx * 100); ln.setAttribute('y1', a.my * 100); ln.setAttribute('x2', b.mx * 100); ln.setAttribute('y2', b.my * 100); ln.setAttribute('class', locked ? 'locked' : '');
+    svg.append(ln);
+  }
+  m.replaceChildren(svg, ...list.map((d) => {
+    const n = h('button', { class: 'node' + (W.node === d.id ? ' on' : ''), style: `left:${d.mx * 100}%;top:${d.my * 100}%` }, h('i', { style: `background:${backdropCss(W.c.code, d.scene.backdrop)}` }), h('b', {}, d.name));
+    n.dataset.node = d.id;
+    n.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault(); n.setPointerCapture(ev.pointerId);
+      const r = m.getBoundingClientRect(); let moved = false;
+      const mv = (e2) => { moved = true; d.mx = clamp((e2.clientX - r.left) / r.width, 0.06, 0.94); d.my = clamp((e2.clientY - r.top) / r.height, 0.08, 0.92); n.style.left = d.mx * 100 + '%'; n.style.top = d.my * 100 + '%'; };
+      const end = () => {
+        n.removeEventListener('pointermove', mv); n.removeEventListener('pointerup', end);
+        if (!moved) {                                       // a click: select, or connect to the one already selected
+          const from = list.find((x) => x.id === W.node);
+          if (from && from !== d) { connect(from, d); W.node = null; W.c.toast(`“${from.name}” and “${d.name}” are now connected`); } else W.node = W.node === d.id ? null : d.id;
+        }
+        W.c.save(library()); draw();
+      };
+      n.addEventListener('pointermove', mv); n.addEventListener('pointerup', end);
+    });
+    return n;
+  }));
+}
+function mapTools() {
+  const list = docs(), kids = [], hint = document.querySelector('#wsHint');
+  hint.textContent = 'Click one scene, then another, to connect them. Drag scenes to arrange the map.';
+  const pairs = [];
+  for (const a of list) for (const b of list) if (a.id < b.id && (linked(a, b) || linked(b, a))) pairs.push([a, b]);
+  const both = (a, b) => [...a.scene.exits.filter((x) => x.to === b.id), ...b.scene.exits.filter((x) => x.to === a.id)];
+  const node = list.find((x) => x.id === W.node);
+  kids.push(h('div', { class: 'card' }, h('h3', {}, '🗺️ The map of this adventure'),
+    h('p', { class: 'dim small' }, 'Each connection puts an exit in both scenes, leading to the other. When the Player walks to an exit and you agree, the story travels to that scene.'),
+    node ? h('div', { class: 'row' }, h('b', { class: 'grow' }, `“${node.name}” — now click the scene to connect it to`), h('button', { onclick: () => pick(node) }, '✏️ Edit this scene')) : h('p', { class: 'dim small' }, 'Nothing selected.')));
+  kids.push(h('div', { class: 'card' }, h('h3', {}, `Connections (${pairs.length})`),
+    pairs.length ? pairs.map(([a, b]) => { const ex = both(a, b), locked = ex.some((x) => x.locked);
+      return h('div', { class: 'row conn' }, h('span', { class: 'grow' }, `${a.name} ⇄ ${b.name}`),
+        h('button', { class: locked ? 'on' : '', title: 'Lock or unlock this way', onclick: () => { for (const x of ex) x.locked = !locked; W.c.save(library()); draw(); } }, locked ? '🔒 Locked' : '🔓 Open'),
+        h('button', { class: 'danger', title: 'Remove the connection', onclick: () => { a.scene.exits = a.scene.exits.filter((x) => x.to !== b.id); b.scene.exits = b.scene.exits.filter((x) => x.to !== a.id); W.c.save(library()); draw(); } }, '✕')); })
+      : h('p', { class: 'dim small' }, 'No connections yet.')));
+  W.el.tools.replaceChildren(...kids);
+}
+
 function drawTools() {
+  if (W.map) return mapTools();
   const sc = W.cur.scene, t = W.el.tools, kids = [];
   kids.push(h('div', { class: 'tabs' }, [['tiles', '🧱', 'Level'], ['objects', '📦', 'Objects'], ['scene', '🌄', 'Scene']].map(([id, icon, label]) =>
     h('button', { 'data-wtab': id, class: W.tab === id ? 'on' : '', onclick: () => { W.tab = id; W.sel = null; draw(); } }, h('span', {}, icon), h('small', {}, label)))));
@@ -179,6 +240,14 @@ function drawTools() {
       !W.cur.live && h('div', { class: 'card' }, h('h3', {}, 'Name'), h('input', { id: 'wsName', maxlength: 40, value: W.cur.name, oninput: (ev) => { W.cur.name = ev.target.value || 'Untitled scene'; changed(); drawBar(); }, onchange: drawList })),
       h('div', { class: 'card' }, h('h3', {}, 'Backdrop'), h('div', { class: 'grid drops' }, BACKDROPS.map((b) => h('button', { class: sc.backdrop === b.id ? 'on' : '', style: `background:${b.css}`, onclick: () => set('backdrop', b.id) }, b.name)))),
       h('div', { class: 'card' }, h('h3', {}, 'Weather'), h('div', { class: 'chips wrap' }, WEATHER.map(([v, l]) => h('button', { class: sc.weather === v ? 'on' : '', onclick: () => set('weather', v) }, l)))),
+      W.c.adventure && h('div', { class: 'card' }, h('h3', {}, 'Exits to other scenes'),
+        sc.exits.map((x) => h('div', { class: 'row conn' },
+          h('input', { maxlength: 40, value: x.label, title: 'Label', oninput: (ev) => { x.label = ev.target.value || 'Exit'; changed(); paintStage(); } }),
+          h('select', { title: 'Leads to', onchange: (ev) => { remember(); x.to = ev.target.value; changed(); } }, h('option', { value: '' }, '— to —'), docs().filter((d) => d !== W.cur).map((d) => h('option', { value: d.id, selected: x.to === d.id }, d.name))),
+          h('button', { class: x.locked ? 'on' : '', title: 'Locked?', onclick: () => { remember(); x.locked = !x.locked; changed(); draw(); } }, x.locked ? '🔒' : '🔓'),
+          h('button', { class: 'danger', onclick: () => { remember(); sc.exits = sc.exits.filter((y) => y !== x); changed(); draw(); } }, '✕'))),
+        h('button', { id: 'wsAddExit', disabled: sc.exits.length >= 12, onclick: () => { remember(); sc.exits.push({ id: rid(), to: '', label: 'Exit', x: 0.5, y: 0.5, locked: false }); changed(); draw(); } }, '＋ Add an exit'),
+        h('p', { class: 'dim small' }, 'Drag an exit on the stage to where the way out is. The 🗺️ Map connects scenes for you.')),
       h('div', { class: 'card' }, h('h3', {}, 'Music'), h('div', { class: 'list' }, MOODS.map((m) => h('button', { class: sc.mood === m.id ? 'on' : '', onclick: () => set('mood', m.id) }, m.name)))));
   }
   const top = t.scrollTop;
@@ -225,6 +294,8 @@ function down(ev) {
     }
     if (W.tool === 'rect') { W.drag = { rect: c, base: JSON.stringify(sc.level) }; setCell(sc, c, W.a, W.k); paintStage(); } else { W.drag = { paint: true }; stamp(p, W.tool === 'erase'); }
   } else {
+    const mk = ev.target.closest('.exit'), door = mk && sc.exits.find((x) => x.id === mk.dataset.exit);
+    if (door) { remember(); W.drag = { e: door, dx: door.x - p.x, dy: door.y - p.y }; W.el.stage.setPointerCapture(ev.pointerId); return; }
     const el = ev.target.closest('.ent'), hit = el && sc.entities.find((e) => e.id === el.dataset.id);
     const was = W.sel; W.sel = hit ? hit.id : null;
     if (hit) { remember(); W.drag = { e: hit, dx: hit.x - p.x, dy: hit.y - p.y }; }

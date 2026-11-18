@@ -18,18 +18,24 @@ import { h, clone, clamp, glyphNode, actionText } from './stage.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
 
 export const G = { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', ask: '' };
-export function resetGuided() { Object.assign(G, { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '' }); }
-export const guidedKey = () => [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat].join('~');
+export function resetGuided() { Object.assign(G, { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', exit: null, pick: null, foe: null, askKind: '' }); }
+export const guidedKey = () => [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat, G.exit, G.pick, G.foe].join('~');
 
 /** Which stage tool the open screen needs: dragging records a path, or draws. */
 export const guidedTool = () => { const top = G.path[G.path.length - 1]; return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : ''; };
 
-const PICKERS = ['speak', 'move', 'give'];   // questions that start with "which one?"
+const PICKERS = ['speak', 'move', 'give', 'tie'];   // questions that start with "which one?"
 /** A tap on something on the stage: answers an open "which one?", otherwise opens that thing's own tools. */
 export function guidedPick(id) {
   const top = G.path[G.path.length - 1] || '';
+  if (top === 'tie') { G.pick = id; return; }
   if (PICKERS.includes(top) && !G.sel) { G.sel = id; return; }
-  if (!top || top === 'thing') { G.path = ['thing']; G.sel = id; }
+  if (!top || top === 'thing' || top === 'exit') { G.path = ['thing']; G.sel = id; }
+}
+/** A click on an exit marker opens that exit's tools. */
+export function guidedMark(exitId) {
+  const top = G.path[G.path.length - 1] || '';
+  if (!top || top === 'thing' || top === 'exit') { G.path = ['exit']; G.sel = null; G.exit = exitId; }
 }
 
 const EMOJI_GROUPS = {
@@ -97,6 +103,8 @@ export function buildGuided(p, c) {
     const ms = clamp(Math.hypot(x - sel.x, y - sel.y) * 3200, 500, 3000);
     if (c.autoTrack(sel, [[ms, x, y]])) done(`${lab(sel)} ${label}`);
   };
+  /** Enter: start outside the screen and walk to where the thing stands now. */
+  const comeIn = (fromX) => { const ms = clamp(Math.abs(sel.x - fromX) * 3200, 500, 3000); c.dropTrack(sel.id); d.tracks.push({ id: sel.id, pts: [0, fromX, sel.y, Math.round(ms), sel.x, sel.y] }); return true; };
   const place = (asset) => { const e = c.addEntity(asset); if (e) { G.sel = e.id; G.path = ['thing']; if (!setup) G.log.push(`${lab(e)} appears`); c.select(e.id); c.rebuild(); } };
   const itemGrid = (items, onPick) => h('div', { class: 'grid' }, items.map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => onPick(i) }, glyphNode(code, i.asset))));
   const searchGrid = (onPick, ph) => {
@@ -120,12 +128,17 @@ export function buildGuided(p, c) {
       if (tgt && c.mods().inventory) p.append(h('div', { class: 'card ask' }, h('b', {}, `${S.names.player} reaches for `, glyphNode(code, tgt.asset, 'mini'), ' — do they get it?'),
         h('div', { class: 'row' }, h('button', { class: 'primary grow', onclick: () => { const l = lab(tgt); c.giveToPlayer(tgt); done(`${S.names.player} takes ${l}`); } }, '🎒 Yes, they take it'),
           h('button', { class: 'grow', onclick: () => { d.target = null; c.rebuild(); } }, 'No'))));
+      const ex = d.exit && d.exits.find((x) => x.id === d.exit);
+      if (ex) p.append(h('div', { class: 'card ask' }, h('b', {}, `${S.names.player} heads for “${ex.label}” — do they go through?`),
+        h('div', { class: 'row' }, h('button', { class: 'primary grow', id: 'travelYes', onclick: () => { const doc = c.travelTo(ex.to); if (doc) done(`Traveling to “${doc.name}”`); } }, '🚶 Yes, travel there'),
+          h('button', { class: 'grow', onclick: () => { d.exit = null; c.rebuild(); } }, 'Not now'))));
+      if (d.battle) p.append(h('div', { class: 'card ask' }, h('b', {}, `⚔️ Battle — round ${d.battle.round}`), h('button', { class: 'primary', id: 'battleOpen', onclick: () => enter('battle') }, 'Open the battle tools')));
       const used = d.use && d.sheet.inv.find((i) => i.id === d.use);
       if (used) p.append(h('div', { class: 'card ask' }, h('b', {}, `${S.names.player} uses `, glyphNode(code, used.asset, 'mini'), ' — is it used up?'),
         h('div', { class: 'row' }, h('button', { class: 'primary grow', onclick: () => { d.sheet.inv = d.sheet.inv.filter((i) => i !== used); d.use = null; done(`${assetLabel(used.asset, used.name)} is used up`); } }, 'Yes, it is gone'),
           h('button', { class: 'grow', onclick: () => { d.use = null; c.rebuild(); } }, 'No, they keep it'))));
-      if (S.rules.player === 'limited' && !d.choices.filter(Boolean).length) p.append(h('div', { class: 'card ask' }, h('b', {}, `Limited will: ${S.names.player} needs options`),
-        h('p', { class: 'dim small' }, 'Write up to three things they may do next turn. Without options they can act freely.'), h('button', { class: 'primary', onclick: () => enter('choices') }, '❓ Write the options')));
+      if (S.rules.player === 'limited' && !d.choices.filter(Boolean).length && !d.ask) p.append(h('div', { class: 'card ask' }, h('b', {}, `Limited will: ${S.names.player} needs options`),
+        h('p', { class: 'dim small' }, 'Write up to three things they may do next turn. Without options they can act freely.'), h('button', { class: 'primary', onclick: () => enter('ask') }, '❓ Decide what they may do')));
     }
     p.append(h('div', { class: 'gtitle' }, h('b', {}, setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
       h('small', { class: 'dim' }, setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.')));
@@ -140,7 +153,10 @@ export function buildGuided(p, c) {
       opt('✏️', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
       opt('🛠️', 'Scene workshop', 'Build levels, prepare scenes', () => c.workshop()),
       sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
-      opt('❓', 'Offer choices', `Options for ${S.names.player}`, () => enter('choices')),
+      opt('❓', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
+      opt('🎥', 'Camera', 'Zoom in on something', () => enter('camera')),
+      c.mods().points && opt('⭐', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
+      S.rules.type === 'adventure' && opt('⚔️', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
       opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
       opt('⚙️', 'Story settings', 'Type, rules, time, invite', () => enter('rules'))));
     p.append(h('p', { class: 'dim small' }, 'Tip: click anything on the stage to change it, drag it to move it.'));
@@ -162,6 +178,8 @@ export function buildGuided(p, c) {
         b('⧉', 'Copy', () => { const k = { ...clone(sel), id: Math.random().toString(36).slice(2, 10), x: clamp(sel.x + 0.09, 0, 1), say: '' }; d.entities.push(k); G.sel = k.id; c.select(k.id); c.rebuild(); }),
         b('🧑', 'Player’s character', () => { d.heroId = isHero ? null : sel.id; c.rebuild(); }, isHero),
         b('🧱', 'Solid', () => { sel.solid = !sel.solid; c.rebuild(); }, sel.solid),
+        S.rules.type === 'adventure' && !isHero && b('⭐', 'Active object', () => enter('active'), !!sel.active),
+        b('🔗', sel.tie ? 'Tied — change' : 'Tie to…', () => { G.pick = null; enter('tie'); }, !!sel.tie),
         c.mods().inventory && !isHero && b('🎒', `Give to ${S.names.player}`, () => { const l = lab(sel); c.giveToPlayer(sel); done(`${S.names.player} gets ${l}`); }),
         b('🗑️', 'Remove', () => { const l = lab(sel); c.removeEntity(sel); done(`${l} disappears`); })),
       sel.solid && h('p', { class: 'dim small' }, 'Solid: the Player’s hero cannot walk through it.'),
@@ -195,6 +213,8 @@ export function buildGuided(p, c) {
       me && sel !== me && opt('🧑', 'Walk to the hero', '', () => walk('walks up to the hero', clamp(me.x + (sel.x < me.x ? -0.13 : 0.13), 0.05, 0.95), me.y)),
       opt('↔️', 'Cross the stage', '', () => walk('crosses the stage', far, sel.y)),
       opt('🚪', 'Walk off to the side', '', () => walk('walks off', edge, sel.y)),
+      opt('➡️', 'Enter from the left', 'Comes in from outside the screen', () => { if (comeIn(-0.18)) done(`${lab(sel)} enters from the left`); }),
+      opt('⬅️', 'Enter from the right', 'Comes in from outside the screen', () => { if (comeIn(1.18)) done(`${lab(sel)} enters from the right`); }),
       opt('⤴️', 'Jump', '', () => { if (c.autoTrack(sel, [[220, sel.x, sel.y - 0.14], [220, sel.x, sel.y], [200, sel.x, sel.y - 0.09], [200, sel.x, sel.y]])) done(`${lab(sel)} jumps`); }),
       opt('〰️', 'Tremble', '', () => { const s = []; for (let i = 0; i < 10; i++) s.push([80, sel.x + (i % 2 ? 0.012 : -0.012), sel.y]); s.push([80, sel.x, sel.y]); if (c.autoTrack(sel, s)) done(`${lab(sel)} trembles`); }),
       moving > 0 && opt('✖', 'Forget its moves', `${(moving / 1000).toFixed(1)} s recorded in this step`, () => { c.dropTrack(sel.id); c.rebuild(); })));
@@ -252,6 +272,7 @@ export function buildGuided(p, c) {
     p.append(h('div', { class: 'gopts' },
       opt('📚', 'A prepared scene', `${(S.scenes || []).length} ready in the workshop`, () => enter('scene:prepared')),
       opt('🌄', 'The place', 'A new backdrop', () => enter('scene:place')),
+      S.rules.type === 'adventure' && opt('🚪', 'Add an exit', 'A way out to another prepared scene', () => { const x = { id: c.rid(), to: '', label: 'Exit', x: 0.9, y: 0.6, locked: false }; d.exits.push(x); G.exit = x.id; enter('exit'); }),
       opt('🌦️', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
       opt('🎵', 'The music', '', () => enter('scene:music')),
       opt('🎬', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
@@ -287,10 +308,181 @@ export function buildGuided(p, c) {
   }
 
   /* ================= ❓ choices ================= */
-  if (top === 'choices') {
-    head(`Choices for ${S.names.player}`, S.rules.player === 'limited' ? 'They must pick one of these next turn.' : 'They can tap one, or still type anything.');
-    const inp = (i) => h('input', { placeholder: `Choice ${i + 1}`, maxlength: 40, value: d.choices[i] || '', oninput: (ev) => { for (let k = 0; k < 3; k++) d.choices[k] ||= ''; d.choices[i] = ev.target.value; c.changedQuiet(); } });
-    p.append(inp(0), inp(1), inp(2), doneBtn(() => (d.choices.filter(Boolean).length ? 'Choices offered' : '')));
+  /* ================= ❓ ask the Player: exactly what they may do next turn ================= */
+  if (top === 'ask') {
+    const kind = d.ask ? d.ask.kind : d.choices.filter(Boolean).length ? 'choice' : '';
+    const mk = (k) => ({ kind: k, text: d.ask ? d.ask.text : '', sides: 6, dc: 0, verb: k === 'target' ? 'Attack' : '', places: [], targets: [] });
+    const set = (k) => { if (k === 'choice' || !k) { d.ask = null; if (!k) d.choices = []; else for (let n = 0; n < 3; n++) d.choices[n] ||= ''; } else { d.ask = mk(k); d.choices = []; } G.askKind = k; c.rebuild(); };
+    const cur = d.ask ? kind : G.askKind === 'choice' ? 'choice' : kind;
+    head(`What may ${S.names.player} do next turn?`, S.rules.player === 'limited' ? 'Limited will: they must do this.' : 'Free will: this is offered, they may still do something else.');
+    p.append(h('div', { class: 'gopts' },
+      opt('🔘', 'Pick one of these', 'Up to three choices', () => set('choice'), cur === 'choice'),
+      opt('🎲', 'Roll a die', 'd6 or d20, with a number to reach', () => set('roll'), cur === 'roll'),
+      opt('📍', 'Go to a place', 'Mark places on the stage', () => set('place'), cur === 'place'),
+      opt('🎯', 'Pick a target', 'Who to attack, talk to, save…', () => set('target'), cur === 'target'),
+      c.mods().inventory && opt('🗑️', 'Give up an item', 'Discard one thing they carry', () => set('discard'), cur === 'discard'),
+      opt('✖', 'Nothing special', 'Clear the request', () => set(''), !cur)));
+    const a = d.ask;
+    if (cur && cur !== 'choice') p.append(h('input', { id: 'askText', placeholder: 'Your question or instruction (optional)', maxlength: 120, value: a.text, oninput: (ev) => { a.text = ev.target.value; c.changedQuiet(); } }));
+    if (cur === 'choice') {
+      const inp = (i) => h('input', { placeholder: `Choice ${i + 1}`, maxlength: 40, value: d.choices[i] || '', oninput: (ev) => { for (let k = 0; k < 3; k++) d.choices[k] ||= ''; d.choices[i] = ev.target.value; c.changedQuiet(); } });
+      p.append(inp(0), inp(1), inp(2));
+    } else if (cur === 'roll') {
+      p.append(h('div', { class: 'row' }, [6, 20].map((n) => h('button', { class: 'grow' + (a.sides === n ? ' on' : ''), onclick: () => { a.sides = n; a.dc = Math.min(a.dc, n); c.rebuild(); } }, `🎲 d${n}`))),
+        h('small', { class: 'dim' }, 'They succeed on…'), h('div', { class: 'chips wrap' }, [0, ...(a.sides === 6 ? [2, 3, 4, 5, 6] : [5, 8, 10, 12, 15, 18])].map((n) => h('button', { 'data-dc': n, class: a.dc === n ? 'on' : '', onclick: () => { a.dc = n; c.rebuild(); } }, n ? `${n} or more` : 'any roll'))));
+    } else if (cur === 'place') {
+      p.append(a.places.map((pl, i) => h('div', { class: 'row' }, h('span', {}, '📍'), h('input', { maxlength: 30, value: pl.label, oninput: (ev) => { pl.label = ev.target.value; c.changedQuiet(); } }), h('button', { onclick: () => { a.places.splice(i, 1); c.rebuild(); } }, '✕'))),
+        h('button', { id: 'addPlace', disabled: a.places.length >= 6, onclick: () => { a.places.push({ label: `Place ${a.places.length + 1}`, x: 0.2 + 0.2 * a.places.length, y: 0.7 }); c.rebuild(); } }, '＋ Add a place'),
+        h('p', { class: 'dim small' }, 'Drag the 📍 markers on the stage to where they belong.'));
+    } else if (cur === 'target') {
+      p.append(h('input', { placeholder: 'What for? e.g. Attack, Talk to, Rescue', maxlength: 20, value: a.verb, oninput: (ev) => { a.verb = ev.target.value; c.changedQuiet(); } }),
+        h('small', { class: 'dim' }, 'Who or what can be picked?'),
+        h('div', { class: 'grid' }, d.entities.filter((e) => e.id !== d.heroId).map((e) => h('button', { class: a.targets.includes(e.id) ? 'on' : '', onclick: () => { a.targets = a.targets.includes(e.id) ? a.targets.filter((x) => x !== e.id) : [...a.targets, e.id]; c.rebuild(); } }, glyphNode(code, e.asset)))));
+    } else if (cur === 'discard') p.append(h('p', { class: 'dim small' }, `${S.names.player} will choose one of their ${d.sheet.inv.length} item(s) to give up.`));
+    p.append(doneBtn(() => (cur ? `${S.names.player} is asked: ${{ choice: 'pick a choice', roll: 'roll a die', place: 'go to a place', target: 'pick a target', discard: 'give up an item' }[cur]}` : '')));
+    return;
+  }
+
+  /* ================= 🎥 camera ================= */
+  if (top === 'camera') {
+    head('Camera', 'The yellow frame shows what the Player will see. The camera moves there when this step plays.');
+    const z = d.cam ? d.cam.z : 1;
+    const look = (x, y) => { d.cam = { x, y, z: d.cam ? d.cam.z : 2 }; c.rebuild(); };
+    p.append(h('small', { class: 'dim' }, 'Zoom'), h('div', { class: 'row' }, [1, 1.5, 2, 3].map((n) => h('button', { 'data-zoom': n, class: 'grow' + (z === n ? ' on' : ''), onclick: () => { d.cam = n === 1 ? null : { x: d.cam ? d.cam.x : 0.5, y: d.cam ? d.cam.y : 0.6, z: n }; c.rebuild(); } }, n === 1 ? 'Whole stage' : `${n}×`))),
+      h('small', { class: 'dim' }, 'Look at'),
+      h('div', { class: 'grid' }, d.entities.map((e) => h('button', { onclick: () => look(e.x, clamp(e.y - 0.08 * e.scale, 0, 1)) }, glyphNode(code, e.asset)))),
+      h('div', { class: 'row' }, [['↖', 0.25, 0.3], ['↗', 0.75, 0.3], ['Centre', 0.5, 0.5], ['↙', 0.25, 0.75], ['↘', 0.75, 0.75]].map(([l, x, y]) => h('button', { class: 'grow', onclick: () => look(x, y) }, l))),
+      doneBtn(() => (d.cam ? `Camera zooms in ${d.cam.z}×` : 'Camera shows the whole stage')));
+    return;
+  }
+
+  /* ================= ⭐ points ================= */
+  if (top === 'award') {
+    head('Award points', `${S.names.player} has ${d.sheet.points || 0} points.`);
+    const give = (n) => { const was = d.award ? d.award.n : 0; d.sheet.points = (d.sheet.points || 0) - was + n; d.award = n ? { n, text: d.award ? d.award.text : '' } : null; c.rebuild(); };
+    p.append(h('div', { class: 'chips wrap' }, [0, 1, 5, 10, 25, 50, -5].map((n) => h('button', { 'data-pts': n, class: (d.award ? d.award.n : 0) === n ? 'on' : '', onclick: () => give(n) }, n ? `${n > 0 ? '+' : ''}${n}` : 'None'))),
+      d.award && h('input', { placeholder: 'What for? (shown to the Player)', maxlength: 60, value: d.award.text, oninput: (ev) => { d.award.text = ev.target.value; c.changedQuiet(); } }),
+      doneBtn(() => (d.award ? `${d.award.n > 0 ? '+' : ''}${d.award.n} points` : '')));
+    return;
+  }
+
+  /* ================= ⭐ active object ================= */
+  if (top === 'active') {
+    if (!sel) return back();
+    head(`${lab(sel)} as an active object`, `${S.names.player} sees its name when pointing at it, and can click it to choose one of the actions you allow.`);
+    const on = !!sel.active, VERBS = ['Look at', 'Use', 'Open', 'Talk to', 'Take', 'Push', 'Read', 'Attack'];
+    p.append(h('button', { id: 'activeToggle', class: on ? 'on' : '', onclick: () => { sel.active = on ? null : { name: '', verbs: ['Look at', 'Use', 'Open'] }; c.rebuild(); } }, on ? '⭐ Active — click to switch off' : 'Make it an active object'));
+    if (on) {
+      const custom = h('input', { placeholder: 'Your own action…', maxlength: 16 });
+      p.append(h('input', { id: 'activeName', placeholder: 'Its name, e.g. “Old oak chest”', maxlength: 40, value: sel.active.name, oninput: (ev) => { sel.active.name = ev.target.value; c.changedQuiet(); } }),
+        h('small', { class: 'dim' }, 'Actions offered'),
+        h('div', { class: 'chips wrap' }, [...new Set([...VERBS, ...sel.active.verbs])].map((v) => h('button', { class: sel.active.verbs.includes(v) ? 'on' : '', onclick: () => { sel.active.verbs = sel.active.verbs.includes(v) ? sel.active.verbs.filter((x) => x !== v) : [...sel.active.verbs, v].slice(0, 6); c.rebuild(); } }, v))),
+        h('div', { class: 'row' }, custom, h('button', { onclick: () => { const v = custom.value.trim(); if (v && sel.active.verbs.length < 6) { sel.active.verbs.push(v); c.rebuild(); } } }, 'Add')));
+    }
+    p.append(h('button', { class: 'primary gdone', onclick: () => { if (sel.active && !sel.active.name.trim()) sel.active.name = lab(sel).replace(/^the /, ''); if (!setup && sel.active) G.log.push(`${sel.active.name} can be used`); back(); } }, '✓ Done'));
+    return;
+  }
+
+  /* ================= 🔗 tie: one thing holds or carries another ================= */
+  if (top === 'tie') {
+    if (!sel) return back();
+    const par = sel.tie && d.entities.find((e) => e.id === sel.tie.to);
+    if (G.pick && G.pick !== sel.id) { const to = d.entities.find((e) => e.id === G.pick); if (to && !to.tie) sel.tie = { to: to.id, dx: 0.05, dy: -0.02, front: true }; G.pick = null; return buildGuided((p.replaceChildren(), p), c); }
+    head(par ? `${lab(sel)} is tied to ${lab(par)}` : `Tie ${lab(sel)} to…`, par ? 'It follows wherever that goes. Drag it on the stage to adjust how it is held.' : 'Pick who or what carries it: here, or by clicking on the stage.');
+    if (!par) p.append(h('div', { class: 'grid' }, d.entities.filter((e) => e.id !== sel.id && !e.tie).map((e) => h('button', { onclick: () => { G.pick = e.id; c.rebuild(); } }, glyphNode(code, e.asset)))));
+    else p.append(h('div', { class: 'row' },
+      h('button', { 'data-layer': 'front', class: 'grow' + (sel.tie.front ? ' on' : ''), onclick: () => { sel.tie.front = true; c.rebuild(); } }, '⬆ In front'),
+      h('button', { 'data-layer': 'back', class: 'grow' + (!sel.tie.front ? ' on' : ''), onclick: () => { sel.tie.front = false; c.rebuild(); } }, '⬇ Behind'),
+      h('button', { class: 'grow', onclick: () => { const at = { x: clamp(par.x + sel.tie.dx * par.scale, 0, 1), y: clamp(par.y + sel.tie.dy * par.scale, 0.08, 1) }; sel.tie = null; Object.assign(sel, at); c.rebuild(); } }, '✂ Untie')));
+    p.append(h('button', { class: 'primary gdone', onclick: () => { if (!setup && sel.tie && par) G.log.push(`${lab(sel)} is tied to ${lab(par)}`); back(); } }, '✓ Done'));
+    return;
+  }
+
+  /* ================= 🚪 an exit to another scene ================= */
+  if (top === 'exit') {
+    const ex = d.exits.find((x) => x.id === G.exit);
+    if (!ex) { home(); return buildGuided((p.replaceChildren(), p), c); }
+    head('Exit', 'Drag it on the stage to where the way out is.');
+    p.append(h('input', { placeholder: 'Label, e.g. “To the forest”', maxlength: 40, value: ex.label, oninput: (ev) => { ex.label = ev.target.value || 'Exit'; c.changedQuiet(); } }),
+      h('small', { class: 'dim' }, 'Leads to'),
+      h('select', { id: 'exitTo', onchange: (ev) => { ex.to = ev.target.value; const sc = (S.scenes || []).find((x) => x.id === ex.to); if (sc && (!ex.label || ex.label === 'Exit')) ex.label = sc.name; c.rebuild(); } }, h('option', { value: '' }, '— choose a prepared scene —'), (S.scenes || []).filter((x) => x.id !== d.sceneId).map((x) => h('option', { value: x.id, selected: ex.to === x.id }, x.name))),
+      h('div', { class: 'row' },
+        h('button', { id: 'exitLock', class: 'grow' + (ex.locked ? ' on' : ''), onclick: () => { ex.locked = !ex.locked; if (!setup) G.log.push(`“${ex.label}” is ${ex.locked ? 'locked' : 'unlocked'}`); c.rebuild(); } }, ex.locked ? '🔒 Locked — click to unlock' : '🔓 Open — click to lock'),
+        h('button', { class: 'grow', disabled: !ex.to, onclick: () => { const doc = c.travelTo(ex.to); if (doc) done(`Traveling to “${doc.name}”`); } }, '🚶 Travel there now'),
+        h('button', { class: 'danger', onclick: () => { d.exits = d.exits.filter((x) => x !== ex); home(); c.rebuild(); } }, '🗑')),
+      doneBtn(''));
+    return;
+  }
+
+  /* ================= ⚔️ battle ================= */
+  if (top === 'battle') {
+    const foes = d.entities.filter((e) => e.hp != null && e.id !== d.heroId);
+    const hpStat = c.mods().stats && d.sheet.stats.find((st) => /health|hp|life/i.test(st.name));
+    const heroHp = () => (hpStat ? hpStat.value : me && me.hp != null ? me.hp : null);
+    const hurtHero = (n) => { if (hpStat) hpStat.value = clamp(hpStat.value - n, 0, hpStat.max ?? 9999); else if (me) { if (me.hp == null) { me.hp = 5; me.maxHp = 5; } me.hp = clamp(me.hp - n, 0, me.maxHp); } };
+    const float = (id, text, col) => { d.floats = d.floats.filter((f) => f.id !== id); d.floats.push({ id, text, c: col }); };
+    const held = (who) => d.entities.filter((e) => e.tie && e.tie.to === who.id);             // a tied sword swings with its owner
+    const lunge = (a, b) => { if (!a || !b) return; const mx = a.x + (b.x - a.x) * 0.7, my = a.y + (b.y - a.y) * 0.7, ox = a.x, oy = a.y; c.autoTrack(a, [[220, mx, my], [120, mx, my], [260, ox, oy]]); };
+    if (!d.battle) {
+      head('Start a battle', 'Pick the enemies. The Player then chooses a move each turn, and you get tools for attacks, damage and checks.');
+      G.foes ||= []; G.hp ||= 5;
+      const cand = d.entities.filter((e) => e.id !== d.heroId && !e.tie);
+      p.append(h('small', { class: 'dim' }, 'Enemies'), cand.length ? h('div', { class: 'grid' }, cand.map((e) => h('button', { class: G.foes.includes(e.id) ? 'on' : '', onclick: () => { G.foes = G.foes.includes(e.id) ? G.foes.filter((x) => x !== e.id) : [...G.foes, e.id]; c.rebuild(); } }, glyphNode(code, e.asset)))) : h('p', { class: 'dim' }, 'Add an enemy to the stage first.'),
+        h('small', { class: 'dim' }, 'Health of each enemy'), h('div', { class: 'row' }, [2, 3, 5, 8, 12, 20].map((n) => h('button', { class: 'grow' + (G.hp === n ? ' on' : ''), onclick: () => { G.hp = n; c.rebuild(); } }, String(n)))),
+        h('button', { class: 'primary gdone', id: 'battleStart', disabled: !G.foes.some((id) => cand.some((e) => e.id === id)), onclick: () => {
+          for (const e of cand) if (G.foes.includes(e.id)) { e.hp = G.hp; e.maxHp = G.hp; }
+          if (!hpStat && me && me.hp == null) { me.hp = 5; me.maxHp = 5; }
+          d.battle = { round: 1 }; d.ask = { kind: 'battle', text: 'Battle! What do you do?', sides: 6, dc: 0, verb: '', places: [], targets: [] }; d.choices = [];
+          d.sfx ||= 'alarm'; d.card ||= 'Battle!'; G.foes = [];
+          if (!setup) G.log.push('A battle begins'); c.rebuild();
+        } }, '⚔️ Begin the battle'));
+      return;
+    }
+    head(`Battle — round ${d.battle.round}`, 'Everything you do here goes into the current step. Use “＋ Next step” between the Player’s hit and the enemy’s answer.');
+    const foe = foes.find((e) => e.id === G.foe) || foes.find((e) => e.id === d.target) || foes[0];
+    const a = d.answer, mv = a && a.kind === 'battle' ? a.move : '';
+    p.append(h('div', { class: 'card' }, h('small', { class: 'dim' }, 'Who is fighting'),
+      h('div', { class: 'row statrow' }, h('b', { class: 'grow' }, '🧑 ', S.names.player, `  ❤ ${heroHp() ?? '–'}`), h('button', { onclick: () => { hurtHero(1); c.rebuild(); } }, '−'), h('button', { onclick: () => { hurtHero(-1); c.rebuild(); } }, '+')),
+      foes.map((e) => h('div', { class: 'row statrow' }, h('button', { class: 'foe' + (e === foe ? ' on' : ''), onclick: () => { G.foe = e.id; c.rebuild(); } }, glyphNode(code, e.asset, 'mini')), h('b', { class: 'grow' }, ` ❤ ${e.hp}/${e.maxHp}`),
+        h('button', { onclick: () => { e.hp = clamp(e.hp - 1, 0, e.maxHp); c.rebuild(); } }, '−'), h('button', { onclick: () => { e.hp = clamp(e.hp + 1, 0, e.maxHp); c.rebuild(); } }, '+')))));
+    if (foe) {
+      const hit = (n) => {                                                 // the Player's blow lands (or misses)
+        lunge(me, foe); for (const w of me ? held(me) : []) w.once = 'swing';
+        if (me && !held(me).length) me.once = 'lunge';
+        if (n) { foe.hp = clamp(foe.hp - n, 0, foe.maxHp); foe.once = 'hit'; float(foe.id, `-${n}`, '#ff5a5a'); d.sfx = 'boom'; } else { float(foe.id, 'miss', '#ffffff'); d.sfx = 'fail'; }
+        if (foe.hp <= 0) { foe.once = 'die'; foe.temp = true; foe.say = ''; }
+        if (!setup) G.log.push(n ? `${S.names.player} hits ${lab(foe)} for ${n}${foe.hp <= 0 ? ' — it falls' : ''}` : `${S.names.player} misses ${lab(foe)}`);
+        c.rebuild();
+      };
+      const strike = (style, n) => {                                       // the enemy's move against the hero
+        const arms = held(foe);
+        if (style === 'strike') { lunge(foe, me); foe.once = 'lunge'; d.sfx = 'boom'; }
+        if (style === 'swing') { lunge(foe, me); if (arms.length) for (const w of arms) w.once = 'swing'; else foe.once = 'swing'; d.sfx = 'boom'; }
+        if (style === 'shoot' || style === 'magic') {
+          foe.once = 'cast'; d.sfx = style === 'magic' ? 'magic' : 'laser';
+          if (me) { const shot = { id: c.rid(), asset: style === 'magic' ? 'e:🔥' : 'e:➤', x: me.x, y: me.y - 0.06, scale: 0.6, flip: me.x < foe.x, rot: 0, say: '', fx: '', emote: '', solid: false, active: null, tie: null, hp: null, maxHp: null, once: 'vanish', temp: true };
+            d.entities.push(shot); d.tracks.push({ id: shot.id, pts: [0, foe.x, foe.y - 0.08 * foe.scale, 420, me.x, me.y - 0.06] }); }
+        }
+        if (style === 'roar') { foe.once = 'roar'; d.burst = 'shake'; d.sfx = 'alarm'; }
+        if (n && me) { hurtHero(n); me.once = 'hit'; float(me.id, `-${n}`, '#ff5a5a'); d.burst = 'hurt'; } else if (me && style !== 'roar') float(me.id, 'miss', '#ffffff');
+        d.battle.round += 1;
+        if (!setup) G.log.push(`${lab(foe)}: ${{ strike: 'strikes', swing: 'swings', shoot: 'shoots', magic: 'casts a spell', roar: 'roars' }[style]}${n ? ` for ${n}` : style === 'roar' ? '' : ' and misses'}`);
+        c.rebuild();
+      };
+      G.dmg ??= 1;
+      const dmg = h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Damage'), [0, 1, 2, 3, 5, 8].map((n) => h('button', { 'data-dmg': n, class: 'grow' + (G.dmg === n ? ' on' : ''), onclick: () => { G.dmg = n; c.rebuild(); } }, n ? String(n) : 'miss')));
+      p.append(dmg,
+        h('div', { class: 'card' }, h('small', { class: 'dim' }, mv === 'attack' ? `${S.names.player} attacks — does it land?` : mv === 'defend' ? `${S.names.player} defends this turn.` : mv === 'flee' ? `${S.names.player} tries to flee.` : `${S.names.player}’s attack`),
+          h('button', { id: 'heroHits', onclick: () => hit(G.dmg) }, ['⚔️ ', S.names.player, ' hits ', glyphNode(code, foe.asset, 'mini'), G.dmg ? ` for ${G.dmg}` : ' — a miss'])),
+        h('div', { class: 'card' }, h('small', { class: 'dim' }, ['What ', glyphNode(code, foe.asset, 'mini'), ' does']),
+          h('div', { class: 'thingbtns' }, [['strike', '👊 Strike'], ['swing', '🗡️ Sword swing'], ['shoot', '🏹 Shoot'], ['magic', '🔥 Magic'], ['roar', '😡 Roar']].map(([id, l]) => h('button', { 'data-attack': id, onclick: () => strike(id, id === 'roar' ? 0 : G.dmg) }, l)))));
+    }
+    p.append(h('div', { class: 'card' }, h('small', { class: 'dim' }, 'Skill check: ask for a d20 roll next turn'),
+        h('div', { class: 'row' }, [[8, 'Easy 8+'], [12, 'Medium 12+'], [16, 'Hard 16+']].map(([dc, l]) => h('button', { class: 'grow' + (d.ask && d.ask.kind === 'roll' && d.ask.dc === dc ? ' on' : ''), onclick: () => { d.ask = { kind: 'roll', text: 'Skill check!', sides: 20, dc, verb: '', places: [], targets: [] }; c.rebuild(); } }, l)),
+          h('button', { class: 'grow' + (d.ask && d.ask.kind === 'battle' ? ' on' : ''), onclick: () => { d.ask = { kind: 'battle', text: 'Your move!', sides: 6, dc: 0, verb: '', places: [], targets: [] }; c.rebuild(); } }, 'A normal move'))),
+      h('div', { class: 'row' },
+        h('button', { class: 'grow danger', id: 'battleEnd', onclick: () => { for (const e of d.entities) { e.hp = null; e.maxHp = null; } d.battle = null; d.ask = null; d.sfx = 'fanfare'; if (!setup) G.log.push('The battle is over'); home(); c.rebuild(); } }, '🏁 End the battle'),
+        doneBtn('')));
     return;
   }
 
