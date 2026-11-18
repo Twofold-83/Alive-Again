@@ -61,8 +61,11 @@ const { setup } = require('./lib');
     await x.shot('s-1-nine-steps');
     await x.watch(); await toPlayer();
     const seq = await x.seen();
-    const idx = [...lines.map((l) => seq.findIndex((k) => k.includes('|' + l + '|'))), seq.findIndex((k) => k.includes('Nine.'))];
-    assert(idx.every((i) => i >= 0) && idx.every((v, i) => i === 0 || v > idx[i - 1]), 'nine steps played in order: ' + JSON.stringify(idx));
+    // the recording starts while the Director's own (final) view is still up: look only at what follows the first step's appearance
+    const idx = []; let from = seq.findIndex((k) => k.includes('|One.|') && !k.includes('Nine.'));
+    for (const want of [...lines.map((l) => '|' + l + '|'), 'Nine.']) { const i = seq.findIndex((k, n) => n >= from && k.includes(want)); idx.push(i); from = i + 1; if (i < 0) break; }
+    assert(idx.length === 9 && idx.every((i) => i >= 0), 'nine steps played in order: ' + JSON.stringify(idx) + ' ' + JSON.stringify(seq));
+    assert(!seq.slice(idx[0], idx[7]).some((k) => k.includes('Nine.')), 'the last step did not show early');
     assert(seq[idx[0]].startsWith('w-rain'), 'rain and the first narration came together');
     let sc = await x.last();
     assert.equal(sc.steps.length, 8); assert.deepEqual(sc.steps.map((f) => f.narration), lines); assert.equal(sc.steps[0].weather, 'rain');
