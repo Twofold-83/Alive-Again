@@ -1673,203 +1673,253 @@
    "items": [
     {
      "slug": "tile-grass",
-     "name": "grass tile ground"
+     "name": "grass tile ground",
+     "kind": "floor"
     },
     {
      "slug": "tile-grass-flowers",
-     "name": "grass with flowers tile meadow"
+     "name": "grass with flowers tile meadow",
+     "kind": "floor"
     },
     {
      "slug": "tile-grass-dirt",
-     "name": "grass on dirt ground top tile"
+     "name": "grass on dirt ground top tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-dirt",
-     "name": "dirt earth tile"
+     "name": "dirt earth tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-path",
-     "name": "path road gravel tile"
+     "name": "path road gravel tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-farmland",
-     "name": "farmland field soil tile"
+     "name": "farmland field soil tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-sand",
-     "name": "sand desert beach tile"
+     "name": "sand desert beach tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-sandstone",
-     "name": "sandstone brick tile"
+     "name": "sandstone brick tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-snow",
-     "name": "snow tile"
+     "name": "snow tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-snow-dirt",
-     "name": "snow on dirt ground top tile"
+     "name": "snow on dirt ground top tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-ice",
-     "name": "ice tile frozen"
+     "name": "ice tile frozen",
+     "kind": "floor"
     },
     {
      "slug": "tile-water",
-     "name": "water tile"
+     "name": "water tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-deep-water",
-     "name": "deep water sea tile"
+     "name": "deep water sea tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-lava",
-     "name": "lava tile"
+     "name": "lava tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-stone",
-     "name": "stone rock tile"
+     "name": "stone rock tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-stone-cracked",
-     "name": "cracked stone tile"
+     "name": "cracked stone tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-cobble",
-     "name": "cobblestone tile"
+     "name": "cobblestone tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-stone-brick",
-     "name": "stone brick wall tile"
+     "name": "stone brick wall tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-mossy-brick",
-     "name": "mossy stone brick tile"
+     "name": "mossy stone brick tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-brick",
-     "name": "red brick wall tile"
+     "name": "red brick wall tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-dungeon-wall",
-     "name": "dark dungeon wall tile"
+     "name": "dark dungeon wall tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-dungeon-floor",
-     "name": "dungeon floor slab tile"
+     "name": "dungeon floor slab tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-checker",
-     "name": "checker floor black white tile"
+     "name": "checker floor black white tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-planks",
-     "name": "wood planks tile"
+     "name": "wood planks tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-wood-floor",
-     "name": "dark wood floor tile"
+     "name": "dark wood floor tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-carpet",
-     "name": "red carpet rug tile"
+     "name": "red carpet rug tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-roof",
-     "name": "red roof tiles"
+     "name": "red roof tiles",
+     "kind": "wall"
     },
     {
      "slug": "tile-thatch",
-     "name": "thatch straw roof tile"
+     "name": "thatch straw roof tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-hedge",
-     "name": "hedge leaves bush tile"
+     "name": "hedge leaves bush tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-cave",
-     "name": "cave rock wall tile"
+     "name": "cave rock wall tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-obsidian",
-     "name": "obsidian dark tile"
+     "name": "obsidian dark tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-metal",
-     "name": "metal plate tile"
+     "name": "metal plate tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-grate",
-     "name": "iron grate tile"
+     "name": "iron grate tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-ore-gold",
-     "name": "gold ore tile"
+     "name": "gold ore tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-ore-coal",
-     "name": "coal ore tile"
+     "name": "coal ore tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-ore-iron",
-     "name": "iron copper ore tile"
+     "name": "iron copper ore tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-ore-diamond",
-     "name": "diamond ore tile"
+     "name": "diamond ore tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-question",
-     "name": "question block mystery"
+     "name": "question block mystery",
+     "kind": "wall"
     },
     {
      "slug": "tile-crate",
-     "name": "crate block tile"
+     "name": "crate block tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-rail",
-     "name": "rail track tile"
+     "name": "rail track tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-trapdoor",
-     "name": "trapdoor hatch tile"
+     "name": "trapdoor hatch tile",
+     "kind": "floor"
     },
     {
      "slug": "tile-window",
-     "name": "window in stone wall tile"
+     "name": "window in stone wall tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-wall-torch",
-     "name": "stone wall with torch tile"
+     "name": "stone wall with torch tile",
+     "kind": "wall"
     },
     {
      "slug": "tile-platform",
-     "name": "wooden platform"
+     "name": "wooden platform",
+     "kind": "floor"
     },
     {
      "slug": "tile-platform-stone",
-     "name": "stone platform ledge"
+     "name": "stone platform ledge",
+     "kind": "floor"
     },
     {
      "slug": "tile-spikes",
-     "name": "spikes trap"
+     "name": "spikes trap",
+     "kind": "floor"
     },
     {
      "slug": "tile-ladder",
-     "name": "ladder"
+     "name": "ladder",
+     "kind": "floor"
     },
     {
      "slug": "tile-chain",
-     "name": "hanging chain"
+     "name": "hanging chain",
+     "kind": "floor"
     },
     {
      "slug": "tile-vines",
-     "name": "hanging vines"
+     "name": "hanging vines",
+     "kind": "floor"
     },
     {
      "slug": "tile-spring",
-     "name": "spring bounce pad"
+     "name": "spring bounce pad",
+     "kind": "floor"
     }
    ]
   },
@@ -2088,6 +2138,2376 @@
     {
      "slug": "pointer",
      "name": "pointing hand cursor"
+    }
+   ]
+  },
+  {
+   "id": "outdoor",
+   "label": "Outdoor ground",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "grass-short",
+     "name": "grass short plain lawn ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-tufts",
+     "name": "grass tufts meadow ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-dark",
+     "name": "dark grass shade forest floor ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-dry",
+     "name": "dry light grass sunny savanna ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-tall",
+     "name": "tall grass bush wild meadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-clover",
+     "name": "grass with clover leaves",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-flowers-red",
+     "name": "grass with red flowers poppies",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-flowers-yellow",
+     "name": "grass with yellow flowers dandelions",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-flowers-blue",
+     "name": "grass with blue flowers",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-flowers-pink",
+     "name": "grass with pink white flowers",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-stones",
+     "name": "grass with small stones pebbles",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-leaves",
+     "name": "grass with autumn leaves",
+     "kind": "floor"
+    },
+    {
+     "slug": "grass-mushrooms",
+     "name": "grass with red mushrooms",
+     "kind": "floor"
+    },
+    {
+     "slug": "dirt-plain",
+     "name": "dirt earth plain brown ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "dirt-pebbles",
+     "name": "dirt with pebbles stones gravel",
+     "kind": "floor"
+    },
+    {
+     "slug": "mud",
+     "name": "mud wet dirt swampy ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "sand-plain",
+     "name": "sand plain beach ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "sand-shells",
+     "name": "sand with shells beach",
+     "kind": "floor"
+    },
+    {
+     "slug": "cobble-brown",
+     "name": "cobblestone brown road stones",
+     "kind": "floor"
+    },
+    {
+     "slug": "cobble-mossy",
+     "name": "mossy cobblestone old road",
+     "kind": "floor"
+    },
+    {
+     "slug": "paving",
+     "name": "paving flagstones plaza square stone",
+     "kind": "floor"
+    },
+    {
+     "slug": "farmland-v",
+     "name": "farmland field soil furrows vertical",
+     "kind": "floor"
+    },
+    {
+     "slug": "farmland-sprouts",
+     "name": "farmland with green sprouts seedlings",
+     "kind": "floor"
+    },
+    {
+     "slug": "farmland-crops",
+     "name": "farmland with crops cabbage vegetables",
+     "kind": "floor"
+    },
+    {
+     "slug": "farmland-wheat",
+     "name": "farmland wheat field golden",
+     "kind": "floor"
+    },
+    {
+     "slug": "farmland-wet",
+     "name": "watered farmland dark wet soil",
+     "kind": "floor"
+    },
+    {
+     "slug": "bridge-h",
+     "name": "wooden bridge planks horizontal east west",
+     "kind": "floor"
+    },
+    {
+     "slug": "bridge-v",
+     "name": "wooden bridge planks vertical north south",
+     "kind": "floor"
+    },
+    {
+     "slug": "forest",
+     "name": "forest trees canopy dense woods",
+     "kind": "wall"
+    },
+    {
+     "slug": "rocks",
+     "name": "rocks boulders rocky wall mountain",
+     "kind": "wall"
+    },
+    {
+     "slug": "road-h",
+     "name": "path road dirt track straight horizontal",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-v",
+     "name": "path road dirt track straight vertical",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-corner-tl",
+     "name": "path road dirt track corner top left turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-corner-tr",
+     "name": "path road dirt track corner top right turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-corner-bl",
+     "name": "path road dirt track corner bottom left turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-corner-br",
+     "name": "path road dirt track corner bottom right turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-t-up",
+     "name": "path road dirt track t junction up fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-t-down",
+     "name": "path road dirt track t junction down fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-t-left",
+     "name": "path road dirt track t junction left fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-t-right",
+     "name": "path road dirt track t junction right fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-cross",
+     "name": "path road dirt track crossing crossroads",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-end-up",
+     "name": "path road dirt track dead end top",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-end-down",
+     "name": "path road dirt track dead end bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-end-left",
+     "name": "path road dirt track dead end left",
+     "kind": "floor"
+    },
+    {
+     "slug": "road-end-right",
+     "name": "path road dirt track dead end right",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-h",
+     "name": "paved stone road street cobble straight horizontal",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-v",
+     "name": "paved stone road street cobble straight vertical",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-corner-tl",
+     "name": "paved stone road street cobble corner top left turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-corner-tr",
+     "name": "paved stone road street cobble corner top right turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-corner-bl",
+     "name": "paved stone road street cobble corner bottom left turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-corner-br",
+     "name": "paved stone road street cobble corner bottom right turn",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-t-up",
+     "name": "paved stone road street cobble t junction up fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-t-down",
+     "name": "paved stone road street cobble t junction down fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-t-left",
+     "name": "paved stone road street cobble t junction left fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-t-right",
+     "name": "paved stone road street cobble t junction right fork",
+     "kind": "floor"
+    },
+    {
+     "slug": "paved-cross",
+     "name": "paved stone road street cobble crossing crossroads",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "water",
+   "label": "Water & lava",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "water",
+     "name": "water pond lake centre middle",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-edge-top",
+     "name": "water pond lake edge top shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-edge-bottom",
+     "name": "water pond lake edge bottom shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-edge-left",
+     "name": "water pond lake edge left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-edge-right",
+     "name": "water pond lake edge right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-corner-tl",
+     "name": "water pond lake corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-corner-tr",
+     "name": "water pond lake corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-corner-bl",
+     "name": "water pond lake corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-corner-br",
+     "name": "water pond lake corner bottom right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-inner-tl",
+     "name": "water pond lake inner corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-inner-tr",
+     "name": "water pond lake inner corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-inner-bl",
+     "name": "water pond lake inner corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-inner-br",
+     "name": "water pond lake inner corner bottom right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-pool",
+     "name": "water pond lake small pool pond single hole",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-stream-h",
+     "name": "water pond lake stream river channel horizontal",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-stream-v",
+     "name": "water pond lake stream river channel vertical",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-shallow",
+     "name": "shallow water ford wade",
+     "kind": "floor"
+    },
+    {
+     "slug": "water-lily",
+     "name": "water with lily pad flower",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-rocks",
+     "name": "water with rocks stepping stones",
+     "kind": "wall"
+    },
+    {
+     "slug": "water-reeds",
+     "name": "water with reeds cattails",
+     "kind": "wall"
+    },
+    {
+     "slug": "waterfall",
+     "name": "waterfall falling water cascade",
+     "kind": "wall"
+    },
+    {
+     "slug": "waterfall-top",
+     "name": "waterfall top edge river falls",
+     "kind": "wall"
+    },
+    {
+     "slug": "waterfall-bottom",
+     "name": "waterfall bottom splash foam",
+     "kind": "wall"
+    },
+    {
+     "slug": "swamp",
+     "name": "swamp water bog murky marsh",
+     "kind": "wall"
+    },
+    {
+     "slug": "swamp-lily",
+     "name": "swamp water with lily pads",
+     "kind": "wall"
+    },
+    {
+     "slug": "swamp-shallow",
+     "name": "shallow swamp mud water wade",
+     "kind": "floor"
+    },
+    {
+     "slug": "lava",
+     "name": "lava magma fire centre middle",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-edge-top",
+     "name": "lava magma fire edge top shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-edge-bottom",
+     "name": "lava magma fire edge bottom shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-edge-left",
+     "name": "lava magma fire edge left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-edge-right",
+     "name": "lava magma fire edge right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-corner-tl",
+     "name": "lava magma fire corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-corner-tr",
+     "name": "lava magma fire corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-corner-bl",
+     "name": "lava magma fire corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-corner-br",
+     "name": "lava magma fire corner bottom right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-inner-tl",
+     "name": "lava magma fire inner corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-inner-tr",
+     "name": "lava magma fire inner corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-inner-bl",
+     "name": "lava magma fire inner corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-inner-br",
+     "name": "lava magma fire inner corner bottom right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-pool",
+     "name": "lava magma fire small pool pond single hole",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-bubbles",
+     "name": "lava bubbling hot bubbles",
+     "kind": "wall"
+    },
+    {
+     "slug": "lava-cooled",
+     "name": "cooled lava rock basalt cracks glowing",
+     "kind": "floor"
+    },
+    {
+     "slug": "basalt",
+     "name": "basalt dark volcanic rock ground",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "cliffs",
+   "label": "Cliffs",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "cliff-edge-top",
+     "name": "cliff top edge top raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-edge-bottom",
+     "name": "cliff top edge bottom raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-edge-left",
+     "name": "cliff top edge left raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-edge-right",
+     "name": "cliff top edge right raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-corner-tl",
+     "name": "cliff top corner top left raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-corner-tr",
+     "name": "cliff top corner top right raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-corner-bl",
+     "name": "cliff top corner bottom left raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-corner-br",
+     "name": "cliff top corner bottom right raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-inner-tl",
+     "name": "cliff top inner corner top left raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-inner-tr",
+     "name": "cliff top inner corner top right raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-inner-bl",
+     "name": "cliff top inner corner bottom left raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-inner-br",
+     "name": "cliff top inner corner bottom right raised ground plateau",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-face",
+     "name": "cliff face rock wall front",
+     "kind": "wall"
+    },
+    {
+     "slug": "cliff-face-left",
+     "name": "cliff face left end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "cliff-face-right",
+     "name": "cliff face right end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "cliff-rock",
+     "name": "cliff rock wall tall middle",
+     "kind": "wall"
+    },
+    {
+     "slug": "cliff-face-vines",
+     "name": "cliff face with vines ivy",
+     "kind": "wall"
+    },
+    {
+     "slug": "cliff-face-cracked",
+     "name": "cliff face cracked rock",
+     "kind": "wall"
+    },
+    {
+     "slug": "cliff-stairs",
+     "name": "stairs carved in cliff steps up",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-cave",
+     "name": "cave entrance in cliff opening",
+     "kind": "floor"
+    },
+    {
+     "slug": "cliff-waterfall",
+     "name": "waterfall down cliff face",
+     "kind": "wall"
+    },
+    {
+     "slug": "rock-wall",
+     "name": "grey rock cliff wall stone mountain face",
+     "kind": "wall"
+    },
+    {
+     "slug": "rock-wall-top",
+     "name": "grey rock top mountain plateau",
+     "kind": "wall"
+    }
+   ]
+  },
+  {
+   "id": "dungeon",
+   "label": "Dungeon",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "dungeon-flagstone",
+     "name": "dungeon stone floor plain flagstones",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-cracked",
+     "name": "dungeon stone floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-mossy",
+     "name": "dungeon stone floor mossy overgrown",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-checker",
+     "name": "dungeon floor checkered dark tiles",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-drain",
+     "name": "dungeon floor with drain grate sewer",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-rune",
+     "name": "dungeon floor with magic rune glowing",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-slab",
+     "name": "dungeon floor big stone slab",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-bones",
+     "name": "dungeon floor with bones remains",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-floor-puddle",
+     "name": "dungeon floor with water puddle wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-wall",
+     "name": "dungeon stone wall face front bricks",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-left",
+     "name": "dungeon wall face left end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-right",
+     "name": "dungeon wall face right end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-cracked",
+     "name": "dungeon wall cracked damaged",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-mossy",
+     "name": "dungeon wall mossy vines damp",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-torch",
+     "name": "dungeon wall with torch fire light",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-banner",
+     "name": "dungeon wall with red banner flag",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-banner-blue",
+     "name": "dungeon wall with blue banner flag",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-chains",
+     "name": "dungeon wall with chains shackles prison",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-bars",
+     "name": "dungeon wall with window bars prison cell",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-shield",
+     "name": "dungeon wall with shield crest swords",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-skull",
+     "name": "dungeon wall with skull niche alcove",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-wall-fountain",
+     "name": "dungeon wall with water spout drain",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top",
+     "name": "dungeon stone wall top dark roof",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-edge-top",
+     "name": "dungeon stone wall top edge top",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-edge-bottom",
+     "name": "dungeon stone wall top edge bottom",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-edge-left",
+     "name": "dungeon stone wall top edge left",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-edge-right",
+     "name": "dungeon stone wall top edge right",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-corner-tl",
+     "name": "dungeon stone wall top corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-corner-tr",
+     "name": "dungeon stone wall top corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-corner-bl",
+     "name": "dungeon stone wall top corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-corner-br",
+     "name": "dungeon stone wall top corner bottom right",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-inner-tl",
+     "name": "dungeon stone wall top inner corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-inner-tr",
+     "name": "dungeon stone wall top inner corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-inner-bl",
+     "name": "dungeon stone wall top inner corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-top-inner-br",
+     "name": "dungeon stone wall top inner corner bottom right",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-doorway",
+     "name": "dungeon doorway open arch door passage",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-door",
+     "name": "dungeon closed wooden door in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-door-locked",
+     "name": "dungeon locked door padlock in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-door-iron",
+     "name": "dungeon iron door gate portcullis bars closed",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-stairs-up",
+     "name": "stairs up stone steps staircase",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-stairs-down",
+     "name": "stairs down stone steps descend cellar",
+     "kind": "floor"
+    },
+    {
+     "slug": "pit",
+     "name": "pit hole chasm drop centre middle",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-edge-top",
+     "name": "pit hole chasm drop edge top shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-edge-bottom",
+     "name": "pit hole chasm drop edge bottom shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-edge-left",
+     "name": "pit hole chasm drop edge left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-edge-right",
+     "name": "pit hole chasm drop edge right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-corner-tl",
+     "name": "pit hole chasm drop corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-corner-tr",
+     "name": "pit hole chasm drop corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-corner-bl",
+     "name": "pit hole chasm drop corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-corner-br",
+     "name": "pit hole chasm drop corner bottom right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "pit-pool",
+     "name": "pit hole chasm drop small pool pond single hole",
+     "kind": "wall"
+    },
+    {
+     "slug": "dungeon-spikes-up",
+     "name": "floor spikes up trap raised danger",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-spikes-down",
+     "name": "floor spikes down trap holes retracted",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-plate",
+     "name": "pressure plate floor switch raised",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-plate-down",
+     "name": "pressure plate floor switch pressed down",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-trapdoor",
+     "name": "trapdoor closed wooden hatch in floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "dungeon-trapdoor-open",
+     "name": "trapdoor open hole hatch in floor",
+     "kind": "wall"
+    }
+   ]
+  },
+  {
+   "id": "house",
+   "label": "House & castle",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "wood-floor-h",
+     "name": "wooden floor planks horizontal boards",
+     "kind": "floor"
+    },
+    {
+     "slug": "wood-floor-v",
+     "name": "wooden floor planks vertical boards",
+     "kind": "floor"
+    },
+    {
+     "slug": "wood-floor-light",
+     "name": "light wooden floor pine planks",
+     "kind": "floor"
+    },
+    {
+     "slug": "wood-floor-parquet",
+     "name": "parquet wooden floor pattern",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red",
+     "name": "red carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-edge-top",
+     "name": "red carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-edge-bottom",
+     "name": "red carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-edge-left",
+     "name": "red carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-edge-right",
+     "name": "red carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-corner-tl",
+     "name": "red carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-corner-tr",
+     "name": "red carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-corner-bl",
+     "name": "red carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-red-corner-br",
+     "name": "red carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue",
+     "name": "blue carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-edge-top",
+     "name": "blue carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-edge-bottom",
+     "name": "blue carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-edge-left",
+     "name": "blue carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-edge-right",
+     "name": "blue carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-corner-tl",
+     "name": "blue carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-corner-tr",
+     "name": "blue carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-corner-bl",
+     "name": "blue carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-blue-corner-br",
+     "name": "blue carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green",
+     "name": "green carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple",
+     "name": "purple royal carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "kitchen-floor",
+     "name": "kitchen tiled floor blue white tiles bathroom",
+     "kind": "floor"
+    },
+    {
+     "slug": "marble-floor",
+     "name": "marble floor white palace castle",
+     "kind": "floor"
+    },
+    {
+     "slug": "marble-floor-diamond",
+     "name": "marble floor diamond pattern black white hall",
+     "kind": "floor"
+    },
+    {
+     "slug": "castle-floor",
+     "name": "castle floor red stone tiles hall",
+     "kind": "floor"
+    },
+    {
+     "slug": "house-wall",
+     "name": "house wall wallpaper cream yellow inside",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-blue",
+     "name": "house wall wallpaper blue inside",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-green",
+     "name": "house wall wallpaper green inside",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-left",
+     "name": "house wall left end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-right",
+     "name": "house wall right end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-brick",
+     "name": "brick wall face red bricks house",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-wood",
+     "name": "wooden wall planks cabin hut",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-plaster",
+     "name": "white plaster wall timber frame tavern",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-window",
+     "name": "house wall with window glass curtains",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-painting",
+     "name": "house wall with painting picture frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-bookshelf",
+     "name": "wall with bookshelf books library",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-fireplace",
+     "name": "wall with fireplace fire hearth chimney",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-clock",
+     "name": "wall with clock time",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-candle",
+     "name": "wall with candle sconce light",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-shelf",
+     "name": "wall with shelf pots jars kitchen",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-wall-mirror",
+     "name": "wall with mirror",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-door",
+     "name": "house door closed in wall wooden",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-door-open",
+     "name": "house door open doorway in wall",
+     "kind": "floor"
+    },
+    {
+     "slug": "house-stairs",
+     "name": "wooden stairs up staircase steps",
+     "kind": "floor"
+    },
+    {
+     "slug": "house-top",
+     "name": "house wooden wall top dark roof",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-edge-top",
+     "name": "house wooden wall top edge top",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-edge-bottom",
+     "name": "house wooden wall top edge bottom",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-edge-left",
+     "name": "house wooden wall top edge left",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-edge-right",
+     "name": "house wooden wall top edge right",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-corner-tl",
+     "name": "house wooden wall top corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-corner-tr",
+     "name": "house wooden wall top corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-corner-bl",
+     "name": "house wooden wall top corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-corner-br",
+     "name": "house wooden wall top corner bottom right",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-inner-tl",
+     "name": "house wooden wall top inner corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-inner-tr",
+     "name": "house wooden wall top inner corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-inner-bl",
+     "name": "house wooden wall top inner corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "house-top-inner-br",
+     "name": "house wooden wall top inner corner bottom right",
+     "kind": "wall"
+    }
+   ]
+  },
+  {
+   "id": "cave",
+   "label": "Cave & mine",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "cave-floor",
+     "name": "cave floor rock ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "cave-floor-pebbles",
+     "name": "cave floor with pebbles gravel",
+     "kind": "floor"
+    },
+    {
+     "slug": "cave-floor-cracked",
+     "name": "cave floor cracked glowing lava cracks",
+     "kind": "floor"
+    },
+    {
+     "slug": "cave-floor-mushrooms",
+     "name": "cave floor with glowing mushrooms",
+     "kind": "floor"
+    },
+    {
+     "slug": "cave-floor-moss",
+     "name": "cave floor mossy damp",
+     "kind": "floor"
+    },
+    {
+     "slug": "cave-wall",
+     "name": "cave wall rock face front",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-top",
+     "name": "cave rock top dark ceiling",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-crystal",
+     "name": "cave crystal wall blue crystals",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-crystal-purple",
+     "name": "cave crystal wall purple amethyst",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-gold",
+     "name": "cave ore wall gold vein",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-iron",
+     "name": "cave ore wall iron copper vein",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-gems",
+     "name": "cave ore wall ruby gems red",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-emerald",
+     "name": "cave ore wall emerald green gems",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-wall-beams",
+     "name": "mine wall wooden support beams timber",
+     "kind": "wall"
+    },
+    {
+     "slug": "cave-entrance",
+     "name": "cave entrance tunnel mine opening dark",
+     "kind": "floor"
+    },
+    {
+     "slug": "mine-entrance-beams",
+     "name": "mine entrance tunnel wooden frame",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-h",
+     "name": "mine rails track straight horizontal",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-v",
+     "name": "mine rails track straight vertical",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-curve-tl",
+     "name": "mine rails track curve corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-curve-tr",
+     "name": "mine rails track curve corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-curve-bl",
+     "name": "mine rails track curve corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-curve-br",
+     "name": "mine rails track curve corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-cross",
+     "name": "mine rails track crossing",
+     "kind": "floor"
+    },
+    {
+     "slug": "rails-end",
+     "name": "mine rails track end buffer stop",
+     "kind": "floor"
+    },
+    {
+     "slug": "void",
+     "name": "dark void black nothing abyss",
+     "kind": "wall"
+    },
+    {
+     "slug": "void-stars",
+     "name": "void with stars space night sky",
+     "kind": "wall"
+    }
+   ]
+  },
+  {
+   "id": "wild",
+   "label": "Snow & desert",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "snow-plain",
+     "name": "snow plain smooth white ground",
+     "kind": "floor"
+    },
+    {
+     "slug": "snow-drifts",
+     "name": "snow drifts wind deep snow",
+     "kind": "floor"
+    },
+    {
+     "slug": "snow-tracks",
+     "name": "snow with footprints tracks",
+     "kind": "floor"
+    },
+    {
+     "slug": "snow-grass",
+     "name": "snow with grass poking through thaw",
+     "kind": "floor"
+    },
+    {
+     "slug": "snow-rocks",
+     "name": "snow with rocks stones",
+     "kind": "floor"
+    },
+    {
+     "slug": "snow-path",
+     "name": "trodden snow path packed",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-cracked",
+     "name": "cracked ice thin frozen lake",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond",
+     "name": "ice frozen pond lake snow centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-edge-top",
+     "name": "ice frozen pond lake snow edge top shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-edge-bottom",
+     "name": "ice frozen pond lake snow edge bottom shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-edge-left",
+     "name": "ice frozen pond lake snow edge left shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-edge-right",
+     "name": "ice frozen pond lake snow edge right shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-corner-tl",
+     "name": "ice frozen pond lake snow corner top left shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-corner-tr",
+     "name": "ice frozen pond lake snow corner top right shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-corner-bl",
+     "name": "ice frozen pond lake snow corner bottom left shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "ice-pond-corner-br",
+     "name": "ice frozen pond lake snow corner bottom right shore",
+     "kind": "floor"
+    },
+    {
+     "slug": "snow-wall",
+     "name": "snowy rock wall face cliff",
+     "kind": "wall"
+    },
+    {
+     "slug": "snow-wall-top",
+     "name": "snowy wall top rock covered in snow",
+     "kind": "wall"
+    },
+    {
+     "slug": "ice-wall",
+     "name": "ice brick wall face igloo frozen",
+     "kind": "wall"
+    },
+    {
+     "slug": "snow-pines",
+     "name": "snowy pine forest trees winter woods",
+     "kind": "wall"
+    },
+    {
+     "slug": "sand-dunes",
+     "name": "sand dunes desert waves",
+     "kind": "floor"
+    },
+    {
+     "slug": "desert-cracked",
+     "name": "cracked desert ground dry earth",
+     "kind": "floor"
+    },
+    {
+     "slug": "sand-bones",
+     "name": "sand with bones skull desert",
+     "kind": "floor"
+    },
+    {
+     "slug": "sand-stones",
+     "name": "sand with stones rocks desert",
+     "kind": "floor"
+    },
+    {
+     "slug": "sandstone-floor",
+     "name": "sandstone floor slabs temple pyramid",
+     "kind": "floor"
+    },
+    {
+     "slug": "sandstone-floor-glyph",
+     "name": "sandstone floor with glyph eye symbol",
+     "kind": "floor"
+    },
+    {
+     "slug": "sandstone-wall",
+     "name": "sandstone wall face bricks temple",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-wall-left",
+     "name": "sandstone wall left end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-wall-right",
+     "name": "sandstone wall right end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-wall-glyphs",
+     "name": "sandstone wall hieroglyphs carvings",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-wall-torch",
+     "name": "sandstone wall with torch",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-doorway",
+     "name": "sandstone doorway temple entrance open",
+     "kind": "floor"
+    },
+    {
+     "slug": "sandstone-door",
+     "name": "sandstone sealed door stone slab closed",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top",
+     "name": "sandstone wall top dark roof",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-edge-top",
+     "name": "sandstone wall top edge top",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-edge-bottom",
+     "name": "sandstone wall top edge bottom",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-edge-left",
+     "name": "sandstone wall top edge left",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-edge-right",
+     "name": "sandstone wall top edge right",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-corner-tl",
+     "name": "sandstone wall top corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-corner-tr",
+     "name": "sandstone wall top corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-corner-bl",
+     "name": "sandstone wall top corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-corner-br",
+     "name": "sandstone wall top corner bottom right",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-inner-tl",
+     "name": "sandstone wall top inner corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-inner-tr",
+     "name": "sandstone wall top inner corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-inner-bl",
+     "name": "sandstone wall top inner corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "sandstone-top-inner-br",
+     "name": "sandstone wall top inner corner bottom right",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis",
+     "name": "oasis water sand beach centre middle",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-edge-top",
+     "name": "oasis water sand beach edge top shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-edge-bottom",
+     "name": "oasis water sand beach edge bottom shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-edge-left",
+     "name": "oasis water sand beach edge left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-edge-right",
+     "name": "oasis water sand beach edge right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-corner-tl",
+     "name": "oasis water sand beach corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-corner-tr",
+     "name": "oasis water sand beach corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-corner-bl",
+     "name": "oasis water sand beach corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-corner-br",
+     "name": "oasis water sand beach corner bottom right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-inner-tl",
+     "name": "oasis water sand beach inner corner top left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-inner-tr",
+     "name": "oasis water sand beach inner corner top right shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-inner-bl",
+     "name": "oasis water sand beach inner corner bottom left shore",
+     "kind": "wall"
+    },
+    {
+     "slug": "oasis-inner-br",
+     "name": "oasis water sand beach inner corner bottom right shore",
+     "kind": "wall"
+    }
+   ]
+  },
+  {
+   "id": "scifi",
+   "label": "Sci-fi",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "scifi-floor",
+     "name": "metal floor panel light spaceship lab",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-dark",
+     "name": "dark metal floor plates",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-tread",
+     "name": "metal tread plate floor diamond",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-light",
+     "name": "metal floor with light strip glowing",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-grate",
+     "name": "metal grated floor grille vent",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-hazard",
+     "name": "warning stripes floor yellow black hazard",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-hazard-h",
+     "name": "floor with warning stripe line horizontal",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-hazard-v",
+     "name": "floor with warning stripe line vertical",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-floor-arrow",
+     "name": "floor with arrow up direction marker",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-wall",
+     "name": "metal wall face panels spaceship lab",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-left",
+     "name": "metal wall left end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-right",
+     "name": "metal wall right end corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-screen",
+     "name": "wall with screen monitor computer display",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-pipes",
+     "name": "wall with pipes tubes plumbing",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-vent",
+     "name": "wall with vent grille air duct",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-light",
+     "name": "wall with lamp light bright",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-window",
+     "name": "wall with window to space stars porthole",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-wall-lockers",
+     "name": "wall with lockers cabinets storage",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-door",
+     "name": "airlock door closed metal sliding door",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-door-open",
+     "name": "airlock door open passage",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-teleporter",
+     "name": "teleporter pad transporter warp floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-energy-h",
+     "name": "energy field force field barrier laser horizontal",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-energy-v",
+     "name": "energy field force field barrier laser vertical",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-coolant",
+     "name": "coolant acid toxic green liquid pool",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-glass-floor",
+     "name": "glass floor window to space",
+     "kind": "floor"
+    },
+    {
+     "slug": "scifi-top",
+     "name": "metal sci-fi wall top dark roof",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-edge-top",
+     "name": "metal sci-fi wall top edge top",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-edge-bottom",
+     "name": "metal sci-fi wall top edge bottom",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-edge-left",
+     "name": "metal sci-fi wall top edge left",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-edge-right",
+     "name": "metal sci-fi wall top edge right",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-corner-tl",
+     "name": "metal sci-fi wall top corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-corner-tr",
+     "name": "metal sci-fi wall top corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-corner-bl",
+     "name": "metal sci-fi wall top corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-corner-br",
+     "name": "metal sci-fi wall top corner bottom right",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-inner-tl",
+     "name": "metal sci-fi wall top inner corner top left",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-inner-tr",
+     "name": "metal sci-fi wall top inner corner top right",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-inner-bl",
+     "name": "metal sci-fi wall top inner corner bottom left",
+     "kind": "wall"
+    },
+    {
+     "slug": "scifi-top-inner-br",
+     "name": "metal sci-fi wall top inner corner bottom right",
+     "kind": "wall"
+    }
+   ]
+  },
+  {
+   "id": "barriers",
+   "label": "Fences & barriers",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "fence-h",
+     "name": "wooden fence horizontal",
+     "solid": true
+    },
+    {
+     "slug": "fence-v",
+     "name": "wooden fence vertical",
+     "solid": true
+    },
+    {
+     "slug": "fence-corner-tl",
+     "name": "wooden fence corner top left",
+     "solid": true
+    },
+    {
+     "slug": "fence-corner-tr",
+     "name": "wooden fence corner top right",
+     "solid": true
+    },
+    {
+     "slug": "fence-corner-bl",
+     "name": "wooden fence corner bottom left",
+     "solid": true
+    },
+    {
+     "slug": "fence-corner-br",
+     "name": "wooden fence corner bottom right",
+     "solid": true
+    },
+    {
+     "slug": "fence-post",
+     "name": "wooden fence post single end",
+     "solid": true
+    },
+    {
+     "slug": "fence-cross",
+     "name": "wooden fence crossing junction",
+     "solid": true
+    },
+    {
+     "slug": "fence-gate",
+     "name": "wooden fence gate closed",
+     "solid": true
+    },
+    {
+     "slug": "fence-gate-open",
+     "name": "wooden fence gate open"
+    },
+    {
+     "slug": "fence-broken",
+     "name": "broken wooden fence damaged",
+     "solid": true
+    },
+    {
+     "slug": "iron-fence-h",
+     "name": "iron fence railing horizontal graveyard",
+     "solid": true
+    },
+    {
+     "slug": "iron-fence-v",
+     "name": "iron fence railing vertical graveyard",
+     "solid": true
+    },
+    {
+     "slug": "iron-fence-corner-tl",
+     "name": "iron fence railing corner top left graveyard",
+     "solid": true
+    },
+    {
+     "slug": "iron-fence-corner-tr",
+     "name": "iron fence railing corner top right graveyard",
+     "solid": true
+    },
+    {
+     "slug": "iron-fence-corner-bl",
+     "name": "iron fence railing corner bottom left graveyard",
+     "solid": true
+    },
+    {
+     "slug": "iron-fence-corner-br",
+     "name": "iron fence railing corner bottom right graveyard",
+     "solid": true
+    },
+    {
+     "slug": "iron-gate",
+     "name": "iron gate closed bars graveyard",
+     "solid": true
+    },
+    {
+     "slug": "stone-wall-h",
+     "name": "low stone wall horizontal garden",
+     "solid": true
+    },
+    {
+     "slug": "stone-wall-v",
+     "name": "low stone wall vertical garden",
+     "solid": true
+    },
+    {
+     "slug": "stone-wall-corner-tl",
+     "name": "low stone wall corner top left garden",
+     "solid": true
+    },
+    {
+     "slug": "stone-wall-corner-tr",
+     "name": "low stone wall corner top right garden",
+     "solid": true
+    },
+    {
+     "slug": "stone-wall-corner-bl",
+     "name": "low stone wall corner bottom left garden",
+     "solid": true
+    },
+    {
+     "slug": "stone-wall-corner-br",
+     "name": "low stone wall corner bottom right garden",
+     "solid": true
+    },
+    {
+     "slug": "hedge-h",
+     "name": "hedge horizontal green bush wall garden",
+     "solid": true
+    },
+    {
+     "slug": "hedge-v",
+     "name": "hedge vertical green bush wall garden",
+     "solid": true
+    },
+    {
+     "slug": "hedge-block",
+     "name": "hedge block square bush maze",
+     "solid": true
+    },
+    {
+     "slug": "hedge-round",
+     "name": "round hedge topiary garden bush",
+     "solid": true
+    },
+    {
+     "slug": "bridge-rail-h",
+     "name": "bridge rail railing horizontal rope",
+     "solid": true
+    },
+    {
+     "slug": "bridge-rail-v",
+     "name": "bridge rail railing vertical rope",
+     "solid": true
+    },
+    {
+     "slug": "barricade",
+     "name": "wooden barricade spikes barrier",
+     "solid": true
+    },
+    {
+     "slug": "rope-barrier",
+     "name": "rope barrier posts velvet museum",
+     "solid": true
+    },
+    {
+     "slug": "laser-gate",
+     "name": "laser gate barrier red beams sci-fi",
+     "solid": true
+    },
+    {
+     "slug": "laser-gate-off",
+     "name": "laser gate off posts sci-fi open"
+    }
+   ]
+  },
+  {
+   "id": "levelprops",
+   "label": "Level props",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "pillar-short",
+     "name": "stone pillar column short",
+     "solid": true
+    },
+    {
+     "slug": "pillar-sandstone",
+     "name": "sandstone pillar column desert temple",
+     "solid": true
+    },
+    {
+     "slug": "pillar-short-broken",
+     "name": "broken stone pillar ruin stump",
+     "solid": true
+    },
+    {
+     "slug": "statue-knight",
+     "name": "stone statue knight warrior",
+     "solid": true
+    },
+    {
+     "slug": "statue-angel",
+     "name": "stone statue angel wings",
+     "solid": true
+    },
+    {
+     "slug": "statue-broken",
+     "name": "broken statue ruin pedestal",
+     "solid": true
+    },
+    {
+     "slug": "fountain-small",
+     "name": "small fountain water plaza",
+     "solid": true
+    },
+    {
+     "slug": "well-stone",
+     "name": "stone well with roof village",
+     "solid": true
+    },
+    {
+     "slug": "well-water",
+     "name": "round well water hole from above",
+     "solid": true
+    },
+    {
+     "slug": "well-dry",
+     "name": "dry empty well dark hole",
+     "solid": true
+    },
+    {
+     "slug": "sign-warning",
+     "name": "warning sign skull danger signpost",
+     "solid": true
+    },
+    {
+     "slug": "sign-board",
+     "name": "notice board quest board papers",
+     "solid": true
+    },
+    {
+     "slug": "street-lamp",
+     "name": "street lamp post lit light town",
+     "solid": true
+    },
+    {
+     "slug": "lantern-post",
+     "name": "lantern on wooden post light",
+     "solid": true
+    },
+    {
+     "slug": "brazier-lit",
+     "name": "brazier fire bowl lit burning",
+     "solid": true
+    },
+    {
+     "slug": "brazier-unlit",
+     "name": "brazier fire bowl unlit cold coals",
+     "solid": true
+    },
+    {
+     "slug": "torch-stand",
+     "name": "standing torch lit pole fire",
+     "solid": true
+    },
+    {
+     "slug": "stalagmite-tall",
+     "name": "tall stalagmite cave rock spike",
+     "solid": true
+    },
+    {
+     "slug": "stalagmites",
+     "name": "stalagmites cluster small cave rocks",
+     "solid": true
+    },
+    {
+     "slug": "crystal-blue",
+     "name": "blue crystal cluster gem cave",
+     "solid": true
+    },
+    {
+     "slug": "crystal-green",
+     "name": "green crystal cluster emerald cave",
+     "solid": true
+    },
+    {
+     "slug": "crystal-red",
+     "name": "red crystal cluster ruby cave",
+     "solid": true
+    },
+    {
+     "slug": "rubble",
+     "name": "rubble pile stones debris ruin"
+    },
+    {
+     "slug": "rubble-wood",
+     "name": "broken planks wood debris wreck"
+    },
+    {
+     "slug": "bones-pile",
+     "name": "pile of bones remains skeleton"
+    },
+    {
+     "slug": "skull-pile",
+     "name": "pile of skulls heap"
+    },
+    {
+     "slug": "cobweb-corner",
+     "name": "cobweb corner top left spider web"
+    },
+    {
+     "slug": "cobweb-corner-right",
+     "name": "cobweb corner top right spider web"
+    },
+    {
+     "slug": "floor-cracks",
+     "name": "cracks decal broken floor crack"
+    },
+    {
+     "slug": "puddle",
+     "name": "water puddle wet"
+    },
+    {
+     "slug": "scorch-mark",
+     "name": "scorch mark burnt ground ash"
+    },
+    {
+     "slug": "floor-hole",
+     "name": "hole in the floor pit small"
+    },
+    {
+     "slug": "grass-tuft",
+     "name": "grass tuft blades weeds"
+    },
+    {
+     "slug": "flower-patch",
+     "name": "flower patch red yellow pink flowers"
+    },
+    {
+     "slug": "stairs-wood",
+     "name": "wooden stairs steps prop"
+    },
+    {
+     "slug": "ladder-hole",
+     "name": "ladder down hole in floor cellar"
+    },
+    {
+     "slug": "lever-floor-off",
+     "name": "floor lever switch off red"
+    },
+    {
+     "slug": "lever-floor-on",
+     "name": "floor lever switch on green"
+    },
+    {
+     "slug": "floor-switch",
+     "name": "floor switch button red round"
+    },
+    {
+     "slug": "floor-switch-pressed",
+     "name": "floor switch button pressed green"
+    },
+    {
+     "slug": "push-block",
+     "name": "pushable stone block puzzle",
+     "solid": true
+    },
+    {
+     "slug": "push-block-ice",
+     "name": "pushable ice block puzzle frozen",
+     "solid": true
+    },
+    {
+     "slug": "push-block-gold",
+     "name": "pushable golden block puzzle",
+     "solid": true
+    },
+    {
+     "slug": "boulder-round",
+     "name": "round boulder big rock",
+     "solid": true
+    },
+    {
+     "slug": "boulder-mossy",
+     "name": "mossy boulder rock green",
+     "solid": true
+    },
+    {
+     "slug": "boulder-snowy",
+     "name": "snowy boulder rock winter",
+     "solid": true
+    },
+    {
+     "slug": "boulder-sandstone",
+     "name": "sandstone boulder desert rock",
+     "solid": true
+    },
+    {
+     "slug": "minecart-rails",
+     "name": "minecart on rails mine cart track",
+     "solid": true
+    },
+    {
+     "slug": "treasure-pile",
+     "name": "treasure pile gold coins heap"
+    },
+    {
+     "slug": "treasure-pile-big",
+     "name": "big treasure hoard gold crown gems"
+    },
+    {
+     "slug": "cage-empty",
+     "name": "empty iron cage prison small",
+     "solid": true
+    },
+    {
+     "slug": "altar",
+     "name": "stone altar with candles temple shrine",
+     "solid": true
+    },
+    {
+     "slug": "altar-dark",
+     "name": "dark altar purple cult ritual",
+     "solid": true
+    },
+    {
+     "slug": "throne-stone",
+     "name": "stone throne seat king",
+     "solid": true
+    },
+    {
+     "slug": "stall-small",
+     "name": "small market stall stand shop",
+     "solid": true
+    },
+    {
+     "slug": "tent-small",
+     "name": "small tent camp",
+     "solid": true
+    },
+    {
+     "slug": "campfire-big",
+     "name": "campfire lit burning fire stones",
+     "solid": true
+    },
+    {
+     "slug": "campfire-out",
+     "name": "campfire unlit out cold ashes smoke"
+    },
+    {
+     "slug": "bedroll",
+     "name": "bedroll sleeping bag camp bed"
+    },
+    {
+     "slug": "portal-gate",
+     "name": "stone portal gate active magic purple"
+    },
+    {
+     "slug": "portal-gate-off",
+     "name": "stone portal gate inactive dark closed",
+     "solid": true
+    },
+    {
+     "slug": "scifi-crate",
+     "name": "sci-fi metal crate container cargo",
+     "solid": true
+    },
+    {
+     "slug": "console",
+     "name": "computer console terminal screen sci-fi",
+     "solid": true
+    },
+    {
+     "slug": "generator",
+     "name": "generator machine power reactor sci-fi",
+     "solid": true
+    },
+    {
+     "slug": "canister",
+     "name": "toxic canister green barrel sci-fi",
+     "solid": true
+    },
+    {
+     "slug": "urn",
+     "name": "urn vase clay pot desert",
+     "solid": true
+    },
+    {
+     "slug": "bench",
+     "name": "wooden bench seat park",
+     "solid": true
+    },
+    {
+     "slug": "log-pile",
+     "name": "log pile firewood stack",
+     "solid": true
+    },
+    {
+     "slug": "banner-stand",
+     "name": "banner on stand flag pole red",
+     "solid": true
     }
    ]
   }

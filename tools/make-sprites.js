@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /*
- * Generates the pixel-art sprite pack in public/px/ : 500 PNGs plus index.json.
+ * Generates the pixel-art sprite pack in public/px/ : 965 PNGs plus index.json
+ * (the original 500 sprites, then the level-editor tile sets and level props).
  *
  *   node tools/make-sprites.js
  *
@@ -4619,16 +4620,1208 @@ S('crosshair', 'crosshair target', 'crosshair', {}, { o: false });
 S('lock', 'padlock locked', 'lock');
 S('pointer', 'pointing hand cursor', 'hand');
 
+// ═════════════════════════ LEVEL EDITOR: tile sets that join ═════════════════════════
+// Everything below was added for the tile-based level editor (16x12 grid, seen from
+// above / three-quarter view). Tiles carry kind 'floor' (walkable) or 'wall' (blocks).
+// Sets join through two small systems:
+//   form()     wobbly, rounded borders for natural things (shores, lava, cliffs, pits)
+//   edgeDist() straight borders for built things (wall tops, carpets)
+// Edge names say where the border is: "water-edge-top" is the top row of a pond (the
+// grass shore is at its top), "water-corner-tl" its top left corner, "water-inner-tl"
+// a water tile with only a nub of land in its top left corner (for L-shaped ponds).
+const KEY = Object.fromEntries(Object.entries(PAL).map(([k, v]) => [v, k]));
+/** A full 16x16 level tile; fn(canvas, slug). */
+function T(slug, name, kind, fn) { D(slug, name, (c) => fn(c, slug)); cat.items[cat.items.length - 1].kind = kind; }
+/** Draw a routine on its own little canvas (own random seed) and return the pixels. */
+function sub(seed, fn) { const g = Array.from({ length: 16 }, () => Array(16).fill(null)); fn(canvas(g, seed)); return g; }
+function each(fn) { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) fn(x, y); }
+/** stamp with a dark outline around it, for things hanging on walls */
+function ostamp(c, x, y, rows, line = 'k') {
+  const on = (i, j) => rows[j] && rows[j][i] && rows[j][i] !== '.';
+  for (let j = -1; j <= rows.length; j++) for (let i = -1; i <= rows[0].length; i++) if (!on(i, j) && (on(i - 1, j) || on(i + 1, j) || on(i, j - 1) || on(i, j + 1))) c.px(x + i, y + j, line);
+  return c.stamp(x, y, rows);
+}
+/** mirror / transpose a painter: 'x' flips left-right, 'y' flips up-down, 't' swaps x and y */
+function turned(how, fn) {
+  return (c, slug) => {
+    const g = sub(slug, (c2) => fn(c2, slug));
+    each((x, y) => { let sx = x, sy = y; for (const h of how) { if (h === 'x') sx = 15 - sx; else if (h === 'y') sy = 15 - sy; else [sx, sy] = [sy, sx]; } c.px(x, y, KEY[g[sy][sx]]); });
+  };
+}
+
+// ── natural borders ──
+const WOB = [0, 0, 1, 1, 1, 0, 0, -1, -1, 0, 0, 1, 1, 0, 0, 0];
+const FORMS = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
+const INNER = ['itl', 'itr', 'ibl', 'ibr'];
+const FORM_SLUG = { t: 'edge-top', b: 'edge-bottom', l: 'edge-left', r: 'edge-right', tl: 'corner-tl', tr: 'corner-tr', bl: 'corner-bl', br: 'corner-br', itl: 'inner-tl', itr: 'inner-tr', ibl: 'inner-bl', ibr: 'inner-br' };
+const FORM_NAME = { t: 'edge top', b: 'edge bottom', l: 'edge left', r: 'edge right', tl: 'corner top left', tr: 'corner top right', bl: 'corner bottom left', br: 'corner bottom right', itl: 'inner corner top left', itr: 'inner corner top right', ibl: 'inner corner bottom left', ibr: 'inner corner bottom right' };
+/** → mask(x, y): true where the border material (the shore) is. Works beyond 0..15 so neighbours can be asked. */
+function form(name, o = {}) {
+  const b = o.band === undefined ? 4 : o.band, R = o.round !== 0;
+  const wb = (i) => (o.wob === 0 ? 0 : WOB[i & 15]);
+  const top = (x, y) => y < b + wb(x);
+  const tl = (x, y) => y < b + wb(x) || x < b + wb(y) || (R && x < b + 4 && y < b + 4 && Math.hypot(x - (b + 3.5), y - (b + 3.5)) > 3.7);
+  const itl = (x, y) => (R ? Math.hypot(x + 0.5, y + 0.5) < b + 0.4 : x < b && y < b);
+  switch (name) {
+    case 'c': return () => false;
+    case 't': return top;
+    case 'b': return (x, y) => top(x, 15 - y);
+    case 'l': return (x, y) => top(y, x);
+    case 'r': return (x, y) => top(y, 15 - x);
+    case 'h': return (x, y) => top(x, y) || top(x, 15 - y);
+    case 'v': return (x, y) => top(y, x) || top(y, 15 - x);
+    case 'tl': return tl;
+    case 'tr': return (x, y) => tl(15 - x, y);
+    case 'bl': return (x, y) => tl(x, 15 - y);
+    case 'br': return (x, y) => tl(15 - x, 15 - y);
+    case 'itl': return itl;
+    case 'itr': return (x, y) => itl(15 - x, y);
+    case 'ibl': return (x, y) => itl(x, 15 - y);
+    case 'ibr': return (x, y) => itl(15 - x, 15 - y);
+    case 'o': return (x, y) => tl(x, y) || tl(15 - x, y) || tl(x, 15 - y) || tl(15 - x, 15 - y);
+  }
+  throw new Error('unknown form ' + name);
+}
+/** o: { land, liquid: painters; rim: colour of the land's edge; bank: colours seen below a top shore; foam } */
+function shore(c, slug, f, o) {
+  const M = form(f, o), land = sub(slug + '/land', o.land), liq = sub('liquid', o.liquid), bank = o.bank || [];
+  each((x, y) => {
+    let col;
+    if (M(x, y)) col = o.rim && (!M(x, y + 1) || !M(x, y - 1) || !M(x - 1, y) || !M(x + 1, y)) ? o.rim : KEY[land[y][x]];
+    else {
+      col = KEY[liq[y][x]];
+      const depth = bank.findIndex((_, i) => M(x, y - 1 - i));
+      if (depth >= 0) col = bank[depth];
+      else if (o.foam && (M(x - 1, y) || M(x + 1, y) || M(x, y + 1) || M(x, y - 1 - bank.length)) && (x * 3 + y * 5) % 7 > 1) col = o.foam;
+    }
+    c.px(x, y, col);
+  });
+}
+/** the whole joining set: centre, 4 edges, 4 corners (and inner corners, single pool) */
+function shoreSet(prefix, words, kind, o, extra = []) {
+  T(prefix, `${words} centre middle`, kind, (c, s) => shore(c, s, 'c', o));
+  for (const f of [...FORMS, ...extra.filter((e) => INNER.includes(e))]) T(`${prefix}-${FORM_SLUG[f]}`, `${words} ${FORM_NAME[f]} shore`, kind, (c, s) => shore(c, s, f, o));
+  if (extra.includes('o')) T(`${prefix}-pool`, `${words} small pool pond single hole`, kind, (c, s) => shore(c, s, 'o', o));
+  if (extra.includes('h')) T(`${prefix}-stream-h`, `${words} stream river channel horizontal`, kind, (c, s) => shore(c, s, 'h', o));
+  if (extra.includes('v')) T(`${prefix}-stream-v`, `${words} stream river channel vertical`, kind, (c, s) => shore(c, s, 'v', o));
+}
+
+// ── straight borders ──
+const EDGES = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
+const EDGE_INNER = ['1', '2', '3', '4'];
+const EDGE_SLUG = { t: 'edge-top', b: 'edge-bottom', l: 'edge-left', r: 'edge-right', tl: 'corner-tl', tr: 'corner-tr', bl: 'corner-bl', br: 'corner-br', 1: 'inner-tl', 2: 'inner-tr', 3: 'inner-bl', 4: 'inner-br' };
+const EDGE_NAME = { t: 'edge top', b: 'edge bottom', l: 'edge left', r: 'edge right', tl: 'corner top left', tr: 'corner top right', bl: 'corner bottom left', br: 'corner bottom right', 1: 'inner corner top left', 2: 'inner corner top right', 3: 'inner corner bottom left', 4: 'inner corner bottom right' };
+/** distance of a pixel to the nearest bordered side; f: letters t b l r, digits 1-4 for inner corners (tl tr bl br) */
+function edgeDist(f, x, y) {
+  let d = 99;
+  for (const ch of f) d = Math.min(d, ch === 't' ? y : ch === 'b' ? 15 - y : ch === 'l' ? x : ch === 'r' ? 15 - x : ch === '1' ? Math.max(x, y) : ch === '2' ? Math.max(15 - x, y) : ch === '3' ? Math.max(x, 15 - y) : Math.max(15 - x, 15 - y));
+  return d;
+}
+/** The dark top of a wall seen from above, with a lighter bevel where it borders the room. */
+function wallTop(c, f, o) {
+  c.fill(o.base).speck(9, o.dark).speck(o.light ? 5 : 0, o.light);
+  if (o.dots) each((x, y) => { if (x % 8 === 3 && y % 8 === 3) c.px(x, y, o.dots); });
+  each((x, y) => { const d = edgeDist(f, x, y); if (d === 0) c.px(x, y, 'k'); else if (d === 1) c.px(x, y, o.hi); else if (d === 2) c.px(x, y, o.rim); else if (d === 3) c.px(x, y, o.dark); });
+}
+function wallTopSet(prefix, words, o) {
+  T(prefix, `${words} wall top dark roof`, 'wall', (c) => wallTop(c, '', o));
+  for (const f of [...EDGES, ...EDGE_INNER]) T(`${prefix}-${EDGE_SLUG[f]}`, `${words} wall top ${EDGE_NAME[f]}`, 'wall', (c) => wallTop(c, f, o));
+}
+function carpet(c, f, r, trim) {
+  const [d, m, l] = ramp(r);
+  each((x, y) => {
+    const e = edgeDist(f, x, y);
+    c.px(x, y, e === 0 ? d : e === 1 ? trim : e === 2 ? d : x % 8 === 3 && y % 8 === 3 ? l : (x + 4) % 8 === 3 && (y + 4) % 8 === 3 ? d : (x % 8 === 3 && (y % 8 === 2 || y % 8 === 4)) || (y % 8 === 3 && (x % 8 === 2 || x % 8 === 4)) ? d : m);
+  });
+}
+function carpetSet(prefix, words, r, trim) {
+  T(prefix, `${words} carpet rug centre middle`, 'floor', (c) => carpet(c, '', r, trim));
+  for (const f of EDGES) T(`${prefix}-${EDGE_SLUG[f]}`, `${words} carpet rug ${EDGE_NAME[f]}`, 'floor', (c) => carpet(c, f, r, trim));
+}
+
+// ── paths and rails: pieces named by where they lead ──
+const WOB2 = [0, 0, 0, 1, 1, 0, 0, 0, 0, -1, -1, 0, 0, 1, 0, 0];
+const ROADS = [
+  ['h', 'ew', 'straight horizontal'], ['v', 'ns', 'straight vertical'],
+  ['corner-tl', 'es', 'corner top left turn'], ['corner-tr', 'sw', 'corner top right turn'], ['corner-bl', 'ne', 'corner bottom left turn'], ['corner-br', 'nw', 'corner bottom right turn'],
+  ['t-up', 'new', 't junction up fork'], ['t-down', 'esw', 't junction down fork'], ['t-left', 'nsw', 't junction left fork'], ['t-right', 'nes', 't junction right fork'],
+  ['cross', 'nesw', 'crossing crossroads'],
+  ['end-up', 's', 'dead end top'], ['end-down', 'n', 'dead end bottom'], ['end-left', 'e', 'dead end left'], ['end-right', 'w', 'dead end right'],
+];
+function road(c, slug, conn, o) {
+  const has = (d) => conn.includes(d);
+  const M = (x, y) => {
+    const inV = x >= 3 + WOB2[y & 15] && x <= 12 + WOB2[(y + 5) & 15], inH = y >= 3 + WOB2[x & 15] && y <= 12 + WOB2[(x + 5) & 15];
+    return (has('n') && y < 8 && inV) || (has('s') && y >= 8 && inV) || (has('w') && x < 8 && inH) || (has('e') && x >= 8 && inH) || Math.hypot(x - 7.5, y - 7.5) < 4.9;
+  };
+  const ground = sub(slug + '/ground', o.ground), way = sub(slug + '/way', o.way);
+  each((x, y) => {
+    if (M(x, y)) c.px(x, y, !M(x, y + 1) || !M(x, y - 1) || !M(x - 1, y) || !M(x + 1, y) ? o.edge : KEY[way[y][x]]);
+    else c.px(x, y, o.shade && M(x, y - 1) ? o.shade : KEY[ground[y][x]]);
+  });
+}
+function roadSet(prefix, words, o, ends = true) {
+  for (const [slug, conn, name] of ROADS) if (ends || !slug.startsWith('end')) T(`${prefix}-${slug}`, `${words} ${name}`, 'floor', (c, s) => road(c, s, conn, o));
+}
+function rails(c, conn, ground) {
+  ground(c);
+  const line = (P, sleepers = true) => { if (sleepers) for (let i = 1; i < 16; i += 4) for (let k = 2; k < 14; k++) { P(k, i, 't2'); P(k, i + 1, 't1'); } for (let i = 0; i < 16; i++) { P(4, i, 'g1'); P(5, i, 'g3'); P(10, i, 'g1'); P(11, i, 'g3'); } };
+  const curve = (P) => {
+    for (const a of [18, 45, 72]) { const r = (a * Math.PI) / 180; for (let d = 2.5; d <= 13.5; d += 0.5) { const x = Math.floor(16 - d * Math.cos(r)), y = Math.floor(d * Math.sin(r)); P(x, y, 't2'); P(x, y + 1, 't1'); } }
+    each((x, y) => { const d = Math.hypot(15.5 - x, y + 0.5); for (const r of [5, 11]) if (Math.abs(d - r) < 0.95) P(x, y, d < r ? 'g1' : 'g3'); });
+  };
+  const px = (x, y, col) => c.px(x, y, col);
+  if (conn === 'ns') line(px);
+  else if (conn === 'ew') line((x, y, col) => c.px(y, x, col));
+  else if (conn === 'nesw') { line((x, y, col) => c.px(y, x, col)); line(px, false); }
+  else curve((x, y, col) => c.px(conn.includes('e') ? x : 15 - x, conn.includes('n') ? y : 15 - y, col));
+}
+
+// ── walls seen from the front ──
+/** brick wall face: light lip on top (where the dark wall top begins), shadow at its foot */
+function face(c, r, mortar) {
+  const [d, , l] = ramp(r);
+  bricks(c, r, mortar);
+  c.h(0, 0, 16, l);
+  for (let x = 0; x < 16; x++) if (c.get(x, 14) !== PAL[mortar]) c.px(x, 14, d);
+  c.h(0, 15, 16, 'k');
+}
+function faceEnd(c, left, dark, mid) { const x = left ? 0 : 15, s = left ? 1 : -1; c.v(x, 0, 16, 'k').v(x + s, 1, 14, dark); for (let y = 1; y < 15; y += 2) c.px(x + 2 * s, y, mid); }
+function boulders(c, gap, body, hi, lo) { c.fill(gap); for (const [x, y, w, h] of [[1, 1, 5, 4], [8, 0, 6, 3], [5, 6, 6, 4], [0, 8, 3, 4], [12, 5, 4, 5], [2, 12, 6, 3], [10, 11, 5, 4], [0, 5, 3, 2], [7, 4, 4, 1]]) c.rect(x, y, w, h, body).h(x, y, w - 1, hi).px(x, y, gap).px(x + w - 1, y + h - 1, gap).h(x + 1, y + h - 1, w - 2, lo); }
+/** an opening in a wall face: frame colours [light, mid, dark], inside painter */
+function arch(c, fr, inside) {
+  c.rect(2, 2, 12, 14, fr[1]).h(3, 1, 10, fr[1]).h(3, 1, 10, fr[0]).v(2, 3, 13, fr[0]).px(2, 2, fr[0]).v(13, 3, 13, fr[2]);
+  for (let y = 5; y < 16; y += 4) c.px(2, y, fr[2]).px(3, y, fr[2]).px(12, y, fr[2]).px(13, y, fr[2]);
+  c.px(7, 1, fr[2]).px(8, 1, fr[2]).px(5, 2, fr[2]).px(10, 2, fr[2]);
+  c.rect(4, 4, 8, 12, 'k').h(5, 3, 6, 'k');
+  if (inside) inside(c);
+}
+function doorLeaf(c, x, y, w, h, r = 'brown') {
+  const [d, m, l] = ramp(r);
+  c.rect(x, y, w, h, m);
+  for (let i = x + 2; i < x + w - 1; i += 3) c.v(i, y, h, d);
+  for (let i = x; i < x + w; i += 3) c.v(i, y + 1, h - 1, l);
+  c.h(x, y + 2, w, 'g3').h(x, y + h - 4, w, 'g3').px(x + w - 2, y + (h >> 1), 'y2').px(x + w - 2, y + (h >> 1) + 1, 'o2');
+}
+const PADLOCK = ['.xx.', 'x..x', 'YYYY', 'YKEY', 'YYOY'];
+function steps(c, cols, x = 0, w = 16) { for (let i = 0; i < 4; i++) c.rect(x, i * 4, w, 4, cols[1]).h(x, i * 4, w, cols[0]).h(x, i * 4 + 3, w, cols[2]); }
+
+// ── shared ground painters ──
+const G = TILES.grass;
+const GROUND = {
+  flowers(c, col, col2) { G(c); for (const [x, y] of [[3, 3], [11, 11]]) c.px(x - 1, y, col).px(x + 1, y, col).px(x, y - 1, col).px(x, y + 1, col).px(x, y, 'y3'); for (const [x, y] of [[12, 3], [7, 7], [3, 12], [14, 8]]) c.px(x, y, col2 || col).px(x, y + 1, 'n1'); },
+  tallGrass(c) { c.fill('n2').speck(8, 'n1'); for (let row = 0; row < 4; row++) for (let i = 0; i < 4; i++) { const x = (i * 4 + row * 2 + 1) % 16, y = row * 4 + 3; c.px(x, y, 'n1').px(x, y - 1, 'n1').px(x, y - 2, 'n3').px((x + 1) % 16, y, 'n3').px((x + 1) % 16, y - 1, 'n3').px((x + 2) % 16, y, 'n1').px((x + 2) % 16, y - 1, 'n1').px((x + 15) % 16, y - 1, 'n3'); } },
+  mud(c) { c.fill('t1').speck(12, 't2').speck(5, 'k'); for (const [x, y, w] of [[2, 3, 5], [9, 6, 5], [4, 11, 6], [12, 13, 3]]) c.h(x, y, w, 't2').h(x + 1, y + 1, w - 1, 'k').px(x + 1, y, 't3'); },
+  dirt2(c) { c.fill('t2').speck(12, 't1').speck(6, 't3'); },
+  caveFloor(c) { c.fill('g3').speck(12, 'g4').speck(7, 't1').speck(5, 'g2'); for (const [x, y] of [[3, 4], [11, 2], [8, 9], [2, 12], [13, 13]]) c.px(x, y, 'g2').px(x + 1, y, 'g2').px(x, y + 1, 'g4').px(x + 1, y + 1, 'g4'); },
+  basalt(c) { c.fill('g4').speck(10, 'g3').speck(8, 'k'); },
+  rockTop(c) { c.fill('t3').speck(8, 't2').speck(4, 'y3'); },
+  dunFloor: TILES.dungeonFloor,
+  sandFloor(c) { c.fill('o3'); for (let i = 0; i < 16; i += 8) c.h(0, i + 7, 16, 't3').v(i + 7, 0, 16, 't3').h(0, i, 16, 'y3').v(i, 0, 16, 'y3'); c.speck(6, 't3'); },
+  metalFloor(c) { c.fill('g2').h(0, 0, 16, 'g1').v(0, 0, 16, 'g1').h(0, 15, 16, 'g3').v(15, 0, 16, 'g3'); for (const [x, y] of [[2, 2], [13, 2], [2, 13], [13, 13]]) c.px(x, y, 'g3'); },
+  darkMetal(c) { c.fill('g3').h(0, 0, 16, 'g2').v(0, 0, 16, 'g2').h(0, 15, 16, 'g4').v(15, 0, 16, 'g4').h(1, 8, 14, 'g4').v(8, 1, 14, 'g4').h(1, 7, 14, 'g2'); },
+  shallow(c) { waves(c, 'b3', 'w0'); c.speck(7, 'b2'); for (const [x, y] of [[4, 5], [12, 10], [7, 14]]) c.px(x, y, 'o3').px(x + 1, y, 'o3'); },
+  swamp(c) { c.fill('c1').speck(10, 'n1'); for (const [x, y, w] of [[1, 2, 4], [9, 5, 5], [3, 9, 5], [11, 13, 4]]) c.h(x, y, w, 'c2').px(x + w, y + 1, 'c2'); for (const [x, y] of [[13, 1], [6, 6], [1, 13]]) c.px(x, y, 'n3').px(x + 1, y + 1, 'n2'); },
+  voidDark(c) { c.fill('k'); },
+};
+const WATER = { land: G, liquid: TILES.water, rim: 'n1', bank: ['t2', 't1'], foam: 'b3' };
+const LAVA = { land: GROUND.basalt, liquid: TILES.lava, rim: 'k', bank: ['r1'], foam: 'y3', band: 3 };
+const OASIS = { land: TILES.sand, liquid: TILES.water, rim: 't3', bank: ['t2'], foam: 'b3' };
+const FROZEN = { land: TILES.snow, liquid: TILES.ice, rim: 'g1', bank: ['b2'], foam: 'w0' };
+const PIT = { land: GROUND.dunFloor, liquid: GROUND.voidDark, rim: 'g2', bank: ['g4', 'g4', 'g4'], band: 3, wob: 0, round: 0 };
+const CLIFF = { land: GROUND.rockTop, liquid: G, rim: 't1', band: 3 };
+
+// ═════════════════════════ CATALOG: level tiles ═════════════════════════
+category('outdoor', 'Outdoor ground', 'tile');
+T('grass-short', 'grass short plain lawn ground', 'floor', (c) => c.fill('n2').speck(7, 'n3').speck(3, 'n1'));
+T('grass-tufts', 'grass tufts meadow ground', 'floor', (c) => { G(c); for (const [x, y] of [[2, 4], [9, 2], [12, 8], [5, 10], [10, 14]]) c.stamp(x, y, ['H.H', 'NHN']); });
+T('grass-dark', 'dark grass shade forest floor ground', 'floor', (c) => { c.fill('n1').speck(14, 'n2').speck(5, 'g4'); for (const [x, y] of [[3, 3], [11, 6], [6, 12]]) c.px(x, y, 'n2').px(x + 1, y - 1, 'n2'); });
+T('grass-dry', 'dry light grass sunny savanna ground', 'floor', (c) => { c.fill('n3').speck(12, 'n2').speck(6, 'y3'); for (const [x, y] of [[4, 5], [12, 11], [8, 14]]) c.px(x, y, 'n2').px(x + 1, y - 1, 'y3'); });
+T('grass-tall', 'tall grass bush wild meadow', 'floor', GROUND.tallGrass);
+T('grass-clover', 'grass with clover leaves', 'floor', (c) => { G(c); for (const [x, y] of [[2, 2], [10, 4], [5, 9], [13, 12]]) c.px(x, y, 'n3').px(x + 1, y, 'n3').px(x, y + 1, 'n3').px(x + 1, y + 1, 'n1').px(x - 1, y + 1, 'n1'); });
+T('grass-flowers-red', 'grass with red flowers poppies', 'floor', (c) => GROUND.flowers(c, 'r2'));
+T('grass-flowers-yellow', 'grass with yellow flowers dandelions', 'floor', (c) => GROUND.flowers(c, 'y2', 'w0'));
+T('grass-flowers-blue', 'grass with blue flowers', 'floor', (c) => GROUND.flowers(c, 'b3', 'b2'));
+T('grass-flowers-pink', 'grass with pink white flowers', 'floor', (c) => GROUND.flowers(c, 'm3', 'w0'));
+T('grass-stones', 'grass with small stones pebbles', 'floor', (c) => { G(c); for (const [x, y, w] of [[3, 4, 3], [10, 9, 4], [5, 12, 2]]) c.h(x, y, w, 'g1').h(x, y + 1, w, 'g2').h(x, y + 2, w, 'n1'); });
+T('grass-leaves', 'grass with autumn leaves', 'floor', (c) => { G(c); for (const [x, y, col] of [[2, 3, 'o2'], [9, 2, 'r2'], [13, 6, 'y2'], [5, 8, 'r2'], [10, 11, 'o2'], [3, 13, 'y2'], [14, 13, 'o2']]) c.px(x, y, col).px(x + 1, y, col).px(x + 1, y + 1, 'o1'); });
+T('grass-mushrooms', 'grass with red mushrooms', 'floor', (c) => { G(c); for (const [x, y] of [[3, 4], [11, 10]]) c.stamp(x, y, ['.RR.', 'RWRR', '.WW.']).h(x, y + 3, 4, 'n1'); c.stamp(8, 4, ['RR', '.W']); });
+T('dirt-plain', 'dirt earth plain brown ground', 'floor', GROUND.dirt2);
+T('dirt-pebbles', 'dirt with pebbles stones gravel', 'floor', (c) => { GROUND.dirt2(c); for (const [x, y, w] of [[2, 2, 2], [9, 4, 3], [5, 8, 2], [12, 11, 2], [3, 13, 3]]) c.h(x, y, w, 'g1').h(x, y + 1, w, 'g3'); });
+T('mud', 'mud wet dirt swampy ground', 'floor', GROUND.mud);
+T('sand-plain', 'sand plain beach ground', 'floor', (c) => c.fill('o3').speck(9, 'y3').speck(3, 't3'));
+T('sand-shells', 'sand with shells beach', 'floor', (c) => { c.fill('o3').speck(9, 'y3').speck(4, 't3'); c.stamp(3, 3, ['.zz', 'zMz']).stamp(10, 9, ['WW.', 'WwW']).px(6, 12, 'w0').px(13, 4, 'm3'); });
+T('cobble-brown', 'cobblestone brown road stones', 'floor', (c) => { c.fill('t1'); for (let row = 0; row < 4; row++) { let x = -(row % 2) * 2; while (x < 16) { const w = 3 + ((x + row * 3) % 2); c.rect(x, row * 4, w, 3, 't2').h(x, row * 4, w, 't3').px(x, row * 4, 't1').px(x + w - 1, row * 4 + 2, 't1'); x += w + 1; } } });
+T('cobble-mossy', 'mossy cobblestone old road', 'floor', (c) => { TILES.cobble(c); each((x, y) => { if (c.get(x, y) === PAL.g3 && (x * 7 + y * 3) % 5 < 2) c.px(x, y, 'n1'); }); c.speck(6, 'n2'); });
+T('paving', 'paving flagstones plaza square stone', 'floor', (c) => { c.fill('g2').speck(8, 'g1'); c.h(0, 7, 16, 'g3').h(0, 15, 16, 'g3').v(5, 0, 7, 'g3').v(12, 0, 7, 'g3').v(2, 8, 7, 'g3').v(9, 8, 7, 'g3'); c.h(0, 0, 16, 'g1').h(0, 8, 16, 'g1'); });
+T('farmland-v', 'farmland field soil furrows vertical', 'floor', turned('t', TILES.farmland));
+T('farmland-sprouts', 'farmland with green sprouts seedlings', 'floor', (c) => { TILES.farmland(c); for (let y = 0; y < 16; y += 4) for (let x = 1; x < 16; x += 4) c.px(x, y + 1, 'n2').px(x + 1, y, 'n3').px(x - 1, y, 'n3'); });
+T('farmland-crops', 'farmland with crops cabbage vegetables', 'floor', (c) => { TILES.farmland(c); for (const [x, y] of [[1, 1], [9, 1], [5, 9], [13, 9]]) c.stamp(x - 1, y, ['.HH.', 'HGHG', 'GHGN', '.NN.']); });
+T('farmland-wheat', 'farmland wheat field golden', 'floor', (c) => { c.fill('y2'); each((x, y) => { const k = (x + (y >> 2) * 2) % 4; if (y % 4 === 3) c.px(x, y, 'o1'); else if (k === 0) c.px(x, y, 'o2'); else if (k === 2 && y % 4 === 0) c.px(x, y, 'y3'); }); });
+T('farmland-wet', 'watered farmland dark wet soil', 'floor', (c) => { c.fill('t1'); for (let y = 0; y < 16; y += 4) c.h(0, y, 16, 't2').h(0, y + 3, 16, 'k'); c.speck(5, 't2'); });
+const bridgeH = (c) => { c.fill('t2'); for (let x = 0; x < 16; x += 4) c.v(x, 0, 16, 't3').v(x + 3, 0, 16, 't1').px(x + 1, (x * 3 + 5) % 12 + 2, 't1'); c.h(0, 0, 16, 't1').h(0, 1, 16, 't3').h(0, 2, 16, 't1').h(0, 13, 16, 't1').h(0, 14, 16, 't3').h(0, 15, 16, 'k'); for (let x = 1; x < 16; x += 4) c.px(x, 1, 'g2').px(x, 14, 'g2'); };
+T('bridge-h', 'wooden bridge planks horizontal east west', 'floor', bridgeH);
+T('bridge-v', 'wooden bridge planks vertical north south', 'floor', (c) => { c.fill('t2'); for (let y = 0; y < 16; y += 4) c.h(0, y, 16, 't3').h(0, y + 3, 16, 't1').px((y * 3 + 5) % 10 + 3, y + 1, 't1'); c.v(0, 0, 16, 't1').v(1, 0, 16, 't3').v(2, 0, 16, 't1').v(13, 0, 16, 't1').v(14, 0, 16, 't3').v(15, 0, 16, 'k'); for (let y = 1; y < 16; y += 4) c.px(1, y, 'g2').px(14, y, 'g2'); });
+T('forest', 'forest trees canopy dense woods', 'wall', (c) => { c.fill('g4'); for (const [cx, cy] of [[4, 3], [12, 3], [20, 3], [-4, 3], [0, 11], [8, 11], [16, 11], [4, 19], [12, 19], [8, -5], [0, -5], [16, -5]]) { c.disc(cx, cy + 1, 4.2, 'g4').disc(cx, cy, 3.9, 'n1').disc(cx - 1, cy - 1, 2.3, 'n2').px(cx - 2, cy - 2, 'n3').px(cx - 1, cy - 3, 'n3').px(cx + 1, cy - 1, 'n3'); } });
+T('rocks', 'rocks boulders rocky wall mountain', 'wall', (c) => boulders(c, 'g4', 'g2', 'g1', 'g3'));
+const PATH = { ground: G, way: TILES.path, edge: 't2', shade: 'n1' };
+roadSet('road', 'path road dirt track', PATH);
+roadSet('paved', 'paved stone road street cobble', { ground: G, way: TILES.cobble, edge: 'g4', shade: 'n1' }, false);
+
+category('water', 'Water & lava', 'tile');
+shoreSet('water', 'water pond lake', 'wall', WATER, [...INNER, 'o', 'h', 'v']);
+T('water-shallow', 'shallow water ford wade', 'floor', GROUND.shallow);
+T('water-lily', 'water with lily pad flower', 'wall', (c) => { TILES.water(c); c.stamp(4, 5, ['.NNNN.', 'NGGGHN', 'NGG.GN', 'NGGGGN', '.NNNN.']).stamp(10, 10, ['.z.', 'zEz', '.z.']); });
+T('water-rocks', 'water with rocks stepping stones', 'wall', (c) => { TILES.water(c); for (const [x, y, w] of [[2, 3, 5], [9, 9, 5]]) c.h(x + 1, y - 1, w - 2, 'g1').rect(x, y, w, 2, 'g2').h(x + 1, y, 2, 'g1').h(x, y + 2, w, 'g3').h(x - 1, y + 3, w + 2, 'b3'); });
+T('water-reeds', 'water with reeds cattails', 'wall', (c) => { TILES.water(c); for (const [x, y] of [[3, 3], [6, 6], [11, 4], [13, 10], [8, 12]]) c.v(x, y, 4, 'n1').v(x, y - 2, 2, 't1').px(x + 1, y + 2, 'n2').px(x, y + 4, 'b3'); });
+T('waterfall', 'waterfall falling water cascade', 'wall', (c) => { c.fill('b2'); for (let x = 0; x < 16; x++) { const k = (x * 7) % 5; for (let y = 0; y < 16; y++) { const p = (y + x * 5) % 8; if (k < 2 && p < 5) c.px(x, y, 'b3'); else if (k === 3 && p < 2) c.px(x, y, 'w0'); else if (k === 4 && p > 5) c.px(x, y, 'b1'); } } });
+T('waterfall-top', 'waterfall top edge river falls', 'wall', (c) => { TILES.water(c); c.rect(0, 10, 16, 6, 'b2'); for (let x = 0; x < 16; x++) { c.px(x, 9 + ((x * 3) % 2), 'w0').px(x, 11, (x * 7) % 5 < 2 ? 'b3' : 'b2'); if ((x * 7) % 5 < 2) c.v(x, 12, 4, 'b3'); if ((x * 7) % 5 === 3) c.v(x, 13, 2, 'w0'); } });
+T('waterfall-bottom', 'waterfall bottom splash foam', 'wall', (c) => { TILES.water(c); for (let x = 0; x < 16; x++) { const h = 3 + ((x * 5) % 3); c.v(x, 0, h, (x * 7) % 5 < 2 ? 'b3' : 'w0'); c.px(x, h, 'w0'); if (x % 3 === 0) c.px(x, h + 2, 'w0').px(x + 1, h + 1, 'b3'); } });
+T('swamp', 'swamp water bog murky marsh', 'wall', GROUND.swamp);
+T('swamp-lily', 'swamp water with lily pads', 'wall', (c) => { GROUND.swamp(c); c.stamp(2, 4, ['.NNN.', 'NGGHN', 'NG.GN', '.NNN.']).stamp(9, 9, ['.NNN.', 'NHGGN', 'NGG.N', '.NNN.']); });
+T('swamp-shallow', 'shallow swamp mud water wade', 'floor', (c) => { c.fill('c2').speck(10, 'c1').speck(6, 'n3'); for (const [x, y, w] of [[2, 3, 4], [9, 7, 5], [4, 12, 4]]) c.h(x, y, w, 'b3'); c.stamp(11, 2, ['N.N', 'NGN']).stamp(3, 8, ['N.N', 'NGN']); });
+shoreSet('lava', 'lava magma fire', 'wall', LAVA, [...INNER, 'o']);
+T('lava-bubbles', 'lava bubbling hot bubbles', 'wall', (c) => { TILES.lava(c); for (const [x, y] of [[4, 3], [11, 8], [5, 12]]) c.stamp(x - 1, y - 1, ['.EE.', 'E..Y', 'Y..Y', '.YY.']); });
+T('lava-cooled', 'cooled lava rock basalt cracks glowing', 'floor', (c) => { GROUND.basalt(c); let x = 3; for (let y = 0; y < 16; y++) { c.px(x, y, 'o2').px(x + 8, 15 - y, 'r2'); if (y % 5 === 2) c.px(x + 1, y, 'y2').px(x + 2, y + 1, 'r2'); x += [0, 1, 0, -1, 1, 0, -1, 0][y % 8]; } });
+T('basalt', 'basalt dark volcanic rock ground', 'floor', GROUND.basalt);
+
+category('cliffs', 'Cliffs', 'tile');
+for (const f of FORMS) T(`cliff-${FORM_SLUG[f]}`, `cliff top ${FORM_NAME[f]} raised ground plateau`, 'floor', (c, s) => shore(c, s, f, CLIFF));
+for (const f of INNER) T(`cliff-${FORM_SLUG[f]}`, `cliff top ${FORM_NAME[f]} raised ground plateau`, 'floor', (c, s) => shore(c, s, f, CLIFF));
+function cliffRock(c) { c.fill('t2'); for (let x = 0; x < 16; x++) { const k = (x * 11 + 3) % 7, y0 = (x * 5) % 9; if (k === 0) c.v(x, 0, 16, 't1'); else if (k === 1) c.v(x, y0, 9, 't3'); else if (k === 4) c.v(x, (y0 + 5) % 16, 5, 't1').v(x, (y0 + 12) % 16, 3, 't1'); else if (k === 5) c.v(x, (y0 + 2) % 12, 4, 't3'); } }
+function cliffFace(c) { cliffRock(c); c.h(0, 0, 16, 't1'); for (let x = 0; x < 16; x += 2) c.px(x, 1, 't1'); c.h(0, 14, 16, 't1').h(0, 15, 16, 'k'); }
+T('cliff-face', 'cliff face rock wall front', 'wall', cliffFace);
+T('cliff-face-left', 'cliff face left end corner', 'wall', (c) => { cliffFace(c); faceEnd(c, true, 't1', 't1'); });
+T('cliff-face-right', 'cliff face right end corner', 'wall', (c) => { cliffFace(c); faceEnd(c, false, 't1', 't1'); });
+T('cliff-rock', 'cliff rock wall tall middle', 'wall', cliffRock);
+T('cliff-face-vines', 'cliff face with vines ivy', 'wall', (c) => { cliffFace(c); for (const [x, h] of [[3, 9], [7, 5], [11, 11], [13, 6]]) for (let y = 0; y < h; y++) { const o = (y >> 1) % 2; c.px(x + o, y, y % 3 === 1 ? 'n3' : 'n2'); if (y % 4 === 0) c.px(x + 1 - o, y, 'n1'); } });
+T('cliff-face-cracked', 'cliff face cracked rock', 'wall', (c) => { cliffFace(c); let x = 6; for (let y = 2; y < 14; y++) { c.px(x, y, 'k'); if (y === 6) c.px(x + 1, y, 'k').px(x + 2, y + 1, 'k').px(x + 3, y + 1, 'k'); x += [1, 0, -1, 0, 1, 1][y % 6]; } });
+T('cliff-stairs', 'stairs carved in cliff steps up', 'floor', (c) => { cliffFace(c); steps(c, ['y3', 't3', 't1'], 3, 10); c.v(2, 0, 16, 't1').v(13, 0, 16, 't1'); });
+T('cliff-cave', 'cave entrance in cliff opening', 'floor', (c) => { cliffFace(c); c.rect(3, 4, 10, 12, 'k').h(4, 3, 8, 'k').h(6, 2, 4, 'k').h(5, 2, 1, 't1').px(3, 4, 't1').px(12, 4, 't1').h(4, 15, 8, 'g4').h(6, 14, 4, 'g4'); });
+T('cliff-waterfall', 'waterfall down cliff face', 'wall', (c) => { cliffFace(c); for (let x = 4; x < 12; x++) for (let y = 0; y < 16; y++) { const p = (y + x * 5) % 8; c.px(x, y, (x * 7) % 5 < 2 && p < 5 ? 'b3' : (x * 7) % 5 === 3 && p < 2 ? 'w0' : 'b2'); } c.v(3, 0, 16, 't1').v(12, 0, 16, 't1'); });
+T('rock-wall', 'grey rock cliff wall stone mountain face', 'wall', (c) => { boulders(c, 'g4', 'g3', 'g2', 'g4'); c.h(0, 0, 16, 'g2').h(0, 14, 16, 'g4').h(0, 15, 16, 'k'); });
+T('rock-wall-top', 'grey rock top mountain plateau', 'wall', (c) => { c.fill('g3').speck(12, 'g4').speck(8, 'g2'); for (const [x, y] of [[3, 3], [10, 6], [6, 11], [13, 13]]) c.h(x, y, 3, 'g2').h(x, y + 1, 3, 'g4'); });
+
+category('dungeon', 'Dungeon', 'tile');
+const DF = GROUND.dunFloor;
+T('dungeon-flagstone', 'dungeon stone floor plain flagstones', 'floor', (c) => { c.fill('g3').speck(8, 'g2').speck(5, 'g4'); c.h(0, 15, 16, 'g4').v(15, 0, 16, 'g4').h(0, 0, 16, 'g2').v(0, 0, 16, 'g2').h(1, 9, 9, 'g4').v(9, 1, 8, 'g4').v(5, 10, 5, 'g4'); });
+T('dungeon-floor-cracked', 'dungeon stone floor cracked broken', 'floor', (c) => { DF(c); let x = 4; for (let y = 1; y < 15; y++) { c.px(x, y, 'k'); if (y === 5) c.px(x + 1, y, 'k').px(x + 2, y - 1, 'k').px(x + 3, y - 1, 'k'); if (y === 10) c.px(x - 1, y + 1, 'k').px(x - 2, y + 1, 'k'); x += [1, 1, 0, 1, -1, 1, 0][y % 7]; } });
+T('dungeon-floor-mossy', 'dungeon stone floor mossy overgrown', 'floor', (c) => { DF(c); c.speck(14, 'n1').speck(6, 'n2'); c.rect(1, 1, 3, 2, 'n1').rect(10, 9, 4, 3, 'n1').px(11, 10, 'n2').px(12, 10, 'n2').px(2, 1, 'n2').rect(4, 12, 3, 2, 'n1').px(5, 12, 'n2'); });
+T('dungeon-floor-checker', 'dungeon floor checkered dark tiles', 'floor', (c) => { each((x, y) => c.px(x, y, ((x >> 3) + (y >> 3)) % 2 ? 'g4' : 'g2')); for (let i = 0; i < 16; i += 8) c.h(0, i + 7, 16, 'k').v(i + 7, 0, 16, 'k'); each((x, y) => { if (x % 8 === 0 && y % 8 < 7 || y % 8 === 0 && x % 8 < 7) c.px(x, y, ((x >> 3) + (y >> 3)) % 2 ? 'g3' : 'g1'); }); });
+T('dungeon-floor-drain', 'dungeon floor with drain grate sewer', 'floor', (c) => { DF(c); c.rect(4, 4, 8, 8, 'g4').rect(5, 5, 6, 6, 'k'); for (let x = 6; x < 11; x += 2) c.v(x, 5, 6, 'g2'); c.h(4, 4, 8, 'g2').h(4, 11, 8, 'g4'); });
+T('dungeon-floor-rune', 'dungeon floor with magic rune glowing', 'floor', (c) => { DF(c); c.stamp(3, 3, ['...JJJJ...', '..J....J..', '.J..PP..J.', 'J..P..P..J', 'J.PPJJPP.J', 'J..P..P..J', 'J...PP...J', '.J..PP..J.', '..J....J..', '...JJJJ...']); });
+T('dungeon-floor-slab', 'dungeon floor big stone slab', 'floor', (c) => { c.fill('g3').speck(10, 'g2').speck(6, 'g4'); c.h(0, 0, 16, 'g2').v(0, 0, 16, 'g2').h(0, 15, 16, 'g4').v(15, 0, 16, 'g4'); });
+T('dungeon-floor-bones', 'dungeon floor with bones remains', 'floor', (c) => { DF(c); ostamp(c, 2, 3, ['W..W', '.WW.', 'W..W'], 'g4'); ostamp(c, 9, 9, ['.WWW.', 'WKWKW', '.WWW.', '.W.W.'], 'g4'); c.px(12, 3, 'w0').px(13, 4, 'w0').px(4, 12, 'w0').px(5, 12, 'w0'); });
+T('dungeon-floor-puddle', 'dungeon floor with water puddle wet', 'floor', (c) => { DF(c); c.stamp(3, 5, ['...UUUUU..', '.UUBBBBBU.', 'UBBABBBBBU', 'UBBBBBBABU', '.UUBBBBUU.', '...UUUU...']); });
+T('dungeon-wall', 'dungeon stone wall face front bricks', 'wall', (c) => face(c, 'grey', 'g4'));
+T('dungeon-wall-left', 'dungeon wall face left end corner', 'wall', (c) => { face(c, 'grey', 'g4'); faceEnd(c, true, 'g4', 'g3'); });
+T('dungeon-wall-right', 'dungeon wall face right end corner', 'wall', (c) => { face(c, 'grey', 'g4'); faceEnd(c, false, 'g4', 'g3'); });
+T('dungeon-wall-cracked', 'dungeon wall cracked damaged', 'wall', (c) => { face(c, 'grey', 'g4'); let x = 9; for (let y = 1; y < 13; y++) { c.px(x, y, 'k'); if (y === 4) c.px(x - 1, y, 'k').px(x - 2, y + 1, 'k'); if (y === 8) c.px(x + 1, y, 'k').px(x + 2, y + 1, 'k').px(x + 3, y + 1, 'k'); x += [0, -1, 0, 1, 1, -1][y % 6]; } });
+T('dungeon-wall-mossy', 'dungeon wall mossy vines damp', 'wall', (c) => { face(c, 'grey', 'g4'); c.speck(12, 'n1', 0, 0, 16, 14); c.rect(1, 1, 4, 2, 'n1').h(1, 1, 3, 'n2').rect(9, 5, 5, 2, 'n1').h(10, 5, 3, 'n2').v(3, 3, 5, 'n1').v(11, 7, 4, 'n1').px(3, 5, 'n2').px(11, 9, 'n2'); });
+T('dungeon-wall-torch', 'dungeon wall with torch fire light', 'wall', (c) => { face(c, 'grey', 'g4'); c.stamp(5, 1, ['..KK..', '.KRRK.', 'KROORK', 'KROYRK', 'KOYYOK', '.KOOK.', '.KTTK.', 'KxTTxK', '.KTTK.', '.KTTK.', '..KK..']); });
+const BANNER = ['xxxxxxxx', '.abbbba.', '.abccba.', '.abccba.', '.abbbba.', '.abbbba.', '.ab..ba.', '.a....a.'];
+const banner = (c, r, x = 4, y = 2) => { const [d, m] = ramp(r); const rows = BANNER.map((row) => row.replace(/a/g, 'Q').replace(/b/g, 'P').replace(/c/g, 'Y')); ostamp(c, x, y, rows); each((px, py) => { if (c.get(px, py) === PAL.p1 && py >= y && py < y + 8) c.px(px, py, d); else if (c.get(px, py) === PAL.p2 && py >= y && py < y + 8) c.px(px, py, m); }); };
+T('dungeon-wall-banner', 'dungeon wall with red banner flag', 'wall', (c) => { face(c, 'grey', 'g4'); banner(c, 'red'); });
+T('dungeon-wall-banner-blue', 'dungeon wall with blue banner flag', 'wall', (c) => { face(c, 'grey', 'g4'); banner(c, 'blue'); });
+T('dungeon-wall-chains', 'dungeon wall with chains shackles prison', 'wall', (c) => { face(c, 'grey', 'g4'); for (const x of [3, 10]) ostamp(c, x, 1, ['.ww', '.x.', '.w.', '.x.', '.w.', '.x.', 'www', 'w.w', 'www']); });
+T('dungeon-wall-bars', 'dungeon wall with window bars prison cell', 'wall', (c) => { face(c, 'grey', 'g4'); c.rect(3, 2, 10, 10, 'g4').rect(4, 3, 8, 8, 'k'); for (const x of [5, 7, 9]) c.v(x, 3, 8, 'g1').v(x + 1, 3, 8, 'g3'); c.h(3, 12, 10, 'g1').h(3, 2, 10, 'k'); });
+T('dungeon-wall-shield', 'dungeon wall with shield crest swords', 'wall', (c) => { face(c, 'grey', 'g4'); ostamp(c, 4, 2, ['RRRRBBBB', 'RRRRBBBB', 'RRYYYYBB', 'RRRYYBBB', 'BBBYYRRR', '.BBBRRR.', '..BBRR..', '...BR...']); });
+T('dungeon-wall-skull', 'dungeon wall with skull niche alcove', 'wall', (c) => { face(c, 'grey', 'g4'); c.rect(4, 3, 8, 9, 'k').h(5, 2, 6, 'k').h(4, 12, 8, 'g1'); c.stamp(5, 5, ['.WWWW.', 'WWWWWW', 'WKWWKW', 'WWWWWW', '.WKKW.', '.wWWw.']); });
+T('dungeon-wall-fountain', 'dungeon wall with water spout drain', 'wall', (c) => { face(c, 'grey', 'g4'); ostamp(c, 5, 3, ['wwwwww', 'wxKKxw', '.xKKx.']); c.v(7, 6, 9, 'b2').v(8, 6, 9, 'b3').px(6, 14, 'b3').px(9, 14, 'b3').h(5, 15, 6, 'b2'); });
+wallTopSet('dungeon-top', 'dungeon stone', { base: 'g4', dark: 'k', light: null, rim: 'g3', hi: 'g2' });
+T('dungeon-doorway', 'dungeon doorway open arch door passage', 'floor', (c) => { face(c, 'grey', 'g4'); arch(c, ['g1', 'g2', 'g3'], (k) => k.rect(4, 13, 8, 3, 'g4').h(5, 12, 6, 'g4').h(4, 15, 8, 'g3')); });
+T('dungeon-door', 'dungeon closed wooden door in wall', 'wall', (c) => { face(c, 'grey', 'g4'); arch(c, ['g1', 'g2', 'g3'], (k) => doorLeaf(k, 4, 4, 8, 12)); c.px(4, 4, 'k').px(11, 4, 'k'); });
+T('dungeon-door-locked', 'dungeon locked door padlock in wall', 'wall', (c) => { face(c, 'grey', 'g4'); arch(c, ['g1', 'g2', 'g3'], (k) => doorLeaf(k, 4, 4, 8, 12)); c.px(4, 4, 'k').px(11, 4, 'k'); ostamp(c, 6, 7, PADLOCK); });
+T('dungeon-door-iron', 'dungeon iron door gate portcullis bars closed', 'wall', (c) => { face(c, 'grey', 'g4'); arch(c, ['g1', 'g2', 'g3'], (k) => { for (let x = 4; x < 12; x += 2) k.v(x, 4, 12, 'g2').v(x + 1, 4, 12, 'k'); k.h(4, 7, 8, 'g1').h(4, 11, 8, 'g1'); for (let x = 4; x < 12; x += 2) k.px(x, 15, 'g1'); }); c.px(4, 4, 'k').px(11, 4, 'k'); });
+T('dungeon-stairs-up', 'stairs up stone steps staircase', 'floor', (c) => { steps(c, ['w0', 'g1', 'g3'], 2, 12); c.rect(0, 0, 2, 16, 'g4').rect(14, 0, 2, 16, 'g4').v(1, 0, 16, 'g3').v(14, 0, 16, 'g3'); });
+T('dungeon-stairs-down', 'stairs down stone steps descend cellar', 'floor', (c) => { c.fill('k'); const cols = ['g4', 'g4', 'g3', 'g2']; for (let i = 0; i < 4; i++) c.rect(2 + (3 - i), i * 4, 12 - 2 * (3 - i), 4, cols[i]).h(2 + (3 - i), i * 4, 12 - 2 * (3 - i), i ? cols[i - 1] : 'k').h(2 + (3 - i), i * 4 + 3, 12 - 2 * (3 - i), i < 3 ? cols[i + 1] : 'g1'); c.rect(0, 0, 2, 16, 'g3').rect(14, 0, 2, 16, 'g3').v(0, 0, 16, 'g2').v(15, 0, 16, 'g4').h(0, 0, 16, 'g2'); c.rect(2, 0, 12, 2, 'k'); });
+shoreSet('pit', 'pit hole chasm drop', 'wall', PIT, ['o']);
+const spikeFloor = (c, up) => { DF(c); for (const [x, y] of [[3, 3], [11, 3], [3, 11], [11, 11], [7, 7]]) { c.rect(x - 1, y, 3, 2, 'k'); if (up) c.px(x, y - 3, 'w0').v(x, y - 2, 3, 'g1').px(x - 1, y, 'g2').px(x + 1, y, 'g3').px(x + 1, y - 1, 'g3'); } };
+T('dungeon-spikes-up', 'floor spikes up trap raised danger', 'floor', (c) => spikeFloor(c, true));
+T('dungeon-spikes-down', 'floor spikes down trap holes retracted', 'floor', (c) => spikeFloor(c, false));
+T('dungeon-plate', 'pressure plate floor switch raised', 'floor', (c) => { DF(c); c.rect(3, 3, 10, 10, 'g2').h(3, 3, 10, 'w0').v(3, 3, 10, 'g1').h(3, 12, 10, 'g4').v(12, 3, 10, 'g4').h(3, 13, 10, 'k').rect(6, 6, 4, 4, 'g1').h(6, 9, 4, 'g3').v(9, 6, 4, 'g3'); });
+T('dungeon-plate-down', 'pressure plate floor switch pressed down', 'floor', (c) => { DF(c); c.rect(3, 3, 10, 10, 'g3').h(3, 3, 10, 'k').v(3, 3, 10, 'k').h(4, 12, 9, 'g2').v(12, 4, 9, 'g2').rect(6, 6, 4, 4, 'o2').h(6, 6, 4, 'o1').v(6, 6, 4, 'o1'); });
+T('dungeon-trapdoor', 'trapdoor closed wooden hatch in floor', 'floor', (c) => { DF(c); c.rect(2, 2, 12, 12, 't2'); for (let x = 2; x < 14; x += 4) c.v(x, 2, 12, 't3').v(x + 3, 2, 12, 't1'); c.h(2, 4, 12, 'g3').h(2, 11, 12, 'g3').h(2, 2, 12, 't1').h(2, 13, 12, 'k').v(1, 2, 12, 'k').v(14, 2, 12, 'k').h(2, 1, 12, 'k').h(2, 14, 12, 'k'); c.stamp(6, 6, ['.xx.', 'x..x', 'x..x', '.XX.']); });
+T('dungeon-trapdoor-open', 'trapdoor open hole hatch in floor', 'wall', (c) => { DF(c); c.rect(2, 2, 12, 12, 'k').rect(2, 2, 12, 3, 'g4').v(1, 2, 12, 'g4').v(14, 2, 12, 'g2').h(2, 14, 12, 'g2').h(1, 1, 14, 'g4'); c.rect(2, 0, 12, 3, 't2').h(2, 0, 12, 't3').h(2, 2, 12, 't1').v(5, 0, 3, 't1').v(9, 0, 3, 't1'); for (let y = 5; y < 13; y += 2) c.h(6, y, 4, 't2'); c.v(6, 4, 9, 't3').v(9, 4, 9, 't3'); });
+
+category('house', 'House & castle', 'tile');
+const woodH = (c, r = 'brown') => { const [d, m, l] = ramp(r); c.fill(m); for (let y = 0; y < 16; y += 4) { c.h(0, y, 16, l).h(0, y + 3, 16, d); const x = (y * 3 + 5) % 16; c.v(x, y, 3, d).px((x + 6) % 16, y + 1, d).px((x + 7) % 16, y + 1, d).px((x + 11) % 16, y + 2, l); } };
+T('wood-floor-h', 'wooden floor planks horizontal boards', 'floor', (c) => woodH(c));
+T('wood-floor-v', 'wooden floor planks vertical boards', 'floor', turned('t', (c) => woodH(c)));
+T('wood-floor-light', 'light wooden floor pine planks', 'floor', (c) => woodH(c, 'tan'));
+T('wood-floor-parquet', 'parquet wooden floor pattern', 'floor', (c) => { each((x, y) => { const q = ((x >> 3) + (y >> 3)) % 2, k = (q ? x : y) % 4, e = (q ? y : x) % 8; c.px(x, y, k === 3 || e === 7 ? 't1' : k === 0 ? 't3' : 't2'); }); });
+carpetSet('carpet-red', 'red', 'red', 'y2');
+carpetSet('carpet-blue', 'blue', 'blue', 'w0');
+T('carpet-green', 'green carpet rug centre middle', 'floor', (c) => carpet(c, '', 'green', 'y2'));
+T('carpet-purple', 'purple royal carpet rug centre middle', 'floor', (c) => carpet(c, '', 'purple', 'y2'));
+T('kitchen-floor', 'kitchen tiled floor blue white tiles bathroom', 'floor', (c) => each((x, y) => c.px(x, y, x % 4 === 3 || y % 4 === 3 ? 'g1' : ((x >> 2) + (y >> 2)) % 2 ? 'b3' : 'w0')));
+T('marble-floor', 'marble floor white palace castle', 'floor', (c) => { c.fill('w0').speck(6, 'g1'); for (let i = 0; i < 16; i++) { c.px(i, (i * 2 + 3 + (i >> 2)) % 16, 'g1'); if (i % 3) c.px((i + 7) % 16, (22 - i) % 16, 'b3'); } c.h(0, 15, 16, 'g1').v(15, 0, 16, 'g1'); });
+T('marble-floor-diamond', 'marble floor diamond pattern black white hall', 'floor', (c) => each((x, y) => { const a = Math.abs((x % 8) - 3.5) + Math.abs((y % 8) - 3.5); c.px(x, y, a < 3.5 ? 'g3' : a < 4.5 ? 'g1' : 'w0'); }));
+T('castle-floor', 'castle floor red stone tiles hall', 'floor', (c) => { each((x, y) => c.px(x, y, x % 8 === 7 || y % 8 === 7 ? 'g4' : x % 8 === 0 || y % 8 === 0 ? 'r3' : ((x >> 3) + (y >> 3)) % 2 ? 'r1' : 'r2')); });
+/** wallpaper wall face with wooden skirting; a/b: paper colours */
+function paper(c, a, b) {
+  c.fill(a); each((x, y) => { if (x % 4 === 1) c.px(x, y, b); });
+  for (let x = 3; x < 16; x += 8) for (let y = 4; y < 10; y += 4) c.px(x, y, b).px((x + 4) % 16, y + 2, b);
+  c.h(0, 0, 16, 't3').h(0, 1, 16, 't1').h(0, 11, 16, 't3').rect(0, 12, 16, 3, 't2').h(0, 15, 16, 'k');
+  for (let x = 3; x < 16; x += 4) c.v(x, 12, 3, 't1');
+}
+const PAPER = (c) => paper(c, 'y3', 'o3');
+T('house-wall', 'house wall wallpaper cream yellow inside', 'wall', PAPER);
+T('house-wall-blue', 'house wall wallpaper blue inside', 'wall', (c) => paper(c, 'b3', 'b2'));
+T('house-wall-green', 'house wall wallpaper green inside', 'wall', (c) => paper(c, 'n3', 'n2'));
+T('house-wall-left', 'house wall left end corner', 'wall', (c) => { PAPER(c); faceEnd(c, true, 't1', 't2'); });
+T('house-wall-right', 'house wall right end corner', 'wall', (c) => { PAPER(c); faceEnd(c, false, 't1', 't2'); });
+T('house-wall-brick', 'brick wall face red bricks house', 'wall', (c) => face(c, 'red', 'g1'));
+T('house-wall-wood', 'wooden wall planks cabin hut', 'wall', (c) => { c.fill('t2'); for (let x = 0; x < 16; x += 4) c.v(x, 0, 16, 't3').v(x + 3, 0, 16, 't1').px(x + 1, (x * 3 + 4) % 11 + 2, 't1'); c.h(0, 0, 16, 't3').h(0, 1, 16, 't1').h(0, 14, 16, 't1').h(0, 15, 16, 'k'); });
+T('house-wall-plaster', 'white plaster wall timber frame tavern', 'wall', (c) => { c.fill('w0').speck(8, 'g1'); c.h(0, 0, 16, 't3').h(0, 1, 16, 't1').v(0, 2, 13, 't2').v(15, 2, 13, 't1').rect(0, 12, 16, 3, 't2').h(0, 12, 16, 't3').h(0, 15, 16, 'k'); });
+T('house-wall-window', 'house wall with window glass curtains', 'wall', (c) => { PAPER(c); c.rect(3, 2, 10, 9, 't1').rect(4, 3, 8, 7, 'b3').v(7, 3, 7, 't1').v(8, 3, 7, 't2').h(4, 6, 8, 't1').px(5, 4, 'w0').px(6, 4, 'w0').px(5, 5, 'w0').px(10, 8, 'w0').v(4, 3, 7, 'r2').v(11, 3, 7, 'r2').px(4, 3, 'r3').px(11, 3, 'r3').h(2, 11, 12, 't3').h(2, 2, 12, 't2'); });
+T('house-wall-painting', 'house wall with painting picture frame', 'wall', (c) => { PAPER(c); ostamp(c, 3, 2, ['YYYYYYYYYY', 'YAAAAAEEAO', 'YAAWAAEEAO', 'YAAAAGAAAO', 'YAGGGGGHAO', 'YGGHGGGGGO', 'YOOOOOOOOO']); });
+T('house-wall-bookshelf', 'wall with bookshelf books library', 'wall', (c) => { c.fill('t1'); const cols = ['r2', 'b2', 'n2', 'y2', 'p2', 'o2', 'g1', 'c2']; for (let s = 0; s < 3; s++) { const y = 1 + s * 5; for (let x = 1; x < 15; x++) { const k = (x * 5 + s * 3) % 8, h = 4 - ((x + s) % 3 === 0 ? 1 : 0); c.v(x, y + 4 - h, h, cols[k]); if ((x + s) % 4 === 1) c.px(x, y + 2, 'y3'); } c.h(0, y + 4, 16, 't3'); } c.v(0, 0, 16, 't2').v(15, 0, 16, 't2').h(0, 0, 16, 't3').h(0, 15, 16, 'k'); });
+T('house-wall-fireplace', 'wall with fireplace fire hearth chimney', 'wall', (c) => { PAPER(c); c.rect(1, 3, 14, 12, 'g2').h(0, 3, 16, 'g1').h(0, 4, 16, 'g3'); for (let y = 6; y < 15; y += 3) c.h(1, y, 14, 'g3'); for (let y = 5; y < 15; y++) c.px((y % 6 < 3 ? 2 : 13), y, 'g3'); c.rect(4, 7, 8, 8, 'k').h(5, 6, 6, 'k'); c.stamp(5, 8, ['..R...', '.ROR.R', '.OYOR.', 'ROYYOR', 'OYEEYO']).h(4, 13, 8, 't2').h(5, 14, 6, 't1'); c.h(0, 15, 16, 'k'); });
+T('house-wall-clock', 'wall with clock time', 'wall', (c) => { PAPER(c); ostamp(c, 4, 2, ['..TTTT..', '.TWWWWT.', 'TWWKWWWT', 'TWWKWWWT', 'TWWKKKWT', 'TWWWWWWT', '.TWWWWT.', '..TTTT..']); });
+T('house-wall-candle', 'wall with candle sconce light', 'wall', (c) => { PAPER(c); ostamp(c, 6, 2, ['.Y..', 'YEY.', '.Y..', '.W..', '.W..', 'xxxx', '.xx.']); });
+T('house-wall-shelf', 'wall with shelf pots jars kitchen', 'wall', (c) => { PAPER(c); ostamp(c, 2, 3, ['.RR..BB..OO.', '.RR.BBBB.OO.', 'RRRRBBBBOOOO', 'TTTTTTTTTTTT', '.C........C.']); });
+T('house-wall-mirror', 'wall with mirror', 'wall', (c) => { PAPER(c); ostamp(c, 4, 1, ['..YYYY..', '.YAAAAY.', 'YAWAAAAY', 'YAAWAAAY', 'YAAAAAAY', 'YAAAAWAY', 'YAAAAAAY', '.YAAAAY.', '..YYYY..']); });
+T('house-door', 'house door closed in wall wooden', 'wall', (c) => { PAPER(c); c.rect(3, 1, 10, 15, 't1'); doorLeaf(c, 4, 2, 8, 14, 'tan'); c.h(4, 15, 8, 'k'); });
+T('house-door-open', 'house door open doorway in wall', 'floor', (c) => { PAPER(c); c.rect(3, 1, 10, 15, 't1').rect(4, 2, 8, 14, 'k').rect(4, 13, 8, 3, 't1').h(4, 15, 8, 't2').rect(4, 2, 2, 13, 't3').v(5, 2, 13, 't2'); });
+T('house-stairs', 'wooden stairs up staircase steps', 'floor', (c) => { steps(c, ['y3', 't3', 't1'], 2, 12); c.rect(0, 0, 2, 16, 't2').rect(14, 0, 2, 16, 't2').v(0, 0, 16, 't3').v(15, 0, 16, 't1'); });
+wallTopSet('house-top', 'house wooden', { base: 't1', dark: 'k', light: null, rim: 't2', hi: 't3' });
+
+category('cave', 'Cave & mine', 'tile');
+const CF = GROUND.caveFloor;
+const caveFace = (c) => { boulders(c, 'k', 'g4', 'g2', 'k'); c.h(0, 14, 16, 'k').h(0, 15, 16, 'k'); };
+T('cave-floor', 'cave floor rock ground', 'floor', CF);
+T('cave-floor-pebbles', 'cave floor with pebbles gravel', 'floor', (c) => { CF(c); for (const [x, y, w] of [[5, 2, 3], [12, 7, 2], [3, 8, 2], [8, 13, 3]]) c.h(x, y, w, 'g1').h(x, y + 1, w, 'g4'); });
+T('cave-floor-cracked', 'cave floor cracked glowing lava cracks', 'floor', (c) => { CF(c); let x = 5; for (let y = 0; y < 16; y++) { c.px(x, y, y % 4 === 1 ? 'y2' : 'o2').px(x - 1, y, 'g4'); if (y === 7) c.px(x + 1, y, 'o2').px(x + 2, y + 1, 'r2').px(x + 3, y + 1, 'r2'); x += [1, 0, 1, -1, 0, 1, -1, -1][y % 8]; } });
+T('cave-floor-mushrooms', 'cave floor with glowing mushrooms', 'floor', (c) => { CF(c); for (const [x, y] of [[2, 3], [10, 5], [5, 10]]) c.stamp(x, y, ['.22.', '2A22', '.WW.']).h(x, y + 3, 4, 'g4'); c.stamp(12, 12, ['22', '.W']); });
+T('cave-floor-moss', 'cave floor mossy damp', 'floor', (c) => { CF(c); c.speck(12, 'n1').rect(2, 9, 4, 3, 'n1').rect(9, 2, 5, 2, 'n1').px(3, 10, 'n2').px(11, 2, 'n2').px(10, 3, 'n2'); });
+T('cave-wall', 'cave wall rock face front', 'wall', caveFace);
+T('cave-wall-top', 'cave rock top dark ceiling', 'wall', (c) => { c.fill('k').speck(12, 'g4'); for (const [x, y] of [[2, 3], [9, 1], [12, 8], [5, 11], [1, 13]]) c.h(x, y, 3, 'g4').px(x + 1, y + 1, 'g4'); });
+const crystals = (c, a) => { caveFace(c); for (const [x, y] of [[2, 2], [9, 6], [4, 9]]) c.stamp(x, y, a); };
+T('cave-wall-crystal', 'cave crystal wall blue crystals', 'wall', (c) => crystals(c, ['..A.', '.AW.', '.AB.', 'ABBU']));
+T('cave-wall-crystal-purple', 'cave crystal wall purple amethyst', 'wall', (c) => crystals(c, ['..J.', '.JW.', '.JP.', 'JPPQ']));
+const nuggets = (c, r) => { const [d, m, l] = ramp(r); caveFace(c); for (const [x, y] of [[2, 2], [10, 1], [6, 6], [12, 9], [3, 10]]) c.rect(x, y, 2, 2, m).px(x, y, l).px(x + 2, y + 1, d).px(x + 1, y + 2, d); };
+T('cave-wall-gold', 'cave ore wall gold vein', 'wall', (c) => nuggets(c, 'gold'));
+T('cave-wall-iron', 'cave ore wall iron copper vein', 'wall', (c) => nuggets(c, 'copper'));
+T('cave-wall-gems', 'cave ore wall ruby gems red', 'wall', (c) => nuggets(c, 'red'));
+T('cave-wall-emerald', 'cave ore wall emerald green gems', 'wall', (c) => nuggets(c, 'lime'));
+T('cave-wall-beams', 'mine wall wooden support beams timber', 'wall', (c) => { caveFace(c); c.rect(1, 0, 3, 16, 't2').v(1, 0, 16, 't3').v(3, 0, 16, 't1').rect(12, 0, 3, 16, 't2').v(12, 0, 16, 't3').v(14, 0, 16, 't1').rect(0, 1, 16, 3, 't2').h(0, 1, 16, 't3').h(0, 3, 16, 't1').px(2, 2, 'g1').px(13, 2, 'g1').h(0, 15, 16, 'k'); });
+T('cave-entrance', 'cave entrance tunnel mine opening dark', 'floor', (c) => { caveFace(c); c.rect(3, 4, 10, 12, 'k').h(4, 3, 8, 'k').h(6, 2, 4, 'k').h(4, 15, 8, 'g3').h(5, 14, 6, 'g4'); for (const [x, y] of [[2, 6], [13, 6], [2, 11], [13, 11], [5, 2], [10, 2]]) c.px(x, y, 'g2'); });
+T('mine-entrance-beams', 'mine entrance tunnel wooden frame', 'floor', (c) => { caveFace(c); c.rect(2, 1, 12, 15, 't2').v(2, 1, 15, 't3').v(13, 1, 15, 't1').h(1, 1, 14, 't3').h(1, 2, 14, 't2').h(1, 3, 14, 't1').rect(4, 4, 8, 12, 'k').h(4, 15, 8, 'g3').h(5, 14, 6, 'g4'); });
+for (const [slug, conn, name] of [['h', 'ew', 'straight horizontal'], ['v', 'ns', 'straight vertical'], ['curve-tl', 'es', 'curve corner top left'], ['curve-tr', 'sw', 'curve corner top right'], ['curve-bl', 'ne', 'curve corner bottom left'], ['curve-br', 'nw', 'curve corner bottom right'], ['cross', 'nesw', 'crossing']]) T(`rails-${slug}`, `mine rails track ${name}`, 'floor', (c) => rails(c, conn, CF));
+T('rails-end', 'mine rails track end buffer stop', 'floor', (c) => { rails(c, 'ns', CF); c.rect(0, 0, 16, 7, null); const g = sub('rails-end/g', CF); each((x, y) => { if (y < 7) c.px(x, y, KEY[g[y][x]]); }); c.rect(2, 5, 12, 3, 't2').h(2, 5, 12, 't3').h(2, 7, 12, 't1').rect(3, 3, 2, 2, 'r2').rect(11, 3, 2, 2, 'r2'); });
+T('void', 'dark void black nothing abyss', 'wall', (c) => { c.fill('k'); for (const [x, y] of [[3, 4], [12, 9]]) c.px(x, y, 'g4'); });
+T('void-stars', 'void with stars space night sky', 'wall', (c) => { c.fill('k').speck(5, 'g4').speck(3, 'p1'); c.px(3, 3, 'w0').px(11, 6, 'g1').px(6, 12, 'b3').px(13, 13, 'g2'); });
+
+category('wild', 'Snow & desert', 'tile');
+T('snow-plain', 'snow plain smooth white ground', 'floor', (c) => c.fill('w0').speck(4, 'b3'));
+T('snow-drifts', 'snow drifts wind deep snow', 'floor', (c) => { c.fill('w0').speck(5, 'g1'); for (const [x, y, w] of [[1, 3, 6], [9, 6, 6], [3, 10, 7], [11, 14, 4]]) c.h(x, y, w, 'b3').px(x - 1, y - 1, 'b3').px(x + w, y - 1, 'b3').h(x + 1, y + 1, w - 2, 'g1'); });
+T('snow-tracks', 'snow with footprints tracks', 'floor', (c) => { TILES.snow(c); for (const [x, y] of [[4, 2], [9, 5], [5, 9], [10, 12]]) c.rect(x, y, 2, 3, 'b3').h(x, y + 2, 2, 'g2'); });
+T('snow-grass', 'snow with grass poking through thaw', 'floor', (c) => { TILES.snow(c); for (const [x, y] of [[2, 4], [9, 2], [12, 9], [5, 11]]) c.stamp(x, y, ['G.G', 'NGN']); });
+T('snow-rocks', 'snow with rocks stones', 'floor', (c) => { TILES.snow(c); for (const [x, y, w] of [[3, 4, 4], [10, 10, 3]]) c.h(x, y - 1, w, 'w0').h(x, y, w, 'g1').rect(x, y + 1, w, 2, 'g2').h(x, y + 3, w, 'b3'); });
+T('snow-path', 'trodden snow path packed', 'floor', (c) => { c.fill('g1').speck(14, 'w0').speck(8, 'b3').speck(4, 'g2'); });
+T('ice-cracked', 'cracked ice thin frozen lake', 'floor', (c) => { TILES.ice(c); let x = 6; for (let y = 0; y < 16; y++) { c.px(x, y, 'b1'); if (y === 5) c.px(x + 1, y, 'b1').px(x + 2, y + 1, 'b1').px(x + 3, y + 1, 'b2'); if (y === 11) c.px(x - 1, y, 'b1').px(x - 2, y + 1, 'b2'); x += [1, 0, -1, 1, 0, -1][y % 6]; } });
+shoreSet('ice-pond', 'ice frozen pond lake snow', 'floor', FROZEN);
+T('snow-wall', 'snowy rock wall face cliff', 'wall', (c) => { boulders(c, 'g4', 'g3', 'g2', 'g4'); c.rect(0, 0, 16, 3, 'w0'); for (let x = 0; x < 16; x++) { if ((x * 7 + 3) % 5 < 3) c.px(x, 3, 'w0'); if ((x * 5) % 7 === 0) c.px(x, 4, 'w0'); if ((x * 3) % 4 === 0) c.px(x, 3, 'b3'); } c.h(0, 14, 16, 'g4').h(0, 15, 16, 'k'); });
+T('snow-wall-top', 'snowy wall top rock covered in snow', 'wall', (c) => { c.fill('b3'); for (const [x, y, r] of [[3, 3, 3], [11, 4, 3.4], [6, 11, 3.6], [14, 12, 2.5], [-1, 10, 2.5], [14, -1, 2], [3, 16, 2]]) c.disc(x, y, r, 'w0'); c.speck(4, 'g2'); });
+T('ice-wall', 'ice brick wall face igloo frozen', 'wall', (c) => face(c, 'ice', 'b1'));
+T('snow-pines', 'snowy pine forest trees winter woods', 'wall', (c) => { c.fill('g4'); for (const [cx, cy] of [[4, 3], [12, 3], [20, 3], [-4, 3], [0, 11], [8, 11], [16, 11], [4, 19], [12, 19], [8, -5], [0, -5], [16, -5]]) c.disc(cx, cy + 1, 4.2, 'g4').disc(cx, cy, 3.9, 'n1').disc(cx - 1, cy - 1, 2.3, 'w0').px(cx + 1, cy + 1, 'n2').px(cx - 1, cy, 'b3').px(cx + 2, cy - 1, 'w0'); });
+T('sand-dunes', 'sand dunes desert waves', 'floor', (c) => { c.fill('o3').speck(6, 'y3'); for (let x = 0; x < 16; x++) for (const [y0, ph] of [[2, 0], [7, 5], [12, 10]]) { const y = y0 + Math.round(1.4 * Math.sin(((x + ph) / 16) * 2 * Math.PI)); c.px(x, y, 't3').px(x, y + 1, 'y3'); } });
+T('desert-cracked', 'cracked desert ground dry earth', 'floor', (c) => { c.fill('t3').speck(8, 'o3'); for (const [x, y, dx, dy, n] of [[0, 5, 1, 0, 6], [5, 5, 0, -1, 6], [5, 5, 1, 1, 5], [9, 9, 1, 0, 7], [9, 9, 0, 1, 7], [3, 11, 1, 0, 6], [3, 11, 0, 1, 5], [3, 6, 0, 1, 6], [12, 0, 0, 1, 4], [12, 3, 1, 1, 4], [0, 14, 1, 0, 3]]) for (let i = 0; i < n; i++) c.px((x + dx * i + 16) % 16, (y + dy * i + 16) % 16, 't2'); });
+T('sand-bones', 'sand with bones skull desert', 'floor', (c) => { TILES.sand(c); ostamp(c, 9, 3, ['.WWW.', 'WKWKW', '.WWW.', '.W.W.'], 't3'); ostamp(c, 2, 10, ['W...W', '.WWW.', 'W...W'], 't3'); });
+T('sand-stones', 'sand with stones rocks desert', 'floor', (c) => { TILES.sand(c); for (const [x, y, w] of [[3, 4, 3], [10, 9, 4], [6, 12, 2]]) c.h(x, y, w, 'y3').h(x, y + 1, w, 't3').h(x, y + 2, w, 't2'); });
+T('sandstone-floor', 'sandstone floor slabs temple pyramid', 'floor', GROUND.sandFloor);
+T('sandstone-floor-glyph', 'sandstone floor with glyph eye symbol', 'floor', (c) => { GROUND.sandFloor(c); c.stamp(4, 5, ['..TTTT..', '.T....T.', 'T..CC..T', '.T.CC.T.', '..TTTT..', '...T....', '..T.....']); });
+T('sandstone-wall', 'sandstone wall face bricks temple', 'wall', (c) => face(c, 'tan', 't2'));
+T('sandstone-wall-left', 'sandstone wall left end corner', 'wall', (c) => { face(c, 'tan', 't2'); faceEnd(c, true, 't1', 't2'); });
+T('sandstone-wall-right', 'sandstone wall right end corner', 'wall', (c) => { face(c, 'tan', 't2'); faceEnd(c, false, 't1', 't2'); });
+T('sandstone-wall-glyphs', 'sandstone wall hieroglyphs carvings', 'wall', (c) => { face(c, 'tan', 't2'); c.rect(1, 3, 14, 9, 't3').h(1, 3, 14, 'y3').h(1, 11, 14, 't2'); c.stamp(2, 5, ['.C..CCC.C.C.', 'CCC.C.C.CCC.', '.C..CCC..C..', 'C.C..C..C.C.', '.C...C..C.C.']); });
+T('sandstone-wall-torch', 'sandstone wall with torch', 'wall', (c) => { face(c, 'tan', 't2'); c.stamp(5, 1, ['..KK..', '.KRRK.', 'KROORK', 'KROYRK', 'KOYYOK', '.KOOK.', '.KTTK.', 'KxTTxK', '.KTTK.', '.KTTK.', '..KK..']); });
+T('sandstone-doorway', 'sandstone doorway temple entrance open', 'floor', (c) => { face(c, 'tan', 't2'); arch(c, ['y3', 't3', 't2'], (k) => k.rect(4, 13, 8, 3, 't1').h(4, 15, 8, 't2')); });
+T('sandstone-door', 'sandstone sealed door stone slab closed', 'wall', (c) => { face(c, 'tan', 't2'); arch(c, ['y3', 't3', 't2'], (k) => { k.rect(4, 4, 8, 12, 't3').h(5, 3, 6, 't3').v(4, 4, 12, 'y3').v(11, 4, 12, 't2').stamp(6, 6, ['.CC.', 'C..C', 'CCCC', '.CC.', '.CC.', '.CC.']); }); });
+wallTopSet('sandstone-top', 'sandstone', { base: 't2', dark: 't1', light: null, rim: 't3', hi: 'y3' });
+shoreSet('oasis', 'oasis water sand beach', 'wall', OASIS, INNER);
+
+category('scifi', 'Sci-fi', 'tile');
+const MF = GROUND.metalFloor, DM = GROUND.darkMetal;
+T('scifi-floor', 'metal floor panel light spaceship lab', 'floor', MF);
+T('scifi-floor-dark', 'dark metal floor plates', 'floor', DM);
+T('scifi-floor-tread', 'metal tread plate floor diamond', 'floor', (c) => { c.fill('g2'); each((x, y) => { if (y % 4 === 0 && x % 4 < 2) c.px(x, y, 'g1'); if (y % 4 === 2 && (x + 2) % 4 < 2) c.px(x, y, 'g3'); }); });
+T('scifi-floor-light', 'metal floor with light strip glowing', 'floor', (c) => { MF(c); c.rect(3, 6, 10, 4, 'g4').rect(4, 7, 8, 2, 'c2').h(5, 7, 5, 'b3').px(5, 7, 'w0'); });
+T('scifi-floor-grate', 'metal grated floor grille vent', 'floor', (c) => { c.fill('g4'); each((x, y) => { if (y % 3 === 0) c.px(x, y, 'g2'); else if (y % 3 === 1) c.px(x, y, 'g3'); }); c.v(0, 0, 16, 'g1').v(15, 0, 16, 'g3').v(7, 0, 16, 'g3').v(8, 0, 16, 'g1'); });
+T('scifi-floor-hazard', 'warning stripes floor yellow black hazard', 'floor', (c) => each((x, y) => c.px(x, y, ((x + y) >> 2) % 2 ? 'y2' : 'g4')));
+T('scifi-floor-hazard-h', 'floor with warning stripe line horizontal', 'floor', (c) => { MF(c); each((x, y) => { if (y >= 6 && y < 10) c.px(x, y, ((x + y) >> 1) % 2 ? 'y2' : 'g4'); }); c.h(0, 5, 16, 'g3').h(0, 10, 16, 'g3'); });
+T('scifi-floor-hazard-v', 'floor with warning stripe line vertical', 'floor', (c) => { MF(c); each((x, y) => { if (x >= 6 && x < 10) c.px(x, y, ((x + y) >> 1) % 2 ? 'y2' : 'g4'); }); c.v(5, 0, 16, 'g3').v(10, 0, 16, 'g3'); });
+T('scifi-floor-arrow', 'floor with arrow up direction marker', 'floor', (c) => { DM(c); c.stamp(4, 3, ['...YY...', '..YYYY..', '.YYYYYY.', 'YY.YY.YY', '...YY...', '...YY...', '...YY...', '...YY...', '...YY...']); });
+const sfWall = (c) => { c.fill('g3').h(0, 0, 16, 'g1').h(0, 1, 16, 'g2'); for (const x of [7, 15]) c.v(x, 2, 12, 'g4'); for (const x of [0, 8]) c.v(x, 2, 12, 'g2'); c.h(0, 4, 16, 'b1').h(0, 5, 16, 'b2').h(0, 11, 16, 'g4').h(0, 12, 16, 'g2').h(0, 14, 16, 'g4').h(0, 15, 16, 'k'); };
+T('scifi-wall', 'metal wall face panels spaceship lab', 'wall', sfWall);
+T('scifi-wall-left', 'metal wall left end corner', 'wall', (c) => { sfWall(c); faceEnd(c, true, 'g4', 'g4'); });
+T('scifi-wall-right', 'metal wall right end corner', 'wall', (c) => { sfWall(c); faceEnd(c, false, 'g4', 'g4'); });
+T('scifi-wall-screen', 'wall with screen monitor computer display', 'wall', (c) => { sfWall(c); c.rect(2, 2, 12, 9, 'k').rect(3, 3, 10, 7, 'c1').h(4, 4, 5, 'c2').h(4, 6, 7, 'c2').h(4, 8, 3, 'n3').px(11, 4, 'n3').px(10, 8, 'r2').px(11, 8, 'y2').px(3, 3, 'c2'); });
+T('scifi-wall-pipes', 'wall with pipes tubes plumbing', 'wall', (c) => { sfWall(c); for (const y of [3, 8]) c.h(0, y, 16, 'g1').h(0, y + 1, 16, 'g2').h(0, y + 2, 16, 'g4').rect(4, y - 1, 2, 5, 'g2').v(4, y - 1, 5, 'g1').rect(11, y - 1, 2, 5, 'g2').v(11, y - 1, 5, 'g1'); ostamp(c, 7, 6, ['R.R', '.R.', 'R.R']); });
+T('scifi-wall-vent', 'wall with vent grille air duct', 'wall', (c) => { sfWall(c); c.rect(3, 3, 10, 8, 'g1').rect(4, 4, 8, 6, 'k'); for (let y = 5; y < 10; y += 2) c.h(4, y, 8, 'g2'); c.h(3, 10, 10, 'g4').px(3, 3, 'w0').px(12, 3, 'g4'); });
+T('scifi-wall-light', 'wall with lamp light bright', 'wall', (c) => { sfWall(c); c.rect(4, 6, 8, 4, 'g4').rect(5, 7, 6, 2, 'y3').h(5, 7, 6, 'w0').h(4, 10, 8, 'y2'); });
+T('scifi-wall-window', 'wall with window to space stars porthole', 'wall', (c) => { sfWall(c); c.rect(2, 2, 12, 9, 'g1').rect(3, 3, 10, 7, 'k').px(5, 4, 'w0').px(10, 5, 'g1').px(7, 8, 'b3').px(11, 8, 'w0').disc(4, 9, 1.5, 'b1').px(4, 8, 'b2').h(2, 10, 12, 'g4').v(13, 2, 9, 'g4'); });
+T('scifi-wall-lockers', 'wall with lockers cabinets storage', 'wall', (c) => { sfWall(c); for (const x of [1, 6, 11]) c.rect(x, 2, 4, 12, 'b2').v(x, 2, 12, 'b3').v(x + 3, 2, 12, 'b1').h(x + 1, 4, 2, 'b1').h(x + 1, 5, 2, 'b1').px(x + 2, 9, 'y2'); });
+T('scifi-door', 'airlock door closed metal sliding door', 'wall', (c) => { sfWall(c); c.rect(2, 1, 12, 15, 'g1').rect(3, 2, 10, 14, 'g2').v(7, 2, 14, 'g4').v(8, 2, 14, 'k').v(3, 2, 14, 'w0').v(9, 2, 14, 'g1'); each((x, y) => { if (y >= 3 && y < 5 && x >= 3 && x < 13) c.px(x, y, ((x + y) >> 1) % 2 ? 'y2' : 'g4'); }); c.rect(5, 8, 2, 3, 'g4').rect(9, 8, 2, 3, 'g4').px(7, 1, 'r2').px(8, 1, 'r2').h(3, 15, 10, 'g4'); });
+T('scifi-door-open', 'airlock door open passage', 'floor', (c) => { sfWall(c); c.rect(2, 1, 12, 15, 'g1').rect(3, 2, 10, 14, 'k').rect(3, 2, 2, 14, 'g2').v(3, 2, 14, 'w0').rect(11, 2, 2, 14, 'g2').v(12, 2, 14, 'g4').rect(5, 13, 6, 3, 'g4').h(5, 15, 6, 'g3').px(7, 1, 'n3').px(8, 1, 'n3'); });
+T('scifi-teleporter', 'teleporter pad transporter warp floor', 'floor', (c) => { DM(c); each((x, y) => { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 7.2) c.px(x, y, d > 6 ? 'g1' : d > 5 ? 'c1' : d > 3.6 ? 'c2' : d > 2.4 ? 'b3' : d > 1.2 ? 'c2' : 'w0'); }); });
+const energy = (c) => { DM(c); each((x, y) => { if (y >= 4 && y < 12) { const k = (x * 3 + y * 5) % 7; c.px(x, y, y === 4 || y === 11 ? 'c1' : (y === 7 || y === 8) ? (k < 2 ? 'b3' : 'w0') : k < 2 ? 'w0' : k < 5 ? 'b3' : 'c2'); } }); c.h(0, 3, 16, 'g4').h(0, 12, 16, 'g4'); };
+T('scifi-energy-h', 'energy field force field barrier laser horizontal', 'wall', energy);
+T('scifi-energy-v', 'energy field force field barrier laser vertical', 'wall', turned('t', energy));
+T('scifi-coolant', 'coolant acid toxic green liquid pool', 'wall', (c) => { waves(c, 'n2', 'n3', 'y3'); for (const [x, y] of [[4, 8], [12, 13]]) c.px(x, y, 'y3').px(x + 1, y, 'n1'); });
+T('scifi-glass-floor', 'glass floor window to space', 'floor', (c) => { c.fill('b1').speck(4, 'k'); for (let i = 0; i < 16; i++) c.px(i, (20 - i) % 16, 'b2').px(i, (21 - i) % 16, 'b2'); c.px(4, 4, 'w0').px(11, 9, 'b3'); c.h(0, 0, 16, 'g1').v(0, 0, 16, 'g1').h(0, 15, 16, 'g3').v(15, 0, 16, 'g3'); });
+wallTopSet('scifi-top', 'metal sci-fi', { base: 'g4', dark: 'k', light: null, rim: 'g2', hi: 'g1', dots: 'g3' });
+
+// ═════════════════════════ LEVEL EDITOR: props to dress a level ═════════════════════════
+// Free-standing things on a transparent background. Unlike finalize() the outline is
+// drawn inside the canvas, so fences and walls may run right up to the tile border and
+// join the next piece. solid: true marks things that normally block walking.
+function outlineIn(grid) {
+  const n = grid.length, edge = [];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!grid[y][x] && ((grid[y - 1] && grid[y - 1][x]) || (grid[y + 1] && grid[y + 1][x]) || grid[y][x - 1] || grid[y][x + 1])) edge.push([x, y]);
+  for (const [x, y] of edge) grid[y][x] = PAL.k;
+  return grid;
+}
+/** prop drawn by a routine. opts: solid, o (false = no outline), size */
+function PD(slug, name, fn, opts = {}) {
+  const item = { slug, name, make: () => { const size = opts.size || 16; const grid = Array.from({ length: size }, () => Array(size).fill(null)); fn(canvas(grid, slug)); return opts.o === false ? grid : outlineIn(grid); } };
+  if (opts.solid) item.solid = true;
+  cat.items.push(item);
+}
+/** prop from an ASCII picture (fixed colours): centred, standing on the bottom row but one, unless opts.x / opts.y say otherwise. opts.swap: 'AB' pairs of characters to recolour, opts.flip */
+function PA(slug, name, src, opts = {}) {
+  let rows = src.trim().split('\n').map((r) => r.trim());
+  if (opts.swap) { const m = {}; opts.swap.split(' ').forEach((p) => { m[p[0]] = p[1]; }); rows = rows.map((r) => [...r].map((ch) => m[ch] || ch).join('')); }
+  const size = opts.size || 16, w = Math.max(...rows.map((r) => r.length));
+  if (w > size || rows.length > size) throw new Error(`${slug}: picture ${w}x${rows.length} too big`);
+  if (opts.flip) rows = rows.map((r) => [...r.padEnd(w, '.')].reverse().join(''));
+  const x = opts.x === undefined ? (size - w) >> 1 : opts.x, y = opts.y === undefined ? size - 1 - rows.length : opts.y;
+  PD(slug, name, (c) => c.stamp(x, y, rows), opts);
+}
+/** fence piece: rails towards the sides in conn (n e s w) and a post in the middle */
+function fence(c, conn, st) {
+  const [l, m, d] = st.cols, has = (ch) => conn.includes(ch);
+  const rows = st.single ? [7] : [7, 10];
+  if (has('n')) c.v(7, 0, 9, l).v(8, 0, 9, m);
+  if (has('s')) c.v(7, 9, 7, l).v(8, 9, 7, m);
+  for (const y of rows) { if (has('w')) c.h(0, y, 8, l).h(0, y + 1, 8, m); if (has('e')) c.h(8, y, 8, l).h(8, y + 1, 8, m); }
+  if (st.pickets) for (let x = 1; x < 16; x += 3) if ((x < 8 && has('w')) || (x > 8 && has('e'))) c.v(x, 5, 8, m).px(x, 4, l);
+  c.rect(6, 4, 4, 10, m).v(6, 4, 10, l).v(9, 4, 10, d).h(6, 13, 4, d).h(6, 4, 3, l);
+  if (st.cap) c.h(6, 3, 4, st.cap).px(7, 2, st.cap).px(8, 2, st.cap);
+}
+function lowWall(c, conn) {
+  const has = (ch) => conn.includes(ch);
+  const part = (x, y, w, h) => { c.rect(x, y, w, h, 'g2'); for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { const X = x + i, Y = y + j; if (Y % 3 === 0) c.px(X, Y, 'g3'); else if ((X + (Y % 6 < 3 ? 0 : 2)) % 5 === 0) c.px(X, Y, 'g3'); } };
+  if (has('n')) part(5, 0, 6, 9); if (has('s')) part(5, 8, 6, 8); if (has('w')) part(0, 5, 9, 9); if (has('e')) part(8, 5, 8, 9);
+  if (has('n')) c.v(5, 0, 6, 'g1'); if (has('s')) c.v(5, 9, 7, 'g1');
+  if (has('w')) c.h(0, 5, 8, 'w0').h(0, 6, 8, 'g1').h(0, 13, 8, 'g4'); if (has('e')) c.h(8, 5, 8, 'w0').h(8, 6, 8, 'g1').h(8, 13, 8, 'g4');
+}
+const FENCE_PIECES = [['h', 'ew', 'horizontal'], ['v', 'ns', 'vertical'], ['corner-tl', 'es', 'corner top left'], ['corner-tr', 'sw', 'corner top right'], ['corner-bl', 'ne', 'corner bottom left'], ['corner-br', 'nw', 'corner bottom right']];
+
+category('barriers', 'Fences & barriers', 'thing');
+const WOODF = { cols: ['t3', 't2', 't1'] }, IRONF = { cols: ['g1', 'g3', 'g4'], pickets: true, cap: 'g2' };
+for (const [s, conn, n] of FENCE_PIECES) PD(`fence-${s}`, `wooden fence ${n}`, (c) => fence(c, conn, WOODF), { solid: true });
+PD('fence-post', 'wooden fence post single end', (c) => fence(c, '', WOODF), { solid: true });
+PD('fence-cross', 'wooden fence crossing junction', (c) => fence(c, 'nesw', WOODF), { solid: true });
+PA('fence-gate', 'wooden fence gate closed', `
+LTC..........LTC
+LTCLLLLLLLLLLLTC
+LTCTTTTTTTTTTLTC
+LTC.LT.LT.LT.LTC
+LTCLLLLLLLLLLLTC
+LTCTTTTTTTTTTLTC
+LTC.LT.LT.LT.LTC
+LTC..........LTC
+CCC..........CCC`, { x: 0, y: 5, solid: true });
+PA('fence-gate-open', 'wooden fence gate open', `
+LTC..........LTC
+LTCL.........LTC
+LTCT.........LTC
+LTCL.........LTC
+LTCT.........LTC
+LTCL.........LTC
+LTCT.........LTC
+LTC..........LTC
+CCC..........CCC`, { x: 0, y: 5 });
+PA('fence-broken', 'broken wooden fence damaged', `
+......LT........
+.....LTTC.......
+LL...LTTC.....L.
+TTLL.LTTC...LLT.
+.....LTTC..LT...
+LLLL.LTTC.......
+TTTTLLTTC..LLT..
+.....LTTC.L..TT.
+.....CCCC.......`, { x: 0, y: 5, solid: true });
+for (const [s, conn, n] of FENCE_PIECES) PD(`iron-fence-${s}`, `iron fence railing ${n} graveyard`, (c) => fence(c, conn, IRONF), { solid: true });
+PA('iron-gate', 'iron gate closed bars graveyard', `
+.x............x.
+xwX.x..xx..x.xwX
+xwXxwxxwwxxwxxwX
+xwX.w..ww..w.xwX
+xwX.w..ww..w.xwX
+xwX.w..wY..w.xwX
+xwX.w..ww..w.xwX
+xwXxwxxwwxxwxxwX
+xwX.w..ww..w.xwX
+XXX..........XXX`, { x: 0, y: 4, solid: true });
+for (const [s, conn, n] of FENCE_PIECES) PD(`stone-wall-${s}`, `low stone wall ${n} garden`, (c) => lowWall(c, conn), { solid: true });
+const hedge = (c, x, y, w, h) => { c.rect(x, y, w, h, 'n1'); for (let i = 0; i < w * h / 5; i++) { const X = x + c.int(w - 1), Y = y + c.int(h - 2); c.px(X, Y, 'n2').px(X + 1, Y, 'n2').px(X, Y + 1, 'n2'); if (i % 3 === 0) c.px(X + 1, Y, 'n3'); } c.h(x, y + h - 1, w, 'g4').h(x, y, w, 'n2'); };
+PD('hedge-h', 'hedge horizontal green bush wall garden', (c) => hedge(c, 0, 4, 16, 10), { solid: true });
+PD('hedge-v', 'hedge vertical green bush wall garden', (c) => hedge(c, 3, 0, 10, 16), { solid: true });
+PD('hedge-block', 'hedge block square bush maze', (c) => hedge(c, 1, 2, 14, 13), { solid: true });
+PA('hedge-round', 'round hedge topiary garden bush', `
+...NGGN...
+..NGHGGN..
+.NGHGGGGN.
+.NGGGGGNN.
+.NGGGNGGN.
+..NNGGNN..
+....TC....
+....TC....
+...CTCC...`, { solid: true });
+PD('bridge-rail-h', 'bridge rail railing horizontal rope', (c) => { fence(c, 'ew', { cols: ['t3', 't2', 't1'], single: true }); c.rect(0, 5, 2, 8, 't2').v(0, 5, 8, 't3').rect(14, 5, 2, 8, 't2').v(15, 5, 8, 't1'); }, { solid: true });
+PD('bridge-rail-v', 'bridge rail railing vertical rope', (c) => { fence(c, 'ns', { cols: ['t3', 't2', 't1'], single: true }); }, { solid: true });
+PA('barricade', 'wooden barricade spikes barrier', `
+w....w....w..w
+.L...L...L..L.
+..L.L.L.L.LL..
+LLLLLLLLLLLLLL
+TTTTTTTTTTTTTT
+..L.L.L.L.L.L.
+.L.L...L.L...L
+C..C.....C...C`, { solid: true });
+PA('rope-barrier', 'rope barrier posts velvet museum', `
+.YY........YY.
+.YOZ......ZYO.
+.YO.RRRRRR.YO.
+.YO........YO.
+.YO........YO.
+.YO........YO.
+OOOO......OOOO`, { solid: true });
+PA('laser-gate', 'laser gate barrier red beams sci-fi', `
+xwX........xwX
+wRXIRIRIRIRwRX
+xwX........xwX
+xwXRIRIRIRIxwX
+xwX........xwX
+wRXIRIRIRIRwRX
+xwX........xwX
+XXX........XXX`, { solid: true });
+PA('laser-gate-off', 'laser gate off posts sci-fi open', `
+xwX........xwX
+wVX........wVX
+xwX........xwX
+xwX........xwX
+xwX........xwX
+wVX........wVX
+xwX........xwX
+XXX........XXX`);
+
+category('levelprops', 'Level props', 'thing');
+const PILLAR = `
+.wwwwwwww.
+wWWWWWWWWx
+.xxxxxxxx.
+..WwwwxX..
+..WwwwxX..
+..WwwwxX..
+..WwwwxX..
+..WwwwxX..
+..WwwwxX..
+..WwwwxX..
+.wwwwwwww.
+wWWWWWWWWx
+XXXXXXXXXX`;
+PA('pillar-short', 'stone pillar column short', PILLAR, { solid: true });
+PA('pillar-sandstone', 'sandstone pillar column desert temple', PILLAR, { solid: true, swap: 'WE wF xL XT' });
+PA('pillar-short-broken', 'broken stone pillar ruin stump', `
+....w.....
+..Ww.wx...
+..WwwwxX..
+..WwwwxX.x
+..WwwwxX..
+.wwwwwwww.
+wWWWWWWWWx
+XXXXXXXXXX`, { solid: true });
+PA('statue-knight', 'stone statue knight warrior', `
+....ww....
+...wWWx...
+...wWWx...
+..wwwwxx.w
+.wWwwwxXxw
+.wWwwwxX.w
+.w.wwxX..w
+...wwxX...
+...w..X...
+..wwwwxx..
+.wWWWWWWx.
+.XXXXXXXX.`, { solid: true });
+PA('statue-angel', 'stone statue angel wings', `
+....ww....
+...wWWx...
+w..wWWx..x
+ww.wwxx.xx
+wWwwWwxxXx
+.wWwwwxXx.
+..wwwwxx..
+...wwxx...
+...wwxx...
+..wwwwxx..
+.wWWWWWWx.
+.XXXXXXXX.`, { solid: true });
+PA('statue-broken', 'broken statue ruin pedestal', `
+...w......
+...wx..x..
+...wwxxX..
+..wwwwxx..
+.wWWWWWWx.
+.XXXXXXXX.`, { solid: true });
+PA('fountain-small', 'small fountain water plaza', `
+.....AA.....
+....A..A....
+...A.BB.A...
+.....BB.....
+..wwwBBwww..
+.wWAABBAAWx.
+wWABBBBBBAWx
+wxABBBBBBAxX
+.wxxxxxxxxX.
+..XXXXXXXX..`, { solid: true });
+PA('well-stone', 'stone well with roof village', `
+.CCCCCCCCCC.
+CTLLLLLLLLTC
+.C........C.
+.T...xx...T.
+.T...xx...T.
+.wwwwwwwwww.
+wWKKKKKKKKWx
+wwxwwxwwxwwx
+wxwwxwwxwwxX
+.XXXXXXXXXX.`, { solid: true });
+PA('well-water', 'round well water hole from above', `
+...wwwwww...
+.wwWWWWWWxx.
+wWWUUUUUUWxX
+wWUBBABBBUxX
+wWUBBBBABUxX
+wwWUUUUUUWxX
+.wxWWWWWWxX.
+..xxxxxxXX..`, { solid: true });
+PA('well-dry', 'dry empty well dark hole', `
+...wwwwww...
+.wwWWWWWWxx.
+wWWKKKKKKWxX
+wWKKKKKKKKxX
+wWKKVKKKKKxX
+wwWKKKKKKWxX
+.wxWWWWWWxX.
+..xxxxxxXX..`, { solid: true });
+PA('sign-warning', 'warning sign skull danger signpost', `
+.CCCCCCCC.
+CLLLLLLLLC
+CLLKLLKLLC
+CLLLKKLLLC
+CLLKLLKLLC
+CTTTTTTTTC
+.CCCTTCCC.
+....TC....
+....TC....
+....TC....`, { solid: true });
+PA('sign-board', 'notice board quest board papers', `
+CCCCCCCCCCCC
+CLWWLLLWWWLC
+CLWWLEELWWLC
+CLLLLEELLLLC
+CLWWWLLLWWLC
+CTTTTTTTTTTC
+.TC......TC.
+.TC......TC.
+.TC......TC.`, { solid: true });
+PA('street-lamp', 'street lamp post lit light town', `
+..XXXX..
+.XYEEYX.
+.XEWWEX.
+.XYEEYX.
+..XXXX..
+...XV...
+...XV...
+...XV...
+...XV...
+...XV...
+...XV...
+..XXVV..
+.XXXVVV.`, { solid: true });
+PA('lantern-post', 'lantern on wooden post light', `
+.TTTTTTT.
+.TC...x..
+.TC..xYx.
+.TC..YEY.
+.TC..xYx.
+.TC......
+.TC......
+.TC......
+.TC......
+.TC......
+TTCC.....`, { solid: true });
+PA('brazier-lit', 'brazier fire bowl lit burning', `
+....R.....
+...RO.R...
+..ROYOR...
+..OYEYOR..
+.ROYEYYO..
+XxxxxxxxxV
+.XxxxxxxV.
+..XVVVVV..
+...X..V...
+..X....V..
+.XX....VV.`, { solid: true });
+PA('brazier-unlit', 'brazier fire bowl unlit cold coals', `
+.VKVVKVKV.
+XxxxxxxxxV
+.XxxxxxxV.
+..XVVVVV..
+...X..V...
+..X....V..
+.XX....VV.`, { solid: true });
+PA('torch-stand', 'standing torch lit pole fire', `
+..R...
+.ROR..
+.OYO..
+.OEO..
+XxxxV.
+.TC...
+.TC...
+.TC...
+.TC...
+.TC...
+.TC...
+XTCV..`, { solid: true });
+PA('stalagmite-tall', 'tall stalagmite cave rock spike', `
+....x.....
+...xwX....
+...xwX....
+..xwwX....
+..xwxXX.x.
+.xwwxXX.xX
+.xwxxXVxwX
+xwwxxXVxxX
+xwxxXXVxXV`, { solid: true });
+PA('stalagmites', 'stalagmites cluster small cave rocks', `
+...x......
+..xwX...x.
+..xwX..xwX
+.xwxX..xxX
+.xwxXVxwxX
+xwxxXVxxXV`, { solid: true });
+const CRYSTAL = `
+....A.....
+...AWA..A.
+...AWB.AWB
+..AAWB.ABU
+..AWBBUABU
+.AAWBBUBBU
+.AWBBBUBUU
+.UBBBUUUU.`;
+PA('crystal-blue', 'blue crystal cluster gem cave', CRYSTAL, { solid: true });
+PA('crystal-green', 'green crystal cluster emerald cave', CRYSTAL, { solid: true, swap: 'AH BG UN' });
+PA('crystal-red', 'red crystal cluster ruby cave', CRYSTAL, { solid: true, swap: 'AI BR UZ' });
+PA('rubble', 'rubble pile stones debris ruin', `
+.....xx.....
+..ww.xXX.w..
+.wxxX..wwxX.
+wwxXXxwxxXXx
+xXXVxxXXVxXV`);
+PA('rubble-wood', 'broken planks wood debris wreck', `
+..L.....T...
+.LT..LL.TC..
+..LTLTC.TC.L
+.CLTTCLLTCLT
+TTCCLTTCCTTC`);
+PA('bones-pile', 'pile of bones remains skeleton', `
+....WWW.....
+...WKWKW....
+.W.WWWWW..W.
+WWW.WKW.WWW.
+.WWWwwWWWw..
+WWwWWWWwWWW.
+.w.wWWw..ww.`);
+PA('skull-pile', 'pile of skulls heap', `
+.....WWW....
+....WKWKW...
+..WWWWWWWWW.
+.WKWKWWKWKW.
+.WWWWWWWWWW.
+..WwW.WwW...`);
+const WEB = `
+WwwWwwwWwwwW....
+wW..w...w.......
+w.W..w...W......
+W..W..ww........
+ww..W...........
+w.w..W..........
+w..w..W.........
+W..w............
+w...W...........
+w...............
+w...............
+W...............`;
+PA('cobweb-corner', 'cobweb corner top left spider web', WEB, { x: 0, y: 0, o: false });
+PA('cobweb-corner-right', 'cobweb corner top right spider web', WEB, { x: 0, y: 0, o: false, flip: true });
+PA('floor-cracks', 'cracks decal broken floor crack', `
+.....K......
+....K.......
+..K.K..K....
+...KK.K.....
+....KK......
+..KK.K......
+.K...KK.....
+......K..K..
+.......KK...
+........K...`, { o: false, y: 3 });
+PA('puddle', 'water puddle wet', `
+...UUUUUU...
+.UUBBBBBBUU.
+UBBAABBBBBBU
+UBBBBBBBABBU
+.UUBBBBBBUU.
+...UUUUU....`, { o: false, y: 6 });
+PA('scorch-mark', 'scorch mark burnt ground ash', `
+...VVVV...
+.VVKKKKVV.
+VKKKVKKKKV
+VKKKKKVKKV
+.VVKKKKVV.
+...VVV....`, { o: false, y: 6 });
+PA('floor-hole', 'hole in the floor pit small', `
+..VVVVVV..
+.VKKKKKKV.
+VKKKKKKKKV
+VKKKKKKKKV
+.xKKKKKKx.
+..xxxxxx..`, { o: false, y: 6 });
+PA('grass-tuft', 'grass tuft blades weeds', `
+.H...H..
+.HG.HG.H
+NHG.HGHG
+NGGNGGGN
+.NNNNNN.`);
+PA('flower-patch', 'flower patch red yellow pink flowers', `
+.R...Y....
+RER.YEY.M.
+.RG..YGMEM
+.GH.GHG.MG
+GHGGHGGHG.
+.NNNNNNNN.`);
+PA('stairs-wood', 'wooden stairs steps prop', `
+........LLLL
+........TTTC
+....LLLLTTTC
+....TTTCTTTC
+LLLLTTTCTTTC
+TTTCTTTCTTTC
+TTTCTTTCTTTC`);
+PA('ladder-hole', 'ladder down hole in floor cellar', `
+..VVVVVVVV..
+.VKKKKKKKKV.
+VKTKKKKKKTKV
+VKTLLLLLLTKV
+VKTKKKKKKTKV
+VKTLLLLLLTKV
+VKTKKKKKKTKV
+.VKTLLLLTKV.
+..VVVVVVVV..`, { o: false, y: 4 });
+const LEVER = `
+.R........
+RIX.......
+.RxX......
+...xX.....
+....xX....
+.wwwwwww..
+wWWWWWWWx.
+XXXXXXXXX.`;
+PA('lever-floor-off', 'floor lever switch off red', LEVER);
+PA('lever-floor-on', 'floor lever switch on green', LEVER, { flip: true, swap: 'RG IH' });
+PA('floor-switch', 'floor switch button red round', `
+..wwwwwwww..
+.wRRRRRRRRx.
+wRIIRRRRRRZx
+wRRRRRRRRRZx
+.xZZZZZZZZX.
+..XXXXXXXX..`);
+PA('floor-switch-pressed', 'floor switch button pressed green', `
+..wwwwwwww..
+.wGGGGGGGGx.
+wxGHGGGGGNxX
+.xXXXXXXXXX.`);
+const BLOCK = `
+WWWWWWWWWWWx
+WwwwwwwwwwxX
+WwwwwXXwwwxX
+WwwwXxxXwwxX
+WwwXxxxxXwxX
+WwwXxxxxXwxX
+WwwwXxxXwwxX
+WwwwwXXwwwxX
+WwwwwwwwwwxX
+WxxxxxxxxxxX
+xXXXXXXXXXXX`;
+PA('push-block', 'pushable stone block puzzle', BLOCK, { solid: true });
+PA('push-block-ice', 'pushable ice block puzzle frozen', BLOCK, { solid: true, swap: 'wA xB XU' });
+PA('push-block-gold', 'pushable golden block puzzle', BLOCK, { solid: true, swap: 'WE wY xO XD' });
+const BOULDER = `
+...wwwww....
+..wWWwwxxx..
+.wWWwwwxxxX.
+wWWwwwxxxxXX
+wWwwwxxxxxXX
+wwwwxxxxxXXX
+wwxxxxxxXXXV
+.xxxxxXXXXV.
+..XXXXXXVV..`;
+PA('boulder-round', 'round boulder big rock', BOULDER, { solid: true });
+PA('boulder-mossy', 'mossy boulder rock green', `
+...HHHHH....
+..HHGGGGGx..
+.wHGGwGGxxX.
+wWWGwwxGxxXX
+wWwwwxxxxxXX
+wwwwxxxxxXXX
+wwxxxxxxXXXV
+.xxxxxXXXXV.
+..XXXXXXVV..`, { solid: true });
+PA('boulder-snowy', 'snowy boulder rock winter', `
+...WWWWW....
+..WWWWWWWA..
+.wWWWAWWAxX.
+wWAWwwxAxxXX
+wWwwwxxxxxXX
+wwwwxxxxxXXX
+wwxxxxxxXXXV
+.xxxxxXXXXV.
+..XXXXXXVV..`, { solid: true });
+PA('boulder-sandstone', 'sandstone boulder desert rock', BOULDER, { solid: true, swap: 'WE wF xL XT VC' });
+PA('minecart-rails', 'minecart on rails mine cart track', `
+..VVVVVVVVVV..
+.VxxxxxxxxxxV.
+.VXwwwwwwwwXV.
+.VXxxxxxxxxXV.
+..VXXXXXXXXV..
+..VKXVVVVXKV..
+TxVKKxTTxKKVxT
+CCXXCCCCCCXXCC`, { solid: true });
+PA('treasure-pile', 'treasure pile gold coins heap', `
+......B.....
+....YYAY.R..
+..YEYYYYYIY.
+.YYYOYEYYYYY
+YEYYYYYOYYEY
+OYYOYYYYYOYO
+.OOOOOOOOOO.`);
+PA('treasure-pile-big', 'big treasure hoard gold crown gems', `
+.....YRY......
+....YYEYY..B..
+..W.YOOOY.BA..
+.YYYEYYYYYYYE.
+YEYYYOYYEYYOYY
+YYOYYYYYYYYYEY
+OYYYEYOYYOYYYO
+.OOOOOOOOOOOO.`);
+PA('cage-empty', 'empty iron cage prison small', `
+...xxxxxx...
+..xwwwwwwX..
+..w.w.w.wX..
+..w.w.w.wX..
+..w.w.w.wX..
+..w.w.w.wX..
+..w.w.w.wX..
+.xwwwwwwwwX.
+.XXXXXXXXXX.`, { solid: true });
+const ALTAR = `
+..Y......Y..
+..W......W..
+.wWwwwwwwWw.
+wWWWWWWWWWWx
+.xRRRYYRRRX.
+.xRRYRRYRRX.
+.xwRRYYRRxX.
+.xwwwwwwxxX.
+wWWWWWWWWWWx
+XXXXXXXXXXXX`;
+PA('altar', 'stone altar with candles temple shrine', ALTAR, { solid: true });
+PA('altar-dark', 'dark altar purple cult ritual', ALTAR, { solid: true, swap: 'RP YJ wX WX xV XK' });
+PA('throne-stone', 'stone throne seat king', `
+..ww....ww..
+..wWwwwwWx..
+..wWRRRRWx..
+..wWRIRRWx..
+..wWRRRRWx..
+.wwWRRRRWxx.
+.wWwwwwwwxX.
+.wWRRRRRRxX.
+.wxwwwwwwxX.
+.wx......xX.
+.XX......XX.`, { solid: true });
+PA('stall-small', 'small market stall stand shop', `
+.RRWWRRWWRRWW.
+RRWWRRWWRRWWRR
+ZZwwZZwwZZwwZZ
+.T..........T.
+.T..........T.
+.T.R.Y.G.O..T.
+LLLLLLLLLLLLLL
+TTTTTTTTTTTTTT
+.TC........TC.
+.TC........TC.`, { solid: true });
+PA('tent-small', 'small tent camp', `
+......CC......
+.....LLTT.....
+....LLLTTT....
+...LLLLTTTT...
+..LLLLKKTTTT..
+.LLLLKKKKTTTT.
+LLLLLKKKKTTTTT
+LLLLKKKKKKTTTT`, { solid: true });
+PA('campfire-big', 'campfire lit burning fire stones', `
+.....R......
+....ROR..R..
+...ROYOR....
+...OYEYO....
+..ROYEYOR...
+.xTOYYYOTx..
+xwTTCTTCTTwx
+.xXCCxxCCXx.`, { solid: true });
+PA('campfire-out', 'campfire unlit out cold ashes smoke', `
+.....x......
+....x.......
+.....x......
+............
+.xTTVVVVTx..
+xwTTCTTCTTwx
+.xXCCxxCCXx.`);
+PA('bedroll', 'bedroll sleeping bag camp bed', `
+.WWW.........
+WWwwBBBBBBBB.
+WwwBBABBBBBBU
+WwwBBBBBBABBU
+.xxUUUUUUUUU.`);
+const GATE = `
+...wwwwwwww...
+..wWxxxxxxWx..
+.wWxPPJJPPxWx.
+.wxPJJPPJJPxX.
+.wxPJPWWPJPxX.
+.wxJPWJJWPJxX.
+.wxJPWJJWPJxX.
+.wxPJPWWPJPxX.
+.wxPJJPPJJPxX.
+.wxPPJJPPJPxX.
+.wxPJPPJJPPxX.
+wWWxxxxxxxxWWx
+XXXXXXXXXXXXXX`;
+PA('portal-gate', 'stone portal gate active magic purple', GATE);
+PA('portal-gate-off', 'stone portal gate inactive dark closed', GATE, { swap: 'PK JV WK', solid: true });
+PA('scifi-crate', 'sci-fi metal crate container cargo', `
+wwwwwwwwwwww
+wWWWWWWWWWxX
+wWxxxxxxxxxX
+wWxOOKOOKOxX
+wWxxxxxxxxxX
+wWx22xxxxRxX
+wWxxxxxxxxxX
+wxxxxxxxxxxX
+XXXXXXXXXXXX`, { solid: true });
+PA('console', 'computer console terminal screen sci-fi', `
+.VVVVVVVVVV.
+.V11111111V.
+.V1H1H2221V.
+.V12221H11V.
+.VVVVVVVVVV.
+xwwwwwwwwwwX
+wRwGwYwxxBwX
+xxxxxxxxxxxX
+.XV......VX.
+.XV......VX.`, { solid: true });
+PA('generator', 'generator machine power reactor sci-fi', `
+..X......X..
+.YXY....YXY.
+..x......x..
+xwwwwwwwwwwX
+wxVVVVVVVVxX
+wxV2A22A2VxX
+wxVA2AA2AVxX
+wxVVVVVVVVxX
+wxOOKOOKOOxX
+xXXXXXXXXXXX`, { solid: true });
+PA('canister', 'toxic canister green barrel sci-fi', `
+.xwwwwx.
+xWwwwwxX
+xNNNNNNX
+wGHGGGNX
+wGHGGGNX
+wGHGKGNX
+wGHGGGNX
+xNNNNNNX
+.XXXXXX.`, { solid: true });
+PA('urn', 'urn vase clay pot desert', `
+..OOOO..
+...DD...
+..OOOO..
+.OFOOOD.
+OFOYYODD
+OFOOOODD
+.OOOODD.
+..DDDD..`, { solid: true });
+PA('bench', 'wooden bench seat park', `
+LLLLLLLLLLLL
+TTTTTTTTTTTT
+.C........C.
+LLLLLLLLLLLL
+TTTTTTTTTTTT
+.TC......TC.
+.TC......TC.`, { solid: true });
+PA('log-pile', 'log pile firewood stack', `
+....CLLC....
+...CLTCLC...
+.CLLCLLCLLC.
+CLTCLCLTCLLC
+CLLLCCLLLLCC
+.CCCC.CCCCC.`, { solid: true });
+PA('banner-stand', 'banner on stand flag pole red', `
+.xxxxxx.
+.RRRRRRX
+.RRYYRRX
+.RYRRYRX
+.RRYYRRX
+.RRRRRRX
+.RR..RRX
+.R....RX
+.......X
+.......X
+.......X
+.....XXX`, { solid: true });
+
+// what the 50 older tiles normally are in a level
+const OLD_WALLS = 'tile-water tile-deep-water tile-lava tile-sandstone tile-stone-brick tile-mossy-brick tile-brick tile-dungeon-wall tile-roof tile-thatch tile-hedge tile-cave tile-obsidian tile-ore-gold tile-ore-coal tile-ore-iron tile-ore-diamond tile-question tile-crate tile-window tile-wall-torch'.split(' ');
+for (const it of CATS.find((c) => c.id === 'tiles').items) it.kind = OLD_WALLS.includes(it.slug) ? 'wall' : 'floor';
+
+// S() reads the current category when a sprite is drawn, not when it is declared, so the
+// older sprites were all drawn with the last category of the original pack current. Keep it so.
+cat = CATS.find((c) => c.id === 'symbols');
+
 // ───────────────────────── write everything ─────────────────────────
+const EXPECT = 965;   // 500 original sprites + 362 level tiles + 103 level props
 function main() {
   const all = CATS.flatMap((c) => c.items);
   const seen = new Set();
+  for (const c of CATS) if (c.group === 'tile') for (const it of c.items) if (it.kind !== 'floor' && it.kind !== 'wall') throw new Error('tile without kind ' + it.slug);
   for (const it of all) {
     if (!/^[a-z0-9-]+$/.test(it.slug)) throw new Error('bad slug ' + it.slug);
     if (seen.has(it.slug)) throw new Error('duplicate slug ' + it.slug);
     seen.add(it.slug);
   }
-  if (!process.env.PX_DRAFT && all.length !== 500) throw new Error(`expected 500 sprites, have ${all.length}: ` + CATS.map((c) => `${c.id} ${c.items.length}`).join(', '));
+  if (!process.env.PX_DRAFT && all.length !== EXPECT) throw new Error(`expected ${EXPECT} sprites, have ${all.length}: ` + CATS.map((c) => `${c.id} ${c.items.length}`).join(', '));
   fs.mkdirSync(OUT, { recursive: true });
   for (const f of fs.readdirSync(OUT)) if (/\.png$/.test(f) && !seen.has(f.slice(0, -4))) fs.unlinkSync(path.join(OUT, f));
   for (const it of all) {
@@ -4636,7 +5829,7 @@ function main() {
     try { grid = it.make(); } catch (e) { throw new Error(`${it.slug}: ${e.message}`); }
     fs.writeFileSync(path.join(OUT, it.slug + '.png'), png(grid));
   }
-  const index = { categories: CATS.map((c) => ({ id: c.id, label: c.label, group: c.group, items: c.items.map(({ slug, name }) => ({ slug, name })) })) };
+  const index = { categories: CATS.map((c) => ({ id: c.id, label: c.label, group: c.group, items: c.items.map(({ slug, name, kind, solid }) => ({ slug, name, ...(c.group === 'tile' ? { kind } : {}), ...(solid ? { solid: true } : {}) })) })) };
   fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index, null, 1) + '\n');
   console.log(`${all.length} sprites in ${CATS.length} categories → ${path.relative(process.cwd(), OUT)}`);
   console.log(CATS.map((c) => `${c.id} ${c.items.length}`).join(', ') + ` | templates ${Object.keys(TPL).length}`);
