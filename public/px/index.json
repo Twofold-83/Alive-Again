@@ -1,0 +1,2095 @@
+{
+ "categories": [
+  {
+   "id": "heroes",
+   "label": "Heroes",
+   "group": "char",
+   "items": [
+    {
+     "slug": "hero",
+     "name": "hero adventurer default player"
+    },
+    {
+     "slug": "heroine",
+     "name": "heroine adventurer girl"
+    },
+    {
+     "slug": "adventurer-torch",
+     "name": "adventurer explorer with torch"
+    },
+    {
+     "slug": "knight",
+     "name": "knight with sword and shield"
+    },
+    {
+     "slug": "knight-red",
+     "name": "red knight with plume"
+    },
+    {
+     "slug": "paladin",
+     "name": "paladin gold knight with hammer"
+    },
+    {
+     "slug": "swordswoman",
+     "name": "swordswoman warrior girl"
+    },
+    {
+     "slug": "lancer",
+     "name": "lancer spearman soldier"
+    },
+    {
+     "slug": "gladiator",
+     "name": "gladiator with spear and shield"
+    },
+    {
+     "slug": "mage",
+     "name": "mage wizard blue with staff"
+    },
+    {
+     "slug": "mage-fire",
+     "name": "fire mage red wizard"
+    },
+    {
+     "slug": "mage-ice",
+     "name": "ice mage frost wizard"
+    },
+    {
+     "slug": "sorceress",
+     "name": "sorceress purple witch mage"
+    },
+    {
+     "slug": "druid",
+     "name": "druid nature mage green"
+    },
+    {
+     "slug": "warlock",
+     "name": "warlock dark mage"
+    },
+    {
+     "slug": "cleric",
+     "name": "cleric healer priest"
+    },
+    {
+     "slug": "priestess",
+     "name": "priestess healer white robe"
+    },
+    {
+     "slug": "monk",
+     "name": "monk orange robe"
+    },
+    {
+     "slug": "rogue",
+     "name": "rogue thief hooded dagger"
+    },
+    {
+     "slug": "thief",
+     "name": "thief bandana dagger"
+    },
+    {
+     "slug": "assassin",
+     "name": "assassin red hood"
+    },
+    {
+     "slug": "ninja",
+     "name": "ninja black"
+    },
+    {
+     "slug": "archer",
+     "name": "archer with bow"
+    },
+    {
+     "slug": "ranger",
+     "name": "ranger hooded bow"
+    },
+    {
+     "slug": "elf",
+     "name": "elf archer pointy ears"
+    },
+    {
+     "slug": "barbarian",
+     "name": "barbarian with axe"
+    },
+    {
+     "slug": "viking",
+     "name": "viking horned helmet axe"
+    },
+    {
+     "slug": "dwarf",
+     "name": "dwarf warrior beard hammer"
+    },
+    {
+     "slug": "samurai",
+     "name": "samurai red armor sword"
+    },
+    {
+     "slug": "pirate-hero",
+     "name": "pirate captain eyepatch sword"
+    },
+    {
+     "slug": "bard",
+     "name": "bard minstrel with lute"
+    },
+    {
+     "slug": "valkyrie",
+     "name": "valkyrie winged warrior spear"
+    },
+    {
+     "slug": "witch-hero",
+     "name": "witch with broom"
+    },
+    {
+     "slug": "alchemist",
+     "name": "alchemist green robe book"
+    }
+   ]
+  },
+  {
+   "id": "townsfolk",
+   "label": "Townsfolk",
+   "group": "char",
+   "items": [
+    {
+     "slug": "king",
+     "name": "king crown red robe"
+    },
+    {
+     "slug": "queen",
+     "name": "queen crown purple dress"
+    },
+    {
+     "slug": "prince",
+     "name": "prince young royal"
+    },
+    {
+     "slug": "princess",
+     "name": "princess pink dress tiara"
+    },
+    {
+     "slug": "guard",
+     "name": "guard soldier with spear"
+    },
+    {
+     "slug": "guard-captain",
+     "name": "guard captain blue plume"
+    },
+    {
+     "slug": "merchant",
+     "name": "merchant trader with sack"
+    },
+    {
+     "slug": "shopkeeper",
+     "name": "shopkeeper apron"
+    },
+    {
+     "slug": "farmer",
+     "name": "farmer straw hat pitchfork"
+    },
+    {
+     "slug": "farmer-woman",
+     "name": "farmer woman straw hat"
+    },
+    {
+     "slug": "boy",
+     "name": "child boy kid"
+    },
+    {
+     "slug": "girl",
+     "name": "child girl kid"
+    },
+    {
+     "slug": "elder",
+     "name": "elder old man beard cane"
+    },
+    {
+     "slug": "granny",
+     "name": "elder old woman granny"
+    },
+    {
+     "slug": "blacksmith",
+     "name": "blacksmith hammer apron"
+    },
+    {
+     "slug": "chef",
+     "name": "chef cook white hat"
+    },
+    {
+     "slug": "innkeeper",
+     "name": "innkeeper barkeep with mug"
+    },
+    {
+     "slug": "fisherman",
+     "name": "fisherman fishing rod"
+    },
+    {
+     "slug": "miner",
+     "name": "miner pickaxe helmet"
+    },
+    {
+     "slug": "lumberjack",
+     "name": "lumberjack woodcutter axe"
+    },
+    {
+     "slug": "priest",
+     "name": "priest black robe"
+    },
+    {
+     "slug": "scholar",
+     "name": "scholar librarian with book"
+    },
+    {
+     "slug": "nobleman",
+     "name": "nobleman rich top hat"
+    },
+    {
+     "slug": "noblewoman",
+     "name": "noblewoman lady blue dress"
+    },
+    {
+     "slug": "maid",
+     "name": "maid servant apron dress"
+    },
+    {
+     "slug": "jester",
+     "name": "jester clown fool"
+    },
+    {
+     "slug": "beggar",
+     "name": "beggar poor hooded"
+    },
+    {
+     "slug": "sailor",
+     "name": "sailor white cap"
+    },
+    {
+     "slug": "pirate",
+     "name": "pirate red bandana"
+    },
+    {
+     "slug": "shepherd",
+     "name": "shepherd with crook staff"
+    },
+    {
+     "slug": "gravedigger",
+     "name": "gravedigger with lantern"
+    },
+    {
+     "slug": "fortune-teller",
+     "name": "fortune teller mystic"
+    },
+    {
+     "slug": "villager",
+     "name": "villager man"
+    },
+    {
+     "slug": "florist",
+     "name": "florist girl with flower"
+    }
+   ]
+  },
+  {
+   "id": "monsters",
+   "label": "Monsters",
+   "group": "char",
+   "items": [
+    {
+     "slug": "slime-green",
+     "name": "green slime blob"
+    },
+    {
+     "slug": "slime-blue",
+     "name": "blue slime water blob"
+    },
+    {
+     "slug": "slime-fire",
+     "name": "fire slime red with flame"
+    },
+    {
+     "slug": "slime-ice",
+     "name": "ice slime frozen spikes"
+    },
+    {
+     "slug": "slime-poison",
+     "name": "poison slime purple"
+    },
+    {
+     "slug": "slime-gold",
+     "name": "gold slime rare"
+    },
+    {
+     "slug": "slime-king",
+     "name": "king slime with crown"
+    },
+    {
+     "slug": "slime-tiny",
+     "name": "tiny baby slime pink"
+    },
+    {
+     "slug": "skeleton",
+     "name": "skeleton undead"
+    },
+    {
+     "slug": "skeleton-warrior",
+     "name": "skeleton warrior sword shield"
+    },
+    {
+     "slug": "skeleton-archer",
+     "name": "skeleton archer bow"
+    },
+    {
+     "slug": "lich",
+     "name": "lich skeleton mage necro"
+    },
+    {
+     "slug": "zombie",
+     "name": "zombie undead green"
+    },
+    {
+     "slug": "mummy",
+     "name": "mummy bandages"
+    },
+    {
+     "slug": "vampire",
+     "name": "vampire dracula cape fangs"
+    },
+    {
+     "slug": "witch",
+     "name": "evil witch green skin"
+    },
+    {
+     "slug": "goblin",
+     "name": "goblin green"
+    },
+    {
+     "slug": "goblin-warrior",
+     "name": "goblin warrior dagger"
+    },
+    {
+     "slug": "goblin-archer",
+     "name": "goblin archer bow"
+    },
+    {
+     "slug": "goblin-shaman",
+     "name": "goblin shaman staff"
+    },
+    {
+     "slug": "orc",
+     "name": "orc warrior axe"
+    },
+    {
+     "slug": "orc-chief",
+     "name": "orc chief armored"
+    },
+    {
+     "slug": "dark-knight",
+     "name": "dark knight black armor"
+    },
+    {
+     "slug": "cultist",
+     "name": "cultist hooded red robe"
+    },
+    {
+     "slug": "bandit",
+     "name": "bandit masked robber"
+    },
+    {
+     "slug": "necromancer",
+     "name": "necromancer scythe"
+    },
+    {
+     "slug": "reaper",
+     "name": "grim reaper death scythe"
+    },
+    {
+     "slug": "pumpkin-man",
+     "name": "pumpkin head scarecrow monster"
+    },
+    {
+     "slug": "demon",
+     "name": "demon devil horns"
+    },
+    {
+     "slug": "bat",
+     "name": "bat purple"
+    },
+    {
+     "slug": "bat-red",
+     "name": "vampire bat red"
+    },
+    {
+     "slug": "ghost",
+     "name": "ghost white spooky"
+    },
+    {
+     "slug": "ghost-blue",
+     "name": "specter blue ghost"
+    },
+    {
+     "slug": "spider",
+     "name": "spider black"
+    },
+    {
+     "slug": "spider-red",
+     "name": "red spider"
+    },
+    {
+     "slug": "flaming-skull",
+     "name": "flaming skull fire"
+    },
+    {
+     "slug": "evil-eye",
+     "name": "evil eye floating eyeball"
+    },
+    {
+     "slug": "mushroom-monster",
+     "name": "mushroom monster red"
+    },
+    {
+     "slug": "snake",
+     "name": "snake green"
+    },
+    {
+     "slug": "rat",
+     "name": "rat grey"
+    },
+    {
+     "slug": "dragon",
+     "name": "dragon green"
+    },
+    {
+     "slug": "dragon-red",
+     "name": "red fire dragon"
+    },
+    {
+     "slug": "dragon-blue",
+     "name": "blue ice dragon"
+    },
+    {
+     "slug": "dragon-black",
+     "name": "black shadow dragon"
+    },
+    {
+     "slug": "golem",
+     "name": "stone golem"
+    },
+    {
+     "slug": "golem-ice",
+     "name": "ice golem"
+    },
+    {
+     "slug": "golem-lava",
+     "name": "lava golem fire"
+    },
+    {
+     "slug": "mimic",
+     "name": "mimic chest monster teeth"
+    },
+    {
+     "slug": "imp",
+     "name": "imp red little devil"
+    },
+    {
+     "slug": "gargoyle",
+     "name": "gargoyle stone winged"
+    },
+    {
+     "slug": "ogre",
+     "name": "ogre big brute"
+    },
+    {
+     "slug": "troll",
+     "name": "troll blue big"
+    },
+    {
+     "slug": "cyclops",
+     "name": "cyclops one eye giant"
+    },
+    {
+     "slug": "yeti",
+     "name": "yeti snow monster"
+    },
+    {
+     "slug": "dire-wolf",
+     "name": "dire wolf black"
+    },
+    {
+     "slug": "wisp-fire",
+     "name": "fire elemental wisp"
+    },
+    {
+     "slug": "wisp-ice",
+     "name": "ice elemental wisp"
+    },
+    {
+     "slug": "scorpion",
+     "name": "scorpion orange"
+    },
+    {
+     "slug": "jellyfish",
+     "name": "jellyfish pink"
+    },
+    {
+     "slug": "piranha",
+     "name": "piranha fish teeth"
+    },
+    {
+     "slug": "man-eating-plant",
+     "name": "carnivorous plant man eater"
+    },
+    {
+     "slug": "worm",
+     "name": "giant worm pink"
+    },
+    {
+     "slug": "tentacle",
+     "name": "tentacle kraken purple"
+    },
+    {
+     "slug": "wasp",
+     "name": "giant wasp hornet"
+    },
+    {
+     "slug": "robot",
+     "name": "robot steel"
+    },
+    {
+     "slug": "treant",
+     "name": "treant tree monster"
+    }
+   ]
+  },
+  {
+   "id": "animals",
+   "label": "Animals",
+   "group": "char",
+   "items": [
+    {
+     "slug": "cat",
+     "name": "cat orange"
+    },
+    {
+     "slug": "cat-black",
+     "name": "black cat"
+    },
+    {
+     "slug": "dog",
+     "name": "dog brown"
+    },
+    {
+     "slug": "dog-white",
+     "name": "white dog"
+    },
+    {
+     "slug": "wolf",
+     "name": "wolf grey"
+    },
+    {
+     "slug": "fox",
+     "name": "fox orange"
+    },
+    {
+     "slug": "chicken",
+     "name": "chicken hen white"
+    },
+    {
+     "slug": "chick",
+     "name": "chick baby chicken yellow"
+    },
+    {
+     "slug": "cow",
+     "name": "cow black and white"
+    },
+    {
+     "slug": "cow-brown",
+     "name": "brown cow"
+    },
+    {
+     "slug": "pig",
+     "name": "pig pink"
+    },
+    {
+     "slug": "boar",
+     "name": "wild boar brown"
+    },
+    {
+     "slug": "sheep",
+     "name": "sheep white wool"
+    },
+    {
+     "slug": "sheep-black",
+     "name": "black sheep"
+    },
+    {
+     "slug": "goat",
+     "name": "goat white"
+    },
+    {
+     "slug": "horse",
+     "name": "horse brown"
+    },
+    {
+     "slug": "horse-white",
+     "name": "white horse"
+    },
+    {
+     "slug": "rabbit",
+     "name": "rabbit bunny white"
+    },
+    {
+     "slug": "bird-blue",
+     "name": "blue bird"
+    },
+    {
+     "slug": "bird-red",
+     "name": "red bird cardinal"
+    },
+    {
+     "slug": "bird-yellow",
+     "name": "yellow bird canary"
+    },
+    {
+     "slug": "crow",
+     "name": "crow raven black bird"
+    },
+    {
+     "slug": "duck",
+     "name": "duck white"
+    },
+    {
+     "slug": "frog",
+     "name": "frog green"
+    },
+    {
+     "slug": "frog-blue",
+     "name": "blue poison frog"
+    },
+    {
+     "slug": "fish",
+     "name": "fish orange goldfish"
+    },
+    {
+     "slug": "fish-blue",
+     "name": "blue fish"
+    },
+    {
+     "slug": "turtle",
+     "name": "turtle green"
+    },
+    {
+     "slug": "bear",
+     "name": "bear brown"
+    },
+    {
+     "slug": "polar-bear",
+     "name": "polar bear white"
+    },
+    {
+     "slug": "deer",
+     "name": "deer stag antlers"
+    },
+    {
+     "slug": "owl",
+     "name": "owl brown"
+    },
+    {
+     "slug": "butterfly",
+     "name": "butterfly blue"
+    },
+    {
+     "slug": "butterfly-orange",
+     "name": "orange butterfly"
+    },
+    {
+     "slug": "bee",
+     "name": "bee honeybee"
+    },
+    {
+     "slug": "crab",
+     "name": "crab red"
+    },
+    {
+     "slug": "snail",
+     "name": "snail"
+    },
+    {
+     "slug": "penguin",
+     "name": "penguin"
+    },
+    {
+     "slug": "octopus",
+     "name": "octopus purple"
+    },
+    {
+     "slug": "ladybug",
+     "name": "ladybug red beetle"
+    },
+    {
+     "slug": "mouse",
+     "name": "mouse grey"
+    },
+    {
+     "slug": "squirrel",
+     "name": "squirrel"
+    },
+    {
+     "slug": "shark",
+     "name": "shark"
+    },
+    {
+     "slug": "monkey",
+     "name": "monkey"
+    }
+   ]
+  },
+  {
+   "id": "weapons",
+   "label": "Weapons & Armour",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "sword",
+     "name": "iron sword"
+    },
+    {
+     "slug": "sword-gold",
+     "name": "golden sword"
+    },
+    {
+     "slug": "sword-fire",
+     "name": "fire sword flame blade"
+    },
+    {
+     "slug": "sword-ice",
+     "name": "ice sword frost blade"
+    },
+    {
+     "slug": "sword-dark",
+     "name": "dark cursed sword purple"
+    },
+    {
+     "slug": "dagger",
+     "name": "dagger knife"
+    },
+    {
+     "slug": "axe",
+     "name": "axe hatchet"
+    },
+    {
+     "slug": "battle-axe",
+     "name": "battle axe double"
+    },
+    {
+     "slug": "hammer",
+     "name": "war hammer"
+    },
+    {
+     "slug": "mace",
+     "name": "spiked mace"
+    },
+    {
+     "slug": "club",
+     "name": "wooden club"
+    },
+    {
+     "slug": "spear",
+     "name": "spear lance"
+    },
+    {
+     "slug": "trident",
+     "name": "golden trident"
+    },
+    {
+     "slug": "scythe",
+     "name": "scythe"
+    },
+    {
+     "slug": "bow",
+     "name": "wooden bow"
+    },
+    {
+     "slug": "crossbow",
+     "name": "crossbow"
+    },
+    {
+     "slug": "arrow",
+     "name": "arrow"
+    },
+    {
+     "slug": "staff-blue",
+     "name": "magic staff blue orb"
+    },
+    {
+     "slug": "staff-red",
+     "name": "fire staff red orb"
+    },
+    {
+     "slug": "wand",
+     "name": "magic wand star"
+    },
+    {
+     "slug": "boomerang",
+     "name": "boomerang"
+    },
+    {
+     "slug": "bomb",
+     "name": "bomb black fuse"
+    },
+    {
+     "slug": "pickaxe",
+     "name": "pickaxe mining tool"
+    },
+    {
+     "slug": "shovel",
+     "name": "shovel spade"
+    },
+    {
+     "slug": "shield-wood",
+     "name": "wooden round shield"
+    },
+    {
+     "slug": "shield-iron",
+     "name": "iron kite shield blue"
+    },
+    {
+     "slug": "shield-gold",
+     "name": "golden shield red"
+    },
+    {
+     "slug": "helmet",
+     "name": "iron helmet"
+    },
+    {
+     "slug": "helmet-gold",
+     "name": "golden helmet"
+    },
+    {
+     "slug": "chestplate",
+     "name": "iron chestplate armor"
+    },
+    {
+     "slug": "boot",
+     "name": "leather boot"
+    },
+    {
+     "slug": "gauntlet",
+     "name": "iron gauntlet glove"
+    },
+    {
+     "slug": "ring-ruby",
+     "name": "gold ring ruby"
+    },
+    {
+     "slug": "amulet",
+     "name": "amulet necklace"
+    },
+    {
+     "slug": "crown",
+     "name": "golden crown"
+    },
+    {
+     "slug": "wizard-hat",
+     "name": "wizard hat blue"
+    }
+   ]
+  },
+  {
+   "id": "items",
+   "label": "Items & Treasure",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "potion-red",
+     "name": "red health potion"
+    },
+    {
+     "slug": "potion-blue",
+     "name": "blue mana potion"
+    },
+    {
+     "slug": "potion-green",
+     "name": "green stamina potion"
+    },
+    {
+     "slug": "potion-purple",
+     "name": "purple magic potion"
+    },
+    {
+     "slug": "vial-red",
+     "name": "small red vial"
+    },
+    {
+     "slug": "vial-pink",
+     "name": "love potion pink vial"
+    },
+    {
+     "slug": "flask-orange",
+     "name": "big orange elixir flask"
+    },
+    {
+     "slug": "poison",
+     "name": "poison flask skull"
+    },
+    {
+     "slug": "bottle-empty",
+     "name": "empty glass bottle"
+    },
+    {
+     "slug": "diamond",
+     "name": "diamond gem white"
+    },
+    {
+     "slug": "ruby",
+     "name": "ruby gem red"
+    },
+    {
+     "slug": "sapphire",
+     "name": "sapphire gem blue"
+    },
+    {
+     "slug": "emerald",
+     "name": "emerald gem green"
+    },
+    {
+     "slug": "amethyst",
+     "name": "amethyst gem purple"
+    },
+    {
+     "slug": "topaz",
+     "name": "topaz gem orange"
+    },
+    {
+     "slug": "pearl",
+     "name": "pearl white"
+    },
+    {
+     "slug": "mana-crystal",
+     "name": "mana crystal blue"
+    },
+    {
+     "slug": "key-gold",
+     "name": "gold key"
+    },
+    {
+     "slug": "key-silver",
+     "name": "silver key"
+    },
+    {
+     "slug": "key-boss",
+     "name": "boss key ornate"
+    },
+    {
+     "slug": "coin-gold",
+     "name": "gold coin"
+    },
+    {
+     "slug": "coin-silver",
+     "name": "silver coin"
+    },
+    {
+     "slug": "coin-copper",
+     "name": "copper coin"
+    },
+    {
+     "slug": "coin-stack",
+     "name": "stack of gold coins"
+    },
+    {
+     "slug": "money-bag",
+     "name": "money bag gold sack"
+    },
+    {
+     "slug": "gold-bar",
+     "name": "gold bar ingot"
+    },
+    {
+     "slug": "scroll",
+     "name": "scroll parchment"
+    },
+    {
+     "slug": "book-red",
+     "name": "red spell book"
+    },
+    {
+     "slug": "map",
+     "name": "treasure map"
+    },
+    {
+     "slug": "letter",
+     "name": "letter envelope mail"
+    },
+    {
+     "slug": "bone",
+     "name": "bone"
+    },
+    {
+     "slug": "skull",
+     "name": "skull remains"
+    },
+    {
+     "slug": "bell",
+     "name": "golden bell"
+    },
+    {
+     "slug": "compass",
+     "name": "compass"
+    },
+    {
+     "slug": "hourglass",
+     "name": "hourglass timer"
+    },
+    {
+     "slug": "torch",
+     "name": "torch burning"
+    },
+    {
+     "slug": "candle",
+     "name": "candle"
+    },
+    {
+     "slug": "lantern",
+     "name": "lantern lamp"
+    },
+    {
+     "slug": "feather",
+     "name": "feather quill"
+    },
+    {
+     "slug": "crystal-ball",
+     "name": "crystal ball orb"
+    },
+    {
+     "slug": "backpack",
+     "name": "backpack bag"
+    },
+    {
+     "slug": "dice",
+     "name": "dice"
+    },
+    {
+     "slug": "trophy",
+     "name": "gold trophy cup"
+    },
+    {
+     "slug": "rope",
+     "name": "rope coil"
+    }
+   ]
+  },
+  {
+   "id": "food",
+   "label": "Food",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "apple",
+     "name": "red apple"
+    },
+    {
+     "slug": "bread",
+     "name": "bread loaf"
+    },
+    {
+     "slug": "cheese",
+     "name": "cheese wedge"
+    },
+    {
+     "slug": "meat",
+     "name": "meat drumstick"
+    },
+    {
+     "slug": "cooked-fish",
+     "name": "cooked fish on plate"
+    },
+    {
+     "slug": "stew",
+     "name": "stew soup bowl"
+    },
+    {
+     "slug": "cake",
+     "name": "cake with cherry"
+    },
+    {
+     "slug": "pie",
+     "name": "pie"
+    },
+    {
+     "slug": "cookie",
+     "name": "cookie"
+    },
+    {
+     "slug": "donut",
+     "name": "donut pink"
+    },
+    {
+     "slug": "candy",
+     "name": "candy sweet"
+    },
+    {
+     "slug": "ice-cream",
+     "name": "ice cream cone"
+    },
+    {
+     "slug": "pizza",
+     "name": "pizza slice"
+    },
+    {
+     "slug": "egg",
+     "name": "egg"
+    },
+    {
+     "slug": "carrot",
+     "name": "carrot"
+    },
+    {
+     "slug": "corn",
+     "name": "corn cob"
+    },
+    {
+     "slug": "pumpkin",
+     "name": "pumpkin"
+    },
+    {
+     "slug": "mushroom-food",
+     "name": "mushroom red"
+    },
+    {
+     "slug": "cherry",
+     "name": "cherries"
+    },
+    {
+     "slug": "strawberry",
+     "name": "strawberry"
+    },
+    {
+     "slug": "grapes",
+     "name": "grapes purple"
+    },
+    {
+     "slug": "banana",
+     "name": "banana"
+    },
+    {
+     "slug": "melon",
+     "name": "watermelon slice"
+    },
+    {
+     "slug": "mug",
+     "name": "mug of ale beer"
+    },
+    {
+     "slug": "wine",
+     "name": "wine bottle"
+    }
+   ]
+  },
+  {
+   "id": "props",
+   "label": "Furniture & Props",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "chest",
+     "name": "wooden treasure chest closed"
+    },
+    {
+     "slug": "chest-open",
+     "name": "wooden treasure chest open gold"
+    },
+    {
+     "slug": "chest-empty",
+     "name": "wooden treasure chest open empty"
+    },
+    {
+     "slug": "chest-gold",
+     "name": "golden treasure chest closed"
+    },
+    {
+     "slug": "chest-gold-open",
+     "name": "golden treasure chest open"
+    },
+    {
+     "slug": "chest-iron",
+     "name": "iron chest locked"
+    },
+    {
+     "slug": "barrel",
+     "name": "wooden barrel"
+    },
+    {
+     "slug": "crate",
+     "name": "wooden crate box"
+    },
+    {
+     "slug": "pot",
+     "name": "clay pot vase"
+    },
+    {
+     "slug": "pot-broken",
+     "name": "broken pot"
+    },
+    {
+     "slug": "sack",
+     "name": "sack bag of grain"
+    },
+    {
+     "slug": "bucket",
+     "name": "empty bucket"
+    },
+    {
+     "slug": "bucket-water",
+     "name": "bucket of water"
+    },
+    {
+     "slug": "table",
+     "name": "wooden table"
+    },
+    {
+     "slug": "chair",
+     "name": "wooden chair"
+    },
+    {
+     "slug": "stool",
+     "name": "stool"
+    },
+    {
+     "slug": "bed",
+     "name": "bed red blanket"
+    },
+    {
+     "slug": "bed-blue",
+     "name": "bed blue blanket"
+    },
+    {
+     "slug": "bookshelf",
+     "name": "bookshelf books"
+    },
+    {
+     "slug": "cupboard",
+     "name": "cupboard dresser"
+    },
+    {
+     "slug": "throne",
+     "name": "royal throne"
+    },
+    {
+     "slug": "clock",
+     "name": "grandfather clock"
+    },
+    {
+     "slug": "mirror",
+     "name": "mirror"
+    },
+    {
+     "slug": "painting",
+     "name": "painting picture"
+    },
+    {
+     "slug": "banner-red",
+     "name": "red banner"
+    },
+    {
+     "slug": "flag-red",
+     "name": "red flag"
+    },
+    {
+     "slug": "statue",
+     "name": "stone statue"
+    },
+    {
+     "slug": "gravestone",
+     "name": "gravestone tombstone"
+    },
+    {
+     "slug": "grave-cross",
+     "name": "wooden grave cross"
+    },
+    {
+     "slug": "coffin",
+     "name": "coffin"
+    },
+    {
+     "slug": "campfire",
+     "name": "campfire"
+    },
+    {
+     "slug": "cauldron",
+     "name": "cauldron green brew"
+    },
+    {
+     "slug": "anvil",
+     "name": "anvil"
+    },
+    {
+     "slug": "signpost",
+     "name": "wooden sign"
+    },
+    {
+     "slug": "sign-right",
+     "name": "arrow sign right"
+    },
+    {
+     "slug": "sign-left",
+     "name": "arrow sign left"
+    },
+    {
+     "slug": "lever-left",
+     "name": "lever switch left off"
+    },
+    {
+     "slug": "lever-right",
+     "name": "lever switch right on"
+    },
+    {
+     "slug": "button",
+     "name": "red button switch"
+    },
+    {
+     "slug": "button-pressed",
+     "name": "red button pressed"
+    },
+    {
+     "slug": "door",
+     "name": "wooden door closed"
+    },
+    {
+     "slug": "door-open",
+     "name": "wooden door open"
+    },
+    {
+     "slug": "door-iron",
+     "name": "iron door locked"
+    },
+    {
+     "slug": "portcullis",
+     "name": "portcullis iron gate"
+    },
+    {
+     "slug": "stairs",
+     "name": "stone stairs"
+    },
+    {
+     "slug": "lamp-post",
+     "name": "street lamp post"
+    },
+    {
+     "slug": "cage",
+     "name": "iron cage"
+    },
+    {
+     "slug": "fountain",
+     "name": "fountain"
+    }
+   ]
+  },
+  {
+   "id": "nature",
+   "label": "Nature",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "tree",
+     "name": "oak tree green"
+    },
+    {
+     "slug": "tree-autumn",
+     "name": "autumn tree orange"
+    },
+    {
+     "slug": "tree-cherry",
+     "name": "cherry blossom tree pink"
+    },
+    {
+     "slug": "tree-apple",
+     "name": "apple tree"
+    },
+    {
+     "slug": "pine",
+     "name": "pine tree"
+    },
+    {
+     "slug": "pine-snow",
+     "name": "snowy pine tree"
+    },
+    {
+     "slug": "palm",
+     "name": "palm tree"
+    },
+    {
+     "slug": "dead-tree",
+     "name": "dead tree"
+    },
+    {
+     "slug": "bush",
+     "name": "bush green"
+    },
+    {
+     "slug": "bush-berry",
+     "name": "berry bush"
+    },
+    {
+     "slug": "rock",
+     "name": "rock boulder"
+    },
+    {
+     "slug": "rock-mossy",
+     "name": "mossy rock"
+    },
+    {
+     "slug": "rock-small",
+     "name": "small stone"
+    },
+    {
+     "slug": "flower-red",
+     "name": "red flower"
+    },
+    {
+     "slug": "flower-blue",
+     "name": "blue flower"
+    },
+    {
+     "slug": "flower-white",
+     "name": "white daisy flower"
+    },
+    {
+     "slug": "tulip",
+     "name": "pink tulip"
+    },
+    {
+     "slug": "sunflower",
+     "name": "sunflower"
+    },
+    {
+     "slug": "mushroom-brown",
+     "name": "brown mushroom"
+    },
+    {
+     "slug": "mushroom-glow",
+     "name": "glowing blue mushroom"
+    },
+    {
+     "slug": "grass",
+     "name": "grass tuft"
+    },
+    {
+     "slug": "cactus",
+     "name": "cactus"
+    },
+    {
+     "slug": "stump",
+     "name": "tree stump"
+    },
+    {
+     "slug": "log",
+     "name": "wooden log"
+    },
+    {
+     "slug": "lily-pad",
+     "name": "lily pad flower"
+    },
+    {
+     "slug": "crystal-purple",
+     "name": "purple crystal cluster"
+    },
+    {
+     "slug": "stalagmite",
+     "name": "stalagmite cave rock"
+    },
+    {
+     "slug": "snowman",
+     "name": "snowman"
+    },
+    {
+     "slug": "hay-bale",
+     "name": "hay bale"
+    },
+    {
+     "slug": "fence",
+     "name": "wooden fence"
+    },
+    {
+     "slug": "wheat",
+     "name": "wheat crop"
+    },
+    {
+     "slug": "scarecrow",
+     "name": "scarecrow"
+    },
+    {
+     "slug": "coral",
+     "name": "coral pink"
+    },
+    {
+     "slug": "shell",
+     "name": "sea shell"
+    },
+    {
+     "slug": "starfish",
+     "name": "starfish"
+    },
+    {
+     "slug": "cloud",
+     "name": "cloud"
+    }
+   ]
+  },
+  {
+   "id": "buildings",
+   "label": "Buildings & Vehicles",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "house",
+     "name": "house red roof"
+    },
+    {
+     "slug": "house-blue",
+     "name": "house blue roof"
+    },
+    {
+     "slug": "cottage",
+     "name": "cottage thatched roof"
+    },
+    {
+     "slug": "shop",
+     "name": "shop store"
+    },
+    {
+     "slug": "inn",
+     "name": "inn tavern"
+    },
+    {
+     "slug": "tower",
+     "name": "stone tower"
+    },
+    {
+     "slug": "wizard-tower",
+     "name": "wizard tower purple"
+    },
+    {
+     "slug": "castle",
+     "name": "castle"
+    },
+    {
+     "slug": "church",
+     "name": "church chapel"
+    },
+    {
+     "slug": "windmill",
+     "name": "windmill"
+    },
+    {
+     "slug": "barn",
+     "name": "red barn"
+    },
+    {
+     "slug": "lighthouse",
+     "name": "lighthouse"
+    },
+    {
+     "slug": "pyramid",
+     "name": "pyramid"
+    },
+    {
+     "slug": "igloo",
+     "name": "igloo"
+    },
+    {
+     "slug": "tent",
+     "name": "tent camp red"
+    },
+    {
+     "slug": "market-stall",
+     "name": "market stall"
+    },
+    {
+     "slug": "well",
+     "name": "stone well"
+    },
+    {
+     "slug": "mine-entrance",
+     "name": "mine entrance cave"
+    },
+    {
+     "slug": "bridge",
+     "name": "wooden bridge"
+    },
+    {
+     "slug": "pillar",
+     "name": "stone pillar column"
+    },
+    {
+     "slug": "pillar-broken",
+     "name": "broken pillar ruin"
+    },
+    {
+     "slug": "cart",
+     "name": "wooden cart"
+    },
+    {
+     "slug": "wagon",
+     "name": "covered wagon"
+    },
+    {
+     "slug": "minecart",
+     "name": "minecart empty"
+    },
+    {
+     "slug": "minecart-gold",
+     "name": "minecart full of gold"
+    },
+    {
+     "slug": "minecart-coal",
+     "name": "minecart full of coal"
+    },
+    {
+     "slug": "rowboat",
+     "name": "rowboat small boat"
+    },
+    {
+     "slug": "sailboat",
+     "name": "sailboat"
+    },
+    {
+     "slug": "ship",
+     "name": "sailing ship"
+    },
+    {
+     "slug": "pirate-ship",
+     "name": "pirate ship black sails"
+    },
+    {
+     "slug": "raft",
+     "name": "raft"
+    },
+    {
+     "slug": "balloon",
+     "name": "hot air balloon"
+    }
+   ]
+  },
+  {
+   "id": "tiles",
+   "label": "Tiles & Terrain",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "tile-grass",
+     "name": "grass tile ground"
+    },
+    {
+     "slug": "tile-grass-flowers",
+     "name": "grass with flowers tile meadow"
+    },
+    {
+     "slug": "tile-grass-dirt",
+     "name": "grass on dirt ground top tile"
+    },
+    {
+     "slug": "tile-dirt",
+     "name": "dirt earth tile"
+    },
+    {
+     "slug": "tile-path",
+     "name": "path road gravel tile"
+    },
+    {
+     "slug": "tile-farmland",
+     "name": "farmland field soil tile"
+    },
+    {
+     "slug": "tile-sand",
+     "name": "sand desert beach tile"
+    },
+    {
+     "slug": "tile-sandstone",
+     "name": "sandstone brick tile"
+    },
+    {
+     "slug": "tile-snow",
+     "name": "snow tile"
+    },
+    {
+     "slug": "tile-snow-dirt",
+     "name": "snow on dirt ground top tile"
+    },
+    {
+     "slug": "tile-ice",
+     "name": "ice tile frozen"
+    },
+    {
+     "slug": "tile-water",
+     "name": "water tile"
+    },
+    {
+     "slug": "tile-deep-water",
+     "name": "deep water sea tile"
+    },
+    {
+     "slug": "tile-lava",
+     "name": "lava tile"
+    },
+    {
+     "slug": "tile-stone",
+     "name": "stone rock tile"
+    },
+    {
+     "slug": "tile-stone-cracked",
+     "name": "cracked stone tile"
+    },
+    {
+     "slug": "tile-cobble",
+     "name": "cobblestone tile"
+    },
+    {
+     "slug": "tile-stone-brick",
+     "name": "stone brick wall tile"
+    },
+    {
+     "slug": "tile-mossy-brick",
+     "name": "mossy stone brick tile"
+    },
+    {
+     "slug": "tile-brick",
+     "name": "red brick wall tile"
+    },
+    {
+     "slug": "tile-dungeon-wall",
+     "name": "dark dungeon wall tile"
+    },
+    {
+     "slug": "tile-dungeon-floor",
+     "name": "dungeon floor slab tile"
+    },
+    {
+     "slug": "tile-checker",
+     "name": "checker floor black white tile"
+    },
+    {
+     "slug": "tile-planks",
+     "name": "wood planks tile"
+    },
+    {
+     "slug": "tile-wood-floor",
+     "name": "dark wood floor tile"
+    },
+    {
+     "slug": "tile-carpet",
+     "name": "red carpet rug tile"
+    },
+    {
+     "slug": "tile-roof",
+     "name": "red roof tiles"
+    },
+    {
+     "slug": "tile-thatch",
+     "name": "thatch straw roof tile"
+    },
+    {
+     "slug": "tile-hedge",
+     "name": "hedge leaves bush tile"
+    },
+    {
+     "slug": "tile-cave",
+     "name": "cave rock wall tile"
+    },
+    {
+     "slug": "tile-obsidian",
+     "name": "obsidian dark tile"
+    },
+    {
+     "slug": "tile-metal",
+     "name": "metal plate tile"
+    },
+    {
+     "slug": "tile-grate",
+     "name": "iron grate tile"
+    },
+    {
+     "slug": "tile-ore-gold",
+     "name": "gold ore tile"
+    },
+    {
+     "slug": "tile-ore-coal",
+     "name": "coal ore tile"
+    },
+    {
+     "slug": "tile-ore-iron",
+     "name": "iron copper ore tile"
+    },
+    {
+     "slug": "tile-ore-diamond",
+     "name": "diamond ore tile"
+    },
+    {
+     "slug": "tile-question",
+     "name": "question block mystery"
+    },
+    {
+     "slug": "tile-crate",
+     "name": "crate block tile"
+    },
+    {
+     "slug": "tile-rail",
+     "name": "rail track tile"
+    },
+    {
+     "slug": "tile-trapdoor",
+     "name": "trapdoor hatch tile"
+    },
+    {
+     "slug": "tile-window",
+     "name": "window in stone wall tile"
+    },
+    {
+     "slug": "tile-wall-torch",
+     "name": "stone wall with torch tile"
+    },
+    {
+     "slug": "tile-platform",
+     "name": "wooden platform"
+    },
+    {
+     "slug": "tile-platform-stone",
+     "name": "stone platform ledge"
+    },
+    {
+     "slug": "tile-spikes",
+     "name": "spikes trap"
+    },
+    {
+     "slug": "tile-ladder",
+     "name": "ladder"
+    },
+    {
+     "slug": "tile-chain",
+     "name": "hanging chain"
+    },
+    {
+     "slug": "tile-vines",
+     "name": "hanging vines"
+    },
+    {
+     "slug": "tile-spring",
+     "name": "spring bounce pad"
+    }
+   ]
+  },
+  {
+   "id": "effects",
+   "label": "Effects",
+   "group": "fx",
+   "items": [
+    {
+     "slug": "explosion",
+     "name": "explosion blast boom"
+    },
+    {
+     "slug": "explosion-big",
+     "name": "big explosion"
+    },
+    {
+     "slug": "smoke",
+     "name": "smoke puff"
+    },
+    {
+     "slug": "fire",
+     "name": "fire flame"
+    },
+    {
+     "slug": "fire-blue",
+     "name": "blue spirit flame"
+    },
+    {
+     "slug": "fireball",
+     "name": "fireball"
+    },
+    {
+     "slug": "magic-bolt",
+     "name": "blue magic bolt"
+    },
+    {
+     "slug": "magic-bolt-purple",
+     "name": "purple dark magic bolt"
+    },
+    {
+     "slug": "ice-shard",
+     "name": "ice shard"
+    },
+    {
+     "slug": "lightning",
+     "name": "lightning bolt"
+    },
+    {
+     "slug": "slash",
+     "name": "sword slash swipe"
+    },
+    {
+     "slug": "impact",
+     "name": "hit impact star"
+    },
+    {
+     "slug": "sparkle",
+     "name": "sparkle shine gold"
+    },
+    {
+     "slug": "poison-bubbles",
+     "name": "poison bubbles"
+    },
+    {
+     "slug": "tornado",
+     "name": "tornado whirlwind"
+    },
+    {
+     "slug": "water-drop",
+     "name": "water drop tear"
+    },
+    {
+     "slug": "snowflake",
+     "name": "snowflake"
+    },
+    {
+     "slug": "leaf",
+     "name": "falling leaf"
+    },
+    {
+     "slug": "air-bubble",
+     "name": "air bubble"
+    },
+    {
+     "slug": "portal",
+     "name": "blue portal"
+    },
+    {
+     "slug": "portal-purple",
+     "name": "purple dark portal"
+    },
+    {
+     "slug": "rune-circle",
+     "name": "magic rune circle"
+    },
+    {
+     "slug": "cobweb",
+     "name": "cobweb spider web"
+    },
+    {
+     "slug": "xp-orb",
+     "name": "experience orb green"
+    },
+    {
+     "slug": "sun",
+     "name": "sun"
+    },
+    {
+     "slug": "moon",
+     "name": "moon crescent"
+    }
+   ]
+  },
+  {
+   "id": "symbols",
+   "label": "Signs & Symbols",
+   "group": "fx",
+   "items": [
+    {
+     "slug": "heart",
+     "name": "heart full life"
+    },
+    {
+     "slug": "heart-half",
+     "name": "half heart"
+    },
+    {
+     "slug": "heart-empty",
+     "name": "empty heart"
+    },
+    {
+     "slug": "star",
+     "name": "gold star"
+    },
+    {
+     "slug": "star-empty",
+     "name": "empty star grey"
+    },
+    {
+     "slug": "arrow-up",
+     "name": "arrow up"
+    },
+    {
+     "slug": "arrow-right",
+     "name": "arrow right"
+    },
+    {
+     "slug": "arrow-down",
+     "name": "arrow down"
+    },
+    {
+     "slug": "arrow-left",
+     "name": "arrow left"
+    },
+    {
+     "slug": "speech-bubble",
+     "name": "speech bubble empty"
+    },
+    {
+     "slug": "speech-dots",
+     "name": "speech bubble talking dots"
+    },
+    {
+     "slug": "speech-exclaim",
+     "name": "speech bubble exclamation alert"
+    },
+    {
+     "slug": "speech-question",
+     "name": "speech bubble question"
+    },
+    {
+     "slug": "thought-bubble",
+     "name": "thought bubble"
+    },
+    {
+     "slug": "exclamation",
+     "name": "exclamation mark alert"
+    },
+    {
+     "slug": "question",
+     "name": "question mark"
+    },
+    {
+     "slug": "zzz",
+     "name": "zzz sleep"
+    },
+    {
+     "slug": "music-note",
+     "name": "music note"
+    },
+    {
+     "slug": "anger",
+     "name": "anger mark"
+    },
+    {
+     "slug": "check",
+     "name": "check mark yes"
+    },
+    {
+     "slug": "cross",
+     "name": "cross mark no"
+    },
+    {
+     "slug": "plus",
+     "name": "plus heal green cross"
+    },
+    {
+     "slug": "crosshair",
+     "name": "crosshair target"
+    },
+    {
+     "slug": "lock",
+     "name": "padlock locked"
+    },
+    {
+     "slug": "pointer",
+     "name": "pointing hand cursor"
+    }
+   ]
+  }
+ ]
+}

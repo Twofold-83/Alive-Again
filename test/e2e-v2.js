@@ -67,7 +67,7 @@ await p.tap('[data-mark="weather=snow"]'); await p.tap('[data-mark="burst=shake"
     assert.match(await p.textContent('#banner'), /Player/);
     // Player: take a choice, reach for the key, emote, roll d20
     await p.tap('#foot .choices button');
-    const key = sc.entities.find((e) => e.asset === 's:old-key');
+    const key = sc.entities.find((e) => /key/.test(e.asset));
     await p.tap(`.ent[data-id="${key.id}"]`);
     await p.waitForSelector('.ent.target');
     await p.tap('#foot .emotes button:nth-child(4)');
@@ -91,7 +91,7 @@ await p.tap('[data-mark="weather=snow"]'); await p.tap('[data-mark="burst=shake"
     await p.waitForFunction(() => /Player/.test(document.querySelector('#banner').textContent));
     await cutDone(p);
     sc = await S(p);
-    assert.equal(sc.sheet.inv.length, 1); assert.equal(sc.sheet.inv[0].asset, 's:old-key'); assert.equal(sc.sheet.stats[0].value, 4);
+    assert.equal(sc.sheet.inv.length, 1); assert.match(sc.sheet.inv[0].asset, /key/); assert.equal(sc.sheet.stats[0].value, 4);
     assert(!sc.entities.some((e) => e.id === key.id));
     // Player uses the key
     await p.tap('#sheet .chip.item');
