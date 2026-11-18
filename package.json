@@ -1,12 +1,12 @@
 {
   "name": "twofold",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A two-player, turn-based storytelling stage: one Player, one Director.",
   "private": true,
   "scripts": {
     "start": "node server.js",
     "test": "node test/smoke.mjs",
-    "test:e2e": "node test/e2e.js && node test/e2e-v2.js && node test/e2e-guided.js && node test/e2e-modes.js", "make-sprites": "node tools/make-sprites.js",
+    "test:e2e": "node test/e2e-play.js && node test/e2e-steps.js", "make-sprites": "node tools/make-sprites.js",
     "upgrade-sprites": "node tools/upgrade-sprites.js"
   },
   "engines": {

@@ -167,6 +167,7 @@ function directorMove({ scene, memory, turn, rules }) {
   }
 
   const said = hero.say || '';
+  hero.say = '';                                           // the Player's line has been heard; it does not hang over the next scene
   const tgt = scene.entities.find((e) => e.id === scene.target);
   const item = scene.sheet.inv.find((i) => i.id === scene.use);
   let did = scene.action || '';

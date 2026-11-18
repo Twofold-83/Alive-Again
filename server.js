@@ -67,6 +67,7 @@ function newScene() {
     steps: [],                                         // earlier moments of a step-by-step turn, played in order before this scene
     sheet: { inv: [], stats: [] },                     // inventory + stats (story-type layers)
     target: null, use: null, roll: null,               // the Player's one-turn extras (+ dice)
+    level: null,                                       // tile grid: floors, walls (see cleanLevel)
   };
 }
 /* Old saved stories predate some fields. */
@@ -92,6 +93,30 @@ function cleanRules(r) {
     player: r && PLAYER_MODES.includes(r.player) ? r.player : 'free',
     moveRange: r ? r3(num(r.moveRange, 0, 1, 0)) : 0,
   };
+}
+/* A level is a 16 x 12 grid of tiles over the backdrop. pal lists the tiles in use
+ * ({ a: asset, k: 'f' floor | 'w' wall }); cells is 192 characters, '0' for empty,
+ * otherwise a base-36 index into pal (1 = pal[0]). Where a level exists the hero
+ * may only stand on floor tiles, and solid things block the way. */
+const LEVEL_W = 16, LEVEL_H = 12;
+function cleanLevel(l) {
+  if (!l || typeof l !== 'object' || typeof l.cells !== 'string' || !/^[0-9a-z]{192}$/.test(l.cells) || !/[^0]/.test(l.cells)) return null;
+  const pal = arr(l.pal).slice(0, 35).map((t) => ({ a: /^p:[a-z0-9-]{1,60}$/.test(t && t.a) ? t.a : 'p:hero', k: t && t.k === 'w' ? 'w' : 'f' }));
+  let cells = '';
+  for (const ch of l.cells) cells += parseInt(ch, 36) <= pal.length ? ch : '0';
+  return { pal, cells };
+}
+function walkable(sc, x, y) {
+  if (sc.level) {
+    const i = Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W));
+    const t = sc.level.pal[parseInt(sc.level.cells[i], 36) - 1];
+    if (!t || t.k !== 'f') return false;
+  }
+  for (const e of sc.entities) {
+    if (!e.solid || e.id === sc.heroId) continue;
+    if (Math.hypot((x - e.x) / (0.065 * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
+  }
+  return true;
 }
 const stageDist = (ax, ay, bx, by) => Math.hypot(ax - bx, (ay - by) * 0.75);   // in stage widths (the stage is 4:3)
 function cleanTrackPts(raw) {
@@ -135,7 +160,7 @@ function cleanScene(s, prev, inner) {
     seen.add(id);
     entities.push({
       id, asset, x: num(e.x, 0, 1, 0.5), y: num(e.y, 0, 1, 0.5), scale: num(e.scale, 0.3, 6, 1), flip: !!e.flip,
-      rot: Math.round(num(e.rot, -360, 360, 0)), say: str(e.say, 160), fx: str(e.fx, 12), emote: str(e.emote, 16),
+      rot: Math.round(num(e.rot, -360, 360, 0)), say: str(e.say, 160), fx: str(e.fx, 12), emote: str(e.emote, 16), solid: !!e.solid,
     });
   }
   const drawing = [];
@@ -157,7 +182,8 @@ function cleanScene(s, prev, inner) {
     drawing, weather: str(s.weather, 12), tracks, burst: str(s.burst, 12), sfx: str(s.sfx, 12), card: str(s.card, 60),
     choices: arr(s.choices).map((c) => str(c, 40)).filter(Boolean).slice(0, 4),
     sheet: cleanSheet(s.sheet), target: null, use: null, roll: null,
-    steps: inner ? [] : arr(s.steps).slice(0, 6).filter((f) => f && typeof f === 'object').map((f) => cleanScene(f, prev, true)),
+    level: cleanLevel(s.level),
+    steps: inner ? [] : arr(s.steps).slice(0, 80).filter((f) => f && typeof f === 'object').map((f) => cleanScene(f, prev, true)),
   };
 }
 
@@ -175,7 +201,7 @@ function cutEstimate(scene, before) {
     if (sc.action || sc.target || sc.use) ms += 1300;
     total += ms; prev = sc;
   }
-  return Math.min(total, 60000);
+  return Math.min(total, 240000);
 }
 
 /* ---------- rooms ---------- */
@@ -315,16 +341,15 @@ async function act(room, token, body) {
           hero.say = str(body.say, 160);
           hero.emote = str(body.emote, 16);
         }
-        if (hero && mode === 'free') {
+        if (hero && mode !== 'tell') {                        // free and limited will: the hero may walk
           let x = num(body.x, 0, 1, hero.x), y = num(body.y, 0, 1, hero.y);
+          let track = Array.isArray(body.track) ? cleanTrackPts(body.track) : [];
+          for (let i = 0; i < track.length; i += 3) if (!walkable(sc, track[i + 1], track[i + 2])) { track = []; break; }
           if (range > 0) {                                    // game movement: only so far per turn
             const d = stageDist(x, y, hero.x, hero.y);
             if (d > range) { x = hero.x + ((x - hero.x) * range) / d; y = hero.y + ((y - hero.y) * range) / d; }
-          } else if (Array.isArray(body.track)) {             // the Player recorded how their hero moves
-            const pts = cleanTrackPts(body.track);
-            if (pts.length >= 6) sc.tracks = [{ id: hero.id, pts }];
-          }
-          hero.x = r3(x); hero.y = r3(y);
+          } else if (track.length >= 6) sc.tracks = [{ id: hero.id, pts: track }];   // the Player recorded how their hero moves
+          if (walkable(sc, x, y)) { hero.x = r3(x); hero.y = r3(y); } else sc.tracks = [];   // walls and solid things stop the hero
         }
         if (mode !== 'tell') {
           sc.target = mode === 'free' && sc.entities.some((e) => e.id === body.target && e.id !== sc.heroId) ? body.target : null;
@@ -353,7 +378,7 @@ async function act(room, token, body) {
       if (room.aiBusy) throw fail(429, 'Claude is still working on your last request');
       const raw = body.scene && typeof body.scene === 'object' ? body.scene : {};
       const scene = cleanScene(raw, room.scene);
-      const said = { action: str(raw.action, 160), target: raw.target, use: raw.use, roll: room.scene.roll };
+      const said = { said: str(raw.said, 160), action: str(raw.action, 300), target: raw.target, use: raw.use, roll: room.scene.roll };
       room.aiBusy = true;
       try {
         const out = await directorAI.interpret(directorAI.describe({ text, scene, raw: said, rules: room.rules, names: room.names }));

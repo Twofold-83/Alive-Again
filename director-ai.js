@@ -126,7 +126,7 @@ function describe({ text, scene, raw, rules, names }) {
       inventory: rules.modules.inventory ? scene.sheet.inv.map((i) => looks(i.asset)) : undefined,
       stats: rules.modules.stats ? scene.sheet.stats.map((s) => ({ name: s.name, value: s.value, max: s.max })) : undefined,
     },
-    player_last_turn: { said: hero ? hero.say : '', did: raw.action || '', reached_for: reached ? looks(reached.asset) : undefined, used: used ? looks(used.asset) : undefined, rolled: raw.roll && raw.roll.by === 'player' ? raw.roll.value : undefined },
+    player_last_turn: { said: raw.said || (hero ? hero.say : ''), did: raw.action || '', reached_for: reached ? looks(reached.asset) : undefined, used: used ? looks(used.asset) : undefined, rolled: raw.roll && raw.roll.by === 'player' ? raw.roll.value : undefined },
   };
 }
 

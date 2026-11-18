@@ -33,41 +33,44 @@ mount a persistent disk there if stories should survive redeploys.
 4. If the clock runs out, the turn is sent as it stands.
 5. 📖 replays the whole story and can download it as a file.
 
-### Two ways to direct
+### How the Director builds a turn
 
-The Director's panel has a switch at the top.
+A turn is a list of **steps**. Everything done within one step plays at the same time
+(a line of speech, an explosion and its sound, two characters moving); "＋ Next step"
+starts what happens after that. There is no limit on steps. The step bar at the top
+of the tool column shows them and offers **Preview turn**, **Reset step** (undo the
+current step), **Clear steps** (start the turn over), and clicking an earlier step
+goes back to it.
 
-**🧭 Step by step** (the default) asks one question at a time. It first shows what the
-Player just did, then "What happens next?" with a handful of broad choices — someone
-speaks, move or animate, add something, change something, change the scene, narrate,
-the Player's sheet, tell Claude — each of which narrows down in one or two more taps.
-A finished path is one *event*; a turn holds up to five, listed with an undo. Moves
-are built in: walk to the hero, cross the stage, jump, tremble, or record a path.
+Inside a step the Director answers one question at a time: "What happens?" → a broad
+choice → narrower choices.
 
-Every event is stored as its own moment (`scene.steps`), so the Player watches the
-turn exactly in the order it was made: the place changes, then a narration, then the
-rain starts, then the next narration, then someone speaks. Moves, sounds, moments and
-title cards belong to the event that made them.
-
-**🤖 Tell Claude** (inside Step by step) lets the Director describe the turn in plain
-words; Claude turns it into stage operations (add, move, speak, scene changes, items,
-stats) on the Director's draft, which they can still adjust before ending the turn.
-It needs an Anthropic API key on the server: set `ANTHROPIC_API_KEY` and run
-`npm install`. Without a key the rest of the game works and the option says so.
-`CLAUDE_MODEL` picks the model (default `claude-opus-5-5`), `CLAUDE_MAX_PER_STORY`
-caps requests per story (default 150). See `director-ai.js`.
-
-**🎛️ All tools** is the full toolbox, in tabs:
-
-
-| Tab | What it does |
+| Choice | What it does |
 | --- | --- |
-| 🎭 Cast | 670+ searchable sprites in 14 categories, plus your own photos, generated assets, or any emoji. Select one on stage to make it speak, resize, rotate, flip, copy, give it a looping effect or an emote, make it the hero, or give it to the Player. |
-| 🌄 Place | 35 backdrops, plus your own. |
-| 🎵 Mood | Background music. |
-| 🎬 Animate | Record up to 10 seconds of movement by dragging characters (one after another or at the same time), preview the turn, and draw freehand on the stage. |
-| ✨ Extras | Weather, a one-off moment (shake, flash, confetti…), a sound effect, a title card, quick choices for the Player, a dice roll, a random scene, story ideas. |
-| ⚙️ More | Story type and layers, turn time, invite link, end the story. |
+| ➕ Add something | 500 pixel sprites and 670 emoji in searchable categories, plus your own photos, generated assets, or any emoji. |
+| 💬 Someone speaks | A line and a face for any character. |
+| 🚶 Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, cross the stage, jump, tremble. Different things move together; one thing's moves follow each other. |
+| 📝 Narrate | One narration per step. |
+| 💥 Moment and sound | Shake, flash, confetti; boom, bell, magic and other sounds. |
+| 🌄 Change the scene | Backdrop, weather, music, a title card, a ready-made scene, story ideas. |
+| ✏️ Draw on the stage | Freehand lines that draw themselves in playback. |
+| 🧱 Build the level | Adventure only, see below. |
+| 🎒 The Player's sheet | Items, stats, a dice roll. |
+| ❓ Offer choices | Up to three options for the Player. |
+| 🤖 Tell Claude | Describe the step in words; Claude stages it (needs `ANTHROPIC_API_KEY` and `npm install`; `CLAUDE_MODEL`, `CLAUDE_MAX_PER_STORY`; see `director-ai.js`). |
+| ⚙️ Story settings | Story type and layers, how the Player plays, turn time, invite link, end the story. |
+
+Clicking anything on the stage opens its own tools (line, size, rotation, effect,
+emote, move, turn into something else, copy, solid, give to the Player, remove);
+dragging moves it.
+
+### Levels (Adventure)
+
+"Build the level" paints a 16 × 12 tile grid over the backdrop: **floor** tiles the
+hero can walk on and **wall** tiles it cannot (any tile picture can be either).
+Things on stage can be switched to **solid**. Once a level exists the Player's hero
+can only stand on floor, slides along walls, and bumps into solid things; the server
+enforces the same rule.
 
 ### How the Player plays
 
@@ -78,9 +81,9 @@ change it at any time:
 | --- | --- |
 | 📝 Narration | only writes what they want to do. Nothing on stage moves until the Director stages it; the Player then watches it as a cut scene. |
 | 🕹️ Free will | drags their hero (the path they draw is replayed for the Director), speaks, picks an emote, types an action, reaches for things. |
-| 🎯 Limited will | must pick one of the options the Director offered for this turn; may add a line of speech. |
+| 🎯 Limited will | must pick one of the options the Director offered for this turn; may also walk and add a line of speech. |
 
-In an Adventure story with free will, **game movement** limits how far the hero can
+With free or limited will, **game movement** limits how far the hero can
 walk per turn (a few steps, half the stage, most of the stage); the Player sees the
 range as a circle.
 
@@ -120,7 +123,7 @@ rotates, `f` flips and Delete removes.
 | `providers.js` | Asset generation hook (AI goes here) |
 | `bots.js` | AI partners for solo play (scripted; language-model hook) |
 | `director-ai.js` | "Tell Claude": the Claude call and the stage operations it may use |
-| `public/guided.js` | The step-by-step Director flow |
+| `public/guided.js` | The Director's panel: step bar and the question flow |
 | `public/app.js` | The client UI |
 | `public/stage.js` | Draws a scene; plays a turn back as a cut scene |
 | `public/catalog.js` | Built-in sprite and backdrop library, asset ids, art packs |

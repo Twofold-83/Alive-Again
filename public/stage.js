@@ -22,7 +22,8 @@ export function norm(sc) {
   sc.drawing ||= []; sc.tracks ||= []; sc.choices ||= []; sc.steps ||= [];
   for (const f of sc.steps) norm(f);
   sc.sheet ||= { inv: [], stats: [] }; sc.sheet.inv ||= []; sc.sheet.stats ||= [];
-  for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; }
+  if (sc.level === undefined) sc.level = null;
+  for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; e.solid = !!e.solid; }
   return sc;
 }
 
@@ -34,6 +35,7 @@ export function glyphNode(code, asset, cls = '') {
 /** The sentence describing what the Player did this turn. */
 export function actionText(scene, names, pendingRoll) {
   const bits = [];
+  if (scene.said) bits.push(`“${scene.said}”`);
   const item = scene.use && scene.sheet.inv.find((i) => i.id === scene.use);
   if (item) bits.push('uses ' + assetLabel(item.asset, item.name));
   const t = scene.target && scene.entities.find((e) => e.id === scene.target);
@@ -45,6 +47,32 @@ export function actionText(scene, names, pendingRoll) {
 }
 
 const SVG = 'http://www.w3.org/2000/svg';
+
+/* ---------- levels: a 16 x 12 tile grid; floors can be walked on, walls cannot ---------- */
+export const LEVEL_W = 16, LEVEL_H = 12, EMPTY_CELLS = '0'.repeat(LEVEL_W * LEVEL_H);
+export const cellAt = (x, y) => Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W));
+/** May the hero stand here? (Same rule as on the server.) */
+export function walkable(scene, x, y) {
+  if (scene.level) {
+    const t = scene.level.pal[parseInt(scene.level.cells[cellAt(x, y)], 36) - 1];
+    if (!t || t.k !== 'f') return false;
+  }
+  for (const e of scene.entities) {
+    if (!e.solid || e.id === scene.heroId) continue;
+    if (Math.hypot((x - e.x) / (0.065 * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
+  }
+  return true;
+}
+/** Walk from (x,y) towards (tx,ty) in small steps, sliding along walls, stopping at whatever blocks. */
+export function walkTo(scene, x, y, tx, ty) {
+  if (!walkable(scene, x, y)) return [tx, ty];                 // standing somewhere impossible: let them get out
+  const n = Math.max(1, Math.ceil(Math.hypot(tx - x, ty - y) / 0.008));
+  const dx = (tx - x) / n, dy = (ty - y) / n;
+  for (let i = 0; i < n; i++) {
+    if (walkable(scene, x + dx, y + dy)) { x += dx; y += dy; } else if (walkable(scene, x + dx, y)) x += dx; else if (walkable(scene, x, y + dy)) y += dy; else break;
+  }
+  return [x, y];
+}
 
 /**
  * Draw `scene` into `root`. Options:
@@ -58,12 +86,21 @@ export function renderStage(root, scene, o = {}) {
     root._els = new Map();
     const draw = document.createElementNS(SVG, 'svg');
     draw.setAttribute('class', 'draw'); draw.setAttribute('viewBox', '0 0 400 300'); draw.setAttribute('preserveAspectRatio', 'none');
-    root.append(h('div', { class: 'bg' }), draw, h('div', { class: 'ents' }), h('div', { class: 'weather' }), h('div', { class: 'bubbles' }),
+    root.append(h('div', { class: 'bg' }), h('div', { class: 'level' }), draw, h('div', { class: 'ents' }), h('div', { class: 'weather' }), h('div', { class: 'bubbles' }),
       h('div', { class: 'strip act' }), h('div', { class: 'strip narr' }), h('div', { class: 'cardov' }), h('div', { class: 'diceov' }), h('div', { class: 'range' }));
     const fit = () => root.style.setProperty('--u', root.clientWidth / 8 + 'px');
     new ResizeObserver(fit).observe(root); fit();
   }
-  const [bg, draw, ents, weather, bubbles, actEl, narrEl, cardEl, diceEl, rangeEl] = root.children;
+  const [bg, level, draw, ents, weather, bubbles, actEl, narrEl, cardEl, diceEl, rangeEl] = root.children;
+  const lkey = scene.level ? scene.level.cells + scene.level.pal.map((t) => t.a + t.k).join() + (o.showKinds ? 'k' : '') : '';
+  if (level._key !== lkey) {
+    level._key = lkey;
+    level.replaceChildren(...(scene.level ? [...scene.level.cells].map((ch) => {
+      const t = scene.level.pal[parseInt(ch, 36) - 1], d = document.createElement('i');
+      if (t) { d.style.backgroundImage = `url("px/${t.a.slice(2)}.png")`; if (o.showKinds && t.k === 'w') d.className = 'wall'; }
+      return d;
+    }) : []));
+  }
   // game movement: how far the hero may walk this turn (the stage is 4:3, so a circle on screen is an ellipse in stage units)
   rangeEl.style.cssText = o.range ? `display:block;left:${(o.range.x - o.range.r) * 100}%;top:${(o.range.y - o.range.r / 0.75) * 100}%;width:${o.range.r * 200}%;height:${(o.range.r / 0.75) * 200}%` : 'display:none';
   const code = o.code || '';
@@ -93,7 +130,7 @@ export function renderStage(root, scene, o = {}) {
     const [fxw, emote] = el.children;
     if (el._asset !== e.asset) { el._asset = e.asset; fxw.replaceChildren(glyphNode(code, e.asset, 'glyph')); }
     el.className = 'ent' + (e.id === scene.heroId ? ' hero' : '') + (e.id === o.selId ? ' sel' : '') + (e.id === scene.target ? ' target' : '')
-      + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked ? ' tracked' : '');
+      + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked ? ' tracked' : '') + (o.showKinds && e.solid ? ' solid' : '');
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '');
     fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${e.flip ? -1 : 1})`;
     if (emote.textContent !== (e.emote || '')) emote.textContent = e.emote || '';
@@ -196,8 +233,8 @@ export function playCut(root, before, after, o, done) {
     at(t, () => { const fe = frame.entities.find((x) => x.id === e.id); fe.say = e.say; fe.emote = e.emote; view.pop = e.id; });
     t += 900 + 45 * e.say.length;
   }
-  if (after.action || after.target || after.use) { at(t, () => { view.pop = null; frame.action = after.action; frame.target = after.target; frame.use = after.use; }); t += 1300; }
-  if (after.roll) {
+  if (o.by === 'player' && (after.action || after.target || after.use)) { at(t, () => { view.pop = null; frame.action = after.action; frame.target = after.target; frame.use = after.use; }); t += 1300; }
+  if (after.roll && after.roll.by === o.by) {
     at(t, () => { view.dice = { ...after.roll, rolling: true }; if (o.sfx) o.sfx('dice'); });
     at(t + 700, () => { view.dice = { ...after.roll }; });
     t += 1700; at(t, () => { view.dice = null; frame.roll = after.roll; });

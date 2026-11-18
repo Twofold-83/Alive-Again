@@ -78,6 +78,11 @@ button.big small { display: block; font-weight: 400; font-size: 12px; opacity: .
 .stage .draw polyline.new { stroke-dasharray: 1; stroke-dashoffset: 1; animation: drawin 1s ease-out forwards; }
 @keyframes drawin { to { stroke-dashoffset: 0; } }
 .stage .bubbles, .stage .weather { pointer-events: none; }
+.stage .level { inset: 0; display: grid; grid-template-columns: repeat(16, 1fr); grid-template-rows: repeat(12, 1fr); pointer-events: none; }
+.stage .level i { background-size: 100% 100%; image-rendering: pixelated; }
+.stage .level i.wall { box-shadow: inset 0 0 0 2px rgba(255, 60, 60, .85); }
+.stage.drawing .level i { outline: 1px solid rgba(255, 255, 255, .12); outline-offset: -1px; }
+.ent.solid { outline: 2px solid rgba(255, 60, 60, .85); outline-offset: 1px; border-radius: 4px; }
 .stage.drawing { cursor: crosshair; }
 .stage.drawing .ents { pointer-events: none; }
 .stage .range { border: 2px dashed rgba(255, 255, 255, .8); border-radius: 50%; background: rgba(255, 255, 255, .08); pointer-events: none; z-index: 0; box-shadow: 0 0 0 1px rgba(0, 0, 0, .4); }
@@ -210,6 +215,16 @@ button.chip.add { color: var(--dim); }
 .pens .pen { flex: 1; min-height: 26px; min-width: 0; padding: 0; border: 2px solid var(--line); }
 .pens .pen.on { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* the steps of the Director's turn */
+.stepbar { display: flex; flex-direction: column; gap: 6px; position: sticky; top: -10px; z-index: 6; background: var(--bg); padding: 10px 0 8px; margin-top: -10px; border-bottom: 1px solid var(--line); }
+.steps { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.stepchip { min-width: 30px; min-height: 28px; padding: 0 6px; font-weight: 600; }
+.stepadd { min-height: 28px; padding: 0 10px; border-style: dashed; }
+.stepbar .row button { min-height: 28px; padding: 2px 6px; font-size: 13px; }
+.stepbar + .ghead { top: 62px; position: static; }
+.thingbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.thingbtns button { text-align: left; }
+
 /* the step-by-step flow */
 .gtitle { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .gtitle b { font-size: 16px; }
@@ -219,7 +234,7 @@ button.chip.add { color: var(--dim); }
 .gopt .gl { display: flex; flex-direction: column; min-width: 0; }
 .gopt b { font-weight: 600; }
 .gopt small { color: var(--dim); font-size: 12px; line-height: 1.25; }
-.ghead { display: flex; align-items: center; gap: 10px; position: sticky; top: -10px; z-index: 5; background: var(--bg); padding: 10px 0 6px; margin-top: -10px; border-bottom: 1px solid var(--line); }
+.ghead { display: flex; align-items: center; gap: 10px; padding: 2px 0 6px; border-bottom: 1px solid var(--line); }
 .ghead > div { display: flex; flex-direction: column; min-width: 0; }
 .ghead b { font-size: 15px; }
 .ghead small { color: var(--dim); font-size: 12px; }
