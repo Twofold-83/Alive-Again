@@ -7,7 +7,7 @@
  * character or thing the current question is about. Every event starts from a
  * snapshot of the draft, so Back/Cancel and "Undo last" are always exact.
  */
-import { CATEGORIES, BACKDROPS, backdropCss, assetLabel } from './catalog.js';
+import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetLabel } from './catalog.js';
 import { MOODS, SFX } from './audio.js';
 import { h, clone, clamp, glyphNode, actionText } from './stage.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
@@ -26,11 +26,14 @@ export function guidedPick(id) {
   return true;
 }
 
-const GROUPS = {
+const EMOJI_GROUPS = {
   char: ['people', 'fantasy', 'animals', 'faces'],
-  thing: ['things', 'tools', 'food', 'vehicles', 'wear', 'nature', 'places', 'blocks', 'body'],
+  thing: ['things', 'tools', 'food', 'vehicles', 'wear', 'nature', 'places', 'body'],
+  tile: ['blocks'],
   fx: ['effects'],
 };
+/** Categories for one "Add something" branch: pixel art first, then the emoji library. */
+const groupCats = (g) => [...PIXEL.filter((c) => c.group === g), ...EMOJI_GROUPS[g].map((id) => { const c = CATEGORIES.find((k) => k.id === id); return { ...c, label: '😀 ' + c.label }; })];
 const short = (s, n = 28) => (s.length > n ? s.slice(0, n) + '…' : s);
 
 export function buildGuided(p, c) {
@@ -50,7 +53,7 @@ export function buildGuided(p, c) {
     if (!G.path.length) return cancel();
     c.setRec(false); c.select(G.sel); c.rebuild();
   };
-  const done = (label) => { G.events.push({ label, snap: G.snap }); leave(); c.rebuild(); };
+  const done = (label) => { G.events.push({ label, snap: G.snap }); c.commitStep(); leave(); c.rebuild(); };   // the stage as it is now is this event's moment in the turn
   const undo = () => { const ev = G.events.pop(); if (ev) { c.setDraft(ev.snap); leave(); c.rebuild(); } };
 
   /* ---------- building blocks ---------- */
@@ -107,15 +110,25 @@ export function buildGuided(p, c) {
         opt('➕', 'Add something', 'A character, a thing, an effect', () => enter('add')),
         opt('✏️', 'Change something', 'Size, look, effect, remove', () => enter('edit')),
         opt('🌄', 'Change the scene', 'Place, weather, music, sound', () => enter('scene')),
-        opt('📝', 'Narrate', 'Tell what happens in words', () => enter('narrate')),
+        opt('📝', 'Narrate', 'Tell what happens in words', () => { enter('narrate'); c.draft.narration = ''; c.rebuild(); }),
         sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
-        opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude'))));
+        opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
+        opt('⚙️', 'Rules of the story', `Type, layers, how ${S.names.player} plays`, () => enter('rules'))));
+      if (!setup && S.rules.player === 'limited' && !d.choices.filter(Boolean).length) p.append(h('div', { class: 'card ask' }, h('b', {}, `Limited will: ${S.names.player} needs options`),
+        h('p', { class: 'dim small' }, 'Write up to three things they may do next turn. Without options they can act freely.'), h('button', { class: 'primary', onclick: () => enter('scene:choices') }, '❓ Write the options')));
     }
     if (G.events.length) {
       p.append(h('div', { class: 'card gevents' }, h('small', { class: 'dim' }, 'This turn so far'),
         G.events.map((ev, i) => h('div', {}, `${i + 1}. ${ev.label}`)),
         h('div', { class: 'row' }, h('button', { class: 'grow', onclick: undo }, '↶ Undo last'), h('button', { class: 'grow', onclick: c.preview }, c.cutting() ? '■ Stop' : '▶ Preview the turn'))));
     }
+    return;
+  }
+
+  /* ================= ⚙️ rules ================= */
+  if (top === 'rules') {
+    head('Rules of the story', 'These apply from now on; they are not an event.');
+    p.append(c.typeCard(), h('button', { class: 'primary gdone', onclick: () => { leave(); c.rebuild(); } }, '✓ Back to the turn'));
     return;
   }
 
@@ -162,18 +175,19 @@ export function buildGuided(p, c) {
   if (top === 'add') {
     head('Add what?');
     p.append(h('div', { class: 'gopts' },
-      opt('🧑', 'A character', 'People, creatures, animals, faces', () => { G.cat = 'people'; enter('add:char'); }),
-      opt('📦', 'A thing', 'Objects, places, vehicles, food…', () => { G.cat = 'things'; enter('add:thing'); }),
-      opt('✨', 'An effect or sign', 'Explosions, hearts, arrows…', () => { G.cat = 'effects'; enter('add:fx'); }),
+      opt('🧑', 'A character', 'Heroes, townsfolk, monsters, animals', () => { G.cat = ''; enter('add:char'); }),
+      opt('📦', 'A thing', 'Items, furniture, nature, buildings…', () => { G.cat = ''; enter('add:thing'); }),
+      opt('🧱', 'A level piece', 'Ground, walls, platforms, hazards', () => { G.cat = ''; enter('add:tile'); }),
+      opt('✨', 'An effect or sign', 'Explosions, hearts, arrows…', () => { G.cat = ''; enter('add:fx'); }),
       opt('🔍', 'Search by name', 'Look through everything', () => { G.q = ''; enter('add:search'); }),
       opt('🖼️', 'Something of my own', 'A photo, a new creation, any emoji', () => enter('add:own'))));
     return;
   }
   const place = (asset) => { const e = c.addEntity(asset); if (e) { G.sel = e.id; G.path.push('added'); c.select(e.id); c.rebuild(); } };
-  if (top === 'add:char' || top === 'add:thing' || top === 'add:fx') {
-    const ids = GROUPS[top.slice(4)], cat = CATEGORIES.find((x) => x.id === G.cat) || CATEGORIES.find((x) => x.id === ids[0]);
+  if (top === 'add:char' || top === 'add:thing' || top === 'add:tile' || top === 'add:fx') {
+    const cats = groupCats(top.slice(4)), cat = cats.find((x) => x.id === G.cat) || cats[0];
     head('Pick one', 'It appears on the stage.');
-    if (ids.length > 1) p.append(h('div', { class: 'chips' }, ids.map((id) => { const x = CATEGORIES.find((k) => k.id === id); return h('button', { class: x === cat ? 'on' : '', onclick: () => { G.cat = id; c.rebuild(); } }, x.label); })));
+    if (cats.length > 1) p.append(h('div', { class: 'chips wrap' }, cats.map((x) => h('button', { class: x === cat ? 'on' : '', onclick: () => { G.cat = x.id; c.rebuild(); } }, x.label))));
     p.append(h('div', { class: 'grid' }, cat.items.map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => place(i.asset) }, glyphNode(code, i.asset)))));
     return;
   }
@@ -182,7 +196,7 @@ export function buildGuided(p, c) {
     const grid = h('div', { class: 'grid' });
     const fill = () => {
       const q = G.q.trim().toLowerCase();
-      const items = q ? CATEGORIES.flatMap((x) => x.items).filter((i) => i.name.includes(q)).slice(0, 120) : [];
+      const items = q ? allItems().filter((i) => i.name.includes(q)).slice(0, 120) : [];
       grid.replaceChildren(...items.map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => place(i.asset) }, glyphNode(code, i.asset))));
       if (q && !items.length) grid.append(h('p', { class: 'dim', style: 'grid-column:1/-1;margin:4px' }, 'Nothing found. Go back and try “Something of my own”.'));
     };
@@ -230,7 +244,7 @@ export function buildGuided(p, c) {
     const grid = h('div', { class: 'grid' }), was = lab(sel);
     const fill = () => {
       const q = G.q.trim().toLowerCase();
-      const items = q ? CATEGORIES.flatMap((x) => x.items).filter((i) => i.name.includes(q)).slice(0, 120) : [];
+      const items = q ? allItems().filter((i) => i.name.includes(q)).slice(0, 120) : [];
       grid.replaceChildren(...items.map((i) => h('button', { title: i.name, onclick: () => { sel.asset = i.asset; done(`${was} turns into ${lab(sel)}`); } }, glyphNode(code, i.asset))));
     };
     p.append(h('input', { type: 'search', placeholder: 'Search: frog, statue, skeleton…', value: G.q, oninput: (ev) => { G.q = ev.target.value; fill(); } }), grid);
@@ -284,9 +298,9 @@ export function buildGuided(p, c) {
 
   /* ================= 📝 narrate ================= */
   if (top === 'narrate') {
-    head('Narrate', 'Shown under the stage, after everything else.');
+    head('Narrate', 'Appears under the stage at this point of the turn. Narrate again later for the next line.');
     p.append(h('input', { placeholder: '“Suddenly, the lights go out.”', maxlength: 240, value: d.narration, enterkeyhint: 'done', oninput: (ev) => { d.narration = ev.target.value; c.changedQuiet(); } }),
-      doneBtn(() => (d.narration ? `Narration “${short(d.narration)}”` : 'No narration')));
+      doneBtn(() => (d.narration ? `Narration “${short(d.narration)}”` : 'The narration clears')));
     return;
   }
 

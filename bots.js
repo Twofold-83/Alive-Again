@@ -65,7 +65,9 @@ function playerMove({ scene, memory, rules }) {
   const out = { x: hero ? hero.x : 0.5, y: hero ? hero.y : 0.8, say, action: '', target: null, use: null, roll: 0,
     emote: chance(0.5) ? pick(['😀', '🤔', '😱', '😡', '😢', '😍']) : '' };
 
-  if (scene.choices.length && chance(0.7)) { out.action = pick(scene.choices); return out; }       // take an offered choice
+  const mode = (rules && rules.player) || 'free';
+  if (scene.choices.length && (mode === 'limited' || chance(0.7))) { out.action = pick(scene.choices); return out; }
+  if (mode === 'tell') { out.action = pick(['I walk up to whoever is closest and ask what is going on.', 'I search the place for anything useful.', 'I try the nearest door.', 'I hide and watch what happens.', 'I pick up the most interesting thing I can see.']); return out; }       // take an offered choice
   if (mods.inventory && scene.sheet.inv.length && chance(0.25)) { out.use = pick(scene.sheet.inv).id; return out; }
   if (mods.dice && chance(0.15)) out.roll = 6;
 

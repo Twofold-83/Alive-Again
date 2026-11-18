@@ -73,9 +73,16 @@ const shots = process.argv[2];
     const sc = await last(p);
     const wiz = sc.entities.find((e) => e.asset === 's:wizard-mage'), dragon = sc.entities.find((e) => e.asset === 'e:🐉');
     assert.equal(wiz.say, 'A friend. Follow me.'); assert(dragon && dragon.say === 'ROAR!');
-    const tw = sc.tracks.find((t) => t.id === wiz.id), td = sc.tracks.find((t) => t.id === dragon.id);
-    assert(tw && tw.pts.length >= 3 * 6, 'walk + jump recorded as one track'); assert(td && td.pts[0] >= tw.pts[tw.pts.length - 3], 'the dragon moves after the wizard');
-    assert.equal(sc.narration, 'Nothing will be the same.'); assert.equal(sc.backdrop, 'b:cave'); assert.equal(sc.sheet.stats[0].value, 3);
+    // every event is its own moment, in the order it was made
+    assert.equal(sc.steps.length, 4);
+    assert.equal(sc.steps[0].entities.find((e) => e.id === wiz.id).say, 'A friend. Follow me.'); assert.equal(sc.steps[0].tracks.length, 0);
+    assert.equal(sc.steps[1].tracks.length, 1); assert.equal(sc.steps[1].tracks[0].id, wiz.id);          // walks to the hero
+    assert.equal(sc.steps[2].tracks.length, 1); assert(sc.steps[2].tracks[0].pts.length >= 12);          // jumps
+    assert(!sc.steps[2].entities.some((e) => e.asset === 'e:🐉'), 'the dragon is not there before Claude’s step');
+    assert.equal(sc.steps[3].backdrop, 'b:cave'); assert.equal(sc.steps[3].narration, 'The wall explodes.'); assert.equal(sc.steps[3].burst, 'shake');
+    assert.equal(sc.steps[3].tracks[0].id, dragon.id);
+    assert.equal(sc.narration, 'Nothing will be the same.'); assert.equal(sc.tracks.length, 0); assert.equal(sc.burst, '');
+    assert.equal(sc.backdrop, 'b:cave'); assert.equal(sc.sheet.stats[0].value, 3);
     await cutDone(p);
     // switching to all tools and back keeps working
     await p.tap('#foot button.go'); await p.waitForFunction(() => /Director/.test(document.querySelector('#banner').textContent)); await cutDone(p);

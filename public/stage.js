@@ -19,7 +19,8 @@ export const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 /** Fill in fields that older saved scenes do not have. */
 export function norm(sc) {
   if (!sc) return sc;
-  sc.drawing ||= []; sc.tracks ||= []; sc.choices ||= [];
+  sc.drawing ||= []; sc.tracks ||= []; sc.choices ||= []; sc.steps ||= [];
+  for (const f of sc.steps) norm(f);
   sc.sheet ||= { inv: [], stats: [] }; sc.sheet.inv ||= []; sc.sheet.stats ||= [];
   for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; }
   return sc;
@@ -58,11 +59,13 @@ export function renderStage(root, scene, o = {}) {
     const draw = document.createElementNS(SVG, 'svg');
     draw.setAttribute('class', 'draw'); draw.setAttribute('viewBox', '0 0 400 300'); draw.setAttribute('preserveAspectRatio', 'none');
     root.append(h('div', { class: 'bg' }), draw, h('div', { class: 'ents' }), h('div', { class: 'weather' }), h('div', { class: 'bubbles' }),
-      h('div', { class: 'strip act' }), h('div', { class: 'strip narr' }), h('div', { class: 'cardov' }), h('div', { class: 'diceov' }));
+      h('div', { class: 'strip act' }), h('div', { class: 'strip narr' }), h('div', { class: 'cardov' }), h('div', { class: 'diceov' }), h('div', { class: 'range' }));
     const fit = () => root.style.setProperty('--u', root.clientWidth / 8 + 'px');
     new ResizeObserver(fit).observe(root); fit();
   }
-  const [bg, draw, ents, weather, bubbles, actEl, narrEl, cardEl, diceEl] = root.children;
+  const [bg, draw, ents, weather, bubbles, actEl, narrEl, cardEl, diceEl, rangeEl] = root.children;
+  // game movement: how far the hero may walk this turn (the stage is 4:3, so a circle on screen is an ellipse in stage units)
+  rangeEl.style.cssText = o.range ? `display:block;left:${(o.range.x - o.range.r) * 100}%;top:${(o.range.y - o.range.r / 0.75) * 100}%;width:${o.range.r * 200}%;height:${(o.range.r / 0.75) * 200}%` : 'display:none';
   const code = o.code || '';
   const css = backdropCss(code, scene.backdrop);
   if (bg._css !== css) { bg._css = css; bg.style.background = css; }
@@ -104,7 +107,7 @@ export function renderStage(root, scene, o = {}) {
     class: 'bubble' + (o.pop === e.id ? ' pop' : ''),
     style: `left:${clamp(e.x, 0.24, 0.76) * 100}%;bottom:min(calc(${(1 - e.y) * 100}% + var(--u) * ${e.scale * 1.22 + 0.12}),82%);z-index:${Math.round(e.y * 1000) + 2000}`,
   }, e.say)));
-  actEl.textContent = actionText(scene, o.names || { player: 'Player' }, o.pendingRoll);
+  actEl.textContent = o.noAct ? '' : actionText(scene, o.names || { player: 'Player' }, o.pendingRoll);
   const droll = scene.roll && scene.roll.by === 'director' ? `🎲 ${scene.roll.value} (d${scene.roll.sides})  ` : '';
   narrEl.textContent = droll + (scene.narration || '');
   if (cardEl.textContent !== (o.card || '')) cardEl.textContent = o.card || '';
@@ -233,4 +236,22 @@ export function playCut(root, before, after, o, done) {
   renderStage(root, frame, view);
   raf = requestAnimationFrame(tick);
   return { skip: finish, total };
+}
+
+/**
+ * Present a whole turn. A step-by-step turn carries its earlier moments in
+ * after.steps; they are played one after another, in the order they were made,
+ * each with its own moves, sounds and narration, ending on `after` itself.
+ */
+export function playTurn(root, before, after, o, done) {
+  const frames = [...(after.steps || []), after];
+  let i = 0, cur = null, stopped = false;
+  const next = () => {
+    if (stopped) return;
+    if (i >= frames.length) { if (done) done(); return; }
+    const prev = i ? frames[i - 1] : before, frame = frames[i++];
+    cur = playCut(root, prev, frame, { ...o, by: o.by }, next);
+  };
+  next();
+  return { skip() { if (stopped) return; stopped = true; const c = cur; cur = null; if (c) c.skip(); renderStage(root, after, o); if (done) done(); } };
 }

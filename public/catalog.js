@@ -89,6 +89,24 @@ export const BACKDROPS = [
   { id: 'b:black', name: 'Void', css: '#000' },
 ];
 
+/* ---------- the pixel-art library (public/px, made by tools/make-sprites.js) ----------
+ * Asset ids p:<slug>. PIXEL holds its categories once loaded; each has a group:
+ * char | thing | tile | fx, used by the step-by-step "Add something" questions. */
+export const PIXEL = [];
+const PX = new Map();
+export async function loadPixel() {
+  try {
+    const r = await fetch('px/index.json', { cache: 'no-cache' });
+    if (!r.ok) return;
+    for (const c of (await r.json()).categories) {
+      const items = c.items.map((i) => { const it = { name: i.name, asset: 'p:' + i.slug }; PX.set(i.slug, it); return it; });
+      PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items });
+    }
+  } catch { /* no pixel pack: the emoji library is used */ }
+}
+/** Every searchable built-in sprite, pixel art first. */
+export const allItems = () => [...PIXEL.flatMap((c) => c.items), ...CATEGORIES.flatMap((c) => c.items)];
+
 /* ---------- art packs (higher quality replacements for the placeholders) ---------- */
 export const PACK = { sprites: {}, backdrops: {} };
 export async function loadPack() {
@@ -103,6 +121,7 @@ export const assetUrl = (code, id) => `/api/rooms/${code}/assets/${id.slice(2)}`
 /** How to draw a sprite asset: { img: url } or { glyph: text }. */
 export function spriteView(code, asset) {
   if (asset.startsWith('c:')) return { img: assetUrl(code, asset) };
+  if (asset.startsWith('p:')) return { img: `px/${asset.slice(2)}.png` };
   if (asset.startsWith('s:')) {
     const slug = asset.slice(2), it = SPRITES.get(slug);
     return PACK.sprites[slug] ? { img: 'packs/' + PACK.sprites[slug] } : { glyph: it ? it.glyph : '❓' };
@@ -113,10 +132,10 @@ export function spriteView(code, asset) {
 export function assetLabel(asset, name) {
   const v = spriteView('', asset);
   if (v.glyph) return v.glyph;
-  const it = asset.startsWith('s:') && SPRITES.get(asset.slice(2));
-  return name || (it ? it.name : 'it');
+  const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;
+  return name || (it ? 'the ' + it.name.split(' ').slice(0, 3).join(' ') : 'it');
 }
-export const assetName = (asset) => { const it = asset.startsWith('s:') && SPRITES.get(asset.slice(2)); return it ? it.name.split(' ').slice(0, 2).join(' ') : ''; };
+export const assetName = (asset) => { const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null; return it ? it.name.split(' ').slice(0, 2).join(' ') : ''; };
 
 export function backdropCss(code, id) {
   if (id && id.startsWith('c:')) return `url("${assetUrl(code, id)}") center/cover no-repeat #000`;

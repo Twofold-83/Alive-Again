@@ -1,6 +1,6 @@
-import { CATEGORIES, BACKDROPS, backdropCss, assetName, loadPack } from './catalog.js';
+import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetName, loadPack, loadPixel } from './catalog.js';
 import { MOODS, SFX, audio } from './audio.js';
-import { h, clone, clamp, norm, glyphNode, renderStage, playCut } from './stage.js';
+import { h, clone, clamp, norm, glyphNode, renderStage, playCut, playTurn } from './stage.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
 import { G, resetGuided, guidedKey, guidedPick, buildGuided } from './guided.js';
 
@@ -103,7 +103,7 @@ function onState(s) {
     if (cut) cut.skip();
     if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {  // present what just happened before handing over control
       const by = s.whose === 'director' ? 'player' : 'director';
-      cut = playCut(stage, s.before, s.scene, { ...stageOpts(), selId: null, pendingRoll: 0, by, sfx: audio.sfx }, () => {
+      cut = playTurn(stage, s.before, s.scene, { ...stageOpts(), selId: null, pendingRoll: 0, range: null, by, sfx: audio.sfx }, () => {
         cut = null;
         if (myTurn()) { audio.blip(); if (navigator.vibrate) navigator.vibrate(120); }
         render();
@@ -122,11 +122,11 @@ function initDraft() {
   } catch { /* ignore */ }
   if (S.you === 'director') {      // fresh turn: last turn's lines, narration and one-turn extras are over
     for (const e of draft.entities) if (e.id !== draft.heroId) e.say = '';
-    Object.assign(draft, { narration: '', tracks: [], burst: '', sfx: '', card: '', choices: [] });
+    Object.assign(draft, { narration: '', tracks: [], burst: '', sfx: '', card: '', choices: [], steps: [] });
     if (draft.roll && draft.roll.by === 'director') draft.roll = null;
   } else {
     const me = hero(draft); if (me) me.say = '';
-    Object.assign(draft, { action: '', target: null, use: null });
+    Object.assign(draft, { action: '', target: null, use: null, heroTrack: null });
     if (draft.roll && draft.roll.by === 'player') draft.roll = null;
   }
   draft.rollWant = 0;
@@ -137,13 +137,30 @@ function changed() { saveDraft(); render(); }                       // may rebui
 function changedQuiet() { saveDraft(); paint(); renderSheet(); }    // never rebuilds the panel (the user is typing in it)
 function rebuild() { uiKey = ''; changed(); }
 
+/* A step-by-step turn: draft.steps holds the scene as it stood after each finished event. */
+const ONE_TURN = { tracks: [], burst: '', sfx: '', card: '' };
+const frameKey = (sc) => JSON.stringify({ ...sc, steps: 0, rollWant: 0, ...ONE_TURN });
+function commitStep() {
+  if (S.turn === 0) return;                      // the opening scene simply appears
+  const frame = { ...clone(draft), steps: [] };
+  delete frame.rollWant;
+  if (draft.steps.length < 6) draft.steps.push(frame); else draft.steps[5] = frame;
+  Object.assign(draft, clone(ONE_TURN)); animAt = 0;   // moves, sounds and title cards belong to the step that made them
+}
+/** What is sent when the Director ends the turn: the last step becomes the scene itself unless something changed after it. */
+function finalScene() {
+  const sc = clone(draft), last = sc.steps[sc.steps.length - 1];
+  if (last && frameKey(last) === frameKey(sc) && !sc.tracks.length && !sc.burst && !sc.sfx && !sc.card) { sc.steps.pop(); return { ...last, steps: sc.steps, rollWant: sc.rollWant }; }
+  return sc;
+}
+
 async function submit() {
   if (submitting || !myTurn()) return;
   if (cut) cut.skip();
   submitting = true; render();
   const turn = S.turn, me = hero(draft), roll = draft.rollWant || 0;
-  const body = S.you === 'director' ? { turn, scene: draft, roll }
-    : { turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, use: draft.use, roll };
+  const body = S.you === 'director' ? { turn, scene: finalScene(), roll }
+    : { turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, use: draft.use, roll, track: draft.heroTrack };
   try { await act('submit', body, 6); } catch (e) {
     if (S && S.turn === turn) { submitting = false; toast(e.message); render(); }
   }
@@ -151,7 +168,19 @@ async function submit() {
 
 /* ---------- stage input ---------- */
 const stage = $('#stage');
-const stageOpts = () => ({ code, names: S.names, selId: directing() ? selId : null, pendingRoll: myTurn() && S.you === 'player' ? draft.rollWant : 0 });
+const heroTurn = () => myTurn() && S.you === "player" && !submitting;
+const heroStart = () => hero(S.scene);            // where the hero stood when the Player's turn began
+const stageOpts = () => {
+  const st = heroTurn() && S.rules.player === 'free' && S.rules.moveRange > 0 ? heroStart() : null;
+  return { code, names: S.names, selId: directing() ? selId : null, pendingRoll: heroTurn() ? draft.rollWant : 0, noAct: heroTurn() && S.rules.player === 'tell', range: st ? { x: st.x, y: st.y, r: S.rules.moveRange } : null };
+};
+/** Game movement: keep a point within the hero's walking range for this turn. */
+function inRange(x, y) {
+  const st = heroStart(), r = S.rules.moveRange;
+  if (!st || !(r > 0)) return [x, y];
+  const d = Math.hypot(x - st.x, (y - st.y) * 0.75);
+  return d > r ? [st.x + ((x - st.x) * r) / d, st.y + ((y - st.y) * r) / d] : [x, y];
+}
 let drag = null;
 function stagePos(ev) {
   const r = stage.getBoundingClientRect();
@@ -171,15 +200,18 @@ stage.addEventListener('pointerdown', (ev) => {
   drag = null;
   if (S.you === 'player') {
     const me = hero(draft);
+    if (S.rules.player !== 'free') return toast(S.rules.player === 'tell' ? 'In this story you write what you want to do, and the Director makes it happen' : 'In this story you choose one of the Director’s options');
     if (!me) return toast('You have no character on stage right now — speak or act instead');
+    draft.heroTrack = null;
     if (hit && hit !== me && mods().inventory) {                    // reach for a thing: the Director decides whether you get it
       draft.target = hit.id;
-      me.x = clamp(hit.x + (me.x < hit.x ? -0.12 : 0.12), 0.04, 0.96); me.y = clamp(hit.y + 0.02, 0.08, 1);
+      [me.x, me.y] = inRange(clamp(hit.x + (me.x < hit.x ? -0.12 : 0.12), 0.04, 0.96), clamp(hit.y + 0.02, 0.08, 1));
       return changed();
     }
     draft.target = null;
-    drag = { e: me, dx: 0, dy: 0 };
-    me.x = p.x; me.y = clamp(p.y, 0.08, 1);
+    const st = heroStart() || me;
+    drag = { e: me, dx: 0, dy: 0, walk: { t0: performance.now(), last: 0, pts: [0, r3(st.x), r3(st.y)] } };   // the path is replayed for the Director
+    [me.x, me.y] = inRange(p.x, clamp(p.y, 0.08, 1));
   } else if (drawOn) {
     if (draft.drawing.length >= 60) return toast('That is a lot of drawing — clear some first');
     drag = { stroke: { id: rid(), c: pen.c, w: pen.w, pts: [r3(p.x), r3(p.y)] } };
@@ -206,6 +238,12 @@ stage.addEventListener('pointermove', (ev) => {
     return paint();
   }
   drag.e.x = clamp(p.x + drag.dx, 0, 1); drag.e.y = clamp(p.y + drag.dy, 0.08, 1);
+  if (drag.walk) {
+    [drag.e.x, drag.e.y] = inRange(drag.e.x, drag.e.y);
+    const t = Math.round(350 + performance.now() - drag.walk.t0);
+    if (t < 8000 && t - drag.walk.last >= 60) { drag.walk.pts.push(t, r3(drag.e.x), r3(drag.e.y)); drag.walk.last = t; }
+    return paint();
+  }
   const tk = drag.take;
   if (tk) {
     const t = Math.round(tk.off + performance.now() - tk.t0);
@@ -217,6 +255,12 @@ stage.addEventListener('pointermove', (ev) => {
 function endDrag() {
   if (!drag) return;
   const d = drag; drag = null;
+  if (d.walk) {                                                     // the Player's own walk: keep it if it was a real drag, not a tap
+    const w = d.walk.pts; let len = 0;
+    for (let i = 3; i < w.length; i += 3) len += Math.hypot(w[i + 1] - w[i - 2], w[i + 2] - w[i - 1]);
+    w.push(Math.max(d.walk.last + 60, 350), r3(d.e.x), r3(d.e.y));
+    draft.heroTrack = w.length >= 12 && len > 0.06 && !(S.rules.moveRange > 0) ? w : null;
+  }
   if (d.take) {                                                     // store the recorded move
     const tk = d.take, t = Math.min(10000, Math.round(tk.off + performance.now() - tk.t0));
     tk.pts.push(Math.max(t, tk.last + 1), r3(d.e.x), r3(d.e.y));
@@ -250,12 +294,16 @@ stage.addEventListener('pointercancel', endDrag);
 
 function previewCut() {
   if (cut) return cut.skip();
-  const start = clone(draft);
-  for (const tr of draft.tracks) { const e = start.entities.find((x) => x.id === tr.id); if (e) { e.x = tr.pts[1]; e.y = tr.pts[2]; } }
-  start.drawing = []; start.narration = '';
-  for (const e of start.entities) e.say = '';
   audio.unlock();
-  cut = playCut(stage, start, draft, { ...stageOpts(), selId: null, by: 'director', sfx: audio.sfx }, () => { cut = null; render(); });
+  const o = { ...stageOpts(), selId: null, by: 'director', sfx: audio.sfx }, end = () => { cut = null; render(); };
+  if (draft.steps.length) cut = playTurn(stage, S.scene, finalScene(), o, end);      // step by step: replay every event in order
+  else {
+    const start = clone(draft);
+    for (const tr of draft.tracks) { const e = start.entities.find((x) => x.id === tr.id); if (e) { e.x = tr.pts[1]; e.y = tr.pts[2]; } }
+    start.drawing = []; start.narration = '';
+    for (const e of start.entities) e.say = '';
+    cut = playCut(stage, start, draft, o, end);
+  }
   render();
 }
 
@@ -366,7 +414,8 @@ function removeEntity(e) {
   if (draft.target === e.id) draft.target = null;
   if (selId === e.id) selId = null;
 }
-function setRules(rules) {
+function setRules(patch) {
+  const rules = { ...S.rules, ...patch };
   if (rules.modules.stats && !draft.sheet.stats.length) draft.sheet.stats = [{ id: rid(), name: '❤️ Health', value: 5, max: 5 }, { id: rid(), name: '💰 Gold', value: 0, max: null }];
   S.rules = rules; saveDraft(); render();
   act('settings', { rules }, 3).catch((e) => toast(e.message));
@@ -382,12 +431,23 @@ function recap(scene) {
 const chips = (list, key, onPick) => h('div', { class: 'chips wrap' }, list.map(([v, label]) => h('button', {
   'data-mark': `${key}=${v}`, class: String(draft[key] ?? '') === String(v) ? 'on' : '', onclick: () => { draft[key] = v; if (onPick) onPick(v); changed(); } }, label)));
 
+const PLAYER_MODES = [
+  { id: 'free', label: '🕹️ Free will', hint: 'The Player moves, animates and speaks for their hero, and types what they do.' },
+  { id: 'limited', label: '🎯 Limited will', hint: 'The Player must pick one of the options you offer each turn. They can still speak.' },
+  { id: 'tell', label: '📝 Narration', hint: 'The Player only writes what they want to do. Nothing moves until you stage it.' },
+];
+const RANGES = [[0, 'Anywhere'], [0.15, 'A few steps'], [0.3, 'Half the stage'], [0.5, 'Most of the stage']];
 function typeCard() {
   const r = S.rules;
   return h('div', { class: 'card' }, h('h3', {}, 'Story type'),
-    h('div', { class: 'chips wrap' }, TYPES.map((t) => h('button', { class: r.type === t.id ? 'on' : '', title: t.hint, onclick: () => setRules({ type: t.id, modules: { inventory: false, stats: false, dice: false, ...t.modules } }) }, t.label))),
+    h('div', { class: 'chips wrap' }, TYPES.map((t) => h('button', { class: r.type === t.id ? 'on' : '', title: t.hint, onclick: () => setRules({ type: t.id, modules: { inventory: false, stats: false, dice: false, ...t.modules }, moveRange: t.id === 'adventure' ? r.moveRange : 0 }) }, t.label))),
     h('p', { class: 'dim small' }, TYPES.find((t) => t.id === r.type).hint + ' Layers can be switched on and off at any time:'),
-    h('div', { class: 'chips wrap' }, MODULES.map((m) => h('button', { class: r.modules[m.id] ? 'on' : '', title: m.hint, onclick: () => setRules({ type: r.type, modules: { ...r.modules, [m.id]: !r.modules[m.id] } }) }, m.label))));
+    h('div', { class: 'chips wrap' }, MODULES.map((m) => h('button', { class: r.modules[m.id] ? 'on' : '', title: m.hint, onclick: () => setRules({ modules: { ...r.modules, [m.id]: !r.modules[m.id] } }) }, m.label))),
+    h('h3', {}, `How ${S.names.player} plays`),
+    h('div', { class: 'chips wrap' }, PLAYER_MODES.map((m) => h('button', { 'data-pmode': m.id, class: r.player === m.id ? 'on' : '', title: m.hint, onclick: () => setRules({ player: m.id }) }, m.label))),
+    h('p', { class: 'dim small' }, PLAYER_MODES.find((m) => m.id === r.player).hint),
+    r.type === 'adventure' && r.player === 'free' && h('h3', {}, 'Game movement: how far the hero walks per turn'),
+    r.type === 'adventure' && r.player === 'free' && h('div', { class: 'chips wrap' }, RANGES.map(([v, l]) => h('button', { 'data-range': v, class: r.moveRange === v ? 'on' : '', onclick: () => setRules({ moveRange: v }) }, l))));
 }
 
 function buildPanel() {
@@ -395,7 +455,9 @@ function buildPanel() {
   if (S.ended) return void p.append(h('div', { class: 'card' }, h('h3', {}, 'The story has ended'), h('p', { class: 'dim' }, 'Flip through it together, or start a new one.')), recap(S.scene) || '');
   if (!myTurn() || S.you !== 'director') {
     const tips = S.you === 'spectator' ? null
-      : myTurn() ? ['Your turn', `Tap or drag on the stage to move.${mods().inventory ? ' Tap a thing to reach for it, or a 🎒 item to use it.' : ''} Then say something, do something — or both — and end your turn.`]
+      : myTurn() ? ['Your turn', S.rules.player === 'tell' ? `Write what you want to do. ${S.names.director} will make it happen on the stage, and you will see it play out.`
+        : S.rules.player === 'limited' ? `Choose one of ${S.names.director}’s options. You can add a line of speech.`
+          : `Drag your hero to walk${S.rules.moveRange > 0 ? ' (inside the circle)' : ' — the path you draw is what the Director sees'}.${mods().inventory ? ' Tap a thing to reach for it, or a 🎒 item to use it.' : ''} Then say something, do something — or both — and end your turn.`]
         : S.you === 'player' ? [S.turn === 0 ? `${S.names.director} is setting the stage…` : `${S.names.director} is deciding what happens…`, 'The whole world is in their hands. Watch the stage.']
           : [`${S.names.player} is making a move…`, 'When they finish you can change anything: the cast, the place, the music, what everybody says.'];
     if (tips) p.append(h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
@@ -456,15 +518,15 @@ function buildPanel() {
     const fill = () => {
       const q = search.trim().toLowerCase();
       let items;
-      if (q) items = CATEGORIES.flatMap((c) => c.items).filter((i) => i.name.includes(q));
+      if (q) items = allItems().filter((i) => i.name.includes(q));
       else if (catId === 'custom') items = S.assets.filter((a) => a.kind === 'sprite').map((a) => ({ asset: 'c:' + a.id, name: a.name }));
-      else items = CATEGORIES.find((c) => c.id === catId).items;
-      grid.replaceChildren(...items.slice(0, 200).map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => addEntity(i.asset) }, glyphNode(code, i.asset))));
+      else items = ([...PIXEL, ...CATEGORIES].find((c) => c.id === catId) || PIXEL[0] || CATEGORIES[0]).items;
+      grid.replaceChildren(...items.slice(0, 300).map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => addEntity(i.asset) }, glyphNode(code, i.asset))));
       if (!items.length) grid.append(h('p', { class: 'dim', style: 'grid-column:1/-1;margin:4px' }, q ? 'Nothing found — try the ✨ Custom tab to make it.' : 'Nothing here yet. Create something below.'));
     };
     p.append(
       h('input', { type: 'search', placeholder: '🔍 Search 600+ sprites (dragon, door, key…)', value: search, enterkeyhint: 'search', oninput: (ev) => { search = ev.target.value; fill(); } }),
-      h('div', { class: 'chips' }, [...CATEGORIES, { id: 'custom', label: '✨ Custom' }].map((c) => h('button', { class: c.id === catId ? 'on' : '', onclick: () => { catId = c.id; search = ''; render(); } }, c.label))),
+      h('div', { class: 'chips wrap' }, [...PIXEL, ...CATEGORIES.map((c) => ({ ...c, label: '😀 ' + c.label })), { id: 'custom', label: '✨ Custom' }].map((c) => h('button', { class: c.id === catId ? 'on' : '', onclick: () => { catId = c.id; search = ''; render(); } }, c.label))),
       grid);
     fill();
     if (catId === 'custom') {
@@ -527,6 +589,7 @@ const guidedCtx = {
   get draft() { return draft; }, get S() { return S; }, get code() { return code; },
   setDraft(d) { draft = d; saveDraft(); },
   select(id) { selId = id || null; }, setRec(on) { rec = !!on; drawOn = false; if (on) { together = false; animAt = tracksEnd(); } },
+  commitStep: () => commitStep(), setRules: (r) => setRules(r), typeCard: () => typeCard(),
   cutting: () => !!cut, preview: () => previewCut(), mods: () => mods(), tracksEnd: () => tracksEnd(),
   toast, act, audio, rebuild: () => rebuild(), changed: () => changed(), changedQuiet: () => changedQuiet(),
   addEntity: (a) => addEntity(a), removeEntity: (e) => removeEntity(e), giveToPlayer: (e) => giveToPlayer(e), autoTrack: (e, s) => autoTrack(e, s),
@@ -607,15 +670,24 @@ function buildFoot() {
       h('button', { class: 'go primary', disabled: !ready || (dmode === 'guided' && G.path.length > 0), onclick: submit }, ready ? (S.turn === 0 ? 'Begin the story ▶' : `End ${side}turn ▶`) : 'Waiting for your Player to join…', tl()));
     f.classList.add('tight');
   } else {
-    const me = hero(draft);
-    if (draft.choices.length) f.append(h('div', { class: 'chips wrap choices' }, draft.choices.map((c) => h('button', { class: draft.action === c ? 'on' : '', onclick: () => { draft.action = draft.action === c ? '' : c; rebuild(); } }, c))));
-    if (me) f.append(h('div', { class: 'chips emotes' }, EMOTES.slice(0, 8).map((e) => h('button', { class: me.emote === e ? 'on' : '', 'aria-label': 'Emote ' + e, onclick: () => { me.emote = me.emote === e ? '' : e; rebuild(); } }, e))));
-    f.append(
-      h('input', { placeholder: '💬 Say something…', maxlength: 160, value: me ? me.say : '', disabled: !me, enterkeyhint: 'next', oninput: (ev) => { me.say = ev.target.value; changedQuiet(); } }),
-      h('input', { placeholder: '✋ Do something… (“open the drawer”)', maxlength: 160, value: draft.action, enterkeyhint: 'done', oninput: (ev) => { draft.action = ev.target.value; changedQuiet(); } }),
-      h('div', { class: 'row' },
-        mods().dice && h('button', { class: 'dice' + (draft.rollWant ? ' on' : ''), title: 'Roll a die with this turn', onclick: () => { draft.rollWant = draft.rollWant === 0 ? 6 : draft.rollWant === 6 ? 20 : 0; rebuild(); } }, draft.rollWant ? `🎲 d${draft.rollWant}` : '🎲'),
-        h('button', { class: 'go primary grow', onclick: submit }, `End ${side}turn ▶`, tl())));
+    const me = hero(draft), mode = S.rules.player;
+    const dice = mods().dice && h('button', { class: 'dice' + (draft.rollWant ? ' on' : ''), title: 'Roll a die with this turn', onclick: () => { draft.rollWant = draft.rollWant === 0 ? 6 : draft.rollWant === 6 ? 20 : 0; rebuild(); } }, draft.rollWant ? `🎲 d${draft.rollWant}` : '🎲');
+    const end = (off) => h('div', { class: 'row' }, dice, h('button', { class: 'go primary grow', disabled: !!off, onclick: submit }, `End ${side}turn ▶`, tl()));
+    const say = () => h('input', { placeholder: '💬 Say something…', maxlength: 160, value: me ? me.say : '', disabled: !me, enterkeyhint: 'next', oninput: (ev) => { me.say = ev.target.value; changedQuiet(); } });
+    const pick = () => h('div', { class: 'chips wrap choices' }, draft.choices.map((c) => h('button', { class: draft.action === c ? 'on' : '', onclick: () => { draft.action = draft.action === c ? '' : c; rebuild(); } }, c)));
+    if (mode === 'tell') {                               // narration: only words; the Director stages them
+      const ta = h('textarea', { id: 'tellBox', rows: 3, maxlength: 300, placeholder: `✍️ What do you want to do? ${S.names.director} will make it happen.` }, draft.action);
+      ta.addEventListener('input', () => { draft.action = ta.value; saveDraft(); });
+      f.append(ta, end());
+    } else if (mode === 'limited' && draft.choices.length) {   // limited will: one of the Director's options
+      f.append(h('div', { class: 'dim small' }, `Choose what you do — ${S.names.director} decided the options:`), pick(), say(), end(!draft.choices.includes(draft.action)));
+    } else {
+      if (draft.choices.length) f.append(pick());
+      if (me) f.append(h('div', { class: 'chips emotes' }, EMOTES.slice(0, 8).map((e) => h('button', { class: me.emote === e ? 'on' : '', 'aria-label': 'Emote ' + e, onclick: () => { me.emote = me.emote === e ? '' : e; rebuild(); } }, e))));
+      f.append(say(),
+        h('input', { placeholder: '✋ Do something… (“open the drawer”)', maxlength: 160, value: draft.action, enterkeyhint: 'done', oninput: (ev) => { draft.action = ev.target.value; changedQuiet(); } }),
+        end());
+    }
   }
 }
 
@@ -659,7 +731,7 @@ function playFrom(i) {
   if (!playing || i >= story.history.length) return stopPlay();
   storyAt = i;
   $('#storyCap').textContent = caption(i);
-  storyCut = playCut($('#storyStage'), i ? story.history[i - 1].scene : null, story.history[i].scene, { ...storyOpts(), by: story.history[i].by, sfx: audio.sfx },
+  storyCut = playTurn($('#storyStage'), i ? story.history[i - 1].scene : null, story.history[i].scene, { ...storyOpts(), by: story.history[i].by, sfx: audio.sfx },
     () => { storyCut = null; if (playing) setTimeout(() => playFrom(i + 1), 700); });
 }
 $('#storyPrev').onclick = () => { stopPlay(); storyAt = Math.max(0, storyAt - 1); showFrame(); };
@@ -729,4 +801,4 @@ function boot() {
 }
 window.addEventListener('hashchange', boot);
 document.addEventListener('pointerdown', () => audio.unlock(), { capture: true });
-loadPack().then(boot);
+Promise.all([loadPack(), loadPixel()]).then(() => { if (PIXEL.length) catId = PIXEL[0].id; boot(); });

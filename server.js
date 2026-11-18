@@ -25,7 +25,7 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const PUBLIC = path.join(__dirname, 'public');
 
 const GRACE_MS = 4000;              // slack after the deadline for a client's auto-submit to arrive
-const MAX_BODY = 600 * 1024;
+const MAX_BODY = 2 * 1024 * 1024;
 const MAX_ASSET_BYTES = 400 * 1024;
 const MAX_ENTITIES = 80;
 const MAX_ASSETS = 80;
@@ -57,12 +57,14 @@ function newCode() {
   }
 }
 
+const HERO_ASSET = fs.existsSync(path.join(PUBLIC, 'px', 'hero.png')) ? 'p:hero' : 's:person';
 function newScene() {
   return {
     backdrop: 'b:room', mood: 'm:none', narration: '', action: '', heroId: 'hero',
-    entities: [{ id: 'hero', asset: 's:person', x: 0.5, y: 0.78, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' }],
+    entities: [{ id: 'hero', asset: HERO_ASSET, x: 0.5, y: 0.78, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' }],
     drawing: [], weather: '',                          // persistent decoration
     tracks: [], burst: '', sfx: '', card: '', choices: [], // the Director's one-turn extras
+    steps: [],                                         // earlier moments of a step-by-step turn, played in order before this scene
     sheet: { inv: [], stats: [] },                     // inventory + stats (story-type layers)
     target: null, use: null, roll: null,               // the Player's one-turn extras (+ dice)
   };
@@ -76,10 +78,29 @@ function upgradeScene(sc) {
 }
 
 const TYPES = { free: { inventory: false, stats: false, dice: false }, adventure: { inventory: true, stats: true, dice: true } };
+/* How the Player takes part (set by the Director):
+ *   tell     the Player only writes what they want to do; the Director stages it
+ *   free     the Player moves, animates and speaks for their hero
+ *   limited  the Player must pick one of the options the Director offered
+ * moveRange (free only): how far the hero may walk per turn, as a fraction of the stage width; 0 = anywhere. */
+const PLAYER_MODES = ['free', 'limited', 'tell'];
 function cleanRules(r) {
   const type = r && TYPES[r.type] ? r.type : 'free';
   const m = (r && r.modules) || TYPES[type];
-  return { type, modules: { inventory: !!m.inventory, stats: !!m.stats, dice: !!m.dice } };
+  return {
+    type, modules: { inventory: !!m.inventory, stats: !!m.stats, dice: !!m.dice },
+    player: r && PLAYER_MODES.includes(r.player) ? r.player : 'free',
+    moveRange: r ? r3(num(r.moveRange, 0, 1, 0)) : 0,
+  };
+}
+const stageDist = (ax, ay, bx, by) => Math.hypot(ax - bx, (ay - by) * 0.75);   // in stage widths (the stage is 4:3)
+function cleanTrackPts(raw) {
+  const pts = []; let last = 0;
+  for (let i = 0; i + 2 < raw.length && i < 660; i += 3) {
+    last = Math.max(last, Math.round(num(raw[i], 0, 10000, 0)));
+    pts.push(last, r3(num(raw[i + 1], 0, 1, 0)), r3(num(raw[i + 2], 0, 1, 0)));
+  }
+  return pts;
 }
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -102,7 +123,7 @@ function cleanSheet(s) {
   return { inv, stats };
 }
 
-function cleanScene(s, prev) {
+function cleanScene(s, prev, inner) {
   const seen = new Set();
   const entities = [];
   for (const e of arr(s && s.entities).slice(0, MAX_ENTITIES)) {
@@ -127,11 +148,7 @@ function cleanScene(s, prev) {
   const tracks = [];   // recorded motion: flat [ms, x, y, ms, x, y, ...], at most 10 seconds
   for (const t of arr(s.tracks).slice(0, 30)) {
     if (!t || !seen.has(t.id) || !Array.isArray(t.pts) || tracks.some((x) => x.id === t.id)) continue;
-    const pts = []; let last = 0;
-    for (let i = 0; i + 2 < t.pts.length && i < 660; i += 3) {
-      last = Math.max(last, Math.round(num(t.pts[i], 0, 10000, 0)));
-      pts.push(last, r3(num(t.pts[i + 1], 0, 1, 0)), r3(num(t.pts[i + 2], 0, 1, 0)));
-    }
+    const pts = cleanTrackPts(t.pts);
     if (pts.length >= 6) tracks.push({ id: t.id, pts });
   }
   return {
@@ -140,20 +157,25 @@ function cleanScene(s, prev) {
     drawing, weather: str(s.weather, 12), tracks, burst: str(s.burst, 12), sfx: str(s.sfx, 12), card: str(s.card, 60),
     choices: arr(s.choices).map((c) => str(c, 40)).filter(Boolean).slice(0, 4),
     sheet: cleanSheet(s.sheet), target: null, use: null, roll: null,
+    steps: inner ? [] : arr(s.steps).slice(0, 6).filter((f) => f && typeof f === 'object').map((f) => cleanScene(f, prev, true)),
   };
 }
 
 /* How long the other side will be watching this turn play out, so it is not charged to their clock. */
-function cutEstimate(sc, before) {
-  const old = new Map((before ? before.entities : []).map((e) => [e.id, e.say]));
-  let ms = 1500;
-  for (const t of sc.tracks) ms = Math.max(ms, 900 + t.pts[t.pts.length - 3]);
-  for (const e of sc.entities) if (e.say && old.get(e.id) !== e.say) ms += 900 + 45 * e.say.length;
-  if (sc.narration && !(before && before.narration === sc.narration)) ms += Math.min(4500, 900 + 40 * sc.narration.length);
-  if (sc.card) ms += 2100;
-  if (sc.roll) ms += 1700;
-  if (sc.action || sc.target || sc.use) ms += 1300;
-  return Math.min(ms, 30000);
+function cutEstimate(scene, before) {
+  let total = 0, prev = before;
+  for (const sc of [...(scene.steps || []), scene]) {
+    const old = new Map((prev ? prev.entities : []).map((e) => [e.id, e.say]));
+    let ms = 1500;
+    for (const t of sc.tracks) ms = Math.max(ms, 900 + t.pts[t.pts.length - 3]);
+    for (const e of sc.entities) if (e.say && old.get(e.id) !== e.say) ms += 900 + 45 * e.say.length;
+    if (sc.narration && !(prev && prev.narration === sc.narration)) ms += Math.min(4500, 900 + 40 * sc.narration.length);
+    if (sc.card) ms += 2100;
+    if (sc.roll) ms += 1700;
+    if (sc.action || sc.target || sc.use) ms += 1300;
+    total += ms; prev = sc;
+  }
+  return Math.min(total, 60000);
 }
 
 /* ---------- rooms ---------- */
@@ -226,7 +248,7 @@ function syncClock(room) {
 /* Commit the current scene as a finished turn and hand over to the other side. */
 function advance(room, timeout) {
   if (timeout) {   // nothing new was submitted: drop every one-turn extra so it does not play twice
-    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, use: null, roll: null });
+    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, use: null, roll: null, steps: [] });
     if (room.whose === 'player') room.scene.choices = [];
   }
   room.history.push({ turn: room.turn, by: room.whose, at: Date.now(), timeout: !!timeout, scene: clone(room.scene) });
@@ -284,20 +306,34 @@ async function act(room, token, body) {
         const roll = rollDie(body.roll);
         if (roll) room.scene.roll = { by: 'director', ...roll };
       } else {
-        const hero = room.scene.entities.find((e) => e.id === room.scene.heroId);
-        if (hero) {
-          hero.x = num(body.x, 0, 1, hero.x);
-          hero.y = num(body.y, 0, 1, hero.y);
+        const sc = room.scene, mode = room.rules.player, range = room.rules.moveRange;
+        const hero = sc.entities.find((e) => e.id === sc.heroId);
+        let action = str(body.action, mode === 'tell' ? 300 : 160);
+        if (mode === 'limited' && sc.choices.length && !sc.choices.includes(action)) throw fail(400, 'Pick one of the Director’s options first');
+        Object.assign(sc, { tracks: [], burst: '', sfx: '', card: '', steps: [], target: null, use: null });   // the Director's one-turn extras are over
+        if (hero && mode !== 'tell') {
           hero.say = str(body.say, 160);
           hero.emote = str(body.emote, 16);
         }
-        const sc = room.scene;
-        sc.action = str(body.action, 160);
-        sc.target = sc.entities.some((e) => e.id === body.target && e.id !== sc.heroId) ? body.target : null;
-        sc.use = sc.sheet.inv.some((i) => i.id === body.use) ? body.use : null;
+        if (hero && mode === 'free') {
+          let x = num(body.x, 0, 1, hero.x), y = num(body.y, 0, 1, hero.y);
+          if (range > 0) {                                    // game movement: only so far per turn
+            const d = stageDist(x, y, hero.x, hero.y);
+            if (d > range) { x = hero.x + ((x - hero.x) * range) / d; y = hero.y + ((y - hero.y) * range) / d; }
+          } else if (Array.isArray(body.track)) {             // the Player recorded how their hero moves
+            const pts = cleanTrackPts(body.track);
+            if (pts.length >= 6) sc.tracks = [{ id: hero.id, pts }];
+          }
+          hero.x = r3(x); hero.y = r3(y);
+        }
+        if (mode !== 'tell') {
+          sc.target = mode === 'free' && sc.entities.some((e) => e.id === body.target && e.id !== sc.heroId) ? body.target : null;
+          sc.use = sc.sheet.inv.some((i) => i.id === body.use) ? body.use : null;
+        }
+        sc.action = action;
         const roll = rollDie(body.roll);
         sc.roll = roll ? { by: 'player', ...roll } : null;
-        sc.tracks = []; sc.burst = ''; sc.sfx = ''; sc.card = ''; sc.choices = [];   // the Director's one-turn extras are over
+        sc.choices = [];
       }
       advance(room, false);
       return { ok: true };
