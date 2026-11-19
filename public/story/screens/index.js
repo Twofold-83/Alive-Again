@@ -1,0 +1,43 @@
+/* Every screen of the Director's question tree, by the name used in G.path. */
+import { screenRoot, screenRules, screenClaude } from './story.js';
+import { screenThing, screenSwap, screenSpeak, screenMove, screenMoveDrag, screenMoveRec, screenAdd, screenAddChar, screenAddSearch, screenAddOwn, screenActive, screenTie, screenExit } from './things.js';
+import { screenMoment, screenScene, screenScenePrepared, screenScenePlace, screenSceneWeather, screenSceneMusic, screenSceneCard, screenCamera, screenNarrate, screenDraw } from './scene.js';
+import { screenAsk, screenAward, screenBattle, screenSheet, screenGive } from './player.js';
+
+/** Every screen of the question tree, by the name used in G.path. */
+export const SCREENS = {
+  'root': screenRoot,
+  'thing': screenThing,
+  'swap': screenSwap,
+  'speak': screenSpeak,
+  'move': screenMove,
+  'move:drag': screenMoveDrag,
+  'move:rec': screenMoveRec,
+  'add': screenAdd,
+  'add:char': screenAddChar,
+  'add:thing': screenAddChar,
+  'add:tile': screenAddChar,
+  'add:fx': screenAddChar,
+  'add:search': screenAddSearch,
+  'add:own': screenAddOwn,
+  'moment': screenMoment,
+  'scene': screenScene,
+  'scene:prepared': screenScenePrepared,
+  'scene:place': screenScenePlace,
+  'scene:weather': screenSceneWeather,
+  'scene:music': screenSceneMusic,
+  'scene:card': screenSceneCard,
+  'ask': screenAsk,
+  'camera': screenCamera,
+  'award': screenAward,
+  'active': screenActive,
+  'tie': screenTie,
+  'exit': screenExit,
+  'battle': screenBattle,
+  'narrate': screenNarrate,
+  'draw': screenDraw,
+  'sheet': screenSheet,
+  'give': screenGive,
+  'rules': screenRules,
+  'claude': screenClaude,
+};

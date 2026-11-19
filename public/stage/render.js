@@ -2,20 +2,6 @@ import { spriteView, assetLabel, backdropCss } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 
 /** Fill in fields that older saved scenes do not have. */
-export function norm(sc) {
-  if (!sc) return sc;
-  sc.drawing ||= []; sc.tracks ||= []; sc.choices ||= []; sc.steps ||= [];
-  for (const f of sc.steps) norm(f);
-  sc.sheet ||= { inv: [], stats: [] }; sc.sheet.inv ||= []; sc.sheet.stats ||= [];
-  if (sc.level === undefined) sc.level = null;
-  sc.exits ||= []; sc.floats ||= []; sc.sceneId ||= ''; sc.travel ||= ''; sc.verb ||= '';
-  for (const k of ['ask', 'answer', 'exit', 'cam', 'award', 'battle', 'point']) if (sc[k] === undefined) sc[k] = null;
-  sc.order ||= [];
-  if (sc.sheet.points == null) sc.sheet.points = 0;
-  for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; e.solid = !!e.solid; e.once ||= ''; e.temp = !!e.temp; e.layer ||= 0; if (e.active === undefined) e.active = null; if (e.tie === undefined) e.tie = null; if (e.hp === undefined) { e.hp = null; e.maxHp = null; } }
-  return sc;
-}
-
 export function glyphNode(code, asset, cls = '') {
   const v = spriteView(code, asset);
   return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);

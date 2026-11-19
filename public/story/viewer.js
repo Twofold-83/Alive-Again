@@ -1,4 +1,5 @@
-import { norm, renderStage } from '../stage/render.js';
+import { normScene } from '../shared/scene-model.js';
+import { renderStage } from '../stage/render.js';
 import { playTurn } from '../stage/playback.js';
 import { h } from '../core/dom.js';
 import { $, toast } from '../core/dom.js';
@@ -13,7 +14,7 @@ function caption(i) { const fr = story.history[i]; return `Page ${i + 1} of ${st
 export async function openStory() {
   try { story = await api(`/api/rooms/${app.code}/history`); } catch (e) { return toast(e.message); }
   if (!story.history.length) return toast('The story has not begun yet');
-  story.history.forEach((x) => norm(x.scene));
+  story.history.forEach((x) => normScene(x.scene));
   storyAt = story.history.length - 1;
   $('#story').hidden = false; showFrame();
 }

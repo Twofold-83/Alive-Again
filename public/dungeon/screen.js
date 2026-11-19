@@ -1,20 +1,19 @@
 /* Dungeon mode: the screen. Castle editor, the game canvas, the hero's controls and the Overlord's panel.
- * The rules live in rpg-sim.js. One browser is the "host" and runs them (the hero's, normally);
+ * The rules live in shared/dungeon-rules.js. One browser is the "host" and runs them (the hero's, normally);
  * the other watches snapshots and sends Overlord commands through the server. */
-import { h } from '../core/dom.js';
+import { h, $, fill, add, toast } from '../core/dom.js';
+import { audio } from '../core/audio.js';
+import { act } from '../core/net.js';
+import { History } from '../core/history.js';
 import { spriteView } from '../core/catalog.js';
 import * as R from '../shared/dungeon-rules.js';
 
 const TS = 48, W = R.RW * TS, H = R.RH * TS;
-function $(s) { return document.querySelector(s); }
-function fill(el, ...kids) { return el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== '')); }
-function add(el, ...kids) { return el.append(...kids.flat().filter((k) => k != null && k !== false && k !== '')); }
-let C = null;                       // { act, toast, audio } from app.js
 let S = null, st = null, run = -1, def = null, mode = 'live';
 let tool = null, editKey = null, viewKey = null, hover = null, painting = false;
 let uiKey = '', hudKey = '', mapKey = '', lastEv = 0, raf = 0, last = 0, sending = false, sent = '', overTry = 0, saveTimer = 0;
 let acc = { snap: 0, hero: 0, lord: 0, ui: 0 }, shake = 0, msgAt = { n: 0, t: 0 }, clock = 0;
-const held = [], want = {}, queue = [], disp = new Map(), fxs = [], undo = [];
+const held = [], want = {}, queue = [], disp = new Map(), fxs = [], history = new History(60);
 
 function hot() { return !!S.hotseat; }
 function isHost() { return hot() || (S.bot === 'player' ? S.you === 'director' : S.you === 'player'); }
@@ -156,7 +155,7 @@ let swingAt = 0;
 const EV_SFX = { swing: 'swish', hit: 'hit', hurt: 'ouch', dead: 'fail', win: 'fanfare', levelup: 'levelup', coin: 'coin', heal: 'heal', key: 'pickup', pickup: 'pickup', door: 'steps', unlock: 'unlock', locked: 'lock',
   chest: 'magic', plate: 'lock', gate: 'unlock', slam: 'slam', dark: 'spell', quake: 'thunder', shoot: 'twang', spawn: 'teleport', boom: 'boom', fuse: 'tick', break: 'hit', fall: 'fall', wind: 'tick', roar: 'growl', whisper: 'ghost', mend: 'heal', click: 'lock' };
 function onEv(e) {
-  const a = C.audio, spark = (o) => fxs.push({ t: clock, len: 0.45, c: '#fff', x: e.x, y: e.y, ...o });
+  const a = audio, spark = (o) => fxs.push({ t: clock, len: 0.45, c: '#fff', x: e.x, y: e.y, ...o });
   if (e.k === 'spook') a.sfx(e.v); else if (e.k === 'kill') a.sfx(e.v ? 'boom' : 'pop'); else if (e.k === 'lordturn' || e.k === 'heroturn') a.blip(); else if (e.k !== 'step' && EV_SFX[e.k]) a.sfx(EV_SFX[e.k]);
   if (e.k === 'step' && e.n % 2) a.sfx('step');
   if (e.k === 'swing') swingAt = clock;
@@ -197,7 +196,7 @@ function post(dt) {
   if (over) { if (clock < overTry) return; overTry = clock + 1.5; }
   else { const sig = st.seq + ':' + st.t + ':' + st.dread; if (acc.snap < (watched ? 0.15 : 4) || sig === sent) return; sent = sig; }
   acc.snap = 0; sending = true;
-  C.act('rpgSnap', { run, state: st, over: over ? st.phase : undefined }).catch(() => {}).finally(() => { sending = false; });
+  act('rpgSnap', { run, state: st, over: over ? st.phase : undefined }).catch(() => {}).finally(() => { sending = false; });
 }
 function frame(ms) {
   raf = requestAnimationFrame(frame);
@@ -232,15 +231,15 @@ function onKey(e) {
   if (st && st.mode === 'turn') { if (e.repeat && clock - lastKey < 0.13) return; lastKey = clock; if (queue.length < 2) queue.push(dir ? { k: 'move', dir } : { k: actn }); return; }
   if (dir) { if (!e.repeat) { const i = held.indexOf(dir); if (i >= 0) held.splice(i, 1); held.push(dir); } } else if (!e.repeat) want[actn] = clock + 0.22;
 }
-function press(k) { C.audio.unlock(); if (st && st.mode === 'turn') queue.push({ k }); else want[k] = clock + 0.3; }
+function press(k) { audio.unlock(); if (st && st.mode === 'turn') queue.push({ k }); else want[k] = clock + 0.3; }
 
 /* ---------- the Overlord's hand ---------- */
 function command(c) {
   if (!st || S.rpg.phase !== 'play') return;
   const probe = JSON.parse(JSON.stringify(st)), why = R.lordCmd(probe, c);
-  if (why) { C.toast(why); C.audio.sfx('error'); return false; }
+  if (why) { toast(why); audio.sfx('error'); return false; }
   if (isHost()) R.lordCmd(st, c);
-  else { st = probe; C.act('rpgCmd', { cmd: c }).catch((e) => C.toast(e.message)); }       // shown at once; the hero's browser has the last word
+  else { st = probe; act('rpgCmd', { cmd: c }).catch((e) => toast(e.message)); }       // shown at once; the hero's browser has the last word
   return true;
 }
 function tileOf(e) {
@@ -251,12 +250,12 @@ function tileOf(e) {
 function onPointer(e) {
   if (!S) return;
   const p = tileOf(e), phase = S.rpg.phase;
-  if (e.type === 'pointerleave') { hover = null; painting = false; return; }
+  if (e.type === 'pointerleave') { hover = null; if (painting) { painting = false; history.note(def); } return; }
   hover = p;
   if (!p) return;
   if (phase === 'build' && isLord() && def) {
-    if (e.type === 'pointerdown') { painting = true; pushUndo(); try { e.target.setPointerCapture(e.pointerId); } catch { /* fine */ } }
-    if (e.type === 'pointerup') painting = false;
+    if (e.type === 'pointerdown') { painting = true; try { e.target.setPointerCapture(e.pointerId); } catch { /* fine */ } }
+    if (e.type === 'pointerup') { painting = false; history.note(def); }                 // one stroke is one undo step
     if (painting && tool && R.paintTile(def, editKey, p.x, p.y, e.button === 2 || e.buttons === 2 ? '.' : tool)) { R.syncDoors(def); saveSoon(); mapKey = ''; }
   } else if (phase === 'play' && isLord() && e.type === 'pointerdown' && tool) {
     const key = viewKey && st.rooms[viewKey] ? viewKey : st.cur;
@@ -273,15 +272,16 @@ const PALETTE = [
   ['Monsters', Object.values(R.MOBS).map((m) => [m.ch, `${m.name} — ${m.hp} health`, m.sprite])],
   ['Start & goal', [['S', 'The hero starts here', 'knight'], ['X', 'The crown — the hero wins by taking it', 'crown']]],
 ];
-function pushUndo() { undo.push(JSON.stringify(def)); if (undo.length > 60) undo.shift(); }
-function undoEdit() { if (!undo.length) return; def = JSON.parse(undo.pop()); if (!def.rooms[editKey]) editKey = Object.keys(def.rooms)[0] || null; saveSoon(); uiKey = ''; }
-function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { if (S && S.rpg.phase === 'build' && isLord() && def) C.act('rpgDef', { def, mode }).catch(() => {}); }, 900); }
-function setDef(d) { pushUndo(); def = d; editKey = Object.keys(def.rooms).find((k) => def.rooms[k].t.includes('S')) || Object.keys(def.rooms)[0] || null; saveSoon(); uiKey = ''; }
+/** A finished change to the castle: remembered for undo, saved to the server soon. */
+function commit() { history.note(def); saveSoon(); }
+function undoEdit() { const earlier = history.undo(); if (!earlier) return; def = earlier; if (!def.rooms[editKey]) editKey = Object.keys(def.rooms)[0] || null; saveSoon(); uiKey = ''; }
+function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { if (S && S.rpg.phase === 'build' && isLord() && def) act('rpgDef', { def, mode }).catch(() => {}); }, 900); }
+function setDef(d) { def = d; editKey = Object.keys(def.rooms).find((k) => def.rooms[k].t.includes('S')) || Object.keys(def.rooms)[0] || null; commit(); uiKey = ''; }
 function start() {
   const why = R.checkDef(def);
-  if (why) { C.toast(why); C.audio.sfx('error'); return; }
+  if (why) { toast(why); audio.sfx('error'); return; }
   clearTimeout(saveTimer);
-  C.act('rpgStart', { def, mode }).catch((e) => C.toast(e.message));
+  act('rpgStart', { def, mode }).catch((e) => toast(e.message));
 }
 function modePick() { return h('div', { class: 'seg' },
   h('button', { id: 'rpgLive', class: mode === 'live' ? 'on' : '', onclick: () => { mode = 'live'; saveSoon(); uiKey = ''; } }, '⚡ Live', h('small', {}, 'Everything moves at once')),
@@ -331,16 +331,16 @@ function side() {
       const room = def.rooms[editKey];
       add(p, 
         h('div', { class: 'rhead' }, h('h3', {}, '🏰 Build your castle'), h('button', { id: 'rpgUndo', title: 'Undo (Ctrl+Z)', onclick: undoEdit }, '↶ Undo')),
-        h('input', { id: 'rpgName', placeholder: 'Name of the castle', maxlength: 40, value: def.name || '', oninput: (e) => { def.name = e.target.value; saveSoon(); } }),
+        h('input', { id: 'rpgName', placeholder: 'Name of the castle', maxlength: 40, value: def.name || '', oninput: (e) => { def.name = e.target.value; commit(); } }),
         h('small', { class: 'dim' }, 'Rooms — click one to edit it, + to add one'),
-        board((k) => { if (def.rooms[k]) editKey = k; else { pushUndo(); if (R.addRoom(def, k)) { editKey = k; saveSoon(); } } uiKey = ''; }),
+        board((k) => { if (def.rooms[k]) editKey = k; else { if (R.addRoom(def, k)) { editKey = k; commit(); } } uiKey = ''; }),
         room && h('div', { class: 'row' },
-          h('button', { class: 'grow', onclick: () => { pushUndo(); def.rooms[editKey] = { ...R.emptyRoom(), fx: room.fx, msg: room.msg }; for (const s of Object.keys(R.DOORS)) if (def.rooms[R.neighbor(editKey, s)]) def.rooms[editKey].t = R.setCh(def.rooms[editKey].t, ...R.DOORS[s], room.t[R.DOORS[s][1] * R.RW + R.DOORS[s][0]]); R.syncDoors(def); saveSoon(); uiKey = ''; } }, '🧹 Empty this room'),
-          h('button', { class: 'grow danger', onclick: () => { pushUndo(); R.removeRoom(def, editKey); editKey = Object.keys(def.rooms)[0] || null; saveSoon(); uiKey = ''; } }, '🗑 Remove room')),
+          h('button', { class: 'grow', onclick: () => { def.rooms[editKey] = { ...R.emptyRoom(), fx: room.fx, msg: room.msg }; for (const s of Object.keys(R.DOORS)) if (def.rooms[R.neighbor(editKey, s)]) def.rooms[editKey].t = R.setCh(def.rooms[editKey].t, ...R.DOORS[s], room.t[R.DOORS[s][1] * R.RW + R.DOORS[s][0]]); R.syncDoors(def); commit(); uiKey = ''; } }, '🧹 Empty this room'),
+          h('button', { class: 'grow danger', onclick: () => { R.removeRoom(def, editKey); editKey = Object.keys(def.rooms)[0] || null; commit(); uiKey = ''; } }, '🗑 Remove room')),
         ...PALETTE.flatMap(([name, list]) => [h('small', { class: 'dim grp' }, name), h('div', { class: 'rpal' }, list.map(([ch, label, s]) => h('button', { 'data-tool': ch, class: tool === ch ? 'on' : '', title: label, onclick: () => { tool = ch; uiKey = ''; } }, icon(s))))]),
         h('small', { class: 'dim' }, tool ? `Painting: ${(PALETTE.flatMap((x) => x[1]).find((x) => x[0] === tool) || [])[1] || ''}. Drag on the room; right-click erases.` : 'Pick something above, then paint on the room.'),
-        room && h('label', { class: 'rfield' }, h('small', { class: 'dim' }, 'Pressure plates in this room…'), h('select', { id: 'rpgFx', onchange: (e) => { room.fx = e.target.value; saveSoon(); } }, R.PLATE_FX.map(([v, l]) => h('option', { value: v, selected: room.fx === v ? '' : null }, l)))),
-        room && h('label', { class: 'rfield' }, h('small', { class: 'dim' }, 'When the hero walks in, you whisper…'), h('input', { id: 'rpgRoomMsg', maxlength: 90, placeholder: 'e.g. Turn back while you can.', value: room.msg || '', oninput: (e) => { room.msg = e.target.value; saveSoon(); } })),
+        room && h('label', { class: 'rfield' }, h('small', { class: 'dim' }, 'Pressure plates in this room…'), h('select', { id: 'rpgFx', onchange: (e) => { room.fx = e.target.value; commit(); } }, R.PLATE_FX.map(([v, l]) => h('option', { value: v, selected: room.fx === v ? '' : null }, l)))),
+        room && h('label', { class: 'rfield' }, h('small', { class: 'dim' }, 'When the hero walks in, you whisper…'), h('input', { id: 'rpgRoomMsg', maxlength: 90, placeholder: 'e.g. Turn back while you can.', value: room.msg || '', oninput: (e) => { room.msg = e.target.value; commit(); } })),
         h('small', { class: 'dim grp' }, 'How it plays'), modePick(),
         h('div', { class: 'row' }, h('button', { id: 'rpgRandom', class: 'grow', onclick: () => setDef(R.randomDef()) }, '🎲 Random castle'), h('button', { class: 'grow', onclick: () => { const d = { name: '', rooms: {} }; R.addRoom(d, '2,1'); R.paintTile(d, '2,1', 7, 5, 'S'); setDef(d); } }, '📄 Start from nothing')),
         h('button', { id: 'rpgStart', class: 'go primary', onclick: start }, '⚔️ Open the gates'));
@@ -358,8 +358,8 @@ function side() {
     showCard(h('h2', {}, heroWon ? '👑 The hero takes the crown!' : '💀 The castle claims another hero'),
       h('p', {}, mine == null ? '' : mine ? 'You win!' : 'You lose — this time.'),
       st && h('p', { class: 'dim' }, `${s.kills || 0} monsters slain · ${s.rooms || 0} rooms explored · ${st.hero.coins} coins · level ${st.hero.lvl}`),
-      isLord() ? h('button', { id: 'rpgAgain', class: 'go primary', onclick: () => C.act('rpgAgain').catch((e) => C.toast(e.message)) }, '🏰 Back to the castle workshop')
-        : soloHero() ? h('button', { id: 'rpgAgain', class: 'go primary', onclick: () => C.act('rpgAgain').catch((e) => C.toast(e.message)) }, '⚔️ Another castle') : h('p', { class: 'dim' }, 'The Overlord can build a new castle.'));
+      isLord() ? h('button', { id: 'rpgAgain', class: 'go primary', onclick: () => act('rpgAgain').catch((e) => toast(e.message)) }, '🏰 Back to the castle workshop')
+        : soloHero() ? h('button', { id: 'rpgAgain', class: 'go primary', onclick: () => act('rpgAgain').catch((e) => toast(e.message)) }, '⚔️ Another castle') : h('p', { class: 'dim' }, 'The Overlord can build a new castle.'));
   }
   if (!st) { add(p, h('p', { class: 'dim' }, 'Waiting for the hero…')); return; }
   add(p, h('div', { class: 'rhead' }, h('h3', {}, st.name ? `🏰 ${st.name}` : '🏰 The castle'), h('span', { class: 'dim' }, st.mode === 'turn' ? '♟️ turn-based' : '⚡ live')));
@@ -425,14 +425,13 @@ function refresh() {
     const v = $('#rpgViewing'); if (v) v.textContent = viewKey && viewKey !== st.cur ? 'Looking at another room — click the hero’s room (🧍) to go back' : 'Click any room to look inside. You can set things up ahead of the hero.';
     if (viewKey === st.cur) viewKey = null;
   }
-  if (g.phase !== 'build') C.audio.setMood(g.phase === 'over' ? (g.winner === 'player' ? 'm:victory' : 'm:sad') : st && st.cur === st.goal ? 'm:boss' : st && st.dark > st.t ? 'm:spooky' : 'm:dungeon');
-  else C.audio.setMood('m:mystery');
+  if (g.phase !== 'build') audio.setMood(g.phase === 'over' ? (g.winner === 'player' ? 'm:victory' : 'm:sad') : st && st.cur === st.goal ? 'm:boss' : st && st.dark > st.t ? 'm:spooky' : 'm:dungeon');
+  else audio.setMood('m:mystery');
 }
 
 /* ---------- wiring to the rest of the app ---------- */
 window.rpgDebug = { get st() { return st; }, get def() { return def; } };   // for the tests and for the curious
-export function rpgInit(ctx) {
-  C = ctx;
+export function rpgInit() {
   const cv = $('#rpgCanvas');
   cv.width = W; cv.height = H;
   for (const t of ['pointerdown', 'pointermove', 'pointerup', 'pointerleave']) cv.addEventListener(t, onPointer);
@@ -452,7 +451,7 @@ export function rpgInit(ctx) {
     if (dir) { held.push(dir); step(); }
   };
   const release = () => { padDir = null; held.length = 0; knob.style.transform = ''; stick.dataset.dir = ''; clearInterval(padTimer); padTimer = 0; };
-  stick.addEventListener('pointerdown', (e) => { e.preventDefault(); C.audio.unlock(); try { stick.setPointerCapture(e.pointerId); } catch { /* fine */ } clearInterval(padTimer); padTimer = setInterval(step, 230); aim(e); });
+  stick.addEventListener('pointerdown', (e) => { e.preventDefault(); audio.unlock(); try { stick.setPointerCapture(e.pointerId); } catch { /* fine */ } clearInterval(padTimer); padTimer = setInterval(step, 230); aim(e); });
   stick.addEventListener('pointermove', (e) => { if (padTimer) aim(e); });
   for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) stick.addEventListener(t, release);
   for (const [id, k] of [['padSword', 'attack'], ['padPotion', 'potion'], ['padBomb', 'bomb']]) $('#' + id).addEventListener('pointerdown', (e) => { e.preventDefault(); press(k); });
@@ -464,7 +463,7 @@ export function rpgState(s) {
   const g = s.rpg;
   if (g.phase === 'build') {
     st = null; run = -1; viewKey = null; fxs.length = 0;
-    if (isLord() && !def) { def = g.def && Object.keys(g.def.rooms).length ? g.def : R.randomDef(); mode = g.mode; editKey = Object.keys(def.rooms).find((k) => def.rooms[k].t.includes('S')) || Object.keys(def.rooms)[0]; tool = null; if (!g.def) saveSoon(); }
+    if (isLord() && !def) { def = g.def && Object.keys(g.def.rooms).length ? g.def : R.randomDef(); mode = g.mode; editKey = Object.keys(def.rooms).find((k) => def.rooms[k].t.includes('S')) || Object.keys(def.rooms)[0]; tool = null; history.reset(def); if (!g.def) saveSoon(); }
     if (tool && tool.length > 1) tool = null;
   } else {
     if (tool && tool.length === 1) tool = null;
@@ -486,5 +485,5 @@ export function rpgEvent(m) {
 }
 export function rpgStop() {
   cancelAnimationFrame(raf); raf = 0; clearTimeout(saveTimer);
-  S = null; st = null; def = null; run = -1; tool = null; editKey = null; viewKey = null; uiKey = ''; hudKey = ''; undo.length = 0; held.length = 0; queue.length = 0; disp.clear(); fxs.length = 0;
+  S = null; st = null; def = null; run = -1; tool = null; editKey = null; viewKey = null; uiKey = ''; hudKey = ''; history.reset(); held.length = 0; queue.length = 0; disp.clear(); fxs.length = 0;
 }

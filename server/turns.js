@@ -1,7 +1,8 @@
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
 import { timers, online, broadcast, touch, rooms } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
-import { cutEstimate, rollDie, cleanScene, walkable, cleanTrackPts, cleanRules } from './scene.js';
+import { cutEstimate, rollDie, cleanScene, cleanTrackPts, cleanRules } from './scene.js';
+import { walkable, stepFields, playerFields } from '../public/shared/scene-model.js';
 import { botMove } from './bots.js';
 import { act } from './actions.js';
 
@@ -34,7 +35,7 @@ export function syncClock(room) {
 /* Commit the current scene as a finished turn and hand over to the other side. */
 function advance(room, timeout) {
   if (timeout) {   // nothing new was submitted: drop every one-turn extra so it does not play twice
-    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, point: null, order: [], use: null, roll: null, steps: [], travel: '', award: null, floats: [], answer: null, verb: '', exit: null });
+    Object.assign(room.scene, stepFields(), playerFields(), { roll: null, steps: [] });
     if (room.whose === 'player') room.scene.choices = [];
   }
   room.history.push({ turn: room.turn, by: room.whose, at: Date.now(), timeout: !!timeout, scene: clone(room.scene) });
@@ -99,7 +100,7 @@ function submitPlayer(room, body) {
     }
   }
   if (mode === 'limited' && ask && ask.kind !== 'battle' && !answer) throw fail(400, 'Do what the Director asked first');
-  Object.assign(sc, { tracks: [], burst: '', sfx: '', card: '', steps: [], target: null, point: null, order: [], use: null, travel: '', award: null, floats: [], verb: '', exit: null });   // the Director's one-turn extras are over
+  Object.assign(sc, stepFields(), playerFields(), { steps: [] });   // the Director's one-turn extras are over
   for (const e of sc.entities) { if (e.id !== sc.heroId) e.say = ''; e.once = ''; }      // lines already heard do not hang around
   sc.entities = sc.entities.filter((e) => !e.temp);
   if (hero && mode !== 'tell') {

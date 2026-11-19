@@ -23,3 +23,6 @@ export function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400);
 }
+/** Like replaceChildren / append, but nothing is drawn for null, false or '' (so `cond && h(...)` can be passed straight in). */
+export function fill(el, ...kids) { el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== '')); return el; }
+export function add(el, ...kids) { el.append(...kids.flat().filter((k) => k != null && k !== false && k !== '')); return el; }

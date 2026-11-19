@@ -3,7 +3,8 @@ import * as directorAI from './director-ai.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { DATA_DIR, ROOM_TTL_MS } from './config.js';
-import { upgradeScene, cleanRules } from './scene.js';
+import { cleanRules } from './scene.js';
+import { normScene } from '../public/shared/scene-model.js';
 
 export const rooms = new Map();   // code -> room
 export const streams = new Map(); // code -> Set<{res, token}>
@@ -80,8 +81,8 @@ export function loadRooms() {
     try {
       const room = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8'));
       if (room.deadline != null) { room.remaining = Math.max(0, room.deadline - Date.now()); room.deadline = null; }
-      upgradeScene(room.scene);
-      for (const hst of room.history) upgradeScene(hst.scene);
+      normScene(room.scene);                                   // stories saved by an older version lack newer fields
+      for (const hst of room.history) normScene(hst.scene);
       room.rules = cleanRules(room.rules);
       rooms.set(room.code, room);
     } catch (e) { console.error('Could not load', f, e.message); }

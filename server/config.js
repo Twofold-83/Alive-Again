@@ -11,7 +11,6 @@ export const PUBLIC = path.join(ROOT, 'public');
 export const GRACE_MS = 4000;              // slack after the deadline for a client's auto-submit to arrive
 export const MAX_BODY = 2 * 1024 * 1024;
 export const MAX_ASSET_BYTES = 400 * 1024;
-export const MAX_ENTITIES = 80;
 export const MAX_ASSETS = 80;
 export const MAX_HISTORY = 1000;
 export const MAX_ROOMS = 5000;

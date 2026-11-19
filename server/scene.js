@@ -1,35 +1,8 @@
-import fs from 'node:fs';
-import path from 'node:path';
+/* What the server accepts as a scene: every field a client sends is checked and cut to size here.
+ * The shape of a scene itself is defined once, for browser and server, in public/shared/scene-model.js. */
+import { MAX_ENTITIES, playerFields } from '../public/shared/scene-model.js';
 import crypto from 'node:crypto';
-import { PUBLIC, MAX_ENTITIES } from './config.js';
 import { arr, num, r3, str, uid, HEX } from './util.js';
-
-const HERO_ASSET = fs.existsSync(path.join(PUBLIC, 'px', 'hero.png')) ? 'p:hero' : 's:person';
-export function newScene() {
-  return {
-    backdrop: 'b:room', mood: 'm:none', narration: '', action: '', heroId: 'hero',
-    entities: [{ id: 'hero', asset: HERO_ASSET, x: 0.5, y: 0.78, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' }],
-    drawing: [], weather: '',                          // persistent decoration
-    tracks: [], burst: '', sfx: '', card: '', choices: [], // the Director's one-turn extras
-    steps: [],                                         // earlier moments of a step-by-step turn, played in order before this scene
-    sheet: { inv: [], stats: [] },                     // inventory + stats (story-type layers)
-    target: null, point: null, order: [], use: null, roll: null,               // the Player's one-turn extras (+ dice)
-    level: null,                                       // tile grid: floors, walls (see cleanLevel)
-    ask: null,                                         // what the Director asks of the Player this turn (see cleanAsk)
-    answer: null, verb: '', exit: null,                // the Player's reply, the verb used on an active object, the exit headed for
-    exits: [], sceneId: '',                            // ways out to other prepared scenes; which prepared scene this is
-    cam: null,                                         // camera: { x, y, z } zoom on a point
-    travel: '', award: null, floats: [],               // one step: travel title, points award, floating numbers
-    battle: null,                                      // { round } while a battle is on
-  };
-}
-/* Old saved stories predate some fields. */
-export function upgradeScene(sc) {
-  const d = newScene();
-  for (const k of Object.keys(d)) if (sc[k] === undefined) sc[k] = k === 'entities' ? [] : d[k];
-  sc.sheet.inv = sc.sheet.inv || []; sc.sheet.stats = sc.sheet.stats || [];
-  return sc;
-}
 
 const TYPES = { free: { inventory: false, stats: false, dice: false }, adventure: { inventory: true, stats: true, dice: true }, rpg: { inventory: false, stats: false, dice: false } };
 /* How the Player takes part (set by the Director):
@@ -50,25 +23,12 @@ export function cleanRules(r) {
  * ({ a: asset, k: 'f' floor | 'w' wall }); cells is 192 characters, '0' for empty,
  * otherwise a base-36 index into pal (1 = pal[0]). Where a level exists the hero
  * may only stand on floor tiles, and solid things block the way. */
-const LEVEL_W = 16, LEVEL_H = 12;
 function cleanLevel(l) {
   if (!l || typeof l !== 'object' || typeof l.cells !== 'string' || !/^[0-9a-z]{192}$/.test(l.cells) || !/[^0]/.test(l.cells)) return null;
   const pal = arr(l.pal).slice(0, 35).map((t) => ({ a: /^p:[a-z0-9-]{1,60}$/.test(t && t.a) ? t.a : 'p:hero', k: t && t.k === 'w' ? 'w' : 'f' }));
   let cells = '';
   for (const ch of l.cells) cells += parseInt(ch, 36) <= pal.length ? ch : '0';
   return { pal, cells };
-}
-export function walkable(sc, x, y) {
-  if (sc.level) {
-    const i = Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W));
-    const t = sc.level.pal[parseInt(sc.level.cells[i], 36) - 1];
-    if (!t || t.k !== 'f') return false;
-  }
-  for (const e of sc.entities) {
-    if (!e.solid || e.id === sc.heroId) continue;
-    if (Math.hypot((x - e.x) / (0.065 * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
-  }
-  return true;
 }
 export function cleanTrackPts(raw) {
   const pts = []; let last = 0;
@@ -143,12 +103,12 @@ export function cleanScene(s, prev, inner) {
   }
   return {
     backdrop: str(s.backdrop, 80) || prev.backdrop, mood: str(s.mood, 40) || 'm:none',
-    narration: str(s.narration, 240), action: '', heroId: seen.has(s.heroId) ? s.heroId : null, entities,
+    narration: str(s.narration, 240), heroId: seen.has(s.heroId) ? s.heroId : null, entities,
     drawing, weather: str(s.weather, 12), tracks, burst: str(s.burst, 12), sfx: str(s.sfx, 12), card: str(s.card, 60),
     choices: arr(s.choices).map((c) => str(c, 40)).filter(Boolean).slice(0, 4),
-    sheet: cleanSheet(s.sheet), target: null, point: null, order: [], use: null, roll: null,
+    sheet: cleanSheet(s.sheet), ...playerFields(), roll: null,          // a Director never sets what the Player did
     level: cleanLevel(s.level),
-    ask: cleanAsk(s.ask, seen), answer: null, verb: '', exit: null,
+    ask: cleanAsk(s.ask, seen),
     exits: arr(s.exits).slice(0, 12).filter((x) => x && typeof x === 'object').map((x) => ({ id: str(x.id, 24) || uid(), to: str(x.to, 24), label: str(x.label, 40) || 'Exit', x: r3(num(x.x, 0, 1, 0.5)), y: r3(num(x.y, 0, 1, 0.5)), locked: !!x.locked })),
     sceneId: str(s.sceneId, 24),
     cam: s.cam && typeof s.cam === 'object' && num(s.cam.z, 1, 4, 1) > 1 ? { x: r3(num(s.cam.x, 0, 1, 0.5)), y: r3(num(s.cam.y, 0, 1, 0.5)), z: r3(num(s.cam.z, 1, 4, 1)) } : null,

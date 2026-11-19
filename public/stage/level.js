@@ -1,18 +1,7 @@
-/* ---------- levels: a 16 x 12 tile grid; floors can be walked on, walls cannot ---------- */
-export const LEVEL_W = 16, LEVEL_H = 12, EMPTY_CELLS = '0'.repeat(LEVEL_W * LEVEL_H);
-export function cellAt(x, y) { return Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W)); }
-/** May the hero stand here? (Same rule as on the server.) */
-export function walkable(scene, x, y) {
-  if (scene.level) {
-    const t = scene.level.pal[parseInt(scene.level.cells[cellAt(x, y)], 36) - 1];
-    if (!t || t.k !== 'f') return false;
-  }
-  for (const e of scene.entities) {
-    if (!e.solid || e.id === scene.heroId) continue;
-    if (Math.hypot((x - e.x) / (0.065 * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
-  }
-  return true;
-}
+/* Levels on the stage: painting tiles, and finding a way for the hero to walk. The rule for where the hero may stand
+ * is shared with the server (shared/scene-model.js). */
+import { LEVEL_W, LEVEL_H, walkable } from '../shared/scene-model.js';
+const EMPTY_CELLS = '0'.repeat(LEVEL_W * LEVEL_H);
 /** Put a tile on one cell of a scene's level (a = asset, k = 'f' floor | 'w' wall; k '' erases). Returns false if nothing changed. */
 export function setCell(scene, c, a, k) {
   const lv = scene.level || { pal: [], cells: EMPTY_CELLS };

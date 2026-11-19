@@ -10,22 +10,20 @@
  * A scene on the bench is added to the map with one button; from then on it saves itself.
  * Scenes on the map are kept with the story and can be saved to a file for another story.
  */
-import { PIXEL, CATEGORIES, backdropCss, pixelInfo } from '../core/catalog.js';
-import { h, clone, clamp } from '../core/dom.js';
-import { norm, glyphNode, renderStage } from '../stage/render.js';
-import { setCell, cellAt, LEVEL_W, LEVEL_H } from '../stage/level.js';
-import { G, resetGuided, guidedPick, guidedMark, buildGuided } from '../story/guided.js';
+import { PIXEL, backdropCss, pixelInfo } from '../core/catalog.js';
+import { h, clone, clamp, rid } from '../core/dom.js';
+import { glyphNode, renderStage } from '../stage/render.js';
+import { setCell } from '../stage/level.js';
+import { LEVEL_W, LEVEL_H, MAX_ENTITIES, cellAt, normScene, newScene, newEntity, freeSpot } from '../shared/scene-model.js';
+import { History } from '../core/history.js';
+import { resetGuided, guidedPick, guidedMark, buildGuided } from '../story/guided.js';
 
-const W = { open: false, c: null, list: [], cur: null, view: 'build', node: null, tab: 'tiles', tool: 'brush', size: 1, a: '', k: 'f', tcat: '', q: '', sel: null, hist: [], redo: [], drag: null, walls: true, saveT: 0, el: null };
+const W = { open: false, c: null, list: [], cur: null, view: 'build', node: null, tab: 'tiles', tool: 'brush', size: 1, a: '', k: 'f', tcat: '', q: '', sel: null, h: new History(), drag: null, walls: true, saveT: 0, el: null };
 let bench = null;                                             // the scene last worked on, kept while the page is open: { code, doc }
 export function workshopOpen() { return W.open; }
-function rid() { return Math.random().toString(36).slice(2, 10); }
 function $root() { return document.querySelector('#workshop'); }
 
-function blankScene() { return norm({
-  backdrop: 'b:meadow', mood: 'm:none', narration: '', action: '', heroId: 'hero', entities: [W.c.blankHero()], drawing: [], weather: '',
-  tracks: [], burst: '', sfx: '', card: '', choices: [], steps: [], sheet: { inv: [], stats: [] }, target: null, use: null, roll: null, level: null,
-}); }
+function blankScene() { return normScene({ ...newScene(), backdrop: 'b:meadow', entities: [W.c.blankHero()] }); }
 function library() { return W.list.map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene })); }
 function onMap(d = W.cur) { return !!d && W.list.includes(d); }
 function tileCats() { return PIXEL.filter((c) => c.group === 'tile'); }
@@ -41,13 +39,13 @@ function spot(near) {
 }
 
 export function openWorkshop(c) {
-  W.c = c; W.open = true; W.sel = null; W.node = null; W.redo = []; W.tab = 'tiles'; W.tool = 'brush'; W.q = '';
-  W.list = c.scenes.map((s) => ({ ...s, scene: norm(s.scene) }));
+  W.c = c; W.open = true; W.sel = null; W.node = null; W.tab = 'tiles'; W.tool = 'brush'; W.q = '';
+  W.list = c.scenes.map((s) => ({ ...s, scene: normScene(s.scene) }));
   W.list.forEach((d, i) => { if (d.mx == null || (d.mx === 0.5 && d.my === 0.5 && W.list.length > 1 && i > 0)) { d.mx = ((i % 4) + 0.5) / 4; d.my = (Math.floor(i / 4) % 3 + 0.5) / 3; } d.scene.sceneId = d.id; });
   const kept = bench && bench.code === c.code ? W.list.find((d) => d.id === bench.doc.id) || (bench.onMap ? null : bench.doc) : null;
   W.cur = kept || (c.stage ? { id: rid(), name: newName(), scene: c.stage() } : { id: rid(), name: newName(), scene: blankScene() });
   W.view = c.map ? 'map' : 'build';
-  W.hist = [JSON.stringify(W.cur.scene)];
+  W.h.reset(W.cur.scene);
   if (!W.a) { const t = tileCats()[0]; if (t) { W.a = t.items[0].asset; W.k = t.items[0].kind === 'wall' ? 'w' : 'f'; } }
   const root = $root(), stage = h('div', { class: 'stage', id: 'wsStage' });
   W.el = { bar: h('header', {}), stage, tools: h('aside', { class: 'wstools' }), map: h('div', { class: 'wsmap', hidden: true }) };
@@ -60,30 +58,29 @@ export function openWorkshop(c) {
 function close() {
   flush();
   bench = { code: W.c.code, doc: W.cur, onMap: onMap() };
-  if (!onMap() && W.hist.length > 1) W.c.toast(`“${W.cur.name}” is not on the map yet — it waits in Build scene`);
+  if (!onMap() && W.h.canUndo) W.c.toast(`“${W.cur.name}” is not on the map yet — it waits in Build scene`);
   W.open = false; document.removeEventListener('keydown', keys); $root().hidden = true; $root().replaceChildren();
   if (W.c.closed) W.c.closed();
 }
 
 /* ---------- the bench ---------- */
 function changed() {
-  const j = JSON.stringify(W.cur.scene);                     // undo history: every finished change is remembered
-  if (j !== W.hist[W.hist.length - 1]) { W.hist.push(j); if (W.hist.length > 80) W.hist.shift(); W.redo = []; }
+  W.h.note(W.cur.scene);                                     // every finished change can be undone
   if (onMap()) saveSoon();
 }
-function remember() { /* changes are recorded when they finish, see changed() */ }
 function undo(dir) {
   if (W.view !== 'build') return;
-  if (dir < 0) { if (W.hist.length < 2) return; W.redo.push(W.hist.pop()); } else { if (!W.redo.length) return; W.hist.push(W.redo.pop()); }
-  W.cur.scene = JSON.parse(W.hist[W.hist.length - 1]); W.sel = null; resetGuided();
+  const scene = dir < 0 ? W.h.undo() : W.h.redo();
+  if (!scene) return;
+  W.cur.scene = scene; W.sel = null; resetGuided();
   if (onMap()) saveSoon();
   draw();
 }
 /** Put another scene on the bench. An unsaved one with work in it is offered to the map first. */
 function build(doc) {
   flush();
-  if (doc !== W.cur && !onMap() && W.hist.length > 1 && confirm(`“${W.cur.name}” is not on the map yet. Add it to the map before you leave it?`)) addToMap(true);
-  W.cur = doc; W.sel = null; W.hist = [JSON.stringify(doc.scene)]; W.redo = []; W.view = 'build'; W.tab = 'tiles'; resetGuided(); draw();
+  if (doc !== W.cur && !onMap() && W.h.canUndo && confirm(`“${W.cur.name}” is not on the map yet. Add it to the map before you leave it?`)) addToMap(true);
+  W.cur = doc; W.sel = null; W.h.reset(doc.scene); W.view = 'build'; W.tab = 'tiles'; resetGuided(); draw();
 }
 function addToMap(quiet) {
   if (onMap()) return;
@@ -97,7 +94,7 @@ function useNow(doc) {
   flush(); W.c.use(doc); W.c.toast(`The story moves to “${doc.name}”`); close();
 }
 function duplicate(doc) {
-  const copy = { id: rid(), name: `${doc.name} (copy)`.slice(0, 40), ...spot(doc), scene: norm({ ...clone(doc.scene), steps: [] }) };
+  const copy = { id: rid(), name: `${doc.name} (copy)`.slice(0, 40), ...spot(doc), scene: normScene({ ...clone(doc.scene), steps: [] }) };
   copy.scene.sceneId = copy.id; copy.scene.exits = [];           // the copy starts unconnected
   W.list.push(copy); saveNow();
   return copy;
@@ -132,7 +129,7 @@ function importFile() {
     try {
       const j = JSON.parse(await file.files[0].text()), got = Array.isArray(j) ? j : j.scenes;
       if (!Array.isArray(got) || !got.length) throw new Error('No scenes in that file');
-      for (const s of got.slice(0, 40)) if (s && s.scene && Array.isArray(s.scene.entities)) { const d = { id: rid(), name: String(s.name || 'Imported scene').slice(0, 40), ...spot(), scene: norm(s.scene) }; d.scene.sceneId = d.id; d.scene.exits = []; W.list.push(d); }
+      for (const s of got.slice(0, 40)) if (s && s.scene && Array.isArray(s.scene.entities)) { const d = { id: rid(), name: String(s.name || 'Imported scene').slice(0, 40), ...spot(), scene: normScene(s.scene) }; d.scene.sceneId = d.id; d.scene.exits = []; W.list.push(d); }
       saveNow(); draw(); W.c.toast('Scenes added to the map');
     } catch (e) { W.c.toast('Could not read that file: ' + e.message); }
   } });
@@ -145,8 +142,8 @@ function drawBar() {
     h('input', { id: 'wsName', maxlength: 40, value: cur.name, title: 'Name of this scene', oninput: (ev) => { cur.name = ev.target.value || 'Untitled scene'; if (onMap()) saveSoon(); } }),
     onMap() ? h('span', { class: 'dim small', id: 'wsSaved' }, '✓ On the map — saves itself') : h('button', { class: 'primary', id: 'wsAdd', title: 'Keep this scene: put it on the map', onclick: () => addToMap() }, '💾 Add scene to map'),
     h('span', { class: 'grow' }),
-    h('button', { title: 'Undo (Ctrl+Z)', disabled: W.hist.length < 2, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
-    h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.redo.length, id: 'wsRedo', onclick: () => undo(1) }, '↷ Redo'),
+    h('button', { title: 'Undo (Ctrl+Z)', disabled: !W.h.canUndo, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
+    h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.h.canRedo, id: 'wsRedo', onclick: () => undo(1) }, '↷ Redo'),
     h('button', { class: W.walls ? 'on' : '', title: 'Mark walls and solid things in red', onclick: () => { W.walls = !W.walls; draw(); } }, '▦ Blocks'),
     h('button', { id: 'wsNew', title: 'Start a new, empty scene', onclick: () => build({ id: rid(), name: newName(), scene: blankScene() }) }, '＋ New'),
     W.c.stage && h('button', { id: 'wsFromStage', title: 'Start from a copy of what is on stage right now', onclick: () => build({ id: rid(), name: newName(), scene: W.c.stage() }) }, '🎬 From stage'),
@@ -240,7 +237,7 @@ function drawTools() {
     const tool = (id, label, title) => h('button', { 'data-tool': id, class: 'grow' + (W.tool === id ? ' on' : ''), title, onclick: () => { W.tool = id; drawTools(); } }, label);
     const cats = tileCats(), cat = cats.find((c) => c.id === W.tcat) || cats[0];
     const count = (k) => (sc.level ? [...sc.level.cells].filter((ch) => (sc.level.pal[parseInt(ch, 36) - 1] || {}).k === k).length : 0);
-    const all = (fn) => { remember(); for (let n = 0; n < LEVEL_W * LEVEL_H; n++) if (fn(n % LEVEL_W, Math.floor(n / LEVEL_W), sc.level ? sc.level.cells[n] : '0')) setCell(sc, n, W.a, W.k); changed(); draw(); };
+    const all = (fn) => { for (let n = 0; n < LEVEL_W * LEVEL_H; n++) if (fn(n % LEVEL_W, Math.floor(n / LEVEL_W), sc.level ? sc.level.cells[n] : '0')) setCell(sc, n, W.a, W.k); changed(); draw(); };
     kids.push(
       h('div', { class: 'row' }, tool('brush', '🖌 Brush', 'Paint tiles'), tool('rect', '▭ Box', 'Drag out a filled rectangle'), tool('fill', '🪣 Fill', 'Fill an area'), tool('erase', '⌫ Erase', 'Remove tiles'), tool('pick', '💧 Pick', 'Pick a tile from the stage')),
       (W.tool === 'brush' || W.tool === 'erase') && h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Size'), [1, 2, 3].map((n) => h('button', { class: 'grow' + (W.size === n ? ' on' : ''), onclick: () => { W.size = n; drawTools(); } }, `${n}×${n}`))),
@@ -257,7 +254,7 @@ function drawTools() {
         h('button', { class: 'grow', id: 'wsFillAll', onclick: () => all(() => true) }, 'Fill everything'),
         h('button', { class: 'grow', id: 'wsBorder', onclick: () => all((x, y) => x === 0 || y === 0 || x === LEVEL_W - 1 || y === LEVEL_H - 1) }, 'Border'),
         h('button', { class: 'grow', onclick: () => all((x, y, old) => old === '0') }, 'Empty tiles')),
-      h('div', { class: 'row' }, h('span', { class: 'dim small grow', id: 'wsCount' }, `${count('f')} floor · ${count('w')} wall tiles`), h('button', { class: 'danger', disabled: !sc.level, onclick: () => { remember(); sc.level = null; changed(); draw(); } }, 'Clear the level')));
+      h('div', { class: 'row' }, h('span', { class: 'dim small grow', id: 'wsCount' }, `${count('f')} floor · ${count('w')} wall tiles`), h('button', { class: 'danger', disabled: !sc.level, onclick: () => { sc.level = null; changed(); draw(); } }, 'Clear the level')));
   } else {
     // the same question flow and the same tools as during a turn, working on this scene
     hint.textContent = 'Click anything on the stage to change it; drag it to move it. The glowing hero marks where the Player starts.';
@@ -269,10 +266,8 @@ function drawTools() {
       select(id) { W.sel = id || null; }, mods: () => W.c.rules.modules, toast: W.c.toast, audio: W.c.audio, rid, maker: W.c.maker,
       rebuild: () => { changed(); draw(); }, changed: () => { changed(); draw(); }, changedQuiet: () => { changed(); paintStage(); },
       addEntity(asset) {
-        if (sc.entities.length >= 80) { W.c.toast('This scene is full'); return null; }
-        let best = null;
-        for (let n = 0; n < 24; n++) { const x = 0.1 + Math.random() * 0.8, y = 0.3 + Math.random() * 0.6, gap = Math.min(9, ...sc.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75))); if (!best || gap > best.gap) best = { x, y, gap }; }
-        const e = { id: rid(), asset, x: best.x, y: best.y, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '', solid: !!pixelInfo(asset).solid, active: null, tie: null, hp: null, maxHp: null, once: '', temp: false, layer: 0 };
+        if (sc.entities.length >= MAX_ENTITIES) { W.c.toast('This scene is full'); return null; }
+        const e = newEntity(asset, { id: rid(), ...freeSpot(sc), solid: !!pixelInfo(asset).solid });
         sc.entities.push(e); W.sel = e.id; return e;
       },
       removeEntity(e) { sc.entities = sc.entities.filter((x) => x !== e); for (const x of sc.entities) if (x.tie && x.tie.to === e.id) x.tie = null; W.sel = null; },
@@ -312,7 +307,6 @@ function down(ev) {
       if (tile) { W.a = tile.a; W.k = tile.k; W.tool = 'brush'; drawTools(); }
       return;
     }
-    remember();
     if (W.tool === 'fill') {                                // flood the connected area that looks the same
       const cells = () => (sc.level ? sc.level.cells : '0'.repeat(LEVEL_W * LEVEL_H)), want = cells()[c], todo = [c], seen = new Set([c]);
       while (todo.length) {
@@ -328,7 +322,7 @@ function down(ev) {
     if (door) { guidedMark(door.id); W.drag = { e: door, dx: door.x - p.x, dy: door.y - p.y }; W.el.stage.setPointerCapture(ev.pointerId); return drawTools(); }
     const el = ev.target.closest('.ent'), hit = el && sc.entities.find((e) => e.id === el.dataset.id);
     const was = W.sel; W.sel = hit ? hit.id : null;
-    if (hit) { remember(); W.drag = { e: hit, dx: hit.x - p.x, dy: hit.y - p.y }; }
+    if (hit) { W.drag = { e: hit, dx: hit.x - p.x, dy: hit.y - p.y }; }
     if (hit) guidedPick(hit.id);
     if (was !== W.sel) { W.tab = 'things'; drawTools(); }
     paintStage();

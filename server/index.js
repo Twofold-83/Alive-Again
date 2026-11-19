@@ -8,7 +8,8 @@ import { act } from './actions.js';
 import { roleOf, streams, broadcast, rooms, newCode, touch, loadRooms, saveDirty, sweep, dirty } from './rooms.js';
 import { MAX_BODY, PUBLIC, MIME, MAX_ROOMS, DATA_DIR, PORT } from './config.js';
 import { botName } from './bots.js';
-import { newScene, cleanRules } from './scene.js';
+import { cleanRules } from './scene.js';
+import { newScene } from '../public/shared/scene-model.js';
 
 
 /* ---------- http ---------- */

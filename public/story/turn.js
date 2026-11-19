@@ -1,8 +1,10 @@
 import { audio } from '../core/audio.js';
 import { rpgState } from '../dungeon/screen.js';
-import { norm, renderStage } from '../stage/render.js';
+import { renderStage } from '../stage/render.js';
 import { playTurn } from '../stage/playback.js';
 import { clone } from '../core/dom.js';
+import { History } from '../core/history.js';
+import { normScene, stepFields, playerFields } from '../shared/scene-model.js';
 import { resetGuided, guidedStart } from './guided.js';
 import { $, toast } from '../core/dom.js';
 import { myTurn, directing, stage, hero, shown, heroTurn, app } from '../core/state.js';
@@ -15,14 +17,14 @@ export function onState(s) {
   $('#main').hidden = !!s.rpg; $('#rpg').hidden = !s.rpg; $('#clock').hidden = !!s.rpg;
   if (s.rpg) { app.S = s; renderChrome(); rpgState(s); return; }     // dungeon mode has its own screen and its own engine
   const prev = app.S;
-  norm(s.scene); norm(s.before);
+  normScene(s.scene); normScene(s.before);
   app.S = s;
   app.localDeadline = s.remainingMs != null ? performance.now() + s.remainingMs : 0;
   const newTurn = !prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended;
   if (newTurn) {
     app.submitting = false; app.selId = null; app.selInv = null; app.rec = false; app.drawOn = false; app.walkMode = false; app.pointMode = false; stopWalkAnim(); resetGuided();
     initDraft();
-    past = []; noteChange();
+    history.reset(); noteChange();
     if (directing()) guidedStart(app.draft);
     if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('⏰ Time ran out — your turn was sent as it was');
     if (app.cut) app.cut.skip();
@@ -47,13 +49,13 @@ function freshDraft() {
     const me = hero(d);
     d.said = me ? me.say : '';     // what the Player said moves from their bubble into the "Player did" strip
     for (const e of d.entities) e.say = '';
-    Object.assign(d, { narration: '', tracks: [], burst: '', sfx: '', card: '', choices: [], steps: [], travel: '', award: null, floats: [] });
+    Object.assign(d, stepFields(), { narration: '', choices: [], steps: [] });
     d.entities = d.entities.filter((e) => !e.temp); for (const e of d.entities) e.once = '';
     d.ask = d.battle ? { kind: 'battle', text: 'Your move!', sides: 6, dc: 0, verb: '', places: [], targets: [] } : null;   // a battle keeps asking for a move
     if (d.roll && d.roll.by === 'director') d.roll = null;
   } else {
     const me = hero(d); if (me) me.say = '';
-    Object.assign(d, { action: '', target: null, point: null, order: [], use: null, heroTrack: null, walked: false, reply: null, act: null, exit: null, verb: '', answer: null });
+    Object.assign(d, playerFields(), { heroTrack: null, walked: false, reply: null, act: null });
     if (d.roll && d.roll.by === 'player') d.roll = null;
   }
   d.rollWant = 0;
@@ -64,24 +66,20 @@ function initDraft() {
   if (!myTurn()) return;
   try {
     const saved = JSON.parse(sessionStorage.getItem('tf.draft') || 'null');
-    if (saved && saved.code === app.code && saved.turn === app.S.turn && saved.you === app.S.you) { app.draft = norm(saved.draft); return; }
+    if (saved && saved.code === app.code && saved.turn === app.S.turn && saved.you === app.S.you) { app.draft = normScene(saved.draft); return; }
   } catch { /* ignore */ }
   app.draft = freshDraft();
 }
 export function saveDraft() { syncOrder(); sessionStorage.setItem('tf.draft', JSON.stringify({ code: app.code, turn: app.S.turn, you: app.S.you, draft: app.draft })); }
 export function paint() { if (!app.cut && app.S) renderStage(stage, shown(), stageOpts()); }
 /* Undo for the Director: every finished change is remembered; Ctrl+Z or the Undo button steps back. */
-let past = [];
-function noteChange() {
-  if (!directing()) return;
-  const j = JSON.stringify(app.draft);
-  if (j !== past[past.length - 1]) { past.push(j); if (past.length > 80) past.shift(); }
-}
-export function canUndo() { return past.length > 1; }
+const history = new History();
+function noteChange() { if (directing()) history.note(app.draft); }
+export function canUndo() { return history.canUndo; }
 export function undo() {
-  if (!canUndo()) return;
-  past.pop();
-  app.draft = JSON.parse(past[past.length - 1]);
+  const earlier = history.undo();
+  if (!earlier) return;
+  app.draft = earlier;
   app.selId = null; resetGuided(); guidedStart(null); app.uiKey = ''; saveDraft(); render();
 }
 /** The Player's turn is replayed in the order they did things: speaking, walking, acting. Whatever is new goes last; whatever was taken back drops out. */
@@ -98,8 +96,8 @@ export function rebuild() { app.uiKey = ''; changed(); }
 /* The Director's turn is a list of steps. draft.steps holds the finished ones (the scene as it
  * stood at the end of each); the draft itself is the step being worked on. Everything done within
  * one step plays at the same time; the next step plays after it. */
-export const ONE_STEP = { tracks: [], burst: '', sfx: '', card: '', travel: '', award: null, floats: [] };   // belongs to the step that made it
-export const PLAYERS = { action: '', target: null, point: null, order: [], use: null, roll: null, answer: null, verb: '', exit: null };    // the Player's last turn: shown while editing, never sent back
+export const ONE_STEP = stepFields();   // belongs to the step that made it
+export const PLAYERS = { ...playerFields(), roll: null };    // the Player's last turn: shown while editing, never sent back
 /** What a new step inherits from the one before: speech and one-off animations are over, short-lived effects are gone. */
 function carry(d) { d.entities = d.entities.filter((e) => !e.temp); for (const e of d.entities) { e.say = ''; e.once = ''; } Object.assign(d, clone(ONE_STEP)); return d; }
 function asFrame(d) { const f = { ...clone(d), ...PLAYERS, steps: [] }; delete f.rollWant; delete f.said; delete f.heroTrack; return f; }

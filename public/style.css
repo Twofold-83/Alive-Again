@@ -99,7 +99,7 @@ small.grp { display: block; margin-top: 6px; text-transform: uppercase; letter-s
 .stage.cut .world { transition: transform .9s ease-in-out; }
 .stage .world > * { position: absolute; }
 .stage .bg, .stage .ents, .stage .bubbles, .stage .draw, .stage .weather, .stage .marks { inset: 0; }
-.stage .marks { pointer-events: none; }
+.stage .marks { pointer-events: none; z-index: 5000; }   /* exits and marked places are signposts: never hidden behind a thing */
 .exit, .place { position: absolute; transform: translate(-50%, -50%); padding: .2em .55em; border-radius: .5em; font: 600 calc(var(--u) * .24)/1.2 "Segoe UI", system-ui, sans-serif; white-space: nowrap; pointer-events: auto; cursor: pointer; box-shadow: 0 1px 4px rgba(0, 0, 0, .5); }
 .exit { background: rgba(20, 60, 30, .88); color: #d9ffd9; border: 2px solid #6fd98a; }
 .exit.locked { background: rgba(60, 20, 20, .88); color: #ffd0d0; border-color: #e06666; }

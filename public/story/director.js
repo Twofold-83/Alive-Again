@@ -1,3 +1,4 @@
+import { normScene, newEntity, freeSpot, HERO_ASSET, MAX_ENTITIES } from '../shared/scene-model.js';
 import { assetName } from '../core/catalog.js';
 import { rid, toast, $ } from '../core/dom.js';
 import { dropTrack, trackEnd, autoTrack } from './input.js';
@@ -10,7 +11,7 @@ import { setRules, typeCard, render } from './view.js';
 import { openStory } from './viewer.js';
 import { leave } from '../shell/home.js';
 import { clone, clamp, h } from '../core/dom.js';
-import { norm } from '../stage/render.js';
+
 import { openWorkshop } from '../build/workshop.js';
 import { resetGuided, guidedStart } from './guided.js';
 
@@ -39,7 +40,7 @@ export const guidedCtx = {
   shareLink: () => shareLink(), openStory: () => openStory(), leave: () => leave(), idea: () => toast('💡 ' + IDEAS[Math.floor(Math.random() * IDEAS.length)]),
 };
 /* ---------- prepared scenes and the scene workshop ---------- */
-function blankHero() { return { id: 'hero', asset: (hero(app.S.scene) || { asset: 'p:hero' }).asset, x: 0.5, y: 0.8, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '', solid: false }; }
+function blankHero() { return newEntity((hero(app.S.scene) || { asset: HERO_ASSET }).asset, { id: 'hero', y: 0.8 }); }
 /** Put a prepared scene (or the workshop's edit of the live one) on the stage, as part of the current step. */
 function useScene(doc, live) {
   const src = doc.scene, me = hero(app.draft), at = src.entities.find((e) => e.id === src.heroId);
@@ -69,7 +70,7 @@ function travelTo(sceneId) {
 /** Keep the scene on stage as a prepared scene, to come back to or to connect on the map. */
 /** A copy of what is on stage, ready for the bench in Build scene: the place and its things, without this turn's lines and moments. */
 function stageCopy() {
-  const scene = norm({ ...clone(app.draft), ...clone(ONE_STEP), ...PLAYERS, steps: [], narration: '', choices: [], ask: null, cam: null, battle: null, said: undefined, rollWant: undefined });
+  const scene = normScene({ ...clone(app.draft), ...clone(ONE_STEP), ...PLAYERS, steps: [], narration: '', choices: [], ask: null, cam: null, battle: null, said: undefined, rollWant: undefined });
   for (const e of scene.entities) { e.say = ''; e.once = ''; }
   return scene;
 }
@@ -87,15 +88,10 @@ export function showWorkshop(o = {}) {
 }
 
 function addEntity(asset) {
-  if (app.draft.entities.length >= 80) return void toast('The stage is full');
-  let best = null;                                   // drop it on the freest spot of the ground, not on top of someone
-  for (let i = 0; i < 24; i++) {
-    const x = 0.1 + Math.random() * 0.8, y = 0.62 + Math.random() * 0.3;
-    const gap = Math.min(9, ...app.draft.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75)));
-    if (!best || gap > best.gap) best = { x, y, gap };
-  }
-  const e = { id: rid(), asset, x: best.x, y: best.y, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' };
-  app.draft.entities.push(e); app.selId = e.id; app.selInv = null;
+  if (app.draft.entities.length >= MAX_ENTITIES) return void toast('The stage is full');
+  const e = newEntity(asset, { id: rid(), ...freeSpot(app.draft, 0.62) });       // on the ground of the backdrop
+  app.draft.entities.push(e);
+  app.selId = e.id; app.selInv = null;
   return e;
 }
 async function randomScene() {

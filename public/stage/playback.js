@@ -1,3 +1,4 @@
+import { playerFields } from '../shared/scene-model.js';
 import { clone, h } from '../core/dom.js';
 import { renderStage, burst } from './render.js';
 import { sample } from './level.js';
@@ -26,9 +27,8 @@ export function playCut(root, before, after, o, done) {
   }
   for (const p of prev.values()) if (!fin.has(p.id)) { frame.entities.push({ ...p, say: '', emote: '' }); moved = true; }
   const sameNarr = !!before && before.narration === after.narration;
-  Object.assign(frame, { narration: sameNarr ? after.narration : '', action: '', target: null, point: null, use: null, roll: null, drawing: after.drawing.filter((d) => !newStrokes.has(d.id)) });
+  Object.assign(frame, playerFields(), { roll: null, narration: sameNarr ? after.narration : '', drawing: after.drawing.filter((d) => !newStrokes.has(d.id)) });   // what the Player did appears in its own beat
   if (before) { frame.backdrop = before.backdrop; frame.weather = before.weather; frame.cam = before.cam; frame.exits = before.exits; frame.level = before.level; }
-  frame.exit = null; frame.answer = null; frame.verb = '';
 
   const view = { ...o, playing: true }, steps = [];
   const sp = o.speed || 1, types = [];                         // sp > 1 plays faster (used by the simulations); types: lines being typed out
