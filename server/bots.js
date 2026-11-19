@@ -1,4 +1,3 @@
-'use strict';
 /*
  * AI partners for solo play.
  *
@@ -19,8 +18,11 @@
  * shapes and start the server with  BOT_PROVIDER=./my-bot.js . Returning null
  * (or throwing) falls back to the scripted bot for that turn.
  */
-const path = require('path');
-const crypto = require('crypto');
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);   // plug-in modules and optional libraries are loaded on demand
 
 let custom = null;
 if (process.env.BOT_PROVIDER) custom = require(path.resolve(process.env.BOT_PROVIDER));
@@ -299,4 +301,4 @@ function directorMove({ scene, memory, turn, rules }) {
   return { scene };
 }
 
-module.exports = { botMove, botName, randomPlace };
+export { botMove, botName, randomPlace };

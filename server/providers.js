@@ -1,4 +1,3 @@
-'use strict';
 /*
  * Asset generation pipeline.
  *
@@ -16,8 +15,11 @@
  * Returning null (or not setting the variable) falls back to the built-in
  * procedural generator below, which needs no network and no API key.
  */
-const path = require('path');
-const crypto = require('crypto');
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);   // plug-in modules and optional libraries are loaded on demand
 
 let custom = null;
 if (process.env.ASSET_PROVIDER) {
@@ -90,4 +92,4 @@ function proceduralBackdrop(prompt) {
   return { ...svg(out, 400, 300), name: prompt };
 }
 
-module.exports = { generateAsset };
+export { generateAsset };

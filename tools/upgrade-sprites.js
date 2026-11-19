@@ -30,10 +30,10 @@ const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'im
 
 (async () => {
   if (!process.env.ASSET_PROVIDER && !args.placeholder) {
-    console.error('No image service is plugged in. Set ASSET_PROVIDER=./your-provider.js (see providers.js), or pass --placeholder to test the pipeline.');
+    console.error('No image service is plugged in. Set ASSET_PROVIDER=./your-provider.js (see server/providers.js), or pass --placeholder to test the pipeline.');
     process.exit(1);
   }
-  const { generateAsset } = require(path.join(root, 'providers.js'));
+  const { generateAsset } = await import(pathToFileURL(path.join(root, 'server', 'providers.js')));
   const { CATEGORIES, BACKDROPS } = await import(pathToFileURL(path.join(root, 'public', 'catalog.js')));
   const manifestFile = path.join(packDir, 'manifest.json');
   const manifest = { sprites: {}, backdrops: {}, pixel: {}, ...JSON.parse(fs.readFileSync(manifestFile, 'utf8')) };

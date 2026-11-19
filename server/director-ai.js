@@ -1,4 +1,3 @@
-'use strict';
 /*
  * "Tell Claude what happens": the Director describes a turn in plain words and
  * Claude turns it into stage operations, which applyOps() below carries out on
@@ -10,8 +9,11 @@
  *   DIRECTOR_AI        path to a module exporting `interpret(input)` to replace
  *                      the Claude call altogether (used by the tests)
  */
-const path = require('path');
-const crypto = require('crypto');
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);   // plug-in modules and optional libraries are loaded on demand
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-5-5';
 const fail = (status, message) => Object.assign(new Error(message), { status });
@@ -189,4 +191,4 @@ function applyOps(scene, ops, rules) {
   return scene;
 }
 
-module.exports = { interpret, describe, applyOps, available };
+export { interpret, describe, applyOps, available };
