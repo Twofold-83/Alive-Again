@@ -1,0 +1,56 @@
+/* The look of everything: colours, type, buttons, fields, and a few layout helpers. Loaded first.
+ *
+ * Style sheets, in the order they load (later ones may refine earlier ones):
+ *   base        this file
+ *   components  cards, tabs, chips, picture grids, meters, toast, overlays
+ *   home        the start screen
+ *   game        top bar, clock, banner, the two columns of a story
+ *   stage       the stage and the playback of a turn
+ *   story       the Player's sheet, the Director's menu, the turn footer, the story viewer
+ *   build       Build scene and the Map
+ *   dungeon     Dungeon mode
+ *   phone       everything that changes in phone mode (body.phone)
+ */
+:root {
+  --bg: #17161c; --panel: #22202a; --panel2: #2b2935; --field: #121117; --line: #3a3747;
+  --text: #e9e6f0; --dim: #9d98ad;
+  --accent: #f2a83b; --accent-ink: #231600; --good: #4fc47f; --bad: #f06a6a;
+  --r: 6px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.4 "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif; }
+[hidden] { display: none !important; }
+::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-thumb { background: #3d394d; border-radius: 5px; } ::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- buttons ---- */
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r); padding: 5px 12px; min-height: 32px; cursor: pointer; transition: background .12s, border-color .12s, transform .06s, box-shadow .12s; }
+button:hover:not(:disabled) { border-color: #6a6485; background: #343142; }
+button:active:not(:disabled) { transform: translateY(1px) scale(.985); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+button.primary:hover:not(:disabled) { background: #ffbb55; }
+button.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+button.danger { color: var(--bad); }
+button.icon { min-width: 32px; padding: 4px; }
+button.link { background: none; border: 0; color: var(--dim); text-decoration: underline; }
+button.recording { background: #b3261e; color: #fff; border-color: transparent; font-weight: 600; animation: recpulse 1.2s ease-in-out infinite; }
+@keyframes recpulse { 50% { background: #7d1b15; } }
+
+/* ---- fields ---- */
+input, select, textarea { background: var(--field); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 9px; min-height: 32px; width: 100%; min-width: 0; transition: border-color .12s, box-shadow .12s; }
+textarea { resize: vertical; line-height: 1.4; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(242, 168, 59, .15); }
+
+/* ---- layout helpers ---- */
+.screen { height: 100vh; display: flex; flex-direction: column; }
+.row { display: flex; gap: 6px; align-items: center; }
+.row.center { justify-content: center; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+.grow { flex: 1; min-width: 0; }
+.dim { color: var(--dim); }
+.small { font-size: 12px; }
+.err { color: var(--bad); min-height: 1.4em; margin: 4px 0 0; grid-column: 1 / -1; }
+img.mini { height: 1.4em; vertical-align: middle; image-rendering: pixelated; }

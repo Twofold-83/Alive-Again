@@ -1,0 +1,27 @@
+/* A story on screen: the top bar, the clock, the banner, and the two columns (stage left, tools right). */
+#top { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--line); flex: none; }
+#top .who { display: flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: var(--r); background: var(--panel); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#top .who.turn { outline: 2px solid var(--accent); }
+#top .who.me b::after { content: " (you)"; font-weight: 400; color: var(--dim); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #666; flex: none; }
+.dot.on { background: var(--good); }
+#top .code { color: var(--dim); font-weight: 700; letter-spacing: 1px; }
+#top .storyname { text-align: center; font: italic 600 15px Georgia, serif; color: #cfc6e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+small.grp { display: block; margin-top: 6px; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+#clock { height: 4px; background: #0e0d12; flex: none; }
+#clock i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s linear; }
+#clock i.low { background: var(--bad); }
+#banner { padding: 6px 12px; background: #2b2540; display: flex; gap: 10px; align-items: center; flex: none; }
+#main { flex: 1; min-height: 0; display: flex; }
+#left { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #000; }
+#right { flex: none; width: 420px; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); }
+
+
+/* narrow windows: the two columns stack */
+@media (max-width: 820px) {
+  #main { flex-direction: column; }
+  #left { flex: none; }
+  #stageWrap { flex: none; }
+  #game .stage { width: min(100%, calc(42vh * 4 / 3)); }
+  #right { flex: 1; width: auto; border-left: 0; }
+}
