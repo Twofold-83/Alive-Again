@@ -7190,6 +7190,1424 @@
      "name": "passport travel document"
     }
    ]
+  },
+  {
+   "id": "play",
+   "label": "Sports, music & toys",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "football",
+     "name": "football soccer ball"
+    },
+    {
+     "slug": "basketball",
+     "name": "basketball ball"
+    },
+    {
+     "slug": "tennis-ball",
+     "name": "tennis ball"
+    },
+    {
+     "slug": "tennis-racket",
+     "name": "tennis racket"
+    },
+    {
+     "slug": "baseball",
+     "name": "baseball ball"
+    },
+    {
+     "slug": "baseball-bat",
+     "name": "baseball bat wooden"
+    },
+    {
+     "slug": "american-football",
+     "name": "american football rugby ball"
+    },
+    {
+     "slug": "volleyball",
+     "name": "volleyball ball"
+    },
+    {
+     "slug": "beach-ball",
+     "name": "beach ball colourful"
+    },
+    {
+     "slug": "golf-club",
+     "name": "golf club and ball"
+    },
+    {
+     "slug": "bowling-ball",
+     "name": "bowling ball"
+    },
+    {
+     "slug": "bowling-pin",
+     "name": "bowling pin skittle"
+    },
+    {
+     "slug": "ping-pong-paddle",
+     "name": "ping pong table tennis paddle bat"
+    },
+    {
+     "slug": "shuttlecock",
+     "name": "badminton shuttlecock"
+    },
+    {
+     "slug": "hockey-stick",
+     "name": "hockey stick and puck"
+    },
+    {
+     "slug": "ice-skate",
+     "name": "ice skate"
+    },
+    {
+     "slug": "roller-skate",
+     "name": "roller skate"
+    },
+    {
+     "slug": "skateboard",
+     "name": "skateboard"
+    },
+    {
+     "slug": "surfboard",
+     "name": "surfboard"
+    },
+    {
+     "slug": "skis",
+     "name": "skis and poles skiing"
+    },
+    {
+     "slug": "sled",
+     "name": "sled sledge toboggan"
+    },
+    {
+     "slug": "boxing-glove",
+     "name": "boxing glove red"
+    },
+    {
+     "slug": "dumbbell",
+     "name": "dumbbell weights gym"
+    },
+    {
+     "slug": "whistle",
+     "name": "whistle referee"
+    },
+    {
+     "slug": "stopwatch",
+     "name": "stopwatch timer"
+    },
+    {
+     "slug": "medal-gold",
+     "name": "gold medal first place"
+    },
+    {
+     "slug": "medal-silver",
+     "name": "silver medal second place"
+    },
+    {
+     "slug": "medal-bronze",
+     "name": "bronze medal third place"
+    },
+    {
+     "slug": "podium",
+     "name": "podium winners first second third"
+    },
+    {
+     "slug": "football-goal",
+     "name": "football goal net soccer"
+    },
+    {
+     "slug": "basketball-hoop",
+     "name": "basketball hoop net"
+    },
+    {
+     "slug": "dartboard",
+     "name": "dartboard darts"
+    },
+    {
+     "slug": "archery-target",
+     "name": "archery target bullseye arrow"
+    },
+    {
+     "slug": "fishing-rod",
+     "name": "fishing rod"
+    },
+    {
+     "slug": "swim-ring",
+     "name": "swim ring rubber ring float"
+    },
+    {
+     "slug": "chequered-flag",
+     "name": "chequered flag finish race"
+    },
+    {
+     "slug": "jump-rope",
+     "name": "jump rope skipping rope"
+    },
+    {
+     "slug": "frisbee",
+     "name": "frisbee flying disc"
+    },
+    {
+     "slug": "acoustic-guitar",
+     "name": "acoustic guitar"
+    },
+    {
+     "slug": "electric-guitar",
+     "name": "electric guitar rock"
+    },
+    {
+     "slug": "piano-keyboard",
+     "name": "piano keyboard keys"
+    },
+    {
+     "slug": "drum",
+     "name": "drum with sticks"
+    },
+    {
+     "slug": "drum-kit",
+     "name": "drum kit drums cymbals"
+    },
+    {
+     "slug": "trumpet",
+     "name": "trumpet brass"
+    },
+    {
+     "slug": "saxophone",
+     "name": "saxophone sax"
+    },
+    {
+     "slug": "violin",
+     "name": "violin fiddle"
+    },
+    {
+     "slug": "recorder",
+     "name": "recorder flute pipe"
+    },
+    {
+     "slug": "xylophone",
+     "name": "xylophone glockenspiel"
+    },
+    {
+     "slug": "tambourine",
+     "name": "tambourine"
+    },
+    {
+     "slug": "maracas",
+     "name": "maracas shakers"
+    },
+    {
+     "slug": "microphone",
+     "name": "microphone mic sing"
+    },
+    {
+     "slug": "harp",
+     "name": "harp"
+    },
+    {
+     "slug": "teddy-bear",
+     "name": "teddy bear soft toy"
+    },
+    {
+     "slug": "doll",
+     "name": "doll toy girl"
+    },
+    {
+     "slug": "toy-car",
+     "name": "toy car wind up"
+    },
+    {
+     "slug": "toy-train",
+     "name": "toy train wooden"
+    },
+    {
+     "slug": "toy-robot",
+     "name": "toy robot wind up"
+    },
+    {
+     "slug": "building-blocks",
+     "name": "building blocks abc toy cubes"
+    },
+    {
+     "slug": "toy-brick",
+     "name": "toy brick building block plastic"
+    },
+    {
+     "slug": "yo-yo",
+     "name": "yo-yo toy"
+    },
+    {
+     "slug": "spinning-top",
+     "name": "spinning top toy"
+    },
+    {
+     "slug": "kite",
+     "name": "kite flying"
+    },
+    {
+     "slug": "party-balloon",
+     "name": "balloon party red"
+    },
+    {
+     "slug": "balloon-bunch",
+     "name": "bunch of balloons party"
+    },
+    {
+     "slug": "rocking-horse",
+     "name": "rocking horse toy"
+    },
+    {
+     "slug": "jack-in-the-box",
+     "name": "jack in the box toy clown"
+    },
+    {
+     "slug": "puzzle-piece",
+     "name": "puzzle piece jigsaw"
+    },
+    {
+     "slug": "puzzle-cube",
+     "name": "puzzle cube colour cube toy"
+    },
+    {
+     "slug": "board-game",
+     "name": "board game dice pawns"
+    },
+    {
+     "slug": "chess-knight",
+     "name": "chess piece knight horse"
+    },
+    {
+     "slug": "marbles",
+     "name": "marbles glass balls"
+    },
+    {
+     "slug": "paper-boat",
+     "name": "paper boat origami"
+    },
+    {
+     "slug": "paper-plane",
+     "name": "paper plane airplane"
+    },
+    {
+     "slug": "water-pistol",
+     "name": "water pistol squirt gun toy"
+    },
+    {
+     "slug": "bucket-and-spade",
+     "name": "bucket and spade sand beach toys"
+    },
+    {
+     "slug": "pinwheel",
+     "name": "pinwheel windmill toy"
+    },
+    {
+     "slug": "rattle",
+     "name": "baby rattle"
+    },
+    {
+     "slug": "gift",
+     "name": "gift present wrapped box bow"
+    },
+    {
+     "slug": "party-popper",
+     "name": "party popper confetti celebration"
+    },
+    {
+     "slug": "pinata",
+     "name": "pinata party donkey"
+    },
+    {
+     "slug": "bunting",
+     "name": "bunting party flags banner"
+    },
+    {
+     "slug": "disco-ball",
+     "name": "disco ball mirror ball party"
+    }
+   ]
+  },
+  {
+   "id": "tools",
+   "label": "Tools, science & medical",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "claw-hammer",
+     "name": "hammer claw tool"
+    },
+    {
+     "slug": "screwdriver",
+     "name": "screwdriver tool"
+    },
+    {
+     "slug": "spanner",
+     "name": "spanner wrench tool"
+    },
+    {
+     "slug": "pliers",
+     "name": "pliers tool"
+    },
+    {
+     "slug": "hand-saw",
+     "name": "saw hand saw tool"
+    },
+    {
+     "slug": "power-drill",
+     "name": "power drill electric"
+    },
+    {
+     "slug": "tape-measure",
+     "name": "tape measure"
+    },
+    {
+     "slug": "toolbox",
+     "name": "toolbox red tools"
+    },
+    {
+     "slug": "screw",
+     "name": "screw nail"
+    },
+    {
+     "slug": "nut-and-bolt",
+     "name": "nut and bolt"
+    },
+    {
+     "slug": "paint-roller",
+     "name": "paint roller decorating"
+    },
+    {
+     "slug": "paintbrush",
+     "name": "paintbrush paint brush"
+    },
+    {
+     "slug": "crowbar",
+     "name": "crowbar"
+    },
+    {
+     "slug": "flashlight",
+     "name": "flashlight torch electric"
+    },
+    {
+     "slug": "duct-tape",
+     "name": "duct tape roll sticky tape"
+    },
+    {
+     "slug": "chainsaw",
+     "name": "chainsaw"
+    },
+    {
+     "slug": "magnet",
+     "name": "magnet horseshoe red"
+    },
+    {
+     "slug": "cog",
+     "name": "cog gear wheel machine"
+    },
+    {
+     "slug": "rake",
+     "name": "rake garden tool"
+    },
+    {
+     "slug": "garden-fork",
+     "name": "garden fork pitchfork tool"
+    },
+    {
+     "slug": "trowel",
+     "name": "trowel garden spade small"
+    },
+    {
+     "slug": "garden-shears",
+     "name": "garden shears secateurs clippers"
+    },
+    {
+     "slug": "seed-packet",
+     "name": "seed packet seeds"
+    },
+    {
+     "slug": "microscope",
+     "name": "microscope science"
+    },
+    {
+     "slug": "telescope",
+     "name": "telescope stars astronomy"
+    },
+    {
+     "slug": "test-tube",
+     "name": "test tube science green"
+    },
+    {
+     "slug": "test-tube-rack",
+     "name": "test tubes rack science"
+    },
+    {
+     "slug": "beaker",
+     "name": "beaker science glass blue liquid"
+    },
+    {
+     "slug": "science-flask",
+     "name": "flask erlenmeyer science bubbling"
+    },
+    {
+     "slug": "bunsen-burner",
+     "name": "bunsen burner flame science"
+    },
+    {
+     "slug": "magnifying-glass",
+     "name": "magnifying glass search detective"
+    },
+    {
+     "slug": "atom",
+     "name": "atom science"
+    },
+    {
+     "slug": "dna",
+     "name": "dna double helix genes"
+    },
+    {
+     "slug": "petri-dish",
+     "name": "petri dish bacteria germs"
+    },
+    {
+     "slug": "dropper",
+     "name": "dropper pipette"
+    },
+    {
+     "slug": "balance-scale",
+     "name": "balance scale weighing justice"
+    },
+    {
+     "slug": "first-aid-kit",
+     "name": "first aid kit medical box"
+    },
+    {
+     "slug": "syringe",
+     "name": "syringe injection needle"
+    },
+    {
+     "slug": "pill",
+     "name": "pill capsule medicine"
+    },
+    {
+     "slug": "pill-bottle",
+     "name": "pill bottle medicine tablets"
+    },
+    {
+     "slug": "plaster",
+     "name": "plaster band-aid sticking plaster"
+    },
+    {
+     "slug": "bandage-roll",
+     "name": "bandage roll"
+    },
+    {
+     "slug": "thermometer",
+     "name": "thermometer temperature fever"
+    },
+    {
+     "slug": "stethoscope",
+     "name": "stethoscope doctor"
+    },
+    {
+     "slug": "crutches",
+     "name": "crutches walking aids"
+    },
+    {
+     "slug": "medicine-bottle",
+     "name": "medicine bottle syrup cough"
+    },
+    {
+     "slug": "tooth",
+     "name": "tooth dentist"
+    },
+    {
+     "slug": "x-ray",
+     "name": "x-ray skeleton scan"
+    },
+    {
+     "slug": "surgical-mask",
+     "name": "surgical mask medical face mask"
+    },
+    {
+     "slug": "hospital-bed",
+     "name": "hospital bed"
+    },
+    {
+     "slug": "broom",
+     "name": "broom sweeping brush"
+    },
+    {
+     "slug": "mop-bucket",
+     "name": "mop and bucket cleaning"
+    },
+    {
+     "slug": "sponge",
+     "name": "sponge washing up"
+    },
+    {
+     "slug": "spray-bottle",
+     "name": "spray bottle cleaner"
+    },
+    {
+     "slug": "dustpan",
+     "name": "dustpan and brush"
+    },
+    {
+     "slug": "feather-duster",
+     "name": "feather duster cleaning"
+    },
+    {
+     "slug": "plunger",
+     "name": "plunger toilet sink"
+    },
+    {
+     "slug": "fire-extinguisher",
+     "name": "fire extinguisher"
+    }
+   ]
+  },
+  {
+   "id": "adventure",
+   "label": "Adventure & holidays",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "pirate-flag",
+     "name": "pirate flag jolly roger skull"
+    },
+    {
+     "slug": "cannon",
+     "name": "cannon pirate ship gun"
+    },
+    {
+     "slug": "spyglass",
+     "name": "spyglass pirate telescope"
+    },
+    {
+     "slug": "anchor",
+     "name": "anchor ship"
+    },
+    {
+     "slug": "ship-wheel",
+     "name": "ship wheel helm steering"
+    },
+    {
+     "slug": "message-in-bottle",
+     "name": "message in a bottle"
+    },
+    {
+     "slug": "treasure-island",
+     "name": "treasure island palm tree x marks the spot"
+    },
+    {
+     "slug": "cutlass",
+     "name": "cutlass pirate sword curved"
+    },
+    {
+     "slug": "treasure-map-x",
+     "name": "treasure map x marks the spot"
+    },
+    {
+     "slug": "sheriff-star",
+     "name": "sheriff star badge"
+    },
+    {
+     "slug": "horseshoe",
+     "name": "horseshoe lucky"
+    },
+    {
+     "slug": "wanted-poster",
+     "name": "wanted poster outlaw"
+    },
+    {
+     "slug": "tumbleweed",
+     "name": "tumbleweed desert"
+    },
+    {
+     "slug": "lasso",
+     "name": "lasso rope cowboy"
+    },
+    {
+     "slug": "cowboy-boot",
+     "name": "cowboy boot spur"
+    },
+    {
+     "slug": "dynamite",
+     "name": "dynamite tnt sticks fuse"
+    },
+    {
+     "slug": "cow-skull",
+     "name": "cow skull desert bones"
+    },
+    {
+     "slug": "gold-nugget",
+     "name": "gold nugget"
+    },
+    {
+     "slug": "ufo",
+     "name": "ufo flying saucer alien spaceship"
+    },
+    {
+     "slug": "planet-earth",
+     "name": "planet earth world globe space"
+    },
+    {
+     "slug": "planet-ringed",
+     "name": "ringed planet saturn"
+    },
+    {
+     "slug": "planet-red",
+     "name": "red planet mars"
+    },
+    {
+     "slug": "planet-ice",
+     "name": "ice planet blue neptune"
+    },
+    {
+     "slug": "satellite",
+     "name": "satellite space orbit"
+    },
+    {
+     "slug": "space-station",
+     "name": "space station orbit"
+    },
+    {
+     "slug": "asteroid",
+     "name": "asteroid meteor space rock"
+    },
+    {
+     "slug": "ray-gun",
+     "name": "ray gun laser blaster space"
+    },
+    {
+     "slug": "space-helmet",
+     "name": "space helmet astronaut"
+    },
+    {
+     "slug": "moon-rover",
+     "name": "moon rover space buggy"
+    },
+    {
+     "slug": "space-shuttle",
+     "name": "space shuttle"
+    },
+    {
+     "slug": "comet",
+     "name": "comet shooting space"
+    },
+    {
+     "slug": "binoculars",
+     "name": "binoculars"
+    },
+    {
+     "slug": "walkie-talkie",
+     "name": "walkie talkie radio"
+    },
+    {
+     "slug": "fingerprint",
+     "name": "fingerprint clue detective"
+    },
+    {
+     "slug": "secret-file",
+     "name": "top secret file folder"
+    },
+    {
+     "slug": "footprints",
+     "name": "footprints tracks clue"
+    },
+    {
+     "slug": "handcuffs",
+     "name": "handcuffs police"
+    },
+    {
+     "slug": "police-badge",
+     "name": "police badge shield"
+    },
+    {
+     "slug": "shuriken",
+     "name": "shuriken ninja star throwing star"
+    },
+    {
+     "slug": "nunchucks",
+     "name": "nunchucks ninja"
+    },
+    {
+     "slug": "katana",
+     "name": "katana samurai ninja sword"
+    },
+    {
+     "slug": "paper-lantern",
+     "name": "paper lantern red festival"
+    },
+    {
+     "slug": "circus-tent",
+     "name": "circus tent big top"
+    },
+    {
+     "slug": "juggling-balls",
+     "name": "juggling balls clubs"
+    },
+    {
+     "slug": "unicycle",
+     "name": "unicycle circus"
+    },
+    {
+     "slug": "ring-of-fire",
+     "name": "ring of fire hoop flaming circus"
+    },
+    {
+     "slug": "rabbit-in-hat",
+     "name": "magic hat rabbit magician trick"
+    },
+    {
+     "slug": "camping-tent",
+     "name": "camping tent green"
+    },
+    {
+     "slug": "sleeping-bag",
+     "name": "sleeping bag camping"
+    },
+    {
+     "slug": "marshmallow-stick",
+     "name": "marshmallow on stick campfire toasting"
+    },
+    {
+     "slug": "hiking-boot",
+     "name": "hiking boot walking"
+    },
+    {
+     "slug": "canteen",
+     "name": "canteen water flask camping"
+    },
+    {
+     "slug": "camp-stove",
+     "name": "camp stove gas cooker"
+    },
+    {
+     "slug": "pocket-knife",
+     "name": "pocket knife swiss army"
+    },
+    {
+     "slug": "christmas-tree",
+     "name": "christmas tree decorated star"
+    },
+    {
+     "slug": "christmas-stocking",
+     "name": "christmas stocking sock"
+    },
+    {
+     "slug": "candy-cane",
+     "name": "candy cane christmas sweet"
+    },
+    {
+     "slug": "bauble",
+     "name": "christmas bauble ornament ball"
+    },
+    {
+     "slug": "snow-globe",
+     "name": "snow globe christmas"
+    },
+    {
+     "slug": "gingerbread-man",
+     "name": "gingerbread man biscuit christmas"
+    },
+    {
+     "slug": "wreath",
+     "name": "christmas wreath holly door"
+    },
+    {
+     "slug": "sleigh",
+     "name": "santa sleigh sled christmas presents"
+    },
+    {
+     "slug": "jack-o-lantern",
+     "name": "jack o lantern halloween pumpkin carved"
+    },
+    {
+     "slug": "candy-bag",
+     "name": "trick or treat bag halloween sweets"
+    },
+    {
+     "slug": "candy-corn",
+     "name": "candy corn halloween sweet"
+    },
+    {
+     "slug": "easter-egg",
+     "name": "easter egg painted zigzag"
+    },
+    {
+     "slug": "easter-egg-dotty",
+     "name": "easter egg blue spotted"
+    },
+    {
+     "slug": "easter-egg-pink",
+     "name": "easter egg pink spotted"
+    },
+    {
+     "slug": "easter-basket",
+     "name": "easter basket eggs"
+    },
+    {
+     "slug": "chocolate-bunny",
+     "name": "chocolate bunny easter rabbit"
+    },
+    {
+     "slug": "fireworks",
+     "name": "fireworks rocket celebration new year"
+    },
+    {
+     "slug": "heart-box",
+     "name": "box of chocolates valentine heart"
+    },
+    {
+     "slug": "ferris-wheel",
+     "name": "ferris wheel funfair big wheel"
+    }
+   ]
+  },
+  {
+   "id": "outdoors",
+   "label": "Plants & landscape",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "birch-tree",
+     "name": "birch tree white trunk"
+    },
+    {
+     "slug": "willow-tree",
+     "name": "willow tree weeping"
+    },
+    {
+     "slug": "round-tree",
+     "name": "round tree topiary lollipop tree park"
+    },
+    {
+     "slug": "bamboo",
+     "name": "bamboo stalks"
+    },
+    {
+     "slug": "fern",
+     "name": "fern plant leaves"
+    },
+    {
+     "slug": "reeds",
+     "name": "reeds cattails bulrush pond plants"
+    },
+    {
+     "slug": "clover",
+     "name": "four leaf clover lucky shamrock"
+    },
+    {
+     "slug": "sprout",
+     "name": "sprout seedling young plant growing"
+    },
+    {
+     "slug": "rose",
+     "name": "rose red flower"
+    },
+    {
+     "slug": "daisy",
+     "name": "daisy white flower"
+    },
+    {
+     "slug": "lavender",
+     "name": "lavender purple flowers"
+    },
+    {
+     "slug": "dandelion",
+     "name": "dandelion seed head wish"
+    },
+    {
+     "slug": "lotus-flower",
+     "name": "lotus flower water lily pink pond"
+    },
+    {
+     "slug": "acorn",
+     "name": "acorn oak nut"
+    },
+    {
+     "slug": "pine-cone",
+     "name": "pine cone fir cone"
+    },
+    {
+     "slug": "maple-leaf",
+     "name": "maple leaf autumn red"
+    },
+    {
+     "slug": "leaf-pile",
+     "name": "pile of leaves autumn"
+    },
+    {
+     "slug": "stick",
+     "name": "stick branch twig wood"
+    },
+    {
+     "slug": "bird-nest",
+     "name": "bird nest eggs"
+    },
+    {
+     "slug": "beehive",
+     "name": "beehive bees honey"
+    },
+    {
+     "slug": "anthill",
+     "name": "anthill ants mound"
+    },
+    {
+     "slug": "pond",
+     "name": "pond water lily pads"
+    },
+    {
+     "slug": "pebbles",
+     "name": "pebbles small stones"
+    },
+    {
+     "slug": "mountain",
+     "name": "mountain peak grey"
+    },
+    {
+     "slug": "snowy-mountain",
+     "name": "snowy mountain snow peak"
+    },
+    {
+     "slug": "volcano",
+     "name": "volcano erupting lava"
+    },
+    {
+     "slug": "hill",
+     "name": "green hill grassy"
+    },
+    {
+     "slug": "waterfall-rocks",
+     "name": "waterfall river cliff"
+    },
+    {
+     "slug": "sand-castle",
+     "name": "sand castle beach"
+    },
+    {
+     "slug": "iceberg",
+     "name": "iceberg ice floating"
+    },
+    {
+     "slug": "seaweed",
+     "name": "seaweed kelp underwater plant"
+    },
+    {
+     "slug": "vegetable-patch",
+     "name": "vegetable patch garden carrots growing"
+    }
+   ]
+  },
+  {
+   "id": "weather",
+   "label": "Sky & weather",
+   "group": "fx",
+   "items": [
+    {
+     "slug": "partly-cloudy",
+     "name": "sun behind cloud partly cloudy weather"
+    },
+    {
+     "slug": "rain-cloud",
+     "name": "rain cloud raining weather"
+    },
+    {
+     "slug": "storm-cloud",
+     "name": "storm cloud thunder lightning"
+    },
+    {
+     "slug": "snow-cloud",
+     "name": "snow cloud snowing weather"
+    },
+    {
+     "slug": "hail-cloud",
+     "name": "hail cloud hailstones ice"
+    },
+    {
+     "slug": "full-moon",
+     "name": "full moon night"
+    },
+    {
+     "slug": "night-sky",
+     "name": "night sky crescent moon and stars"
+    },
+    {
+     "slug": "star-cluster",
+     "name": "stars twinkling night sky"
+    },
+    {
+     "slug": "shooting-star",
+     "name": "shooting star falling wish"
+    },
+    {
+     "slug": "rainbow",
+     "name": "rainbow colours"
+    },
+    {
+     "slug": "raindrops",
+     "name": "raindrops rain falling"
+    },
+    {
+     "slug": "snowflakes",
+     "name": "snow falling snowflakes winter"
+    },
+    {
+     "slug": "wind-gust",
+     "name": "wind gust blowing air"
+    },
+    {
+     "slug": "fog",
+     "name": "fog mist haze"
+    },
+    {
+     "slug": "sunrise",
+     "name": "sunrise sunset sun horizon"
+    },
+    {
+     "slug": "big-fire",
+     "name": "big fire flames blaze burning"
+    },
+    {
+     "slug": "water-splash",
+     "name": "water splash drops"
+    },
+    {
+     "slug": "sea-wave",
+     "name": "sea wave ocean surf"
+    },
+    {
+     "slug": "bubbles",
+     "name": "bubbles soap bubbles floating"
+    },
+    {
+     "slug": "dust-cloud",
+     "name": "dust cloud puff running"
+    },
+    {
+     "slug": "steam",
+     "name": "steam hot vapour rising"
+    },
+    {
+     "slug": "icicles",
+     "name": "icicles ice hanging frozen"
+    }
+   ]
+  },
+  {
+   "id": "emotes",
+   "label": "Emotes & icons",
+   "group": "fx",
+   "items": [
+    {
+     "slug": "face-happy",
+     "name": "happy face smile emoji"
+    },
+    {
+     "slug": "face-grin",
+     "name": "grinning face big smile happy"
+    },
+    {
+     "slug": "face-laughing",
+     "name": "crying laughing face lol funny"
+    },
+    {
+     "slug": "face-sad",
+     "name": "sad face unhappy"
+    },
+    {
+     "slug": "face-crying",
+     "name": "crying face tears sad"
+    },
+    {
+     "slug": "face-angry",
+     "name": "angry face mad cross"
+    },
+    {
+     "slug": "face-furious",
+     "name": "furious red angry face rage"
+    },
+    {
+     "slug": "face-scared",
+     "name": "scared face afraid fear sweat"
+    },
+    {
+     "slug": "face-surprised",
+     "name": "surprised shocked face wow"
+    },
+    {
+     "slug": "face-love",
+     "name": "love face heart eyes"
+    },
+    {
+     "slug": "face-kiss",
+     "name": "kiss face blowing kiss wink"
+    },
+    {
+     "slug": "face-sleeping",
+     "name": "sleeping face asleep zzz"
+    },
+    {
+     "slug": "face-yawning",
+     "name": "sleepy tired yawning face"
+    },
+    {
+     "slug": "face-sick",
+     "name": "sick face green ill queasy"
+    },
+    {
+     "slug": "face-fever",
+     "name": "sick face thermometer fever ill"
+    },
+    {
+     "slug": "face-mask",
+     "name": "face with medical mask ill"
+    },
+    {
+     "slug": "face-cool",
+     "name": "cool face sunglasses"
+    },
+    {
+     "slug": "face-thinking",
+     "name": "thinking face hmm wondering"
+    },
+    {
+     "slug": "face-wink",
+     "name": "winking face wink"
+    },
+    {
+     "slug": "face-silly",
+     "name": "silly face tongue out cheeky"
+    },
+    {
+     "slug": "face-confused",
+     "name": "confused face unsure worried"
+    },
+    {
+     "slug": "face-neutral",
+     "name": "neutral face blank meh"
+    },
+    {
+     "slug": "face-shy",
+     "name": "shy blushing face embarrassed"
+    },
+    {
+     "slug": "face-star-eyes",
+     "name": "excited face star eyes amazed"
+    },
+    {
+     "slug": "face-dizzy",
+     "name": "dizzy face knocked out"
+    },
+    {
+     "slug": "face-nerd",
+     "name": "nerd face glasses clever"
+    },
+    {
+     "slug": "face-devil",
+     "name": "devil face naughty purple horns"
+    },
+    {
+     "slug": "face-angel",
+     "name": "angel face halo innocent good"
+    },
+    {
+     "slug": "face-cold",
+     "name": "cold freezing face blue shivering"
+    },
+    {
+     "slug": "face-clown",
+     "name": "clown face red nose"
+    },
+    {
+     "slug": "poo",
+     "name": "poo poop emoji funny"
+    },
+    {
+     "slug": "thumbs-up",
+     "name": "thumbs up like good yes hand"
+    },
+    {
+     "slug": "thumbs-down",
+     "name": "thumbs down dislike bad no hand"
+    },
+    {
+     "slug": "waving-hand",
+     "name": "waving hand hello goodbye hi"
+    },
+    {
+     "slug": "peace-sign",
+     "name": "peace sign victory hand two fingers"
+    },
+    {
+     "slug": "fist-bump",
+     "name": "fist punch hand"
+    },
+    {
+     "slug": "point-up",
+     "name": "finger pointing up hand"
+    },
+    {
+     "slug": "clapping-hands",
+     "name": "clapping hands applause bravo"
+    },
+    {
+     "slug": "flexed-arm",
+     "name": "strong arm muscle flex"
+    },
+    {
+     "slug": "speech-heart",
+     "name": "speech bubble heart love"
+    },
+    {
+     "slug": "speech-angry",
+     "name": "speech bubble angry scribble swearing grumble"
+    },
+    {
+     "slug": "curved-arrow",
+     "name": "curved arrow turn back return"
+    },
+    {
+     "slug": "tick-box",
+     "name": "tick box done green check mark"
+    },
+    {
+     "slug": "cross-box",
+     "name": "cross box wrong red x mark"
+    },
+    {
+     "slug": "broken-heart",
+     "name": "broken heart sad love"
+    },
+    {
+     "slug": "sparkling-heart",
+     "name": "sparkling heart pink love shine"
+    },
+    {
+     "slug": "heart-arrow",
+     "name": "heart with arrow cupid love valentine"
+    },
+    {
+     "slug": "two-hearts",
+     "name": "two hearts love couple"
+    },
+    {
+     "slug": "heart-blue",
+     "name": "blue heart"
+    },
+    {
+     "slug": "glowing-star",
+     "name": "glowing star shining bright"
+    },
+    {
+     "slug": "warning-triangle",
+     "name": "warning sign danger caution"
+    },
+    {
+     "slug": "no-entry",
+     "name": "no entry forbidden not allowed stop"
+    },
+    {
+     "slug": "music-notes",
+     "name": "music notes song singing"
+    },
+    {
+     "slug": "twinkle",
+     "name": "twinkle sparkle four point star white"
+    },
+    {
+     "slug": "sparkles",
+     "name": "sparkles three stars magic glitter"
+    },
+    {
+     "slug": "poof",
+     "name": "poof smoke puff vanish cloud"
+    },
+    {
+     "slug": "sweat-drops",
+     "name": "sweat drops nervous phew"
+    },
+    {
+     "slug": "dizzy-stars",
+     "name": "dizzy stars seeing stars spinning"
+    },
+    {
+     "slug": "paw-print",
+     "name": "paw print animal track pet"
+    },
+    {
+     "slug": "kiss-mark",
+     "name": "kiss mark lips lipstick"
+    },
+    {
+     "slug": "skull-crossbones",
+     "name": "skull and crossbones danger poison pirate"
+    },
+    {
+     "slug": "map-pin",
+     "name": "map pin location marker place"
+    },
+    {
+     "slug": "sound-on",
+     "name": "sound on speaker volume loud"
+    },
+    {
+     "slug": "play-button",
+     "name": "play button start go green"
+    },
+    {
+     "slug": "number-0",
+     "name": "number 0 zero digit"
+    },
+    {
+     "slug": "number-1",
+     "name": "number 1 one digit"
+    },
+    {
+     "slug": "number-2",
+     "name": "number 2 two digit"
+    },
+    {
+     "slug": "number-3",
+     "name": "number 3 three digit"
+    },
+    {
+     "slug": "number-4",
+     "name": "number 4 four digit"
+    },
+    {
+     "slug": "number-5",
+     "name": "number 5 five digit"
+    },
+    {
+     "slug": "number-6",
+     "name": "number 6 six digit"
+    },
+    {
+     "slug": "number-7",
+     "name": "number 7 seven digit"
+    },
+    {
+     "slug": "number-8",
+     "name": "number 8 eight digit"
+    },
+    {
+     "slug": "number-9",
+     "name": "number 9 nine digit"
+    },
+    {
+     "slug": "shout-bubble",
+     "name": "shout bubble loud yell exclamation"
+    },
+    {
+     "slug": "pow-burst",
+     "name": "pow comic hit burst yellow bang"
+    },
+    {
+     "slug": "explosion-blue",
+     "name": "blue magic explosion blast"
+    }
+   ]
   }
  ]
 }

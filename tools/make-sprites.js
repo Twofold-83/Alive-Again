@@ -11231,6 +11231,3150 @@ UBBBBBBB
 UUUUUUUU
 `);
 
+// ───────────────────────── sports, music and toys ─────────────────────────
+category('play', 'Sports, music & toys', 'thing');
+pack(`
+// sport
+@football | football soccer ball
+..WWWWWW..
+.WWKKWWWW.
+WWWKKWWKWW
+WKWWWWWKKW
+WKKWWKWWWW
+WWWWKKKWWW
+WWKWWKWWKW
+.WKKWWWKK.
+..WWWWWW..
+@basketball | basketball ball
+..OOOOOO..
+.OODOOKOO.
+OOODOKOOOO
+ODDDKDDDDO
+OOOKDOOOOO
+OOKODOOOOO
+OOKOODOOOO
+.OKOODOOO.
+..OOOOOO..
+@tennis-ball | tennis ball
+..HHHH..
+.HHHWHH.
+HHHWHHHH
+HWWHHHHH
+HHHHHWWH
+HHHHWHHH
+.HHWHHH.
+..HHHH..
+@tennis-racket | tennis racket
+....RRRR...
+...RWxWxR..
+..RxWxWxWR.
+..RWxWxWxR.
+..RxWxWxWR.
+...RWxWxR..
+....RRRR...
+.....BB....
+.....BB....
+.....VV....
+.....VV....
+@baseball | baseball ball
+..WWWWWW..
+.WRWWWWRW.
+WWRWWWWRWW
+WRWWWWWWRW
+WRWWWWWWRW
+WWRWWWWRWW
+.WRWWWWRW.
+..WWWWWW..
+@baseball-bat | baseball bat wooden
+.........LL
+........LLL
+.......LLL.
+......LLL..
+.....LLL...
+....LLT....
+...LLT.....
+..LT.......
+.VV........
+VV.........
+@american-football | american football rugby ball
+....TTTTT...
+..TTTTTTTTT.
+.TTLWWWWWTTT
+TTLLWTWTWTTT
+.TTTTTTTTTT.
+..TTTTTTTC..
+....CCCCC...
+@volleyball | volleyball ball
+..WWWWWW..
+.WWxWWWWW.
+WWxWWWxxWW
+WxWWxxWWWW
+WxxxWWWWxW
+WWWxWWWxWW
+.WWWxxxWW.
+..WWWWWW..
+@beach-ball | beach ball colourful
+..RRWWYY..
+.RRRWWYYY.
+RRRRWWYYYY
+RRRRWWYYYY
+BBBBWWGGGG
+BBBBWWGGGG
+.BBBWWGGG.
+..BBWWGG..
+@golf-club | golf club and ball
+.........x
+........x.
+.......x..
+......x...
+.....x....
+....x.....
+...x......
+xxxx...WW.
+xxx....WW.
+GGGGGGGGGG
+@bowling-ball | bowling ball
+..PPPPPP..
+.PPJPPPPP.
+PPJPKPKPPP
+PPPPPPPPPP
+PPPPPKPPPP
+PPPPPPPPPQ
+.PPPPPPQQ.
+..PPQQQQ..
+@bowling-pin | bowling pin skittle
+..WWW..
+.WWWWW.
+.WWWWW.
+..RRR..
+..WWW..
+.WWWWW.
+WWWWWWW
+WWWWWWW
+WWWWWWW
+.WWWWW.
+.wwwww.
+@ping-pong-paddle | ping pong table tennis paddle bat
+..RRRRR...
+.RRRRRRR..
+.RRIRRRR..
+.RRRRRRR.W
+.RRRRRRR..
+..RRRRR...
+...LLL....
+...LLL....
+...TTT....
+@shuttlecock | badminton shuttlecock
+W.W.W.W
+WWWWWWW
+.W.W.W.
+.WWWWW.
+..W.W..
+..WWW..
+..RRR..
+..RRR..
+@hockey-stick | hockey stick and puck
+.........T
+........T.
+.......T..
+......T...
+.....T....
+....T.....
+...T......
+TTTT...VVV
+RRR....VVV
+@ice-skate | ice skate
+.WWWW.....
+.WWWW.....
+.WAWW.....
+.WWWWW....
+.WAWWWWW..
+.WWWWWWWW.
+.WWWWWWWW.
+..x....x..
+xxxxxxxxxx
+@roller-skate | roller skate
+.MMMM.....
+.MMMM.....
+.MWMM.....
+.MMMMM....
+.MWMMMMM..
+.MMMMMMMM.
+YYYYYYYYYY
+.VV....VV.
+.VV....VV.
+@skateboard | skateboard
+B............B
+.BBBBBBBBBBBB.
+..RRRRRRRRRR..
+..VV......VV..
+..VV......VV..
+@surfboard | surfboard
+....AA....
+...AAAA...
+...ARRA...
+..AARRAA..
+..AARRAA..
+..AARRAA..
+..AARRAA..
+..AARRAA..
+..AARRAA..
+...ARRA...
+...ARRA...
+....AA....
+@skis | skis and poles skiing
+.R..x..x.R.
+.R..x..x.R.
+.R..x..x.R.
+.R..x..x.R.
+.R..x..x.R.
+.R..x..x.R.
+.R..x..x.R.
+.R.xxxxxxR.
+.R..x..x.R.
+RR..V..V.RR
+@sled | sled sledge toboggan
+.T.........T
+.TRRRRRRRRRT
+..RRRRRRRRR.
+..x.......x.
+x.x.......x.
+xxxxxxxxxxxx
+@boxing-glove | boxing glove red
+..RRRRR...
+.RRIRRRR..
+RRRRRRRRR.
+RRRRRRRRRR
+RRRRRRRRRR
+.RRRRRRRR.
+..RRRRRR..
+..WWWWWW..
+..WWWWWW..
+@dumbbell | dumbbell weights gym
+VV........VV
+VVV......VVV
+VVVxxxxxxVVV
+VVVxxxxxxVVV
+VVV......VVV
+VV........VV
+@whistle | whistle referee
+......xx....
+.....x......
+.YYYYYYYYYY.
+YYYEYYYYYYYY
+YYYKKYYY....
+YYYYYYYY....
+.YYYYYY.....
+@stopwatch | stopwatch timer
+....VV....
+...VVVV.V.
+..xxxxxx..
+.xWWWKWWx.
+xWWWWKWWWx
+xWWWWKWWWx
+xWWWWWRWWx
+.xWWWWWWx.
+..xxxxxx..
+@medal-gold | gold medal first place | a=gold
+RR.....BB
+.RR...BB.
+..RR.BB..
+...RBB...
+..bbbbb..
+.bbcbbbb.
+.bcbbabb.
+.bbbbabb.
+.bbbbbab.
+..aaaaa..
+=medal-silver | silver medal second place | medal-gold | a=steel
+=medal-bronze | bronze medal third place | medal-gold | a=copper
+@podium | podium winners first second third
+.....YYYY.....
+.....YKKY.....
+.xxxxYYKYYY...
+.xKKxYYKYooo..
+.xxKxYYYYoKKo.
+.xKxxYYYYooKo.
+.xKKxYYYYoKKo.
+.xxxxYYYYoooo.
+@football-goal | football goal net soccer
+WWWWWWWWWWWWWW
+WxWxWxWxWxWxWW
+WWxWxWxWxWxWxW
+WxWxWxWxWxWxWW
+WWxWxWxWxWxWxW
+WxWxWxWxWxWxWW
+W............W
+W............W
+@basketball-hoop | basketball hoop net
+.WWWWWWWWWW.
+.WWWWWWWWWW.
+.WWWRRRRWWW.
+.WWWRWWRWWW.
+.WWWRRRRWWW.
+..OOOOOOOO..
+...WxWxWx...
+...xWxWxW...
+....xWxW....
+.....x......
+.....x......
+.....x......
+@dartboard | dartboard darts
+...KKKKKK...
+..KWWKKWWK..
+.KWRRWWGGWK.
+KWRKKGGKKGWK
+KWRKGRRGKGWK
+KKWWRYYRWWKK
+KWGKGRRGKRWK
+KWGKKGGKKRWK
+.KWGGWWRRWK.
+..KWWKKWWK..
+...KKKKKK...
+@archery-target | archery target bullseye arrow
+...WWWWWW...
+..WWKKKKWW..
+.WKKBBBBKKW.
+WWKBBRRBBKWW
+WKBBRYYRBBKW
+WKBBRYYRBBKW
+WWKBBRRBBKWW
+.WKKBBBBKKW.
+..WWKKKKWW..
+...WWWWWW...
+....T..T....
+...T....T...
+@fishing-rod | fishing rod
+..........T.
+.........T.x
+........T..x
+.......T...x
+......T....x
+.....T.....x
+....T......x
+...Tx......x
+..TV.......R
+.TT........W
+TT..........
+@swim-ring | swim ring rubber ring float
+...RRRRRR...
+..WWRRRRWW..
+.WWW....WWW.
+RRR......RRR
+RRR......RRR
+RRR......RRR
+.WWW....WWW.
+..WWRRRRWW..
+...RRRRRR...
+@chequered-flag | chequered flag finish race
+TKWKWKWKW..
+TWKWKWKWK..
+TKWKWKWKW..
+TWKWKWKWK..
+TKWKWKWKW..
+T..........
+T..........
+T..........
+T..........
+T..........
+@jump-rope | jump rope skipping rope
+.RR......RR.
+.RR......RR.
+.RR......RR.
+..x......x..
+.x........x.
+.x........x.
+.x........x.
+..x......x..
+...xx..xx...
+.....xx.....
+@frisbee | frisbee flying disc
+...OOOOOO...
+.OOOFFFFOOO.
+OOFFOOOOFFOO
+.OOOOOOOOOD.
+...DDDDDD...
+// music
+@acoustic-guitar | acoustic guitar
+..........CC
+.........LCC
+........L...
+.......L....
+..TTT.L.....
+.TLLLTT.....
+TLLLLLLT....
+TLLKKLLT....
+TLLKKLLT....
+.TLLLLT.....
+..TTTT......
+@electric-guitar | electric guitar rock
+..........VV
+.........xVV
+........x...
+.......x....
+.R..RRx.....
+.RRRRRR.....
+RRRWWRRR....
+RRRWWRR.....
+RRRRRRR.....
+.RRR.RR.....
+@piano-keyboard | piano keyboard keys
+VVVVVVVVVVVVVV
+VRVVxxVVxxVVGV
+VVVVVVVVVVVVVV
+WKWKWWKWKWKWWW
+WKWKWWKWKWKWWW
+WWWWWWWWWWWWWW
+wwwwwwwwwwwwww
+@drum | drum with sticks
+L..........L
+.L........L.
+..L......L..
+.WWWWWWWWWW.
+RWWWWWWWWWWR
+RYRRYRRYRRYR
+RRYRRYRRYRRR
+RYRRYRRYRRYR
+.RRRRRRRRRR.
+@drum-kit | drum kit drums cymbals
+YYYY......YYYY
+..x........x..
+..x..BBBB..x..
+..x.BWWWWB.x..
+.RRRBWWWWBRRR.
+RWWRBBBBBBRWWR
+RRRR.BBBB.RRRR
+.x..x....x..x.
+x...x....x...x
+@trumpet | trumpet brass
+......x.x.x...
+YYYYYYYYYYYYY.
+Y..YYEYEYEYYYY
+....YYYYYY..YY
+.....Y..Y...YY
+.....YYYY....Y
+@saxophone | saxophone sax
+......VV.
+.....YY..
+.....Y...
+.....YY..
+.....YE..
+.....YY..
+Y....YE..
+YY..YYY..
+YYYYYY...
+.YYYY....
+@violin | violin fiddle
+.........CC
+........TC.
+.......T...
+..OO..T....
+.OOOOT.....
+.OOKOO.....
+OOOKOOO....
+OOOOOOO....
+.OOOOO.....
+..DDD......
+@recorder | recorder flute pipe
+.........LL
+........LL.
+.......LK..
+......LL...
+.....LK....
+....LL.....
+...LK......
+..LL.......
+.TT........
+TT.........
+@xylophone | xylophone glockenspiel
+.........T.T..
+..........W.W.
+RROOYYGGBBPP..
+RROOYYGGBBPP..
+RROOYYGGBBPP..
+.ROOYYGGBBP...
+.ROOYYGGBB....
+..OOYYGGB.....
+TTTTTTTTTTTT..
+@tambourine | tambourine
+...LLLLLL...
+..LWWWWWWL..
+YLWWWWWWWWLY
+.LWWWWWWWWL.
+.LWWWWWWWWL.
+YLWWWWWWWWLY
+..LWWWWWWL..
+...LLYYLL...
+@maracas | maracas shakers
+.RR.....GG.
+RYRR...GYGG
+RRRR...GGGG
+RYRR...GGYG
+.RR.....GG.
+..T.....T..
+..T.....T..
+...T...T...
+...T...T...
+@microphone | microphone mic sing
+..xxxx..
+.xVxVxx.
+.xxVxVx.
+.xVxVxx.
+..xxxx..
+..VVVV..
+...VV...
+...VV...
+...VV...
+...VV...
+@harp | harp
+.YYYYYYY...
+YY.x.x.xY..
+Y..x.x.x.Y.
+Y..x.x.x.Y.
+Y..x.x.xY..
+Y..x.x.Y...
+Y..x.xY....
+Y..x.Y.....
+Y..xY......
+YYYY.......
+OOOO.......
+// toys and parties
+@teddy-bear | teddy bear soft toy
+.TT....TT.
+TLTTTTTTLT
+.TTTTTTTT.
+.TKTTTTKT.
+.TTLLLLTT.
+..TLKKLT..
+.TTTTTTTT.
+TTTLLLLTTT
+TTTLLLLTTT
+.TTTTTTTT.
+.TT....TT.
+@doll | doll toy girl
+..YYYYYY..
+.YYYYYYYY.
+.YSSSSSSY.
+YYSKSSKSYY
+YYSSSSSSYY
+Y..SMMS..Y
+..MMMMMM..
+.SMMzMMMS.
+..MMMMMM..
+.MMMMMMMM.
+...S..S...
+...R..R...
+@toy-car | toy car wind up
+....x.......
+...xxx......
+...BBBBBB...
+..BBAABAAB..
+.BBBBBBBBBB.
+BBBBBBBBBBBY
+BBVVBBBBVVBB
+..VV....VV..
+@toy-train | toy train wooden
+....V.........
+....V..RRRR...
+..GGGG.RAAR...
+.GGGGGGRRRR...
+YYYYYYYYYYYY..
+.VV..VV..VV...
+.VV..VV..VV...
+@toy-robot | toy robot wind up
+....R.....
+....x.....
+..BBBBBB..
+..BWKBKW..
+..BBBBBB..
+.xRRRRRRx.
+.xRYYGGRx.
+.xRRRRRRx.
+...BB.BB..
+..VVV.VVV.
+@building-blocks | building blocks abc toy cubes
+....RRRR....
+....RWWR....
+....RWRR....
+....RRRR....
+.BBBB..GGGG.
+.BWBB..GWWG.
+.BWWB..GWGG.
+.BBBB..GGGG.
+@toy-brick | toy brick building block plastic
+..RR..RR..
+.RIIRRIIR.
+RRRRRRRRRR
+RIRRRRRRRR
+RRRRRRRRRR
+RRRRRRRRRZ
+ZZZZZZZZZZ
+@yo-yo | yo-yo toy
+....x...
+....x...
+....x...
+...x....
+..RRRR..
+.RRIRRR.
+RRIYYRRR
+RRRYYRRR
+.RRRRRR.
+..RRRR..
+@spinning-top | spinning top toy
+....R....
+....R....
+..YYYYY..
+.BBBBBBB.
+RRRRRRRRR
+.YYYYYYY.
+..GGGGG..
+...BBB...
+....x....
+@kite | kite flying
+....RR.....
+...RRYY....
+..RRRYYY...
+.RRRRYYYY..
+..BBBGGG...
+...BBGG....
+....BG.....
+.....x.....
+....R.x....
+.......xB..
+........x..
+@party-balloon | balloon party red | a=red
+..bbbb..
+.bbcbbb.
+bbcbbbbb
+bbcbbbbb
+bbbbbbbb
+.bbbbbb.
+..bbbb..
+...bb...
+...x....
+....x...
+...x....
+....x...
+@balloon-bunch | bunch of balloons party
+..RR..YY...
+.RRRRYYYY..
+.RRRRYYYY..
+..RRBBYY...
+...BBBB....
+...BBBB....
+....BB.....
+....xx.....
+....x......
+....x......
+....x......
+@rocking-horse | rocking horse toy
+.......TT.L.
+......TTLLL.
+T.....TLLKL.
+T..RRRRLLLL.
+.LLRRRRLL...
+.LLLLLLLL...
+.LL....LL...
+RL......LR..
+.RRRRRRRR...
+@jack-in-the-box | jack in the box toy clown
+...R..B...
+...RRBB...
+..SSSSSS..
+..SKSSKS..
+..SSRRSS..
+...xxxx...
+...xxxx...
+BBBBBBBBBB
+BYBBBBBBYB
+BBBBYYBBBB
+BYBBBBBBYB
+BBBBBBBBBB
+@puzzle-piece | puzzle piece jigsaw | a=green
+....bb....
+...bbbb...
+....bb....
+bbbbbbbbb.
+bcbbbbbbbbb
+bbbbbbbbbbb
+bbbbbbbbb.
+bbbb..bbb.
+bbbb..bbb.
+bbbbbbbbb.
+@puzzle-cube | puzzle cube colour cube toy
+RRRWWWBBB
+RRRWWWBBB
+YYYGGGRRR
+YYYGGGRRR
+BBBOOOYYY
+BBBOOOYYY
+GGGRRRWWW
+GGGRRRWWW
+@board-game | board game dice pawns
+GGGGGGGGGGGG
+GWRWYWBWGWWG
+GWGGGGGGGGRG
+GYGG.R.GGGWG
+GWGGRRRGGGBG
+GBGGGGGGGGWG
+GWYWRWBWYWGG
+GGGGGGGGGGGG
+@chess-knight | chess piece knight horse
+...VV....
+..VVVVV..
+.VVKVVVV.
+.VVVVVVVV
+.VV.VVVVV
+....VVVV.
+...VVVV..
+...VVVV..
+..VVVVVV.
+.VVVVVVVV
+@marbles | marbles glass balls
+....BBB....
+...BABBB...
+...BBBBB...
+.RRRBBGGG..
+RIRRR.GHGG.
+RRRRR.GGGG.
+.RRR...GG..
+@paper-boat | paper boat origami
+.....W.....
+....WWW....
+...WWwWW...
+..WWWwWWW..
+WWWWWwWWWWW
+.WWWWWWWWW.
+..wwwwwww..
+@paper-plane | paper plane airplane
+..........W
+.......WWWW
+....WWWWWW.
+.WWWWWWWWw.
+WWWWWWWww..
+...WWwww...
+....Ww.....
+....w......
+@water-pistol | water pistol squirt gun toy
+.....OO.....
+GGGGGOOGGGG.
+GHGGGGGGGGGA
+GGGGGGGGGG..
+..GGG.O.....
+..GGG.......
+..GGG.......
+@bucket-and-spade | bucket and spade sand beach toys
+.xxxxxx.....
+x......x..R.
+RRRRRRRR..R.
+RIRRRRRR..R.
+.RRRRRR...R.
+.RIRRRR..YYY
+.RRRRRR..YYY
+..RRRR...YY.
+@pinwheel | pinwheel windmill toy
+..RR.BBBB.
+..RRRBBB..
+YYYRRB....
+YYYYxGGGG.
+.YY.GGGG..
+....xGG...
+....x.....
+....x.....
+....x.....
+....x.....
+@rattle | baby rattle
+..AAAA...
+.AAWAAA..
+.AARRAA..
+.AAAAAA..
+..AAAA...
+....YY...
+.....YY..
+......MM.
+.....M..M
+......MM.
+@gift | gift present wrapped box bow | a=blue
+..RR..RR..
+.R..RR..R.
+..RRRRRR..
+bbbbRRbbbb
+bcbbRRbbbb
+RRRRRRRRRR
+bbbbRRbbbb
+bbbbRRbbbb
+aaaaRRaaaa
+@party-popper | party popper confetti celebration
+.....R..Y.B
+...G..B..R.
+..Y.M..G...
+.....Y..M..
+...OOY.R...
+..OYOO.....
+.OYOOO.....
+OYOOO......
+YOOO.......
+OO.........
+@pinata | pinata party donkey
+........M.M.
+.......YYYY.
+.......BBKB.
+M.BBBBBBBBB.
+.RRRRRRRRR..
+.YYYYYYYYY..
+.GGGGGGGGG..
+.MM.MM.MM.M.
+.BB.BB.BB.B.
+@bunting | bunting party flags banner
+xxxxxxxxxxxxxx
+RRR.YYY.BBB.GG
+RRR.YYY.BBB.GG
+.R...Y...B...G
+@disco-ball | disco ball mirror ball party
+.....x....
+.....x....
+...wwww...
+..wWwAwww.
+.wwAwwWwAw
+.wWwwAwwww
+.wwwAwwWwx
+..wAwwwwx.
+...wwxx...
+`);
+
+// ───────────────────────── tools, science and medical ─────────────────────────
+category('tools', 'Tools, science & medical', 'thing');
+pack(`
+// hand tools
+@claw-hammer | hammer claw tool
+.xxxxxx...
+xxxxxxxx..
+xx.TT.....
+x..TT.....
+...TT.....
+...TT.....
+...TT.....
+...TT.....
+...RR.....
+...RR.....
+@screwdriver | screwdriver tool
+.........x
+........x.
+.......x..
+......x...
+.....x....
+...RR.....
+..RRIR....
+.RRIR.....
+RRRR......
+.RR.......
+@spanner | spanner wrench tool
+.......x.x
+.......xxx
+......xxx.
+.....xx...
+....xx....
+...xx.....
+.xxx......
+xxx.......
+x.x.......
+@pliers | pliers tool
+.x....x.
+.xx..xx.
+..xxxx..
+...xx...
+..xVVx..
+..R..R..
+.RR..RR.
+.R....R.
+.R....R.
+.R....R.
+@hand-saw | saw hand saw tool
+TTT.........
+T.Twwwwwwww.
+T.Twwwwwwwww
+TTTwwwwwwww.
+...w.w.w.w..
+@power-drill | power drill electric
+.OOOOOOO....
+OOOOOOOOxxxx
+OOFOOOOOx...
+.OOOOOOO....
+..OOO.......
+..OOO.......
+..OOO.......
+.VVVVV......
+.VVVVV......
+@tape-measure | tape measure
+.YYYYYYY...
+YYYYYYYYY..
+YYVVVVYYY..
+YYVxxVYYY..
+YYVVVVYYY..
+YYYYYYYYYEE
+.YYYYYYYEKE
+@toolbox | toolbox red tools
+....VVVV....
+...V....V...
+RRRRRRRRRRRR
+RIRRRRRRRRRR
+RRRRRYYRRRRR
+ZZZZZYYZZZZZ
+RRRRRRRRRRRR
+RRRRRRRRRRRR
+ZZZZZZZZZZZZ
+@screw | screw nail
+xxxxxx
+xVVVVx
+.xxxx.
+..xw..
+..wx..
+..xw..
+..wx..
+..xw..
+..wx..
+...x..
+@nut-and-bolt | nut and bolt
+.xxxx.....
+xwwwwx....
+.xxxx.....
+..xw......
+..wx.xxxx.
+..xw.xVVx.
+..wx.xVVx.
+..xw.xxxx.
+@paint-roller | paint roller decorating
+BBBBBBBBBB.
+BABBBBBBBBx
+BBBBBBBBBBx
+.....xxxxxx
+.....x.....
+.....R.....
+.....R.....
+.....R.....
+.....R.....
+@paintbrush | paintbrush paint brush
+.........BB
+........BBB
+.......xBB.
+......xx...
+.....LL....
+....LL.....
+...LL......
+..LL.......
+.TL........
+TT.........
+@crowbar | crowbar
+..xx......
+.x..x.....
+.x..x.....
+....x.....
+....x.....
+....x.....
+....x.....
+....x.....
+....x.....
+....xx....
+@flashlight | flashlight torch electric
+........xxEE
+.VVVVVVxxEEE
+VVVVVVVxxEYE
+VVRVVVVxxEEE
+.VVVVVVxxEEE
+........xxEE
+@duct-tape | duct tape roll sticky tape
+..xxxxxx..
+.xxwwwwxx.
+xxwVVVVwxx
+xxwV..Vwxx
+xxwV..Vwxx
+xxwVVVVwxxx
+.xxwwwwxxxx
+..xxxxxx.xx
+@chainsaw | chainsaw
+...VVVV.......
+..V....V......
+.OOOOOOOxxxxxx
+OOOOOOOOxVxVxx
+OOKKOOOOxxxxxx
+OOOOOOO.......
+.VVV..........
+#magnet
+.RRR..RRR.
+.RRR..RRR.
+.RRR..RRR.
+.RRR..RRR.
+.RRR..RRR.
+.RRRRRRRR.
+..RRRRRR..
+...RRRR...
+#magtips
+.www..www.
+.www..www.
+=magnet | magnet horseshoe red | magnet magtips
+@cog | cog gear wheel machine
+...xx.xx...
+.x.xxxxx.x.
+.xxxxxxxxx.
+xxxx...xxxx
+.xxx...xxx.
+xxxx...xxxx
+.xxxxxxxxx.
+.x.xxxxx.x.
+...xx.xx...
+// garden tools
+@rake | rake garden tool
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+.xxxxxxxxx.
+.x.x.x.x.x.
+.x.x.x.x.x.
+@garden-fork | garden fork pitchfork tool
+....RR....
+....RR....
+....TT....
+....TT....
+....TT....
+....TT....
+..xxxxxx..
+..x.xx.x..
+..x.xx.x..
+..x.xx.x..
+@trowel | trowel garden spade small
+.......GG.
+......GG..
+.....GG...
+....xx....
+..xxx.....
+.xxwx.....
+xxwx......
+xxx.......
+x.........
+@garden-shears | garden shears secateurs clippers
+.w.....w.
+.ww...ww.
+..ww.ww..
+...wVw...
+...GGG...
+..GG.GG..
+.GG...GG.
+.G.....G.
+.G.....G.
+@seed-packet | seed packet seeds
+WWWWWWWW
+WGGGGGGW
+WGRGGYGW
+WGGGGGGW
+WGNGGNGW
+WWWWWWWW
+WxxxxxxW
+WWWWWWWW
+// science
+@microscope | microscope science
+....VVV...
+....VVV...
+...VVV....
+...VVV.VV.
+..xVV...V.
+..xx....V.
+........V.
+..AAAA..V.
+.......VV.
+.VVVVVVVV.
+VVVVVVVVVV
+@telescope | telescope stars astronomy
+.........xBB
+.......xxBBB
+.....xWWBB..
+...xxWWW....
+..YWWW......
+..YW.T......
+....T.T.....
+...T...T....
+..T.....T...
+@test-tube | test tube science green
+.WWWW.
+..AA..
+..AA..
+..AA..
+..GG..
+..GH..
+..GG..
+..GG..
+..GG..
+...G..
+@test-tube-rack | test tubes rack science
+.A...A...A..
+.A...A...A..
+.R...A...A..
+TRTTTYTTTBTT
+.R...Y...B..
+.R...Y...B..
+TTTTTTTTTTTT
+T..........T
+@beaker | beaker science glass blue liquid
+A.......A.
+AA.....AA.
+.A.....A..
+.Ax....A..
+.ABBBBBA..
+.AxBBBBA..
+.ABBABBA..
+.AxBBBBA..
+.AAAAAAA..
+@science-flask | flask erlenmeyer science bubbling
+..W.W...
+...W....
+..AAAA..
+...AA...
+...AA...
+..AMMA..
+.AMMMMA.
+AMMzMMMA
+AMMMMMMA
+AAAAAAAA
+@bunsen-burner | bunsen burner flame science
+....A.....
+...ABA....
+...BAB....
+...BBB....
+....x.....
+....x.....
+....x.....
+....xxxx..
+...Vx.....
+.VVVVVVV..
+@magnifying-glass | magnifying glass search detective
+..xxxx....
+.xAAAAx...
+xAAWAAAx..
+xAWAAAAx..
+xAAAAAAx..
+.xAAAAx...
+..xxxxTT..
+......TTT.
+.......TTT
+........TT
+@atom | atom science
+....BBBB....
+..BB....BB..
+.B.BB..BB.B.
+.B...BB...B.
+B...BRRB...B
+B...BRRB...B
+.B...BB...B.
+.B.BB..BB.B.
+..BB....BB..
+....BBBB....
+@dna | dna double helix genes
+.B....R.
+..BWWR..
+...RB...
+..RWWB..
+.R....B.
+..RWWB..
+...BR...
+..BWWR..
+.B....R.
+..BWWR..
+...RB...
+@petri-dish | petri dish bacteria germs
+..AAAAAAAA..
+.AWWWWWWWWA.
+AWWGGWWWWHWA
+AWWGGWWMWWWA
+AWHWWWWMMWWA
+.AWWWWWWWWA.
+..AAAAAAAA..
+@dropper | dropper pipette
+..RRR..
+.RRRRR.
+.RRRRR.
+..RRR..
+..AAA..
+..AAA..
+..ABA..
+..ABA..
+...A...
+...A...
+...B...
+@balance-scale | balance scale weighing justice
+.....YY.....
+YYYYYYYYYYYY
+Y....YY....Y
+Y....YY....Y
+YYY..YY..YYY
+OOO..YY..OOO
+.....YY.....
+.....YY.....
+...YYYYYY...
+..OOOOOOOO..
+// medical
+@first-aid-kit | first aid kit medical box
+....WWWW....
+...W....W...
+WWWWWWWWWWWW
+WWWWWRRWWWWW
+WWWRRRRRRWWW
+WWWRRRRRRWWW
+WWWWWRRWWWWW
+WWWWWWWWWWWW
+wwwwwwwwwwww
+@syringe | syringe injection needle
+.........xx
+........xx.
+.......AA.x
+......AAA..
+.....GAA...
+....GGA....
+...GGA.....
+..xGA......
+.x.........
+x..........
+@pill | pill capsule medicine
+......RRR.
+.....RRRRR
+....RRIRRR
+...WRRRRR.
+..WWWRRR..
+.WWWWWR...
+WWWWWW....
+WWWWW.....
+.www......
+@pill-bottle | pill bottle medicine tablets
+..WWWWWW..
+..WWWWWW..
+.OOOOOOOO.
+.OWWWWWWO.
+.OWRRWWWO.
+.OWWWWWWO.
+.OWxxxxWO.
+.OOOOOOOO.
+.DDDDDDDD.
+@plaster | plaster band-aid sticking plaster
+.........FF.
+.......FFFFF
+.....FFEEFF.
+...FFEEEEF..
+.FFFEEEFF...
+FFFFFEFF....
+.FFFFF......
+..FF........
+@bandage-roll | bandage roll
+...WWWWWW...
+..WWwwwwWW..
+.WWwWWWWwWW.
+.WWwWxxWwWW.
+.WWwWWWWwWWW
+..WWwwwwWWWW
+...WWWWWW.WW
+..........ww
+@thermometer | thermometer temperature fever
+..WWW..
+..WxW..
+..WRW..
+..WxW..
+..WRW..
+..WRW..
+..WRW..
+.WRRRW.
+.WRRRW.
+..WWW..
+@stethoscope | stethoscope doctor
+.V.....V..
+.V.....V..
+.V.....V..
+.V.....V..
+..V...V...
+...VVV....
+....V.....
+....V..xx.
+....V.xwwx
+.....Vxwwx
+......Vxx.
+@crutches | crutches walking aids
+.TTT...TTT.
+..x.....x..
+..x.....x..
+..x.....x..
+.xVx...xVx.
+..x.....x..
+..x.....x..
+..x.....x..
+..x.....x..
+..V.....V..
+@medicine-bottle | medicine bottle syrup cough
+...WWW...
+...WWW...
+..TTTTT..
+.TTTTTTT.
+.TWWWWWT.
+.TWRWWWT.
+.TWWWWWT.
+.TTTTTTT.
+.CCCCCCC.
+@tooth | tooth dentist
+.WWW..WWW.
+WWWWWWWWWW
+WWAWWWWWWW
+WWWWWWWWWW
+WWWWWWWWWw
+.WWWWWWWw.
+.WWW..WWw.
+.WW....Ww.
+.WW....Ww.
+@x-ray | x-ray skeleton scan
+VVVVVVVVVV
+VVVwwwwVVV
+VVwVwwVwVV
+VVwwwwwwVV
+VVVwwwwVVV
+VwwVwwVwwV
+VVVwwwwVVV
+VwwVwwVwwV
+VVVVwwVVVV
+VVVVVVVVVV
+@surgical-mask | surgical mask medical face mask
+x..........x
+.xAAAAAAAAx.
+.xAAAAAAAAx.
+..ABBBBBBA..
+.xAAAAAAAAx.
+.xABBBBBBAx.
+x..AAAAAA..x
+@hospital-bed | hospital bed
+x............x
+x.WW.........x
+xWWWAAAAAAAAAx
+xxxxxxxxxxxxxx
+x............x
+V............V
+// cleaning and safety
+@broom | broom sweeping brush
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+.....T.....
+...RRRRR...
+..YYYYYYY..
+..YOYOYOY..
+..YOYOYOY..
+@mop-bucket | mop and bucket cleaning
+.........T..
+.........T..
+.x.....x.T..
+x.......xT..
+BBBBBBBBBT..
+BABBBBBB.T..
+.BBBBBB.WWW.
+.BABBBB.WWWW
+..BBBB..W.WW
+@sponge | sponge washing up
+.YYYYYYYYYY.
+YYOYYYYOYYYY
+YYYYOYYYYOYY
+YOYYYYYOYYYY
+GGGGGGGGGGGG
+.NNNNNNNNNN.
+@spray-bottle | spray bottle cleaner
+..RRRRR.
+.RR..R..
+..RRR...
+...W....
+..AAAA..
+.AAAAAA.
+.AWWWWA.
+.AWBBWA.
+.AAAAAA.
+.BBBBBB.
+@dustpan | dustpan and brush
+.........TT.
+........TT..
+..RRRR.TT...
+.RRRRRRR....
+RRRRRRRR.YYY
+RIRRRRRR.YOY
+RRRRRRRR.YOY
+@feather-duster | feather duster cleaning
+..MM.zz..
+.MzMMzMM.
+MMzMMMzMz
+.zMMzMMM.
+..MMzMM..
+...MMM...
+....T....
+....T....
+....T....
+....T....
+@plunger | plunger toilet sink
+....T....
+....T....
+....T....
+....T....
+....T....
+....T....
+..RRRRR..
+.RRIRRRR.
+RRRRRRRRR
+@fire-extinguisher | fire extinguisher
+..VVV....
+.xxRxxVV.
+...R...V.
+..RRRR.V.
+.RRRRRRV.
+.RWWWWR..
+.RWWWWR..
+.RRRRRR..
+.RRRRRR..
+.RRRRRR..
+.ZZZZZZ..
+`);
+
+// ───────────────────────── adventure themes and holidays ─────────────────────────
+category('adventure', 'Adventure & holidays', 'thing');
+pack(`
+// pirates
+@pirate-flag | pirate flag jolly roger skull
+TVVVVVVVVV.
+TVVWWWWVVV.
+TVWKWWKWVV.
+TVVWWWWVVV.
+TVWVWWVWVV.
+TVVVVVVVVV.
+T..........
+T..........
+T..........
+T..........
+@cannon | cannon pirate ship gun
+.........VVV
+...VVVVVVVVV
+VVVVVVVVVVVV
+VVXVVVVVVVVV
+.VVVVVVVVVV.
+...TTTTT....
+..TTCCCTT...
+..TCCTCCT...
+...TCCCT....
+@spyglass | spyglass pirate telescope
+.........YY
+........TTY
+.......TTT.
+......YTT..
+.....TTY...
+....TTT....
+...YTT.....
+..TTY......
+.AT........
+@anchor | anchor ship
+....xx....
+...x..x...
+....xx....
+..xxxxxx..
+....xx....
+....xx....
+x...xx...x
+xx..xx..xx
+.xx.xx.xx.
+..xxxxxx..
+....xx....
+@ship-wheel | ship wheel helm steering
+....T.T....
+.T..TTT..T.
+..TTT.TTT..
+..T.T.T.T..
+TTT.TYT.TTT
+..TTTYTTT..
+TTT.TYT.TTT
+..T.T.T.T..
+..TTT.TTT..
+.T..TTT..T.
+....T.T....
+@message-in-bottle | message in a bottle
+.........TT.
+........AA..
+.....AAAAA..
+...AAAAAA...
+..AAEEEAA...
+.AAEEEAAA...
+.AAAEAAA....
+.AAAAAA.....
+..AAAA......
+@treasure-island | treasure island palm tree x marks the spot
+.....GG.GGG...
+...GGGGGG.....
+..GG..TGGGG...
+......T...G...
+.....T........
+.....T....R.R.
+..EEETEEEE.R..
+.EEEEEEEEER.R.
+AEEEEEEEEEEEEA
+AAAAAAAAAAAAAA
+@cutlass | cutlass pirate sword curved
+.........ww
+........wWw
+.......wWw.
+......wWw..
+.....wWw...
+....wWw....
+.Y.wWw.....
+.YYYw......
+.TYY.......
+T..Y.......
+@treasure-map-x | treasure map x marks the spot
+EE........EE
+.EEEEEEEEEE.
+.EEKEKEEEEE.
+.EEEEEKEAAE.
+.EGEEEEKEAE.
+.EGGEEKEEEE.
+.EEEEEEREREE
+.EEEEEEEREE.
+.EEEEEEREREE
+EE........EE
+// wild west
+@sheriff-star | sheriff star badge
+.....Y.....
+....YYY....
+YYYYYYYYYYY
+.YYYEEEYYY.
+..YYEYEYY..
+..YYYYYYY..
+.YYYY.YYYY.
+.YY.....YY.
+@horseshoe | horseshoe lucky
+.xxx...xxx.
+.xVx...xVx.
+.xxx...xxx.
+.xVx...xVx.
+.xxx...xxx.
+.xVxx.xxVx.
+..xxxxxxx..
+...xxVxx...
+@wanted-poster | wanted poster outlaw
+EEEEEEEEE
+EKKEKEKKE
+EEEEEEEEE
+EELLLLLEE
+EELCCCLEE
+EELSSSLEE
+EELLLLLEE
+EEEEEEEEE
+EKKKKKKKE
+EEEEEEEEE
+@tumbleweed | tumbleweed desert
+..L.TLT...
+.T.LT.LT..
+L.TL.T.TL.
+.TL.TL.L.T
+T.LT.LT.L.
+.T.TL.TL.T
+..LT.T.LT.
+...TLTL...
+@lasso | lasso rope cowboy
+...LLLLLL...
+.LL......LL.
+L..........L
+.LL......LL.
+...LLLLLL...
+.......L....
+......L.....
+.....L......
+....LL......
+@cowboy-boot | cowboy boot spur
+..TTTT....
+..TLTT....
+..TTTT....
+..TLTT....
+..TTTT....
+..TTTTT...
+..TTTTTTT.
+xYTTTTTTTT
+..CC.CCCCC
+@dynamite | dynamite tnt sticks fuse
+......Y...
+.....x.O..
+....x.....
+.RR.RR.RR.
+.RR.RR.RR.
+VVVVVVVVVV
+.RR.RR.RR.
+.RR.RR.RR.
+VVVVVVVVVV
+.RR.RR.RR.
+@cow-skull | cow skull desert bones
+W.........W
+WW.......WW
+.WWWWWWWWW.
+..WKKWKKW..
+..WKKWKKW..
+...WWWWW...
+...WWWWW...
+....WKW....
+....WWW....
+@gold-nugget | gold nugget
+...YYY....
+.YYEEYYY..
+YYEYYYYYY.
+YYYYYOYYYY
+.YYYYYYYO.
+..OOYYOO..
+// space
+@ufo | ufo flying saucer alien spaceship
+....AAAAAA....
+...AAWAAAAA...
+...AAAAAAAA...
+.xxxxxxxxxxxx.
+xxRxxYxxGxxBxx
+.XXXXXXXXXXXX.
+...XXXXXXXX...
+....E....E....
+...E......E...
+@planet-earth | planet earth world globe space
+...BBBBBB...
+..BBGGBBBB..
+.BGGGGBBGBB.
+BBGGGBBGGGBB
+BBBGGBBBGGBB
+BBBGBBBBBGBB
+BBBBBGGBBBBB
+.BBBGGGGBBB.
+..BBBGGBBB..
+...WWWWWW...
+#planet a=orange
+...bbbbbb...
+..bbcccbbb..
+.bbccbbbbbb.
+bbcbbbbabbbb
+bbbbbbbbbbbb
+bbbabbbbbbab
+bbbbbbbbbbbb
+.bbbbbabbba.
+..bbbbbbaa..
+...aaaaaa...
+#rings y=4 x=-1
+EEEEEEEEEEEEEE
+.FFFFFFFFFFFF.
+=planet-ringed | ringed planet saturn | planet rings
+=planet-red | red planet mars | planet:a=red
+=planet-ice | ice planet blue neptune | planet:a=ice
+@satellite | satellite space orbit
+BBB......BBB
+BAB.wwww.BAB
+BBBxwWWwxBBB
+BAB.wwww.BAB
+BBB..xx..BBB
+....xxxx....
+.....R......
+@space-station | space station orbit
+....B..B....
+....B..B....
+BBB.wwww.BBB
+BABxwAAwxBAB
+BBB.wwww.BBB
+....wwww....
+BBB.wAAw.BBB
+BABxwwwwxBAB
+BBB..xx..BBB
+@asteroid | asteroid meteor space rock
+...xxxxx...
+.xxxwxxxxx.
+xxwwxxxXxxx
+xxxxxxXXxxx
+xXxxxxxxxxX
+xXXxxwxxxX.
+.xxxxxxXX..
+...XXXX....
+@ray-gun | ray gun laser blaster space
+..........G.
+RRRRRRRR.G..
+RRIRRRRRxxY.
+RRRRRRRR.G..
+..RRR.Y...G.
+..RRR.......
+..ZZZ.......
+@space-helmet | space helmet astronaut
+...WWWWWW...
+..WWWWWWWW..
+.WWBBBBBBWW.
+.WBBABBBBBW.
+.WBABBBBBBW.
+.WBBBBBBBBW.
+.WWBBBBBBWW.
+..WWWWWWWW..
+.wwRwwwwBww.
+..wwwwwwww..
+@moon-rover | moon rover space buggy
+.........x....
+........xxx...
+...WWWW..x....
+..WWAAWW.x....
+xxxxxxxxxxxx..
+.xYxxxxxxxx...
+.VV..VV..VV...
+VxxVVxxVVxxV..
+.VV..VV..VV...
+@space-shuttle | space shuttle
+......WW......
+.....WWWW.....
+.....WVVW.....
+.....WWWW.....
+.....WWWW.....
+....WWWWWW....
+...VWWWWWWV...
+..VVWWWWWWVV..
+.VVVWWWWWWVVV.
+.VV.xx..xx.VV.
+....OO..OO....
+@comet | comet shooting space
+.........AA.
+......AAAAWA
+....AABBWWWA
+..ABBBAWWWA.
+.AB.BAAAAA..
+A..B..A.....
+..A.........
+// spies and detectives
+@binoculars | binoculars
+.VVV..VVV.
+.VVV..VVV.
+VVVVVVVVVV
+VVVVxxVVVV
+VVVV..VVVV
+VAAV..VAAV
+VAAV..VAAV
+.VV....VV.
+@walkie-talkie | walkie talkie radio
+.x......
+.x......
+.x......
+VVVVVV..
+VxxxxV..
+VxxxxV..
+VVVVVV..
+VGVVRV..
+VVVVVV..
+VVVVVV..
+@fingerprint | fingerprint clue detective
+..BBBBB..
+.B.....B.
+B..BBB..B
+B.B...B.B
+B.B.B.B.B
+B.B.B.B.B
+..B.B.B..
+.B..B.B..
+....B..B.
+@secret-file | top secret file folder
+.LLLLL......
+LLLLLLLLLLLL
+LLLLLLLLLLLL
+LLRRRRRRRRLL
+LLRWRWRWWRLL
+LLRRRRRRRRLL
+LLLLLLLLLLLL
+TTTTTTTTTTTT
+@footprints | footprints tracks clue
+..TT.......
+.TTTT......
+.TTTT..TT..
+..TT..TTTT.
+......TTTT.
+.TT....TT..
+.TT........
+.......TT..
+.......TT..
+@handcuffs | handcuffs police
+.xxxx...xxxx.
+x....x.x....x
+x....xxx....x
+x....x.x....x
+.xxxx...xxxx.
+@police-badge | police badge shield
+YYY.YYY.YYY
+YYYYYYYYYYY
+YYYBBBBBYYY
+YYBBYBYBBYY
+.YBBBYBBBY.
+.YYBBBBBYY.
+..YYYYYYY..
+...YYYYY...
+.....Y.....
+// ninja and far east
+@shuriken | shuriken ninja star throwing star
+.....x.....
+....xx.....
+....xxx....
+xxxxxVxxx..
+..xxxVxxxxx
+....xxx....
+.....xx....
+.....x.....
+@nunchucks | nunchucks ninja
+..xxxxxx..
+.x......x.
+T........T
+TT......TT
+TT......TT
+TT......TT
+TT......TT
+TT......TT
+@katana | katana samurai ninja sword
+..........w
+.........wW
+........wW.
+.......wW..
+......wW...
+.....wW....
+....wW.....
+..YYW......
+..VY.......
+.VR........
+VR.........
+@paper-lantern | paper lantern red festival
+...VVVV...
+....YY....
+..RRRRRR..
+.RRIRRRRR.
+RRIRRYRRRR
+RRIRRYRRRR
+.RRIRRRRR.
+..RRRRRR..
+....YY....
+....YY....
+// circus and funfair
+@circus-tent | circus tent big top
+......RR......
+......R.......
+.....RWR......
+....RWWRR.....
+..RRWWRRWWR...
+.RWWRRWWRRWW..
+RRWWRRWWRRWWR.
+.RWWRRVVRRWW..
+.RWWRRVVRRWW..
+.RWWRVVVVRWW..
+@juggling-balls | juggling balls clubs
+....BB....
+....BB....
+.RR....YY.
+.RR....YY.
+..........
+..W....W..
+..GG..GG..
+..GG..GG..
+@unicycle | unicycle circus
+...RRRR...
+....VV....
+....xx....
+....xx....
+..VVVVVV..
+.VV.xx.VV.
+.V.xxxx.V.
+.VV.xx.VV.
+..VVVVVV..
+@ring-of-fire | ring of fire hoop flaming circus
+..Y.O..Y.O..
+.OYOROOYORO.
+OROO....OORY
+YO........OO
+OR........RO
+YO........OY
+ORO......ORO
+.OYOO..OOYO.
+..OROYYORO..
+.....VV.....
+.....VV.....
+....VVVV....
+@rabbit-in-hat | magic hat rabbit magician trick
+...WW.WW...
+...WM.MW...
+...WWWWW...
+...WKWKW...
+...WWMWW...
+VVVVVVVVVVV
+.VVVVVVVVV.
+..VVVVVVV..
+..RRRRRRR..
+..VVVVVVV..
+..VVVVVVV..
+// camping
+@camping-tent | camping tent green
+......NN......
+.....NGGN.....
+....NGGGGN....
+...NGGVVGGN...
+..NGGGVVGGGN..
+.NGGGVVVVGGGN.
+NGGGGVVVVGGGGN
+x............x
+@sleeping-bag | sleeping bag camping
+.SSS........
+SKSKBBBBBBB.
+SSSSBABBBBBB
+.CCBBBBBBBBB
+..UUUUUUUUU.
+@marshmallow-stick | marshmallow on stick campfire toasting
+.........WW
+........WWW
+........FW.
+.......T...
+......T....
+.....T.....
+....T......
+...T.......
+..T........
+.T.........
+@hiking-boot | hiking boot walking
+..TTTT....
+..TYTT....
+..TTTT....
+..TYTTT...
+..TTTTTTT.
+..TLTTTTTT
+..TTTTTTTT
+.VVVVVVVVV
+.V.V.V.V.V
+@canteen | canteen water flask camping
+....xx....
+...VxxV...
+..NNNNNN..
+.NGGGGGGN.
+NGGHGGGGGN
+NGGHGGGGGN
+NGGGGGGGGN
+.NGGGGGGN.
+..NNNNNN..
+@camp-stove | camp stove gas cooker
+..B.A.B...
+.xxxxxxx..
+..xxxxx...
+...xxx....
+.BBBBBBB..
+.BABBBBB..
+.BBBBBBB..
+.UUUUUUU..
+@pocket-knife | pocket knife swiss army
+......ww...
+.....wWw...
+....wWw..x.
+...wWw..x..
+.RRRRRRRR..
+RRRWRRRRRR.
+RRWWWRRRRR.
+RRRWRRRRRR.
+.RRRRRRRR..
+// christmas, halloween, easter and more
+@christmas-tree | christmas tree decorated star
+.....Y.....
+....YYY....
+.....G.....
+....GGG....
+...GRGGG...
+....GGG....
+...GGGYG...
+..GBGGGGG..
+...GGGGG...
+..GGGRGGG..
+.GGYGGGGBG.
+.....T.....
+....RRR....
+@christmas-stocking | christmas stocking sock
+..WWWWW...
+..WWWWW...
+..RRRRR...
+..RRGRR...
+..RRRRR...
+..RGRRR...
+..RRRRRRR.
+..RRRRRRRR
+..RRRRRRRR
+...RRRRRR.
+@candy-cane | candy cane christmas sweet
+..RWRW...
+.W....R..
+.R....W..
+......R..
+.....W...
+.....R...
+.....W...
+.....R...
+.....W...
+.....R...
+@bauble | christmas bauble ornament ball
+....YY....
+....xx....
+..RRRRRR..
+.RRIRRRRR.
+RRIRRRRRRR
+WYWYWYWYWY
+RRRRRRRRRR
+.RRRRRRRZ.
+..RRRRZZ..
+@snow-globe | snow globe christmas
+...AAAAAA...
+..AAWAAAAA..
+.AAAAAGAWAA.
+.AWAAGGGAAA.
+.AAAAGGGAAA.
+.AAWGGGGGAA.
+..AAAATAAA..
+..WWWWWWWW..
+.RRRRRRRRRR.
+.RRRRRRRRRR.
+@gingerbread-man | gingerbread man biscuit christmas
+...TTTT...
+...TKTKT..
+...TTTT...
+.TTTRRTTT.
+TTTTTTTTTT
+...TWTT...
+...TTTT...
+...TWTT...
+..TTT.TTT.
+..TT...TT.
+@wreath | christmas wreath holly door
+...GGGGGG...
+..GNGRRGNG..
+.GNG....GNG.
+GGR......GGG
+GNG......GNG
+GGG......RGG
+.GNG....GNG.
+..GNGGGGNG..
+...GGRRGG...
+....RRRR....
+@sleigh | santa sleigh sled christmas presents
+.........BYG..
+Y........BGR..
+YR.......RRRR.
+.RRRRRRRRRRRR.
+.RRIRRRRRRRR..
+..RRRRRRRRR...
+...x.....x....
+Y..x.....x..Y.
+.YYYYYYYYYYY..
+@jack-o-lantern | jack o lantern halloween pumpkin carved
+.....GG.....
+....GG......
+..OOOGOOOO..
+.OOFOOOOOOO.
+OOKKOOOKKOOO
+OOKKOOOKKOOO
+OOOOOKOOOOOO
+OKOKOKOKOKOO
+.OKKKKKKKOO.
+..OODOOODO..
+@candy-bag | trick or treat bag halloween sweets
+.R.Y.M.G..
+RRRYYMMGG.
+OOOOOOOOOO
+OOOOOOOOOO
+OKKOOOKKOO
+OOOOKOOOOO
+OKOKOKOKOO
+OOKKKKKOOD
+.OOOOOODD.
+@candy-corn | candy corn halloween sweet
+...WW...
+...WW...
+..WWWW..
+..OOOO..
+.OOOOOO.
+.OFOOOO.
+YYYYYYYY
+YEYYYYYY
+.YYYYYY.
+#egg a=yellow
+...bbbb...
+..bbcbbb..
+.bbcbbbbb.
+.bcbbbbbb.
+bbbbbbbbbb
+bbbbbbbbbb
+bbbbbbbbba
+bbbbbbbbba
+.bbbbbbaa.
+..bbaaaa..
+#eggzigzag y=3
+.M.M.M.M..
+M.M.M.M.MM
+..........
+BBBBBBBBBB
+..........
+.M.M.M.M..
+#eggdots y=2
+...W..W...
+.W..W...W.
+....W.W...
+W.W....W.W
+...W.W....
+.W....W.W.
+....W.....
+=easter-egg | easter egg painted zigzag | egg eggzigzag
+=easter-egg-dotty | easter egg blue spotted | egg:a=blue eggdots
+=easter-egg-pink | easter egg pink spotted | egg:a=pink eggdots
+@easter-basket | easter basket eggs
+....TTTT....
+..TT....TT..
+.T........T.
+.T.MM.BB.YT.
+.TMMMBBBBYYT
+LLLLLLLLLLLL
+.LTLTLTLTLL.
+.LLTLTLTLTL.
+..LLLLLLLL..
+@chocolate-bunny | chocolate bunny easter rabbit
+..TT.TT..
+..TC.TC..
+..TC.TC..
+..TTTTT..
+..TKTKT..
+..TTLTT..
+.TTTTTTT.
+.TTRRRTT.
+.TTTYTTT.
+.TTTTTTT.
+.CC...CC.
+@fireworks | fireworks rocket celebration new year
+.Y...R...B..
+..Y.R.R.B...
+Y.YRRWRRB.B.
+..Y.RRR.B...
+.Y...R...B..
+...G..x.....
+..GGG.x.....
+...G..x.....
+......x.....
+.....xx.....
+@heart-box | box of chocolates valentine heart
+.RRR..RRR.
+RRIRRRRRRR
+RIRRWWRRRR
+RRRWWWWRRR
+RRRRWWRRRR
+.RRRRRRRR.
+..RRRRRR..
+...RRRR...
+....RR....
+`);
+function ferrisWheel(c) {
+  for (let a = 0; a < 360; a += 3) { const r = a * Math.PI / 180; c.px(Math.round(15.5 + 12 * Math.cos(r)), Math.round(14 + 12 * Math.sin(r)), 'g1').px(Math.round(15.5 + 6 * Math.cos(r)), Math.round(14 + 6 * Math.sin(r)), 'g2'); }
+  for (let k = 0; k < 8; k++) { const r = k * Math.PI / 4; for (let i = 1; i < 12; i++) c.px(Math.round(15.5 + i * Math.cos(r)), Math.round(14 + i * Math.sin(r)), 'g2'); }
+  for (let i = 0; i < 16; i++) c.px(15 - (i >> 1), 14 + i, 'g3').px(16 + (i >> 1), 14 + i, 'g3');
+  c.rect(5, 29, 22, 2, 'g3');
+  for (let k = 0; k < 8; k++) { const r = k * Math.PI / 4, x = Math.round(15.5 + 12 * Math.cos(r)) - 1, y = Math.round(14 + 12 * Math.sin(r)); c.rect(x, y, 3, 3, ['r2', 'y2', 'b2', 'n2'][k % 4]).h(x, y, 3, 'w0'); }
+  c.rect(15, 13, 2, 2, 'y2');
+}
+ND('ferris-wheel', 'ferris wheel funfair big wheel', ferrisWheel, { size: 32 });
+
+// ───────────────────────── plants and landscape ─────────────────────────
+category('outdoors', 'Plants & landscape', 'thing');
+pack(`
+@birch-tree | birch tree white trunk
+...HHHHHH...
+.HHHGHHHHH..
+HHGHHHHGHHH.
+HHHHGHHHHGHH
+.HGHHHHGHHH.
+..HHHWWHHH..
+.....WK.....
+.....WW.....
+.....KW.....
+.....WW.....
+.....WK.....
+....WWWW....
+@willow-tree | willow tree weeping
+....GGGGG....
+..GGGHGGGGG..
+.GGHGGGGGHGG.
+GGGGGGTGGGGGG
+GHG.GGTGG.GHG
+G.G.G.TT.G.GG
+G.G.G.TT.G.G.
+G...G.TT.G.G.
+G.....TT...G.
+.....TTTT....
+@round-tree | round tree topiary lollipop tree park
+...GGGGGG...
+..GGHHGGGG..
+.GGHHGGGGGG.
+.GGHGGGGGGN.
+.GGGGGGGGNN.
+..GGGGGGNN..
+...GGNNNN...
+.....TT.....
+.....TT.....
+.....TT.....
+....TTTT....
+@bamboo | bamboo stalks
+..G....H..
+.GG..G.HH.
+..G..G.H..
+..N..G.N..
+..G..N.H..
+..G..G.H..
+..N..G.N..
+..G..N.H..
+..G..G.H..
+..N..G.N..
+..G..G.H..
+@fern | fern plant leaves
+G....G....G
+.G..GG...G.
+.GG.G.G.GG.
+G.G.GG.G.G.
+.G.GG.GG.G.
+..GG.G.GG..
+...G.GG.G..
+....GGG....
+.....N.....
+@reeds | reeds cattails bulrush pond plants
+..T....T...
+..T..T.T...
+..T..T.T.G.
+..T..T.G.G.
+G.G..G.G.G.
+G.G.GG.G.G.
+G.G.G..GG..
+.GG.G.GG...
+..GGGGG....
+@clover | four leaf clover lucky shamrock
+..GG.GG..
+.GHGGGHG.
+.GGGGGGG.
+..GGNGG..
+.GGGGGGG.
+.GHGGGHG.
+..GG.GG..
+....N....
+.....N...
+@sprout | sprout seedling young plant growing
+.HH...HH.
+HHGH.HGHH
+.HHGGGHH.
+...HGH...
+....G....
+....G....
+.TTTTTTT.
+TTCTTTCTT
+@rose | rose red flower
+..RRRR...
+.RRIRRR..
+RRIRRZRR.
+RRRZZRRR.
+.RRRRRR..
+..RRRR...
+....G....
+..GGG.G..
+...GGGG..
+....G....
+....G....
+@daisy | daisy white flower
+..W.W.W..
+.WWWWWWW.
+..WYYYW..
+.WWYYYWW.
+..WYYYW..
+.WWWWWWW.
+..W.G.W..
+....G.G..
+..G.GG...
+...GG....
+....G....
+@lavender | lavender purple flowers
+.P...P...P.
+.PP.PP..PP.
+.JP.PJ..PJ.
+.PP.PP..PP.
+..P.P...P..
+..G.G...G..
+..G..G.G...
+...G.G.G...
+....GGG....
+@dandelion | dandelion seed head wish
+...W.W.W...
+..W.W.W.W..
+.W.WWWWW.W.
+..WWWwWWW..
+.W.WWWWW.W.
+..W.W.W.W..
+...W.G.W...
+.....G.....
+.....G.....
+....GGG....
+@lotus-flower | lotus flower water lily pink pond
+....zz.....
+..z.zz.z...
+..zzMMzz...
+.zzMYYMzz..
+GGzzMMzzGGG
+GGGGGGGGGGG
+.GGGNGGGGG.
+@acorn | acorn oak nut
+....T....
+...TT....
+.CCCCCCC.
+CTCTCTCTC
+.LLLLLLL.
+.LFLLLLL.
+.LLLLLLL.
+..LLLLL..
+...LLL...
+@pine-cone | pine cone fir cone
+...TT...
+..TLTT..
+.TLTTLT.
+.TTLTTT.
+TLTTLTLT
+TTLTTLTT
+.TLTLTT.
+.TTLTLT.
+..TTLT..
+...TT...
+@maple-leaf | maple leaf autumn red
+....R....
+.R.RRR.R.
+.RRRRRRR.
+RRRROORRR
+.RRROORR.
+RRRROORRR
+..RRORR..
+.R..O..R.
+....O....
+@leaf-pile | pile of leaves autumn
+.....O..R...
+...OORROYO..
+..ROYOORROO.
+.OORROYOORY.
+ROYOOROORROO
+OROORYOROOYR
+@stick | stick branch twig wood
+.........TL.
+.......TTT..
+..L...TT....
+...TTTT.....
+..TTT.......
+.TT..T......
+TT....L.....
+@bird-nest | bird nest eggs
+....AA.WW...
+...AAAWWWA..
+.TLAAAWWAAT.
+TLTLTLTLTLTL
+.TLTLTLTLTL.
+..TTLTLTLT..
+...TTTTTT...
+@beehive | beehive bees honey
+....YYYY....
+...YYYYYY...
+..OOOOOOOO..
+..YYYYYYYY..
+.OOOOOOOOOO.
+.YYYYVVYYYY.
+.OOOOVVOOOO.
+..YYYYYYYY..
+...OOOOOO...
+@anthill | anthill ants mound
+.....CC.....
+....TTTT....
+...TTLTTT...
+..TTTTTTLT..
+.TTLTTTTTTT.
+TTTTTTLTTTTT
+Z..Z.....Z..
+@pond | pond water lily pads
+...AAAAAAA....
+.AAABBBBBAAA..
+ABBBBGGBBBBBA.
+ABWBBGGBBBBBBA
+ABBBBBBBBGGBBA
+.AABBBBBBGBAA.
+...AAAAAAAA...
+@pebbles | pebbles small stones
+.....xxx....
+....xwxxx...
+.xx.xxxxX...
+xwxx.XXX.xx.
+xxxX....xwxx
+.XX.....xxXX
+@mountain | mountain peak grey
+......xx......
+.....xxxx.....
+....xxwxxX....
+...xxwxxxXX...
+..xxwxxxxxXX..
+.xxwxxxXxxxXX.
+xxxxxxXXxxxxXX
+xxxxxXXxxxxxXX
+#snowpeak
+......WW......
+.....WWWW.....
+....WWWWWW....
+...WW.WW.WW...
+=snowy-mountain | snowy mountain snow peak | mountain snowpeak
+@volcano | volcano erupting lava
+....R.Y.R.....
+.....OYO......
+....ROYOR.....
+....TOOOT.....
+...TTROTTT....
+..TTTRTTTCC...
+.TTTTRRTTTCC..
+TTTTTTRTTTTCC.
+TTTTTTTTTTTTCC
+@hill | green hill grassy
+.....GGGG.....
+...GGHGGGGG...
+..GHHGGGGGGG..
+.GHGGGGGGGGGN.
+GGGGGGGGGGGGNN
+GGGGGGGGGGNNNN
+@waterfall-rocks | waterfall river cliff
+xxxAAAAAAxxx
+xXxABAABAxXx
+xxxAABAAAxxx
+xXxABAABAxxx
+xxxAABAAAxXx
+xXxABAABAxxx
+xxxAABAAAxxx
+.WWWAAAAWWW.
+WAWWWWWWWWAW
+.AAWAAAWAAA.
+@sand-castle | sand castle beach
+.....R......
+.....TR.....
+..E..T..E...
+.EFE.EE.EFE.
+.EEEEEEEEEE.
+.EFEEEEEEFE.
+.EEEEVVEEEE.
+EEFEEVVEEFEE
+EEEEEEEEEEEE
+@iceberg | iceberg ice floating
+.....WW.....
+....WWWA....
+...WWWWAA...
+..WWAWWWAA..
+.WWWWWAWWAA.
+BBBBBBBBBBBB
+.BAAAAAAAAB.
+..BAAAAAAB..
+....BAAB....
+@seaweed | seaweed kelp underwater plant
+.G....G...
+..G..G..G.
+..G..G.G..
+.G....G.G.
+.G...G..G.
+..G..G.G..
+..G...GG..
+.G...G.G..
+.GG..GG...
+..GGGG....
+@vegetable-patch | vegetable patch garden carrots growing
+.G.G..H.H..G.G
+.GGG..HHH..GGG
+..O....H....O.
+TTTTTTTTTTTTTT
+TCTTCTTTCTTCTT
+CCCCCCCCCCCCCC
+`);
+
+// ───────────────────────── sky and weather ─────────────────────────
+category('weather', 'Sky & weather', 'fx');
+pack(`
+#cl a=white
+....bbb.....
+..bbbbbbbb..
+.bbbbbbbbbb.
+bbbbbbbbbbbb
+bbbbbbbbbbbb
+.aaaaaaaaaa.
+#rainfall y=7
+..A...A...A.
+..B...B...B.
+#snowfall y=7
+..W...W...W.
+............
+....W...W...
+#hailfall y=7
+.ww...ww....
+.ww...ww.ww.
+....ww...ww.
+....ww......
+#cloudbolt y=6
+.....YY.....
+....YY......
+....YYY.....
+.....Y......
+....Y.......
+#sunbit x=6 y=-3
+..Y.Y.
+.YYYYY
+YYEEYY
+.YEEYY
+..YYY.
+=partly-cloudy | sun behind cloud partly cloudy weather | sunbit cl
+=rain-cloud | rain cloud raining weather | cl:a=grey rainfall
+=storm-cloud | storm cloud thunder lightning | cl:a=dark cloudbolt
+=snow-cloud | snow cloud snowing weather | cl snowfall
+=hail-cloud | hail cloud hailstones ice | cl:a=grey hailfall
+@full-moon | full moon night
+...EEEEEE...
+..EEEEEEEE..
+.EEEwEEEEEE.
+EEEwwEEEEwEE
+EEEEEEEEEEEE
+EEEEEEwwEEEE
+EEwEEEwwEEEE
+.EEEEEEEEEF.
+..EEEEEEFF..
+...EFFFF....
+@night-sky | night sky crescent moon and stars
+.....EE....W.
+...EEE.......
+..EEE....W...
+..EEE........
+.EEEE......W.
+.EEEE........
+..EEEE...E...
+..EEEEEEEE...
+W...EEEEE....
+......W......
+@star-cluster | stars twinkling night sky
+....Y.......
+...YYY....W.
+....Y.......
+.........Y..
+.W......YYY.
+.........Y..
+...Y........
+..YYY...W...
+...Y........
+@shooting-star | shooting star falling wish
+..........Y.
+.........YYY
+.......EEYY.
+.....EE.EY..
+...EE..E....
+.EE..EE.....
+E...E.......
+@rainbow | rainbow colours
+...RRRRRRRR...
+.RROOOOOOOORR.
+RROYYYYYYYYORR
+ROYGGGGGGGGYOR
+ROYGBBBBBBGYOR
+ROYGB....BGYOR
+ROYG......GYOR
+ROY........YOR
+@raindrops | raindrops rain falling
+.A....A....
+.B..A.B..A.
+....B....B.
+..A....A...
+..B..A.B...
+.....B....A
+A.........B
+B...A......
+....B......
+@snowflakes | snow falling snowflakes winter
+.W.....W...
+WWW...WWW..
+.W..W..W...
+...WWW.....
+....W....W.
+.W......WWW
+WWW..W...W.
+.W..WWW....
+.....W.....
+@wind-gust | wind gust blowing air
+....wwww....
+.wwww...w...
+........w...
+wwwwwwww....
+............
+..wwwwwwwww.
+...........w
+.wwww.....w.
+@fog | fog mist haze
+..wwwwwwww..
+wwwWWWWWWwww
+............
+.wwwWWWWwwww
+wwWWWWWWWww.
+............
+..wwwWWWWwww
+@sunrise | sunrise sunset sun horizon
+.Y....Y....Y.
+..Y...Y...Y..
+....OOOOO....
+Y..OYYYYYO..Y
+..OYYEEYYYO..
+..OYYEYYYYO..
+BBBBBBBBBBBBB
+.AABBBAABBBA.
+@big-fire | big fire flames blaze burning
+.....R......
+....RR...R..
+.R..ROR..R..
+.RR.ROOR.RR.
+.RORROYORRR.
+RROOOYYOOOR.
+ROOYOYEYOOR.
+ROYYYEEYYOR.
+.ROYEEEEYR..
+..RRYYYYR...
+@water-splash | water splash drops
+A....A....A
+.A..AAA..A.
+..A.ABA.A..
+.A.AABAA.A.
+A.ABBBBBA.A
+.AABBWBBAA.
+AABBBBBBBAA
+.AAAAAAAAA.
+@sea-wave | sea wave ocean surf
+....WWWW.....
+..WWAAAAW....
+.WAABBBBAW...
+WABBBB..WAW..
+WABBB....W...
+ABBBBB.......
+ABBBBBBAAAAAA
+BBBBBBBBBBBBB
+@bubbles | bubbles soap bubbles floating
+...AAA.....
+..A.W.A....
+..A...A.AA.
+...AAA.A.WA
+.AA....A..A
+A.WA....AA.
+A..A.......
+.AA...AA...
+.....A.WA..
+......AA...
+@dust-cloud | dust cloud puff running
+....LLL.....
+..LLLFLLL...
+.LLFLLLLLL.L
+LLLLLLFLLLL.
+.LLTLLLLLTL.
+..TT.LTT....
+@steam | steam hot vapour rising
+..WW....WW..
+.WW....WW...
+.Ww.....Ww..
+..WW.....WW.
+...Ww...WW..
+..WW...Ww...
+.WW....WW...
+.Ww.....WW..
+@icicles | icicles ice hanging frozen
+AAAAAAAAAAAA
+AWAABAAWAABA
+.WA.BA.WA.B.
+.WA.B..WA...
+..A....W....
+..A....A....
+`);
+
+// ───────────────────────── emotes and icons ─────────────────────────
+category('emotes', 'Emotes & icons', 'fx');
+pack(`
+// faces: one head, different eyes, mouths and extras
+#face a=yellow
+...bbbbbb...
+..bcccbbbb..
+.bccbbbbbbb.
+bbcbbbbbbbbb
+bbbbbbbbbbbb
+bbbbbbbbbbbb
+bbbbbbbbbbbb
+bbbbbbbbbbba
+bbbbbbbbbbba
+.bbbbbbbbaa.
+..bbbbbaaa..
+...aaaaaa...
+#e-dot y=4
+...K....K...
+...K....K...
+#e-happy y=4
+...K....K...
+..K.K..K.K..
+#e-closed y=5
+..KKK..KKK..
+#e-heart y=3
+..R.R..R.R..
+..RRR..RRR..
+...R....R...
+#e-star y=3
+...O....O...
+..OWO..OWO..
+...O....O...
+#e-wide y=3
+..WWW..WWW..
+..WKW..WKW..
+..WWW..WWW..
+#e-angry y=3
+..K......K..
+...KK..KK...
+...K....K...
+#e-x y=3
+..K.K..K.K..
+...K....K...
+..K.K..K.K..
+#e-shades y=3
+KKKKKKKKKKKK
+.KKKK..KKKK.
+..KK....KK..
+#e-wink y=4
+...K........
+...K...KKK..
+#e-sad y=3
+....K..K....
+...K....K...
+...K....K...
+#e-brow y=3
+.......KK...
+...K....K...
+...K....K...
+#m-smile y=7
+..K......K..
+...KKKKKK...
+#m-grin y=7
+..KKKKKKKK..
+..KWWWWWWK..
+...KKKKKK...
+#m-frown y=8
+...KKKKKK...
+..K......K..
+#m-o y=7
+.....KK.....
+....KRRK....
+.....KK.....
+#m-flat y=8
+...KKKKKK...
+#m-wavy y=8
+..K.KK.KK...
+...K..K..K..
+#m-tongue y=7
+..KKKKKKKK..
+.....MMM....
+.....MMM....
+#m-kiss y=7
+.....RR.....
+......R.....
+.....RR.....
+#m-grit y=7
+..KKKKKKKK..
+..KWKWKWKK..
+..KKKKKKKK..
+#m-open y=7
+..KKKKKKKK..
+..KRRRRRRK..
+...KRMMRK...
+....KKKK....
+#m-small y=8
+....KKKK....
+#x-tears y=6
+...A....A...
+...A....A...
+...A....A...
+...A....A...
+#x-laughtears y=4
+A..........A
+AA........AA
+#x-sweat y=1
+.........A..
+.........AA.
+.........AA.
+#x-blush y=6
+.MM......MM.
+#x-zzz y=0
+.........UUU
+..........U.
+.........UUU
+#x-halo y=-2
+...YYYYYY...
+..Y......Y..
+#x-horns y=-1
+.R........R.
+.RR......RR.
+#x-thermo y=8
+....KKKK....
+.......WWWWR
+#x-mask y=6
+.WWWWWWWWWW.
+WWWWWWWWWWWW
+.WWwwwwwwWW.
+..WWWWWWWW..
+#x-chin y=9
+..SSS.......
+.SSSy.......
+.SSy........
+#x-glasses y=3
+.VVVV..VVVV.
+.VWKVVVVWKV.
+.VVVV..VVVV.
+#x-nose y=5
+.....RR.....
+.....RR.....
+#x-kissheart y=6
+.........R.R
+.........RRR
+..........R.
+=face-happy | happy face smile emoji | face e-dot m-smile
+=face-grin | grinning face big smile happy | face e-happy m-grin
+=face-laughing | crying laughing face lol funny | face e-happy m-open x-laughtears
+=face-sad | sad face unhappy | face e-sad m-frown
+=face-crying | crying face tears sad | face e-closed m-frown x-tears
+=face-angry | angry face mad cross | face e-angry m-frown
+=face-furious | furious red angry face rage | face:a=red e-angry m-grit
+=face-scared | scared face afraid fear sweat | face e-wide m-o x-sweat
+=face-surprised | surprised shocked face wow | face e-wide m-o
+=face-love | love face heart eyes | face e-heart m-smile
+=face-kiss | kiss face blowing kiss wink | face e-wink m-kiss x-kissheart
+=face-sleeping | sleeping face asleep zzz | face e-closed m-o x-zzz
+=face-yawning | sleepy tired yawning face | face e-closed m-open
+=face-sick | sick face green ill queasy | face:a=lime e-sad m-wavy
+=face-fever | sick face thermometer fever ill | face e-sad x-thermo
+=face-mask | face with medical mask ill | face e-dot x-mask
+=face-cool | cool face sunglasses | face e-shades m-smile
+=face-thinking | thinking face hmm wondering | face e-brow m-flat x-chin
+=face-wink | winking face wink | face e-wink m-smile
+=face-silly | silly face tongue out cheeky | face e-wink m-tongue
+=face-confused | confused face unsure worried | face e-dot m-wavy
+=face-neutral | neutral face blank meh | face e-dot m-flat
+=face-shy | shy blushing face embarrassed | face e-happy m-small x-blush
+=face-star-eyes | excited face star eyes amazed | face e-star m-grin
+=face-dizzy | dizzy face knocked out | face e-x m-wavy
+=face-nerd | nerd face glasses clever | face x-glasses m-grin
+=face-devil | devil face naughty purple horns | face:a=purple e-angry m-smile x-horns
+=face-angel | angel face halo innocent good | face e-happy m-smile x-halo
+=face-cold | cold freezing face blue shivering | face:a=ice e-wide m-grit
+=face-clown | clown face red nose | face:a=white e-dot m-open x-nose
+@poo | poo poop emoji funny
+.....TT.....
+....TTTT....
+...TTLTTT...
+..TTTTTTTT..
+..TWKTTWKT..
+.TTWKTTWKTT.
+.TLTTTTTTTT.
+TTTKTTTTKTTT
+TTTTKKKKTTTT
+.TTTTTTTTTT.
+// hands
+@thumbs-up | thumbs up like good yes hand
+.....ss...
+.....ss...
+....sss...
+....ss....
+BBsssssss.
+BBsssssst.
+BBsssssss.
+BBsssssst.
+BBsssssss.
+BB.sssst..
+=thumbs-down | thumbs down dislike bad no hand | thumbs-up | | rot=2
+@waving-hand | waving hand hello goodbye hi
+..s.s.s...
+..s.s.s.s.
+..s.s.s.s.
+..sssss.s.
+s.sssssss.
+sssssssss.
+.ssssssss.
+..ssssss..
+...sssst..
+...BBBB...
+@peace-sign | peace sign victory hand two fingers
+.s...s...
+.ss.ss...
+..s.s....
+..sss....
+..sssss..
+.sstssts.
+.sssssss.
+..sssss..
+..tssst..
+..BBBB...
+@fist-bump | fist punch hand
+.ssssssss.
+sstststsss
+ssssssssss
+ssssssssss
+tsssssssss
+.tsssssss.
+..BBBBBB..
+@point-up | finger pointing up hand
+...ss....
+...ss....
+...ss....
+...ss....
+...sssss.
+.sstststs
+.ssssssss
+.ssssssss
+..ssssst.
+..BBBBB..
+@clapping-hands | clapping hands applause bravo
+.Y..Y..Y..
+..Y....Y..
+..ss.ss...
+.sss.sss..
+.sssssss..
+ssstssss..
+ssssstss..
+.sssssss..
+..sssst...
+@flexed-arm | strong arm muscle flex
+....sss....
+...sssss...
+...ssssss..
+....sssss..
+.....sssss.
+..ss.sssss.
+.sssssssss.
+.sssstssst.
+..ssssssst.
+...ttttt...
+// bubbles and marks
+#b-heart x=4 y=2
+.R.R.
+RRRRR
+.RRR.
+..R..
+#b-scribble x=3 y=2
+R.R.RR.
+.R.R..R
+RR.R.R.
+=speech-heart | speech bubble heart love | bubble_speech b-heart
+=speech-angry | speech bubble angry scribble swearing grumble | bubble_speech b-scribble
+@curved-arrow | curved arrow turn back return | a=blue
+..bbbbbb..
+.bbbbbbbb.
+.bb....bb.
+.bb....bb.
+.bb....bb.
+bbbbbb.bb.
+.bbbb..bb.
+..bb...bb.
+@tick-box | tick box done green check mark
+GGGGGGGGGG
+GGGGGGGGWG
+GGGGGGGWWG
+GGGGGGWWGG
+GWWGGWWGGG
+GGWWWWGGGG
+GGGWWGGGGG
+GGGGGGGGGG
+@cross-box | cross box wrong red x mark
+RRRRRRRRRR
+RWWRRRRWWR
+RRWWRRWWRR
+RRRWWWWRRR
+RRRWWWWRRR
+RRWWRRWWRR
+RWWRRRRWWR
+RRRRRRRRRR
+@broken-heart | broken heart sad love
+.RRR..RRR.
+RRIRR.RRRR
+RIRR.RRRRR
+RRRRR.RRRR
+.RRR.RRRR.
+..RRR.RR..
+...R.RR...
+....RR....
+@sparkling-heart | sparkling heart pink love shine
+W........W.
+.zzz..zzz..
+zzWzzzzzzz.
+zzzzzzzzzz.
+.zzzzzzzzW.
+..zzzzzz...
+W..zzzz....
+....zz...W.
+@heart-arrow | heart with arrow cupid love valentine
+.........xx
+.RRR..RRxx.
+RRIRRRRxRR.
+RIRRRRxRRR.
+.RRRRxRRR..
+..RRxRRR...
+.TxRRRR....
+TT..RR.....
+@two-hearts | two hearts love couple
+.RR.RR.....
+RRRRRRR....
+RRRRRMM.MM.
+.RRRMMMMMMM
+..RRMMMMMMM
+...R.MMMMM.
+......MMM..
+.......M...
+=heart-blue | blue heart | heart | a=blue
+@glowing-star | glowing star shining bright
+.....E.....
+.E...E...E.
+....EYE....
+...EYYYE...
+EEEYYYYYEEE
+..EYYYYYE..
+...EYYYE...
+..EYYEYYE..
+.EE.....EE.
+@warning-triangle | warning sign danger caution
+.....YY.....
+....YYYY....
+....YKKY....
+...YYKKYY...
+...YYKKYY...
+..YYYKKYYY..
+..YYYYYYYY..
+.YYYYKKYYYY.
+.YYYYYYYYYY.
+@no-entry | no entry forbidden not allowed stop
+...RRRRRR...
+..RRWWWWRR..
+.RRRWWWWWRR.
+RRWRRWWWWWRR
+RWWWRRWWWWWR
+RWWWWRRWWWWR
+RWWWWWRRWWWR
+RRWWWWWRRWRR
+.RRWWWWWRRR.
+..RRWWWWRR..
+...RRRRRR...
+@music-notes | music notes song singing
+....PPPPPP.
+....PJPPPP.
+....P....P.
+....P....P.
+....P....P.
+..PPP..PPP.
+.PJPP.PJPP.
+..PP...PP..
+@twinkle | twinkle sparkle four point star white
+.....W.....
+.....W.....
+....WWW....
+..WWWAWWW..
+WWWWAAAWWWW
+..WWWAWWW..
+....WWW....
+.....W.....
+.....W.....
+@sparkles | sparkles three stars magic glitter
+....Y......
+...YYY...Y.
+..YYEYY.YYY
+...YYY...Y.
+....Y......
+.Y.....Y...
+YYY...YYY..
+.Y.....Y...
+@poof | poof smoke puff vanish cloud
+..ww..www...
+.wWWwwWWWw..
+wWWWWWWWWWw.
+wWWW...WWWWw
+.wWW....WWw.
+wWWW...WWWw.
+wWWWWWWWWWw.
+.wwWWwwWWw..
+...ww..ww...
+@sweat-drops | sweat drops nervous phew
+....A.....
+...AA.....
+...AA...A.
+.......AA.
+.A.....AA.
+AA........
+AA........
+@dizzy-stars | dizzy stars seeing stars spinning
+....Y.......
+...YYY....Y.
+....Y....YYY
+..........Y.
+.Y...xxxx...
+YYY.x....x..
+.Y...xxxx...
+@paw-print | paw print animal track pet
+..TT..TT..
+..TT..TT..
+TT......TT
+TT.TTTT.TT
+..TTTTTT..
+.TTTTTTTT.
+.TTTTTTTT.
+..TT..TT..
+@kiss-mark | kiss mark lips lipstick
+..RRR.RRR..
+.RRRRRRRRR.
+RRIRRRRRRRR
+.ZZZZZZZZZ.
+RRRRRRRRRRR
+.RRRRRRRRR.
+...RRRRR...
+@skull-crossbones | skull and crossbones danger poison pirate
+W.........W
+WW.WWWWW.WW
+..WWWWWWW..
+..WKKWKKW..
+..WKKWKKW..
+...WWKWW...
+...WKWKW...
+WW.......WW
+W.........W
+@map-pin | map pin location marker place
+..RRRRR..
+.RRRRRRR.
+RRRWWWRRR
+RRRWWWRRR
+RRRWWWRRR
+.RRRRRRR.
+..RRRRR..
+...RRR...
+....R....
+@sound-on | sound on speaker volume loud
+...x....A..
+..xx..A..A.
+wwxx...A.A.
+wwxx.A.A.A.
+wwxx...A.A.
+..xx..A..A.
+...x....A..
+@play-button | play button start go green
+..GGGGGG..
+.GGGGGGGG.
+GGGWGGGGGG
+GGGWWWGGGG
+GGGWWWWWGG
+GGGWWWGGGG
+GGGWGGGGGG
+.GGGGGGGG.
+..GGGGGG..
+`);
+const DIGITS = ['.WWW. W...W W..WW W.W.W WW..W W...W .WWW.', '..W.. .WW.. ..W.. ..W.. ..W.. ..W.. .WWW.', '.WWW. W...W ....W ...W. ..W.. .W... WWWWW', 'WWWW. ....W ....W .WWW. ....W ....W WWWW.', '...W. ..WW. .W.W. W..W. WWWWW ...W. ...W.',
+  'WWWWW W.... WWWW. ....W ....W W...W .WWW.', '.WWW. W.... W.... WWWW. W...W W...W .WWW.', 'WWWWW ....W ...W. ..W.. ..W.. ..W.. ..W..', '.WWW. W...W W...W .WWW. W...W W...W .WWW.', '.WWW. W...W W...W .WWWW ....W ....W .WWW.'];
+const DIGIT_NAMES = 'zero one two three four five six seven eight nine'.split(' ');
+// each glyph drawn at double size with a grey foot, so it stays readable when small
+pack(DIGITS.map((g, n) => `@number-${n} | number ${n} ${DIGIT_NAMES[n]} digit\n` + g.split(' ').map((row, j) => { const wide = [...row].map((ch) => (ch === '.' ? '..' : j > 4 ? 'ww' : 'WW')).join(''); return wide + '\n' + wide; }).join('\n')).join('\n'));
+ND('shout-bubble', 'shout bubble loud yell exclamation', (c) => { burst(c, 7.5, 7.5, 7.4, ['w0', 'w0', 'w0', 'w0'], 9); c.rect(7, 4, 2, 5, 'r2').rect(7, 10, 2, 2, 'r2'); }, {}, 'shout');
+ND('pow-burst', 'pow comic hit burst yellow bang', (c) => { burst(c, 7.5, 7.5, 7.4, ['r2', 'y2', 'y2', 'y3'], 11); c.stamp(4, 6, ['R.R.R.RR', 'RR.R.R.R', 'R.R.R.RR']); }, {}, 'pow');
+ND('explosion-blue', 'blue magic explosion blast', (c) => burst(c, 7.5, 7.5, 7.4, ['b1', 'b2', 'b3', 'w0']), {}, 'blast-blue');
+
 // S() reads the current category when a sprite is drawn, not when it is declared, so the
 // older sprites were all drawn with the last category of the original pack current. Keep it so.
 cat = CATS.find((c) => c.id === 'symbols');
