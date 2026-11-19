@@ -145,8 +145,8 @@ export function buildGuided(p, c) {
         h('p', { class: 'dim small' }, 'Write up to three things they may do next turn. Without options they can act freely.'), h('button', { class: 'primary', onclick: () => enter('ask') }, '❓ Decide what they may do')));
     }
     p.append(h('div', { class: 'gtitle' }, h('b', {}, ws ? 'Things and scene' : setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
-      h('small', { class: 'dim' }, ws ? 'The same tools as during a turn.' : setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.')));
-    if (!ws && setup) p.append(h('div', { class: 'row' }, h('button', { class: 'grow', id: 'undoBtn', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo'), h('button', { class: 'grow', onclick: () => c.saveAsScene() }, '💾 Save as a prepared scene')));
+      h('small', { class: 'dim' }, ws ? 'Add things, make them solid or active, set the place, exits, weather and music.' : setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.')));
+    if (!ws && setup) p.append(h('div', { class: 'row' }, h('button', { class: 'grow', id: 'undoBtn', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo')));
     const sheet = c.mods().inventory || c.mods().stats || c.mods().dice;
     p.append(h('div', { class: 'gopts' },
       opt('➕', 'Add something', 'A character, a thing, an effect', () => enter('add')),
@@ -156,7 +156,8 @@ export function buildGuided(p, c) {
       !ws && opt('💥', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
       opt('🌄', 'Change the scene', 'Place, weather, music, title', () => enter('scene')),
       !ws && opt('✏️', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
-      !ws && opt('🛠️', 'Scene workshop', 'Build levels, prepare scenes', () => c.workshop()),
+      !ws && opt('🏗️', 'Build scene', 'Levels, objects, exits — make a place', () => c.workshop()),
+      !ws && opt('🗺️', 'Map', `${(S.scenes || []).length} scenes — arrange, copy, go there`, () => c.workshop({ map: true })),
       !ws && sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
       !ws && opt('❓', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
       !ws && opt('🎥', 'Camera', 'Zoom in on something', () => enter('camera')),
@@ -184,8 +185,8 @@ export function buildGuided(p, c) {
         b('🔄', 'Turn into…', () => { G.q = ''; enter('swap'); }),
         b('⧉', 'Copy', () => { const k = { ...clone(sel), id: Math.random().toString(36).slice(2, 10), x: clamp(sel.x + 0.09, 0, 1), say: '' }; d.entities.push(k); G.sel = k.id; c.select(k.id); c.rebuild(); }),
         !ws && b('🧑', 'Player’s character', () => { d.heroId = isHero ? null : sel.id; c.rebuild(); }, isHero),
-        b('🧱', 'Solid', () => { sel.solid = !sel.solid; c.rebuild(); }, sel.solid),
-        S.rules.type === 'adventure' && !isHero && b('⭐', 'Active object', () => enter('active'), !!sel.active),
+        ws && b('🧱', 'Solid', () => { sel.solid = !sel.solid; c.rebuild(); }, sel.solid),
+        ws && S.rules.type === 'adventure' && !isHero && b('⭐', 'Active object', () => enter('active'), !!sel.active),
         b('🔗', sel.tie ? 'Tied — change' : 'Tie to…', () => { G.pick = null; enter('tie'); }, !!sel.tie),
         !ws && c.mods().inventory && !isHero && b('🎒', `Give to ${S.names.player}`, () => { const l = lab(sel); c.giveToPlayer(sel); done(`${S.names.player} gets ${l}`); }),
         !(ws && isHero) && b('🗑️', 'Remove', () => { const l = lab(sel); c.removeEntity(sel); done(`${l} disappears`); })),
@@ -279,23 +280,21 @@ export function buildGuided(p, c) {
   if (top === 'scene') {
     head('Change what about the scene?');
     p.append(h('div', { class: 'gopts' },
-      !ws && opt('📚', 'A prepared scene', `${(S.scenes || []).length} ready in the workshop`, () => enter('scene:prepared')),
+      !ws && opt('🗺️', 'Go to a scene from the map', `${(S.scenes || []).length} on the map`, () => enter('scene:prepared')),
       opt('🌄', 'The place', 'A new backdrop', () => enter('scene:place')),
-      S.rules.type === 'adventure' && opt('🚪', 'Add an exit', 'A way out to another prepared scene', () => { const x = { id: c.rid(), to: '', label: 'Exit', x: 0.9, y: 0.6, locked: false }; d.exits.push(x); G.exit = x.id; enter('exit'); }),
+      ws && S.rules.type === 'adventure' && opt('🚪', 'Add an exit', 'A way out to another prepared scene', () => { const x = { id: c.rid(), to: '', label: 'Exit', x: 0.9, y: 0.6, locked: false }; d.exits.push(x); G.exit = x.id; enter('exit'); }),
       opt('🌦️', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
       opt('🎵', 'The music', '', () => enter('scene:music')),
       !ws && opt('🎬', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
-      !ws && opt('💾', 'Save as a prepared scene', 'Keep this scene for later', () => c.saveAsScene()),
-      !ws && S.rules.type === 'adventure' && opt('🗺️', 'The map', 'How your scenes connect', () => c.workshop({ map: true })),
       !ws && opt('🎲', 'A surprise scene', 'A ready-made place and cast', async () => { if (await c.randomScene()) done('A whole new scene'); }),
       !ws && opt('💡', 'Give me an idea', 'A random story twist', () => c.idea())));
     return;
   }
   if (top === 'scene:prepared') {
-    head('Bring in a prepared scene', 'It replaces the place, the level and everything on stage except the hero.');
+    head('Go to a scene from the map', 'It replaces the place, the level and everything on stage except the hero.');
     const list = S.scenes || [];
     p.append(list.length ? h('div', { class: 'col' }, list.map((sc) => h('button', { class: 'prep', onclick: () => { c.useScene(sc); done(`The scene changes to “${sc.name}”`); } }, h('b', {}, sc.name), h('small', { class: 'dim' }, `${sc.scene.entities.length - 1} things${sc.scene.level ? ' · has a level' : ''}`))))
-      : h('p', { class: 'dim' }, 'No prepared scenes yet.'), h('button', { onclick: () => c.workshop() }, '🛠️ Open the scene workshop'));
+      : h('p', { class: 'dim' }, 'The map is empty. Build a scene and add it to the map first.'), h('button', { onclick: () => c.workshop() }, '🏗️ Build scene'));
     return;
   }
   if (top === 'scene:place') {

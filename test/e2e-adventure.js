@@ -26,11 +26,23 @@ const { setup } = require('./lib');
     let [hx, hy] = await pos('#stage .ent.hero'), [sx, sy] = await pos(ent('sword'));
     assert(Math.abs(sx - hx) < 0.3 && Math.abs(sy - hy) < 0.3, 'the tied sword sits with the hero');
     // an active object
+    // an active object is made in Build scene, where places are made; then the scene is used in the story
+    assert.equal(await p.locator('.gopt:has-text("Add an exit")').count(), 0);
+    await x.opt('Build scene'); await p.waitForSelector('#wsStage'); await p.waitForSelector('#wsAdd'); await p.click('[data-wtab=things]');
     await x.add('treasure chest'); await thing('Active object'); await p.click('#activeToggle'); await p.fill('#activeName', 'Old chest'); await x.done(); await x.done();
+    await p.click('#wsUse'); await p.waitForSelector('#workshop', { state: 'hidden' });
+    assert.equal(await p.locator('#stage .ent').count(), 4, 'hero, tied sword, mage and chest are on stage');
+    { const b = await p.locator(ent('chest')).boundingBox(), st = await p.locator('#stage').boundingBox();                    // keep the chest near the middle, in view of the zoomed camera later
+      await p.mouse.move(b.x + b.width / 2, b.y + b.height - 4); await p.mouse.down(); await p.mouse.move(st.x + st.width * 0.62, st.y + st.height * 0.62, { steps: 8 }); await p.mouse.up(); await p.click('.gdone').catch(() => {}); }
     await toPlayer();
 
     /* ---- active object: name on hover, verbs on click ---- */
     assert.equal(await p.getAttribute(ent('chest'), 'data-name'), 'Old chest');
+    // a written action can point at a thing or a spot on the stage
+    await p.click('#pointBtn'); await p.click(ent('chest')); assert.match(await act(), /Look at 👉 Old chest/);
+    { const b = await p.locator('#stage').boundingBox(); await p.click('#pointBtn'); await p.mouse.click(b.x + b.width * 0.12, b.y + b.height * 0.25); }
+    await p.waitForSelector('#stage .pointmark'); assert.match(await act(), /Look at 👉 that spot/);
+    await p.click('#pointClear'); assert.equal(await p.locator('#stage .pointmark').count(), 0); assert.equal(await p.locator('#pointClear').count(), 0);
     await p.click(ent('chest')); await p.waitForSelector('#verbs');
     assert.match(await p.textContent('#verbs'), /Old chest.*Look at.*Use.*Open/s);
     await p.click('#verbs button:has-text("Open")');
@@ -83,8 +95,10 @@ const { setup } = require('./lib');
     await p.click('#stage .place >> nth=1'); await p.waitForFunction(() => /back/.test((document.querySelector('#walkBtn') || {}).textContent || ''));
     await p.waitForTimeout(3500);
     [hx, hy] = await x.heroPos(); assert(Math.abs(hx - 0.4) < 0.03 && Math.abs(hy - 0.7) < 0.03, `the hero walked to the chosen place (${hx}, ${hy})`);
+    await p.fill('#foot input[placeholder^="✋"]', 'Kick'); await p.click('#pointBtn'); { const b = await p.locator(ent('chest')).boundingBox(); await p.mouse.click(b.x + b.width / 2, b.y + b.height - 4); }
     await toDirector();
     sc = await x.last(); assert.deepEqual(sc.answer, { kind: 'place', label: 'Place 2' }); assert.match(await p.textContent('.card.told'), /goes to Place 2/);
+    assert(sc.point && sc.point.id, 'the action points at the chest'); assert.equal(sc.action, 'Kick'); assert.match(await p.textContent('.card.told'), /Kick 👉 Old chest/);
     /* ---- ask: pick a target; then give up an item ---- */
     await x.opt('Ask Player'); await x.opt('Pick a target'); await p.click('#panel > .grid button >> nth=0'); await x.done();
     await toPlayer();
@@ -96,14 +110,16 @@ const { setup } = require('./lib');
     sc = await x.last(); assert.equal(sc.answer.kind, 'discard'); assert.equal(sc.sheet.inv.length, 0); assert.match(await p.textContent('.card.told'), /discards/);
 
     /* ---- the map: connect two prepared scenes, travel through an exit ---- */
-    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
-    await p.click('#wsNew'); await p.click('#wsNew');
-    await p.click('#wsMap'); await p.waitForSelector('.wsmap .node');
-    assert.equal(await p.locator('.wsmap .node').count(), 2);
-    await p.click('.wsmap .node >> nth=0'); await p.click('.wsmap .node >> nth=1');
+    await x.opt('Map'); await p.waitForSelector('.wsmap .node');
+    assert.equal(await p.locator('.wsmap .node').count(), 1, 'the scene used earlier is on the map');
+    await p.click('#mapNew'); await p.waitForSelector('#wsAdd'); await p.click('#wsAdd'); await p.waitForSelector('#wsSaved');
+    await p.click('#wsMap'); await p.waitForSelector('.wsmap .node >> nth=1');
+    await p.click('.wsmap .node >> nth=1'); await p.click('#mapDup'); assert.equal(await p.locator('.wsmap .node').count(), 3, 'duplicated on the map');
+    await p.click('#mapDel'); assert.equal(await p.locator('.wsmap .node').count(), 2, 'and deleted again');
+    await p.click('.wsmap .node >> nth=0'); await p.click('#mapLink'); await p.click('.wsmap .node >> nth=1');
     await p.waitForSelector('.wsmap line', { state: 'attached' }); assert.match(await p.textContent('.wstools'), /Connections \(1\).*Scene [12] ⇄ Scene [12]/s);
     await p.click('.conn button:has-text("Open")'); await p.waitForSelector('.wsmap line.locked', { state: 'attached' }); await p.click('.conn button:has-text("Locked")');
-    await p.click('.wsdoc:has-text("Scene 1")'); await p.waitForSelector('#wsStage .exit');
+    await p.click('#mapEdit'); await p.waitForSelector('#wsStage .exit');
     await x.shot('a-1-workshop-exit');
     await p.click('#wsUse'); await p.waitForSelector('#workshop', { state: 'hidden' });
     assert.match(await p.textContent('#stage .exit'), /Scene 2/);

@@ -1,21 +1,21 @@
 /*
- * The scene workshop: a full-screen editor, separate from the turn, where the
- * Director builds scenes — tile levels (floors and walls), objects (solid or
- * not), backdrop, weather, music, and where the hero starts.
+ * Building places, apart from the turn. Two full-screen views:
  *
- * It works on a list of scene documents { id, name, scene }:
- *   - prepared scenes, saved with the story and loadable during any turn
- *     ("Change the scene" > "A prepared scene"), and
- *   - on the Director's own turn, the scene that is on stage right now.
- * Prepared scenes save themselves as they are edited. They can be exported to a
- * file and imported into another story.
+ *   BUILD SCENE  one scene on the bench: level tiles (floors and walls), things (solid, active, tied),
+ *                backdrop, weather, music, exits, and where the hero starts. Everything that makes a
+ *                place is done here and nowhere else.
+ *   MAP          every scene that was added to the map. Arrange, rename, duplicate, delete, connect
+ *                (a connection puts an exit in both scenes) and go there in the story.
+ *
+ * A scene on the bench is added to the map with one button; from then on it saves itself.
+ * Scenes on the map are kept with the story and can be saved to a file for another story.
  */
-import { PIXEL, CATEGORIES, allItems, BACKDROPS, backdropCss, pixelInfo, assetLabel } from './catalog.js';
-import { MOODS } from './audio.js';
+import { PIXEL, CATEGORIES, backdropCss, pixelInfo } from './catalog.js';
 import { h, clone, clamp, norm, glyphNode, renderStage, setCell, cellAt, LEVEL_W, LEVEL_H } from './stage.js';
 import { G, resetGuided, guidedPick, guidedMark, buildGuided } from './guided.js';
 
-const W = { open: false, c: null, list: [], cur: null, tab: 'tiles', tool: 'brush', size: 1, a: '', k: 'f', tcat: '', ocat: '', q: '', sel: null, undo: [], redo: [], drag: null, walls: true, liveDirty: false, saveT: 0, el: null };
+const W = { open: false, c: null, list: [], cur: null, view: 'build', node: null, tab: 'tiles', tool: 'brush', size: 1, a: '', k: 'f', tcat: '', q: '', sel: null, hist: [], redo: [], drag: null, walls: true, saveT: 0, el: null };
+let bench = null;                                             // the scene last worked on, kept while the page is open: { code, doc }
 export const workshopOpen = () => W.open;
 const rid = () => Math.random().toString(36).slice(2, 10);
 const $root = () => document.querySelector('#workshop');
@@ -24,105 +24,141 @@ const blankScene = () => norm({
   backdrop: 'b:meadow', mood: 'm:none', narration: '', action: '', heroId: 'hero', entities: [W.c.blankHero()], drawing: [], weather: '',
   tracks: [], burst: '', sfx: '', card: '', choices: [], steps: [], sheet: { inv: [], stats: [] }, target: null, use: null, roll: null, level: null,
 });
-const library = () => W.list.filter((d) => !d.live).map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene }));
-const docs = () => W.list.filter((d) => !d.live);
+const library = () => W.list.map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene }));
+const onMap = (d = W.cur) => !!d && W.list.includes(d);
 const tileCats = () => PIXEL.filter((c) => c.group === 'tile');
-const objectCats = () => [...PIXEL.filter((c) => c.group !== 'tile'), ...PIXEL.filter((c) => c.group === 'tile').map((c) => ({ ...c, label: c.label + ' (as a piece)' })), ...CATEGORIES.map((c) => ({ ...c, label: '😀 ' + c.label }))];
+const newName = () => { for (let n = W.list.length + 1; ; n++) if (!W.list.some((d) => d.name === `Scene ${n}`)) return `Scene ${n}`; };
+const saveNow = () => { clearTimeout(W.saveT); W.saveT = 0; return W.c.save(library()); };
+const saveSoon = () => { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); };
+function flush() { if (W.saveT) saveNow(); }
+/** A free spot on the map for a new scene. */
+function spot(near) {
+  if (near) return { mx: clamp(near.mx + 0.09, 0.06, 0.94), my: clamp(near.my + 0.11, 0.08, 0.92) };
+  for (let n = 0; n < 24; n++) { const mx = ((n % 4) + 0.5) / 4, my = (Math.floor(n / 4) % 4 + 0.5) / 4; if (!W.list.some((d) => Math.abs(d.mx - mx) < 0.1 && Math.abs(d.my - my) < 0.1)) return { mx, my }; }
+  return { mx: 0.1 + Math.random() * 0.8, my: 0.1 + Math.random() * 0.8 };
+}
 
 export function openWorkshop(c) {
-  W.c = c; W.open = true; W.sel = null; W.redo = []; W.liveDirty = false; W.tab = 'tiles'; W.tool = 'brush'; W.q = ''; W.map = !!c.map; W.node = null;
-  W.list = [...(c.live ? [c.live] : []), ...c.scenes.map((s) => ({ ...s, scene: norm(s.scene) }))];
-  if (!W.list.length) W.list.push({ id: rid(), name: 'Scene 1', scene: blankScene() });
-  docs().forEach((d, i) => { if (d.mx == null || (d.mx === 0.5 && d.my === 0.5 && docs().length > 1 && i > 0)) { d.mx = ((i % 4) + 0.5) / 4; d.my = (Math.floor(i / 4) % 3 + 0.5) / 3; } });
-  W.cur = W.list[0]; W.hist = [JSON.stringify(W.cur.scene)];
-  for (const d of docs()) d.scene.sceneId = d.id;
+  W.c = c; W.open = true; W.sel = null; W.node = null; W.redo = []; W.tab = 'tiles'; W.tool = 'brush'; W.q = '';
+  W.list = c.scenes.map((s) => ({ ...s, scene: norm(s.scene) }));
+  W.list.forEach((d, i) => { if (d.mx == null || (d.mx === 0.5 && d.my === 0.5 && W.list.length > 1 && i > 0)) { d.mx = ((i % 4) + 0.5) / 4; d.my = (Math.floor(i / 4) % 3 + 0.5) / 3; } d.scene.sceneId = d.id; });
+  const kept = bench && bench.code === c.code ? W.list.find((d) => d.id === bench.doc.id) || (bench.onMap ? null : bench.doc) : null;
+  W.cur = kept || (c.stage ? { id: rid(), name: newName(), scene: c.stage() } : { id: rid(), name: newName(), scene: blankScene() });
+  W.view = c.map ? 'map' : 'build';
+  W.hist = [JSON.stringify(W.cur.scene)];
   if (!W.a) { const t = tileCats()[0]; if (t) { W.a = t.items[0].asset; W.k = t.items[0].kind === 'wall' ? 'w' : 'f'; } }
-  const root = $root();
-  const stage = h('div', { class: 'stage', id: 'wsStage' });
-  W.el = { bar: h('header', {}), list: h('aside', { class: 'wslist' }), stage, tools: h('aside', { class: 'wstools' }) };
-  W.el.map = h('div', { class: 'wsmap', hidden: true });
-  root.replaceChildren(W.el.bar, h('div', { class: 'wsbody' }, W.el.list, h('div', { class: 'wsmid' }, stage, W.el.map, h('p', { class: 'dim small', id: 'wsHint' })), W.el.tools));
+  const root = $root(), stage = h('div', { class: 'stage', id: 'wsStage' });
+  W.el = { bar: h('header', {}), stage, tools: h('aside', { class: 'wstools' }), map: h('div', { class: 'wsmap', hidden: true }) };
+  root.replaceChildren(W.el.bar, h('div', { class: 'wsbody' }, h('div', { class: 'wsmid' }, stage, W.el.map, h('p', { class: 'dim small', id: 'wsHint' })), W.el.tools));
   stage.addEventListener('pointerdown', down); stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
   document.addEventListener('keydown', keys);
   root.hidden = false;
   draw();
 }
 function close() {
-  if (W.liveDirty && !confirm('You changed the scene on stage but did not put the changes on stage. Close anyway?')) return;
   flush();
+  bench = { code: W.c.code, doc: W.cur, onMap: onMap() };
+  if (!onMap() && W.hist.length > 1) W.c.toast(`“${W.cur.name}” is not on the map yet — it waits in Build scene`);
   W.open = false; document.removeEventListener('keydown', keys); $root().hidden = true; $root().replaceChildren();
   if (W.c.closed) W.c.closed();
 }
 
-/* ---------- saving ---------- */
-function flush() { if (W.saveT) { clearTimeout(W.saveT); W.saveT = 0; W.c.save(library()); } }
+/* ---------- the bench ---------- */
 function changed() {
   const j = JSON.stringify(W.cur.scene);                     // undo history: every finished change is remembered
   if (j !== W.hist[W.hist.length - 1]) { W.hist.push(j); if (W.hist.length > 80) W.hist.shift(); W.redo = []; }
-  if (W.cur.live) W.liveDirty = true; else { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); }
+  if (onMap()) saveSoon();
 }
 function remember() { /* changes are recorded when they finish, see changed() */ }
 function undo(dir) {
+  if (W.view !== 'build') return;
   if (dir < 0) { if (W.hist.length < 2) return; W.redo.push(W.hist.pop()); } else { if (!W.redo.length) return; W.hist.push(W.redo.pop()); }
   W.cur.scene = JSON.parse(W.hist[W.hist.length - 1]); W.sel = null; resetGuided();
-  if (W.cur.live) W.liveDirty = true; else { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); }
+  if (onMap()) saveSoon();
   draw();
+}
+/** Put another scene on the bench. An unsaved one with work in it is offered to the map first. */
+function build(doc) {
+  flush();
+  if (doc !== W.cur && !onMap() && W.hist.length > 1 && confirm(`“${W.cur.name}” is not on the map yet. Add it to the map before you leave it?`)) addToMap(true);
+  W.cur = doc; W.sel = null; W.hist = [JSON.stringify(doc.scene)]; W.redo = []; W.view = 'build'; W.tab = 'tiles'; resetGuided(); draw();
+}
+function addToMap(quiet) {
+  if (onMap()) return;
+  Object.assign(W.cur, spot()); W.cur.scene.sceneId = W.cur.id; W.cur.scene.steps = [];
+  W.list.push(W.cur); saveNow();
+  if (!quiet) { W.c.toast(`“${W.cur.name}” is on the map`); draw(); }
+}
+function useNow(doc) {
+  if (!W.c.use) return;
+  if (doc === W.cur && !onMap()) addToMap(true);
+  flush(); W.c.use(doc); W.c.toast(`The story moves to “${doc.name}”`); close();
+}
+function duplicate(doc) {
+  const copy = { id: rid(), name: `${doc.name} (copy)`.slice(0, 40), ...spot(doc), scene: norm({ ...clone(doc.scene), steps: [] }) };
+  copy.scene.sceneId = copy.id; copy.scene.exits = [];           // the copy starts unconnected
+  W.list.push(copy); saveNow();
+  return copy;
+}
+function remove(doc) {
+  if (!confirm(`Delete “${doc.name}” from the map?`)) return;
+  W.list = W.list.filter((d) => d !== doc);
+  for (const d of W.list) d.scene.exits = d.scene.exits.filter((x) => x.to !== doc.id);
+  if (W.node === doc.id) W.node = null;
+  saveNow(); draw();
 }
 function keys(ev) {
   if (!W.open) return;
-  const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName);
-  if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z') { ev.preventDefault(); undo(ev.shiftKey ? 1 : -1); } else if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'y') { ev.preventDefault(); undo(1); }
+  const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName), mod = ev.ctrlKey || ev.metaKey, key = ev.key.toLowerCase();
+  if (W.view === 'map') {
+    const node = W.list.find((d) => d.id === W.node);
+    if (typing || !node) return;
+    if (mod && key === 'd') { ev.preventDefault(); W.node = duplicate(node).id; draw(); } else if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); remove(node); } else if (ev.key === 'Enter') build(node);
+    return;
+  }
+  if (mod && key === 'z') { ev.preventDefault(); undo(ev.shiftKey ? 1 : -1); } else if (mod && key === 'y') { ev.preventDefault(); undo(1); }
   else if (!typing && (ev.key === 'Delete' || ev.key === 'Backspace') && W.sel && W.sel !== W.cur.scene.heroId) { ev.preventDefault(); W.cur.scene.entities = W.cur.scene.entities.filter((e) => e.id !== W.sel); W.sel = null; resetGuided(); changed(); draw(); }
-  else if (!typing && (ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'd' && W.sel) { ev.preventDefault(); const src = W.cur.scene.entities.find((e) => e.id === W.sel); if (src && src.id !== W.cur.scene.heroId) { const k = { ...clone(src), id: rid(), x: clamp(src.x + 1 / LEVEL_W, 0, 1) }; W.cur.scene.entities.push(k); W.sel = k.id; guidedPick(k.id); changed(); draw(); } }
+  else if (!typing && mod && key === 'd' && W.sel) { ev.preventDefault(); const src = W.cur.scene.entities.find((e) => e.id === W.sel); if (src && src.id !== W.cur.scene.heroId) { const k = { ...clone(src), id: rid(), x: clamp(src.x + 1 / LEVEL_W, 0, 1) }; W.cur.scene.entities.push(k); W.sel = k.id; changed(); draw(); } }
 }
 
-/* ---------- drawing the workshop ---------- */
+/* ---------- drawing ---------- */
 const paintStage = () => renderStage(W.el.stage, W.cur.scene, { code: W.c.code, names: W.c.names, selId: W.sel, showKinds: W.walls });
-function draw() { W.el.stage.hidden = W.map; W.el.map.hidden = !W.map; if (W.map) drawMap(); else paintStage(); drawBar(); drawList(); drawTools(); }
-function pick(doc) { flush(); W.cur = doc; W.sel = null; W.hist = [JSON.stringify(doc.scene)]; W.redo = []; W.map = false; resetGuided(); draw(); }
+function draw() { const map = W.view === 'map'; W.el.stage.hidden = map; W.el.map.hidden = !map; $root().classList.toggle('mapview', map); if (map) drawMap(); else paintStage(); drawBar(); drawTools(); }
 
-function drawBar() {
-  const cur = W.cur, can = !!W.c.use;
-  W.el.bar.replaceChildren(
-    h('b', {}, '🛠️ Scene workshop'),
-    h('span', { class: 'dim' }, cur.live ? 'editing the scene on stage' : `editing “${cur.name}”`),
-    h('span', { class: 'grow' }),
-    W.c.adventure && h('button', { id: 'wsMap', class: W.map ? 'on' : '', title: 'How the prepared scenes connect', onclick: () => { W.map = !W.map; W.node = null; draw(); } }, '🗺️ Map'),
-    h('button', { title: 'Undo (Ctrl+Z)', disabled: W.hist.length < 2, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
-    h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.redo.length, onclick: () => undo(1) }, '↷ Redo'),
-    h('button', { class: W.walls ? 'on' : '', title: 'Mark walls and solid things in red', onclick: () => { W.walls = !W.walls; draw(); } }, '▦ Show what blocks'),
-    cur.live
-      ? h('button', { class: 'primary', id: 'wsUse', onclick: () => { W.c.use(cur); W.liveDirty = false; close(); } }, '✓ Put these changes on stage')
-      : h('button', { class: 'primary', id: 'wsUse', disabled: !can, title: can ? '' : 'You can bring a scene on stage during your own turn', onclick: () => { flush(); W.c.use(cur); close(); } }, can ? '▶ Use this scene in the story now' : 'Usable on your turn'),
-    h('button', { id: 'wsClose', onclick: close }, 'Close'));
-}
-
-function drawList() {
-  const cur = W.cur;
-  const add = (doc) => { const n = docs().length; doc.mx = ((n % 4) + 0.5) / 4; doc.my = (Math.floor(n / 4) % 3 + 0.5) / 3; W.list.push(doc); changed(); W.c.save(library()); pick(doc); };
-  const file = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: async () => {
+function importFile() {
+  const file = h('input', { type: 'file', accept: '.json,application/json', onchange: async () => {
     try {
       const j = JSON.parse(await file.files[0].text()), got = Array.isArray(j) ? j : j.scenes;
       if (!Array.isArray(got) || !got.length) throw new Error('No scenes in that file');
-      for (const s of got.slice(0, 40)) if (s && s.scene && Array.isArray(s.scene.entities)) W.list.push({ id: rid(), name: String(s.name || 'Imported scene').slice(0, 40), scene: norm(s.scene) });
-      W.c.save(library()); draw(); W.c.toast('Scenes imported');
+      for (const s of got.slice(0, 40)) if (s && s.scene && Array.isArray(s.scene.entities)) { const d = { id: rid(), name: String(s.name || 'Imported scene').slice(0, 40), ...spot(), scene: norm(s.scene) }; d.scene.sceneId = d.id; d.scene.exits = []; W.list.push(d); }
+      saveNow(); draw(); W.c.toast('Scenes added to the map');
     } catch (e) { W.c.toast('Could not read that file: ' + e.message); }
-    file.value = '';
   } });
-  W.el.list.replaceChildren(
-    h('h3', {}, 'Scenes'),
-    h('div', { class: 'col' }, W.list.map((d) => h('button', { class: 'wsdoc' + (d === cur ? ' on' : ''), onclick: () => pick(d) },
-      h('i', { style: `background:${backdropCss(W.c.code, d.scene.backdrop)}` }), h('span', {}, h('b', {}, d.name), h('small', {}, d.live ? 'in the story right now' : `${d.scene.entities.length - 1} things${d.scene.level ? ' · level' : ''}`))))),
-    h('button', { id: 'wsNew', onclick: () => add({ id: rid(), name: `Scene ${library().length + 1}`, scene: blankScene() }) }, '＋ New scene'),
-    h('button', { id: 'wsDup', onclick: () => add({ id: rid(), name: cur.live ? 'Copy of the stage' : `${cur.name} (copy)`.slice(0, 40), scene: norm({ ...clone(cur.scene), steps: [] }) }) }, cur.live ? '⧉ Save a copy as a prepared scene' : '⧉ Duplicate'),
-    !cur.live && h('button', { class: 'danger', onclick: () => { if (!confirm(`Delete “${cur.name}”?`)) return; W.list = W.list.filter((d) => d !== cur); W.c.save(library()); if (!W.list.length) W.list.push({ id: rid(), name: 'Scene 1', scene: blankScene() }); pick(W.list[0]); } }, '🗑 Delete'),
-    h('hr', {}),
-    h('button', { disabled: !library().length, onclick: () => { const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify({ twofoldScenes: 1, scenes: library() })], { type: 'application/json' })), download: 'twofold-scenes.json' }); a.click(); } }, '⬇ Save scenes to a file'),
-    h('button', { onclick: () => file.click() }, '⬆ Load scenes from a file'), file,
-    h('p', { class: 'dim small' }, 'Prepared scenes are kept with this story. Save them to a file to reuse them in another one.'));
+  file.click();
+}
+function drawBar() {
+  const cur = W.cur, can = !!W.c.use, tab = (id, label, v) => h('button', { id, class: 'wsview' + (W.view === v ? ' on' : ''), onclick: () => { if (W.view === v) return; flush(); W.view = v; W.node = null; W.sel = null; resetGuided(); draw(); } }, label);
+  const kids = [tab('wsBuild', '🏗️ Build scene', 'build'), tab('wsMap', `🗺️ Map (${W.list.length})`, 'map'), h('span', { class: 'sep' })];
+  if (W.view === 'build') kids.push(
+    h('input', { id: 'wsName', maxlength: 40, value: cur.name, title: 'Name of this scene', oninput: (ev) => { cur.name = ev.target.value || 'Untitled scene'; if (onMap()) saveSoon(); } }),
+    onMap() ? h('span', { class: 'dim small', id: 'wsSaved' }, '✓ On the map — saves itself') : h('button', { class: 'primary', id: 'wsAdd', title: 'Keep this scene: put it on the map', onclick: () => addToMap() }, '💾 Add scene to map'),
+    h('span', { class: 'grow' }),
+    h('button', { title: 'Undo (Ctrl+Z)', disabled: W.hist.length < 2, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
+    h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.redo.length, id: 'wsRedo', onclick: () => undo(1) }, '↷ Redo'),
+    h('button', { class: W.walls ? 'on' : '', title: 'Mark walls and solid things in red', onclick: () => { W.walls = !W.walls; draw(); } }, '▦ Blocks'),
+    h('button', { id: 'wsNew', title: 'Start a new, empty scene', onclick: () => build({ id: rid(), name: newName(), scene: blankScene() }) }, '＋ New'),
+    W.c.stage && h('button', { id: 'wsFromStage', title: 'Start from a copy of what is on stage right now', onclick: () => build({ id: rid(), name: newName(), scene: W.c.stage() }) }, '🎬 From stage'),
+    h('button', { class: can ? 'primary' : '', id: 'wsUse', disabled: !can, title: can ? 'Bring this scene on stage, in the step you are making' : 'You can do this during your own turn', onclick: () => useNow(cur) }, '▶ Use in story'));
+  else kids.push(
+    h('span', { class: 'dim small' }, 'Every scene you added. Drag to arrange.'), h('span', { class: 'grow' }),
+    h('button', { id: 'mapNew', onclick: () => build({ id: rid(), name: newName(), scene: blankScene() }) }, '＋ New scene'),
+    h('button', { disabled: !W.list.length, title: 'Save every scene on the map to a file, to use in another story', onclick: () => { const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify({ twofoldScenes: 1, scenes: library() })], { type: 'application/json' })), download: 'twofold-scenes.json' }); a.click(); } }, '⬇ Save to file'),
+    h('button', { title: 'Add the scenes from a file to this map', onclick: importFile }, '⬆ Load from file'));
+  kids.push(h('button', { id: 'wsClose', onclick: close }, 'Close'));
+  W.el.bar.replaceChildren(...kids.filter(Boolean));
 }
 
-/* ---------- the map: how prepared scenes connect through exits ---------- */
+/* ---------- the map ---------- */
 const linked = (a, b) => a.scene.exits.some((x) => x.to === b.id);
 function connect(a, b) {
   const dx = b.mx - a.mx, dy = b.my - a.my, side = Math.abs(dx) >= Math.abs(dy);
@@ -131,7 +167,7 @@ function connect(a, b) {
   if (!linked(b, a)) b.scene.exits.push({ id: rid(), to: a.id, label: a.name, locked: false, ...at(side ? dx <= 0 : dy <= 0) });
 }
 function drawMap() {
-  const m = W.el.map, list = docs();
+  const m = W.el.map, list = W.list;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none');
   for (const a of list) for (const b of list) if (a.id < b.id && (linked(a, b) || linked(b, a))) {
@@ -139,47 +175,59 @@ function drawMap() {
     ln.setAttribute('x1', a.mx * 100); ln.setAttribute('y1', a.my * 100); ln.setAttribute('x2', b.mx * 100); ln.setAttribute('y2', b.my * 100); ln.setAttribute('class', locked ? 'locked' : '');
     svg.append(ln);
   }
+  const here = W.c.sceneId && W.c.sceneId();
   m.replaceChildren(svg, ...list.map((d) => {
-    const n = h('button', { class: 'node' + (W.node === d.id ? ' on' : ''), style: `left:${d.mx * 100}%;top:${d.my * 100}%` }, h('i', { style: `background:${backdropCss(W.c.code, d.scene.backdrop)}` }), h('b', {}, d.name));
+    const n = h('button', { class: 'node' + (W.node === d.id ? ' on' : '') + (d.id === here ? ' here' : ''), style: `left:${d.mx * 100}%;top:${d.my * 100}%`, title: d.id === here ? 'The story is here now' : '' },
+      h('i', { style: `background:${backdropCss(W.c.code, d.scene.backdrop)}` }), h('b', {}, d.name), d.id === here && h('small', {}, '📍 the story is here'));
     n.dataset.node = d.id;
+    n.addEventListener('dblclick', () => build(d));
     n.addEventListener('pointerdown', (ev) => {
       ev.preventDefault(); n.setPointerCapture(ev.pointerId);
-      const r = m.getBoundingClientRect(); let moved = false;
-      const mv = (e2) => { moved = true; d.mx = clamp((e2.clientX - r.left) / r.width, 0.06, 0.94); d.my = clamp((e2.clientY - r.top) / r.height, 0.08, 0.92); n.style.left = d.mx * 100 + '%'; n.style.top = d.my * 100 + '%'; };
+      const r = m.getBoundingClientRect(), x0 = ev.clientX, y0 = ev.clientY; let moved = false;
+      const mv = (e2) => { if (!moved && Math.hypot(e2.clientX - x0, e2.clientY - y0) < 5) return; moved = true; d.mx = clamp((e2.clientX - r.left) / r.width, 0.06, 0.94); d.my = clamp((e2.clientY - r.top) / r.height, 0.08, 0.92); n.style.left = d.mx * 100 + '%'; n.style.top = d.my * 100 + '%'; };
       const end = () => {
         n.removeEventListener('pointermove', mv); n.removeEventListener('pointerup', end);
-        if (!moved) {                                       // a click: select, or connect to the one already selected
+        if (!moved) {                                       // a click: select; with "connect" switched on, join it to the selected one
           const from = list.find((x) => x.id === W.node);
-          if (from && from !== d) { connect(from, d); W.node = null; W.c.toast(`“${from.name}” and “${d.name}” are now connected`); } else W.node = W.node === d.id ? null : d.id;
+          if (W.linking && from && from !== d) { connect(from, d); W.linking = false; W.c.toast(`“${from.name}” and “${d.name}” are now connected`); } else W.node = W.node === d.id && !W.linking ? null : d.id;
         }
-        W.c.save(library()); draw();
+        saveNow(); draw();
       };
       n.addEventListener('pointermove', mv); n.addEventListener('pointerup', end);
     });
     return n;
-  }));
+  }), !list.length && h('div', { class: 'mapempty' }, h('h3', {}, 'The map is empty'), h('p', { class: 'dim' }, 'Build a scene, then press “💾 Add scene to map”. It will wait here until the story needs it.'),
+    h('button', { class: 'primary', onclick: () => { W.view = 'build'; draw(); } }, '🏗️ Go to Build scene')));
 }
 function mapTools() {
-  const list = docs(), kids = [], hint = document.querySelector('#wsHint');
-  hint.textContent = 'Click one scene, then another, to connect them. Drag scenes to arrange the map.';
+  const list = W.list, kids = [], hint = document.querySelector('#wsHint'), adv = W.c.adventure;
+  hint.textContent = W.linking ? 'Now click the scene to connect it to.' : 'Click a scene to select it, double-click to open it in Build scene, drag to arrange.';
   const pairs = [];
   for (const a of list) for (const b of list) if (a.id < b.id && (linked(a, b) || linked(b, a))) pairs.push([a, b]);
   const both = (a, b) => [...a.scene.exits.filter((x) => x.to === b.id), ...b.scene.exits.filter((x) => x.to === a.id)];
-  const node = list.find((x) => x.id === W.node);
-  kids.push(h('div', { class: 'card' }, h('h3', {}, '🗺️ The map of this adventure'),
-    h('p', { class: 'dim small' }, 'Each connection puts an exit in both scenes, leading to the other. When the Player walks to an exit and you agree, the story travels to that scene.'),
-    node ? h('div', { class: 'col' }, h('b', {}, `“${node.name}” is selected — click another scene to connect them`), h('div', { class: 'row' }, h('button', { class: 'grow', id: 'mapEdit', onclick: () => pick(node) }, '✏️ Edit this scene'), W.c.use && h('button', { class: 'grow primary', id: 'mapUse', onclick: () => { flush(); W.c.use(node); close(); } }, '▶ Go there now'))) : h('p', { class: 'dim small' }, 'Nothing selected.')));
-  kids.push(h('div', { class: 'card' }, h('h3', {}, `Connections (${pairs.length})`),
+  const node = list.find((x) => x.id === W.node), big = (id, label, sub, fn, cls = '') => h('button', { id, class: 'mapact ' + cls, onclick: fn }, h('b', {}, label), h('small', {}, sub));
+  if (node) kids.push(h('div', { class: 'card' },
+    h('input', { id: 'mapName', maxlength: 40, value: node.name, title: 'Rename this scene', oninput: (ev) => { node.name = ev.target.value || 'Untitled scene'; saveSoon(); const b = W.el.map.querySelector(`[data-node="${node.id}"] b`); if (b) b.textContent = node.name; } }),
+    h('small', { class: 'dim' }, `${node.scene.entities.length - 1} things${node.scene.level ? ' · has a level' : ''}${node.scene.exits.length ? ` · ${node.scene.exits.length} exits` : ''}`),
+    big('mapEdit', '✏️ Edit', 'Open it in Build scene', () => build(node)),
+    big('mapDup', '⧉ Duplicate', 'A copy to change', () => { W.node = duplicate(node).id; draw(); }),
+    adv && big('mapLink', W.linking ? '🔗 Click the other scene…' : '🔗 Connect to another scene', 'Puts an exit in both scenes', () => { W.linking = !W.linking; draw(); }, W.linking ? 'on' : ''),
+    big('mapUse', '▶ Go there in the story now', W.c.use ? 'In the step you are making' : 'Possible during your own turn', () => useNow(node), W.c.use ? 'primary' : 'off'),
+    big('mapDel', '🗑 Delete', 'Remove it from the map', () => remove(node), 'danger')));
+  else kids.push(h('div', { class: 'card' }, h('h3', {}, '🗺️ The map'), h('p', { class: 'dim small' }, 'Every scene you added lives here. Select one to edit, duplicate, connect or delete it — or to move the story there.'),
+    list.length ? h('div', { class: 'col' }, list.map((d) => h('button', { class: 'wsdoc', onclick: () => { W.node = d.id; draw(); } }, h('i', { style: `background:${backdropCss(W.c.code, d.scene.backdrop)}` }), h('span', {}, h('b', {}, d.name), h('small', {}, `${d.scene.entities.length - 1} things${d.scene.level ? ' · level' : ''}`))))) : null));
+  if (adv) kids.push(h('div', { class: 'card' }, h('h3', {}, `Connections (${pairs.length})`),
+    h('p', { class: 'dim small' }, 'A connection puts an exit in both scenes. When the Player walks to an exit and you agree, the story travels there.'),
     pairs.length ? pairs.map(([a, b]) => { const ex = both(a, b), locked = ex.some((x) => x.locked);
       return h('div', { class: 'row conn' }, h('span', { class: 'grow' }, `${a.name} ⇄ ${b.name}`),
-        h('button', { class: locked ? 'on' : '', title: 'Lock or unlock this way', onclick: () => { for (const x of ex) x.locked = !locked; W.c.save(library()); draw(); } }, locked ? '🔒 Locked' : '🔓 Open'),
-        h('button', { class: 'danger', title: 'Remove the connection', onclick: () => { a.scene.exits = a.scene.exits.filter((x) => x.to !== b.id); b.scene.exits = b.scene.exits.filter((x) => x.to !== a.id); W.c.save(library()); draw(); } }, '✕')); })
+        h('button', { class: locked ? 'on' : '', title: 'Lock or unlock this way', onclick: () => { for (const x of ex) x.locked = !locked; saveNow(); draw(); } }, locked ? '🔒 Locked' : '🔓 Open'),
+        h('button', { class: 'danger', title: 'Remove the connection', onclick: () => { a.scene.exits = a.scene.exits.filter((x) => x.to !== b.id); b.scene.exits = b.scene.exits.filter((x) => x.to !== a.id); saveNow(); draw(); } }, '✕')); })
       : h('p', { class: 'dim small' }, 'No connections yet.')));
-  W.el.tools.replaceChildren(...kids);
+  W.el.tools.replaceChildren(...kids.filter(Boolean));
 }
 
 function drawTools() {
-  if (W.map) return mapTools();
+  if (W.view === 'map') return mapTools();
   const sc = W.cur.scene, t = W.el.tools, kids = [];
   kids.push(h('div', { class: 'tabs' }, [['tiles', '🧱', 'Level tiles'], ['things', '🎭', 'Things & scene']].map(([id, icon, label]) =>
     h('button', { 'data-wtab': id, class: W.tab === id ? 'on' : '', onclick: () => { W.tab = id; W.sel = null; resetGuided(); draw(); } }, h('span', {}, icon), h('small', {}, label)))));
@@ -212,7 +260,6 @@ function drawTools() {
     // the same question flow and the same tools as during a turn, working on this scene
     hint.textContent = 'Click anything on the stage to change it; drag it to move it. The glowing hero marks where the Player starts.';
     const box = h('div', { class: 'col wsg' });
-    if (!W.cur.live && !G.path.length) box.append(h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Name'), h('input', { id: 'wsName', maxlength: 40, value: W.cur.name, oninput: (ev) => { W.cur.name = ev.target.value || 'Untitled scene'; changed(); drawBar(); }, onchange: drawList })));
     const sub = h('div', { class: 'col' });
     buildGuided(sub, {
       mode: 'workshop', get draft() { return W.cur.scene; }, code: W.c.code, pen: {},

@@ -72,7 +72,7 @@ choice → narrower choices.
 | 💥 Moment and sound | Shake, flash, confetti; 50 sound effects in five groups (action, magic, places, nature, people & spooks) — click one to hear it. |
 | 🌄 Change the scene | A prepared scene, backdrop, weather, music, a title card, a random scene, story ideas. |
 | ✏️ Draw on the stage | Freehand lines that draw themselves in playback. |
-| 🛠️ Scene workshop | Levels and prepared scenes, see below. |
+| 🏗️ Build scene / 🗺️ Map | Make places and keep them on the map, see below. |
 | 🎒 The Player's sheet | Items, stats, a dice roll. |
 | ❓ Offer choices | Up to three options for the Player. |
 | 🤖 Tell Claude | Describe the step in words; Claude stages it (needs `ANTHROPIC_API_KEY` and `npm install`; `CLAUDE_MODEL`, `CLAUDE_MAX_PER_STORY`; see `director-ai.js`). |
@@ -93,33 +93,35 @@ dragging moves it.
 | 🎥 Camera | Zoom 1.5×, 2× or 3× onto a thing or a corner; the camera moves there when the step plays. The Director sees the framing as a yellow frame. |
 | ➡️ Enter | "Move or animate → Enter from the left/right" brings a character in from outside the screen. |
 | ⭐ Points | A layer; the Director awards points with a reason, shown to the Player as the step plays. |
-| 🚪 Exits and the map | Scenes can have exits that lead to other prepared scenes, locked or open. The workshop's 🗺️ Map connects scenes with a click. When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story continues in that scene, with the hero arriving at the way back. |
+| 🚪 Exits and the map | Scenes can have exits that lead to other prepared scenes, locked or open. The 🗺️ Map connects scenes. When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story continues in that scene, with the hero arriving at the way back. |
 | ⚔️ Battle | The Director picks enemies and their health. The Player then chooses Attack, Defend or Flee each turn. The battle tools open by themselves on the Director's turn: one click on a damage number resolves the Player's blow, another the enemy's reply (strike, sword swing, shoot, magic, roar), each as its own step with animation, damage number, sound and health change. The battle ends by itself when the last enemy falls. |
 
 Speech bubbles belong to the step they were said in: a new step starts without them,
 and no line survives into the other side's turn.
 
-### The scene workshop
+### Build scene and the Map
 
-"Scene workshop" opens a full-screen editor that is separate from the turn. The
-Director can use it during setup, during their own turn, and while waiting for the
-Player.
+Places are made in one spot only, apart from the turn. The Director can open it during
+setup, during their own turn, and while waiting for the Player.
 
-- **Level:** a 16 × 12 tile grid over the backdrop, painted with brush (1–3 tiles
-  wide), box, fill, erase and pick tools, from 412 tiles in nine sets (outdoor, water
-  and lava, cliffs, dungeon, house and castle, cave and mine, snow and desert, sci-fi).
-  Every tile is either **floor** (the hero can
-  walk on it) or **wall** (it cannot). Undo/redo with Ctrl+Z / Ctrl+Y.
-- **Things & scene:** the same question flow and the same tools as during a turn
-  (add something, click a thing to change it, layers, tie, active object, solid, copy,
-  backdrop, weather, music, exits), working on the scene being edited. The hero marker
-  sets where the Player starts. Ctrl+D copies the selected thing.
-- **Prepared scenes:** any number of scenes can be built in advance. They are saved
-  with the story, can be exported to a file and imported into another story, and are
-  brought on stage during a turn with "Change the scene → A prepared scene" (or
-  "Use this scene in the story now" in the workshop).
-- On the Director's own turn the list also contains the scene that is on stage, so
-  the same editor changes the live level.
+**🏗️ Build scene** has one scene on the bench:
+
+- **Level tiles:** a 16 × 12 tile grid over the backdrop, painted with brush (1–3 tiles
+  wide), box, fill, erase and pick tools, from 412 tiles in nine sets. Every tile is
+  either **floor** (the hero can walk on it) or **wall** (it cannot).
+- **Things & scene:** add things, make them solid or **active** (a name and verbs the
+  Player can click), tie them together, set layers; backdrop, weather, music and
+  **exits**. The hero marker sets where the Player starts. These construction tools are
+  not in the turn menu any more — a turn is for telling the story.
+- **💾 Add scene to map** keeps the scene. From then on it saves itself.
+- **▶ Use in story** brings the scene on stage in the step being made (and adds it to
+  the map if it was not there). **🎬 From stage** starts from a copy of what is on stage
+  now; **＋ New** starts empty. Undo/redo with Ctrl+Z / Ctrl+Y, Ctrl+D copies a thing.
+
+**🗺️ Map** shows every scene that was added. Drag to arrange; select one to rename,
+edit (double-click), duplicate (Ctrl+D), delete, connect to another scene (adventure:
+an exit in both, lockable) or to go there in the story. The whole map can be saved to a
+file and loaded into another story.
 
 Where a level exists the hero can only stand on floor tiles, and solid things block
 it; the server enforces the same rule.
@@ -204,7 +206,7 @@ commands to the hero, and remembers the game across reloads. `public/rpg.js` is 
 | `bots.js` | AI partners for solo play (scripted; language-model hook) |
 | `director-ai.js` | "Tell Claude": the Claude call and the stage operations it may use |
 | `public/guided.js` | The Director's panel: step bar and the question flow |
-| `public/workshop.js` | The scene workshop: level editor and prepared scenes |
+| `public/workshop.js` | Build scene (level and scene editor) and the Map |
 | `public/app.js` | The client UI |
 | `public/stage.js` | Draws a scene; plays a turn back as a cut scene |
 | `public/catalog.js` | Built-in sprite and backdrop library, asset ids, art packs |

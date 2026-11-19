@@ -470,3 +470,17 @@ button.foe.on { outline: 2px solid var(--accent); }
 .rkeys { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
 kbd { display: inline-block; min-width: 22px; padding: 1px 6px; margin-right: 2px; text-align: center; border: 1px solid #5a5570; border-bottom-width: 3px; border-radius: 4px; background: #2b2935; font: 600 12px ui-monospace, monospace; }
 @media (max-width: 900px) { #rpg { flex-direction: column; overflow-y: auto; } #rpgSide { width: auto; border-left: 0; } #rpgWrap { min-height: 60vw; } .typepick { grid-template-columns: 1fr; } }
+
+/* ---- build scene / map ---- */
+#workshop > header { flex-wrap: wrap; }
+#workshop .wsview { font-weight: 700; padding: 6px 14px; }
+#workshop .wsview.on { background: #3a3350; color: var(--text); border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+#workshop header .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+#workshop header #wsName { width: 170px; font-weight: 600; }
+#workshop > header { gap: 6px; } #workshop > header button { padding-left: 9px; padding-right: 9px; }
+.wsmap .node.here { box-shadow: 0 0 0 3px #4fc47f; } .wsmap .node small { display: block; font-size: 10px; color: #9be2b4; }
+.wsmap .mapempty { position: absolute; inset: 0; margin: auto; width: 360px; height: max-content; text-align: center; }
+.mapact { display: block; width: 100%; text-align: left; padding: 7px 10px; margin-top: 5px; } .mapact small { display: block; font-size: 11px; opacity: .75; font-weight: 400; } .mapact.off { opacity: .6; }
+.wstools #mapName { width: 100%; font-weight: 700; font-size: 15px; }
+.pointmark { position: absolute; transform: translate(-90%, -50%); font-size: 26px; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .6)); animation: pointbob .7s ease-in-out infinite alternate; z-index: 3; }
+@keyframes pointbob { to { transform: translate(-115%, -50%); } }

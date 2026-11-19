@@ -24,7 +24,7 @@ export function norm(sc) {
   sc.sheet ||= { inv: [], stats: [] }; sc.sheet.inv ||= []; sc.sheet.stats ||= [];
   if (sc.level === undefined) sc.level = null;
   sc.exits ||= []; sc.floats ||= []; sc.sceneId ||= ''; sc.travel ||= ''; sc.verb ||= '';
-  for (const k of ['ask', 'answer', 'exit', 'cam', 'award', 'battle']) if (sc[k] === undefined) sc[k] = null;
+  for (const k of ['ask', 'answer', 'exit', 'cam', 'award', 'battle', 'point']) if (sc[k] === undefined) sc[k] = null;
   if (sc.sheet.points == null) sc.sheet.points = 0;
   for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; e.solid = !!e.solid; e.once ||= ''; e.temp = !!e.temp; e.layer ||= 0; if (e.active === undefined) e.active = null; if (e.tie === undefined) e.tie = null; if (e.hp === undefined) { e.hp = null; e.maxHp = null; } }
   return sc;
@@ -54,7 +54,9 @@ export function actionText(scene, names, pendingRoll) {
   if (a && a.kind === 'discard') bits.push('discards ' + assetLabel(a.asset, a.name));
   const ex = scene.exit && (scene.exits || []).find((x) => x.id === scene.exit);
   if (ex) bits.push('heads for ' + ex.label);
-  if (scene.action) bits.push(scene.action);
+  const pt = scene.point, pe = pt && pt.id && scene.entities.find((e) => e.id === pt.id);          // the action points at something on the stage
+  if (pt) bits.push(`${scene.action || 'Look at'} 👉 ${pe ? (pe.active ? pe.active.name : assetLabel(pe.asset)) : 'that spot'}`);
+  else if (scene.action) bits.push(scene.action);
   if (scene.roll && scene.roll.by === 'player') bits.push(`🎲 rolls ${scene.roll.value} (d${scene.roll.sides})${a && a.kind === 'roll' && a.dc ? (scene.roll.value >= a.dc ? ` — success (needed ${a.dc})` : ` — fails (needed ${a.dc})`) : ''}`);
   else if (pendingRoll) bits.push(`🎲 will roll a d${pendingRoll}`);
   return bits.length ? `✋ ${names.player}: ${bits.join(' · ')}` : '';
@@ -189,11 +191,13 @@ export function renderStage(root, scene, o = {}) {
 
   // exits to other scenes, and places the Director marked for the Player to choose from
   const places = scene.ask && scene.ask.kind === 'place' ? scene.ask.places : [];
-  const mkey = JSON.stringify([scene.exits, places, scene.exit, o.pickPlace]);
+  const ptSpot = scene.point && scene.point.id == null ? scene.point : null;
+  const mkey = JSON.stringify([scene.exits, places, scene.exit, o.pickPlace, ptSpot]);
   if (marks._key !== mkey) {
     marks._key = mkey;
     marks.replaceChildren(
       ...scene.exits.map((x) => { const d = h('div', { class: 'exit' + (x.locked ? ' locked' : '') + (scene.exit === x.id ? ' on' : ''), style: `left:${x.x * 100}%;top:${x.y * 100}%` }, (x.locked ? '🔒 ' : '🚪 ') + x.label); d.dataset.exit = x.id; return d; }),
+      ...(ptSpot ? [h('div', { class: 'pointmark', style: `left:${ptSpot.x * 100}%;top:${ptSpot.y * 100}%` }, '👉')] : []),
       ...places.map((pl, i) => { const d = h('div', { class: 'place' + (o.pickPlace === i ? ' on' : ''), style: `left:${pl.x * 100}%;top:${pl.y * 100}%` }, '📍 ' + pl.label); d.dataset.place = i; return d; }));
   }
 
@@ -227,7 +231,7 @@ export function renderStage(root, scene, o = {}) {
     if (!el) { el = h('div', { class: 'ent' }, h('div', { class: 'fxw' }), h('span', { class: 'emote' }), h('div', { class: 'hp' }, h('i', {})), h('span', { class: 'float' })); el.dataset.id = e.id; root._els.set(e.id, el); ents.append(el); }
     const [fxw, emote, hp, fl] = el.children, at = spot(e);
     if (el._asset !== e.asset) { el._asset = e.asset; fxw.replaceChildren(glyphNode(code, e.asset, 'glyph')); }
-    el.className = 'ent' + (e.id === scene.heroId ? ' hero' : '') + (e.id === o.selId ? ' sel' : '') + (e.id === scene.target || (o.pickId && e.id === o.pickId) ? ' target' : '')
+    el.className = 'ent' + (e.id === scene.heroId ? ' hero' : '') + (e.id === o.selId ? ' sel' : '') + (e.id === scene.target || (scene.point && e.id === scene.point.id) || (o.pickId && e.id === o.pickId) ? ' target' : '')
       + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked || (at.held && at.held.tracked) ? ' tracked' : '') + (at.held && (at.held.gone || at.held.fresh) ? ' gone' : '') + (o.showKinds && e.solid ? ' solid' : '') + (e.active ? ' active' : '') + (o.hot && o.hot.has(e.id) ? ' hot' : '')
       + (o.speaker === e.id ? ' speaking' : '') + (e.walk && !e.fx ? ' walk' : '') + (e.pop ? ' popin' : '');
     el.dataset.name = e.active ? e.active.name : '';
@@ -339,7 +343,7 @@ export function playCut(root, before, after, o, done) {
   }
   for (const p of prev.values()) if (!fin.has(p.id)) { frame.entities.push({ ...p, say: '', emote: '' }); moved = true; }
   const sameNarr = !!before && before.narration === after.narration;
-  Object.assign(frame, { narration: sameNarr ? after.narration : '', action: '', target: null, use: null, roll: null, drawing: after.drawing.filter((d) => !newStrokes.has(d.id)) });
+  Object.assign(frame, { narration: sameNarr ? after.narration : '', action: '', target: null, point: null, use: null, roll: null, drawing: after.drawing.filter((d) => !newStrokes.has(d.id)) });
   if (before) { frame.backdrop = before.backdrop; frame.weather = before.weather; frame.cam = before.cam; frame.exits = before.exits; frame.level = before.level; }
   frame.exit = null; frame.answer = null; frame.verb = '';
 
@@ -387,7 +391,7 @@ export function playCut(root, before, after, o, done) {
     t += Math.min(7500, e.say.length * 24 + Math.max(1100, 600 + 28 * e.say.length));
   }
   if (sayers.length) at(t, () => { view.speaker = null; view.pop = null; frame.cam = after.cam; });
-  if (o.by === 'player' && (after.action || after.target || after.use || after.exit || after.answer)) { at(t, () => { view.pop = null; frame.action = after.action; frame.target = after.target; frame.use = after.use; frame.exit = after.exit; frame.answer = after.answer; frame.verb = after.verb; }); t += 1300; }
+  if (o.by === 'player' && (after.action || after.target || after.point || after.use || after.exit || after.answer)) { at(t, () => { view.pop = null; frame.action = after.action; frame.target = after.target; frame.point = after.point; frame.use = after.use; frame.exit = after.exit; frame.answer = after.answer; frame.verb = after.verb; }); t += 1300; }
   if (after.roll && after.roll.by === o.by) {
     at(t, () => { view.dice = { ...after.roll, rolling: true }; if (o.sfx) o.sfx('dice'); });
     at(t + 700, () => { view.dice = { ...after.roll }; });

@@ -48,6 +48,7 @@ let es = null, lastMsg = 0, uiKey = '';
 let cut = null;                              // a cut scene currently playing on the main stage
 let rec = false;                             // Director: dragging records a path
 let drawOn = false;                          // Director: dragging draws
+let pointMode = false;                       // Player (adventure): the next click on the stage is what the written action points at
 let walkMode = false;                        // Player: the next click on the stage is where the hero walks
 let walkAnim = 0;                            // Player: animation frame of a walk being shown
 const pen = { c: '#ffffff', w: 4 };
@@ -104,7 +105,7 @@ function onState(s) {
   localDeadline = s.remainingMs != null ? performance.now() + s.remainingMs : 0;
   const newTurn = !prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended;
   if (newTurn) {
-    submitting = false; selId = null; selInv = null; rec = false; drawOn = false; walkMode = false; stopWalkAnim(); resetGuided();
+    submitting = false; selId = null; selInv = null; rec = false; drawOn = false; walkMode = false; pointMode = false; stopWalkAnim(); resetGuided();
     initDraft();
     past = []; noteChange();
     if (directing()) guidedStart(draft);
@@ -137,7 +138,7 @@ function freshDraft() {
     if (d.roll && d.roll.by === 'director') d.roll = null;
   } else {
     const me = hero(d); if (me) me.say = '';
-    Object.assign(d, { action: '', target: null, use: null, heroTrack: null, walked: false, reply: null, act: null, exit: null, verb: '', answer: null });
+    Object.assign(d, { action: '', target: null, point: null, use: null, heroTrack: null, walked: false, reply: null, act: null, exit: null, verb: '', answer: null });
     if (d.roll && d.roll.by === 'player') d.roll = null;
   }
   d.rollWant = 0;
@@ -176,7 +177,7 @@ function rebuild() { uiKey = ''; changed(); }
  * stood at the end of each); the draft itself is the step being worked on. Everything done within
  * one step plays at the same time; the next step plays after it. */
 const ONE_STEP = { tracks: [], burst: '', sfx: '', card: '', travel: '', award: null, floats: [] };   // belongs to the step that made it
-const PLAYERS = { action: '', target: null, use: null, roll: null, answer: null, verb: '', exit: null };    // the Player's last turn: shown while editing, never sent back
+const PLAYERS = { action: '', target: null, point: null, use: null, roll: null, answer: null, verb: '', exit: null };    // the Player's last turn: shown while editing, never sent back
 /** What a new step inherits from the one before: speech and one-off animations are over, short-lived effects are gone. */
 const carry = (d) => { d.entities = d.entities.filter((e) => !e.temp); for (const e of d.entities) { e.say = ''; e.once = ''; } Object.assign(d, clone(ONE_STEP)); return d; };
 const asFrame = (d) => { const f = { ...clone(d), ...PLAYERS, steps: [] }; delete f.rollWant; delete f.said; delete f.heroTrack; return f; };
@@ -217,7 +218,7 @@ async function submit() {
   submitting = true; render(); audio.sfx('send');
   const turn = S.turn, me = hero(draft), roll = draft.rollWant || 0;
   const body = S.you === 'director' ? { turn, scene: finalScene(), roll }
-    : { answer: draft.reply, act: draft.act, exit: draft.exit, turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, use: draft.use, roll, track: draft.heroTrack };
+    : { answer: draft.reply, act: draft.act, exit: draft.exit, turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, point: draft.point, use: draft.use, roll, track: draft.heroTrack };
   try { await act('submit', body, 6); } catch (e) {
     if (S && S.turn === turn) { submitting = false; toast(e.message); render(); }
   }
@@ -305,6 +306,12 @@ stage.addEventListener('pointerdown', (ev) => {
   drag = null;
   if (S.you === 'player') {
     const me = hero(draft);
+    if (pointMode) {                                               // what the written action is about: a thing, or a spot
+      pointMode = false;
+      draft.point = hit && hit !== me ? { id: hit.id } : { x: r3(p.x), y: r3(p.y) };
+      if (!draft.action.trim()) draft.action = 'Look at';
+      return rebuild();
+    }
     if (S.rules.player === 'tell') return toast('In this story you write what you want to do, and the Director makes it happen');
     if (!me) return toast('You have no character on stage right now — speak or act instead');
     hideVerbs();
@@ -482,7 +489,7 @@ function render() {
   renderChrome();
   renderSheet();
   const key = [S.you, S.turn, S.whose, S.ended, S.joined.player, S.joined.director, submitting, selId, selInv, S.assets.length, S.settings.turnSeconds,
-    JSON.stringify(S.rules), rec, drawOn, walkMode, myTurn() && draft.walked, !!cut, myTurn() && draft.target, myTurn() && draft.use, myTurn() && JSON.stringify([draft.reply, draft.act, draft.exit]), myTurn() && draft.steps.length, guidedKey()].join('|');
+    JSON.stringify(S.rules), rec, drawOn, walkMode, myTurn() && draft.walked, !!cut, myTurn() && draft.target, myTurn() && JSON.stringify(draft.point), pointMode, myTurn() && draft.use, myTurn() && JSON.stringify([draft.reply, draft.act, draft.exit]), myTurn() && draft.steps.length, guidedKey()].join('|');
   if (workshopOpen()) return;                              // the workshop has the tools while it is open
   if (key !== uiKey) { uiKey = key; buildPanel(); buildFoot(); } else refreshMarks();
   tick();
@@ -586,7 +593,7 @@ function buildPanel() {
           : [`${S.names.player} is making a move…`, 'When they finish you can change anything: the cast, the place, the music, what everybody says.'];
     if (S.info.text && S.you !== 'director') p.append(h('div', { class: 'card', id: 'howto' }, h('h3', {}, '📜 ' + (S.info.title || 'How to play')), h('p', { class: 'pre' }, S.info.text)));
     if (tips) p.append(h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
-    if (S.you === 'director') p.append(h('button', { id: 'wsOpen', onclick: showWorkshop }, '🛠️ Scene workshop — prepare scenes while you wait'));
+    if (S.you === 'director') p.append(h('div', { class: 'row' }, h('button', { id: 'wsOpen', class: 'grow', onclick: () => showWorkshop() }, '🏗️ Build scene — while you wait'), h('button', { class: 'grow', onclick: () => showWorkshop({ map: true }) }, '🗺️ Map')));
     const r = recap(S.scene); if (r) p.append(r);
     return;
   }
@@ -597,7 +604,7 @@ const guidedCtx = {
   get draft() { return draft; }, get S() { return S; }, get code() { return code; },
   pen, workshop: (o) => showWorkshop(o), useScene: (doc) => useScene(doc, false), travelTo: (id) => travelTo(id), rid,
   select(id) { selId = id || null; },
-  nextStep, resetStep, clearSteps, gotoStep, stepEmpty, canUndo, undo, saveAsScene: () => saveAsScene(),
+  nextStep, resetStep, clearSteps, gotoStep, stepEmpty, canUndo, undo,
   cutting: () => !!cut, preview: () => previewCut(), mods: () => mods(), trackEnd: (id) => trackEnd(id), dropTrack: (id) => dropTrack(id),
   toast, act, audio, rebuild: () => rebuild(), changed: () => changed(), changedQuiet: () => changedQuiet(),
   addEntity: (a) => addEntity(a), removeEntity: (e) => removeEntity(e), giveToPlayer: (e) => giveToPlayer(e), autoTrack: (e, st) => autoTrack(e, st),
@@ -614,7 +621,9 @@ function useScene(doc, live) {
   const cameFrom = draft.sceneId;
   Object.assign(draft, { backdrop: src.backdrop, mood: src.mood, weather: src.weather, level: clone(src.level), tracks: [], exits: clone(src.exits || []), sceneId: live ? draft.sceneId : doc.id, cam: null });
   if (!live) draft.drawing = [];
-  draft.entities = src.entities.filter((e) => e.id !== src.heroId).map((e) => ({ ...clone(e), id: live ? e.id : rid(), say: live ? e.say : '' }));
+  const ids = new Map(src.entities.map((e) => [e.id, e.id === src.heroId && me ? me.id : live ? e.id : rid()]));        // ties keep pointing at the right thing
+  draft.entities = src.entities.filter((e) => e.id !== src.heroId && !(me && !live && e.tie && e.tie.to === src.heroId))       // what the hero holds comes from the hero on stage
+    .map((e) => ({ ...clone(e), id: ids.get(e.id), say: live ? e.say : '', tie: e.tie && ids.has(e.tie.to) ? { ...e.tie, to: ids.get(e.tie.to) } : null }));
   if (me) {
     const door = !live && cameFrom && draft.exits.find((x) => x.to === cameFrom);   // arrive at the way back to where they came from
     if (door) { me.x = clamp(door.x + (door.x < 0.5 ? 0.08 : -0.08), 0.04, 0.96); me.y = clamp(door.y + (door.y < 0.3 ? 0.14 : 0.05), 0.1, 1); } else if (at) { me.x = at.x; me.y = at.y; }
@@ -632,26 +641,21 @@ function travelTo(sceneId) {
   return doc;
 }
 /** Keep the scene on stage as a prepared scene, to come back to or to connect on the map. */
-function saveAsScene() {
-  const name = (prompt('Name for this scene', `Scene ${(S.scenes || []).length + 1}`) || '').trim().slice(0, 40);
-  if (!name) return;
+/** A copy of what is on stage, ready for the bench in Build scene: the place and its things, without this turn's lines and moments. */
+function stageCopy() {
   const scene = norm({ ...clone(draft), ...clone(ONE_STEP), ...PLAYERS, steps: [], narration: '', choices: [], ask: null, cam: null, battle: null, said: undefined, rollWant: undefined });
   for (const e of scene.entities) { e.say = ''; e.once = ''; }
-  const doc = { id: rid(), name, mx: 0.5, my: 0.5, scene };
-  S.scenes = [...(S.scenes || []), doc];
-  if (!draft.sceneId) draft.sceneId = doc.id;                 // the stage now "is" that scene on the map
-  act('saveScenes', { scenes: S.scenes }, 3).then(() => toast(`Saved “${name}” to your prepared scenes`), (e) => toast(e.message));
-  rebuild();
+  return scene;
 }
 function showWorkshop(o = {}) {
   const can = directing();
-  const live = can ? { id: 'live', name: 'The scene on stage now', live: true, scene: norm({ ...clone(draft), steps: [], tracks: [], said: undefined }) } : null;
-  $('#panel').replaceChildren(); resetGuided();              // the same tools now work on the workshop's scene
+  $('#panel').replaceChildren(); resetGuided();              // the same tools now work on the scene being built
   openWorkshop({
-    code, names: S.names, scenes: clone(S.scenes || []), live, blankHero, toast, audio, adventure: S.rules.type === 'adventure', map: !!o.map,
+    code, names: S.names, scenes: clone(S.scenes || []), blankHero, toast, audio, adventure: S.rules.type === 'adventure', map: !!o.map,
     rules: S.rules, assets: S.assets, maker: (k, f) => maker(k, f),
+    stage: can ? stageCopy : null, sceneId: () => (can ? draft.sceneId : S.scene.sceneId),
     save: (scenes) => { S.scenes = clone(scenes); return act('saveScenes', { scenes }, 3).catch((e) => toast(e.message)); },
-    use: can ? (doc) => useScene(doc, !!doc.live) : null,
+    use: can ? (doc) => useScene(doc, false) : null,
     closed: () => { resetGuided(); if (directing()) guidedStart(draft); uiKey = ''; render(); },
   });
 }
@@ -734,8 +738,13 @@ function buildFoot() {
     const dice = mods().dice && h('button', { class: 'dice' + (draft.rollWant ? ' on' : ''), title: 'Roll a die with this turn', onclick: () => { draft.rollWant = draft.rollWant === 0 ? 6 : draft.rollWant === 6 ? 20 : 0; rebuild(); } }, draft.rollWant ? `🎲 d${draft.rollWant}` : '🎲');
     const walkBtn = mode !== 'tell' && me && (draft.walked
       ? h('button', { id: 'walkBtn', class: 'grow', onclick: undoWalk }, '↶ Take the walk back')
-      : h('button', { id: 'walkBtn', class: 'grow' + (walkMode ? ' recording' : ''), onclick: () => { walkMode = !walkMode; render(); } }, walkMode ? 'Click on the stage where to go…' : '🚶 Walk'));
+      : h('button', { id: 'walkBtn', class: 'grow' + (walkMode ? ' recording' : ''), onclick: () => { walkMode = !walkMode; pointMode = false; render(); } }, walkMode ? 'Click on the stage where to go…' : '🚶 Walk'));
     const end = (off) => h('div', { class: 'row' }, dice, h('button', { class: 'go primary grow', disabled: !!off, onclick: submit }, `End ${side}turn ▶`, tl()));
+    const pointed = () => { const pt = draft.point, e = pt && pt.id && draft.entities.find((x) => x.id === pt.id); return e ? (e.active ? e.active.name : assetLabel(e.asset)) : 'that spot'; };
+    const pointRow = () => S.rules.type === 'adventure' && h('div', { class: 'row', id: 'pointRow' },
+      h('button', { id: 'pointBtn', class: 'grow' + (pointMode ? ' recording' : draft.point ? ' on' : ''), title: 'Tie what you wrote to something on the stage', onclick: () => { pointMode = !pointMode; walkMode = false; render(); } },
+        pointMode ? 'Click a thing or a spot on the stage…' : draft.point ? `👉 ${pointed()} — click to point at something else` : '👉 Point at something on the stage'),
+      draft.point && h('button', { id: 'pointClear', title: 'Point at nothing', onclick: () => { draft.point = null; if (draft.action === 'Look at') draft.action = ''; rebuild(); } }, '✕'));
     const say = () => h('input', { placeholder: '💬 Say something…', maxlength: 160, value: me ? me.say : '', disabled: !me, enterkeyhint: 'next', oninput: (ev) => { me.say = ev.target.value; changedQuiet(); } });
     const pick = () => h('div', { class: 'chips wrap choices' }, draft.choices.map((c) => h('button', { class: draft.action === c ? 'on' : '', onclick: () => { draft.action = draft.action === c ? '' : c; rebuild(); } }, c)));
     const ask = draft.ask, rp = draft.reply || {};
@@ -760,7 +769,7 @@ function buildFoot() {
     if (mode === 'tell') {                               // narration: only words; the Director stages them
       const ta = h('textarea', { id: 'tellBox', rows: 3, maxlength: 300, placeholder: `✍️ What do you want to do? ${S.names.director} will make it happen.` }, draft.action);
       ta.addEventListener('input', () => { draft.action = ta.value; saveDraft(); });
-      f.append(ta, end());
+      f.append(ta, pointRow(), end());
     } else if (mode === 'limited' && draft.choices.length) {   // limited will: one of the Director's options
       f.append(h('div', { class: 'dim small' }, `Choose what you do — ${S.names.director} decided the options:`), pick(), asked, say(), walkBtn, end(!draft.choices.includes(draft.action) || must));
     } else if (mode === 'limited' && ask) {              // limited will: do exactly what was asked
@@ -771,7 +780,7 @@ function buildFoot() {
       if (me) f.append(h('div', { class: 'chips emotes' }, EMOTES.slice(0, 8).map((e) => h('button', { class: me.emote === e ? 'on' : '', 'aria-label': 'Emote ' + e, onclick: () => { me.emote = me.emote === e ? '' : e; rebuild(); } }, e))));
       f.append(say(),
         h('input', { placeholder: '✋ Do something… (“open the drawer”)', maxlength: 160, value: draft.action, enterkeyhint: 'done', oninput: (ev) => { draft.action = ev.target.value; changedQuiet(); } }),
-        walkBtn, end());
+        pointRow(), walkBtn, end());
     }
   }
 }
@@ -779,7 +788,7 @@ function buildFoot() {
 /* ---------- keyboard (computers) ---------- */
 document.addEventListener('keydown', (ev) => {
   if (!S || !code || !$('#story').hidden || workshopOpen()) return;
-  if (ev.key === 'Escape' && walkMode) { walkMode = false; return render(); }
+  if (ev.key === 'Escape' && (walkMode || pointMode)) { walkMode = pointMode = false; return render(); }
   const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName);
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !typing && directing()) { ev.preventDefault(); return undo(); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'd' && !typing && directing() && selId) { ev.preventDefault(); const src = draft.entities.find((e) => e.id === selId); if (src) { const k = { ...clone(src), id: rid(), x: clamp(src.x + 0.08, 0, 1), say: '' }; draft.entities.push(k); selId = k.id; guidedPick(k.id); rebuild(); } return; }

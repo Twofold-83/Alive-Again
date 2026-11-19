@@ -88,8 +88,8 @@ const { setup } = require('./lib');
 
     /* ---- the scene workshop: build a level, prepare scenes, use them ---- */
     await settings('[data-pmode=free]');
-    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
-    assert.match(await p.textContent('.wslist'), /in the story right now/);
+    await x.opt('Build scene'); await p.waitForSelector('#wsStage');
+    await p.waitForSelector('#wsAdd');                                               // a scene on the bench is not on the map until you add it
     const ws = await p.locator('#wsStage').boundingBox(), cw = ws.width / 16, ch = ws.height / 12;
     const cell = (cx, cy) => [ws.x + cw * (cx + 0.5), ws.y + ch * (cy + 0.5)];
     const tileBtn = (kind) => ({ click: async () => { await p.click(`.grid.tiles button >> nth=${kind === 'wall' ? 12 : 0}`); await p.click(`[data-kind=${kind === 'wall' ? 'w' : 'f'}]`); } });
@@ -112,14 +112,15 @@ const { setup } = require('./lib');
     await p.click('#wsUndo'); await p.click('button[title^="Redo"]');                  // undo and redo work on everything here
     await x.shot('s-3-workshop');
     // a second prepared scene, by duplicating; the library is saved with the story
-    await p.click('#wsDup'); assert.equal(await p.locator('.wsdoc').count(), 3);
-    await p.click('.wsdoc:has-text("The river crossing") >> nth=0');
-    await p.click('#wsUse');                                                        // bring the prepared scene on stage, in this step
+    await p.click('#wsAdd'); await p.waitForSelector('#wsSaved');
+    await p.click('#wsMap'); await p.click('.wsmap .node'); await p.click('#mapDup'); assert.equal(await p.locator('.wsmap .node').count(), 2);
+    await p.click('.wsmap .node >> nth=0'); assert.equal(await p.inputValue('#mapName'), 'The river crossing');
+    await p.click('#mapUse');                                                        // bring the prepared scene on stage, in this step
     await p.waitForSelector('#workshop', { state: 'hidden' });
     assert.equal(await p.locator('#stage .level i').count(), 192); assert.equal(await p.locator('#stage .ent').count(), 2);
     let saved = await p.evaluate(async () => { const r = await fetch(`/api/rooms/${location.hash.slice(1)}/events?token=${localStorage.getItem('tf.token')}`); const rd = r.body.getReader(); let b = ''; for (;;) { const { value } = await rd.read(); b += new TextDecoder().decode(value); const i = b.indexOf('data: '); const e = b.indexOf('\n\n', i); if (i >= 0 && e > i) { rd.cancel(); return JSON.parse(b.slice(i + 6, e)).scenes; } } });
     assert.equal(saved.length, 2); assert.equal(saved[0].name, 'The river crossing'); assert(saved[0].scene.level && saved[0].scene.entities.some((e) => e.solid));
-    await x.opt('Change the scene'); assert.match(await p.textContent('.gopt:has-text("A prepared scene")'), /2 ready/); await p.click('.gback');
+    await x.opt('Change the scene'); assert.match(await p.textContent('.gopt:has-text("Go to a scene from the map")'), /2 on the map/); await p.click('.gback');
     await toPlayer();
     const [px, py] = await x.heroPos(); assert(Math.abs(px - 6.5 / 16) < 0.03, `the hero starts where the prepared scene says (${px})`);
     // pointing past the wall: the hero finds the gap and walks around
@@ -131,18 +132,18 @@ const { setup } = require('./lib');
     let tr = sc.tracks[0].pts; assert(tr.length >= 12, 'the walk has corners: ' + tr.length / 3 + ' points');
     let low = 0; for (let i = 0; i < tr.length; i += 3) low = Math.max(low, tr[i + 2]); assert(low > 10 / 12, `it went through the gap at the bottom (lowest point ${low})`);
     for (let i = 0; i < tr.length; i += 3) assert(!(Math.floor(tr[i + 1] * 16) === 10 && tr[i + 2] < 10 / 12), 'no point of the walk is inside the wall');
-    // close the gap in the workshop (editing the live scene), then the hero cannot cross; a solid thing cannot be entered
-    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
+    // close the gap in Build scene and use the scene again: the hero starts on the left and cannot cross
+    await x.opt('Build scene'); await p.waitForSelector('#wsStage'); assert.equal(await p.inputValue('#wsName'), 'The river crossing');
     await tileBtn('wall').click(); await p.click('[data-tool=brush]');
     await p.mouse.move(...cell(10, 10)); await p.mouse.down(); await p.mouse.move(...cell(10, 11), { steps: 4 }); await p.mouse.up();
     await p.click('#wsUse'); await p.waitForSelector('#workshop', { state: 'hidden' });
-    assert.equal(await p.locator('#stage .ent').count(), 2, 'editing the live scene keeps what is on stage');
+    assert.equal(await p.locator('#stage .ent').count(), 2);
     await toPlayer();
-    await x.walk(3.5 / 16, 5.5 / 12);                                               // back to the left side
-    [qx] = await x.heroPos(); assert(qx > 11 / 16, `walled in: the hero stays on its side, as near as it can get (${qx})`);
+    await x.walk(13.5 / 16, 5.5 / 12);                                              // towards the far side
+    [qx] = await x.heroPos(); assert(qx < 10 / 16, `walled in: the hero stays on its side, as near as it can get (${qx})`);
     await p.click('#walkBtn');
     await toDirector();
-    await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
+    await x.opt('Build scene'); await p.waitForSelector('#wsStage');
     await p.click('[data-tool=erase]'); await p.mouse.click(...cell(10, 10));                 // an erased tile is a hole: still not walkable
     await tileBtn('floor').click(); await p.mouse.click(...cell(10, 11));                      // a floor tile reopens the way
     await p.click('#wsUse'); await p.waitForSelector('#workshop', { state: 'hidden' });
