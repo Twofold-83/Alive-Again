@@ -26,7 +26,7 @@ export function norm(sc) {
   sc.exits ||= []; sc.floats ||= []; sc.sceneId ||= ''; sc.travel ||= ''; sc.verb ||= '';
   for (const k of ['ask', 'answer', 'exit', 'cam', 'award', 'battle']) if (sc[k] === undefined) sc[k] = null;
   if (sc.sheet.points == null) sc.sheet.points = 0;
-  for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; e.solid = !!e.solid; e.once ||= ''; e.temp = !!e.temp; if (e.active === undefined) e.active = null; if (e.tie === undefined) e.tie = null; if (e.hp === undefined) { e.hp = null; e.maxHp = null; } }
+  for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; e.solid = !!e.solid; e.once ||= ''; e.temp = !!e.temp; e.layer ||= 0; if (e.active === undefined) e.active = null; if (e.tie === undefined) e.tie = null; if (e.hp === undefined) { e.hp = null; e.maxHp = null; } }
   return sc;
 }
 
@@ -214,8 +214,9 @@ export function renderStage(root, scene, o = {}) {
   /** Where a thing is drawn: a tied thing follows whatever it is tied to, in front of or behind it. */
   const spot = (e) => {
     const p = e.tie && byId.get(e.tie.to);
-    if (!p || p === e || p.tie) return { x: e.x, y: e.y, z: Math.round(e.y * 1000) + 1 };
-    return { x: p.x + e.tie.dx * p.scale * (p.flip ? -1 : 1), y: p.y + e.tie.dy * p.scale, z: Math.round(p.y * 1000) + 1 + (e.tie.front ? 1 : -1) };
+    const lift = (e.layer || 0) * 3000;                      // sent to the back / brought to the front by the Director
+    if (!p || p === e || p.tie) return { x: e.x, y: e.y, z: Math.round(e.y * 1000) + 1 + lift };
+    return { x: p.x + e.tie.dx * p.scale * (p.flip ? -1 : 1), y: p.y + e.tie.dy * p.scale, z: Math.round(p.y * 1000) + 1 + (p.layer || 0) * 3000 + (e.tie.front ? 1 : -1), held: p };
   };
   const live = new Set(), floats = o.floats || [];
   for (const e of scene.entities) {
@@ -225,7 +226,7 @@ export function renderStage(root, scene, o = {}) {
     const [fxw, emote, hp, fl] = el.children, at = spot(e);
     if (el._asset !== e.asset) { el._asset = e.asset; fxw.replaceChildren(glyphNode(code, e.asset, 'glyph')); }
     el.className = 'ent' + (e.id === scene.heroId ? ' hero' : '') + (e.id === o.selId ? ' sel' : '') + (e.id === scene.target || (o.pickId && e.id === o.pickId) ? ' target' : '')
-      + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked ? ' tracked' : '') + (o.showKinds && e.solid ? ' solid' : '') + (e.active ? ' active' : '') + (o.hot && o.hot.has(e.id) ? ' hot' : '');
+      + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked || (at.held && at.held.tracked) ? ' tracked' : '') + (at.held && (at.held.gone || at.held.fresh) ? ' gone' : '') + (o.showKinds && e.solid ? ' solid' : '') + (e.active ? ' active' : '') + (o.hot && o.hot.has(e.id) ? ' hot' : '');
     el.dataset.name = e.active ? e.active.name : '';
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '') + (o.playing && e.once ? ' once-' + e.once : '');
     fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${e.flip !== !!(e.tie && byId.get(e.tie.to) && byId.get(e.tie.to).flip) ? -1 : 1})`;

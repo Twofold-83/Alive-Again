@@ -13,7 +13,7 @@
 import { PIXEL, CATEGORIES, allItems, BACKDROPS, backdropCss, pixelInfo, assetLabel } from './catalog.js';
 import { MOODS } from './audio.js';
 import { h, clone, clamp, norm, glyphNode, renderStage, setCell, cellAt, LEVEL_W, LEVEL_H } from './stage.js';
-import { WEATHER } from './consts.js';
+import { G, resetGuided, guidedPick, guidedMark, buildGuided } from './guided.js';
 
 const W = { open: false, c: null, list: [], cur: null, tab: 'tiles', tool: 'brush', size: 1, a: '', k: 'f', tcat: '', ocat: '', q: '', sel: null, undo: [], redo: [], drag: null, walls: true, liveDirty: false, saveT: 0, el: null };
 export const workshopOpen = () => W.open;
@@ -30,11 +30,12 @@ const tileCats = () => PIXEL.filter((c) => c.group === 'tile');
 const objectCats = () => [...PIXEL.filter((c) => c.group !== 'tile'), ...PIXEL.filter((c) => c.group === 'tile').map((c) => ({ ...c, label: c.label + ' (as a piece)' })), ...CATEGORIES.map((c) => ({ ...c, label: '😀 ' + c.label }))];
 
 export function openWorkshop(c) {
-  W.c = c; W.open = true; W.sel = null; W.undo = []; W.redo = []; W.liveDirty = false; W.tab = 'tiles'; W.tool = 'brush'; W.q = ''; W.map = false; W.node = null;
+  W.c = c; W.open = true; W.sel = null; W.redo = []; W.liveDirty = false; W.tab = 'tiles'; W.tool = 'brush'; W.q = ''; W.map = !!c.map; W.node = null;
   W.list = [...(c.live ? [c.live] : []), ...c.scenes.map((s) => ({ ...s, scene: norm(s.scene) }))];
   if (!W.list.length) W.list.push({ id: rid(), name: 'Scene 1', scene: blankScene() });
   docs().forEach((d, i) => { if (d.mx == null || (d.mx === 0.5 && d.my === 0.5 && docs().length > 1 && i > 0)) { d.mx = ((i % 4) + 0.5) / 4; d.my = (Math.floor(i / 4) % 3 + 0.5) / 3; } });
-  W.cur = W.list[0];
+  W.cur = W.list[0]; W.hist = [JSON.stringify(W.cur.scene)];
+  for (const d of docs()) d.scene.sceneId = d.id;
   if (!W.a) { const t = tileCats()[0]; if (t) { W.a = t.items[0].asset; W.k = t.items[0].kind === 'wall' ? 'w' : 'f'; } }
   const root = $root();
   const stage = h('div', { class: 'stage', id: 'wsStage' });
@@ -50,30 +51,35 @@ function close() {
   if (W.liveDirty && !confirm('You changed the scene on stage but did not put the changes on stage. Close anyway?')) return;
   flush();
   W.open = false; document.removeEventListener('keydown', keys); $root().hidden = true; $root().replaceChildren();
+  if (W.c.closed) W.c.closed();
 }
 
 /* ---------- saving ---------- */
 function flush() { if (W.saveT) { clearTimeout(W.saveT); W.saveT = 0; W.c.save(library()); } }
 function changed() {
+  const j = JSON.stringify(W.cur.scene);                     // undo history: every finished change is remembered
+  if (j !== W.hist[W.hist.length - 1]) { W.hist.push(j); if (W.hist.length > 80) W.hist.shift(); W.redo = []; }
   if (W.cur.live) W.liveDirty = true; else { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); }
 }
-function remember() { W.undo.push(JSON.stringify(W.cur.scene)); if (W.undo.length > 60) W.undo.shift(); W.redo = []; }
+function remember() { /* changes are recorded when they finish, see changed() */ }
 function undo(dir) {
-  const from = dir < 0 ? W.undo : W.redo, to = dir < 0 ? W.redo : W.undo;
-  if (!from.length) return;
-  to.push(JSON.stringify(W.cur.scene)); W.cur.scene = JSON.parse(from.pop()); W.sel = null; changed(); draw();
+  if (dir < 0) { if (W.hist.length < 2) return; W.redo.push(W.hist.pop()); } else { if (!W.redo.length) return; W.hist.push(W.redo.pop()); }
+  W.cur.scene = JSON.parse(W.hist[W.hist.length - 1]); W.sel = null; resetGuided();
+  if (W.cur.live) W.liveDirty = true; else { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); }
+  draw();
 }
 function keys(ev) {
   if (!W.open) return;
   const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName);
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z') { ev.preventDefault(); undo(ev.shiftKey ? 1 : -1); } else if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'y') { ev.preventDefault(); undo(1); }
-  else if (!typing && (ev.key === 'Delete' || ev.key === 'Backspace') && W.sel && W.sel !== W.cur.scene.heroId) { ev.preventDefault(); remember(); W.cur.scene.entities = W.cur.scene.entities.filter((e) => e.id !== W.sel); W.sel = null; changed(); draw(); }
+  else if (!typing && (ev.key === 'Delete' || ev.key === 'Backspace') && W.sel && W.sel !== W.cur.scene.heroId) { ev.preventDefault(); W.cur.scene.entities = W.cur.scene.entities.filter((e) => e.id !== W.sel); W.sel = null; resetGuided(); changed(); draw(); }
+  else if (!typing && (ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'd' && W.sel) { ev.preventDefault(); const src = W.cur.scene.entities.find((e) => e.id === W.sel); if (src && src.id !== W.cur.scene.heroId) { const k = { ...clone(src), id: rid(), x: clamp(src.x + 1 / LEVEL_W, 0, 1) }; W.cur.scene.entities.push(k); W.sel = k.id; guidedPick(k.id); changed(); draw(); } }
 }
 
 /* ---------- drawing the workshop ---------- */
 const paintStage = () => renderStage(W.el.stage, W.cur.scene, { code: W.c.code, names: W.c.names, selId: W.sel, showKinds: W.walls });
 function draw() { W.el.stage.hidden = W.map; W.el.map.hidden = !W.map; if (W.map) drawMap(); else paintStage(); drawBar(); drawList(); drawTools(); }
-function pick(doc) { flush(); W.cur = doc; W.sel = null; W.undo = []; W.redo = []; W.map = false; draw(); }
+function pick(doc) { flush(); W.cur = doc; W.sel = null; W.hist = [JSON.stringify(doc.scene)]; W.redo = []; W.map = false; resetGuided(); draw(); }
 
 function drawBar() {
   const cur = W.cur, can = !!W.c.use;
@@ -82,7 +88,7 @@ function drawBar() {
     h('span', { class: 'dim' }, cur.live ? 'editing the scene on stage' : `editing “${cur.name}”`),
     h('span', { class: 'grow' }),
     W.c.adventure && h('button', { id: 'wsMap', class: W.map ? 'on' : '', title: 'How the prepared scenes connect', onclick: () => { W.map = !W.map; W.node = null; draw(); } }, '🗺️ Map'),
-    h('button', { title: 'Undo (Ctrl+Z)', disabled: !W.undo.length, onclick: () => undo(-1) }, '↶ Undo'),
+    h('button', { title: 'Undo (Ctrl+Z)', disabled: W.hist.length < 2, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
     h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.redo.length, onclick: () => undo(1) }, '↷ Redo'),
     h('button', { class: W.walls ? 'on' : '', title: 'Mark walls and solid things in red', onclick: () => { W.walls = !W.walls; draw(); } }, '▦ Show what blocks'),
     cur.live
@@ -162,7 +168,7 @@ function mapTools() {
   const node = list.find((x) => x.id === W.node);
   kids.push(h('div', { class: 'card' }, h('h3', {}, '🗺️ The map of this adventure'),
     h('p', { class: 'dim small' }, 'Each connection puts an exit in both scenes, leading to the other. When the Player walks to an exit and you agree, the story travels to that scene.'),
-    node ? h('div', { class: 'row' }, h('b', { class: 'grow' }, `“${node.name}” — now click the scene to connect it to`), h('button', { onclick: () => pick(node) }, '✏️ Edit this scene')) : h('p', { class: 'dim small' }, 'Nothing selected.')));
+    node ? h('div', { class: 'col' }, h('b', {}, `“${node.name}” is selected — click another scene to connect them`), h('div', { class: 'row' }, h('button', { class: 'grow', id: 'mapEdit', onclick: () => pick(node) }, '✏️ Edit this scene'), W.c.use && h('button', { class: 'grow primary', id: 'mapUse', onclick: () => { flush(); W.c.use(node); close(); } }, '▶ Go there now'))) : h('p', { class: 'dim small' }, 'Nothing selected.')));
   kids.push(h('div', { class: 'card' }, h('h3', {}, `Connections (${pairs.length})`),
     pairs.length ? pairs.map(([a, b]) => { const ex = both(a, b), locked = ex.some((x) => x.locked);
       return h('div', { class: 'row conn' }, h('span', { class: 'grow' }, `${a.name} ⇄ ${b.name}`),
@@ -175,8 +181,8 @@ function mapTools() {
 function drawTools() {
   if (W.map) return mapTools();
   const sc = W.cur.scene, t = W.el.tools, kids = [];
-  kids.push(h('div', { class: 'tabs' }, [['tiles', '🧱', 'Level'], ['objects', '📦', 'Objects'], ['scene', '🌄', 'Scene']].map(([id, icon, label]) =>
-    h('button', { 'data-wtab': id, class: W.tab === id ? 'on' : '', onclick: () => { W.tab = id; W.sel = null; draw(); } }, h('span', {}, icon), h('small', {}, label)))));
+  kids.push(h('div', { class: 'tabs' }, [['tiles', '🧱', 'Level tiles'], ['things', '🎭', 'Things & scene']].map(([id, icon, label]) =>
+    h('button', { 'data-wtab': id, class: W.tab === id ? 'on' : '', onclick: () => { W.tab = id; W.sel = null; resetGuided(); draw(); } }, h('span', {}, icon), h('small', {}, label)))));
   const hint = document.querySelector('#wsHint');
 
   if (W.tab === 'tiles') {
@@ -199,56 +205,28 @@ function drawTools() {
         h('button', { class: 'grow', id: 'wsBorder', onclick: () => all((x, y) => x === 0 || y === 0 || x === LEVEL_W - 1 || y === LEVEL_H - 1) }, 'Border'),
         h('button', { class: 'grow', onclick: () => all((x, y, old) => old === '0') }, 'Empty tiles')),
       h('div', { class: 'row' }, h('span', { class: 'dim small grow', id: 'wsCount' }, `${count('f')} floor · ${count('w')} wall tiles`), h('button', { class: 'danger', disabled: !sc.level, onclick: () => { remember(); sc.level = null; changed(); draw(); } }, 'Clear the level')));
-  } else if (W.tab === 'objects') {
-    hint.textContent = 'Click an object to select it, drag it to move it. Drag the hero to where the Player starts.';
-    const sel = sc.entities.find((e) => e.id === W.sel);
-    if (sel) {
-      const b = (label, title, fn, on) => h('button', { class: 'grow' + (on ? ' on' : ''), title, onclick: () => { remember(); fn(); changed(); draw(); } }, label);
-      const isHero = sel.id === sc.heroId;
-      kids.push(h('div', { class: 'seltools' },
-        h('div', { class: 'row' }, h('span', { style: 'font-size:24px' }, glyphNode(W.c.code, sel.asset, 'mini')), h('b', { class: 'grow' }, isHero ? 'The hero’s starting place' : assetLabel(sel.asset))),
-        h('div', { class: 'row' },
-          b('➖', 'Smaller', () => { sel.scale = clamp(sel.scale / 1.25, 0.3, 6); }), b('➕', 'Bigger', () => { sel.scale = clamp(sel.scale * 1.25, 0.3, 6); }),
-          b('↺', 'Rotate left', () => { sel.rot = (sel.rot - 15) % 360; }), b('↻', 'Rotate right', () => { sel.rot = (sel.rot + 15) % 360; }), b('↔️', 'Flip', () => { sel.flip = !sel.flip; })),
-        !isHero && h('div', { class: 'row' },
-          b('🧱 Solid', 'The hero cannot walk through it', () => { sel.solid = !sel.solid; }, sel.solid),
-          b('▦ Snap', 'Snap to the middle of its tile', () => { sel.x = (Math.floor(sel.x * LEVEL_W) + 0.5) / LEVEL_W; sel.y = Math.min(1, (Math.floor(sel.y * LEVEL_H) + 1) / LEVEL_H); }),
-          b('⧉ Copy', 'Duplicate', () => { const k = { ...clone(sel), id: rid(), x: clamp(sel.x + 1 / LEVEL_W, 0, 1) }; sc.entities.push(k); W.sel = k.id; }),
-          b('🗑', 'Remove', () => { sc.entities = sc.entities.filter((e) => e !== sel); W.sel = null; }))));
-    }
-    const grid = h('div', { class: 'grid' });
-    const cats = objectCats(), cat = cats.find((c) => c.id === W.ocat) || cats[0];
-    const place = (i) => {
-      if (sc.entities.length >= 80) return W.c.toast('This scene is full');
-      remember();
-      let best = null;
-      for (let n = 0; n < 24; n++) { const x = 0.1 + Math.random() * 0.8, y = 0.3 + Math.random() * 0.6, gap = Math.min(9, ...sc.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75))); if (!best || gap > best.gap) best = { x, y, gap }; }
-      const e = { id: rid(), asset: i.asset, x: best.x, y: best.y, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '', solid: !!pixelInfo(i.asset).solid };
-      sc.entities.push(e); W.sel = e.id; changed(); draw();
-    };
-    const fill = () => {
-      const q = W.q.trim().toLowerCase(), items = q ? allItems().filter((i) => i.name.includes(q)).slice(0, 200) : cat.items;
-      grid.replaceChildren(...items.map((i) => h('button', { title: i.name, 'aria-label': i.name, onclick: () => place(i) }, glyphNode(W.c.code, i.asset))));
-    };
-    fill();
-    kids.push(h('input', { type: 'search', placeholder: '🔍 Search objects (table, tree, skeleton…)', value: W.q, oninput: (ev) => { W.q = ev.target.value; fill(); } }),
-      h('div', { class: 'chips wrap' }, cats.map((c) => h('button', { class: c === cat && !W.q ? 'on' : '', onclick: () => { W.ocat = c.id; W.q = ''; drawTools(); } }, c.label))), grid);
   } else {
-    hint.textContent = 'The backdrop shows wherever no tile is painted.';
-    const set = (k, v) => { remember(); sc[k] = v; changed(); draw(); };
-    kids.push(
-      !W.cur.live && h('div', { class: 'card' }, h('h3', {}, 'Name'), h('input', { id: 'wsName', maxlength: 40, value: W.cur.name, oninput: (ev) => { W.cur.name = ev.target.value || 'Untitled scene'; changed(); drawBar(); }, onchange: drawList })),
-      h('div', { class: 'card' }, h('h3', {}, 'Backdrop'), h('div', { class: 'grid drops' }, BACKDROPS.map((b) => h('button', { class: sc.backdrop === b.id ? 'on' : '', style: `background:${b.css}`, onclick: () => set('backdrop', b.id) }, b.name)))),
-      h('div', { class: 'card' }, h('h3', {}, 'Weather'), h('div', { class: 'chips wrap' }, WEATHER.map(([v, l]) => h('button', { class: sc.weather === v ? 'on' : '', onclick: () => set('weather', v) }, l)))),
-      W.c.adventure && h('div', { class: 'card' }, h('h3', {}, 'Exits to other scenes'),
-        sc.exits.map((x) => h('div', { class: 'row conn' },
-          h('input', { maxlength: 40, value: x.label, title: 'Label', oninput: (ev) => { x.label = ev.target.value || 'Exit'; changed(); paintStage(); } }),
-          h('select', { title: 'Leads to', onchange: (ev) => { remember(); x.to = ev.target.value; changed(); } }, h('option', { value: '' }, '— to —'), docs().filter((d) => d !== W.cur).map((d) => h('option', { value: d.id, selected: x.to === d.id }, d.name))),
-          h('button', { class: x.locked ? 'on' : '', title: 'Locked?', onclick: () => { remember(); x.locked = !x.locked; changed(); draw(); } }, x.locked ? '🔒' : '🔓'),
-          h('button', { class: 'danger', onclick: () => { remember(); sc.exits = sc.exits.filter((y) => y !== x); changed(); draw(); } }, '✕'))),
-        h('button', { id: 'wsAddExit', disabled: sc.exits.length >= 12, onclick: () => { remember(); sc.exits.push({ id: rid(), to: '', label: 'Exit', x: 0.5, y: 0.5, locked: false }); changed(); draw(); } }, '＋ Add an exit'),
-        h('p', { class: 'dim small' }, 'Drag an exit on the stage to where the way out is. The 🗺️ Map connects scenes for you.')),
-      h('div', { class: 'card' }, h('h3', {}, 'Music'), h('div', { class: 'list' }, MOODS.map((m) => h('button', { class: sc.mood === m.id ? 'on' : '', onclick: () => set('mood', m.id) }, m.name)))));
+    // the same question flow and the same tools as during a turn, working on this scene
+    hint.textContent = 'Click anything on the stage to change it; drag it to move it. The glowing hero marks where the Player starts.';
+    const box = h('div', { class: 'col wsg' });
+    if (!W.cur.live && !G.path.length) box.append(h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Name'), h('input', { id: 'wsName', maxlength: 40, value: W.cur.name, oninput: (ev) => { W.cur.name = ev.target.value || 'Untitled scene'; changed(); drawBar(); }, onchange: drawList })));
+    const sub = h('div', { class: 'col' });
+    buildGuided(sub, {
+      mode: 'workshop', get draft() { return W.cur.scene; }, code: W.c.code, pen: {},
+      S: { turn: 0, names: W.c.names, rules: W.c.rules, assets: W.c.assets || [], scenes: library(), claude: false },
+      select(id) { W.sel = id || null; }, mods: () => W.c.rules.modules, toast: W.c.toast, audio: W.c.audio, rid, maker: W.c.maker,
+      rebuild: () => { changed(); draw(); }, changed: () => { changed(); draw(); }, changedQuiet: () => { changed(); paintStage(); },
+      addEntity(asset) {
+        if (sc.entities.length >= 80) { W.c.toast('This scene is full'); return null; }
+        let best = null;
+        for (let n = 0; n < 24; n++) { const x = 0.1 + Math.random() * 0.8, y = 0.3 + Math.random() * 0.6, gap = Math.min(9, ...sc.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75))); if (!best || gap > best.gap) best = { x, y, gap }; }
+        const e = { id: rid(), asset, x: best.x, y: best.y, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '', solid: !!pixelInfo(asset).solid, active: null, tie: null, hp: null, maxHp: null, once: '', temp: false, layer: 0 };
+        sc.entities.push(e); W.sel = e.id; return e;
+      },
+      removeEntity(e) { sc.entities = sc.entities.filter((x) => x !== e); for (const x of sc.entities) if (x.tie && x.tie.to === e.id) x.tie = null; W.sel = null; },
+      dropTrack() {}, trackEnd: () => 0, cutting: () => false, canUndo: () => false, undo() {}, autoTrack: () => false,
+    });
+    box.append(sub); kids.push(box);
   }
   const top = t.scrollTop;
   t.replaceChildren(...kids.filter(Boolean));
@@ -295,11 +273,12 @@ function down(ev) {
     if (W.tool === 'rect') { W.drag = { rect: c, base: JSON.stringify(sc.level) }; setCell(sc, c, W.a, W.k); paintStage(); } else { W.drag = { paint: true }; stamp(p, W.tool === 'erase'); }
   } else {
     const mk = ev.target.closest('.exit'), door = mk && sc.exits.find((x) => x.id === mk.dataset.exit);
-    if (door) { remember(); W.drag = { e: door, dx: door.x - p.x, dy: door.y - p.y }; W.el.stage.setPointerCapture(ev.pointerId); return; }
+    if (door) { guidedMark(door.id); W.drag = { e: door, dx: door.x - p.x, dy: door.y - p.y }; W.el.stage.setPointerCapture(ev.pointerId); return drawTools(); }
     const el = ev.target.closest('.ent'), hit = el && sc.entities.find((e) => e.id === el.dataset.id);
     const was = W.sel; W.sel = hit ? hit.id : null;
     if (hit) { remember(); W.drag = { e: hit, dx: hit.x - p.x, dy: hit.y - p.y }; }
-    if (was !== W.sel) { if (W.tab !== 'objects') W.tab = 'objects'; drawTools(); }
+    if (hit) guidedPick(hit.id);
+    if (was !== W.sel) { W.tab = 'things'; drawTools(); }
     paintStage();
   }
   if (W.drag) W.el.stage.setPointerCapture(ev.pointerId);
@@ -314,12 +293,13 @@ function move(ev) {
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) setCell(sc, y * LEVEL_W + x, W.a, W.k);
     return paintStage();
   }
+  const par = d.e.tie && sc.entities.find((x) => x.id === d.e.tie.to);
+  if (par) { d.e.tie.dx = clamp(((p.x - par.x) / par.scale) * (par.flip ? -1 : 1), -1, 1); d.e.tie.dy = clamp((p.y + 0.04 - par.y) / par.scale, -1, 1); return paintStage(); }   // a tied thing: adjust how it is held
   d.e.x = clamp(p.x + d.dx, 0, 1); d.e.y = clamp(p.y + d.dy, 0.05, 1); d.moved = true;
   paintStage();
 }
 function up() {
   const d = W.drag; if (!d) return;
   W.drag = null;
-  if (d.e && !d.moved) W.undo.pop();
   changed(); draw();
 }

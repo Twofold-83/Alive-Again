@@ -3,7 +3,7 @@ import { MOODS, SFX, audio } from './audio.js';
 import { h, clone, clamp, norm, glyphNode, renderStage, playTurn, findWalk, sample } from './stage.js';
 import { openWorkshop, workshopOpen } from './workshop.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
-import { resetGuided, guidedKey, guidedPick, guidedMark, guidedTool, buildGuided } from './guided.js';
+import { resetGuided, guidedKey, guidedPick, guidedMark, guidedTool, guidedStart, buildGuided } from './guided.js';
 
 /* ---------- small helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -101,6 +101,8 @@ function onState(s) {
   if (newTurn) {
     submitting = false; selId = null; selInv = null; rec = false; drawOn = false; walkMode = false; stopWalkAnim(); resetGuided();
     initDraft();
+    past = []; noteChange();
+    if (directing()) guidedStart(draft);
     if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('⏰ Time ran out — your turn was sent as it was');
     if (cut) cut.skip();
     if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {  // present what just happened before handing over control
@@ -145,7 +147,21 @@ function initDraft() {
 }
 const saveDraft = () => sessionStorage.setItem('tf.draft', JSON.stringify({ code, turn: S.turn, you: S.you, draft }));
 const paint = () => { if (!cut && S) renderStage(stage, shown(), stageOpts()); };
-function changed() { saveDraft(); render(); }                       // may rebuild the panel
+/* Undo for the Director: every finished change is remembered; Ctrl+Z or the Undo button steps back. */
+let past = [];
+function noteChange() {
+  if (!directing()) return;
+  const j = JSON.stringify(draft);
+  if (j !== past[past.length - 1]) { past.push(j); if (past.length > 80) past.shift(); }
+}
+const canUndo = () => past.length > 1;
+function undo() {
+  if (!canUndo()) return;
+  past.pop();
+  draft = JSON.parse(past[past.length - 1]);
+  selId = null; resetGuided(); guidedStart(null); uiKey = ''; saveDraft(); render();
+}
+function changed() { noteChange(); saveDraft(); render(); }           // may rebuild the panel
 function changedQuiet() { saveDraft(); paint(); renderSheet(); }    // never rebuilds the panel (the user is typing in it)
 function rebuild() { uiKey = ''; changed(); }
 
@@ -452,6 +468,7 @@ function render() {
   renderSheet();
   const key = [S.you, S.turn, S.whose, S.ended, S.joined.player, S.joined.director, submitting, selId, selInv, S.assets.length, S.settings.turnSeconds,
     JSON.stringify(S.rules), rec, drawOn, walkMode, myTurn() && draft.walked, !!cut, myTurn() && draft.target, myTurn() && draft.use, myTurn() && JSON.stringify([draft.reply, draft.act, draft.exit]), myTurn() && draft.steps.length, guidedKey()].join('|');
+  if (workshopOpen()) return;                              // the workshop has the tools while it is open
   if (key !== uiKey) { uiKey = key; buildPanel(); buildFoot(); } else refreshMarks();
   tick();
 }
@@ -562,9 +579,9 @@ function buildPanel() {
 }
 const guidedCtx = {
   get draft() { return draft; }, get S() { return S; }, get code() { return code; },
-  pen, workshop: () => showWorkshop(), useScene: (doc) => useScene(doc, false), travelTo: (id) => travelTo(id), rid,
+  pen, workshop: (o) => showWorkshop(o), useScene: (doc) => useScene(doc, false), travelTo: (id) => travelTo(id), rid,
   select(id) { selId = id || null; },
-  nextStep, resetStep, clearSteps, gotoStep, stepEmpty,
+  nextStep, resetStep, clearSteps, gotoStep, stepEmpty, canUndo, undo, saveAsScene: () => saveAsScene(),
   cutting: () => !!cut, preview: () => previewCut(), mods: () => mods(), trackEnd: (id) => trackEnd(id), dropTrack: (id) => dropTrack(id),
   toast, act, audio, rebuild: () => rebuild(), changed: () => changed(), changedQuiet: () => changedQuiet(),
   addEntity: (a) => addEntity(a), removeEntity: (e) => removeEntity(e), giveToPlayer: (e) => giveToPlayer(e), autoTrack: (e, st) => autoTrack(e, st),
@@ -597,13 +614,28 @@ function travelTo(sceneId) {
   rebuild();
   return doc;
 }
-function showWorkshop() {
+/** Keep the scene on stage as a prepared scene, to come back to or to connect on the map. */
+function saveAsScene() {
+  const name = (prompt('Name for this scene', `Scene ${(S.scenes || []).length + 1}`) || '').trim().slice(0, 40);
+  if (!name) return;
+  const scene = norm({ ...clone(draft), ...clone(ONE_STEP), ...PLAYERS, steps: [], narration: '', choices: [], ask: null, cam: null, battle: null, said: undefined, rollWant: undefined });
+  for (const e of scene.entities) { e.say = ''; e.once = ''; }
+  const doc = { id: rid(), name, mx: 0.5, my: 0.5, scene };
+  S.scenes = [...(S.scenes || []), doc];
+  if (!draft.sceneId) draft.sceneId = doc.id;                 // the stage now "is" that scene on the map
+  act('saveScenes', { scenes: S.scenes }, 3).then(() => toast(`Saved “${name}” to your prepared scenes`), (e) => toast(e.message));
+  rebuild();
+}
+function showWorkshop(o = {}) {
   const can = directing();
   const live = can ? { id: 'live', name: 'The scene on stage now', live: true, scene: norm({ ...clone(draft), steps: [], tracks: [], said: undefined }) } : null;
+  $('#panel').replaceChildren(); resetGuided();              // the same tools now work on the workshop's scene
   openWorkshop({
-    code, names: S.names, scenes: clone(S.scenes || []), live, blankHero, toast, audio, adventure: S.rules.type === 'adventure',
+    code, names: S.names, scenes: clone(S.scenes || []), live, blankHero, toast, audio, adventure: S.rules.type === 'adventure', map: !!o.map,
+    rules: S.rules, assets: S.assets, maker: (k, f) => maker(k, f),
     save: (scenes) => { S.scenes = clone(scenes); return act('saveScenes', { scenes }, 3).catch((e) => toast(e.message)); },
     use: can ? (doc) => useScene(doc, !!doc.live) : null,
+    closed: () => { resetGuided(); if (directing()) guidedStart(draft); uiKey = ''; render(); },
   });
 }
 
@@ -732,6 +764,8 @@ document.addEventListener('keydown', (ev) => {
   if (!S || !code || !$('#story').hidden || workshopOpen()) return;
   if (ev.key === 'Escape' && walkMode) { walkMode = false; return render(); }
   const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName);
+  if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !typing && directing()) { ev.preventDefault(); return undo(); }
+  if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'd' && !typing && directing() && selId) { ev.preventDefault(); const src = draft.entities.find((e) => e.id === selId); if (src) { const k = { ...clone(src), id: rid(), x: clamp(src.x + 0.08, 0, 1), say: '' }; draft.entities.push(k); selId = k.id; guidedPick(k.id); rebuild(); } return; }
   if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); submit(); } else if (ev.key === 'Escape' && cut) cut.skip();
   else if (!typing && directing() && selId) {
     const sel = draft.entities.find((e) => e.id === selId); if (!sel) return;

@@ -103,11 +103,13 @@ const { setup } = require('./lib');
     await p.keyboard.press('Control+z'); assert.match(await p.textContent('#wsCount'), /192 floor · 0 wall/);
     await p.keyboard.press('Control+y'); assert.match(await p.textContent('#wsCount'), /182 floor · 10 wall/);
     await p.click('[data-tool=pick]'); await p.mouse.click(...cell(10, 3)); assert(await p.locator('[data-kind=w].on').count(), 'picking a wall tile selects the wall brush');
-    await p.click('[data-wtab=objects]'); await p.fill('.wstools input[type=search]', 'crate'); await p.click('.wstools .grid button');
-    await p.click('.seltools button:has-text("Solid")');
+    await p.click('[data-wtab=things]'); await x.add('crate');                     // the same add-and-change tools as during a turn
+    await p.click('.thingbtns button:has-text("Solid")');
     const dragWs = async (sel, cx, cy) => { const b = await p.locator(sel).boundingBox(); await p.mouse.move(b.x + b.width / 2, b.y + b.height - 3); await p.mouse.down(); await p.mouse.move(...cell(cx, cy), { steps: 10 }); await p.mouse.up(); };
     await dragWs('#wsStage .ent.sel', 3, 5.4); await dragWs('#wsStage .ent.hero', 6, 5.4);
-    await p.click('[data-wtab=scene]'); await p.fill('#wsName', 'The river crossing'); await p.click('.wstools .grid.drops button >> nth=3');
+    await x.done(); await p.fill('#wsName', 'The river crossing');
+    await x.opt('Change the scene'); await x.opt('The place'); await p.click('[data-mark="backdrop=b:hall"]'); await x.done();
+    await p.click('#wsUndo'); await p.click('button[title^="Redo"]');                  // undo and redo work on everything here
     await x.shot('s-3-workshop');
     // a second prepared scene, by duplicating; the library is saved with the story
     await p.click('#wsDup'); assert.equal(await p.locator('.wsdoc').count(), 3);

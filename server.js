@@ -183,7 +183,7 @@ function cleanScene(s, prev, inner) {
       active: e.active && typeof e.active === 'object' && str(e.active.name, 40) ? { name: str(e.active.name, 40), verbs: arr(e.active.verbs).map((v) => str(v, 16)).filter(Boolean).slice(0, 6) } : null,
       tie: e.tie && typeof e.tie === 'object' && typeof e.tie.to === 'string' ? { to: str(e.tie.to, 24), dx: r3(num(e.tie.dx, -1, 1, 0)), dy: r3(num(e.tie.dy, -1, 1, 0)), front: e.tie.front !== false } : null,
       hp: e.hp == null ? null : Math.round(num(e.hp, 0, 9999, 1)), maxHp: e.hp == null ? null : Math.round(num(e.maxHp, 1, 9999, 1)),
-      once: str(e.once, 12), temp: !!e.temp,
+      once: str(e.once, 12), temp: !!e.temp, layer: Math.sign(Math.round(num(e.layer, -1, 1, 0))),
     });
   }
   const drawing = [];

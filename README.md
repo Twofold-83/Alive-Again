@@ -38,8 +38,8 @@ mount a persistent disk there if stories should survive redeploys.
 A turn is a list of **steps**. Everything done within one step plays at the same time
 (a line of speech, an explosion and its sound, two characters moving); "＋ Next step"
 starts what happens after that. There is no limit on steps. The step bar at the top
-of the tool column shows them and offers **Preview turn**, **Reset step** (undo the
-current step), **Clear steps** (start the turn over), and clicking an earlier step
+of the tool column shows them and offers **Preview turn**, **Undo** (Ctrl+Z, one
+change at a time), **Reset step** (undo the whole current step), **Clear steps** (start the turn over), and clicking an earlier step
 goes back to it.
 
 Inside a step the Director answers one question at a time: "What happens?" → a broad
@@ -76,7 +76,7 @@ dragging moves it.
 | ➡️ Enter | "Move or animate → Enter from the left/right" brings a character in from outside the screen. |
 | ⭐ Points | A layer; the Director awards points with a reason, shown to the Player as the step plays. |
 | 🚪 Exits and the map | Scenes can have exits that lead to other prepared scenes, locked or open. The workshop's 🗺️ Map connects scenes with a click. When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story continues in that scene, with the hero arriving at the way back. |
-| ⚔️ Battle | The Director picks enemies and their health. The Player then chooses Attack, Defend or Flee each turn. The battle tools resolve hits with damage numbers, health bars, sounds and ready-made attack animations (strike, sword swing, shoot, magic, roar), and can ask for a d20 skill check. |
+| ⚔️ Battle | The Director picks enemies and their health. The Player then chooses Attack, Defend or Flee each turn. The battle tools open by themselves on the Director's turn: one click on a damage number resolves the Player's blow, another the enemy's reply (strike, sword swing, shoot, magic, roar), each as its own step with animation, damage number, sound and health change. The battle ends by itself when the last enemy falls. |
 
 Speech bubbles belong to the step they were said in: a new step starts without them,
 and no line survives into the other side's turn.
@@ -92,10 +92,10 @@ Player.
   and lava, cliffs, dungeon, house and castle, cave and mine, snow and desert, sci-fi).
   Every tile is either **floor** (the hero can
   walk on it) or **wall** (it cannot). Undo/redo with Ctrl+Z / Ctrl+Y.
-- **Objects:** place any sprite, move, resize, rotate, flip, snap to the grid, copy,
-  and switch **solid** on for things the hero must walk around. The hero marker sets
-  where the Player starts.
-- **Scene:** name, backdrop, weather, music.
+- **Things & scene:** the same question flow and the same tools as during a turn
+  (add something, click a thing to change it, layers, tie, active object, solid, copy,
+  backdrop, weather, music, exits), working on the scene being edited. The hero marker
+  sets where the Player starts. Ctrl+D copies the selected thing.
 - **Prepared scenes:** any number of scenes can be built in advance. They are saved
   with the story, can be exported to a file and imported into another story, and are
   brought on stage during a turn with "Change the scene → A prepared scene" (or

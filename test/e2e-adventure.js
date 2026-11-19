@@ -17,6 +17,9 @@ const { setup } = require('./lib');
     await p.goto(t.base); await p.click('#hotseat'); await p.waitForSelector('.gopts');
     await x.opt('Story settings'); await p.click('.card .chips button:has-text("Adventure")'); await p.click('.chips button:has-text("Points")'); await x.done();
     await x.add('mage'); await x.done();
+    assert.equal(await p.locator('#stage .ent').count(), 2); await p.click('#undoBtn'); assert.equal(await p.locator('#stage .ent').count(), 1, 'undo takes the last change back');
+    await x.add('mage'); await p.click('[data-lay="1"]');
+    assert(Number(await p.evaluate(() => document.querySelector('#stage .ent.sel').style.zIndex)) > 3000, 'brought to the front'); await p.click('[data-lay="0"]'); await x.done();
     // tie a sword to the hero: it is drawn where the hero is, and follows
     await x.add('iron sword'); await thing('Tie to'); await p.click('#panel .grid button >> nth=0');
     await p.waitForSelector('[data-layer=front].on'); await p.click('[data-layer=back]'); await p.click('[data-layer=front]'); await x.done(); await x.done();
@@ -35,7 +38,9 @@ const { setup } = require('./lib');
     await x.walk(0.5, 0.9);
     [sx, sy] = await pos(ent('sword')); [hx, hy] = await x.heroPos();
     assert(Math.abs(sx - hx) < 0.3 && Math.abs(sy - hy) < 0.3, 'the sword walked along with the hero');
+    await p.evaluate(() => { window.__gap = 0; window.__moved = 0; const x0 = parseFloat(document.querySelector('#stage .ent.hero').getBoundingClientRect().x); setInterval(() => { const h = document.querySelector('#stage .ent.hero').getBoundingClientRect(), s = document.querySelector('#stage .ent:has(img[src*="sword"])').getBoundingClientRect(); window.__gap = Math.max(window.__gap, Math.hypot(h.x - s.x, h.y - s.y)); window.__moved = Math.max(window.__moved, Math.abs(h.x - x0)); }, 30); });
     await toDirector();
+    { const g = await p.evaluate(() => [window.__gap, window.__moved]); assert(g[0] < 90, `the sword stayed in the hero’s hand while the walk was replayed (gap ${g[0]}px, hero moved ${g[1]}px)`); }
     assert.match(await p.textContent('.card.told'), /Open: Old chest/);
     let sc = await x.last(); assert.equal(sc.verb, 'Open'); assert(sc.entities.find((e) => e.id === sc.target).active);
 
@@ -129,9 +134,11 @@ const { setup } = require('./lib');
     await p.click('.askbox button:has-text("Attack")'); assert.match(await act(), /attacks/);
     await toDirector();
     sc = await x.last(); assert.deepEqual(sc.answer, { kind: 'battle', move: 'attack' }); assert(sc.battle);
-    await p.click('#battleOpen'); await p.click('[data-dmg="2"]'); await p.click('#heroHits');
-    assert.match(await p.textContent('.statrow:has(.foe)'), /1\/3/);
-    await p.click('#nextStep'); await p.click('#battleOpen'); await p.click('[data-dmg="1"]'); await p.click('[data-attack=swing]');
+    await p.waitForSelector('#heroHits');                                           // the battle tools open by themselves
+    await p.click('#heroHits [data-dmg="2"]');                                      // one click: animation, damage, sound, and its own step
+    assert.equal(await p.locator('.stepchip').count(), 2); assert.match(await p.textContent('.statrow:has(.foe)'), /1\/3/);
+    await p.click('[data-attack=swing]'); await p.click('#foeHits [data-dmg="1"]');
+    assert.equal(await p.locator('.stepchip').count(), 3);
     await x.shot('a-3-battle');
     await p.evaluate(() => { window.__float = []; setInterval(() => { for (const f of document.querySelectorAll('#stage .float')) if (f.textContent && !window.__float.includes(f.textContent)) window.__float.push(f.textContent); }, 40); });
     await toPlayer();
@@ -143,8 +150,8 @@ const { setup } = require('./lib');
     assert.equal(sc.steps[0].entities.find((e) => e.tie).once, 'swing', 'the tied sword swung with the hero’s attack');
     // finish it
     await p.click('.askbox button:has-text("Attack")'); await toDirector();
-    await p.click('#battleOpen'); await p.click('[data-dmg="2"]'); await p.click('#heroHits');
-    await x.done(); await x.opt('Battle'); await p.click('#battleEnd');
+    await p.click('#heroHits [data-dmg="2"]');                                      // the last enemy falls: the battle ends by itself
+    assert.match(await p.textContent('.gtitle'), /what happens/);
     await toPlayer();
     sc = await x.last(); assert.equal(sc.battle, null); assert.equal(sc.ask, null);
     await x.walk(0.5, 0.8); await toDirector();

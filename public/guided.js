@@ -19,7 +19,9 @@ import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
 
 export const G = { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', ask: '' };
 export function resetGuided() { Object.assign(G, { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', exit: null, pick: null, foe: null, askKind: '' }); }
-export const guidedKey = () => [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat, G.exit, G.pick, G.foe].join('~');
+export const guidedKey = () => [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat, G.exit, G.pick, G.foe, G.style, (G.did || []).length].join('~');
+/** At the start of the Director's turn: in a battle, the battle tools are what they need. */
+export function guidedStart(d) { G.did = []; if (d && d.battle) G.path = ['battle']; }
 
 /** Which stage tool the open screen needs: dragging records a path, or draws. */
 export const guidedTool = () => { const top = G.path[G.path.length - 1]; return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : ''; };
@@ -54,7 +56,8 @@ export function buildGuided(p, c) {
   const sel = d.entities.find((e) => e.id === G.sel);
   const me = d.entities.find((e) => e.id === d.heroId);
   const lab = (e) => assetLabel(e.asset);
-  const setup = S.turn === 0, stepNo = d.steps.length + 1;
+  const ws = c.mode === 'workshop';                       // the same tools, used on a prepared scene in the workshop
+  const setup = ws || S.turn === 0, stepNo = ws ? 1 : d.steps.length + 1;
   if (p._gpath !== G.path.join('>') + G.sel) { p._gpath = G.path.join('>') + G.sel; p.scrollTop = 0; }
 
   /* ---------- navigation ---------- */
@@ -76,7 +79,8 @@ export function buildGuided(p, c) {
         h('button', { class: 'stepadd', id: 'nextStep', title: 'Finish this step and start what happens after it', onclick: () => c.nextStep() }, '＋ Next step')),
       h('div', { class: 'row' },
         h('button', { class: 'grow', id: 'previewBtn', onclick: c.preview }, c.cutting() ? '■ Stop' : '▶ Preview turn'),
-        h('button', { class: 'grow', id: 'resetStep', title: 'Undo everything in this step', onclick: () => c.resetStep() }, '↶ Reset step'),
+        h('button', { class: 'grow', id: 'undoBtn', title: 'Undo the last change (Ctrl+Z)', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo'),
+        h('button', { class: 'grow', id: 'resetStep', title: 'Undo everything in this step', onclick: () => c.resetStep() }, '⟲ Reset step'),
         h('button', { class: 'grow', id: 'clearSteps', title: 'Start the whole turn over', onclick: () => { if (d.steps.length === 0 || confirm('Remove every step of this turn and start over?')) c.clearSteps(); } }, '🗑 Clear steps'))));
   }
 
@@ -140,25 +144,26 @@ export function buildGuided(p, c) {
       if (S.rules.player === 'limited' && !d.choices.filter(Boolean).length && !d.ask) p.append(h('div', { class: 'card ask' }, h('b', {}, `Limited will: ${S.names.player} needs options`),
         h('p', { class: 'dim small' }, 'Write up to three things they may do next turn. Without options they can act freely.'), h('button', { class: 'primary', onclick: () => enter('ask') }, '❓ Decide what they may do')));
     }
-    p.append(h('div', { class: 'gtitle' }, h('b', {}, setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
-      h('small', { class: 'dim' }, setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.')));
+    p.append(h('div', { class: 'gtitle' }, h('b', {}, ws ? 'Things and scene' : setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
+      h('small', { class: 'dim' }, ws ? 'The same tools as during a turn.' : setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.')));
+    if (!ws && setup) p.append(h('div', { class: 'row' }, h('button', { class: 'grow', id: 'undoBtn', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo'), h('button', { class: 'grow', onclick: () => c.saveAsScene() }, '💾 Save as a prepared scene')));
     const sheet = c.mods().inventory || c.mods().stats || c.mods().dice;
     p.append(h('div', { class: 'gopts' },
       opt('➕', 'Add something', 'A character, a thing, an effect', () => enter('add')),
-      opt('💬', 'Someone speaks', 'Give a character a line', () => enter('speak')),
-      opt('🚶', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
-      opt('📝', 'Narrate', 'Tell what happens in words', () => { d.narration = ''; enter('narrate'); }),
-      opt('💥', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
+      !ws && opt('💬', 'Someone speaks', 'Give a character a line', () => enter('speak')),
+      !ws && opt('🚶', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
+      !ws && opt('📝', 'Narrate', 'Tell what happens in words', () => { d.narration = ''; enter('narrate'); }),
+      !ws && opt('💥', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
       opt('🌄', 'Change the scene', 'Place, weather, music, title', () => enter('scene')),
-      opt('✏️', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
-      opt('🛠️', 'Scene workshop', 'Build levels, prepare scenes', () => c.workshop()),
-      sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
-      opt('❓', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
-      opt('🎥', 'Camera', 'Zoom in on something', () => enter('camera')),
-      c.mods().points && opt('⭐', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
-      S.rules.type === 'adventure' && opt('⚔️', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
-      opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
-      opt('⚙️', 'Story settings', 'Type, rules, time, invite', () => enter('rules'))));
+      !ws && opt('✏️', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
+      !ws && opt('🛠️', 'Scene workshop', 'Build levels, prepare scenes', () => c.workshop()),
+      !ws && sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
+      !ws && opt('❓', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
+      !ws && opt('🎥', 'Camera', 'Zoom in on something', () => enter('camera')),
+      !ws && c.mods().points && opt('⭐', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
+      !ws && S.rules.type === 'adventure' && opt('⚔️', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
+      !ws && opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
+      !ws && opt('⚙️', 'Story settings', 'Type, rules, time, invite', () => enter('rules'))));
     p.append(h('p', { class: 'dim small' }, 'Tip: click anything on the stage to change it, drag it to move it.'));
     if (G.log.length) p.append(h('div', { class: 'card gevents' }, h('small', { class: 'dim' }, `In step ${stepNo} so far`), G.log.map((l) => h('div', {}, '• ' + l))));
     return;
@@ -170,18 +175,21 @@ export function buildGuided(p, c) {
     const isHero = sel.id === d.heroId;
     head(lab(sel), 'Drag it on the stage to move it.');
     const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, icon + ' ' + label);
-    p.append(sayInput('What does it say? (optional)'), lookRow(),
+    const lay = (v, label) => h('button', { 'data-lay': v, class: 'grow' + ((sel.layer || 0) === v ? ' on' : ''), onclick: () => { sel.layer = v; c.rebuild(); } }, label);
+    p.append(!ws && sayInput('What does it say? (optional)'), lookRow(),
+      !sel.tie && h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, '⬇ Behind all'), lay(0, 'By position'), lay(1, '⬆ In front')),
       h('div', { class: 'row' }, pickSel(FX, 'fx', 'Effect'), pickSel([['', 'No emote'], ...EMOTES.map((e) => [e, e])], 'emote', 'Emote')),
       h('div', { class: 'thingbtns' },
-        b('🚶', 'Move / animate', () => enter('move')),
+        !ws && b('🚶', 'Move / animate', () => enter('move')),
         b('🔄', 'Turn into…', () => { G.q = ''; enter('swap'); }),
         b('⧉', 'Copy', () => { const k = { ...clone(sel), id: Math.random().toString(36).slice(2, 10), x: clamp(sel.x + 0.09, 0, 1), say: '' }; d.entities.push(k); G.sel = k.id; c.select(k.id); c.rebuild(); }),
-        b('🧑', 'Player’s character', () => { d.heroId = isHero ? null : sel.id; c.rebuild(); }, isHero),
+        !ws && b('🧑', 'Player’s character', () => { d.heroId = isHero ? null : sel.id; c.rebuild(); }, isHero),
         b('🧱', 'Solid', () => { sel.solid = !sel.solid; c.rebuild(); }, sel.solid),
         S.rules.type === 'adventure' && !isHero && b('⭐', 'Active object', () => enter('active'), !!sel.active),
         b('🔗', sel.tie ? 'Tied — change' : 'Tie to…', () => { G.pick = null; enter('tie'); }, !!sel.tie),
-        c.mods().inventory && !isHero && b('🎒', `Give to ${S.names.player}`, () => { const l = lab(sel); c.giveToPlayer(sel); done(`${S.names.player} gets ${l}`); }),
-        b('🗑️', 'Remove', () => { const l = lab(sel); c.removeEntity(sel); done(`${l} disappears`); })),
+        !ws && c.mods().inventory && !isHero && b('🎒', `Give to ${S.names.player}`, () => { const l = lab(sel); c.giveToPlayer(sel); done(`${S.names.player} gets ${l}`); }),
+        !(ws && isHero) && b('🗑️', 'Remove', () => { const l = lab(sel); c.removeEntity(sel); done(`${l} disappears`); })),
+      ws && isHero && h('p', { class: 'dim small' }, 'This marks where the Player’s hero starts in this scene.'),
       sel.solid && h('p', { class: 'dim small' }, 'Solid: the Player’s hero cannot walk through it.'),
       doneBtn(''));
     return;
@@ -270,14 +278,16 @@ export function buildGuided(p, c) {
   if (top === 'scene') {
     head('Change what about the scene?');
     p.append(h('div', { class: 'gopts' },
-      opt('📚', 'A prepared scene', `${(S.scenes || []).length} ready in the workshop`, () => enter('scene:prepared')),
+      !ws && opt('📚', 'A prepared scene', `${(S.scenes || []).length} ready in the workshop`, () => enter('scene:prepared')),
       opt('🌄', 'The place', 'A new backdrop', () => enter('scene:place')),
       S.rules.type === 'adventure' && opt('🚪', 'Add an exit', 'A way out to another prepared scene', () => { const x = { id: c.rid(), to: '', label: 'Exit', x: 0.9, y: 0.6, locked: false }; d.exits.push(x); G.exit = x.id; enter('exit'); }),
       opt('🌦️', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
       opt('🎵', 'The music', '', () => enter('scene:music')),
-      opt('🎬', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
-      opt('🎲', 'A surprise scene', 'A ready-made place and cast', async () => { if (await c.randomScene()) done('A whole new scene'); }),
-      opt('💡', 'Give me an idea', 'A random story twist', () => c.idea())));
+      !ws && opt('🎬', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
+      !ws && opt('💾', 'Save as a prepared scene', 'Keep this scene for later', () => c.saveAsScene()),
+      !ws && S.rules.type === 'adventure' && opt('🗺️', 'The map', 'How your scenes connect', () => c.workshop({ map: true })),
+      !ws && opt('🎲', 'A surprise scene', 'A ready-made place and cast', async () => { if (await c.randomScene()) done('A whole new scene'); }),
+      !ws && opt('💡', 'Give me an idea', 'A random story twist', () => c.idea())));
     return;
   }
   if (top === 'scene:prepared') {
@@ -408,7 +418,7 @@ export function buildGuided(p, c) {
       h('select', { id: 'exitTo', onchange: (ev) => { ex.to = ev.target.value; const sc = (S.scenes || []).find((x) => x.id === ex.to); if (sc && (!ex.label || ex.label === 'Exit')) ex.label = sc.name; c.rebuild(); } }, h('option', { value: '' }, '— choose a prepared scene —'), (S.scenes || []).filter((x) => x.id !== d.sceneId).map((x) => h('option', { value: x.id, selected: ex.to === x.id }, x.name))),
       h('div', { class: 'row' },
         h('button', { id: 'exitLock', class: 'grow' + (ex.locked ? ' on' : ''), onclick: () => { ex.locked = !ex.locked; if (!setup) G.log.push(`“${ex.label}” is ${ex.locked ? 'locked' : 'unlocked'}`); c.rebuild(); } }, ex.locked ? '🔒 Locked — click to unlock' : '🔓 Open — click to lock'),
-        h('button', { class: 'grow', disabled: !ex.to, onclick: () => { const doc = c.travelTo(ex.to); if (doc) done(`Traveling to “${doc.name}”`); } }, '🚶 Travel there now'),
+        !ws && h('button', { class: 'grow', disabled: !ex.to, onclick: () => { const doc = c.travelTo(ex.to); if (doc) done(`Traveling to “${doc.name}”`); } }, '🚶 Travel there now'),
         h('button', { class: 'danger', onclick: () => { d.exits = d.exits.filter((x) => x !== ex); home(); c.rebuild(); } }, '🗑')),
       doneBtn(''));
     return;
@@ -438,51 +448,62 @@ export function buildGuided(p, c) {
         } }, '⚔️ Begin the battle'));
       return;
     }
-    head(`Battle — round ${d.battle.round}`, 'Everything you do here goes into the current step. Use “＋ Next step” between the Player’s hit and the enemy’s answer.');
+    head(`⚔️ Battle — round ${d.battle.round}`, 'One click per event. Each becomes its own step, so they play one after the other.');
     const foe = foes.find((e) => e.id === G.foe) || foes.find((e) => e.id === d.target) || foes[0];
     const a = d.answer, mv = a && a.kind === 'battle' ? a.move : '';
+    const endBattle = (sound, card) => { const dd = c.draft; for (const e of dd.entities) { e.hp = null; e.maxHp = null; } dd.battle = null; dd.ask = null; dd.sfx = sound; if (card) dd.card = card; G.path = []; };
+    /** Finish the event just built: it becomes a step of its own, and the tools stay open for the next one. */
+    const stepOn = (label) => {
+      const left = d.entities.some((e) => e.hp != null && e.id !== d.heroId && !e.temp), down = heroHp() === 0;
+      c.nextStep(); G.log = []; G.path = ['battle'];
+      if (!left) { endBattle('fanfare', 'Victory!'); c.toast('All enemies are down — the battle is over'); } else if (down) c.toast(`${S.names.player} is at 0 health — decide what happens`);
+      if (label) G.did = [...(G.did || []), label].slice(-4);
+      c.rebuild();
+    };
     p.append(h('div', { class: 'card' }, h('small', { class: 'dim' }, 'Who is fighting'),
       h('div', { class: 'row statrow' }, h('b', { class: 'grow' }, '🧑 ', S.names.player, `  ❤ ${heroHp() ?? '–'}`), h('button', { onclick: () => { hurtHero(1); c.rebuild(); } }, '−'), h('button', { onclick: () => { hurtHero(-1); c.rebuild(); } }, '+')),
-      foes.map((e) => h('div', { class: 'row statrow' }, h('button', { class: 'foe' + (e === foe ? ' on' : ''), onclick: () => { G.foe = e.id; c.rebuild(); } }, glyphNode(code, e.asset, 'mini')), h('b', { class: 'grow' }, ` ❤ ${e.hp}/${e.maxHp}`),
+      foes.map((e) => h('div', { class: 'row statrow' }, h('button', { class: 'foe' + (e === foe ? ' on' : ''), title: 'Choose this enemy', onclick: () => { G.foe = e.id; c.rebuild(); } }, glyphNode(code, e.asset, 'mini')), h('b', { class: 'grow' }, ` ❤ ${e.hp}/${e.maxHp}`),
         h('button', { onclick: () => { e.hp = clamp(e.hp - 1, 0, e.maxHp); c.rebuild(); } }, '−'), h('button', { onclick: () => { e.hp = clamp(e.hp + 1, 0, e.maxHp); c.rebuild(); } }, '+')))));
     if (foe) {
       const hit = (n) => {                                                 // the Player's blow lands (or misses)
         lunge(me, foe); for (const w of me ? held(me) : []) w.once = 'swing';
-        if (me && !held(me).length) me.once = 'lunge';
         if (n) { foe.hp = clamp(foe.hp - n, 0, foe.maxHp); foe.once = 'hit'; float(foe.id, `-${n}`, '#ff5a5a'); d.sfx = 'boom'; } else { float(foe.id, 'miss', '#ffffff'); d.sfx = 'fail'; }
         if (foe.hp <= 0) { foe.once = 'die'; foe.temp = true; foe.say = ''; }
-        if (!setup) G.log.push(n ? `${S.names.player} hits ${lab(foe)} for ${n}${foe.hp <= 0 ? ' — it falls' : ''}` : `${S.names.player} misses ${lab(foe)}`);
-        c.rebuild();
+        stepOn(n ? `${S.names.player} hits ${lab(foe)} for ${n}${foe.hp <= 0 ? ' — it falls' : ''}` : `${S.names.player} misses`);
       };
       const strike = (style, n) => {                                       // the enemy's move against the hero
         const arms = held(foe);
-        if (style === 'strike') { lunge(foe, me); foe.once = 'lunge'; d.sfx = 'boom'; }
+        if (style === 'strike') { lunge(foe, me); d.sfx = 'boom'; }
         if (style === 'swing') { lunge(foe, me); if (arms.length) for (const w of arms) w.once = 'swing'; else foe.once = 'swing'; d.sfx = 'boom'; }
         if (style === 'shoot' || style === 'magic') {
           foe.once = 'cast'; d.sfx = style === 'magic' ? 'magic' : 'laser';
-          if (me) { const shot = { id: c.rid(), asset: style === 'magic' ? 'e:🔥' : 'e:➤', x: me.x, y: me.y - 0.06, scale: 0.6, flip: me.x < foe.x, rot: 0, say: '', fx: '', emote: '', solid: false, active: null, tie: null, hp: null, maxHp: null, once: 'vanish', temp: true };
+          if (me) { const shot = { id: c.rid(), asset: style === 'magic' ? 'e:🔥' : 'e:➤', x: me.x, y: me.y - 0.06, scale: 0.6, flip: me.x < foe.x, rot: 0, say: '', fx: '', emote: '', solid: false, active: null, tie: null, hp: null, maxHp: null, once: 'vanish', temp: true, layer: 1 };
             d.entities.push(shot); d.tracks.push({ id: shot.id, pts: [0, foe.x, foe.y - 0.08 * foe.scale, 420, me.x, me.y - 0.06] }); }
         }
         if (style === 'roar') { foe.once = 'roar'; d.burst = 'shake'; d.sfx = 'alarm'; }
         if (n && me) { hurtHero(n); me.once = 'hit'; float(me.id, `-${n}`, '#ff5a5a'); d.burst = 'hurt'; } else if (me && style !== 'roar') float(me.id, 'miss', '#ffffff');
         d.battle.round += 1;
-        if (!setup) G.log.push(`${lab(foe)}: ${{ strike: 'strikes', swing: 'swings', shoot: 'shoots', magic: 'casts a spell', roar: 'roars' }[style]}${n ? ` for ${n}` : style === 'roar' ? '' : ' and misses'}`);
-        c.rebuild();
+        stepOn(`${lab(foe)} ${{ strike: 'strikes', swing: 'swings', shoot: 'shoots', magic: 'casts a spell', roar: 'roars' }[style]}${n ? ` for ${n}` : style === 'roar' ? '' : ' and misses'}`);
       };
-      G.dmg ??= 1;
-      const dmg = h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Damage'), [0, 1, 2, 3, 5, 8].map((n) => h('button', { 'data-dmg': n, class: 'grow' + (G.dmg === n ? ' on' : ''), onclick: () => { G.dmg = n; c.rebuild(); } }, n ? String(n) : 'miss')));
-      p.append(dmg,
-        h('div', { class: 'card' }, h('small', { class: 'dim' }, mv === 'attack' ? `${S.names.player} attacks — does it land?` : mv === 'defend' ? `${S.names.player} defends this turn.` : mv === 'flee' ? `${S.names.player} tries to flee.` : `${S.names.player}’s attack`),
-          h('button', { id: 'heroHits', onclick: () => hit(G.dmg) }, ['⚔️ ', S.names.player, ' hits ', glyphNode(code, foe.asset, 'mini'), G.dmg ? ` for ${G.dmg}` : ' — a miss'])),
-        h('div', { class: 'card' }, h('small', { class: 'dim' }, ['What ', glyphNode(code, foe.asset, 'mini'), ' does']),
-          h('div', { class: 'thingbtns' }, [['strike', '👊 Strike'], ['swing', '🗡️ Sword swing'], ['shoot', '🏹 Shoot'], ['magic', '🔥 Magic'], ['roar', '😡 Roar']].map(([id, l]) => h('button', { 'data-attack': id, onclick: () => strike(id, id === 'roar' ? 0 : G.dmg) }, l)))));
+      G.style ||= 'strike';
+      const dmgRow = (fn, id) => h('div', { class: 'row', id }, [[0, 'Miss'], [1, '1'], [2, '2'], [3, '3'], [5, '5'], [8, '8']].map(([n, l]) => h('button', { 'data-dmg': n, class: 'grow', onclick: () => fn(n) }, l)));
+      p.append(
+        h('div', { class: 'card' }, h('b', {}, '1. ', mv === 'attack' ? `${S.names.player} attacks ` : mv === 'defend' ? `${S.names.player} defends. ` : mv === 'flee' ? `${S.names.player} tries to flee. ` : `${S.names.player}’s attack on `, mv === 'defend' || mv === 'flee' ? '' : glyphNode(code, foe.asset, 'mini')),
+          mv === 'flee' ? h('div', { class: 'row' }, h('button', { class: 'grow', id: 'fleeYes', onclick: () => { endBattle('magic', ''); if (!setup) G.log.push(`${S.names.player} gets away`); c.rebuild(); } }, '🏃 They get away'), h('span', { class: 'dim small grow' }, 'or they fail: go on to 2.'))
+            : mv === 'defend' ? h('small', { class: 'dim' }, 'Take it into account in the damage below.')
+              : [h('small', { class: 'dim' }, 'How much damage does it do?'), dmgRow(hit, 'heroHits')]),
+        h('div', { class: 'card' }, h('b', {}, '2. What ', glyphNode(code, foe.asset, 'mini'), ' does back'),
+          h('div', { class: 'chips wrap' }, [['strike', '👊 Strike'], ['swing', '🗡️ Sword swing'], ['shoot', '🏹 Shoot'], ['magic', '🔥 Magic']].map(([id, l]) => h('button', { 'data-attack': id, class: G.style === id ? 'on' : '', onclick: () => { G.style = id; c.rebuild(); } }, l)),
+            h('button', { 'data-attack': 'roar', onclick: () => strike('roar', 0) }, '😡 Just roars')),
+          h('small', { class: 'dim' }, 'Damage to the hero'), dmgRow((n) => strike(G.style, n), 'foeHits')));
     }
-    p.append(h('div', { class: 'card' }, h('small', { class: 'dim' }, 'Skill check: ask for a d20 roll next turn'),
-        h('div', { class: 'row' }, [[8, 'Easy 8+'], [12, 'Medium 12+'], [16, 'Hard 16+']].map(([dc, l]) => h('button', { class: 'grow' + (d.ask && d.ask.kind === 'roll' && d.ask.dc === dc ? ' on' : ''), onclick: () => { d.ask = { kind: 'roll', text: 'Skill check!', sides: 20, dc, verb: '', places: [], targets: [] }; c.rebuild(); } }, l)),
-          h('button', { class: 'grow' + (d.ask && d.ask.kind === 'battle' ? ' on' : ''), onclick: () => { d.ask = { kind: 'battle', text: 'Your move!', sides: 6, dc: 0, verb: '', places: [], targets: [] }; c.rebuild(); } }, 'A normal move'))),
+    if (G.did && G.did.length) p.append(h('div', { class: 'card gevents' }, h('small', { class: 'dim' }, 'So far this turn'), G.did.map((l) => h('div', {}, '• ' + l))));
+    p.append(h('div', { class: 'card' }, h('small', { class: 'dim' }, `What ${S.names.player} does next turn`),
+        h('div', { class: 'row' }, h('button', { class: 'grow' + (d.ask && d.ask.kind === 'battle' ? ' on' : ''), onclick: () => { d.ask = { kind: 'battle', text: 'Your move!', sides: 6, dc: 0, verb: '', places: [], targets: [] }; c.rebuild(); } }, 'A battle move'),
+          [[8, 'Check 8+'], [12, 'Check 12+'], [16, 'Check 16+']].map(([dc, l]) => h('button', { class: 'grow' + (d.ask && d.ask.kind === 'roll' && d.ask.dc === dc ? ' on' : ''), title: 'A d20 skill check', onclick: () => { d.ask = { kind: 'roll', text: 'Skill check!', sides: 20, dc, verb: '', places: [], targets: [] }; c.rebuild(); } }, l)))),
       h('div', { class: 'row' },
-        h('button', { class: 'grow danger', id: 'battleEnd', onclick: () => { for (const e of d.entities) { e.hp = null; e.maxHp = null; } d.battle = null; d.ask = null; d.sfx = 'fanfare'; if (!setup) G.log.push('The battle is over'); home(); c.rebuild(); } }, '🏁 End the battle'),
-        doneBtn('')));
+        h('button', { class: 'grow danger', id: 'battleEnd', onclick: () => { endBattle('fanfare', ''); if (!setup) G.log.push('The battle is over'); c.rebuild(); } }, '🏁 End the battle'),
+        h('button', { class: 'grow', onclick: () => { home(); c.rebuild(); } }, 'Other tools')));
     return;
   }
 
