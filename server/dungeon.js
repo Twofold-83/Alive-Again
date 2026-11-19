@@ -1,9 +1,9 @@
-import * as rpgSim from '../public/rpg-sim.js';
+import * as rpgSim from '../public/shared/dungeon-rules.js';
 import { streams, touch, broadcast, online } from './rooms.js';
 import { fail } from './util.js';
 
-/* Dungeon mode (type 'rpg') has its own rules, shared with the browser: public/rpg-sim.js. One browser runs the game; the server keeps the castle, relays and remembers. */
-const rpgHost = (room) => (room.bot === 'player' ? 'director' : 'player');     // whose browser runs the game
+/* Dungeon mode (type 'rpg') has its own rules, shared with the browser: public/shared/dungeon-rules.js. One browser runs the game; the server keeps the castle, relays and remembers. */
+function rpgHost(room) { return room.bot === 'player' ? 'director' : 'player'; }     // whose browser runs the game
 function rpgRelay(room, obj, toHost) {
   const set = streams.get(room.code), host = room.tokens[rpgHost(room)];
   if (!set) return;

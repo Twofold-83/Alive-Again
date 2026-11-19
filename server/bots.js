@@ -36,17 +36,17 @@ async function botMove(ctx) {
 }
 
 const BOT_NAMES = ['Robin', 'Juno', 'Milo', 'Ada', 'Otis', 'Nova', 'Ivy', 'Felix'];
-const botName = () => pick(BOT_NAMES);
+function botName() { return pick(BOT_NAMES); }
 
 /* ---------- helpers ---------- */
-const pick = (a) => a[Math.floor(Math.random() * a.length)];
-const chance = (p) => Math.random() < p;
-const uid = () => crypto.randomBytes(4).toString('hex');
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const glyph = (e) => (e.asset.startsWith('e:') ? e.asset.slice(2) : 'the strange thing');
-const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-const nearest = (from, list) => list.slice().sort((a, b) => dist(a, from) - dist(b, from))[0];
-const ent = (kind, emoji, x, y, say = '', scale = 1) => ({ id: `${kind}-${uid()}`, asset: 'e:' + emoji, x, y, scale, flip: false, rot: 0, say, fx: '', emote: '' });
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function chance(p) { return Math.random() < p; }
+function uid() { return crypto.randomBytes(4).toString('hex'); }
+function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function glyph(e) { return e.asset.startsWith('e:') ? e.asset.slice(2) : 'the strange thing'; }
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+function nearest(from, list) { return list.slice().sort((a, b) => dist(a, from) - dist(b, from))[0]; }
+function ent(kind, emoji, x, y, say = '', scale = 1) { return { id: `${kind}-${uid()}`, asset: 'e:' + emoji, x, y, scale, flip: false, rot: 0, say, fx: '', emote: '' }; }
 
 /* ====================================================================
  * Scripted PLAYER: looks at what is on stage and makes a simple choice.

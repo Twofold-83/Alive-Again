@@ -30,7 +30,7 @@ function json(res, status, obj) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Length': Buffer.byteLength(s) });
   res.end(s);
 }
-const validToken = (t) => typeof t === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(t);
+function validToken(t) { return typeof t === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(t); }
 function serveStatic(req, res, pathname) {
   let rel;
   try { rel = decodeURIComponent(pathname); } catch { rel = '/'; }

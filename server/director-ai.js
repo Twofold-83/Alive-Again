@@ -16,10 +16,10 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);   // plug-in modules and optional libraries are loaded on demand
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-5-5';
-const fail = (status, message) => Object.assign(new Error(message), { status });
-const uid = () => crypto.randomBytes(4).toString('hex');
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const fin = (v) => typeof v === 'number' && Number.isFinite(v);
+function fail(status, message) { return Object.assign(new Error(message), { status }); }
+function uid() { return crypto.randomBytes(4).toString('hex'); }
+function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function fin(v) { return typeof v === 'number' && Number.isFinite(v); }
 
 const BACKDROPS = 'room darkroom kitchen hall dungeon ship meadow forest mountain lake swamp night graveyard sunset beach desert snow icecave volcano hell clouds street city road cave sea space moon level grid dream alert stage white black'.split(' ');
 const MOODS = 'none calm happy town funny love lullaby dream sea quest heroic victory mystery sneaky tense chase battle boss sad eerie spooky dungeon space'.split(' ');
@@ -61,7 +61,7 @@ Also return "note": one short sentence, addressed to the Director, saying what y
 
 let custom = null;
 if (process.env.DIRECTOR_AI) custom = require(path.resolve(process.env.DIRECTOR_AI));
-const available = () => !!(custom || process.env.ANTHROPIC_API_KEY);
+function available() { return !!(custom || process.env.ANTHROPIC_API_KEY); }
 
 let lazy = null;
 function sdk() {

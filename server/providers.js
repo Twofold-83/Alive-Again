@@ -50,10 +50,10 @@ function hueFor(prompt, r) {
   for (const w of prompt.toLowerCase().split(/[^a-z]+/)) if (w in HUES) return HUES[w];
   return Math.floor(r() * 360);
 }
-const svg = (body, w, h, extra = '') => ({
+function svg(body, w, h, extra = '') { return {
   mime: 'image/svg+xml',
   data: Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" ${extra}>${body}</svg>`),
-});
+}; }
 
 function proceduralSprite(prompt) {
   const r = rng('sprite:' + prompt);

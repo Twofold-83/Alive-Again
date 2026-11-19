@@ -10,26 +10,28 @@
  * A scene on the bench is added to the map with one button; from then on it saves itself.
  * Scenes on the map are kept with the story and can be saved to a file for another story.
  */
-import { PIXEL, CATEGORIES, backdropCss, pixelInfo } from './catalog.js';
-import { h, clone, clamp, norm, glyphNode, renderStage, setCell, cellAt, LEVEL_W, LEVEL_H } from './stage.js';
-import { G, resetGuided, guidedPick, guidedMark, buildGuided } from './guided.js';
+import { PIXEL, CATEGORIES, backdropCss, pixelInfo } from '../core/catalog.js';
+import { h, clone, clamp } from '../core/dom.js';
+import { norm, glyphNode, renderStage } from '../stage/render.js';
+import { setCell, cellAt, LEVEL_W, LEVEL_H } from '../stage/level.js';
+import { G, resetGuided, guidedPick, guidedMark, buildGuided } from '../story/guided.js';
 
 const W = { open: false, c: null, list: [], cur: null, view: 'build', node: null, tab: 'tiles', tool: 'brush', size: 1, a: '', k: 'f', tcat: '', q: '', sel: null, hist: [], redo: [], drag: null, walls: true, saveT: 0, el: null };
 let bench = null;                                             // the scene last worked on, kept while the page is open: { code, doc }
-export const workshopOpen = () => W.open;
-const rid = () => Math.random().toString(36).slice(2, 10);
-const $root = () => document.querySelector('#workshop');
+export function workshopOpen() { return W.open; }
+function rid() { return Math.random().toString(36).slice(2, 10); }
+function $root() { return document.querySelector('#workshop'); }
 
-const blankScene = () => norm({
+function blankScene() { return norm({
   backdrop: 'b:meadow', mood: 'm:none', narration: '', action: '', heroId: 'hero', entities: [W.c.blankHero()], drawing: [], weather: '',
   tracks: [], burst: '', sfx: '', card: '', choices: [], steps: [], sheet: { inv: [], stats: [] }, target: null, use: null, roll: null, level: null,
-});
-const library = () => W.list.map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene }));
-const onMap = (d = W.cur) => !!d && W.list.includes(d);
-const tileCats = () => PIXEL.filter((c) => c.group === 'tile');
-const newName = () => { for (let n = W.list.length + 1; ; n++) if (!W.list.some((d) => d.name === `Scene ${n}`)) return `Scene ${n}`; };
-const saveNow = () => { clearTimeout(W.saveT); W.saveT = 0; return W.c.save(library()); };
-const saveSoon = () => { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); };
+}); }
+function library() { return W.list.map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene })); }
+function onMap(d = W.cur) { return !!d && W.list.includes(d); }
+function tileCats() { return PIXEL.filter((c) => c.group === 'tile'); }
+function newName() { for (let n = W.list.length + 1; ; n++) if (!W.list.some((d) => d.name === `Scene ${n}`)) return `Scene ${n}`; }
+function saveNow() { clearTimeout(W.saveT); W.saveT = 0; return W.c.save(library()); }
+function saveSoon() { clearTimeout(W.saveT); W.saveT = setTimeout(() => { W.saveT = 0; W.c.save(library()); }, 700); }
 function flush() { if (W.saveT) saveNow(); }
 /** A free spot on the map for a new scene. */
 function spot(near) {
@@ -122,7 +124,7 @@ function keys(ev) {
 }
 
 /* ---------- drawing ---------- */
-const paintStage = () => renderStage(W.el.stage, W.cur.scene, { code: W.c.code, names: W.c.names, selId: W.sel, showKinds: W.walls });
+function paintStage() { return renderStage(W.el.stage, W.cur.scene, { code: W.c.code, names: W.c.names, selId: W.sel, showKinds: W.walls }); }
 function draw() { const map = W.view === 'map'; W.el.stage.hidden = map; W.el.map.hidden = !map; $root().classList.toggle('mapview', map); if (map) drawMap(); else paintStage(); drawBar(); drawTools(); }
 
 function importFile() {
@@ -159,7 +161,7 @@ function drawBar() {
 }
 
 /* ---------- the map ---------- */
-const linked = (a, b) => a.scene.exits.some((x) => x.to === b.id);
+function linked(a, b) { return a.scene.exits.some((x) => x.to === b.id); }
 function connect(a, b) {
   const dx = b.mx - a.mx, dy = b.my - a.my, side = Math.abs(dx) >= Math.abs(dy);
   const at = (far) => (side ? { x: far ? 0.94 : 0.06, y: 0.6 } : { x: 0.5, y: far ? 0.95 : 0.16 });

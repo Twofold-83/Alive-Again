@@ -12,19 +12,20 @@
  * G.path is where the Director is in the question tree, G.sel the character or
  * thing the current question is about.
  */
-import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetLabel } from './catalog.js';
-import { MOODS, SFX, SFX_GROUPS } from './audio.js';
-import { h, clone, clamp, glyphNode, actionText } from './stage.js';
-import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
+import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetLabel } from '../core/catalog.js';
+import { MOODS, SFX, SFX_GROUPS } from '../core/audio.js';
+import { h, clone, clamp } from '../core/dom.js';
+import { glyphNode, actionText } from '../stage/render.js';
+import { FX, EMOTES, WEATHER, BURSTS } from '../core/consts.js';
 
 export const G = { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', ask: '' };
 export function resetGuided() { Object.assign(G, { path: [], sel: null, log: [], busy: false, cat: '', q: '', note: '', exit: null, pick: null, foe: null, askKind: '' }); }
-export const guidedKey = () => [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat, G.exit, G.pick, G.foe, G.style, (G.did || []).length].join('~');
+export function guidedKey() { return [G.path.join('>'), G.sel, G.log.length, G.busy, G.cat, G.exit, G.pick, G.foe, G.style, (G.did || []).length].join('~'); }
 /** At the start of the Director's turn: in a battle, the battle tools are what they need. */
 export function guidedStart(d) { G.did = []; if (d && d.battle) G.path = ['battle']; }
 
 /** Which stage tool the open screen needs: dragging records a path, or draws. */
-export const guidedTool = () => { const top = G.path[G.path.length - 1]; return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : ''; };
+export function guidedTool() { const top = G.path[G.path.length - 1]; return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : ''; }
 
 const PICKERS = ['speak', 'move', 'give', 'tie'];   // questions that start with "which one?"
 /** A tap on something on the stage: answers an open "which one?", otherwise opens that thing's own tools. */
@@ -47,8 +48,8 @@ const EMOJI_GROUPS = {
   fx: ['effects'],
 };
 /** Categories for one "Add something" branch: pixel art first, then the emoji library. */
-const groupCats = (g) => [...PIXEL.filter((c) => c.group === g), ...EMOJI_GROUPS[g].map((id) => { const c = CATEGORIES.find((k) => k.id === id); return { ...c, label: '😀 ' + c.label }; })];
-const short = (s, n = 28) => (s.length > n ? s.slice(0, n) + '…' : s);
+function groupCats(g) { return [...PIXEL.filter((c) => c.group === g), ...EMOJI_GROUPS[g].map((id) => { const c = CATEGORIES.find((k) => k.id === id); return { ...c, label: '😀 ' + c.label }; })]; }
+function short(s, n = 28) { return s.length > n ? s.slice(0, n) + '…' : s; }
 const PENS = ['#ffffff', '#15131c', '#ff5a5a', '#ffb454', '#ffe14d', '#57d38c', '#4db8ff', '#c77dff'];
 
 export function buildGuided(p, c) {

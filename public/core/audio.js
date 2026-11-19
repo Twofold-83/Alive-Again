@@ -34,8 +34,8 @@ let ctx = null, master = null, music = null, timer = null, step = 0, nextAt = 0,
 let level = Number(localStorage.getItem('tf.vol') ?? (localStorage.getItem('tf.muted') === '1' ? 0 : 2));   // 0 off, 1 quiet, 2 full
 if (![0, 1, 2].includes(level)) level = 2;
 const VOL = [0, 0.06, 0.14];
-const live = () => ctx && level > 0 && ctx.state === 'running';
-const hz = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+function live() { return ctx && level > 0 && ctx.state === 'running'; }
+function hz(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
 
 function tone(midi, len, wave, vol, when = 0, out = master) {
   const t = ctx.currentTime + Math.max(0, when);
@@ -189,7 +189,7 @@ function playSfx(name) {
   }
 }
 
-const applyLevel = () => { if (master) master.gain.value = VOL[level]; };
+function applyLevel() { if (master) master.gain.value = VOL[level]; }
 export const audio = {
   sfx: playSfx,
   /** Must be called from a user gesture at least once (browser autoplay rules). */

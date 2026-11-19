@@ -19,7 +19,7 @@
  * plugged in. Do not rename an item once stories use it: the slug comes from the name.
  */
 export const SPRITES = new Map();   // slug -> { glyph, name, asset }
-const cat = (id, label, items) => ({
+function cat(id, label, items) { return {
   id, label,
   items: items.split(',').map((s) => {
     const i = s.indexOf(' '), glyph = s.slice(0, i), name = s.slice(i + 1);
@@ -29,7 +29,7 @@ const cat = (id, label, items) => ({
     SPRITES.set(slug, item);
     return item;
   }),
-});
+}; }
 
 export const CATEGORIES = [
   cat('people', 'People', '🧑 person,👩 woman,👨 man,🧒 child,👧 girl,👦 boy,👵 old woman grandma,👴 old man grandpa,👶 baby,🧔 bearded man,👱 blond,🧕 woman headscarf,🤵 groom suit,👰 bride,🤰 pregnant,👮 police officer cop,🕵️ detective spy,💂 guard,👷 builder worker,🧑‍⚕️ doctor nurse,🧑‍🍳 cook chef,🧑‍🚀 astronaut,🧑‍🌾 farmer,🧑‍🏫 teacher,🧑‍🎤 singer,🧑‍🎨 artist,🧑‍✈️ pilot,🧑‍🚒 firefighter,🧑‍⚖️ judge,🤴 prince king,👸 princess queen,🥷 ninja thief,🦸 superhero,🦹 villain,🤡 clown,🎅 santa,🧑‍🔬 scientist,🧑‍💻 hacker programmer,🧑‍🔧 mechanic,🧑‍🎓 student,🧑‍💼 office worker,🏃 runner,🧎 kneeling,🧍 standing,💃 dancer woman,🕺 dancer man,🧗 climber,🏊 swimmer,🤺 fencer,🏇 jockey rider,🧘 meditating,🛌 sleeping in bed,👪 family,👫 couple,👯 twins'),
@@ -49,7 +49,7 @@ export const CATEGORIES = [
 ];
 
 const stars = 'radial-gradient(1px 1px at 12% 18%,#fff 99%,transparent),radial-gradient(1.5px 1.5px at 31% 9%,#fff 99%,transparent),radial-gradient(1px 1px at 47% 27%,#fff 99%,transparent),radial-gradient(1.5px 1.5px at 63% 13%,#fff 99%,transparent),radial-gradient(1px 1px at 78% 31%,#fff 99%,transparent),radial-gradient(1px 1px at 90% 8%,#fff 99%,transparent),radial-gradient(1px 1px at 22% 40%,#fff 99%,transparent),radial-gradient(1.5px 1.5px at 70% 45%,#fff 99%,transparent),';
-const sun = (x, y, c) => `radial-gradient(circle at ${x}% ${y}%,${c} 0 6%,transparent 6.5%),`;
+function sun(x, y, c) { return `radial-gradient(circle at ${x}% ${y}%,${c} 0 6%,transparent 6.5%),`; }
 
 export const BACKDROPS = [
   { id: 'b:room', name: 'Room', css: 'linear-gradient(#d9c7a8 0 58%,#6e4f33 58% 60%,#9a7350 60%)' },
@@ -105,7 +105,7 @@ export async function loadPixel() {
   } catch { /* no pixel pack: the emoji library is used */ }
 }
 /** Every searchable built-in sprite, pixel art first. */
-export const allItems = () => [...PIXEL.flatMap((c) => c.items), ...CATEGORIES.flatMap((c) => c.items)];
+export function allItems() { return [...PIXEL.flatMap((c) => c.items), ...CATEGORIES.flatMap((c) => c.items)]; }
 
 /* ---------- art packs (higher quality replacements for the placeholders) ---------- */
 export const PACK = { sprites: {}, backdrops: {}, pixel: {} };
@@ -116,7 +116,7 @@ export async function loadPack() {
   } catch { /* no pack installed: placeholders are used */ }
 }
 
-export const assetUrl = (code, id) => `/api/rooms/${code}/assets/${id.slice(2)}`;
+export function assetUrl(code, id) { return `/api/rooms/${code}/assets/${id.slice(2)}`; }
 
 /** How to draw a sprite asset: { img: url } or { glyph: text }. */
 export function spriteView(code, asset) {
@@ -136,8 +136,8 @@ export function assetLabel(asset, name) {
   return name || (it ? 'the ' + it.name.split(' ').slice(0, 3).join(' ') : 'it');
 }
 /** Catalog facts about a pixel sprite: { kind: 'floor'|'wall' } for tiles, { solid } for props. */
-export const pixelInfo = (asset) => (asset.startsWith('p:') && PX.get(asset.slice(2))) || {};
-export const assetName = (asset) => { const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null; return it ? it.name.split(' ').slice(0, 2).join(' ') : ''; };
+export function pixelInfo(asset) { return (asset.startsWith('p:') && PX.get(asset.slice(2))) || {}; }
+export function assetName(asset) { const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null; return it ? it.name.split(' ').slice(0, 2).join(' ') : ''; }
 
 export function backdropCss(code, id) {
   if (id && id.startsWith('c:')) return `url("${assetUrl(code, id)}") center/cover no-repeat #000`;

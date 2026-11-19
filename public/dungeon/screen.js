@@ -1,14 +1,14 @@
 /* Dungeon mode: the screen. Castle editor, the game canvas, the hero's controls and the Overlord's panel.
  * The rules live in rpg-sim.js. One browser is the "host" and runs them (the hero's, normally);
  * the other watches snapshots and sends Overlord commands through the server. */
-import { h } from './stage.js';
-import { spriteView } from './catalog.js';
-import * as R from './rpg-sim.js';
+import { h } from '../core/dom.js';
+import { spriteView } from '../core/catalog.js';
+import * as R from '../shared/dungeon-rules.js';
 
 const TS = 48, W = R.RW * TS, H = R.RH * TS;
-const $ = (s) => document.querySelector(s);
-const fill = (el, ...kids) => el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
-const add = (el, ...kids) => el.append(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
+function $(s) { return document.querySelector(s); }
+function fill(el, ...kids) { return el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== '')); }
+function add(el, ...kids) { return el.append(...kids.flat().filter((k) => k != null && k !== false && k !== '')); }
 let C = null;                       // { act, toast, audio } from app.js
 let S = null, st = null, run = -1, def = null, mode = 'live';
 let tool = null, editKey = null, viewKey = null, hover = null, painting = false;
@@ -16,11 +16,11 @@ let uiKey = '', hudKey = '', mapKey = '', lastEv = 0, raf = 0, last = 0, sending
 let acc = { snap: 0, hero: 0, lord: 0, ui: 0 }, shake = 0, msgAt = { n: 0, t: 0 }, clock = 0;
 const held = [], want = {}, queue = [], disp = new Map(), fxs = [], undo = [];
 
-const hot = () => !!S.hotseat;
-const isHost = () => hot() || (S.bot === 'player' ? S.you === 'director' : S.you === 'player');
-const isLord = () => hot() || S.you === 'director';
-const heroKeys = () => isHost() && S.bot !== 'player';
-const soloHero = () => S.bot === 'director' && S.you === 'player';
+function hot() { return !!S.hotseat; }
+function isHost() { return hot() || (S.bot === 'player' ? S.you === 'director' : S.you === 'player'); }
+function isLord() { return hot() || S.you === 'director'; }
+function heroKeys() { return isHost() && S.bot !== 'player'; }
+function soloHero() { return S.bot === 'director' && S.you === 'player'; }
 
 /* ---------- sprites ---------- */
 const imgs = new Map();
@@ -29,7 +29,7 @@ function img(slug) {
   if (!i) { i = new Image(); i.src = spriteView(null, 'p:' + slug).img; imgs.set(slug, i); }
   return i.complete && i.naturalWidth ? i : null;
 }
-const icon = (slug) => h('img', { src: spriteView(null, 'p:' + slug).img, class: 'px', alt: '' });
+function icon(slug) { return h('img', { src: spriteView(null, 'p:' + slug).img, class: 'px', alt: '' }); }
 function spr(g, slug, x, y, o = {}) {
   const i = img(slug);
   if (!i) return;
@@ -42,7 +42,7 @@ function spr(g, slug, x, y, o = {}) {
   g.drawImage(i, -s / 2, -s / 2, s, s);
   g.restore();
 }
-const hash = (k, x, y) => { let n = (x * 73856093) ^ (y * 19349663) ^ (k.charCodeAt(0) * 83492791) ^ (k.charCodeAt(2) * 2971); n = (n ^ (n >>> 13)) * 1274126177; return ((n ^ (n >>> 16)) >>> 0) % 100; };
+function hash(k, x, y) { let n = (x * 73856093) ^ (y * 19349663) ^ (k.charCodeAt(0) * 83492791) ^ (k.charCodeAt(2) * 2971); n = (n ^ (n >>> 13)) * 1274126177; return ((n ^ (n >>> 16)) >>> 0) % 100; }
 const SIDE_ROT = { N: 0, S: Math.PI, W: -Math.PI / 2, E: Math.PI / 2 };
 const ARROW_ROT = { '>': 0, V: Math.PI / 2, '<': Math.PI, A: -Math.PI / 2 };
 const MOB_BY_CH = Object.fromEntries(Object.entries(R.MOBS).map(([k, m]) => [m.ch, k]));
@@ -232,7 +232,7 @@ function onKey(e) {
   if (st && st.mode === 'turn') { if (e.repeat && clock - lastKey < 0.13) return; lastKey = clock; if (queue.length < 2) queue.push(dir ? { k: 'move', dir } : { k: actn }); return; }
   if (dir) { if (!e.repeat) { const i = held.indexOf(dir); if (i >= 0) held.splice(i, 1); held.push(dir); } } else if (!e.repeat) want[actn] = clock + 0.22;
 }
-const press = (k) => { C.audio.unlock(); if (st && st.mode === 'turn') queue.push({ k }); else want[k] = clock + 0.3; };
+function press(k) { C.audio.unlock(); if (st && st.mode === 'turn') queue.push({ k }); else want[k] = clock + 0.3; }
 
 /* ---------- the Overlord's hand ---------- */
 function command(c) {
@@ -283,9 +283,9 @@ function start() {
   clearTimeout(saveTimer);
   C.act('rpgStart', { def, mode }).catch((e) => C.toast(e.message));
 }
-const modePick = () => h('div', { class: 'seg' },
+function modePick() { return h('div', { class: 'seg' },
   h('button', { id: 'rpgLive', class: mode === 'live' ? 'on' : '', onclick: () => { mode = 'live'; saveSoon(); uiKey = ''; } }, '⚡ Live', h('small', {}, 'Everything moves at once')),
-  h('button', { id: 'rpgTurn', class: mode === 'turn' ? 'on' : '', onclick: () => { mode = 'turn'; saveSoon(); uiKey = ''; } }, '♟️ Turn-based', h('small', {}, `Hero: ${R.AP} moves, then the Overlord`)));
+  h('button', { id: 'rpgTurn', class: mode === 'turn' ? 'on' : '', onclick: () => { mode = 'turn'; saveSoon(); uiKey = ''; } }, '♟️ Turn-based', h('small', {}, `Hero: ${R.AP} moves, then the Overlord`))); }
 
 function board(pickRoom) {
   const cells = [];
@@ -383,11 +383,11 @@ function side() {
   }
   if (!isLord() || hot()) add(p, h('small', { class: 'dim grp' }, 'The hero'), controls());
 }
-const controls = () => h('div', { class: 'rkeys' },
+function controls() { return h('div', { class: 'rkeys' },
   h('div', { class: 'touch' }, '🕹️ Slide your thumb on the pad to walk. ⚔️ swings your sword, 🧪 drinks a potion, 💣 drops a bomb — then run.'),
   h('div', {}, h('kbd', {}, '↑'), h('kbd', {}, '←'), h('kbd', {}, '↓'), h('kbd', {}, '→'), ' or ', h('kbd', {}, 'W'), h('kbd', {}, 'A'), h('kbd', {}, 'S'), h('kbd', {}, 'D'), ' walk'),
   h('div', {}, h('kbd', {}, 'Space'), ' swing your sword'), h('div', {}, h('kbd', {}, 'Q'), ' drink a potion'), h('div', {}, h('kbd', {}, 'E'), ' drop a bomb, then run'),
-  h('div', { class: 'dim' }, 'Find keys for locked doors. Gates open when every monster in the room is gone. Take the crown to win.'));
+  h('div', { class: 'dim' }, 'Find keys for locked doors. Gates open when every monster in the room is gone. Take the crown to win.')); }
 
 function hud() {
   const el = $('#rpgHud');

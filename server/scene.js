@@ -78,7 +78,7 @@ export function cleanTrackPts(raw) {
   }
   return pts;
 }
-export const rollDie = (sides) => ([6, 20].includes(sides) ? { sides, value: 1 + crypto.randomInt(sides) } : null);
+export function rollDie(sides) { return [6, 20].includes(sides) ? { sides, value: 1 + crypto.randomInt(sides) } : null; }
 
 /* What the Director asks of the Player for their next turn. kind:
  *   roll     roll a die (sides 6|20; dc = the number to reach, 0 for none)

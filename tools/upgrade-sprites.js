@@ -34,7 +34,7 @@ const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'im
     process.exit(1);
   }
   const { generateAsset } = await import(pathToFileURL(path.join(root, 'server', 'providers.js')));
-  const { CATEGORIES, BACKDROPS } = await import(pathToFileURL(path.join(root, 'public', 'catalog.js')));
+  const { CATEGORIES, BACKDROPS } = await import(pathToFileURL(path.join(root, 'public', 'core', 'catalog.js')));
   const manifestFile = path.join(packDir, 'manifest.json');
   const manifest = { sprites: {}, backdrops: {}, pixel: {}, ...JSON.parse(fs.readFileSync(manifestFile, 'utf8')) };
   fs.mkdirSync(path.join(packDir, 'gen'), { recursive: true });

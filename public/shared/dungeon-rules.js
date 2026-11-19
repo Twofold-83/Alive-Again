@@ -43,15 +43,15 @@ export const POWERS = {
 export const SPOOKS = [['thunder', '⛈️ Thunder'], ['evil', '😈 Evil laugh'], ['ghost', '👻 Wail'], ['scream', '😱 Scream'], ['growl', '🐻 Growl'], ['knock', '✊ Knocking']];
 
 const BORDER_OK = '#T><AV', DOOR_OK = 'DLG#', SOLID = '#T%bcCrGL><AV';
-const idx = (x, y) => y * RW + x;
-const inside = (x, y) => x > 0 && y > 0 && x < RW - 1 && y < RH - 1;
-const onBoard = (x, y) => x >= 0 && y >= 0 && x < RW && y < RH;
-const rnd = (n) => Math.floor(Math.random() * n);
-const pick = (a) => a[rnd(a.length)];
-const dist = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-export const roomKey = (x, y) => `${x},${y}`;
-export const neighbor = (key, side) => { const [x, y] = key.split(',').map(Number), d = SIDE_D[side]; return roomKey(x + d[0], y + d[1]); };
-export const doorSide = (x, y) => Object.keys(DOORS).find((s) => DOORS[s][0] === x && DOORS[s][1] === y) || null;
+function idx(x, y) { return y * RW + x; }
+function inside(x, y) { return x > 0 && y > 0 && x < RW - 1 && y < RH - 1; }
+function onBoard(x, y) { return x >= 0 && y >= 0 && x < RW && y < RH; }
+function rnd(n) { return Math.floor(Math.random() * n); }
+function pick(a) { return a[rnd(a.length)]; }
+function dist(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+export function roomKey(x, y) { return `${x},${y}`; }
+export function neighbor(key, side) { const [x, y] = key.split(',').map(Number), d = SIDE_D[side]; return roomKey(x + d[0], y + d[1]); }
+export function doorSide(x, y) { return Object.keys(DOORS).find((s) => DOORS[s][0] === x && DOORS[s][1] === y) || null; }
 
 /* ---------- building a castle ---------- */
 export function emptyRoom() {
@@ -59,7 +59,7 @@ export function emptyRoom() {
   for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) t += inside(x, y) ? '.' : '#';
   return { t, fx: 'open', msg: '' };
 }
-export const setCh = (t, x, y, ch) => t.slice(0, idx(x, y)) + ch + t.slice(idx(x, y) + 1);
+export function setCh(t, x, y, ch) { return t.slice(0, idx(x, y)) + ch + t.slice(idx(x, y) + 1); }
 /** Keeps the outer walls whole and the doors between neighbouring rooms in step with each other. */
 export function syncDoors(def) {
   for (const key of Object.keys(def.rooms)) {
@@ -206,16 +206,16 @@ function addMob(st, k, r, x, y, delay = 0) {
   st.mobs.push(m);
   return m;
 }
-const ev = (st, k, x = 0, y = 0, v = 0) => { st.ev.push({ n: ++st.seq, k, x, y, v }); if (st.ev.length > 30) st.ev.splice(0, st.ev.length - 30); };
-const say = (st, text, who = 'sys') => { st.msg = { n: ++st.seq, text, who }; };
-export const tileAt = (st, x, y, r = st.cur) => (onBoard(x, y) && st.rooms[r] ? st.rooms[r].t[idx(x, y)] : '#');
-const setTile = (st, x, y, ch, r = st.cur) => { st.rooms[r].t = setCh(st.rooms[r].t, x, y, ch); };
-const mobAt = (st, x, y, r = st.cur) => st.mobs.find((m) => m.r === r && m.x === x && m.y === y);
-const roomMobs = (st, r = st.cur) => st.mobs.filter((m) => m.r === r);
-export const spikesUp = (st) => st.spikes;
-const walk = (ch, fly, ghost) => (ghost ? true : !SOLID.includes(ch) && ch !== 'D' && ch !== 'X' && (fly || (ch !== '~' && ch !== 'o')));
-const mobCanStand = (st, m, x, y) => inside(x, y) && walk(tileAt(st, x, y, m.r), MOBS[m.k].fly, MOBS[m.k].ghost) && !mobAt(st, x, y, m.r) && !(m.r === st.cur && st.hero.x === x && st.hero.y === y);
-const heroCanStand = (ch) => !SOLID.includes(ch) && ch !== '~';
+function ev(st, k, x = 0, y = 0, v = 0) { st.ev.push({ n: ++st.seq, k, x, y, v }); if (st.ev.length > 30) st.ev.splice(0, st.ev.length - 30); }
+function say(st, text, who = 'sys') { st.msg = { n: ++st.seq, text, who }; }
+export function tileAt(st, x, y, r = st.cur) { return onBoard(x, y) && st.rooms[r] ? st.rooms[r].t[idx(x, y)] : '#'; }
+function setTile(st, x, y, ch, r = st.cur) { st.rooms[r].t = setCh(st.rooms[r].t, x, y, ch); }
+function mobAt(st, x, y, r = st.cur) { return st.mobs.find((m) => m.r === r && m.x === x && m.y === y); }
+function roomMobs(st, r = st.cur) { return st.mobs.filter((m) => m.r === r); }
+export function spikesUp(st) { return st.spikes; }
+function walk(ch, fly, ghost) { return ghost ? true : !SOLID.includes(ch) && ch !== 'D' && ch !== 'X' && (fly || (ch !== '~' && ch !== 'o')); }
+function mobCanStand(st, m, x, y) { return inside(x, y) && walk(tileAt(st, x, y, m.r), MOBS[m.k].fly, MOBS[m.k].ghost) && !mobAt(st, x, y, m.r) && !(m.r === st.cur && st.hero.x === x && st.hero.y === y); }
+function heroCanStand(ch) { return !SOLID.includes(ch) && ch !== '~'; }
 
 function arrive(st) {
   const room = st.rooms[st.cur];

@@ -1,6 +1,6 @@
 /* Dungeon mode: the rules, played out by a computer hero against a computer Overlord in many random castles. */
 import assert from 'node:assert';
-import * as R from '../public/rpg-sim.js';
+import * as R from '../public/shared/dungeon-rules.js';
 import fs from 'node:fs';
 
 for (const s of [...Object.values(R.MOBS), ...Object.values(R.LOOT)]) assert(fs.existsSync(`public/px/${s.sprite}.png`), 'sprite ' + s.sprite);
