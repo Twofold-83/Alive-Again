@@ -25,6 +25,7 @@ export function norm(sc) {
   if (sc.level === undefined) sc.level = null;
   sc.exits ||= []; sc.floats ||= []; sc.sceneId ||= ''; sc.travel ||= ''; sc.verb ||= '';
   for (const k of ['ask', 'answer', 'exit', 'cam', 'award', 'battle', 'point']) if (sc[k] === undefined) sc[k] = null;
+  sc.order ||= [];
   if (sc.sheet.points == null) sc.sheet.points = 0;
   for (const e of sc.entities) { e.rot ||= 0; e.fx ||= ''; e.emote ||= ''; e.solid = !!e.solid; e.once ||= ''; e.temp = !!e.temp; e.layer ||= 0; if (e.active === undefined) e.active = null; if (e.tie === undefined) e.tie = null; if (e.hp === undefined) { e.hp = null; e.maxHp = null; } }
   return sc;
@@ -359,8 +360,11 @@ export function playCut(root, before, after, o, done) {
     at(0, () => root.classList.add('fade')); at(380, swap); at(760, () => root.classList.remove('fade')); t = 760;
   } else swap();
   if (after.card) { at(t, () => { view.card = after.card; }); t += 1900; at(t, () => { view.card = ''; }); t += 200; }
-  const tM = t;
-  let popped = false;
+  /* The rest is a few acts. A Director's step always plays: movement, lines, dice. A Player's turn plays speaking, walking
+   * and acting in the order the Player did them (after.order). */
+  let tM = t, tEnd = t, popped = false;
+  const actMove = () => {
+  tM = t;
   at(tM, () => {                                                       // everything starts moving
     frame.weather = after.weather; frame.drawing = after.drawing; view.newStrokes = newStrokes; frame.cam = after.cam;
     for (const e of frame.entities) {
@@ -380,18 +384,26 @@ export function playCut(root, before, after, o, done) {
   const camMoved = JSON.stringify(before ? before.cam : null) !== JSON.stringify(after.cam), acting = after.entities.some((e) => e.once) || after.floats.length;
   t = tM + Math.max(trackEnd ? trackEnd + 250 : 0, moved || newStrokes.size || camMoved ? 950 : 300, acting ? 1100 : 0);
   if (after.award) { at(t, () => { view.award = after.award; if (o.sfx) o.sfx(after.award.n < 0 ? 'fail' : 'coin'); }); t += 1600; at(t, () => { view.award = null; }); }
-  const tEnd = t;
+  tEnd = t;
   at(t, () => { for (const e of frame.entities) { e.walk = false; e.face = 0; if (e.tracked) { const f = fin.get(e.id); e.tracked = false; e.x = f.x; e.y = f.y; } } });
+  };
+  const actSay = () => {
   const sayers = after.entities.filter((e) => e.say && !(prev.has(e.id) && prev.get(e.id).say === e.say));
   if (o.by === 'player') sayers.sort((a, b) => (b.id === after.heroId) - (a.id === after.heroId));
   for (const e of sayers) {                                            // each line is typed out, the camera leans in on who speaks
-    at(t, () => { const fe = frame.entities.find((x) => x.id === e.id); fe.emote = e.emote; view.pop = e.id; view.speaker = e.id; if (autoCam) frame.cam = { x: e.x, y: Math.max(0, e.y - 0.1 * e.scale), z: 1.16 }; });
+    at(t, () => { const fe = frame.entities.find((x) => x.id === e.id); fe.emote = e.emote; view.pop = e.id; view.speaker = e.id; if (autoCam) frame.cam = { x: fe.x, y: Math.max(0, fe.y - 0.1 * e.scale), z: 1.16 }; });
     types.push({ t0: t, id: e.id, text: e.say, n: 0 });
     frame.entities.find((x) => x.id === e.id).sayLen = e.say.length;
     t += Math.min(7500, e.say.length * 24 + Math.max(1100, 600 + 28 * e.say.length));
   }
   if (sayers.length) at(t, () => { view.speaker = null; view.pop = null; frame.cam = after.cam; });
+  };
+  const actDo = () => {
   if (o.by === 'player' && (after.action || after.target || after.point || after.use || after.exit || after.answer)) { at(t, () => { view.pop = null; frame.action = after.action; frame.target = after.target; frame.point = after.point; frame.use = after.use; frame.exit = after.exit; frame.answer = after.answer; frame.verb = after.verb; }); t += 1300; }
+  };
+  const acts = { walk: actMove, say: actSay, act: actDo };
+  const order = o.by === 'player' ? [...new Set([...(after.order || []).filter((k) => acts[k]), 'walk', 'say', 'act'])] : ['walk', 'say', 'act'];
+  for (const k of order) acts[k]();
   if (after.roll && after.roll.by === o.by) {
     at(t, () => { view.dice = { ...after.roll, rolling: true }; if (o.sfx) o.sfx('dice'); });
     at(t + 700, () => { view.dice = { ...after.roll }; });

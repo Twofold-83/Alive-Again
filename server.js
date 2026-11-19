@@ -66,7 +66,7 @@ function newScene() {
     tracks: [], burst: '', sfx: '', card: '', choices: [], // the Director's one-turn extras
     steps: [],                                         // earlier moments of a step-by-step turn, played in order before this scene
     sheet: { inv: [], stats: [] },                     // inventory + stats (story-type layers)
-    target: null, point: null, use: null, roll: null,               // the Player's one-turn extras (+ dice)
+    target: null, point: null, order: [], use: null, roll: null,               // the Player's one-turn extras (+ dice)
     level: null,                                       // tile grid: floors, walls (see cleanLevel)
     ask: null,                                         // what the Director asks of the Player this turn (see cleanAsk)
     answer: null, verb: '', exit: null,                // the Player's reply, the verb used on an active object, the exit headed for
@@ -214,7 +214,7 @@ function cleanScene(s, prev, inner) {
     narration: str(s.narration, 240), action: '', heroId: seen.has(s.heroId) ? s.heroId : null, entities,
     drawing, weather: str(s.weather, 12), tracks, burst: str(s.burst, 12), sfx: str(s.sfx, 12), card: str(s.card, 60),
     choices: arr(s.choices).map((c) => str(c, 40)).filter(Boolean).slice(0, 4),
-    sheet: cleanSheet(s.sheet), target: null, point: null, use: null, roll: null,
+    sheet: cleanSheet(s.sheet), target: null, point: null, order: [], use: null, roll: null,
     level: cleanLevel(s.level),
     ask: cleanAsk(s.ask, seen), answer: null, verb: '', exit: null,
     exits: arr(s.exits).slice(0, 12).filter((x) => x && typeof x === 'object').map((x) => ({ id: str(x.id, 24) || uid(), to: str(x.to, 24), label: str(x.label, 40) || 'Exit', x: r3(num(x.x, 0, 1, 0.5)), y: r3(num(x.y, 0, 1, 0.5)), locked: !!x.locked })),
@@ -318,7 +318,7 @@ function syncClock(room) {
 /* Commit the current scene as a finished turn and hand over to the other side. */
 function advance(room, timeout) {
   if (timeout) {   // nothing new was submitted: drop every one-turn extra so it does not play twice
-    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, point: null, use: null, roll: null, steps: [], travel: '', award: null, floats: [], answer: null, verb: '', exit: null });
+    Object.assign(room.scene, { tracks: [], burst: '', sfx: '', card: '', action: '', target: null, point: null, order: [], use: null, roll: null, steps: [], travel: '', award: null, floats: [], answer: null, verb: '', exit: null });
     if (room.whose === 'player') room.scene.choices = [];
   }
   room.history.push({ turn: room.turn, by: room.whose, at: Date.now(), timeout: !!timeout, scene: clone(room.scene) });
@@ -395,7 +395,7 @@ async function act(room, token, body) {
           }
         }
         if (mode === 'limited' && ask && ask.kind !== 'battle' && !answer) throw fail(400, 'Do what the Director asked first');
-        Object.assign(sc, { tracks: [], burst: '', sfx: '', card: '', steps: [], target: null, point: null, use: null, travel: '', award: null, floats: [], verb: '', exit: null });   // the Director's one-turn extras are over
+        Object.assign(sc, { tracks: [], burst: '', sfx: '', card: '', steps: [], target: null, point: null, order: [], use: null, travel: '', award: null, floats: [], verb: '', exit: null });   // the Director's one-turn extras are over
         for (const e of sc.entities) { if (e.id !== sc.heroId) e.say = ''; e.once = ''; }      // lines already heard do not hang around
         sc.entities = sc.entities.filter((e) => !e.temp);
         if (hero && mode !== 'tell') {
@@ -419,6 +419,7 @@ async function act(room, token, body) {
           if (ex) sc.exit = ex.id;
           if (askTarget) sc.target = askTarget;
         }
+        sc.order = [...new Set(arr(body.order).filter((k) => ['say', 'walk', 'act'].includes(k)))];   // the order the Player did things in, for the replay
         sc.point = null;                                      // adventure: the written action may point at a thing or a spot on the stage
         if (room.rules.type === 'adventure' && body.point && typeof body.point === 'object') {
           const thing = sc.entities.find((e) => e.id === body.point.id && e.id !== sc.heroId);

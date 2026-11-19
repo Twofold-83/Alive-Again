@@ -138,7 +138,7 @@ function freshDraft() {
     if (d.roll && d.roll.by === 'director') d.roll = null;
   } else {
     const me = hero(d); if (me) me.say = '';
-    Object.assign(d, { action: '', target: null, point: null, use: null, heroTrack: null, walked: false, reply: null, act: null, exit: null, verb: '', answer: null });
+    Object.assign(d, { action: '', target: null, point: null, order: [], use: null, heroTrack: null, walked: false, reply: null, act: null, exit: null, verb: '', answer: null });
     if (d.roll && d.roll.by === 'player') d.roll = null;
   }
   d.rollWant = 0;
@@ -153,7 +153,7 @@ function initDraft() {
   } catch { /* ignore */ }
   draft = freshDraft();
 }
-const saveDraft = () => sessionStorage.setItem('tf.draft', JSON.stringify({ code, turn: S.turn, you: S.you, draft }));
+const saveDraft = () => { syncOrder(); sessionStorage.setItem('tf.draft', JSON.stringify({ code, turn: S.turn, you: S.you, draft })); };
 const paint = () => { if (!cut && S) renderStage(stage, shown(), stageOpts()); };
 /* Undo for the Director: every finished change is remembered; Ctrl+Z or the Undo button steps back. */
 let past = [];
@@ -169,6 +169,13 @@ function undo() {
   draft = JSON.parse(past[past.length - 1]);
   selId = null; resetGuided(); guidedStart(null); uiKey = ''; saveDraft(); render();
 }
+/** The Player's turn is replayed in the order they did things: speaking, walking, acting. Whatever is new goes last; whatever was taken back drops out. */
+function syncOrder() {
+  if (!S || S.you !== 'player' || !draft) return;
+  const me = hero(draft), has = { say: !!(me && me.say), walk: !!draft.walked, act: !!(draft.action || draft.target || draft.point || draft.use || draft.exit || draft.act || (draft.reply && !draft.reply.roll)) };
+  draft.order = (draft.order || []).filter((k) => has[k]);
+  for (const k of Object.keys(has)) if (has[k] && !draft.order.includes(k)) draft.order.push(k);
+}
 function changed() { noteChange(); saveDraft(); render(); }           // may rebuild the panel
 function changedQuiet() { saveDraft(); paint(); renderSheet(); }    // never rebuilds the panel (the user is typing in it)
 function rebuild() { uiKey = ''; changed(); }
@@ -177,7 +184,7 @@ function rebuild() { uiKey = ''; changed(); }
  * stood at the end of each); the draft itself is the step being worked on. Everything done within
  * one step plays at the same time; the next step plays after it. */
 const ONE_STEP = { tracks: [], burst: '', sfx: '', card: '', travel: '', award: null, floats: [] };   // belongs to the step that made it
-const PLAYERS = { action: '', target: null, point: null, use: null, roll: null, answer: null, verb: '', exit: null };    // the Player's last turn: shown while editing, never sent back
+const PLAYERS = { action: '', target: null, point: null, order: [], use: null, roll: null, answer: null, verb: '', exit: null };    // the Player's last turn: shown while editing, never sent back
 /** What a new step inherits from the one before: speech and one-off animations are over, short-lived effects are gone. */
 const carry = (d) => { d.entities = d.entities.filter((e) => !e.temp); for (const e of d.entities) { e.say = ''; e.once = ''; } Object.assign(d, clone(ONE_STEP)); return d; };
 const asFrame = (d) => { const f = { ...clone(d), ...PLAYERS, steps: [] }; delete f.rollWant; delete f.said; delete f.heroTrack; return f; };
@@ -218,7 +225,7 @@ async function submit() {
   submitting = true; render(); audio.sfx('send');
   const turn = S.turn, me = hero(draft), roll = draft.rollWant || 0;
   const body = S.you === 'director' ? { turn, scene: finalScene(), roll }
-    : { answer: draft.reply, act: draft.act, exit: draft.exit, turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, point: draft.point, use: draft.use, roll, track: draft.heroTrack };
+    : { answer: draft.reply, act: draft.act, exit: draft.exit, turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, point: draft.point, order: draft.order, use: draft.use, roll, track: draft.heroTrack };
   try { await act('submit', body, 6); } catch (e) {
     if (S && S.turn === turn) { submitting = false; toast(e.message); render(); }
   }

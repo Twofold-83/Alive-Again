@@ -123,12 +123,20 @@ const { setup } = require('./lib');
     await x.opt('Change the scene'); assert.match(await p.textContent('.gopt:has-text("Go to a scene from the map")'), /2 on the map/); await p.click('.gback');
     await toPlayer();
     const [px, py] = await x.heroPos(); assert(Math.abs(px - 6.5 / 16) < 0.03, `the hero starts where the prepared scene says (${px})`);
-    // pointing past the wall: the hero finds the gap and walks around
+    // pointing past the wall: the hero finds the gap and walks around. The Player speaks first, then walks: the replay keeps that order
+    await p.fill('#foot input[placeholder^="💬"]', 'Off I go!');
     await x.walk(13.5 / 16, 5.5 / 12);
+    await p.fill('#foot input[placeholder^="✋"]', 'Looks around');
+    await p.evaluate(() => { window.__beats = []; let last = null; const add = (k) => { if (!window.__beats.includes(k)) window.__beats.push(k); };
+      setInterval(() => { const st = document.querySelector('#stage'); if (!/\bcut\b/.test(st.className)) { last = null; return; }
+        const h = st.querySelector('.ent.hero'), x = h && h.style.left; if (last != null && x !== last) add('walk'); last = x;
+        if (st.querySelector('.bubbles').textContent.trim()) add('say'); if (/Looks around/.test(st.querySelector('.strip.act').textContent)) add('act'); }, 30); });
     let [qx, qy] = await x.heroPos(); assert(Math.abs(qx - 13.5 / 16) < 0.03 && Math.abs(qy - 5.5 / 12) < 0.03, `the hero walked around the wall (${qx}, ${qy})`);
     await x.shot('s-4-walked-around');
     await toDirector();
     sc = await x.last();
+    assert.deepEqual(sc.order, ['say', 'walk', 'act'], 'the order the Player did things in is kept');
+    assert.deepEqual(await p.evaluate(() => window.__beats), ['say', 'walk', 'act'], 'and the replay shows it in that order');
     let tr = sc.tracks[0].pts; assert(tr.length >= 12, 'the walk has corners: ' + tr.length / 3 + ' points');
     let low = 0; for (let i = 0; i < tr.length; i += 3) low = Math.max(low, tr[i + 2]); assert(low > 10 / 12, `it went through the gap at the bottom (lowest point ${low})`);
     for (let i = 0; i < tr.length; i += 3) assert(!(Math.floor(tr[i + 1] * 16) === 10 && tr[i + 2] < 10 / 12), 'no point of the walk is inside the wall');
