@@ -108,11 +108,11 @@ export async function loadPixel() {
 export const allItems = () => [...PIXEL.flatMap((c) => c.items), ...CATEGORIES.flatMap((c) => c.items)];
 
 /* ---------- art packs (higher quality replacements for the placeholders) ---------- */
-export const PACK = { sprites: {}, backdrops: {} };
+export const PACK = { sprites: {}, backdrops: {}, pixel: {} };
 export async function loadPack() {
   try {
     const r = await fetch('packs/manifest.json', { cache: 'no-cache' });
-    if (r.ok) { const j = await r.json(); Object.assign(PACK.sprites, j.sprites); Object.assign(PACK.backdrops, j.backdrops); }
+    if (r.ok) { const j = await r.json(); Object.assign(PACK.sprites, j.sprites); Object.assign(PACK.backdrops, j.backdrops); Object.assign(PACK.pixel, j.pixel); }
   } catch { /* no pack installed: placeholders are used */ }
 }
 
@@ -121,7 +121,7 @@ export const assetUrl = (code, id) => `/api/rooms/${code}/assets/${id.slice(2)}`
 /** How to draw a sprite asset: { img: url } or { glyph: text }. */
 export function spriteView(code, asset) {
   if (asset.startsWith('c:')) return { img: assetUrl(code, asset) };
-  if (asset.startsWith('p:')) return { img: `px/${asset.slice(2)}.png` };
+  if (asset.startsWith('p:')) return { img: PACK.pixel[asset.slice(2)] ? 'packs/' + PACK.pixel[asset.slice(2)] : `px/${asset.slice(2)}.png` };   // an art pack can replace any pixel sprite
   if (asset.startsWith('s:')) {
     const slug = asset.slice(2), it = SPRITES.get(slug);
     return PACK.sprites[slug] ? { img: 'packs/' + PACK.sprites[slug] } : { glyph: it ? it.glyph : '❓' };

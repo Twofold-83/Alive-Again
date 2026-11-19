@@ -63,6 +63,9 @@ function playSfx(name) {
     case 'alarm': seq([81, 76, 81, 76, 81, 76], 0.18, 'square', 0.17); break;
     case 'heart': [0, 0.22, 0.8, 1.02].forEach((t) => tone(33, 0.16, 'sine', 1.8, t)); break;
     case 'laser': seq([96, 91, 86, 81, 76, 71], 0.03, 'sawtooth', 0.08); break;
+    case 'talk': tone(79 + Math.random() * 7, 0.035, 'square', 0.22); break;
+    case 'type': tone(67, 0.02, 'triangle', 0.25); break;
+    case 'step': noise(0.06, 0.9, 700); break;
     case 'dice': [0, 0.08, 0.17, 0.3].forEach((t) => tone(90 + Math.random() * 8, 0.04, 'square', 0.5, t)); break;
   }
 }

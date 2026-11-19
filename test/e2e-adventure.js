@@ -14,8 +14,8 @@ const { setup } = require('./lib');
     const pos = (sel) => p.evaluate((s) => { const st = document.querySelector(s).style; return [parseFloat(st.left) / 100, parseFloat(st.top) / 100]; }, sel);
     const act = () => p.textContent('.strip.act');
 
-    await p.goto(t.base); await p.click('#hotseat'); await p.waitForSelector('.gopts');
-    await x.opt('Story settings'); await p.click('.card .chips button:has-text("Adventure")'); await p.click('.chips button:has-text("Points")'); await x.done();
+    await p.goto(t.base); await p.click('#typeAdventure'); await p.click('#hotseat'); await p.waitForSelector('.gopts');
+    await x.opt('Story settings'); assert.match(await p.textContent('#panel .card'), /Adventure.*chosen when the story was created/s); await p.click('.chips button:has-text("Points")'); await x.done();
     await x.add('mage'); await x.done();
     assert.equal(await p.locator('#stage .ent').count(), 2); await p.click('#undoBtn'); assert.equal(await p.locator('#stage .ent').count(), 1, 'undo takes the last change back');
     await x.add('mage'); await p.click('[data-lay="1"]');

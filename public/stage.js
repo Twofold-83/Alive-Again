@@ -158,13 +158,13 @@ export function renderStage(root, scene, o = {}) {
     const draw = document.createElementNS(SVG, 'svg');
     draw.setAttribute('class', 'draw'); draw.setAttribute('viewBox', '0 0 400 300'); draw.setAttribute('preserveAspectRatio', 'none');
     // the world (everything the camera looks at) and, over it, the things that stay put on the screen
-    root.append(h('div', { class: 'world' }, h('div', { class: 'bg' }), h('div', { class: 'level' }), draw, h('div', { class: 'marks' }), h('div', { class: 'ents' }), h('div', { class: 'weather' }), h('div', { class: 'bubbles' }), h('div', { class: 'dest' }), h('div', { class: 'camframe' })),
-      h('div', { class: 'strip act' }), h('div', { class: 'strip narr' }), h('div', { class: 'cardov' }), h('div', { class: 'diceov' }), h('div', { class: 'awardov' }));
+    root.append(h('div', { class: 'world' }, h('div', { class: 'bg' }), h('div', { class: 'level' }), draw, h('div', { class: 'marks' }), h('div', { class: 'ents' }), h('div', { class: 'weather' }), h('div', { class: 'dest' }), h('div', { class: 'camframe' })),
+      h('div', { class: 'strip act' }), h('div', { class: 'strip narr' }), h('div', { class: 'cardov' }), h('div', { class: 'diceov' }), h('div', { class: 'awardov' }), h('div', { class: 'bar top' }), h('div', { class: 'bar bot' }), h('div', { class: 'bubbles' }));
     const fit = () => root.style.setProperty('--u', root.clientWidth / 8 + 'px');
     new ResizeObserver(fit).observe(root); fit();
   }
-  const [world, actEl, narrEl, cardEl, diceEl, awardEl] = root.children;
-  const [bg, level, draw, marks, ents, weather, bubbles, destEl, camEl] = world.children;
+  const [world, actEl, narrEl, cardEl, diceEl, awardEl, , , bubbles] = root.children;
+  const [bg, level, draw, marks, ents, weather, destEl, camEl] = world.children;
   const code = o.code || '';
   const css = backdropCss(code, scene.backdrop);
   if (bg._css !== css) { bg._css = css; bg.style.background = css; }
@@ -172,7 +172,8 @@ export function renderStage(root, scene, o = {}) {
 
   // camera: zoom the world onto a point (shown as a frame instead while the Director edits)
   const cam = scene.cam && scene.cam.z > 1 ? scene.cam : null;
-  if (cam && !o.camFrame) { const z = cam.z, c = (v) => clamp(50 - v * z * 100, (1 - z) * 100, 0); world.style.transform = `translate(${c(cam.x)}%, ${c(cam.y)}%) scale(${z})`; } else world.style.transform = '';
+  let zoom = 1, panX = 0, panY = 0;                            // where a point of the world ends up on screen (speech bubbles live on the screen)
+  if (cam && !o.camFrame) { const c = (v) => clamp(50 - v * cam.z * 100, (1 - cam.z) * 100, 0); zoom = cam.z; panX = c(cam.x); panY = c(cam.y); world.style.transform = `translate(${panX}%, ${panY}%) scale(${zoom})`; } else world.style.transform = '';
   camEl.style.cssText = cam && o.camFrame ? `display:block;width:${100 / cam.z}%;height:${100 / cam.z}%;left:${clamp(cam.x - 0.5 / cam.z, 0, 1 - 1 / cam.z) * 100}%;top:${clamp(cam.y - 0.5 / cam.z, 0, 1 - 1 / cam.z) * 100}%` : 'display:none';
 
   const lkey = scene.level ? scene.level.cells + scene.level.pal.map((t) => t.a + t.k).join() + (o.showKinds ? 'k' : '') : '';
@@ -211,12 +212,13 @@ export function renderStage(root, scene, o = {}) {
   }
 
   const byId = new Map(scene.entities.map((e) => [e.id, e]));
+  const faces = (e) => e.flip !== (e.face < 0);                // mirrored: flipped by the Director, or walking to the left right now
   /** Where a thing is drawn: a tied thing follows whatever it is tied to, in front of or behind it. */
   const spot = (e) => {
     const p = e.tie && byId.get(e.tie.to);
     const lift = (e.layer || 0) * 3000;                      // sent to the back / brought to the front by the Director
     if (!p || p === e || p.tie) return { x: e.x, y: e.y, z: Math.round(e.y * 1000) + 1 + lift };
-    return { x: p.x + e.tie.dx * p.scale * (p.flip ? -1 : 1), y: p.y + e.tie.dy * p.scale, z: Math.round(p.y * 1000) + 1 + (p.layer || 0) * 3000 + (e.tie.front ? 1 : -1), held: p };
+    return { x: p.x + e.tie.dx * p.scale * (faces(p) ? -1 : 1), y: p.y + e.tie.dy * p.scale, z: Math.round(p.y * 1000) + 1 + (p.layer || 0) * 3000 + (e.tie.front ? 1 : -1), held: p };
   };
   const live = new Set(), floats = o.floats || [];
   for (const e of scene.entities) {
@@ -226,10 +228,11 @@ export function renderStage(root, scene, o = {}) {
     const [fxw, emote, hp, fl] = el.children, at = spot(e);
     if (el._asset !== e.asset) { el._asset = e.asset; fxw.replaceChildren(glyphNode(code, e.asset, 'glyph')); }
     el.className = 'ent' + (e.id === scene.heroId ? ' hero' : '') + (e.id === o.selId ? ' sel' : '') + (e.id === scene.target || (o.pickId && e.id === o.pickId) ? ' target' : '')
-      + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked || (at.held && at.held.tracked) ? ' tracked' : '') + (at.held && (at.held.gone || at.held.fresh) ? ' gone' : '') + (o.showKinds && e.solid ? ' solid' : '') + (e.active ? ' active' : '') + (o.hot && o.hot.has(e.id) ? ' hot' : '');
+      + (e.fresh ? ' fresh' : '') + (e.gone ? ' gone' : '') + (e.tracked || (at.held && at.held.tracked) ? ' tracked' : '') + (at.held && (at.held.gone || at.held.fresh) ? ' gone' : '') + (o.showKinds && e.solid ? ' solid' : '') + (e.active ? ' active' : '') + (o.hot && o.hot.has(e.id) ? ' hot' : '')
+      + (o.speaker === e.id ? ' speaking' : '') + (e.walk && !e.fx ? ' walk' : '') + (e.pop ? ' popin' : '');
     el.dataset.name = e.active ? e.active.name : '';
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '') + (o.playing && e.once ? ' once-' + e.once : '');
-    fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${e.flip !== !!(e.tie && byId.get(e.tie.to) && byId.get(e.tie.to).flip) ? -1 : 1})`;
+    fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${faces(e) !== !!(at.held && faces(at.held)) ? -1 : 1})`;
     if (emote.textContent !== (e.emote || '')) emote.textContent = e.emote || '';
     hp.style.display = e.hp == null ? 'none' : 'block';
     if (e.hp != null) hp.firstChild.style.width = clamp((e.hp / (e.maxHp || 1)) * 100, 0, 100) + '%';
@@ -241,13 +244,17 @@ export function renderStage(root, scene, o = {}) {
   }
   for (const [id, el] of root._els) if (!live.has(id)) { el.remove(); root._els.delete(id); }
 
-  bubbles.replaceChildren(...scene.entities.filter((e) => e.say && !e.gone).map((e) => { const at = spot(e); return h('div', {
-    class: 'bubble' + (o.pop === e.id ? ' pop' : ''),
-    style: `left:${clamp(at.x, 0.24, 0.76) * 100}%;bottom:min(calc(${(1 - at.y) * 100}% + var(--u) * ${e.scale * 1.22 + 0.12}),82%);z-index:${Math.round(at.y * 1000) + 2000}`,
+  const size = (n) => (n > 100 ? ' xlong' : n > 45 ? ' long' : '');   // longer text is set smaller and wider, so it never fills the stage
+  const speakers = scene.entities.filter((e) => e.say && !e.gone).sort((a, b) => (b.id === o.speaker) - (a.id === o.speaker));   // whoever speaks now gets the best spot
+  bubbles.replaceChildren(...speakers.map((e) => { const at = spot(e), sx = at.x * 100 * zoom + panX, sy = at.y * 100 * zoom + panY; return h('div', {
+    class: 'bubble' + (o.pop === e.id ? ' pop' : '') + (o.speaker && o.speaker !== e.id ? ' old' : '') + size(e.sayLen || e.say.length), 'data-id': e.id,
+    style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * 1.22 + 0.12) * zoom})`,
   }, e.say); }));
-  actEl.textContent = o.noAct ? '' : actionText(scene, o.names || { player: 'Player' }, o.pendingRoll);
   const droll = scene.roll && scene.roll.by === 'director' ? `🎲 ${scene.roll.value} (d${scene.roll.sides})  ` : '';
   narrEl.textContent = droll + (scene.narration || '');
+  narrEl.className = 'strip narr' + size((scene.narrLen || (scene.narration || '').length) / 2);
+  layoutBubbles(root, bubbles, narrEl);
+  actEl.textContent = o.noAct ? '' : actionText(scene, o.names || { player: 'Player' }, o.pendingRoll);
   const card = o.travel ? '🚶 Traveling to\n' + o.travel : o.card || '';
   if (cardEl.textContent !== card) cardEl.textContent = card;
   cardEl.classList.toggle('travel', !!o.travel);
@@ -256,6 +263,31 @@ export function renderStage(root, scene, o = {}) {
   diceEl.classList.toggle('rolling', !!(o.dice && o.dice.rolling));
   const award = o.award ? `${o.award.n >= 0 ? '+' : ''}${o.award.n} ⭐${o.award.text ? '\n' + o.award.text : ''}` : '';
   if (awardEl.textContent !== award) awardEl.textContent = award;
+}
+
+/** Place speech bubbles: always fully on the stage, clear of the narration, and not on top of each other. */
+function layoutBubbles(root, layer, narrEl) {
+  if (!layer.children.length) return;
+  const st = root.getBoundingClientRect(), nb = narrEl.getBoundingClientRect();
+  const floor = (nb.height > 4 ? nb.top : st.bottom) - 3, placed = [];
+  for (const b of layer.children) {
+    b.style.transform = 'translate(-50%, 0)';
+    const r = b.getBoundingClientRect(), w = r.width, hh = r.height;
+    const fit = (dx, dy) => { const L = Math.max(st.left + 3, Math.min(st.right - w - 3, r.left + dx)), T = Math.max(st.top + 3, Math.min(floor - hh, r.top + dy)); return { L, T, R: L + w, B: T + hh }; };
+    const over = (q) => placed.reduce((a, p) => a + Math.max(0, Math.min(q.R, p.R) - Math.max(q.L, p.L)) * Math.max(0, Math.min(q.B, p.B) - Math.max(q.T, p.T)), 0);
+    // its natural spot if that is free; otherwise the free spot nearest to it, searched over the whole stage
+    let best = { q: fit(0, 0), d: 0 }; best.ov = over(best.q);
+    if (best.ov) {
+      for (let T = st.top + 3; T <= floor - hh; T += 14) for (const L of [r.left, st.left + 3, st.right - w - 3, (st.left + st.right - w) / 2, r.left - w * 0.6, r.left + w * 0.6]) {
+        const q = fit(L - r.left, T - r.top), ov = over(q), d = Math.hypot(q.L - r.left, q.T - r.top);
+        if (ov < best.ov - 1 || (Math.abs(ov - best.ov) <= 1 && d < best.d)) best = { q, ov, d };
+      }
+    }
+    placed.push(best.q);
+    const mx = best.q.L - r.left, my = best.q.T - r.top;
+    b.style.transform = `translate(calc(-50% + ${mx}px), ${my}px)`;
+    b.classList.toggle('moved', Math.abs(mx) > 10 || Math.abs(my) > 10);   // its pointer would point at the wrong place
+  }
 }
 
 /* ---------- cut scenes ---------- */
@@ -312,6 +344,8 @@ export function playCut(root, before, after, o, done) {
   frame.exit = null; frame.answer = null; frame.verb = '';
 
   const view = { ...o, playing: true }, steps = [];
+  const sp = o.speed || 1, types = [];                         // sp > 1 plays faster (used by the simulations); types: lines being typed out
+  const autoCam = o.autoCam !== false && !after.cam && !(before && before.cam);
   const at = (ms, fn) => steps.push({ ms, fn });
   let t = 0;
   const swap = () => { frame.backdrop = after.backdrop; frame.level = after.level; frame.exits = after.exits; };
@@ -327,7 +361,9 @@ export function playCut(root, before, after, o, done) {
     for (const e of frame.entities) {
       const f = fin.get(e.id);
       if (!f) { e.gone = true; continue; }
+      if (e.fresh) e.pop = true;                               // newcomers pop in
       e.fresh = false;
+      if (e.tracked || f.x !== e.x || f.y !== e.y) { e.walk = true; e.face = Math.sign(f.x - e.x); }   // on the move: bob along, face the way it goes
       Object.assign(e, { scale: f.scale, rot: f.rot, flip: f.flip, fx: f.fx, once: f.once, hp: f.hp, maxHp: f.maxHp, tie: f.tie });
       if (!f.say) e.emote = f.emote;
       if (!e.tracked) { e.x = f.x; e.y = f.y; }
@@ -339,24 +375,28 @@ export function playCut(root, before, after, o, done) {
   const camMoved = JSON.stringify(before ? before.cam : null) !== JSON.stringify(after.cam), acting = after.entities.some((e) => e.once) || after.floats.length;
   t = tM + Math.max(trackEnd ? trackEnd + 250 : 0, moved || newStrokes.size || camMoved ? 950 : 300, acting ? 1100 : 0);
   if (after.award) { at(t, () => { view.award = after.award; if (o.sfx) o.sfx('bell'); }); t += 1600; at(t, () => { view.award = null; }); }
-  at(t, () => { for (const e of frame.entities) if (e.tracked) { const f = fin.get(e.id); e.tracked = false; e.x = f.x; e.y = f.y; } });
+  const tEnd = t;
+  at(t, () => { for (const e of frame.entities) { e.walk = false; e.face = 0; if (e.tracked) { const f = fin.get(e.id); e.tracked = false; e.x = f.x; e.y = f.y; } } });
   const sayers = after.entities.filter((e) => e.say && !(prev.has(e.id) && prev.get(e.id).say === e.say));
   if (o.by === 'player') sayers.sort((a, b) => (b.id === after.heroId) - (a.id === after.heroId));
-  for (const e of sayers) {
-    at(t, () => { const fe = frame.entities.find((x) => x.id === e.id); fe.say = e.say; fe.emote = e.emote; view.pop = e.id; });
-    t += 900 + 45 * e.say.length;
+  for (const e of sayers) {                                            // each line is typed out, the camera leans in on who speaks
+    at(t, () => { const fe = frame.entities.find((x) => x.id === e.id); fe.emote = e.emote; view.pop = e.id; view.speaker = e.id; if (autoCam) frame.cam = { x: e.x, y: Math.max(0, e.y - 0.1 * e.scale), z: 1.16 }; });
+    types.push({ t0: t, id: e.id, text: e.say, n: 0 });
+    frame.entities.find((x) => x.id === e.id).sayLen = e.say.length;
+    t += Math.min(7500, e.say.length * 24 + Math.max(1100, 600 + 28 * e.say.length));
   }
+  if (sayers.length) at(t, () => { view.speaker = null; view.pop = null; frame.cam = after.cam; });
   if (o.by === 'player' && (after.action || after.target || after.use || after.exit || after.answer)) { at(t, () => { view.pop = null; frame.action = after.action; frame.target = after.target; frame.use = after.use; frame.exit = after.exit; frame.answer = after.answer; frame.verb = after.verb; }); t += 1300; }
   if (after.roll && after.roll.by === o.by) {
     at(t, () => { view.dice = { ...after.roll, rolling: true }; if (o.sfx) o.sfx('dice'); });
     at(t + 700, () => { view.dice = { ...after.roll }; });
     t += 1700; at(t, () => { view.dice = null; frame.roll = after.roll; });
   }
-  if (after.narration && !sameNarr) { at(t, () => { view.pop = null; frame.narration = after.narration; }); t += Math.min(4500, 900 + 40 * after.narration.length); }
+  if (after.narration && !sameNarr) { frame.narrLen = after.narration.length; types.push({ t0: t, id: null, text: after.narration, n: 0 }); t += Math.min(8000, after.narration.length * 22 + Math.max(1300, 700 + 26 * after.narration.length)); }
   const total = t + 250;
   steps.sort((a, b) => a.ms - b.ms);
 
-  let i = 0, raf = 0, finished = false;
+  let i = 0, raf = 0, finished = false, lastStep = -999;
   const start = performance.now();
   const finish = () => {
     if (finished) return;
@@ -367,21 +407,30 @@ export function playCut(root, before, after, o, done) {
   };
   const tick = () => {
     if (finished) return;
-    const el = performance.now() - start;
+    const el = (performance.now() - start) * sp;
     let dirty = false;
     while (i < steps.length && steps[i].ms <= el) { steps[i++].fn(); dirty = true; }
     if (trackEnd && el >= tM && el <= tM + trackEnd + 250) {
       for (const tr of tracks) {
         const e = frame.entities.find((x) => x.id === tr.id), p = e && e.tracked && sample(tr.pts, el - tM);
-        if (p) { e.x = p[0]; e.y = p[1]; }
+        if (p) { if (Math.abs(p[0] - e.x) > 0.0008) e.face = Math.sign(p[0] - e.x); e.x = p[0]; e.y = p[1]; }
       }
       dirty = true;
     }
+    for (const ty of types) {                                         // typewriter, with a soft tick every few letters
+      if (el < ty.t0 || ty.n >= ty.text.length) continue;
+      const n = Math.min(ty.text.length, Math.floor((el - ty.t0) / (ty.id ? 24 : 22)) + 1);
+      if (n === ty.n) continue;
+      if (o.sfx && Math.floor(n / 3) !== Math.floor(ty.n / 3)) o.sfx(ty.id ? 'talk' : 'type');
+      ty.n = n; dirty = true;
+      if (ty.id) { const fe = frame.entities.find((x) => x.id === ty.id); if (fe) fe.say = ty.text.slice(0, n); } else frame.narration = ty.text.slice(0, n);
+    }
+    if (o.sfx && el >= tM && el < tEnd && el - lastStep > 290 && frame.entities.some((e) => e.walk && !e.gone)) { lastStep = el; o.sfx('step'); }
     if (dirty) renderStage(root, frame, view);
     if (el >= total) return finish();
     raf = requestAnimationFrame(tick);
   };
-  const guard = setTimeout(finish, total + 1500);    // background tabs pause animation frames
+  const guard = setTimeout(finish, total / sp + 1500);    // background tabs pause animation frames
   root.classList.add('cut');
   renderStage(root, frame, view);
   raf = requestAnimationFrame(tick);
@@ -395,13 +444,23 @@ export function playCut(root, before, after, o, done) {
  */
 export function playTurn(root, before, after, o, done) {
   const frames = [...(after.steps || []), after];
-  let i = 0, cur = null, stopped = false;
+  let i = 0, cur = null, stopped = false, wait = 0;
+  const bars = () => root.querySelectorAll('.bar');
+  const end = () => {                                                  // curtain: bars away, and a "Your turn" cue if control comes back to this player
+    root.classList.remove('cine'); for (const b of bars()) b.textContent = '';
+    if (o.stinger) { const st = h('div', { class: 'stinger' }, o.stinger); root.append(st); setTimeout(() => st.remove(), 1500); }
+    if (done) done();
+  };
   const next = () => {
     if (stopped) return;
-    if (i >= frames.length) { if (done) done(); return; }
+    if (i >= frames.length) return end();
     const prev = i ? frames[i - 1] : before, frame = frames[i++];
-    cur = playCut(root, prev, frame, { ...o, by: o.by }, next);
+    root.dataset.step = i;
+    cur = playCut(root, prev, frame, o, () => { cur = null; wait = setTimeout(next, 220 / (o.speed || 1)); });
   };
+  renderStage(root, before || frames[0], o);                           // make sure the stage exists before the bars are labelled
+  root.classList.add('cine');
+  if (bars()[0]) bars()[0].textContent = o.who ? `${o.who}${frames.length > 1 ? `  ·  ${frames.length} moments` : ''}  ·  click to skip` : '';
   next();
-  return { skip() { if (stopped) return; stopped = true; const c = cur; cur = null; if (c) c.skip(); renderStage(root, after, o); if (done) done(); } };
+  return { skip() { if (stopped) return; stopped = true; clearTimeout(wait); const c = cur; cur = null; if (c) c.skip(); renderStage(root, after, o); end(); } };
 }

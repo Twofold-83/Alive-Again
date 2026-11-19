@@ -107,7 +107,8 @@ function onState(s) {
     if (cut) cut.skip();
     if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {  // present what just happened before handing over control
       const by = s.whose === 'director' ? 'player' : 'director';
-      cut = playTurn(stage, s.before, s.scene, { ...stageOpts(), selId: null, pendingRoll: 0, dest: null, by, sfx: audio.sfx }, () => {
+      if (s.turn === 1 && s.info.title) { const first = s.scene.steps[0] || s.scene; if (!first.card) first.card = s.info.title; }   // the story opens on its title
+      cut = playTurn(stage, s.before, s.scene, { ...stageOpts(), selId: null, pendingRoll: 0, dest: null, camFrame: false, by, sfx: audio.sfx, who: `${by === 'director' ? '🎬' : '🧑'} ${s.names[by]}`, stinger: myTurn() ? (s.hotseat ? `${s.whose === 'director' ? 'Director' : 'Player'}’s turn` : 'Your turn') : '' }, () => {
         cut = null;
         if (myTurn()) { audio.blip(); if (navigator.vibrate) navigator.vibrate(120); }
         render();
@@ -410,7 +411,7 @@ stage.addEventListener('pointercancel', endDrag);
 function previewCut() {
   if (cut) return cut.skip();
   audio.unlock();
-  cut = playTurn(stage, S.scene, finalScene(), { ...stageOpts(), selId: null, by: 'director', sfx: audio.sfx }, () => { cut = null; render(); });
+  cut = playTurn(stage, S.scene, finalScene(), { ...stageOpts(), selId: null, camFrame: false, by: 'director', sfx: audio.sfx, who: '▶ Preview' }, () => { cut = null; render(); });
   render();
 }
 
@@ -456,6 +457,9 @@ setInterval(tick, 250);
 /* ---------- main render ---------- */
 function render() {
   if (!S) return;
+  const ts = $('#titleScreen'), showTitle = S.turn === 0 && !(myTurn() && S.you === 'director') && !!(S.info.title || S.info.text);
+  ts.hidden = !showTitle;
+  if (showTitle) ts.replaceChildren(h('h2', {}, S.info.title || 'A new story'), S.info.text && h('p', {}, S.info.text), h('small', {}, `${S.names.director} is setting the stage…`));
   const tool = directing() ? guidedTool() : '';          // the stage tool always follows the open Director screen
   rec = tool === 'rec'; drawOn = tool === 'draw';
   const scene = shown();
@@ -551,8 +555,8 @@ const PLAYER_MODES = [
 function typeCard() {
   const r = S.rules;
   return h('div', { class: 'card' }, h('h3', {}, 'Story type'),
-    h('div', { class: 'chips wrap' }, TYPES.map((t) => h('button', { class: r.type === t.id ? 'on' : '', title: t.hint, onclick: () => setRules({ type: t.id, modules: { inventory: false, stats: false, dice: false, points: S.rules.modules.points, ...t.modules }, }) }, t.label))),
-    h('p', { class: 'dim small' }, TYPES.find((t) => t.id === r.type).hint + ' Layers can be switched on and off at any time:'),
+    h('p', {}, h('b', {}, TYPES.find((t) => t.id === r.type).label), h('span', { class: 'dim small' }, '  — chosen when the story was created')),
+    h('p', { class: 'dim small' }, 'Layers can be switched on and off at any time:'),
     h('div', { class: 'chips wrap' }, MODULES.map((m) => h('button', { class: r.modules[m.id] ? 'on' : '', title: m.hint, onclick: () => setRules({ modules: { ...r.modules, [m.id]: !r.modules[m.id] } }) }, m.label))),
     h('h3', {}, `How ${S.names.player} plays`),
     h('div', { class: 'chips wrap' }, PLAYER_MODES.map((m) => h('button', { 'data-pmode': m.id, class: r.player === m.id ? 'on' : '', title: m.hint, onclick: () => setRules({ player: m.id }) }, m.label))),
@@ -569,6 +573,7 @@ function buildPanel() {
           : `Press “Walk” and click where your hero should go (once per turn).${mods().inventory ? ' Click a thing to reach for it, or a 🎒 item to use it.' : ''} Then say something, do something — or both — and end your turn.`]
         : S.you === 'player' ? [S.turn === 0 ? `${S.names.director} is setting the stage…` : `${S.names.director} is deciding what happens…`, 'The whole world is in their hands. Watch the stage.']
           : [`${S.names.player} is making a move…`, 'When they finish you can change anything: the cast, the place, the music, what everybody says.'];
+    if (S.info.text && S.you !== 'director') p.append(h('div', { class: 'card', id: 'howto' }, h('h3', {}, '📜 ' + (S.info.title || 'How to play')), h('p', { class: 'pre' }, S.info.text)));
     if (tips) p.append(h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
     if (S.you === 'director') p.append(h('button', { id: 'wsOpen', onclick: showWorkshop }, '🛠️ Scene workshop — prepare scenes while you wait'));
     const r = recap(S.scene); if (r) p.append(r);
@@ -586,6 +591,7 @@ const guidedCtx = {
   toast, act, audio, rebuild: () => rebuild(), changed: () => changed(), changedQuiet: () => changedQuiet(),
   addEntity: (a) => addEntity(a), removeEntity: (e) => removeEntity(e), giveToPlayer: (e) => giveToPlayer(e), autoTrack: (e, st) => autoTrack(e, st),
   maker: (k, f) => maker(k, f), randomScene: () => randomScene(), typeCard: () => typeCard(), setRules: (r) => setRules(r),
+  setInfo: (info) => { S.info = info; act('settings', { info }, 3).catch((e) => toast(e.message)); },
   shareLink: () => shareLink(), openStory: () => openStory(), leave: () => leave(), idea: () => toast('💡 ' + IDEAS[Math.floor(Math.random() * IDEAS.length)]),
 };
 /* ---------- prepared scenes and the scene workshop ---------- */
@@ -839,9 +845,11 @@ function leave(msg) {
   $('#invite').hidden = true; $('#newBtns').hidden = false; codeEl.value = '';
   errEl.textContent = msg || '';
 }
+let storyType = 'free';                                    // chosen once, when the story is created
+for (const b of document.querySelectorAll('#typePick button')) b.onclick = () => { storyType = b.dataset.type; for (const o of document.querySelectorAll('#typePick button')) o.classList.toggle('on', o === b); };
 async function create(role, mode) {
   errEl.textContent = '';
-  try { enter((await api('/api/rooms', { token, name: myName(), role, mode })).code); } catch (e) { errEl.textContent = e.message; }
+  try { enter((await api('/api/rooms', { token, name: myName(), role, mode, type: storyType })).code); } catch (e) { errEl.textContent = e.message; }
 }
 async function join(c, quiet) {
   c = (c || '').trim().toUpperCase();

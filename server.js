@@ -264,7 +264,7 @@ function view(room, role) {
     scene: room.scene,
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
     before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
-    rules: room.rules, hotseat: !!room.hotseat, claude: directorAI.available(),
+    rules: room.rules, info: room.info || { title: '', text: '' }, hotseat: !!room.hotseat, claude: directorAI.available(),
     scenes: role === 'director' || room.hotseat ? room.scenes || [] : undefined,
     historyLen: room.history.length, bot: room.bot || null,
     lastTimeout: room.lastTimeout,
@@ -419,7 +419,8 @@ async function act(room, token, body) {
     case 'settings': {
       directorOnly();
       room.settings.turnSeconds = Math.round(num(body.turnSeconds, 0, 600, room.settings.turnSeconds));
-      if (body.rules && typeof body.rules === 'object') room.rules = cleanRules(body.rules);
+      if (body.rules && typeof body.rules === 'object') room.rules = cleanRules({ ...body.rules, type: room.rules.type });   // layers can change, the story type cannot
+      if (body.info && typeof body.info === 'object') room.info = { title: str(body.info.title, 60), text: typeof body.info.text === 'string' ? body.info.text.replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').trim().slice(0, 800) : '' };
       touch(room); broadcast(room);
       return { ok: true };
     }
@@ -584,7 +585,8 @@ async function handle(req, res) {
       tokens: { director: null, player: null }, names: { director: 'Director', player: 'Player' },
       settings: { turnSeconds: 60 }, turn: 0, whose: 'director', deadline: null, remaining: null,
       ended: false, lastTimeout: false, scene: newScene(), history: [], assets: [],
-      rules: cleanRules({ type: mode === 'bot' && role === 'player' ? 'adventure' : 'free' }),
+      rules: cleanRules({ type: body.type === 'adventure' || (body.type == null && mode === 'bot' && role === 'player') ? 'adventure' : 'free' }),   // chosen once, here
+      info: { title: '', text: '' },
     };
     room.tokens[role] = body.token;
     room.names[role] = str(body.name, 20) || room.names[role];

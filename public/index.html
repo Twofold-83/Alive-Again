@@ -18,6 +18,11 @@
     <p class="tag">A story told by two.<br>One plays the hero. One plays the whole world.</p>
     <p id="invite" class="invite" hidden></p>
     <input id="name" maxlength="20" placeholder="Your name" autocomplete="nickname" enterkeyhint="done">
+    <div id="typePick" class="typepick">
+      <span class="dim small">Kind of story</span>
+      <button id="typeFree" class="on" data-type="free">🎭 Free play<small>Just the stage and your imagination</small></button>
+      <button id="typeAdventure" data-type="adventure">🗺️ Adventure<small>Inventory, stats, levels, maps, battles</small></button>
+    </div>
     <div id="newBtns">
       <button id="newDirector" class="big primary">🎬 Start a story as Director<small>You control the world, the cast and the music</small></button>
       <button id="newPlayer" class="big">🧑 Start a story as Player<small>You are the hero — your partner directs</small></button>
@@ -43,7 +48,7 @@
   <div id="banner" hidden></div>
   <div id="main">
     <div id="left">
-      <div id="stageWrap"><div id="stage" class="stage"></div></div>
+      <div id="stageWrap"><div id="stage" class="stage"></div><div id="titleScreen" hidden></div></div>
       <div id="sheet" hidden></div>
     </div>
     <div id="right">

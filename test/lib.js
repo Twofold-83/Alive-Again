@@ -20,7 +20,7 @@ exports.setup = async (port, env = {}) => {
       opt: (label) => p.click(`.gopt:has-text("${label}")`),
       done: () => p.click('.gdone'),
       end: () => p.click('#foot button.go'),
-      cutDone: () => p.waitForFunction(() => !document.querySelector('#stage').classList.contains('cut'), null, { timeout: 60000 }),
+      cutDone: () => p.waitForFunction(() => !/\b(cut|cine)\b/.test(document.querySelector('#stage').className), null, { timeout: 90000 }),
       shot: async (n) => { if (t.shots) await p.screenshot({ path: path.join(t.shots, n + '.png') }); },
       last: () => p.evaluate(async () => (await (await fetch(`/api/rooms/${location.hash.slice(1)}/history`)).json()).history.at(-1).scene),
       heroPos: () => p.evaluate(() => { const s = document.querySelector('.ent.hero').style; return [parseFloat(s.left) / 100, parseFloat(s.top) / 100]; }),

@@ -11,6 +11,8 @@ const { setup } = require('./lib');
     assert.match(code, /^[A-Z]{5}$/);
     assert(await D.p.isDisabled('#foot button.go'), 'cannot begin before the Player joins');
     assert.equal(await D.p.locator('.stepbar').count(), 0, 'no steps while setting the stage');
+    // a title screen with instructions
+    await D.opt('Story settings'); await D.p.fill('#infoTitle', 'The Dark Forest'); await D.p.fill('#infoText', 'Find the way out.\nBe kind to wizards.'); await D.p.waitForTimeout(700); await D.done();
     // set the stage
     await D.add('mage'); await D.p.fill('#panel input', 'Welcome, traveller!'); await D.done();
     await D.opt('Change the scene'); await D.opt('The place'); await D.p.click('[data-mark="backdrop=b:forest"]'); await D.done();
@@ -18,6 +20,8 @@ const { setup } = require('./lib');
     // the Player joins by link and sees nothing of the draft
     await P.p.goto(`${t.base}/#${code}`); await P.p.fill('#name', 'Sam'); await P.p.click('#joinBtn');
     await P.p.waitForSelector('#foot .status');
+    await P.p.waitForSelector('#titleScreen:not([hidden])'); assert.match(await P.p.textContent('#titleScreen'), /The Dark Forest.*Find the way out/s); assert.match(await P.p.textContent('#howto'), /Be kind to wizards/);
+    await P.p.evaluate(() => { window.__title = false; setInterval(() => { if (document.querySelector('#stage .cardov').textContent === 'The Dark Forest') window.__title = true; }, 40); });
     assert.equal(await P.p.locator('#stage .ent').count(), 1, 'the Player must not see the uncommitted draft');
     await D.p.waitForSelector('#foot button.go:not([disabled])');
     await D.shot('p-1-setup');
@@ -25,6 +29,7 @@ const { setup } = require('./lib');
     // the Player's turn
     await P.p.waitForSelector('#foot button.go'); await P.cutDone();
     assert.equal(await P.p.locator('#stage .ent').count(), 2);
+    assert(await P.p.evaluate(() => window.__title), 'the story opened on its title'); assert(await P.p.isHidden('#titleScreen'));
     assert.match(await P.p.textContent('.strip.narr'), /dark forest/);
     const [hx] = await P.heroPos();
     await P.p.mouse.click(600, 400); assert.equal((await P.heroPos())[0], hx, 'clicking the stage alone does not move the hero');

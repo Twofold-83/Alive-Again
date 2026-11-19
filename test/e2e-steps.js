@@ -13,7 +13,7 @@ const { setup } = require('./lib');
     const narrate = async (text) => { await x.opt('Narrate'); assert.equal(await p.inputValue('#panel input'), ''); await p.fill('#panel input', text); await x.done(); };
     const stage = () => p.locator('#stage').boundingBox();
 
-    await p.goto(t.base); await p.click('#hotseat'); await p.waitForSelector('.gopts');
+    await p.goto(t.base); await p.click('#typeAdventure'); await p.click('#hotseat'); await p.waitForSelector('.gopts');
     const right = await p.locator('#right').boundingBox(), st0 = await stage();
     assert(right.x >= st0.x + st0.width - 2, 'tool column to the right of the stage');
     assert.equal(await p.locator('.modesw').count(), 0, 'one Director screen, no mode switch');
@@ -87,7 +87,7 @@ const { setup } = require('./lib');
     sc = await x.last(); assert.equal(sc.action, 'Go back'); assert(Math.abs(sc.entities.find((e) => e.id === sc.heroId).x - 0.7) < 0.02);
 
     /* ---- the scene workshop: build a level, prepare scenes, use them ---- */
-    await settings('.card .chips button:has-text("Adventure")', '[data-pmode=free]');
+    await settings('[data-pmode=free]');
     await x.opt('Scene workshop'); await p.waitForSelector('#wsStage');
     assert.match(await p.textContent('.wslist'), /in the story right now/);
     const ws = await p.locator('#wsStage').boundingBox(), cw = ws.width / 16, ch = ws.height / 12;

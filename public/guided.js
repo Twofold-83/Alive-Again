@@ -554,7 +554,13 @@ export function buildGuided(p, c) {
     head('Story settings', 'These apply from now on.');
     const time = h('select', { onchange: (ev) => c.act('settings', { turnSeconds: Number(ev.target.value) }, 3).catch((e) => c.toast(e.message)) },
       [[0, 'No time limit'], [30, '30 seconds'], [60, '1 minute'], [90, '1½ minutes'], [120, '2 minutes'], [180, '3 minutes'], [300, '5 minutes'], [600, '10 minutes']].map(([v, l]) => h('option', { value: v, selected: S.settings.turnSeconds === v }, l)));
+    const info = { title: S.info.title, text: S.info.text }; let infoT = 0;
+    const saveInfo = () => { clearTimeout(infoT); infoT = setTimeout(() => c.setInfo({ ...info }), 500); };
     p.append(c.typeCard(),
+      h('div', { class: 'card' }, h('h3', {}, '📜 Title screen and instructions'),
+        h('input', { id: 'infoTitle', placeholder: 'Title of your story', maxlength: 60, value: info.title, oninput: (ev) => { info.title = ev.target.value; saveInfo(); } }),
+        h('textarea', { id: 'infoText', rows: 4, maxlength: 800, placeholder: 'A few lines for the Player: what the story is about, how to play, what the goal is…', oninput: (ev) => { info.text = ev.target.value; saveInfo(); } }, info.text),
+        h('p', { class: 'dim small' }, 'The Player sees this while you set the stage, the story opens on the title, and the instructions stay in their side panel.')),
       h('div', { class: 'card' }, h('h3', {}, '⏱ Time per turn'), time, h('p', { class: 'dim small' }, 'Applies from the next turn. The clock pauses if either of you drops off.')),
       h('div', { class: 'card' }, h('h3', {}, `Story code: ${code}`), h('div', { class: 'row' }, h('button', { class: 'grow', onclick: c.shareLink }, S.bot || S.hotseat ? '🔗 Let someone watch' : '🔗 Copy invite link'), h('button', { class: 'grow', onclick: c.openStory }, '📖 Story so far'))),
       h('div', { class: 'row' }, h('button', { class: 'danger grow', onclick: () => { if (confirm('End the story?')) c.act('end', {}, 3).catch((e) => c.toast(e.message)); } }, '🎬 End the story'), h('button', { class: 'grow', onclick: c.leave }, 'Leave to the start screen')),

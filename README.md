@@ -33,6 +33,24 @@ mount a persistent disk there if stories should survive redeploys.
 4. If the clock runs out, the turn is sent as it stands.
 5. 📖 replays the whole story and can download it as a file.
 
+### How a finished turn is shown
+
+The other side watches a finished turn as a short film: black bars slide in with the
+name of whose turn it was, things walk (bobbing, facing the way they go), newcomers
+pop in, each line is typed out while its speaker bounces and the camera leans in a
+little, earlier bubbles dim, narration appears as a subtitle, and at the end the bars
+slide away with a "Your turn" cue. A click skips it.
+
+Speech bubbles are always placed fully on the stage, clear of the narration and of
+each other; long lines are set smaller and wider. `npm run sim` plays random turns
+sped up and checks exactly that (bubbles on stage, no overlap, lines readable long
+enough, playback ending on the real scene).
+
+The story type (Free play or Adventure) is chosen once, on the start screen. The
+Director can give the story a **title screen and instructions** under Story settings:
+the Player sees them while the stage is being set, the story opens on the title, and
+the instructions stay in the Player's side panel.
+
 ### How the Director builds a turn
 
 A turn is a list of **steps**. Everything done within one step plays at the same time
@@ -210,6 +228,10 @@ including in stories already told:
 ```bash
 ASSET_PROVIDER=./my-provider.js node tools/upgrade-sprites.js --only=fantasy --limit=10 --style="pixel art, 64px"
 ```
+
+`--only=px` (or `--only=px-heroes`, `--only=px-dungeon`, …) sends the pixel-art library
+through the same service; results are listed under `pixel` in the manifest and replace
+the built-in pixel sprites everywhere.
 
 Run it without `--only`/`--limit` to redo the whole library (700+ images, so check
 the service's price first). You can also drop hand-made images into `public/packs/`

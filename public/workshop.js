@@ -194,12 +194,15 @@ function drawTools() {
     kids.push(
       h('div', { class: 'row' }, tool('brush', '🖌 Brush', 'Paint tiles'), tool('rect', '▭ Box', 'Drag out a filled rectangle'), tool('fill', '🪣 Fill', 'Fill an area'), tool('erase', '⌫ Erase', 'Remove tiles'), tool('pick', '💧 Pick', 'Pick a tile from the stage')),
       (W.tool === 'brush' || W.tool === 'erase') && h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Size'), [1, 2, 3].map((n) => h('button', { class: 'grow' + (W.size === n ? ' on' : ''), onclick: () => { W.size = n; drawTools(); } }, `${n}×${n}`))),
-      h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'This tile is'),
-        h('button', { 'data-kind': 'f', class: 'grow' + (W.k === 'f' ? ' on' : ''), onclick: () => { W.k = 'f'; drawTools(); } }, '🟩 Floor'),
-        h('button', { 'data-kind': 'w', class: 'grow' + (W.k === 'w' ? ' on' : ''), onclick: () => { W.k = 'w'; drawTools(); } }, '🧱 Wall')),
       cats.length > 1 && h('div', { class: 'chips wrap' }, cats.map((c) => h('button', { class: c === cat ? 'on' : '', onclick: () => { W.tcat = c.id; drawTools(); } }, c.label))),
-      cat ? h('div', { class: 'grid tiles' }, cat.items.map((i) => h('button', { title: i.name + (i.kind ? ` (${i.kind})` : ''), 'aria-label': i.name, class: (W.a === i.asset ? 'on ' : '') + (i.kind === 'wall' ? 'iswall' : ''), onclick: () => { W.a = i.asset; if (i.kind) W.k = i.kind === 'wall' ? 'w' : 'f'; if (W.tool === 'erase' || W.tool === 'pick') W.tool = 'brush'; drawTools(); } }, glyphNode(W.c.code, i.asset))))
-        : h('p', { class: 'dim' }, 'The tile library is missing.'),
+      ...(cat ? [['floor', 'f', '🟩 Floor — the hero can walk here'], ['wall', 'w', '🧱 Walls — these block the hero']].map(([kind, k, title]) => {
+        const items = cat.items.filter((i) => (i.kind === 'wall' ? 'wall' : 'floor') === kind);
+        return items.length ? h('div', { class: 'col', 'data-set': kind }, h('small', { class: 'dim' }, `${title} (${items.length})`),
+          h('div', { class: 'grid tiles' }, items.map((i) => h('button', { title: i.name, 'aria-label': i.name, class: (W.a === i.asset ? 'on ' : '') + (kind === 'wall' ? 'iswall' : ''), onclick: () => { W.a = i.asset; W.k = k; if (W.tool === 'erase' || W.tool === 'pick') W.tool = 'brush'; drawTools(); } }, glyphNode(W.c.code, i.asset))))) : null;
+      }) : [h('p', { class: 'dim' }, 'The tile library is missing.')]),
+      h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Use the chosen tile as'),
+        h('button', { 'data-kind': 'f', class: 'grow' + (W.k === 'f' ? ' on' : ''), onclick: () => { W.k = 'f'; drawTools(); } }, 'Floor'),
+        h('button', { 'data-kind': 'w', class: 'grow' + (W.k === 'w' ? ' on' : ''), onclick: () => { W.k = 'w'; drawTools(); } }, 'Wall')),
       h('div', { class: 'row' },
         h('button', { class: 'grow', id: 'wsFillAll', onclick: () => all(() => true) }, 'Fill everything'),
         h('button', { class: 'grow', id: 'wsBorder', onclick: () => all((x, y) => x === 0 || y === 0 || x === LEVEL_W - 1 || y === LEVEL_H - 1) }, 'Border'),

@@ -201,7 +201,7 @@ button.big small { display: block; font-weight: 400; font-size: 12px; opacity: .
 .bubble { position: absolute; transform: translateX(-50%); max-width: 46%; background: #fff; color: #17161c; border-radius: .7em; padding: .25em .6em; font-size: calc(var(--u) * .28); line-height: 1.2; text-align: center; overflow-wrap: anywhere; box-shadow: 0 1px 3px rgba(0, 0, 0, .4); font-family: "Segoe UI", system-ui, sans-serif; }
 .bubble::after { content: ""; position: absolute; left: 50%; bottom: -.4em; margin-left: -.35em; border: .4em solid transparent; border-top-color: #fff; border-bottom: 0; }
 .bubble.pop { animation: bpop .22s ease-out; }
-@keyframes bpop { from { transform: translateX(-50%) scale(.4); opacity: 0; } }
+@keyframes bpop { from { opacity: 0; } }
 .strip { left: 0; right: 0; z-index: 9000; padding: .35em .7em; font-size: calc(var(--u) * .28); line-height: 1.25; pointer-events: none; overflow-wrap: anywhere; }
 .strip:empty { display: none; }
 .strip.act { top: 0; background: rgba(242, 168, 59, .93); color: #231600; font-style: italic; }
@@ -360,3 +360,39 @@ button.foe.on { outline: 2px solid var(--accent); }
 .wsmap .node b { font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wsmap .node.on { outline: 3px solid #fff; }
 .conn input { flex: 1.2; } .conn select { flex: 1; }
+
+/* ---- cinematic playback of a finished turn ---- */
+.stage .bar { left: 0; right: 0; height: 0; background: #000; z-index: 8900; pointer-events: none; transition: height .35s ease; overflow: hidden; color: #b9b4c9; font: 600 calc(var(--u) * .2)/2.2 "Segoe UI", system-ui, sans-serif; text-align: center; letter-spacing: .06em; white-space: nowrap; }
+.stage .bar.top { top: 0; } .stage .bar.bot { bottom: 0; }
+.stage.cine .bar { height: 7%; }
+.stage.cine .strip.narr { background: none; text-shadow: 0 0 .3em #000, 0 0 .6em #000, 0 .08em .1em #000; bottom: 1%; font-size: calc(var(--u) * .3); }
+.stage.cine .strip.act { top: 7%; }
+.stage.cine { cursor: pointer; }
+.stinger { inset: 0; z-index: 9600; display: flex; align-items: center; justify-content: center; pointer-events: none; font: 800 calc(var(--u) * .9)/1 "Segoe UI", system-ui, sans-serif; color: #fff; text-shadow: 0 .05em .12em #000, 0 0 .6em rgba(242, 168, 59, .9); letter-spacing: .04em; animation: stinger 1.4s ease-out forwards; }
+@keyframes stinger { 0% { opacity: 0; transform: scale(1.5); } 18% { opacity: 1; transform: scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: scale(.96); } }
+.bubble { transition: opacity .3s; }
+.bubble.old { opacity: .35; }
+.ent.speaking .fxw { animation: speak .42s ease-in-out infinite; }
+@keyframes speak { 50% { transform: translateY(-5%) scale(1.04, .97); } }
+.ent.walk .fxw { animation: walkbob .3s ease-in-out infinite; }
+@keyframes walkbob { 50% { transform: translateY(-7%) rotate(2.5deg); } }
+.ent.popin .fxw { animation: popin .45s cubic-bezier(.2, 1.7, .4, 1); }
+@keyframes popin { from { transform: scale(.1) translateY(30%); } }
+.stage.cut .ent.gone .fxw { transform: scale(.3) translateY(20%); transition: transform .45s ease-in; }
+.stage.nosmooth .ent, .stage.nosmooth .world, .stage.nosmooth .ent .glyph { transition: none !important; }
+.stage > .bubbles { inset: 0; z-index: 8950; pointer-events: none; }
+.bubble.moved::after { display: none; }
+.bubble.long { font-size: calc(var(--u) * .235); max-width: 54%; }
+.bubble.xlong { font-size: calc(var(--u) * .2); max-width: 64%; }
+.strip.narr.long { font-size: calc(var(--u) * .24) !important; }
+.strip.narr.xlong { font-size: calc(var(--u) * .2) !important; }
+.bubble { width: max-content; }
+.typepick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.typepick > span { grid-column: 1 / -1; text-transform: uppercase; letter-spacing: .08em; }
+.typepick button { text-align: left; padding: 10px 14px; font-weight: 600; }
+.typepick button small { display: block; font-weight: 400; font-size: 12px; opacity: .8; }
+#titleScreen { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 8%; text-align: center; background: radial-gradient(ellipse at 50% 40%, #2c2740, #0b0a10); }
+#titleScreen h2 { margin: 0; font: 700 44px/1.1 Georgia, "Times New Roman", serif; letter-spacing: .02em; }
+#titleScreen p { margin: 0; max-width: 46em; white-space: pre-line; font-size: 16px; line-height: 1.5; color: #d9d4e6; }
+#titleScreen small { color: var(--dim); }
+.pre { white-space: pre-line; }

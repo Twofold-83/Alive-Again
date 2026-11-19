@@ -85,7 +85,7 @@ try {
     assert.equal((await post(`/api/rooms/${code}/act`, { token: 'bot', type: 'submit', turn: me.state.turn })).stale, true);
     me.ctl.abort();
     // human Director, bot Player
-    ({ code } = await post('/api/rooms', { token: 'solo-human-0002', name: 'Mia', role: 'director', bot: true }));
+    ({ code } = await post('/api/rooms', { token: 'solo-human-0002', name: 'Mia', role: 'director', bot: true, type: 'adventure' }));
     me = listen(code, 'solo-human-0002'); await sleep(300);
     assert.equal(me.state.bot, 'player'); assert.equal(me.state.joined.player, true); assert.equal(me.state.online.player, true);
     for (let i = 0; i < 10; i++) {
