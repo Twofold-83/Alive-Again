@@ -384,6 +384,7 @@ function side() {
   if (!isLord() || hot()) add(p, h('small', { class: 'dim grp' }, 'The hero'), controls());
 }
 const controls = () => h('div', { class: 'rkeys' },
+  h('div', { class: 'touch' }, '🕹️ Slide your thumb on the pad to walk. ⚔️ swings your sword, 🧪 drinks a potion, 💣 drops a bomb — then run.'),
   h('div', {}, h('kbd', {}, '↑'), h('kbd', {}, '←'), h('kbd', {}, '↓'), h('kbd', {}, '→'), ' or ', h('kbd', {}, 'W'), h('kbd', {}, 'A'), h('kbd', {}, 'S'), h('kbd', {}, 'D'), ' walk'),
   h('div', {}, h('kbd', {}, 'Space'), ' swing your sword'), h('div', {}, h('kbd', {}, 'Q'), ' drink a potion'), h('div', {}, h('kbd', {}, 'E'), ' drop a bomb, then run'),
   h('div', { class: 'dim' }, 'Find keys for locked doors. Gates open when every monster in the room is gone. Take the crown to win.'));
@@ -409,6 +410,9 @@ function refresh() {
   const g = S.rpg, key = [g.phase, g.run, S.you, hot(), S.bot, S.joined.player, !!st, !!def, editKey, tool, mode, viewKey, st && st.mode, g.winner].join();
   if (key !== uiKey) { uiKey = key; side(); mapKey = ''; const b = $('#rpgBoard'); if (b) b.dataset.key = ''; }
   hud(); paintBoard();
+  const pad = $('#rpgPad'), showPad = document.body.classList.contains('phone') && g.phase === 'play' && !!st && heroKeys();
+  if (pad.hidden === showPad) pad.hidden = !showPad;
+  if (showPad) { $('#padPotion').lastElementChild.textContent = st.hero.potions; $('#padBomb').lastElementChild.textContent = st.hero.bombs; $('#padPotion').classList.toggle('none', !st.hero.potions); $('#padBomb').classList.toggle('none', !st.hero.bombs); }
   const msg = $('#rpgMsg'), m = st && st.msg, on = m && g.phase === 'play' && clock - msgAt.t < 4.5;
   msg.hidden = !on;
   if (on && msg.dataset.n !== String(m.n)) { msg.dataset.n = m.n; msg.className = m.who; msg.textContent = (m.who === 'lord' ? '😈 ' : '') + m.text; }
@@ -435,6 +439,24 @@ export function rpgInit(ctx) {
   cv.addEventListener('contextmenu', (e) => e.preventDefault());
   window.addEventListener('keydown', onKey); window.addEventListener('keyup', onKey);
   window.addEventListener('blur', () => { held.length = 0; });
+  /* phones: a thumb pad and three buttons under the game */
+  const stick = $('#rpgStick'), knob = stick.firstElementChild;
+  let padDir = null, padTimer = 0;
+  const step = () => { if (padDir && st && st.mode === 'turn' && queue.length < 1) queue.push({ k: 'move', dir: padDir }); };
+  const aim = (e) => {
+    const r = stick.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), len = Math.hypot(dx, dy), max = r.width * 0.3;
+    const dir = len < r.width * 0.11 ? null : Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
+    knob.style.transform = `translate(${(dx / (len || 1)) * Math.min(len, max)}px, ${(dy / (len || 1)) * Math.min(len, max)}px)`;
+    if (dir === padDir) return;
+    padDir = dir; held.length = 0; stick.dataset.dir = dir || '';
+    if (dir) { held.push(dir); step(); }
+  };
+  const release = () => { padDir = null; held.length = 0; knob.style.transform = ''; stick.dataset.dir = ''; clearInterval(padTimer); padTimer = 0; };
+  stick.addEventListener('pointerdown', (e) => { e.preventDefault(); C.audio.unlock(); try { stick.setPointerCapture(e.pointerId); } catch { /* fine */ } clearInterval(padTimer); padTimer = setInterval(step, 230); aim(e); });
+  stick.addEventListener('pointermove', (e) => { if (padTimer) aim(e); });
+  for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) stick.addEventListener(t, release);
+  for (const [id, k] of [['padSword', 'attack'], ['padPotion', 'potion'], ['padBomb', 'bomb']]) $('#' + id).addEventListener('pointerdown', (e) => { e.preventDefault(); press(k); });
+  $('#rpgPad').addEventListener('contextmenu', (e) => e.preventDefault());
 }
 /** The server's view of the story arrived (someone joined, the game started or ended, ...). */
 export function rpgState(s) {

@@ -162,6 +162,19 @@ sits on the left and the tools on the right; Ctrl+Enter ends
 the turn, and with something selected the arrow keys move it, `+`/`-` resize, `r`
 rotates, `f` flips and Delete removes.
 
+## Phone or computer
+
+The start screen asks what you are playing on (it guesses the first time and remembers).
+The 📱/💻 button in the top bar switches at any time.
+
+**Phone mode** is laid out for one thumb in portrait: the stage fills the width on top,
+the tools scroll under it, and the button that ends your turn stays at the bottom. Touch
+targets are at least 44 px, text fields do not make iOS zoom, the layout respects the
+notch and the home bar, and while you type the stage shrinks to leave room for the
+keyboard. Active objects show their names without hovering. Build scene and the Map
+stack the stage above the tools. Dungeon mode gets a thumb pad and sword, potion and bomb
+buttons. Held sideways, the stage sits on the left and the tools on the right.
+
 ## Dungeon mode
 
 A third kind of story, chosen on the start screen: an action game for two. The

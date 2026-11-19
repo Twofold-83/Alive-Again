@@ -441,14 +441,15 @@ function renderChrome() {
     h('i', { class: 'dot' + (S.online[role] ? ' on' : '') }), (S.bot === role ? '🤖' : icon) + ' ', h('b', {}, S.joined[role] ? S.names[role] : '…'));
   $('#top').replaceChildren(
     who('director', S.rpg ? '😈' : '🎬'), who('player', S.rpg ? '🗡️' : '🧑'), h('span', { class: 'grow storyname' }, S.info.title ? `“${S.info.title}”` : ''),
-    h('button', { class: 'code', 'aria-label': 'Copy the invite link', title: 'Copy the invite link', onclick: () => { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('🔗 Invite link copied'), () => {}); } }, '🔗 ' + code),
+    h('button', { class: 'code', 'aria-label': 'Copy the invite link', title: 'Copy the invite link', onclick: () => { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('🔗 Invite link copied'), () => {}); } }, '🔗', h('span', { class: 'codetxt' }, ' ' + code)),
     S.rpg ? h('button', { onclick: () => leave(), 'aria-label': 'Leave', title: 'Back to the title screen' }, '🚪') : h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, '📖'),
-    h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.cycle(); audio.sfx('pop'); }, 'aria-label': 'Sound', title: 'Sound: loud, quiet, off' }, audio.icon));
+    h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.cycle(); audio.sfx('pop'); }, 'aria-label': 'Sound', title: 'Sound: loud, quiet, off' }, audio.icon),
+    h('button', { id: 'devBtn', onclick: () => setDevice(isPhone() ? 'computer' : 'phone', true), 'aria-label': 'Phone or computer layout', title: 'Switch between the phone and the computer layout' }, isPhone() ? '📱' : '💻'));
 
   const b = $('#banner'); let content = null;
   if (!connected) content = ['📡 Reconnecting…'];
   else if (S.ended) content = ['🎬 The End.', h('button', { onclick: openStory }, 'Read the story')];
-  else if (S.hotseat && S.rpg) content = ['🎭 You play both sides — the keyboard moves the hero, the panel on the right is the Overlord'];
+  else if (S.hotseat && S.rpg) content = [isPhone() ? '🎭 Both sides: the pad moves the hero, the Overlord’s powers are below' : '🎭 You play both sides — the keyboard moves the hero, the panel on the right is the Overlord'];
   else if (S.hotseat) content = [`🎭 You play both sides — now you are the ${S.whose === 'director' ? 'Director' : 'Player'}`];
   else if (S.you === 'spectator') content = ['👀 You are watching this story.'];
   else if (!S.joined[other()]) content = [`Invite your ${other() === 'player' ? 'Player' : 'Director'} — code ${code}`, h('button', { class: 'primary', onclick: shareLink }, 'Share link')];
@@ -475,6 +476,7 @@ setInterval(tick, 250);
 /* ---------- main render ---------- */
 function render() {
   if (!S) return;
+  $('#right').classList.toggle('pl', S.you === 'player' && !S.ended);     // phones: the Player's controls come first
   const ts = $('#titleScreen'), showTitle = S.turn === 0 && !(myTurn() && S.you === 'director') && !!(S.info.title || S.info.text);
   ts.hidden = !showTitle;
   if (showTitle) ts.replaceChildren(h('h2', {}, S.info.title || 'A new story'), S.info.text && h('p', {}, S.info.text), h('small', {}, `${S.names.director} is setting the stage…`));
@@ -913,6 +915,21 @@ document.addEventListener('pointerdown', () => { audio.unlock(); $('#musicHint')
 document.addEventListener('keydown', () => audio.unlock(), { capture: true });
 /* a soft click on every button, so the whole interface feels alive */
 document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('button, .ent.hot, select')) audio.sfx('ui'); }, { capture: true });
+/* phone or computer: chosen on the start screen (guessed the first time), changeable any time from the top bar */
+function setDevice(d, keep) {
+  const phone = d === 'phone';
+  document.body.classList.toggle('phone', phone);
+  if (keep) localStorage.setItem('tf.device', d);
+  for (const b of document.querySelectorAll('#devicePick button')) b.classList.toggle('on', b.dataset.dev === d);
+  uiKey = ''; if (S) { renderChrome(); if (!S.rpg) render(); }
+  window.dispatchEvent(new Event('resize'));
+}
+const isPhone = () => document.body.classList.contains('phone');
+for (const b of document.querySelectorAll('#devicePick button')) b.onclick = () => setDevice(b.dataset.dev, true);
+setDevice(localStorage.getItem('tf.device') || (matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820 ? 'phone' : 'computer'));
+/* on a phone the keyboard takes half the screen: while typing in the tools, the stage steps aside */
+document.addEventListener('focusin', (e) => { if (isPhone() && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.closest('#right, #rpgSide')) document.body.classList.add('typing'); });
+document.addEventListener('focusout', () => setTimeout(() => { if (!/^(INPUT|TEXTAREA)$/.test((document.activeElement || {}).tagName || '')) document.body.classList.remove('typing'); }, 120));
 /* the start screen: spooky music, a pixel scene, the odd clap of thunder */
 audio.setMood(HOME_MOOD);
 $('#homeSound').textContent = audio.icon;

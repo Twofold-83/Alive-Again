@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#15131c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Twofold — a story told by two</title>
@@ -18,9 +19,13 @@
     <h1 class="gametitle">Twofold</h1>
     <p class="subtitle">The Return of the Four-Armed Boy</p>
     <p class="tag">A story told by two.<br>One plays the hero. One plays the whole world.</p>
-    <p id="musicHint" class="hint">♪ click anywhere for music</p>
+    <p id="musicHint" class="hint">♪ tap or click anywhere for music</p>
   </div>
   <div class="homebox">
+    <div id="devicePick" class="devpick" role="group" aria-label="What are you playing on?">
+      <button data-dev="phone">📱 Phone</button>
+      <button data-dev="computer">💻 Computer</button>
+    </div>
     <p id="invite" class="invite" hidden></p>
     <input id="name" maxlength="20" placeholder="Your name" autocomplete="nickname" enterkeyhint="done">
     <div id="typePick" class="typepick">
@@ -66,6 +71,14 @@
     <div id="rpgLeft">
       <div id="rpgHud"></div>
       <div id="rpgWrap"><canvas id="rpgCanvas"></canvas><div id="rpgMsg" hidden></div><div id="rpgCard" hidden></div></div>
+      <div id="rpgPad" hidden>
+        <div id="rpgStick" aria-label="Walk"><i></i></div>
+        <div id="rpgBtns">
+          <button id="padPotion" aria-label="Drink a potion">🧪<b></b></button>
+          <button id="padBomb" aria-label="Drop a bomb">💣<b></b></button>
+          <button id="padSword" aria-label="Swing your sword">⚔️</button>
+        </div>
+      </div>
     </div>
     <aside id="rpgSide"></aside>
   </div>

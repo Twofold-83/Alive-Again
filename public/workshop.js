@@ -154,8 +154,8 @@ function drawBar() {
     h('button', { id: 'mapNew', onclick: () => build({ id: rid(), name: newName(), scene: blankScene() }) }, '＋ New scene'),
     h('button', { disabled: !W.list.length, title: 'Save every scene on the map to a file, to use in another story', onclick: () => { const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify({ twofoldScenes: 1, scenes: library() })], { type: 'application/json' })), download: 'twofold-scenes.json' }); a.click(); } }, '⬇ Save to file'),
     h('button', { title: 'Add the scenes from a file to this map', onclick: importFile }, '⬆ Load from file'));
-  kids.push(h('button', { id: 'wsClose', onclick: close }, 'Close'));
-  W.el.bar.replaceChildren(...kids.filter(Boolean));
+  const acts = kids.splice(3).filter(Boolean);                 // on a phone the actions get a row of their own that scrolls sideways
+  W.el.bar.replaceChildren(...kids, h('div', { class: 'wsacts' }, acts), h('button', { id: 'wsClose', onclick: close }, 'Close'));
 }
 
 /* ---------- the map ---------- */
