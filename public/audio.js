@@ -178,6 +178,9 @@ function playSfx(name) {
     case 'step': noise(0.06, 0.9, 700); break;
     case 'dice': [0, 0.08, 0.17, 0.3].forEach((t) => tone(90 + R() * 8, 0.04, 'square', 0.5, t)); break;
     case 'pop': glide(62, 84, 0.07, 'sine', 0.7); break;
+    case 'swish': noise(0.1, 1.1, 1800, { type: 'highpass', to: 6000 }); break;
+    case 'ouch': glide(66, 52, 0.16, 'square', 0.7); noise(0.08, 1.4, 900); break;
+    case 'twang': glide(74, 60, 0.09, 'triangle', 0.7); break;
     case 'ui': tone(86, 0.02, 'triangle', 0.16); break;
     case 'send': noise(0.25, 0.7, 500, { swell: true, to: 2600 }); tone(76, 0.12, 'triangle', 0.3, 0.12); break;
     case 'tick': tone(93, 0.025, 'square', 0.35); break;

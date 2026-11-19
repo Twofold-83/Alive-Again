@@ -1,6 +1,7 @@
 import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetName, loadPack, loadPixel } from './catalog.js';
 import { MOODS, SFX, audio } from './audio.js';
 import { startTitle } from './title.js';
+import { rpgInit, rpgState, rpgEvent, rpgStop } from './rpg.js';
 import { h, clone, clamp, norm, glyphNode, renderStage, playTurn, findWalk, sample } from './stage.js';
 import { openWorkshop, workshopOpen } from './workshop.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
@@ -82,6 +83,7 @@ function connect() {
   mine.onopen = () => { connected = true; renderChrome(); };
   mine.onmessage = (e) => { lastMsg = Date.now(); connected = true; onState(JSON.parse(e.data)); };
   mine.addEventListener('ping', () => { lastMsg = Date.now(); });
+  mine.addEventListener('rpg', (e) => { lastMsg = Date.now(); rpgEvent(JSON.parse(e.data)); });
   mine.addEventListener('gone', () => { mine.close(); leave('That story no longer exists.'); });
   mine.onerror = () => {
     if (es !== mine) return;
@@ -94,6 +96,8 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && co
 window.addEventListener('online', () => { if (code) connect(); });
 
 function onState(s) {
+  $('#main').hidden = !!s.rpg; $('#rpg').hidden = !s.rpg; $('#clock').hidden = !!s.rpg;
+  if (s.rpg) { S = s; renderChrome(); rpgState(s); return; }     // dungeon mode has its own screen and its own engine
   const prev = S;
   norm(s.scene); norm(s.before);
   S = s;
@@ -429,14 +433,15 @@ function renderChrome() {
   const who = (role, icon) => h('span', { class: 'who' + (S.you === role && !S.hotseat ? ' me' : '') + (!S.ended && S.whose === role ? ' turn' : '') },
     h('i', { class: 'dot' + (S.online[role] ? ' on' : '') }), (S.bot === role ? '🤖' : icon) + ' ', h('b', {}, S.joined[role] ? S.names[role] : '…'));
   $('#top').replaceChildren(
-    who('director', '🎬'), who('player', '🧑'), h('span', { class: 'grow storyname' }, S.info.title ? `“${S.info.title}”` : ''),
+    who('director', S.rpg ? '😈' : '🎬'), who('player', S.rpg ? '🗡️' : '🧑'), h('span', { class: 'grow storyname' }, S.info.title ? `“${S.info.title}”` : ''),
     h('button', { class: 'code', 'aria-label': 'Copy the invite link', title: 'Copy the invite link', onclick: () => { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('🔗 Invite link copied'), () => {}); } }, '🔗 ' + code),
-    h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, '📖'),
+    S.rpg ? h('button', { onclick: () => leave(), 'aria-label': 'Leave', title: 'Back to the title screen' }, '🚪') : h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, '📖'),
     h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.cycle(); audio.sfx('pop'); }, 'aria-label': 'Sound', title: 'Sound: loud, quiet, off' }, audio.icon));
 
   const b = $('#banner'); let content = null;
   if (!connected) content = ['📡 Reconnecting…'];
   else if (S.ended) content = ['🎬 The End.', h('button', { onclick: openStory }, 'Read the story')];
+  else if (S.hotseat && S.rpg) content = ['🎭 You play both sides — the keyboard moves the hero, the panel on the right is the Overlord'];
   else if (S.hotseat) content = [`🎭 You play both sides — now you are the ${S.whose === 'director' ? 'Director' : 'Player'}`];
   else if (S.you === 'spectator') content = ['👀 You are watching this story.'];
   else if (!S.joined[other()]) content = [`Invite your ${other() === 'player' ? 'Player' : 'Director'} — code ${code}`, h('button', { class: 'primary', onclick: shareLink }, 'Share link')];
@@ -844,7 +849,7 @@ function enter(c) {
 function leave(msg) {
   if (es) es.close();
   if (cut) cut.skip();
-  es = null; code = null; S = null;
+  es = null; code = null; S = null; rpgStop();
   audio.setMood(HOME_MOOD); $('#homeSound').textContent = audio.icon;
   history.replaceState(null, '', location.pathname);
   $('#story').hidden = true; $('#game').hidden = true; $('#home').hidden = false;
@@ -853,7 +858,16 @@ function leave(msg) {
 }
 const HOME_MOOD = 'm:spooky';
 let storyType = 'free';                                    // chosen once, when the story is created
-for (const b of document.querySelectorAll('#typePick button')) b.onclick = () => { storyType = b.dataset.type; for (const o of document.querySelectorAll('#typePick button')) o.classList.toggle('on', o === b); };
+const HOME_LABELS = {   // the start buttons speak the language of the chosen kind of story
+  rpg: { newDirector: ['😈 Start as the Overlord', 'You build the castle and command its monsters'], newPlayer: ['🗡️ Start as the Hero', 'Sword in hand — your partner is the Overlord'],
+    soloPlayer: ['🤖 Solo Hero', 'AI is the Overlord'], soloDirector: ['🤖 Solo Overlord', 'AI is the hero'], hotseat: ['🎭 Play both sides', 'Keyboard for the hero, mouse for the Overlord'] },
+};
+const homeDefault = Object.fromEntries([...document.querySelectorAll('#newBtns button')].map((b) => [b.id, b.innerHTML]));
+for (const b of document.querySelectorAll('#typePick button')) b.onclick = () => {
+  storyType = b.dataset.type;
+  for (const o of document.querySelectorAll('#typePick button')) o.classList.toggle('on', o === b);
+  for (const o of document.querySelectorAll('#newBtns button')) { const l = (HOME_LABELS[storyType] || {})[o.id]; if (l) o.replaceChildren(l[0], h('small', {}, l[1])); else o.innerHTML = homeDefault[o.id]; }
+};
 async function create(role, mode) {
   errEl.textContent = '';
   try { enter((await api('/api/rooms', { token, name: myName(), role, mode, type: storyType })).code); } catch (e) { errEl.textContent = e.message; }
@@ -894,5 +908,6 @@ document.addEventListener('click', (e) => { if (e.target.closest && e.target.clo
 audio.setMood(HOME_MOOD);
 $('#homeSound').textContent = audio.icon;
 $('#homeSound').onclick = (e) => { e.currentTarget.textContent = audio.cycle(); };
+rpgInit({ act, toast, audio });
 startTitle($('#titleArt'), () => { if (!code) audio.sfx('thunder'); });
 Promise.all([loadPack(), loadPixel()]).then(boot);

@@ -84,7 +84,17 @@ function upgradeScene(sc) {
   return sc;
 }
 
-const TYPES = { free: { inventory: false, stats: false, dice: false }, adventure: { inventory: true, stats: true, dice: true } };
+const TYPES = { free: { inventory: false, stats: false, dice: false }, adventure: { inventory: true, stats: true, dice: true }, rpg: { inventory: false, stats: false, dice: false } };
+/* Dungeon mode (type 'rpg') has its own rules, shared with the browser: public/rpg-sim.js. One browser runs the game; the server keeps the castle, relays and remembers. */
+let rpgSim = null;
+import('./public/rpg-sim.js').then((m) => { rpgSim = m; }, (e) => console.error('Dungeon rules failed to load:', e));
+const rpgHost = (room) => (room.bot === 'player' ? 'director' : 'player');     // whose browser runs the game
+function rpgRelay(room, obj, toHost) {
+  const set = streams.get(room.code), host = room.tokens[rpgHost(room)];
+  if (!set) return;
+  const msg = `event: rpg\ndata: ${JSON.stringify(obj)}\n\n`;
+  for (const s of set) if ((s.token === host) === toHost) { try { s.res.write(msg); } catch { /* closed */ } }
+}
 /* How the Player takes part (set by the Director):
  *   tell     the Player only writes what they want to do; the Director stages it
  *   free     the Player moves, animates and speaks for their hero
@@ -266,7 +276,7 @@ function view(room, role) {
     before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
     rules: room.rules, info: room.info || { title: '', text: '' }, hotseat: !!room.hotseat, claude: directorAI.available(),
     scenes: role === 'director' || room.hotseat ? room.scenes || [] : undefined,
-    historyLen: room.history.length, bot: room.bot || null,
+    historyLen: room.history.length, bot: room.bot || null, rpg: room.rpg || null,
     lastTimeout: room.lastTimeout,
   };
 }
@@ -327,6 +337,7 @@ function advance(room, timeout) {
 
 /* If an AI partner holds the current turn, let it "think" for a human-ish moment and then play. */
 function maybeBot(room) {
+  if (room.rpg) return;                 // in dungeon mode the computer side lives in the host's browser
   if (!room.bot || room.ended || room.whose !== room.bot || botBusy.has(room.code)) return;
   botBusy.add(room.code);
   const turn = room.turn;
@@ -453,6 +464,47 @@ async function act(room, token, body) {
     case 'randomScene': {
       directorOnly();
       return { ok: true, place: randomPlace() };
+    }
+    case 'rpgDef': case 'rpgStart': case 'rpgAgain': case 'rpgSnap': case 'rpgCmd': {
+      const g = room.rpg;
+      if (!g || !rpgSim) throw fail(409, 'This is not a dungeon story');
+      const isLord = token === room.tokens.director, isHost = token === room.tokens[rpgHost(room)];
+      const boss = isLord || (isHost && room.bot === 'director');          // playing alone against the computer Overlord, the hero runs the show
+      const mode = (m) => (m === 'turn' ? 'turn' : m === 'live' ? 'live' : g.mode);
+      if (body.type === 'rpgDef') {
+        if (!isLord) throw fail(403, 'Only the Overlord builds the castle');
+        g.def = rpgSim.cleanDef(body.def); g.mode = mode(body.mode); touch(room);
+        return { ok: true };
+      }
+      if (body.type === 'rpgStart') {
+        if (!boss) throw fail(403, 'Only the Overlord can open the gates');
+        const def = rpgSim.cleanDef(body.def), why = rpgSim.checkDef(def);
+        if (why) throw fail(400, why);
+        Object.assign(g, { phase: 'play', mode: mode(body.mode), def, state: null, run: g.run + 1, winner: null });
+        touch(room); broadcast(room);
+        return { ok: true };
+      }
+      if (body.type === 'rpgAgain') {
+        if (!boss) throw fail(403, 'Only the Overlord can do that');
+        Object.assign(g, { phase: 'build', state: null, winner: null });
+        touch(room); broadcast(room);
+        return { ok: true };
+      }
+      if (g.phase !== 'play') throw fail(409, 'No game is running');
+      if (body.type === 'rpgCmd') {
+        if (!isLord) throw fail(403, 'Only the Overlord can do that');
+        if (!online(room, rpgHost(room))) throw fail(409, 'The hero is away — the castle is frozen');
+        if (!body.cmd || typeof body.cmd !== 'object' || JSON.stringify(body.cmd).length > 400) throw fail(400, 'Bad command');
+        rpgRelay(room, { t: 'cmd', cmd: body.cmd }, true);
+        return { ok: true };
+      }
+      if (!isHost || body.run !== g.run || !body.state || typeof body.state !== 'object' || Array.isArray(body.state)) throw fail(409, 'Out of date');
+      if (JSON.stringify(body.state).length > 200000) throw fail(413, 'Too large');
+      g.state = body.state;
+      if (Date.now() - (g.savedAt || 0) > 5000) { g.savedAt = Date.now(); touch(room); }
+      if (body.over === 'won' || body.over === 'lost') { g.phase = 'over'; g.winner = body.over === 'won' ? 'player' : 'director'; touch(room); broadcast(room); }
+      else rpgRelay(room, { t: 'snap', run: g.run, state: g.state }, false);
+      return { ok: true };
     }
     case 'end': {
       directorOnly();
@@ -588,6 +640,7 @@ async function handle(req, res) {
       rules: cleanRules({ type: body.type === 'adventure' || (body.type == null && mode === 'bot' && role === 'player') ? 'adventure' : 'free' }),   // chosen once, here
       info: { title: '', text: '' },
     };
+    if (body.type === 'rpg') { room.rules = cleanRules({ type: 'rpg' }); room.settings.turnSeconds = 0; room.rpg = { phase: 'build', mode: 'live', def: null, state: null, run: 0, winner: null }; }
     room.tokens[role] = body.token;
     room.names[role] = str(body.name, 20) || room.names[role];
     if (mode === 'hotseat') {             // one person, one device, both sides

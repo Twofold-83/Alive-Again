@@ -160,6 +160,33 @@ sits on the left and the tools on the right; Ctrl+Enter ends
 the turn, and with something selected the arrow keys move it, `+`/`-` resize, `r`
 rotates, `f` flips and Delete removes.
 
+## Dungeon mode
+
+A third kind of story, chosen on the start screen: an action game for two. The
+**Hero** walks a castle with a sword; the **Overlord** built that castle and fights back.
+
+- **Building.** The Overlord lays out up to 20 rooms on a board, paints walls, water,
+  pits, barrels, doors (open, locked, gates), spikes, arrow traps, pressure plates,
+  chests, loot and monsters, and places the hero's start and the crown. Each room can
+  have a pressure-plate effect (ambush, doors slam shut, lights out, arrows, quake, open
+  the gates) and a line the Overlord whispers when the hero walks in. "Random castle"
+  builds a complete, winnable castle in one click.
+- **Playing.** The hero moves with the arrow keys or WASD, swings the sword with Space,
+  drinks potions (Q) and drops bombs (E). Hearts, keys, coins, levels, a golden sword and
+  heart containers. Take the crown to win; run out of hearts and the Overlord wins.
+- **The Overlord during play** earns *dread* and spends it: summon monsters anywhere away
+  from the hero, drop spikes, put the lights out, fire the arrow traps, shake the ceiling
+  down, mend monsters, slam the doors. Whispers and spooky noises are free.
+- **Live or turn-based.** Live: everything moves at once. Turn-based: the hero takes five
+  moves (the monsters answer each one), then the Overlord takes a turn.
+- Works for two people, alone as the hero, alone as the Overlord (a computer hero
+  explores), or one person on both sides.
+
+The rules are in `public/rpg-sim.js` (no drawing, no network; `npm test` plays 300 whole
+games computer-against-computer). The hero's browser runs the game so the controls have no
+lag; the server keeps the castle, relays snapshots to the Overlord and the Overlord's
+commands to the hero, and remembers the game across reloads. `public/rpg.js` is the screen.
+
 ## Built to be stable
 
 - The server is the single source of truth; clients only edit a local draft.

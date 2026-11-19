@@ -27,6 +27,7 @@
       <span class="dim small">Kind of story</span>
       <button id="typeFree" class="on" data-type="free">🎭 Free play<small>Just the stage and your imagination</small></button>
       <button id="typeAdventure" data-type="adventure">🗺️ Adventure<small>Inventory, stats, levels, maps, battles</small></button>
+      <button id="typeRpg" data-type="rpg">⚔️ Dungeon<small>A hero with a sword against the Overlord’s castle — live or turn-based</small></button>
     </div>
     <div id="newBtns">
       <button id="newDirector" class="big primary">🎬 Start a story as Director<small>You control the world, the cast and the music</small></button>
@@ -60,6 +61,13 @@
       <section id="panel"></section>
       <footer id="foot"></footer>
     </div>
+  </div>
+  <div id="rpg" hidden>
+    <div id="rpgLeft">
+      <div id="rpgHud"></div>
+      <div id="rpgWrap"><canvas id="rpgCanvas"></canvas><div id="rpgMsg" hidden></div><div id="rpgCard" hidden></div></div>
+    </div>
+    <aside id="rpgSide"></aside>
   </div>
 </main>
 
