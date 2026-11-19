@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /*
- * Generates the pixel-art sprite pack in public/px/ : 965 PNGs plus index.json
- * (the original 500 sprites, then the level-editor tile sets and level props).
+ * Generates the pixel-art sprite pack in public/px/ : 1965 PNGs plus index.json
+ * (the original 500 sprites, the level-editor tile sets and level props, then 1000
+ * everyday and modern sprites).
  *
  *   node tools/make-sprites.js
  *
@@ -5806,12 +5807,5436 @@ PA('banner-stand', 'banner on stand flag pole red', `
 const OLD_WALLS = 'tile-water tile-deep-water tile-lava tile-sandstone tile-stone-brick tile-mossy-brick tile-brick tile-dungeon-wall tile-roof tile-thatch tile-hedge tile-cave tile-obsidian tile-ore-gold tile-ore-coal tile-ore-iron tile-ore-diamond tile-question tile-crate tile-window tile-wall-torch'.split(' ');
 for (const it of CATS.find((c) => c.id === 'tiles').items) it.kind = OLD_WALLS.includes(it.slug) ? 'wall' : 'floor';
 
+// ═════════════════════════ 1000 MORE SPRITES: everyday and modern things ═════════════════════════
+// Sprites declared from here on remember their own category (see the note on S() further
+// down), so adding them does not disturb how the older sprites are drawn.
+//
+// pack() reads a small listing language, one sprite per header line:
+//   @slug | search name | default colours | options     a new picture (rows follow) and its sprite
+//   #part x=.. y=.. m=red                               a picture used only as a layer (rows follow)
+//   =slug | search name | layers | colours | options    a sprite made of layers of earlier pictures
+// Layer names are looked up among the new pictures first, then among the older templates.
+let NEW_TPL = 0;
+const NEW_FN = new Set();
+function newLayer(spec) { return TPL['n-' + /^[^:+]+/.exec(spec)[0]] ? 'n-' + spec : spec; }
+function NS(slug, name, layers, colors = {}, opts = {}) {
+  const anchor = cat.group === 'fx' ? 'center' : 'bottom', specs = layers.trim().split(/\s+/);
+  cat.items.push({ slug, name, make: () => finalize(compose(specs.map(newLayer), colors), { anchor, ...opts }) });
+}
+/** like D(), outlined, and counted as a new drawing routine */
+function ND(slug, name, fn, opts = {}, key = fn) {
+  NEW_FN.add(key);
+  D(slug, name, fn, { o: true, anchor: cat.group === 'fx' ? 'center' : 'bottom', ...opts });
+}
+function pairs(str) { const o = {}; for (const p of (str || '').split(/\s+/)) if (p) { const [k, v] = p.split('='); o[k] = v; } return o; }
+function optsOf(str) { const o = pairs(str); for (const k in o) o[k] = o[k] === 'false' ? false : o[k] === 'true' ? true : isNaN(o[k]) ? o[k] : +o[k]; return o; }
+function newTpl(name, def) {
+  if (TPL['n-' + name]) throw new Error('duplicate new template ' + name);
+  NEW_TPL++;
+  return (TPL['n-' + name] = { name: 'n-' + name, rows: [], x: +(def.x || 0), y: +(def.y || 0), def });
+}
+function pack(src) {
+  let cur = null;
+  for (const line of src.split('\n')) {
+    const l = line.trim();
+    if (!l || l.startsWith('//')) continue;
+    if (l[0] !== '@' && l[0] !== '#' && l[0] !== '=') { cur.rows.push(l); continue; }
+    const f = l.slice(1).split('|').map((s) => s.trim());
+    if (l[0] === '=') { NS(f[0], f[1], f[2], pairs(f[3]), optsOf(f[4])); cur = null; }
+    else if (l[0] === '#') { const [name, ...rest] = f[0].split(/\s+/); cur = newTpl(name, pairs(rest.join(' '))); }
+    else { cur = newTpl(f[0], pairs(f[2])); NS(f[0], f[1], f[0], {}, optsOf(f[3])); }
+  }
+}
+
+// ───────────────────────── modern people ─────────────────────────
+category('people', 'Modern people', 'char');
+pack(`
+// clothes and hair for the older "hum" and "kid" bodies (kid: shift by +0,3)
+#coat y=7 m=white
+..mnn....nnm..
+..m.nn..nn.m..
+....nn..nn....
+....nn..nn....
+#tie y=7 m=red
+......nn......
+......n.......
+#shirtfront y=7
+.....WWWW.....
+......WW......
+#vest y=7 m=orange
+....nEnnEn....
+....nEnnEn....
+#stripes y=8
+..x.xxxxxx.x..
+#overalls y=7 m=blue
+....n....n....
+....nnnnnn....
+....nnonnn....
+#bib y=8 m=green
+.....nnnn.....
+....nnnnnn....
+....nnnnnn....
+....mmmmmm....
+#steth y=7
+.....V..V.....
+.....VVVx.....
+#badge y=8
+.....Y........
+#scarf y=7 m=red
+....nnnnnn....
+........nm....
+#bowtie y=7 m=red
+.....nmmn.....
+#necklace y=7
+.....Y..Y.....
+......YY......
+#skirt y=10 g=blue
+...hhhhhhhh...
+...ghhhihhg...
+....ss..ss....
+#shorts y=12
+....ss..ss....
+#tutu y=9
+..zzzzzzzzzz..
+.zzMzzMzzMzzz.
+....ss__ss....
+....ss..ss....
+#eyemask y=4 m=black
+...nnWnnWnn...
+....nKnnKn....
+#shades y=4
+...KKKKKKKK...
+....KK..KK....
+#glasses y=4
+....AKxxKA....
+....AK..KA....
+#mustache y=6 a=brown
+.....bbbb.....
+#clownnose y=5
+......RR......
+#straps y=7
+....T....T....
+....T....T....
+#emblem y=7
+......YY......
+.....YYYY.....
+#refstripes y=7
+....eKeKeK....
+....eKeKeK....
+#hawaii y=7
+.....Y..H.....
+....H..M..Y...
+#chestpack y=8
+.....xBRx.....
+#gloves y=8 m=red
+.nn........nn.
+.nn........nn.
+#bibno y=7
+.....WWWW.....
+.....WKKW.....
+#policecap y=0 m=navy
+....nnnnnn....
+...nnnYYnnn...
+...nnnnnnnn...
+...KKKKKKKK...
+#firehat y=0 m=red
+.....nnnn.....
+....nnYYnn....
+...nnnYYnnn...
+..mmmmmmmmmmm.
+#hardhat y=0 m=yellow
+.....nnnn.....
+....nonnnn....
+...nnonnnnn...
+..mmmmmmmmmm..
+#nursecap y=0
+....WWWWWW....
+...WWWRRWWW...
+#scrubcap y=1 m=green
+....nnnnnn....
+...nnonnnnn...
+...mnnnnnnm...
+#spacehelm y=0
+....wWWWWw....
+...WWWWWWWW...
+..WW......WW..
+..WA.......W..
+..W........w..
+..W........w..
+..WW......ww..
+...WWwwwwww...
+#phones y=1
+....VVVVVV....
+...V......V...
+...V......V...
+..RR......RR..
+..RR......RR..
+#helmet y=0 m=red
+....nnnnnn....
+...nonnnnnn...
+...nmnmnmnm...
+#cowboyhat y=0 m=brown
+....nn.nn.....
+....nnnnnn....
+.o..mmmmmm..o.
+..nnnnnnnnnn..
+#fedora y=0 m=brown
+.....nnnnn....
+....nnnnnn....
+....KKKKKK....
+..mmmmmmmmmm..
+#beanie y=0 m=red
+......WW......
+....nnnnnn....
+...nnnnnnnn...
+...mnmnmnmn...
+#beret y=0 m=red
+........K.....
+....nnnnnn....
+..nnnonnnnn...
+#partyhat y=0
+......Y.......
+......RR......
+.....RYRR.....
+....RRRYRR....
+#afro y=0 a=black
+....bbbbbb....
+..bbbcbbbbbb..
+..bbb....bbb..
+..bb......bb..
+..bb......bb..
+#pigtails y=1 a=brown
+....bbbbbb....
+...bcbbbbbb...
+.bbbb....bbbb.
+.bb........bb.
+.a..........a.
+#mohawk y=0 a=pink
+......bb......
+.....bcbb.....
+......bb......
+#hijab y=1 m=teal
+....nnnnnn....
+...nnonnnnn...
+...nn....nn...
+...n......n...
+...n......n...
+...nn....nn...
+...mnnnnnnm...
+#turban y=0 m=orange
+.....nnnn.....
+....nonnnn....
+...nnnonnnn...
+...mnnnnnnm...
+#bob y=1 a=black
+....bbbbbb....
+...bcbbbbbb...
+...bbbbbbbb...
+..bb......bb..
+..bb......bb..
+#curly y=0 a=brown
+....b.bb.b....
+...bbbbbbbb...
+..bbcbbbbbbb..
+..bb.b..b.bb..
+..b........b..
+#sunhat y=0 m=cream
+.....nnnn.....
+....nRRRRn....
+.mmmmmmmmmmmm.
+#veil y=0
+....WWWWWW....
+..WWWWWWWWWW..
+..WWWWWWWWWW..
+.WWWWWWWWWWWW.
+.WwWWWWWWWWwW.
+.WwWWWWWWWWwW.
+.Www......wwW.
+.ww........ww.
+#gradcap y=0
+..VVVVVVVVVV..
+....VVVVVV.Y..
+...........Y..
+#visor y=4
+...AAAAAAAA...
+...BBBBBBBB...
+#antenna y=0
+.......R......
+.......x......
+#dpack y=5 m=orange
+.nnn......nnn.
+.non......nnn.
+.nnn......nnn.
+.mmm......mmm.
+// things in the hands
+#briefcase_r y=9
+...........CC.
+..........TTTT
+..........TLTT
+..........TTTT
+#clipboard_l y=7
+.LLL..........
+.WWW..........
+.WxW..........
+.WWW..........
+#wrench_r y=5
+...........x.x
+...........xxx
+............x.
+............x.
+............x.
+#mic_r y=6
+...........xw.
+...........xx.
+............V.
+............V.
+#brush_r y=5
+............R.
+............L.
+............T.
+............T.
+............T.
+#palette_l y=7
+.LLL..........
+LRLBL.........
+LLGLL.........
+.LL...........
+#magnifier_r y=5
+...........xx.
+..........xAAx
+..........xAAx
+...........xx.
+............T.
+#camera_c y=8
+.....VVVV.....
+.....VAAV.....
+#parcel_l y=7
+.LLLL.........
+.LRLL.........
+.TRTT.........
+#letter_r y=7
+...........WWW
+...........WRW
+...........WWW
+#tray_l y=5
+.R.A..........
+xxxx..........
+#racket_r y=3
+...........RR.
+..........RWWR
+..........RWWR
+...........RR.
+............T.
+............T.
+#gavel_r y=6
+..........TTT.
+..........TTT.
+............L.
+............L.
+#flask_r y=6
+...........W..
+...........W..
+..........GGG.
+..........GHG.
+#balloon_r y=0 m=red
+..........nn..
+.........noon.
+.........nnnn.
+..........nn..
+...........x..
+...........x..
+...........x..
+...........x..
+...........x..
+#phone_r y=7
+...........VV.
+...........AV.
+...........VV.
+#stopsign_r y=2
+...........RR.
+..........RWWR
+..........RWWR
+...........RR.
+............x.
+............x.
+............x.
+............x.
+#cane_r y=7
+...........TT.
+............T.
+............T.
+............T.
+............T.
+............T.
+............T.
+#baguette_l y=5
+L.............
+LL............
+.LL...........
+..L...........
+#ball_f y=12
+..........WK..
+..........KW..
+#bball_r y=8
+...........OO.
+...........DO.
+#dumbbell_r y=8
+..........V.V.
+..........VVV.
+..........V.V.
+#guitar_r y=4 m=red
+.............L
+............L.
+...........L..
+..........L...
+.........nnn..
+.........nKn..
+.........nnn..
+#medkit_r y=9
+..........WWWW
+..........WRRW
+..........WWWW
+#box_l y=7
+WWWW..........
+WRRW..........
+#satchel y=7
+....T.........
+.....T........
+.TTT..........
+.TLT..........
+.TTT..........
+#scissors_r y=6
+...........x.x
+............x.
+...........R.R
+#card_r y=5 m=yellow
+...........nn.
+...........nn.
+...........nn.
+
+// everyday adults
+=man | man adult blue shirt | hum hair_short | d=blue g=navy j=dark a=brown
+=woman | woman adult red top long hair skirt | hum hair_long skirt | d=red g=navy j=dark a=black s=skin3
+=man-beard | man with beard green jumper | hum hair_short beard | d=green g=dark j=black a=black s=skin2
+=woman-bun | woman hair bun yellow dress | hum hair_bun dress | d=yellow j=orange a=copper
+=man-afro | man afro hair orange hoodie | hum afro | d=orange g=grey j=white a=black s=skin2
+=woman-curly | woman curly hair purple top | hum curly skirt | d=purple g=dark j=black a=black s=skin2
+=woman-hijab | woman hijab headscarf | hum dress hijab:m=purple | d=teal j=gold s=skin3
+=man-turban | man turban beard | hum turban beard:a=black | d=white g=tan j=brown s=skin3
+=man-bald-glasses | bald man glasses mustache | hum glasses mustache | d=cream g=brown j=dark a=brown
+=woman-bob-glasses | woman bob haircut glasses | hum bob glasses | d=teal g=dark j=black a=red
+=mum | mum mother woman ponytail | hum hair_pony necklace | d=pink g=blue j=white a=brown
+=dad | dad father man mustache | hum hair_short mustache | d=red g=blue j=brown a=black s=skin3
+=woman-sunhat | woman sun hat summer dress | hum hair_long sunhat dress | d=ice j=blue a=yellow
+=man-beanie | man beanie hat scarf winter | hum beanie scarf:m=yellow | d=navy g=dark j=black a=brown
+=woman-winter | woman winter coat beanie scarf | hum hair_long beanie:m=pink scarf:m=white | d=purple g=dark j=black a=brown
+// teens and kids
+=teen-boy | teen boy teenager hoodie headphones | hum hair_spiky phones | d=dark g=blue j=white a=black
+=teen-girl | teen girl teenager phone pigtails | hum pigtails phone_r skirt | d=lime g=navy j=white a=orange
+=punk | punk rocker mohawk | hum mohawk shades | d=black g=dark j=black a=pink
+=skater | skater helmet shorts | hum hair_short helmet shorts | d=yellow g=teal j=red a=brown s=skin3
+=kid-boy-cap | boy kid child with cap | kid hair_short+0,3 cap:m=red+0,3 | d=green g=blue j=white a=black s=skin3
+=kid-girl-pigtails | girl kid child pigtails | kid pigtails+0,3 | d=yellow g=red a=brown
+=kid-boy-curly | boy kid child curly hair | kid curly+0,3 | d=orange g=navy a=black s=skin2
+=kid-girl-bob | girl kid child bob hair | kid bob+0,3 | d=purple g=pink a=black s=skin3
+=schoolboy | schoolboy pupil uniform tie | kid hair_short+0,3 tie+0,3 | d=white g=navy j=black a=yellow
+=schoolgirl | schoolgirl pupil uniform | kid hair_pony+0,3 tie:m=blue+0,3 | d=white g=maroon j=black a=black s=skin2
+=kid-balloon | kid child holding balloon | kid hair_spiky+0,3 balloon_r+-1,2 | d=teal g=brown a=orange
+=birthday-kid | birthday kid party hat | kid hair_long+0,3 partyhat+0,3 | d=pink g=purple a=orange
+=kid-football | kid playing football soccer | kid hair_short+0,3 ball_f | d=red g=white j=black a=brown s=skin2
+@baby | baby in diaper | a=brown
+....bb....
+..ssbsss..
+.ssssssss.
+.ssKssKss.
+.ssssssss.
+..tsMMst..
+.ssssssss.
+.s.WWWW.s.
+...WWWW...
+..ss..ss..
+=baby-dark | baby dark skin curly | baby | a=black s=skin2
+// elders
+=grandpa | grandpa old man cane glasses | hum hair_sides:a=white mustache:a=white glasses cane_r | d=tan g=brown j=dark
+=grandma | grandma old woman glasses | hum hair_bun:a=white glasses dress | d=rose j=purple
+=old-man-cap | old man flat cap grey beard | hum beard:a=grey cap:m=grey | d=forest g=dark j=black s=skin2
+=old-woman-cane | old woman grey curly hair cane | hum curly:a=grey cane_r skirt | d=violet g=grey j=black s=skin3
+// health and rescue
+=doctor | doctor man white coat stethoscope | hum hair_short coat steth | d=blue g=navy j=black a=black s=skin3
+=doctor-woman | doctor woman with stethoscope | hum hair_pony coat steth | d=teal g=dark j=black a=brown
+=nurse | nurse woman first aid | hum hair_bun nursecap medkit_r | d=ice g=ice j=white a=yellow
+=nurse-man | nurse man scrubs clipboard | hum hair_short clipboard_l | d=teal g=teal j=white a=black s=skin2
+=surgeon | surgeon mask scrubs | hum scrubcap mask:m=ice | d=green g=green j=white
+=paramedic | paramedic ambulance medic | hum hair_short stripes medkit_r | d=green g=forest j=black a=red
+=police-officer | police officer man cop | hum hair_short policecap badge | d=navy g=navy j=black a=brown
+=police-woman | police officer woman cop | hum hair_pony policecap badge | d=blue g=navy j=black a=black s=skin2
+=firefighter | firefighter with axe | hum firehat stripes axe_r | d=gold g=gold j=black
+=firefighter-woman | firefighter woman yellow helmet | hum hair_pony firehat:m=yellow stripes | d=dark g=dark j=black a=copper s=skin3
+// food and service
+=cook | cook chef white hat mustache | hum hair_short chefhat mustache | d=white g=dark j=black a=black s=skin3
+=baker | baker with bread baguette | hum hair_bun chefhat apron baguette_l | d=tan g=brown j=brown a=copper
+=waiter | waiter with tray bow tie | hum hair_short bowtie:m=black tray_l | d=white g=black j=black a=black
+=waitress | waitress apron tray | hum hair_pony apron tray_l | d=black g=black j=black a=red
+=barista | barista coffee green apron | hum hair_short beard bib mug_r | d=white g=dark j=brown a=brown
+=shop-assistant | shop assistant cashier red apron | hum hair_pony bib:m=red | d=white g=navy j=black a=black s=skin2
+=hairdresser | hairdresser barber scissors | hum bob bib:m=black scissors_r | d=pink g=dark j=black a=purple
+=cleaner | cleaner janitor broom | hum hair_short bib:m=blue broom_r | d=grey g=grey j=black a=grey s=skin3
+// school and office
+=teacher | teacher woman with book glasses | hum bob glasses book_l skirt | d=green g=brown j=black a=brown
+=teacher-man | teacher man tie book | hum hair_short tie:m=green book_l:p=blue | d=cream g=brown j=dark a=black s=skin2
+=professor | professor old wild white hair bow tie | hum curly:a=white mustache:a=white coat bowtie | d=brown g=dark j=black
+=student | student with backpack and book | hum hair_short straps book_l | d=lime g=blue j=white a=black s=skin3
+=student-girl | student girl backpack | hum hair_long straps book_l:p=purple skirt | d=yellow g=dark j=red a=brown s=skin2
+=graduate | graduate cap gown graduation | hum hair_long robe gradcap | d=black j=gold a=brown
+=office-worker | office worker man tie briefcase | hum hair_short shirtfront tie briefcase_r | d=dark g=dark j=black a=brown
+=businesswoman | businesswoman suit briefcase | hum hair_bun shirtfront briefcase_r skirt | d=navy g=navy j=black a=black s=skin2
+=boss | boss manager black suit gold tie | hum hair_sides mustache:a=grey shirtfront tie:m=gold | d=black g=black j=black
+=programmer | programmer coder headphones glasses hoodie | hum hair_long phones glasses | d=violet g=dark j=white a=brown
+=librarian | librarian woman books glasses | hum hair_bun:a=grey glasses book_l:p=green skirt | d=maroon g=brown j=black
+=reporter | news reporter microphone | hum hair_long mic_r shirtfront skirt | d=red g=dark j=black a=yellow
+// trades
+=builder | builder construction worker hard hat | hum hardhat vest hammer_r | d=blue g=navy j=brown s=skin3
+=builder-woman | builder woman hard hat vest | hum hair_pony hardhat:m=white vest:m=lime | d=dark g=blue j=brown a=black s=skin2
+=engineer | engineer hard hat clipboard | hum hardhat:m=white clipboard_l tie:m=blue | d=ice g=navy j=black
+=mechanic | mechanic wrench overalls | hum hair_short overalls wrench_r | d=grey g=blue j=black a=black s=skin2
+=plumber | plumber red cap mustache overalls | hum cap:m=red mustache overalls wrench_r | d=red g=blue j=brown
+=house-painter | house painter decorator brush | hum cap:m=white overalls:m=white brush_r | d=ice g=white j=grey a=brown
+=farmer-overalls | farmer overalls straw hat pitchfork | hum strawhat overalls pitchfork_r | d=red g=blue j=brown
+=gardener | gardener woman sun hat flower | hum hair_long sunhat bib flower_r | d=tan g=brown j=dark a=copper
+// travel
+=pilot | pilot airline captain | hum hair_short policecap:m=white shirtfront tie:m=black | d=navy g=navy j=black a=brown
+=flight-attendant | flight attendant air hostess scarf | hum hair_bun scarf skirt | d=blue g=blue j=black a=yellow
+=astronaut | astronaut white space suit | hum spacehelm chestpack | d=white g=white j=grey
+=astronaut-orange | astronaut orange suit | hum spacehelm chestpack | d=orange g=orange j=dark s=skin2
+=ship-captain | ship captain white beard cap | hum beard:a=white policecap:m=white shirtfront | d=navy g=white j=black
+=bus-driver | bus driver cap tie | hum hair_short cap:m=navy tie:m=blue | d=ice g=navy j=black a=grey s=skin2
+=train-conductor | train conductor ticket | hum policecap:m=maroon mustache card_r:m=white | d=maroon g=dark j=black a=black
+=mail-carrier | mail carrier postman letter | hum hair_short cap:m=blue satchel letter_r | d=ice g=navy j=black a=orange
+=delivery-rider | delivery rider courier helmet box | dpack hum helmet:m=teal box_l | d=teal g=dark j=black s=skin3
+=courier | courier delivery parcel | hum cap:m=brown parcel_l | d=tan g=brown j=dark a=black s=skin2
+=crossing-guard | crossing guard lollipop stop sign | hum hair_long cap:m=yellow vest:m=yellow stopsign_r | d=dark g=dark j=black a=grey
+=tourist | tourist camera hawaiian shirt | hum sunhat:m=tan shades hawaii camera_c shorts | d=orange g=tan j=brown
+=hiker | hiker backpack walking stick | dpack:m=green hum hair_short beanie:m=green cane_r shorts | d=red g=tan j=brown a=brown
+// science and arts
+=scientist | scientist lab coat flask glasses | hum hair_spiky:a=grey glasses coat flask_r | d=purple g=dark j=black
+=scientist-woman | scientist woman lab coat | hum hair_pony coat flask_r | d=pink g=navy j=black a=black s=skin2
+=artist | artist painter beret palette | hum hair_long beret brush_r palette_l | d=black g=blue j=brown a=brown
+=photographer | photographer with camera | hum hair_short camera_c cap:m=dark | d=tan g=forest j=brown a=copper
+=guitarist | musician guitar player | hum hair_long guitar_r | d=black g=blue j=black a=black
+=singer | singer with microphone | hum afro mic_r dress | d=purple j=gold a=black s=skin2
+=dj | dj headphones sunglasses | hum hair_short phones shades | d=lime g=black j=white a=blue s=skin3
+=ballerina | ballerina dancer tutu | hum hair_bun tutu | d=pink g=pink j=pink a=brown
+// sport
+=runner | athlete runner sprinter number | hum hair_short bibno shorts | d=red g=red j=white a=black s=skin2
+=footballer | footballer soccer player ball | hum hair_short shorts ball_f | d=blue g=white j=black a=yellow
+=basketball-player | basketball player | hum afro bandana:m=white shorts bball_r | d=yellow g=purple j=white a=black s=skin2
+=tennis-player | tennis player racket | hum hair_pony racket_r skirt | d=white g=white j=white a=yellow
+=swimmer | swimmer swim cap | hum scrubcap:m=blue shorts | d=skin g=blue j=skin
+=boxer | boxer red gloves | hum hair_short gloves shorts | d=skin3 g=red j=black a=black s=skin3
+=cyclist | cyclist bike helmet sunglasses | hum helmet:m=blue shades shorts | d=lime g=black j=white
+=referee | referee striped shirt yellow card | hum hair_short refstripes shorts card_r | d=white g=black j=black a=brown
+=coach | coach trainer cap clipboard | hum cap:m=red clipboard_l | d=red g=dark j=white a=brown s=skin3
+=lifeguard | lifeguard beach sunglasses | hum hair_short shades shorts | d=red g=red j=skin a=yellow
+// law and order, and trouble
+=detective | detective trench coat hat magnifier | hum fedora coat:m=tan magnifier_r | d=cream g=brown j=dark
+=judge | judge wig gavel robe | hum hair_long:a=white robe gavel_r | d=black j=white
+=security-guard | security guard sunglasses | hum policecap:m=black shades badge | d=black g=black j=black s=skin2
+=soldier | soldier army green helmet | hum helmet:m=forest | d=forest g=forest j=black s=skin3
+=burglar | burglar robber striped shirt mask sack | hum beanie:m=black refstripes eyemask sack_l | d=white g=dark j=black
+// big days and shows
+=bride | bride wedding dress veil bouquet | veil hum hair_long dress flower_r | d=white j=white a=brown
+=groom | groom wedding suit bow tie | hum hair_short shirtfront bowtie:m=black | d=black g=black j=black a=black s=skin3
+=clown | clown red nose wig | hum afro:a=red clownnose bowtie:m=blue | d=yellow g=blue j=red s=pale
+=magician | magician top hat wand | cape hum hair_short tophat shirtfront bowtie wand_r | d=black g=black j=black a=black
+=superhero | superhero cape mask | cape hum hair_short eyemask:m=navy emblem | d=blue g=blue j=red a=black
+=superheroine | superheroine cape mask | cape:m=gold hum hair_long eyemask:m=navy emblem | d=red g=red j=gold a=yellow
+=supervillain | villain supervillain dark cape | cape:m=violet hum beard:a=black eyemask | d=purple g=dark j=black s=pale
+// robot helpers
+=android | android robot helper humanoid | hum visor antenna | s=pale d=steel g=steel j=grey
+@robot-helper | robot helper friendly white
+.....R......
+.....x......
+..WWWWWWWW..
+.WVVVVVVVVw.
+.WVAVVVVAVw.
+.WVVVAAVVVw.
+..WWWWWWww..
+...xXXXXx...
+.xWWWWWWWWx.
+.x.WWBBWw.x.
+.A.WWWWWw.A.
+...wwwwww...
+...VV..VV...
+@robot-butler | robot butler waiter with tray
+......YY......
+.....YEYY.....
+....YKYYKY....
+....YYYYYO....
+.A...VRRV.....
+.A..VVVVVV....
+xxxxVVWWVVVx..
+....VVWWVV.x..
+....VVVVVV.x..
+.....V..V.....
+.....V..V.....
+....VV..VV....
+`);
+
+// ───────────────────────── adventure cast ─────────────────────────
+category('cast', 'Adventure cast', 'char');
+pack(`
+#tricorn y=0 m=black
+....nnnnnn....
+..nnnnWWnnnn..
+.nYYYYYYYYYYn.
+#parrot_l y=4
+.RR...........
+YRK...........
+.RG...........
+#hook_r y=8
+............x.
+...........xx.
+#santahat y=0
+..........W...
+....RRRRRRR...
+...RRRRRRR....
+...WWWWWWWW...
+#elfhat y=0 m=green
+.........Y....
+.....nnnnn....
+....nnnnnn....
+...RRRRRRRR...
+#bunnyears y=-3
+....WW..WW....
+....WM..MW....
+....WM..MW....
+....WW..WW....
+#bunnynose y=5
+......MM......
+#nemes y=0
+....YYBBYY....
+...BYYBBYYB...
+.YB........BY.
+.BY........YB.
+.YB........BY.
+.BY........YB.
+.YB........BY.
+#club_r y=4
+...........TT.
+...........TLT
+...........TT.
+............T.
+............T.
+............T.
+#whip_r y=3
+..........TT..
+.........T..T.
+............T.
+...........T..
+...........T..
+............T.
+#juggle y=-3
+......BB......
+......BB......
+..RR......YY..
+..RR......YY..
+#scubamask y=3
+...BBBBBBBB...
+...BAKAAKAB...
+...BBBBBBBB...
+#snorkel y=1
+..Y...........
+..Y...........
+..Y...........
+..Y...........
+..YY..........
+#pumpkinbucket_r y=8
+...........xx.
+..........OOOO
+..........OKKO
+..........DOOD
+#lasso_r y=4
+..........LLL.
+.........L...L
+..........LLL.
+............L.
+............L.
+#hoop_r y=5
+..........MM..
+.........M..M.
+.........M..M.
+..........MM..
+#cybereye y=4
+.......xxRx...
+.......xxxx...
+#metalarm y=7
+..........xx..
+...........x..
+...........x..
+#blaster_r y=8
+..........VVVV
+...........V..
+#laptop_l y=8
+xxx...........
+xAx...........
+xxxx..........
+#waistcoat y=7 m=brown
+....nn..nn....
+....nn..nn....
+#santatrim y=7
+......WW......
+......WW......
+#basket_r y=7
+...........LL.
+..........L..L
+..........RYBL
+..........TTTT
+..........TTTT
+#wolfhead y=0
+..xx......xx..
+..xxx....xxx..
+...xxxxxxxx...
+...xxxxxxxx...
+...xYxxxxYx...
+...xxwKKwxx...
+....wWwwWw....
+#flattop y=0
+...KKKKKKKK...
+...KKKKKKKK...
+...K.K..K.K...
+#bolts y=5
+..x........x..
+..............
+// pirates
+=pirate-captain | pirate captain hook hat beard | cape:m=maroon hum beard:a=black tricorn eyepatch sword_r hook_r | d=maroon g=dark j=black
+=pirate-girl | pirate girl bandana sword | hum hair_long bandana sword_r | d=white g=maroon j=brown a=red
+=pirate-first-mate | pirate with parrot striped shirt | hum bandana:m=blue beard refstripes parrot_l | d=white g=navy j=brown a=brown s=skin2
+=cabin-boy | cabin boy kid pirate | kid hair_short+0,3 bandana:m=red+0,3 | d=ice g=brown a=yellow
+// wild west
+=cowboy | cowboy hat lasso | hum cowboyhat scarf lasso_r | d=blue g=navy j=brown
+=cowgirl | cowgirl hat ponytail | hum hair_pony cowboyhat:m=cream skirt | d=red g=tan j=brown a=yellow
+=sheriff | sheriff star badge mustache | hum cowboyhat:m=tan mustache waistcoat badge | d=cream g=dark j=black
+=outlaw | outlaw bandit wild west masked | hum cowboyhat:m=black mask:m=red sack_l | d=dark g=black j=black
+=prospector | prospector gold miner beard pickaxe | hum strawhat:m=brown beard_long:a=grey overalls pickaxe_r | d=red g=blue j=brown
+// space
+=space-captain | space captain starship uniform | hum hair_short emblem | d=gold g=black j=black a=brown
+=space-trooper | space trooper soldier white armour blaster | hum helm_full:m=white armor:m=white blaster_r | d=white g=white j=dark
+=space-girl | space girl pink space suit astronaut | hum spacehelm chestpack | d=pink g=pink j=purple s=skin3
+=cyborg | cyborg half robot red eye | hum hair_spiky cybereye metalarm | d=dark g=black j=grey a=white
+// spies
+=spy | spy trench coat hat sunglasses | hum fedora:m=dark shades coat:m=dark | d=black g=black j=black
+=secret-agent | secret agent black suit sunglasses | hum hair_short shades shirtfront tie:m=black | d=black g=black j=black a=black
+=spy-woman | spy woman black suit sunglasses | hum hair_pony shades blaster_r | d=black g=black j=black a=red
+=hacker | hacker hood laptop | hum hood:m=dark laptop_l | d=dark g=black j=black
+// martial arts
+=ninja-red | red ninja sword | hum hood:m=red mask:m=red sword_r | d=red g=maroon j=black
+=ninja-blue | blue ninja | hum hood:m=navy mask:m=navy dagger_r | d=navy g=navy j=dark
+=sensei | sensei old karate master white beard | hum hair_sides:a=white beard_long robe cane_r | d=white j=black
+=karate-kid | karate kid white suit black belt | kid hair_short+0,3 bandana:m=white+0,3 | d=white g=white j=black a=black s=skin3
+// circus
+=ringmaster | circus ringmaster top hat red coat | hum tophat mustache:a=black shirtfront bowtie:m=black whip_r | d=red g=white j=black
+=acrobat | circus acrobat hoop | hum hair_bun hoop_r shorts | d=teal g=teal j=teal a=black
+=strongman | circus strongman dumbbell mustache | hum mustache:a=black overalls:m=red dumbbell_r shorts | d=skin g=red j=black
+=juggler | juggler juggling balls | hum hair_short juggle | d=purple g=yellow j=red
+=lion-tamer | lion tamer whip | hum hair_short whip_r waistcoat:m=red | d=cream g=tan j=black a=black s=skin2
+// outdoors
+=scout | scout kid hat neckerchief camping | kid cowboyhat:m=tan+0,3 scarf:m=yellow+0,3 | d=green g=tan j=brown
+=park-ranger | park ranger hat green uniform | hum hair_short cowboyhat:m=tan badge | d=forest g=tan j=brown a=brown s=skin3
+=safari-explorer | safari explorer pith helmet | hum hardhat:m=cream mustache camera_c shorts | d=cream g=tan j=brown
+=scuba-diver | scuba diver mask snorkel tank | dpack:m=yellow hum scrubcap:m=dark scubamask snorkel | d=dark g=dark j=lime
+=mountaineer | mountaineer climber pickaxe backpack | dpack:m=red hum beanie:m=blue scarf:m=white pickaxe_r | d=orange g=dark j=brown
+// holidays
+=santa | santa claus father christmas sack | hum santahat beard_long santatrim sack_l | d=red g=red j=black
+=mrs-claus | mrs claus christmas | hum hair_bun:a=white glasses dress apron | d=red j=white
+=christmas-elf | christmas elf santa helper | kid ears+0,3 elfhat+0,3 | d=green g=red j=green
+=easter-bunny | easter bunny rabbit costume basket eggs | hum bunnyears bunnynose basket_r | d=white g=white j=white s=white
+@ghost-costume-kid | kid in ghost sheet costume halloween
+...WWWWWW...
+..WWWWWWWW..
+..WWKWWKWW..
+..WWKWWKWW..
+..WWWWWWWW..
+.WWWWWWWWWW.
+.WWWWWWWWwW.
+.WWWWWWWWwW.
+.WwWWwWWwWw.
+..TT....TT..
+=witch-kid | kid witch costume halloween trick or treat | kid hair_long:a=purple+0,3 wizhat:m=black+0,3 pumpkinbucket_r+-1,2 | d=purple g=black j=black
+=vampire-kid | kid vampire costume halloween | kid hair_short:a=black+0,3 fangs+0,3 bowtie+0,3 | d=black g=black j=black s=pale
+=pumpkin-kid | kid pumpkin head costume halloween | kid pumpkinhead+0,3 | d=black g=green j=black
+=leprechaun | leprechaun green hat orange beard | hum tophat:m=green beard:a=orange | d=green g=green j=black
+// myths and far away
+@mermaid | mermaid with green tail | a=red d=teal
+....bbbbbb....
+...bcbbbbbb...
+..bbssssssbb..
+..bbsKssKsbb..
+..bbsKssKsbb..
+..ab.tsst.ba..
+..a.sMssMs.a..
+....s.ss.s....
+.....eeee.....
+.....eeffe....
+......eeee..d.
+.......eeeedd.
+........eeedd.
+...........d..
+@genie | genie from lamp blue
+.....YY.....
+....KKKK....
+...AAAAAA...
+...AKAAKA...
+...AKAAKA...
+....BAAB....
+.YAAPPPPAAY.
+.A..PPPP..A.
+.A..RRRR..A.
+....BAAB....
+.....AAB....
+......AB....
+.......B....
+=fairy | fairy wings wand | wings_h hum hair_bun dress wand_r | d=lime j=yellow a=pink
+=pharaoh | pharaoh egypt king | hum nemes robe staff_r:p=gold | d=white j=gold s=skin3
+=caveman | caveman club stone age | hum hair_long beard club_r shorts | d=copper g=copper j=skin a=black
+=werewolf | werewolf wolf man | hum wolfhead | d=maroon g=navy j=grey s=grey
+=frankenstein | frankenstein monster green bolts | hum flattop bolts | d=dark g=black j=black s=zombie
+`);
+
+// ───────────────────────── more creatures ─────────────────────────
+category('creatures', 'More creatures', 'char');
+pack(`
+// pets
+@kitten | kitten small cat sitting | a=grey
+b.....b.
+bb...bb.
+bbbbbbb.
+bKbbbKb.
+bbbMbbb.
+.bcccb.b
+.bcccb.b
+.bbbbbbb
+@cat-sleeping | cat sleeping curled up | a=orange
+..........b.
+...bbbbb.bb.
+.bbbbbbbbbbb
+bbabbbbbKbKb
+bbbabbbbbMbb
+abbbbbbbbbb.
+.aaaaaaaaa..
+@puppy | puppy small dog sitting | a=tan
+.aa....aa.
+abbbbbbbba
+abbKbbKbba
+.bbbbbbbb.
+.bbcKKcbb.
+..bcRRcb..
+..bbbbbb.b
+.bbccccbbb
+.bbccccbb.
+.bb.bb.bb.
+@dachshund | dachshund sausage dog | a=copper
+..........aab.
+b.........abbb
+.b........aKbK
+.bbbbbbbbbbbb.
+.bbbbbbbbbbb..
+..bcccccccbb..
+..b.b....b.b..
+@bulldog | bulldog pug dog | a=tan
+.a........a.
+aabbbbbbbbaa
+.bKbbbbbbKb.
+.bbcKKKKcbb.
+.bcWccccWcb.
+..bbbRRbbb..
+.bbbbbbbbbb.
+.bbccccccbb.
+.bb.bb.bb.bb
+@poodle | poodle fluffy dog | a=steel
+.........ccc..
+........ccccc.
+.cc.....bcKcc.
+.cc......bbbbK
+..b.....bbb...
+..bccccccc....
+...cccccccc...
+...ccccccc....
+...b.b..b.b...
+...c.c..c.c...
+@hamster | hamster pet | a=orange
+.zz....zz.
+.bbbbbbbb.
+bbKbbbbKbb
+bWWWMMWWWb
+bWWWWWWWWb
+.bWWWWWWb.
+.zz....zz.
+=guinea-pig | guinea pig pet brown | hamster | a=brown
+@goldfish-bowl | goldfish in bowl pet fish
+...wwwwww...
+..w......w..
+.wAAAAAAAAw.
+wAAAOOAAAAAw
+wAAOOOKAAWAw
+wAAAOOAAAAAw
+.wAAAAGAAAw.
+..wYYYGYYw..
+...wwwwww...
+@parrot | parrot red macaw | a=red
+...bbbb...
+..bbWKbY..
+..bbWWYY..
+..bbbbbY..
+.bbbGGb...
+.bbGGBb...
+.bbBBBb...
+..bBBb....
+.TTTbTTT..
+...bb.....
+...Ab.....
+=parrot-blue | blue and gold parrot macaw | parrot | a=blue
+@hedgehog | hedgehog
+..C.C.C.C...
+.CTCTCTCTC..
+CTCTCTCTCLL.
+TCTCTCTCLLKL
+CTCTCTCLLLLK
+.TCTCTLLLLL.
+..L.L..L.L..
+// farm
+@rooster | rooster cockerel
+........RR..
+.N.....RRR..
+NNN....WWKO.
+1NN...WWWWOO
+.NNW.WWWWR..
+.NWWWWWWWR..
+..WWwwWWW...
+..WWWwwWW...
+...WWWWW....
+....O.O.....
+...OO.OO....
+@turkey | turkey bird thanksgiving
+..T.O.T.O...
+.O.TTOTT.T..
+.TTOTTOTTO..
+OTTTTLLTTLL.
+TTOTLLLLLKL.
+.TTLLLLLLLOO
+..TLLLLLLR..
+...LLLLLLR..
+....LLLL....
+....O..O....
+...OO.OO....
+#donkeyears y=-2 a=grey
+..........b.b.
+..........b.b.
+..........b.b.
+=donkey | donkey grey long ears | horse donkeyears | a=grey d=dark
+@llama | llama alpaca | a=cream
+.........b.b.
+.........bbb.
+.........bKbb
+.........bbbT
+.........bb..
+.........bb..
+..bbbbbbbbb..
+.bbbbbbbbbb..
+.bcbbbbbbbb..
+.bbbbbbbbbb..
+..bb.b..bb.b.
+..bb.b..bb.b.
+..aa.a..aa.a.
+#bullhorns y=-1
+.........W...W
+.........WW.WW
+..............
+..............
+..............
+..............
+..............
+............Y.
+=bull | bull brown horns nose ring | cow bullhorns | a=brown d=dark
+=goose | goose grey farm bird | duck | a=grey
+@swan | swan white bird
+....WWW....
+...WWKWOO..
+...WW......
+...WW......
+....WW.....
+W...WW.....
+WWWWWWWW...
+WWWwwWWWW..
+.WWWwwWWW..
+..WWWWWW...
+// zoo and savanna
+@lion | lion with mane | a=tan
+.........TTTT.
+........TTTTTT
+........CTbbKT
+T.......CTbbbK
+T.......CTTbb.
+.bbbbbbbbCTT..
+.bbbbbbbbbCT..
+.bbbbbbbbbb...
+.bbccccccbb...
+.bb.bb..bb.b..
+.bb.....bb....
+#bigcat a=orange
+..........b..b
+.........bbbbb
+bb.......bKbKb
+.b.......WbbMW
+.bbbbbbbbbbWW.
+.bbbbbbbbbbb..
+.bbbbbbbbbbb..
+.bWWWWWWWbb...
+.bb.bb..bb.b..
+.bb.....bb....
+#tigerstripes
+..............
+...........K..
+.K............
+..............
+....K..K......
+...K..K..K....
+....K..K......
+#leopardspots
+..............
+..............
+.C............
+..............
+...C..C.C.....
+..C..C..C.C...
+....C..C......
+=tiger | tiger orange stripes | bigcat tigerstripes
+=leopard | leopard cheetah spots | bigcat:a=yellow leopardspots
+=panther | black panther big cat | bigcat:a=dark
+=lioness | lioness female lion | bigcat:a=tan
+@elephant | elephant grey trunk | a=grey
+....bbbbbbb.........
+..bbbbbbbbbbb.bbbb..
+.bbbbbbbbbbbbbbbbbb.
+.bbbbbbbbbbbaabbKbb.
+.bbbbbbbbbbbaabbbbb.
+abbbbbbbbbbbbabbbbb.
+a.bbbbbbbbbbbbbWWbb.
+a.bbbbbbbbbbbbW..bb.
+..bbbbbbbbbbbb...bb.
+..bbbbbbbbbbbb...bb.
+..bbb.bbb.bbbb..bbc.
+..bbb.....bbb.......
+..bbb.....bbb.......
+..cWc.....cWc.......
+@giraffe | giraffe tall long neck | a=yellow
+.........T.T.
+.........bbb.
+.........bKbb
+.........bbbb
+.........bT..
+.........bb..
+.........Tb..
+.........bb..
+.........bT..
+..bbbbbbbbb..
+.TbTbbTbbTb..
+Tbbbbbbbbbb..
+T.bTbbTbbb...
+..bb.b.bb.b..
+..bb.b.bb.b..
+..bT.b.bT.b..
+..bb.b.bb.b..
+..CC.C.CC.C..
+#zebrastripes
+..............
+..............
+..............
+..............
+...K.K.K.K.K..
+...K.K.K.K....
+...K.K.K.K....
+...K.K.K.K....
+...K......K...
+..............
+..K........K..
+=zebra | zebra striped horse | horse:a=white,d=black zebrastripes
+@hippo | hippo hippopotamus | a=grey
+.........b..b.
+..bbbbbbbbbbbb
+.bbbbbbbbbbKbb
+bbbbbbbbbccccc
+bbbbbbbbbcKccK
+bbbbbbbbbccccc
+.bbbbbbbbbWbW.
+.bbb.bb.bbb...
+.aaa.aa.aaa...
+@rhino | rhino rhinoceros horn | a=grey
+........b....W
+..bbbbbbbb..WW
+.bbbbbbbbbbbW.
+abbbbbbbbbKbb.
+abbbbbabbbbbb.
+.bbbbbabbbbb..
+.bbbbbbbbbb...
+.bbb.bb.bbb...
+.aaa.aa.aaa...
+@gorilla | gorilla ape | a=black
+....bbbb....
+...bbbbbb...
+...bxKxKb...
+...bxxxxb...
+.bbbbxxbbbb.
+bbbbbbbbbbbb
+bbbcbbbbcbbb
+bb.bbbbbb.bb
+bb.bbbbbb.bb
+xx.bb..bb.xx
+...bbb.bbb..
+#pandamarks
+..VV....VV..
+............
+..VWV..VWV..
+............
+............
+............
+VVVV....VVVV
+VVV......VVV
+VV........VV
+VV........VV
+...VVV.VVV..
+..VVVV.VVVV.
+=panda | panda bear black and white | bear:a=white pandamarks
+@koala | koala | a=grey
+bbb......bbb
+bcbbbbbbbbcb
+bbbbbbbbbbbb
+.bbKbbbbKbb.
+.bbbbKKbbbb.
+.bbbbKKbbbb.
+..bbbbbbbb..
+.bbbccccbbb.
+.bbbccccbbb.
+..bb.bb.bb..
+@kangaroo | kangaroo | a=copper
+.........b.b..
+.........bbb..
+.........bKbb.
+.........bbbb.
+........bbb...
+......bbbbb...
+.....bbbbbbb..
+....bbbbcc.b..
+...bbbbbcc....
+..abbbbbbb....
+.aa.bbbbb.....
+aa...bb.b.....
+a....bbbbb....
+@camel | camel desert hump | a=tan
+...........bb.
+....bb.....bKb
+...bbbb....bbb
+..bbbbbb...bb.
+.bbbbbbbbbbbb.
+.bbbbbbbbbbb..
+.bbbbbbbbbb...
+..bbbccbbb....
+..b.b..b.b....
+..b.b..b.b....
+..a.a..a.a....
+@crocodile | crocodile alligator | a=green
+....a.a.a.bb..
+a..bbbbbbbbKbb
+bbbbbbbbbbbbbb
+.bbbbccccWKWKW
+...bb..bb.....
+@flamingo | flamingo pink bird
+....MMM.
+...MMKMK
+...MM.zK
+...MM...
+....M...
+..MMMM..
+.MMMzMM.
+.MMzzMM.
+..MMMM..
+...M....
+...M....
+...MM...
+...M....
+@ostrich | ostrich big bird
+.......xx.
+......xxKO
+.......x..
+.......x..
+.......x..
+.WVVVVVx..
+WWVVVVVV..
+.WVVVVVV..
+..VVVVV...
+...z.z....
+...z.z....
+...z.z....
+..zz.zz...
+@peacock | peacock tail feathers
+.Y2.Y2.Y2.Y2.
+2B2G2B2B2G2B2
+2G2B2GBG2B2G2
+.2B2GBBBG2B2.
+.2G2BKBKB2G2.
+..2GBBOBBG2..
+...2BBBBB2...
+....BBBBB....
+.....BBB.....
+....O...O....
+@sloth | sloth hanging on branch | a=tan
+TTTTTTTTTTT
+.b.......b.
+.b.bbbbb.b.
+.bbbcccbbb.
+.bbcKcKcbb.
+..bccMccb..
+..bbbbbbb..
+..bbbbbbb..
+...bb.bb...
+@meerkat | meerkat standing | a=tan
+..bbbb..
+.bKbbKb.
+.bbKKbb.
+..bbbb..
+..bccb..
+.bbccbb.
+.b.cc.b.
+..bccb..
+..bccb..
+..bbbb.a
+..b..baa
+.bb..bb.
+// forest and sky
+@raccoon | raccoon masked | a=grey
+b......b....
+bb....bb....
+bbbbbbbb..aa
+bVKbbKVb.bVb
+WWbKKbWW.bbb
+.bbbbbb.bVb.
+.bbccbbbbb..
+.bbccbbbb...
+.bb.bb.bb...
+@skunk | skunk black white stripe
+.WWW..........
+WVVWW.....V.V.
+WV.VW....VVVV.
+WV..WWWWWWVKVV
+.VV.VVVVVVVVVK
+..VVVVVVVVVV..
+...VVVVVVVV...
+...VV.V.VV.V..
+@beaver | beaver flat tail | a=brown
+........bb.b
+.......bbbbb
+......bbbKbb
+.....bbbbbbK
+..bbbbbbbWW.
+.bbbbbbbbb..
+CCbbbcccbb..
+CVCbbcccb...
+.CCbb.bb....
+@moose | moose elk antlers | a=brown
+.......LL.L.LL
+........LLLLL.
+.........bbb..
+.........bKbb.
+.........bbbbb
+..bbbbbbbbbbba
+.bbbbbbbbbb.b.
+.bbbbbbbbbb...
+.bbbbbbbbb....
+.bb.b...b.b...
+.aa.a...a.a...
+.aa.a...a.a...
+@badger | badger | a=grey
+..........V...
+..bbbbbbbVWW..
+.bbbbbbbbWVVWW
+abbbbbbbbWWWVK
+abbbbbbbbbWWW.
+.VVV.VV.VVV...
+.VV..VV..VV...
+@mole | mole digging out of dirt
+....VVVV....
+...VVVVVV...
+..zVVKVKVz..
+..zzVVMVzz..
+.TTTVVVVTTT.
+TLTTTTTTTTLT
+TTTTLTTTTTTT
+@woodpecker | woodpecker bird on trunk
+.RR....TTT
+RVVK...TCT
+VVVxxx.TTT
+WVV....TCT
+WWVV...TTT
+WWVV...TCT
+.WVV.x.TTT
+..VVV..TCT
+...V...TTT
+@eagle | eagle flying bird of prey | a=brown
+bb..........bb
+bbb...WW...bbb
+abbb.WKKW.bbba
+.abbbbYYbbbba.
+..aabbbbbbaa..
+.....bbbb.....
+....Y.WW.Y....
+@pigeon | pigeon city bird
+...xxx....
+..xxKxO...
+..2PPx....
+.xxxxxx...
+xwwwxxxx..
+.xwwwxxVV.
+..xxxx....
+...M.M....
+@seagull | seagull sea bird
+....WWW....
+...WWKWYY..
+...WWWW.R..
+x..WWWW....
+xxwwwWWW...
+.xxwwwWW...
+..WWWWW....
+...O.O.....
+@toucan | toucan tropical bird big beak
+..VVVV.....
+.VVWKOOOO..
+.VWWOOOYOO.
+.VWWW.OOR..
+.VVVV......
+.VVVVV.....
+..VVVVV....
+...VVV.....
+..TOTOTT...
+....VV.....
+@hummingbird | hummingbird tiny bird
+.GG.......
+GGGG.22...
+.NGG2K2xxx
+..G2222...
+..NH22....
+.NN.......
+// sea
+@whale | blue whale spout | a=blue
+.....A.A............
+......A.............
+....bbbbbbbbbb......
+..bbbbbbbbbbbbbb..a.
+.bbKbbbbbbbbbbbbbaa.
+.bbbbbbbbbbbbbbbbba.
+.cbbbbbbbbbbbbbbb.a.
+..ccccccccbbbb......
+....cccccc..........
+@dolphin | dolphin jumping | a=blue
+.......bb.....
+......bbbb....
+....bbbbbbb...
+..bbbbbbbbbb..
+.bbKbbbbbbbbb.
+abbbbcccc.bbb.
+.acccc.....bb.
+............bb
+...........bbb
+..........b..b
+#orcapatch
+..............
+..............
+..............
+....WW........
+..............
+.....WWWW.....
+..WWWW........
+=orca | orca killer whale black white | dolphin:a=black orcapatch
+@seal | seal sea lion | a=grey
+........bbb.
+.......bbKbK
+.......bbbbW
+......bbbb..
+.....bbbb...
+...bbbbbb...
+.bbbbbbbb.a.
+abbbccccbbaa
+aa.bb..bbb..
+@walrus | walrus tusks | a=brown
+...bbbbbb...
+..bbKbbKbb..
+..bLLKKLLb..
+..bLLLLLLb..
+.bbbWbbWbbb.
+bbbbWbbWbbbb
+bbbbbbbbbbbb
+abbbbbbbbbba
+aab......baa
+@seahorse | seahorse | a=orange
+..b.b...
+..bbb...
+.bbKbcc.
+.bbbb...
+..bb....
+..bbb...
+.bbccb..
+.bbccb..
+..bbb...
+...bb...
+....b...
+..b.b...
+..bbb...
+@lobster | lobster red claws | a=red
+bb.....bb..
+bbb...bbb..
+.bb...bb...
+..b.K.K.b..
+..bbbbbbb..
+...bbcbb...
+..abbbbba..
+.a.bbcbb.a.
+...bbbbb...
+....bbb....
+...bbbbb...
+@shrimp | shrimp prawn pink
+.K........
+I.IIII....
+.IIzIIII..
+KIIIIzIII.
+..I.I.IzII
+.......III
+......IzI.
+.....III..
+....II....
+@squid | squid | a=pink
+....bb....
+...bbbb...
+..bbbbbb..
+.bbbbbbbb.
+..bbbbbb..
+..bKbbKb..
+..bbbbbb..
+..b.bb.b..
+.b..bb..b.
+.b.b..b.b.
+b..b..b..b
+@stingray | stingray manta ray | a=navy
+....bbbb.....
+..bbbbbbbb...
+.bbKbbbbKbb..
+bbbbbbbbbbbb.
+.bbbbccbbbb..
+..bbbbbbbb...
+....bbbb.....
+.....aa......
+......a......
+......a......
+.......a.....
+@pufferfish | pufferfish blowfish spiky
+..T..T..T..
+...YYYYY...
+T.YYYYYYY.T
+.YYWKYYYYY.
+.YYWWYYYYYO
+TYYYYYYEEYT
+.YYYYEEEEY.
+..EEEEEEE..
+T..EEEEE..T
+..T..T..T..
+@clownfish | clownfish orange white stripes
+....OOO.....
+..OKOWOOWO.O
+.OOOOWOOWOWO
+.OOOOWOOWOWO
+..OOOWOOWO.O
+....OOO.....
+@angelfish | angelfish tropical fish yellow stripes
+.....YY...
+....YYY...
+...YKYYK..
+..YYKYYKY.Y
+.YKYKYYKYYY
+..YYKYYKY.Y
+...YKYYK..
+....YYY...
+.....YY...
+@eel | eel sea snake | a=teal
+..........bbb.
+.........bbKbb
+....bbb..bbbW.
+...bbbbb.bb...
+bb.bb.bbbbb...
+.bbbb..bbb....
+..bb..........
+@clam | clam shell with pearl
+..zzzzzzzz..
+.zzMzzMzzMz.
+zzMzzMzzMzzz
+zMzzMzzMzzMz
+VVVVWWWVVVVV
+zzzzWWWzzzzz
+.zzzzzzzzzz.
+..MMMMMMMM..
+@swordfish | swordfish | a=blue
+........a.....
+.......aa.....
+a....bbbbbb...
+aa.bbbbbbKbxxx
+.abbbbbbbbb...
+aa.ccccccc....
+a.....a.......
+@narwhal | narwhal horned whale | a=ice
+.............L
+a...........L.
+aa..bbbbbb.L..
+.abbbbbbbbbb..
+..bbbbbbbKbb..
+..bccccccccb..
+....cccccc....
+// insects and reptiles
+@ant | ant insect
+........C.C.
+.ZZ..ZZ.ZZ..
+ZRZZZRZZZKZ.
+.ZZ..ZZ.ZZ..
+C.C.C.C.C...
+@caterpillar | caterpillar green bug
+.........K.K
+..........G.
+.GG.GG.GGHHG
+GHGGHGGHGKGK
+GGGGGGGGGGMG
+.N..N..N....
+@dragonfly | dragonfly
+.AAA..22..AAA.
+AAAAA.KK.AAAAA
+.AAAAA22AAAAA.
+..AAA.22.AAA..
+.AAAA.22.AAAA.
+.AA...22...AA.
+......22......
+......11......
+......22......
+@grasshopper | grasshopper cricket green
+.......N...K
+.....NNG..K.
+....NG.GGGG.
+.GGGGGGGGKG.
+NGHHHHGGGGG.
+..N.NGG.N...
+.N..N.N..N..
+@beetle | beetle bug | a=teal
+..V....V..
+...VVVV...
+V.bbVVbb.V
+.bbcbVbbb.
+VbbbbVbbbV
+.bbbbVbbb.
+V.bbbVbb.V
+...bbbb...
+@fly | fly housefly
+.AA....AA.
+AAAA..AAAA
+.AAVVVVAA.
+..VRVVRV..
+..VVVVVV..
+...VVVV...
+..V.VV.V..
+@mosquito | mosquito
+..AA.AA....
+...AAA.....
+..VVVVVKV..
+.VVVVVVVVxxR
+..V.V.V....
+.V..V..V...
+@firefly | firefly glowing bug
+.....AA...
+....AAAA..
+EYYVVVVKV.
+EYYVVVVVV.
+.E.V.V.V..
+@slug | slug slimy | a=tan
+..........K.K
+..........b.b
+....bbbbbbbbb
+..bbbcbbbbbKb
+bbbbbbbbbbbbb
+@lizard | lizard green | a=green
+...........bbb
+..........bbKb
+.a..bbbbbbbbb.
+a..bbccccbb...
+a.bb.b..b.b...
+.ab..b....b...
+=gecko | gecko orange lizard | lizard | a=orange
+@chameleon | chameleon on branch
+.....HH.......
+...GGGGGG.GG..
+..GGHGGGGGGGG.
+.GG.GGHGGGWKG.
+.G.GGGGGGGGGGR
+.GG.GGGGGG.GG.
+..GNN.GG......
+TTTTTTTTTTTTTT
+@cobra | cobra snake hooded | a=tan
+...bbbb...
+..bbbbbb..
+.bbKbbKbb.
+.bbbbbbbb.
+.bbcRRcbb.
+..bccccb..
+...bccb...
+...bccb.b.
+.bbbccbbb.
+bbbbbbbb..
+.bbbbbb...
+// dinosaurs
+@t-rex | t-rex tyrannosaurus dinosaur | a=green
+..........bbbbbbb.
+.........bbbKbbbbb
+.........bbbbbbbbb
+.........bbbbWKWKW
+.........bbbbbbbb.
+........bbbbWKWK..
+a......bbbbb......
+aa....bbbbbbbb....
+.aa..bbbbbcc.b....
+..abbbbbbbcc......
+...abbbbbbcc......
+....abbbbbc.......
+.....bbb.bb.......
+.....bb..bb.......
+.....bbb.bbb......
+@triceratops | triceratops dinosaur three horns | a=teal
+..........cc........
+.........cccc.W..W..
+.....bbbbccccbW.W...
+...bbbbbbbcccbbbb...
+..bbbbbbbbbccbKbbb.W
+.bbbbbbbbbbbcbbbbbW.
+abbbbbbbbbbbbbbbbbb.
+a.bbbbbbbbbbb.bbbb..
+..bbb.bb.bbbb.......
+..bbb.....bbb.......
+..aaa.....aaa.......
+@stegosaurus | stegosaurus dinosaur back plates | a=green
+......O..O..O.......
+.....OOOOOOOOO......
+....ObbObbObbbO.....
+W..bbbbbbbbbbbbb....
+.Wbbbbbbbbbbbbbbbbb.
+W.abbbbbbbbbbbbbbKb.
+...abbbbbbbbbbb.bb..
+....bbb.bb.bbb......
+....bbb....bbb......
+....aaa....aaa......
+@brontosaurus | brontosaurus long neck dinosaur diplodocus | a=blue
+...............bbb..
+..............bbKbb.
+..............bbbbb.
+..............bb....
+.............bbb....
+.............bb.....
+.....bbbbbbbbbb.....
+...bbbbbbbbbbbb.....
+a.bbbbbbbbbbbbb.....
+.abbbbbbbbbbbb......
+...bbb.bb.bbb.......
+...bbb....bbb.......
+...aaa....aaa.......
+@pterodactyl | pterodactyl flying dinosaur | a=copper
+b............b
+bb....a.....bb
+bbb...ab...bbb
+.bbbb.bbb.bbbb
+..bbbbbKbbbbb.
+...bbbbbOObb..
+.....bbb.OO...
+.....b.b......
+@raptor | raptor velociraptor dinosaur | a=orange
+.........bbbb.
+........bbKbbb
+........bbbWWW
+a.......bb....
+.a....bbbb....
+..abbbbbbb.b..
+...bbbbbcc....
+....bbbb......
+....b..b......
+....bb.bb.....
+@dino-egg | dinosaur egg spotted
+...EEEE...
+..EEEGEE..
+.EEGEEEEE.
+.EEEEEEGE.
+EEEEGEEEEE
+EGEEEEEEEF
+EEEEEEGEFF
+.EEGEEEFF.
+..EEEFFF..
+@baby-dino | baby dinosaur hatching from egg
+...GGGG...
+..GKGGKG..
+..GGGGGG..
+...GHHG...
+.E.GGGG.E.
+EEE.EE.EEE
+EEEEEEEEEF
+EEEEEEEEFF
+.EEEEEEFF.
+..EEEFFF..
+// aliens and robots
+@alien-green | alien little green man antenna | a=green
+..b......b..
+...b....b...
+..bbbbbbbb..
+.bbbbbbbbbb.
+.bKKbbbbKKb.
+.bKKbbbbKKb.
+..bbbbbbbb..
+...bbaabb...
+..PPPPPPPP..
+.bPPPYPPPPb.
+.b.PPPPPP.b.
+...PP..PP...
+...VV..VV...
+@alien-grey | grey alien big eyes
+...wwwwww...
+..wwwwwwww..
+.wwwwwwwwww.
+.wKKwwwwKKw.
+.wKKKwwKKKw.
+..wKKwwKKw..
+...wwwwww...
+....wxxw....
+...wwwwww...
+..ww.ww.ww..
+..w..ww..w..
+....ww.ww...
+....w...w...
+@alien-blob | alien blob purple three eyes | a=purple
+.W...W...W.
+.K...K...K.
+.b...b...b.
+.bbbbbbbbb.
+bbbbbbbbbbb
+bbcbbbbbbbb
+bbbbKKKbbbb
+bbbbbbbbbbb
+.bbbbbbbbb.
+b.b.b.b.b.b
+b.b.b.b.b.b
+@alien-one-eye | alien one eye teal cyclops | a=teal
+....R.....
+....b.....
+..bbbbbb..
+.bbWWWWbb.
+.bWWKKWWb.
+.bWWKKWWb.
+.bbWWWWbb.
+..bbbbbb..
+.bbbccbbb.
+b.bbccbb.b
+b.bbbbbb.b
+..bb..bb..
+.bbb..bbb.
+@robot-dog | robot dog pet
+..........x.x.
+R.........xxxx
+x.........xAxx
+x.........xxxV
+.xxxxxxxxxxx..
+.xwwwwwwwwx...
+.xxxxxxxxxx...
+.VV.VV.VV.VV..
+.x...x.x...x..
+.V...V.V...V..
+@robot-ball | round robot ball droid
+....WWWW....
+...WWOOWW...
+...WVAAVW...
+...xxxxxx...
+..WWWWWWWW..
+.WWOWWWWOWW.
+.WOOOWWWWOW.
+.WWOWWxxWWW.
+.WWWWWxxWWw.
+..WWOWWWWw..
+...wwwwww...
+@robot-tank | robot on tracks treads claws
+....R.......
+....x.......
+..YYYYYYY...
+..YAAYAAY...
+..YYYYYYY...
+...xXXXx....
+.OOOOOOOOO.x
+xO.OOROOO.xx
+.OOOOOOOOO.x
+.VVVVVVVVVV.
+VxVxVxVxVxVV
+.VVVVVVVVVV.
+// storybook beasts
+#unihorn y=-2
+.............Y
+............Y.
+=unicorn | unicorn white horse horn pink mane | horse:a=white,d=pink unihorn
+#pegwing y=0
+....xx......
+...xWWx.....
+..xWWWWx....
+..xwWWWx....
+...xxwWx....
+=pegasus | pegasus winged horse | horse:a=white,d=ice pegwing
+@phoenix | phoenix fire bird
+Y..........Y
+OY...YY...YO
+OOY.YOOK.YOO
+ROOYOOOOYOOR
+.ROOOOOOOOR.
+..RROOOORR..
+....OOOO....
+....ROOR....
+...R.RR.R...
+..Y..OO..Y..
+.....YY.....
+@sea-serpent | sea serpent loch ness monster | a=green
+.bbb..........
+bbKbb.........
+bbbbW.........
+.bbb..........
+.bbb...bbb....
+.bbb..bbbbb..b
+.bbbb.bbcbbb.b
+AAbbAAAbbbAAbA
+.AAAAAAAAAAAA.
+@swamp-monster | swamp monster creature green
+....NNNN....
+..NNGGGGNN..
+.NGGYKGYKGN.
+.NGGGGGGGGN.
+NGGNKKKKNGGN
+NGGGNNNNGGGN
+GGNGGGGGGNGG
+GG.GGHGGG.GG
+N..GGGGGG..N
+...GG..GG...
+..NGG..GGN..
+@furry-monster | cute furry monster purple one eye horns | a=purple
+W..........W
+WW........WW
+.bbbbbbbbbb.
+bbbbWWWWbbbb
+bbbWWKKWWbbb
+bbbWWKKWWbbb
+bbbbWWWWbbbb
+bbKKKKKKKKbb
+bbbWKWKWKbbb
+.bbbbbbbbbb.
+.bb.bbbb.bb.
+.aa......aa.
+@baby-dragon | baby dragon cute green | a=green
+..R.....R...
+..bb...bb...
+..bbbbbbb...
+.bbKbbbKbb..
+.bbbbbbbbb.W
+..bbKKbb..WW
+..bbbbbb.WWb
+.bbccccbbbb.
+.bbccccbb...
+a.bccccb....
+aa.bb.bb....
+.aabb.bb....
+`);
+
+// ───────────────────────── home ─────────────────────────
+category('home', 'Home & garden', 'thing');
+pack(`
+// living room
+@sofa | sofa couch red | a=red
+..bbbbbbbbbb..
+..bcbbbbbbbb..
+..bbbbbabbbb..
+bbbbbbbabbbbbb
+bcbccccacccbbb
+bbbbbbbbbbbbbb
+baaaaaaaaaaaab
+C............C
+=sofa-blue | blue sofa couch | sofa | a=blue
+@armchair | armchair comfy chair | a=green
+..bbbbbb..
+..bcbbbb..
+..bbbbbb..
+bbbbbbbbbb
+bcbccccbbb
+bbbbbbbbbb
+baaaaaaaab
+C........C
+@coffee-table | coffee table low
+LLLLLLLLLLLL
+TTTTTTTTTTTT
+.T........T.
+.T........T.
+.C........C.
+@floor-lamp | floor lamp standing lamp
+..EEEE..
+.EYYYYE.
+.YYYYYY.
+YYYYYYYO
+...x....
+...x....
+...x....
+...x....
+...x....
+...x....
+...x....
+.VVVVV..
+@table-lamp | table lamp bedside lamp | a=blue
+..EEEE..
+.EYYYYE.
+EYYYYYYO
+...x....
+..bbb...
+.bcbbb..
+.bbbbb..
+..aaa...
+@rug | rug carpet mat | a=red
+Y.Y.Y.Y.Y.Y.Y.
+bbbbbbbbbbbbbb
+bYYYYYYYYYYYYb
+bYbbcbbbbcbbYb
+bYbcbbccbbcbYb
+bYbbcbbbbcbbYb
+bYYYYYYYYYYYYb
+bbbbbbbbbbbbbb
+Y.Y.Y.Y.Y.Y.Y.
+@fireplace | fireplace hearth fire
+TTTTTTTTTTTTTT
+LLLLLLLLLLLLLL
+.xxxxxxxxxxxx.
+.xwxVVVVVVxwx.
+.xxVVVVYVVVxx.
+.xwVVYVOVVVwx.
+.xxVVOYOYVVxx.
+.xwVVOOOOVVwx.
+.xxVCTCTCTVxx.
+XXXXXXXXXXXXXX
+@photo-frame | photo frame family portrait picture
+TTTTTTTT
+TAAAAAAT
+TAACCAAT
+TAASSAAT
+TAASSAAT
+TARRRRAT
+TRRRRRRT
+TTTTTTTT
+@houseplant | houseplant potted plant
+...G..G...
+.G.GG.G.G.
+.GGHGGGGG.
+GGGGHGGGHG
+.GHGGGGGG.
+..GGNGGG..
+...NNN....
+..OOOOOO..
+..DOOOOD..
+...OOOO...
+...DOOD...
+@vase-flowers | vase of flowers bouquet
+.R..Y..M.
+RYR.YO.MM
+.R.GY.GM.
+..G.G.G..
+...GGG...
+..AAAAA..
+..ABBBA..
+..BBBBB..
+...BBB...
+..BBBBB..
+@window-curtains | window with curtains
+TTTTTTTTTTTT
+RRRAAAAAARRR
+RRRAAWAAARRR
+RRAAAAAAAARR
+RRAAAAAWAARR
+RZAAAAAAAAZR
+RRAAAAAAAARR
+RRRAAAAAARRR
+TTTTTTTTTTTT
+@cushion | cushion pillow purple | a=purple
+b........b
+.bbbbbbbb.
+.bcbbbbbb.
+.bbbYbbbb.
+.bbbbbbbb.
+.baaaaaab.
+b........b
+@fan | electric fan
+..xxxxx..
+.xwAxAwx.
+xwAAxAAwx
+xxxxVxxxx
+xwAAxAAwx
+.xwAxAwx.
+..xxxxx..
+....x....
+....x....
+..VVVVV..
+// bedroom
+@double-bed | double bed blue blanket | a=blue
+TTTTTTTTTTTTTT
+TLTTTTTTTTTTLT
+TWWWWWTTWWWWWT
+TWWWWwTTWWWWwT
+bbbbbbbbbbbbbb
+bcbbbbbbbbbbbb
+bbbbbbbcbbbbbb
+bbbbbbbbbbbbbb
+aaaaaaaaaaaaaa
+T............T
+@bunk-bed | bunk bed
+T..........T
+TWWBBBBBBBBT
+TTTTTTTTTTTT
+T........L.T
+T........L.T
+TWWRRRRRRLRT
+TTTTTTTTTTTT
+T........L.T
+T..........T
+@crib | baby crib cot
+W..........W
+WWWWWWWWWWWW
+W.W.W.W.W.WW
+WzWzWzWzWzWW
+WzWzWzWzWzWW
+WWWWWWWWWWWW
+W..........W
+@wardrobe | wardrobe closet
+TTTTTTTTTT
+TLLLLTLLLT
+TLLLLTLLLT
+TLLLLTLLLT
+TLLLYTYLLT
+TLLLLTLLLT
+TLLLLTLLLT
+TLLLLTLLLT
+TTTTTTTTTT
+TLLLLLLLYT
+TTTTTTTTTT
+C........C
+@dresser | dresser chest of drawers
+LLLLLLLLLLLL
+TTTTTTTTTTTT
+TLLLLYYLLLLT
+TTTTTTTTTTTT
+TLLLLYYLLLLT
+TTTTTTTTTTTT
+TLLLLYYLLLLT
+TTTTTTTTTTTT
+C..........C
+@pillow | pillow white
+.WWWWWWWWWW.
+WWWWWWWWWWWW
+WWWWWWWWWWWw
+WWWWWWWWWwww
+.wwwwwwwwww.
+@laundry-basket | laundry basket clothes
+..RR.AAA....
+.RRRWAAABB..
+LLLLLLLLLLLL
+.LTLTLTLTLL.
+.LLTLTLTLTL.
+.LTLTLTLTLL.
+..LLLLLLLL..
+@coat-rack | coat rack stand
+.T..T..T.
+..T.T.T..
+...TTT...
+.RR.T....
+.RR.T.BB.
+.RR.T.BB.
+....T.BB.
+....T....
+....T....
+....T....
+..TTTTT..
+// kitchen
+@fridge | fridge refrigerator
+WWWWWWWW
+WWWWWWWw
+WWWWWxWw
+WWWWWxWw
+xxxxxxxx
+WWWWWxWw
+WWWWWxWw
+WWWWWWWw
+WWWWWWWw
+WWWWWWWw
+WWWWWWWw
+wwwwwwww
+V......V
+@cooker | cooker stove oven
+VxVxxVxVxx
+WWWWWWWWWW
+WRWRWWRWRW
+WWWWWWWWWW
+WVVVVVVVVW
+WVVOOOOVVW
+WVVOYYOVVW
+WVVVVVVVVW
+WWWWWWWWWW
+wwwwwwwwww
+@microwave | microwave oven
+wwwwwwwwwwww
+wVVVVVVVVwGw
+wVAAVVVVVwxw
+wVAVVVVVVwxw
+wVVVVVVVVwxw
+wwwwwwwwwwww
+@toaster | toaster with toast
+..LLL.LLL..
+..LFL.LFL..
+.xxxxxxxxx.
+xwwwwwwwwwx
+xwwwwwwwwRx
+xwwwwwwwwwx
+xxxxxxxxxxx
+V.........V
+@kettle | kettle red | a=red
+....VV....
+...bbbb...
+..bbbbbb.V
+bbbcbbbbbV
+.bbcbbbbbV
+..bbbbbbbV
+..bbbbbb..
+..aaaaaa..
+@blender | blender mixer smoothie
+..VVVVV..
+..AAAAA.x
+..AMMMA.x
+..AMMMAx.
+...AMA...
+...AAA...
+..xxxxx..
+..xRxxx..
+.xxxxxxx.
+@kitchen-sink | kitchen sink tap
+.....xx.....
+....xx.x....
+....x..A....
+wwwwwwwwwwww
+wxAAAAAAAAxw
+wwxxxxxxxxww
+TTTTTTTTTTTT
+TLLLLTTLLLLT
+TLLLYTTYLLLT
+TLLLLTTLLLLT
+TTTTTTTTTTTT
+@washing-machine | washing machine laundry
+WWWWWWWWWW
+WBWxxxWRWW
+wwwwwwwwww
+WWWxxxxWWW
+WWxAAAAxWW
+WWxABBAxWW
+WWxAAAAxWW
+WWWxxxxWWW
+WWWWWWWWWW
+wwwwwwwwww
+@frying-pan | frying pan with fried egg
+..VVVVVV......
+.VXWWWXXV.....
+VXWWYYWXXVTTTT
+VXWWYYWWXVTTTT
+.VXWWWWXV.....
+..VVVVVV......
+@cooking-pot | cooking pot saucepan steam
+...w...w....
+....w...w...
+.xxxxxxxxxx.
+VxwwxxxxxxxV
+VxwxxxxxxxxV
+.xxxxxxxxxx.
+.xxxxxxxxxx.
+..XXXXXXXX..
+@kitchen-knife | kitchen knife
+.........ww
+.......wwWw
+.....wwWWw.
+...wwWWww..
+..VwWww....
+.VVVw......
+VVV........
+VV.........
+@fork | fork cutlery
+.w.w.w.
+.w.w.w.
+.w.w.w.
+.wwwww.
+..www..
+...w...
+...w...
+...w...
+...w...
+...w...
+...x...
+@spoon | spoon cutlery
+..www..
+.wWwww.
+.wWwww.
+.wwwww.
+..www..
+...w...
+...w...
+...w...
+...w...
+...w...
+...x...
+@plate | plate dish empty
+..wwwwwwww..
+.wWWWWWWWWw.
+wWWwwwwwwWWw
+wWWwWWWWwWWw
+wWWwwwwwwWWw
+.wWWWWWWWWw.
+..wwwwwwww..
+@bowl | bowl blue empty | a=blue
+bbbbbbbbbbbb
+bWWWWWWWWWWb
+.bcbbbbbbbb.
+.bbbbbbbbbb.
+..bbbbbbbb..
+...aaaaaa...
+@glass | glass of water
+A......A
+AWWWWWWA
+ABBBBBBA
+ABWBBBBA
+ABWBBBBA
+.ABBBBA.
+.ABBBBA.
+.AAAAAA.
+@teacup | teacup cup of tea saucer
+..w..w....
+...w..w...
+WWWWWWWW..
+WTTTTTTWWW
+WWWWWWWW.W
+.WWWWWWWW.
+..WWWWW...
+wwwwwwwww.
+@teapot | teapot | a=blue
+.....YY.....
+....bbbb....
+..bbbbbbbb..
+b.bbcbbbbbaa
+bbbbcbbbbb.a
+.bbbbbbbbb.a
+..bbbbbbbbaa
+..bbbbbbbb..
+...aaaaaa...
+@chopping-board | chopping board cutting board tomato
+..LLLLLLLLLLL
+..LLLLLLLLLLL
+TTLLRRLLLLTLL
+TTLRRRRLLLLLL
+..LLRRLLGGLLL
+..LLLLLLLLLLL
+..TTTTTTTTTTT
+@rolling-pin | rolling pin baking
+..........TT
+.........TT.
+.......LLL..
+.....LLLLL..
+...LLLFLL...
+..LLLFLL....
+..LLLLL.....
+.TTLL.......
+TT..........
+@whisk | whisk baking
+..xxx..
+.x.x.x.
+x..x..x
+x..x..x
+x..x..x
+.x.x.x.
+..xxx..
+...V...
+...V...
+...V...
+...V...
+@spatula | spatula kitchen turner
+.VVVVV.
+.V.V.V.
+.V.V.V.
+.VVVVV.
+..VVV..
+...R...
+...R...
+...R...
+...R...
+...R...
+@oven-glove | oven glove mitt | a=red
+...bbbb..
+..bbbbbb.
+..bbcbbb.
+b.bbbbbb.
+bbbbbbbb.
+bbbbbbbb.
+.bbbbbbb.
+..bbbbb..
+..WWWWW..
+..WWWWW..
+@bin | trash can rubbish bin
+....xx....
+.xxxxxxxx.
+xxxxxxxxxx
+.xwxxwxxx.
+.xwxxwxxX.
+.xwxxwxxX.
+.xwxxwxxX.
+.xwxxwxxX.
+..xxxxxX..
+@jar | jar of jam | a=red
+..YYYYYY..
+..YYYYYY..
+.AAAAAAAA.
+.AbbbbbbA.
+.AWWWWWbA.
+.AWbbWWbA.
+.AbbbbbbA.
+.AbbbbbbA.
+..AAAAAA..
+@salt-pepper | salt and pepper shakers
+.xxx...xxx.
+.xxx...xxx.
+WWWWW.VVVVV
+WWKWW.VVWVV
+WWWWW.VVVVV
+WWWWW.VVVVV
+WWWWW.VVVVV
+@dining-table | dining table with tablecloth
+WWWWWWWWWWWWWW
+WRWRWRWRWRWRWW
+WWWWWWWWWWWWWW
+.WRWRWRWRWRWW.
+..T........T..
+..T........T..
+..T........T..
+..C........C..
+// bathroom
+@bathtub | bathtub bath bubbles
+....W..W.....x
+..WWWWWWWW..xx
+.WWAWWAWWWW.x.
+WWWWWWWWWWWWWW
+WWWWWWWWWWWWWw
+.WWWWWWWWWWWw.
+.WWWWWWWWWWww.
+..wwwwwwwwww..
+..Y........Y..
+@shower | shower
+xxxxxxx..
+x.....x..
+x....xxx.
+x...xxxxx
+x...A.A.A
+x....A.A.
+x...A.A.A
+x....A.A.
+x...A.A.A
+x........
+x........
+XXXXXXXXX
+@toilet | toilet loo
+WWWWWW....
+WWWWxW....
+WWWWWW....
+WWWWWW....
+.WWWW.....
+wwwwwwwwww
+WWWWWWWWWW
+.WWWWWWWW.
+..WWWWWW..
+...WWWW...
+..wwwwww..
+@bathroom-sink | bathroom sink wash basin
+....xx....
+...xx.x...
+...x..A...
+WWWWWWWWWW
+WwAAAAAAwW
+.WWWWWWWW.
+...WWWW...
+....WW....
+....WW....
+....WW....
+...wwww...
+@toilet-paper | toilet paper roll
+..WWWWWW..
+.WWwwwwWW.
+.WwxVVxwW.
+.WWwwwwWWW
+.WWWWWWWWW
+.WWWWWWWWW
+..WWWWWWWW
+........Ww
+@toothbrush | toothbrush | a=blue
+.........WW
+........WWW
+.......bWW.
+......bb...
+.....bb....
+....bb.....
+...bb......
+..bc.......
+.bb........
+bb.........
+@toothpaste | toothpaste tube
+.........xx
+.......WWx.
+.....WWBWW.
+....WBBBWW.
+...WWRRWW..
+..WWWWWW...
+.WWWWWW....
+WWWWW......
+WW.........
+@soap | soap bar bubbles
+........A.
+..A...AA..
+....A.....
+.zzzzzzzz.
+zzWWzzzzzz
+zzzzzzzzzM
+zzzzzzzzMM
+.MMMMMMMM.
+@towel | towel folded | a=teal
+bbbbbbbbbbbb
+bcccccccccbb
+bbbbbbbbbbbb
+bWWWWWWWWWbb
+bbbbbbbbbbbb
+aaaaaaaaaaaa
+bbbbbbbbbbbb
+aaaaaaaaaaaa
+@rubber-duck | rubber duck bath toy
+...YYYY....
+..YYKYYOO..
+..YYYYYO...
+Y..YYYY....
+YYYYYYYYY..
+YYYEEYYYY..
+.YYYYYYY...
+..YYYYY....
+@shampoo | shampoo bottle
+...VV...
+...VVV..
+...xx...
+..PPPP..
+.PPPPPP.
+.PWWWWP.
+.PWJJWP.
+.PWWWWP.
+.PPPPPP.
+.QQQQQQ.
+@hairdryer | hair dryer
+.MMMMMMM..
+MMMMMMMMxx
+MMzMMMMMxx
+MMMMMMMMxx
+.MMMMMMM..
+...MM.....
+...MM.....
+...MM.....
+...VV.....
+@comb | comb hair
+TTTTTTTTTTTT
+TTTTTTTTTTTT
+T.T.T.T.T.T.
+T.T.T.T.T.T.
+T.T.T.T.T.T.
+// garden
+@lawnmower | lawn mower garden
+.........VV
+........V..
+.......V...
+......V....
+.RRRRRV....
+RRRRRRRR...
+RRRYRRRR...
+VVRRRRVV...
+VxV..VxV...
+.V....V....
+@watering-can | watering can garden
+........xxx.
+A......x...x
+.A..GGGGGG.x
+A.xGGGGGGGx.
+...xGHGGGG..
+....GGGGGG..
+....GGGGGG..
+....NNNNNN..
+@garden-hose | garden hose coiled
+...GGGGGG...
+..GNNNNNNG..
+.GN.GGGG.NG.
+.GNG.NN.GNG.
+.GNG.NN.GNG.
+.GN.GGGG.NG.
+..GNNNNNNGGY
+...GGGGGG.YY
+@flower-pot | flower pot terracotta empty
+OOOOOOOOOO
+DOOOOOOOOD
+.OTTTTTTO.
+.OOOOOOOO.
+.DOOOOOOD.
+..OOOOOO..
+..DOOOOD..
+@wheelbarrow | wheelbarrow garden
+..TTTTTTTT....
+RRRRRRRRRRR...
+.RRRRRRRRR.TTT
+..RRRRRRR.T...
+...xxxxxxT....
+..VVx...x.....
+.VxxV...x.....
+..VV....x.....
+@garden-gnome | garden gnome red hat
+....R.....
+...RRR....
+...RRR....
+..RRRRR...
+..SKSKS...
+..WWSWW...
+.BWWWWWB..
+.BBWWWBB..
+.SBBWBBS..
+..BBBBB...
+..GGGGG...
+..VV.VV...
+@bird-house | bird house nest box
+....RR....
+...RRRR...
+..RRRRRR..
+.RRRRRRRR.
+..LLLLLL..
+..LLVVLL..
+..LLVVLL..
+..LLLLLL..
+..LLTTLL..
+....TT....
+....TT....
+....TT....
+@barbecue | barbecue grill bbq
+..w..w..w...
+...w..w.....
+.ZZIZZIZZIZ.
+VVVVVVVVVVVV
+.VVVVVVVVVV.
+..VVVVVVVV..
+...VV..VV...
+..V......V..
+.V........V.
+.V........V.
+@deck-chair | deck chair beach chair striped
+T.........
+TR........
+.TWR......
+.TRWR.....
+..TWRW....
+..TTRWRW..
+.T..TTTTTT
+T.....T..T
+T....T...T
+@parasol | beach umbrella parasol
+.....RWWR.....
+...RRWWWWRR...
+.RRRWWRRWWRRR.
+RRRWWWRRWWWRRR
+......T.......
+......T.......
+......T.......
+......T.......
+......T.......
+......T.......
+@paddling-pool | paddling pool kids pool
+..RRRRRRRRRR..
+.RAAAAAAAAAAR.
+RYAAWAAAAAAAYR
+RYYAAAAAWAAYYR
+.RYYYYYYYYYYR.
+..RRRRRRRRRR..
+@swing-set | swing playground
+RRRRRRRRRRRR
+R..x..x....R
+R..x..x....R
+R..x..x....R
+R..x..x....R
+R..x..x....R
+R..BBBB....R
+R..........R
+R..........R
+@slide | playground slide
+.BB.........
+.BYY........
+.B.YYY......
+.BB..YYY....
+.B.....YYY..
+.BB......YYY
+.B.........Y
+.BB.........
+.B..........
+@dog-house | dog house kennel
+.....RR.....
+....RRRR....
+...RRRRRR...
+..RRRRRRRR..
+.RRRRRRRRRR.
+..LLLLLLLL..
+..LLLVVLLL..
+..LLVVVVLL..
+..LLVVVVLL..
+..TLVVVVLT..
+@hammock | hammock between posts
+T............T
+TW..........WT
+T.WW......WW.T
+T..RWRWRWRW..T
+T...RWRWRW...T
+T............T
+T............T
+@washing-line | washing line clothes drying
+T............T
+TxxxxxxxxxxxxT
+T.RR..WWW.BB.T
+T.RR..W.W.BB.T
+T.RR......B..T
+T............T
+T............T
+T............T
+// garage and around the house
+@step-ladder | step ladder
+...xx...
+..xYYx..
+..x..x..
+..xYYx..
+.x....x.
+.xYYYYx.
+.x....x.
+xYYYYYYx
+x......x
+x......x
+@paint-can | paint can tin blue | a=blue
+..xxxxxx..
+.x......x.
+xbbbbbbbbx
+wwwwwwwwww
+wxbbbbxxxw
+wxbcbbxxxw
+wxxbbxxxxw
+wxxxxxxxxw
+.xxxxxxxx.
+@tyre | tyre tire wheel
+..VVVVVV..
+.VVKKKKVV.
+VVKxxxxKVV
+VKxxwwxxKV
+VKxwVVwxKV
+VKxwVVwxKV
+VKxxwwxxKV
+VVKxxxxKVV
+.VVKKKKVV.
+..VVVVVV..
+@fuel-can | fuel can petrol jerrycan
+.YY..RRRR.
+.Y..RR..R.
+RRRRRRRRR.
+RRIRRRRRR.
+RRRZRRZRR.
+RRRRZZRRR.
+RRRZRRZRR.
+RRRRRRRRR.
+ZZZZZZZZZ.
+@cardboard-box | cardboard box moving box
+.LLLLLLLLLL.
+LLLLLFFLLLLL
+TTTTTFFTTTTT
+LLLLLFFLLLLL
+LLLLLLLLLLLL
+LLLLLLLLLTLL
+LLLLLLLLLLLL
+TTTTTTTTTTTT
+@vacuum-cleaner | vacuum cleaner hoover
+........VV
+.......V..
+......V...
+.RRRR.V...
+RRIRRRV...
+RRRRRRV...
+RRRRRR.V..
+VVRRVV.V..
+VV..VVxxxx
+@iron | clothes iron
+....VVVVVV..
+...V.....V..
+..AAAAAAAAA.
+.AAWAAAAAAA.
+AAAAAAAAAAA.
+xxxxxxxxxxx.
+@light-bulb | light bulb idea
+..EEEE..
+.EYYYYE.
+EYYWYYYE
+EYYWYYYE
+EYYYYYYE
+.EYOOYE.
+..EOOE..
+..xxxx..
+..XXXX..
+...xx...
+@front-door | front door house door red | a=red
+TTTTTTTTTT
+TbbbbbbbbT
+TbAAbbAAbT
+TbAAbbAAbT
+TbbbbbbbbT
+TbccbbccbT
+TbcbbbcbYT
+TbcbbbcbbT
+TbccbbccbT
+TbbbbbbbbT
+TbbbbbbbbT
+@house-window | house window glass panes
+WWWWWWWWWW
+WAAAWAAAAW
+WAWAWAAAAW
+WAAAWAAAAW
+WWWWWWWWWW
+WAAAWAAAAW
+WAAAWAAWAW
+WAAAWAAAAW
+WWWWWWWWWW
+wwwwwwwwww
+@doormat | doormat welcome mat
+TLTLTLTLTLTL
+LTTTTTTTTTTT
+TTLLTLTLLLTL
+LTTTTTTTTTTT
+TLTLTLTLTLTL
+`);
+
+// ───────────────────────── food and drink ─────────────────────────
+category('meals', 'Food & drink', 'thing');
+pack(`
+// fruit
+@orange | orange fruit
+.....GG..
+...OOGOO.
+..OOOOOOO
+.OOFOOOOO
+.OFFOOOOO
+.OOOOOOOD
+.OOOOOODD
+..OOOODD.
+...DDDD..
+@lemon | lemon yellow fruit | a=yellow
+...bbbbb...
+.bbbccbbbb.
+bbbccbbbbbb
+bbbbbbbbbba
+.bbbbbbbaa.
+...aaaaa...
+=lime | lime green fruit | lemon | a=green
+@pear | pear green fruit
+....T....
+....T.G..
+...HHGG..
+...HHH...
+..HHHHH..
+.HHEHHHG.
+.HEEHHHG.
+.HHHHHGG.
+..HHGGG..
+@peach | peach fruit
+....T.G..
+...TGG...
+..FFIFF..
+.FFFIIFF.
+.FFFIIIF.
+.FFFIIIF.
+.FFIIIII.
+..FIIII..
+@pineapple | pineapple
+...G.G...
+.G.GGG.G.
+..GGGGG..
+...GGG...
+..YOYOY..
+.YOYOYOY.
+.OYOYOYO.
+.YOYOYOY.
+.OYOYOYO.
+.YOYOYOY.
+..OYOYO..
+@watermelon-slice | watermelon slice
+RRRRRRRRRRRR
+RRKRRRKRRKRR
+WRRRKRRRRRRW
+GWRRRRRKRRWG
+.GWRRRRRRWG.
+..GGWWWWGG..
+....GGGG....
+@kiwi | kiwi fruit half
+..TTTTTT..
+.THHHHHHT.
+THHKHHKHHT
+THKHEEHKHT
+THHHEEHHHT
+THKHHHHKHT
+.THHKKHHT.
+..TTTTTT..
+@blueberries | blueberries berries
+....G.....
+..BBGBB...
+.BABBBAB..
+.BBBUBBBU.
+..UBBBBB..
+..BABBU...
+...BBU....
+@coconut | coconut half
+..TTTTTT..
+.TWWWWWWT.
+TWWWWWWWWT
+TWWwwwwWWT
+TTWWWWWWTT
+.CTTTTTTC.
+..CCCCCC..
+@avocado | avocado half
+...NNN...
+..NHHHN..
+..NHHHN..
+.NHHHHHN.
+.NHTTTHN.
+NHHTLTHHN
+NHHTTTHHN
+.NHHHHHN.
+..NNNNN..
+@raspberry | raspberry berry
+...GGG...
+..GGGGG..
+..RIRIR..
+.RIRIRIR.
+.IRIRIRI.
+..IRIRI..
+...RIR...
+....R....
+=green-apple | green apple | apple | a=green
+// vegetables
+@tomato | tomato
+...GGG...
+..RGGGR..
+.RRRGRRR.
+RRIRRRRRR
+RIIRRRRRR
+RRRRRRRRZ
+.RRRRRRZ.
+..RRRZZ..
+@potato | potato
+..LLLL.....
+.LLLLLLLL..
+LLTLLLLLLL.
+LLLLLLTLLLL
+LLLLLLLLLTL
+.LLTLLLLLL.
+..TTLLLTT..
+@onion | onion
+....G....
+....GG...
+...FF....
+..FFFFF..
+.FFEFFFD.
+FFEFFFFDD
+FFEFFFDDD
+.FFFFDDD.
+..DDDDD..
+...W.W...
+@broccoli | broccoli
+..GG.GGG..
+.GGGGGGGG.
+GGHGGGHGGG
+GGGGGGGGGN
+.GGNGGGNN.
+...HHHH...
+...HHH....
+...HHH....
+@lettuce | lettuce cabbage green
+..HHHHHH..
+.HHGHHGHH.
+HHGHHHHGHH
+HGHHGGHHGH
+HHHGHHGHHH
+.HHGHHGHG.
+..GGGGGG..
+@cucumber | cucumber
+..........NN
+........NGGN
+......NGGHN.
+....NGGHGN..
+..NGGHGGN...
+.NGHGGGN....
+NGGGGN......
+.NNN........
+@bell-pepper | red bell pepper | a=red
+....GG...
+....G....
+.bbbGbbb.
+bbcbbbbbb
+bcbbbbbbb
+bcbbbbbba
+bbbbbbbba
+.bbbabba.
+..bb.aa..
+=bell-pepper-yellow | yellow bell pepper | bell-pepper | a=yellow
+@chili | chili pepper hot
+.G.........
+.GG........
+..RRR......
+..RIRRR....
+...RRRRRR..
+.....RRRRR.
+.......RRRR
+.........RR
+@eggplant | eggplant aubergine
+.......GG.
+......GGG.
+.....PGG..
+....PPPP..
+...PPJPP..
+..PPJPPP..
+.PPPPPPQ..
+.PPPPPQQ..
+.PPPPQQ...
+..QQQQ....
+@peas | peas in pod
+.G.........
+.GNNNNNNN..
+NGHGHGHGHN.
+NHHGHHGHHGN
+.NNGHGHGHN.
+...NNNNNN..
+@garlic | garlic bulb
+....L....
+....W....
+...WWW...
+..WWWWW..
+.WWwWwWW.
+.WWwWwWW.
+.WWwWwWW.
+..WwwwW..
+...LLL...
+@radish | radish beetroot
+.G..G..G.
+.GG.G.GG.
+..GGGGG..
+...MMM...
+..MMzMM..
+.MMzMMMM.
+.MMMMMMM.
+..MMMMM..
+...WWW...
+....W....
+@salad-bowl | salad bowl
+..HG.RR.HH..
+.HHGHRRGHHG.
+WWWWWWWWWWWW
+.WWWWWWWWWW.
+.WWWWWWWWWw.
+..WWWWWWww..
+...wwwwww...
+// meals
+@burger | burger hamburger cheeseburger
+..LLLLLLLL..
+.LLFLLFLLLL.
+LLLLLLLLFLLL
+HGHHGHHGHHGH
+YYYYYYYYYYYY
+CTCCTCCCTCCC
+RRRRRRRRRRRR
+LLLLLLLLLLLL
+.LLLLLLLLLL.
+@hot-dog | hot dog sausage in bun
+..ZZZZZZZZZ..
+.ZIYIIYIIYIZ.
+LLIIYIIYIIYLL
+LLLLLLLLLLLLL
+.LLLLLLLLLLL.
+..TTTTTTTTT..
+@fries | fries chips french fries
+.Y.Y.YY.Y.
+.YYYEYYYY.
+.YEYYYEYY.
+RYYEYYYYYR
+RRRRRRRRRR
+RRRYYRRRRR
+.RRYYRRRR.
+.RRRRRRRR.
+..RRRRRR..
+@pizza-slice | pizza slice pepperoni
+LLLLLLLLLLL
+.YYRRYYYYY.
+.YYRRYYGYY.
+..YYYYRRY..
+..YGYYRRY..
+...YYYYY...
+...YRRYY...
+....YYY....
+....YY.....
+.....Y.....
+@taco | taco
+...HGRHYRH...
+..YHRGHRHGY..
+.YYYYYYYYYYY.
+YYFYYYYYYFYYY
+YYYYYFYYYYYYY
+.YYYYYYYYYYY.
+@sandwich | sandwich
+LLLLLLLLLLLL
+EEEEEEEEEEEL
+HGHHGHGHHGHG
+IIIIIIIIIIII
+YYYYYYYYYYYY
+EEEEEEEEEEEL
+LLLLLLLLLLLL
+@sushi | sushi roll
+..OOOIOOO.
+.OIOOOOIOO
+.WWWWWWWWW
+VWWWWWWWWV
+VVVVVVVVVV
+VVVVVVVVVV
+.VVVVVVVV.
+@ramen | ramen noodles bowl chopsticks
+..........T.
+.........T.T
+..EYEYEW.T..
+.EYEYEWYW...
+RRRRRRRRRRRR
+.RWRRRRRRRR.
+.RRRRRRRRRZ.
+..RRRRRRZZ..
+...ZZZZZZ...
+@spaghetti | spaghetti pasta meatballs
+...EYERRYE...
+..EYRRREYEY..
+.wEYERYEYEYw.
+wWWWWWWWWWWWw
+.wWWWWWWWWWw.
+...wwwwwww...
+@rice-bowl | rice bowl
+...WWWWWW...
+..WWWwWWWW..
+.WWwWWWWwWW.
+BBBBBBBBBBBB
+.BBABBBBBBB.
+.BBBBBBBBBU.
+..BBBBBBUU..
+...UUUUUU...
+@fried-egg | fried egg sunny side up
+..WWWW.....
+.WWWWWWWW..
+WWWYYYWWWW.
+WWYEYYYWWWW
+WWYYYYYWWW.
+.WWYYYWWWW.
+..WWWWWW...
+@bacon | bacon rashers
+ZZ..ZZZ..ZZ.
+RIZZRIIZZRIZ
+IRRIIRRIIRRI
+ZIIZZIIZZIIZ
+.ZZ..ZZ..ZZ.
+@pancakes | pancakes stack syrup
+....YY......
+.LLLYYLLLL..
+LTTTTTTTTTL.
+.LLLLLLLLL..
+LTTCTTTTTTL.
+.LLLCLLLLL..
+LTTTTTTTTTL.
+.LLLLLLLLL..
+wwwwwwwwwwww
+@waffle | waffle
+FFFFFFFFF
+FOFFOFFOF
+FFFFFFFFF
+FOFFOFFOF
+FFFFFFFFF
+FOFFOFFOF
+FFFFFFFFF
+@toast | toast slice butter
+.TTT..TTT.
+TLLLTTLLLT
+TLLLLLLLLT
+TLLYYYLLLT
+TLLYYYLLLT
+.TLLLLLLT.
+.TLLLLLLT.
+.TTTTTTTT.
+@croissant | croissant
+....FFFF....
+..FFOFFOFF..
+.FOFFOFFOFF.
+FFOFFOFFOFFF
+FFF.DDDD.FFF
+.DD......DD.
+@pretzel | pretzel
+..TTT..TTT..
+.TL.TTTT.LT.
+.T...TT...T.
+.TL.TTTT.LT.
+..TTT..TTT..
+...TTLLTT...
+....TTTT....
+@soup | bowl of soup tomato
+....w..w....
+...w..w.....
+WWWWWWWWWWWW
+WRRRRIRRRRRW
+.WRRRRRRRRW.
+.WWWWWWWWWW.
+..WWWWWWWW..
+...wwwwww...
+@steak | steak meat
+..ZZZZZZ....
+.ZRRRRRRZZ..
+ZRRIRRRRRRZ.
+ZRRRRWWRRRRZ
+ZRRRRWWRRRZ.
+.ZRRRRRRRZ..
+..ZZZZZZZ...
+@roast-chicken | roast chicken turkey dinner
+W..........W
+.L..LLLL..L.
+.LLLLFLLLLL.
+..LLFLLLLL..
+.LLLLLLLLLL.
+.TLLLLLLLLT.
+wwTTTTTTTTww
+.wwwwwwwwww.
+@sausage | sausage
+.........ZZ.
+.......ZRRIZ
+.....ZRRIRZ.
+...ZRRIRRZ..
+.ZRRIRRZ....
+ZRRRRZ......
+.ZZZ........
+@kebab | kebab skewer
+..........x.
+.........RR.
+........RRR.
+......GGG...
+.....GGG....
+...TTT......
+..TTT.......
+.YY.........
+x...........
+@dumpling | dumpling
+....W.W.W...
+...WWWWWWW..
+.WWWwWwWwWW.
+WWWWWWWWWWWW
+WWWWWWWWWWWw
+.wwwwwwwwww.
+@popcorn | popcorn box
+.E.EE.EE.E.
+EEEYEEEYEEE
+.EYEEEYEEE.
+RWRWRWRWRWR
+RWRWRWRWRWR
+.WRWRWRWRW.
+.WRWRWRWRW.
+.WRWRWRWRW.
+..RWRWRWR..
+@cereal | cereal bowl milk spoon
+.........xx.
+........x...
+.WOWWYWOx...
+AAAAAAAAAAA.
+.AAWAAAAAA..
+.AAAAAAAAB..
+..BBBBBBB...
+@lunchbox | lunch box
+....VVVV....
+...V....V...
+BBBBBBBBBBBB
+BAABBBBBBBBB
+BBBBBwwBBBBB
+UUUUUwwUUUUU
+BBBBBBBBBBBB
+BBBBBBBBBBBB
+UUUUUUUUUUUU
+@burrito | burrito wrap
+........HRH.
+......EEGRE.
+....EEEEEEE.
+...EEEFEEE..
+..EEEFEEE...
+.xxEEEEE....
+xwxxEE......
+.xwx........
+// sweets
+@cupcake | cupcake pink frosting cherry
+....RR....
+...zRz....
+..zzzzzz..
+.zzMzzzzz.
+zzzzzzMzzz
+.LTLTLTLT.
+.LTLTLTLT.
+..LTLTLT..
+@birthday-cake | birthday cake with candles
+..Y..Y..Y...
+..R..B..G...
+..R..B..G...
+.WWWWWWWWWW.
+.WzWWzWWzWW.
+.MMMMMMMMMM.
+.zzzzzzzzzz.
+.MMMMMMMMMM.
+wwwwwwwwwwww
+@chocolate-bar | chocolate bar
+.TTTTTTTT
+.TCTTCTTC
+.TTTTTTTT
+.TCTTCTTC
+RRRRRRRRR
+RRWWRRRRR
+RRRRRRRRR
+RRRRRRRRR
+@lollipop | lollipop swirl candy
+..RRRR..
+.RWWWRR.
+RWRRRWRR
+RWRWRWRR
+RWRWWRWR
+.RWRRRW.
+..RRRR..
+...W....
+...W....
+...W....
+...W....
+@ice-lolly | ice lolly popsicle
+..RRRR..
+.RRIRRR.
+.RIRRRR.
+.OOOOOO.
+.OFOOOO.
+.YYYYYY.
+.YEYYYY.
+.YYYYYY.
+...LL...
+...LL...
+...LL...
+@jelly | jelly jello dessert wobbly
+...RRRR...
+..RIRRRR..
+..RIRRRR..
+.RRRRRRRR.
+.RIRRRRRR.
+RRRRRRRRRR
+wWWWWWWWWw
+.wwwwwwww.
+@muffin | muffin blueberry
+..TTTTTT..
+.TLTTUTTT.
+TTTUTTTLTT
+TTTTTTTUTT
+.YEYEYEYE.
+.YEYEYEYE.
+..YEYEYE..
+@cake-slice | slice of cake strawberry
+.......R....
+......WWW...
+....WWWWWW..
+..WWWWWWWWW.
+.EEEEEEEEEE.
+.RRRRRRRRRR.
+.EEEEEEEEEE.
+.EEEEEEEEEE.
+wwwwwwwwwwww
+@cotton-candy | cotton candy candyfloss
+..zzzzz..
+.zzMzzzz.
+zzzzzzMzz
+zMzzzzzzz
+zzzzMzzzz
+.zzzzzzz.
+..zzMzz..
+...zzz...
+....W....
+....W....
+....W....
+@honey-pot | honey pot
+...YYYY.T..
+..YEYYYT...
+.OOOOOOOO..
+.OFOOOOOO..
+OOOWWWWOOO.
+OFOWYYWOOO.
+OOOWWWWOOD.
+.OOOOOODD..
+..DDDDDD...
+@macaron | macaron sweet pink | a=rose
+..bbbbbb..
+.bcbbbbbb.
+bbbbbbbbbb
+WWWWWWWWWW
+bbbbbbbbbb
+.aaaaaaaa.
+@sundae | ice cream sundae
+.....R....
+...WWWW...
+..WWzWWW..
+.AzzzzWWA.
+.AzMzzzzA.
+..AzzzzA..
+...AzzA...
+....AA....
+....AA....
+..AAAAAA..
+@gummy-bear | gummy bear sweet | a=red
+.bb..bb.
+.bbbbbb.
+.bKbbKb.
+.bbccbb.
+bbbbbbbb
+.bbcbbb.
+.bbbbbb.
+.bb..bb.
+// drinks
+@coffee-cup | coffee cup takeaway
+.VVVVVVVV.
+VVVVVVVVVV
+.WWWWWWWW.
+.TTTTTTTT.
+.TTLTTTTT.
+.TTTTTTTT.
+..WWWWWW..
+..WWWWWW..
+@milk-carton | milk carton
+...WWWW..
+..WWWWWW.
+.WWWWWWWW
+.BBBBBBBB
+.WWWWWWWW
+.WBBWWWWW
+.WBBWWWWW
+.WWWWWWWW
+.BBBBBBBB
+.wwwwwwww
+@juice-box | juice box straw
+......W..
+.....W...
+.OOOOWOO.
+.OOOOOOO.
+.OFFOOOO.
+.OYYYOOO.
+.OYOYOOO.
+.OYYYOOO.
+.OOOOOOO.
+.DDDDDDD.
+@orange-juice | glass of orange juice
+A......A.O
+AOOOOOOAOO
+AOFOOOOA.
+AOFOOOOA.
+AOOOOOOA.
+.AOOOOA..
+.AOOOOA..
+.AAAAAA..
+@soda-can | soda can fizzy drink cola | a=red
+.xxxxxx.
+xwwwwxxx
+bbbbbbbb
+bcbbbbba
+bWWWWWba
+bcWWbbba
+bWWWWWba
+bcbbbbba
+bbbbbbbb
+.xxxxxx.
+@soda-cup | soda cup with straw fast food drink
+.....R...
+....R....
+.WWWRWWW.
+WWWWWWWWW
+.RRRRRRR.
+.RWWRRRR.
+.RWRRRRR.
+..RRRRR..
+..RRRRR..
+..ZZZZZ..
+@water-bottle | water bottle plastic
+..BBB..
+..BBB..
+..AAA..
+.AAAAA.
+.AWAAA.
+.BBBBB.
+.BBBBB.
+.AWAAA.
+.AWAAA.
+.AAAAA.
+.AAAAA.
+@milkshake | milkshake strawberry
+.....R.W.
+...WWWW..
+..WWWWWW.
+.AzzzzzzA
+.AzzMzzzA
+..AzzzzA.
+..AzMzzA.
+...AzzA..
+...AzzA..
+..AAAAAA.
+@lemonade | lemonade jug pitcher
+.AAAAAAA...
+.AEYEEEYAAA
+.AEEWEEEA.A
+.AEEEEYEA.A
+.AYEEEEEAAA
+.AEEEYEEA..
+.AEWEEEEA..
+..AAAAAA...
+@hot-chocolate | hot chocolate mug marshmallows
+..w...w....
+...w...w...
+.WWzWWzW...
+RRRRRRRRRR.
+RRIRRRRR.R.
+RRIRRRRR.R.
+RRRRRRRRR..
+.RRRRRRR...
+@bubble-tea | bubble tea boba
+.....P...
+....P....
+.WWWPWWW.
+.ALLLLLA.
+.ALLLLLA.
+.ALLLLLA.
+..ALLLA..
+..AKLKA..
+..AKKKA..
+..AAAAA..
+@baby-bottle | baby bottle milk
+...FF...
+..FFFF..
+..BBBB..
+.AWWWWA.
+.AWWWWA.
+.AxWWWA.
+.AWWWWA.
+.AxWWWA.
+.AWWWWA.
+.AAAAAA.
+// pantry
+@ketchup | ketchup bottle | a=red
+...WW...
+...WW...
+..bbbb..
+.bbbbbb.
+.bcbbbb.
+.bWWWWb.
+.bWbbWb.
+.bWWWWb.
+.bbbbbb.
+.aaaaaa.
+=mustard | mustard bottle yellow | ketchup | a=yellow
+@butter | butter block
+..EEEEEEEEE.
+.EEEEEEEEEY.
+EEEEEEEEEYY.
+YYYYYYYYYYY.
+YYYYYYYYYY..
+wwwwwwwwwwww
+@egg-carton | egg carton box of eggs
+.WW.WW.WW.WW.
+WWWWWWWWWWWWW
+xWWxWWxWWxWWx
+xxxxxxxxxxxxx
+xwxxwxxwxxwxx
+XXXXXXXXXXXXX
+@flour-bag | flour bag sack baking
+.WWWWWWW.
+.wwwwwww.
+WWWWWWWWW
+WWWLLLWWW
+WWLLFLLWW
+WWWLLLWWW
+WWWWWWWWW
+WWBBBBBWW
+wwwwwwwww
+`);
+
+// ───────────────────────── clothes and accessories ─────────────────────────
+category('clothes', 'Clothes & accessories', 'thing');
+pack(`
+// hats
+@baseball-cap | baseball cap red | a=red
+...bbbbbb...
+..bcbbbbbb..
+.bbbbWWbbb..
+.bbbbbbbbbb.
+.bbbbbbbaaaa
+........aaaa
+@top-hat | top hat black
+..VVVVVV..
+..VXVVVV..
+..VXVVVV..
+..VVVVVV..
+..VVVVVV..
+..RRRRRR..
+VVVVVVVVVV
+.VVVVVVVV.
+@cowboy-hat | cowboy hat brown
+....TT.TT.....
+...TLTTTTT....
+...TTTTTTT....
+T..CCCCCCC..T.
+TTTTTTTTTTTTT.
+.TTLLLLLLTTT..
+@straw-hat | straw hat sun hat ribbon
+....EEEEE....
+...EEYEEEE...
+...RRRRRRR...
+.EEEEEEEEEEE.
+EYEYEYEYEYEYE
+.EEEEEEEEEEE.
+@woolly-hat | woolly hat beanie bobble | a=blue
+....WW....
+...WWWW...
+..bbbbbb..
+.bbcbbbbb.
+.bbbbbbbb.
+.WbWbWbWb.
+.bWbWbWbW.
+@party-hat | party hat cone
+....Y....
+....Y....
+...BB....
+...BMB...
+..BBBBB..
+..MBBMB..
+.BBBMBBB.
+.BMBBBBM.
+YYYYYYYYY
+@hard-hat | hard hat yellow safety helmet
+....YY.....
+..YYEYYY...
+.YYEYYYYY..
+.YYEYYYYY..
+.YYYYYYYY..
+OOOOOOOOOOO
+@chef-hat | chef hat white
+..WWW.WWW.
+.WWWWWWWWW
+WWWWWWWWWW
+WWWWWWWWWW
+.WWWWWWWW.
+..WwWwWw..
+..WwWwWw..
+..wwwwww..
+@police-cap | police cap hat
+...UUUUUU...
+.UUUUUUUUUU.
+UUUUUYYUUUUU
+.UUUUYYUUUU.
+.KKKKKKKKKK.
+.VVVVVVVVVVV
+...VVVVVVVV.
+@pirate-hat | pirate hat skull
+.....VV.....
+....VVVV....
+...VVWWVV...
+..VVWKKWVV..
+.VVVVWWVVVV.
+VVVVWVVWVVVV
+YYYYYYYYYYYY
+@bike-helmet | bike helmet cycling
+...RRRRRR...
+..RRIRRRRR..
+.RRVRRVRRVR.
+.RRVRRVRRVR.
+RRRRRRRRRRRR
+.x........x.
+..x......x..
+// clothes
+@t-shirt | t-shirt tee red | a=red
+..bba..abb..
+.bbbbaabbbb.
+bbbbbbbbbbbb
+bb.bbbbbb.bb
+...bcbbbb...
+...bcbbbb...
+...bbbbbb...
+...bbbbbb...
+...aaaaaa...
+=t-shirt-blue | blue t-shirt tee | t-shirt | a=blue
+#teestripes y=3
+...WWWWWW...
+............
+...WWWWWW...
+............
+...WWWWWW...
+=striped-shirt | striped t-shirt sailor top | t-shirt:a=navy teestripes
+@hoodie | hoodie sweatshirt grey | a=grey
+...bbbbbb...
+..bbaaaabb..
+.bbbaaaabbb.
+bbbbWbbWbbbb
+bb.bWbbWb.bb
+bb.bbbbbb.bb
+bb.baaaab.bb
+bb.baaaab.bb
+...bbbbbb...
+@sweater | sweater jumper knitted | a=green
+..bbb..bbb..
+.bbbbbbbbbb.
+bbbbbbbbbbbb
+bbWbWbWbWbbb
+bbbWbWbWbWbb
+bb.bbbbbb.bb
+bb.bbbbbb.bb
+aa.bbbbbb.aa
+...aaaaaa...
+@jacket | jacket coat brown leather | a=brown
+..bbb..bbb..
+.bbbba.bbbb.
+bbbbba.bbbbb
+bbbbbaYbbbbb
+bb.bba.bb.bb
+bb.bbaYbb.bb
+bb.bba.bb.bb
+aa.bba.bb.aa
+...bbabbb...
+@raincoat | raincoat yellow rain jacket
+...YYYYYY...
+..YYOOOOYY..
+.YYYYOOYYYY.
+YYYYYOYYYYYY
+YY.YYOKYY.YY
+YY.YYOYYY.YY
+YY.YYOKYY.YY
+OO.YYOYYY.OO
+...YYOYYY...
+...YYYYYY...
+@pink-dress | dress pink | a=pink
+...b....b...
+...bb..bb...
+...bbbbbb...
+...bbbbbb...
+....YYYY....
+...bbbbbb...
+..bbbcbbbb..
+..bbbcbbbb..
+.bbbbcbbbbb.
+.bbbbbcbbbb.
+.aaaaaaaaaa.
+@pleated-skirt | skirt pleated blue | a=blue
+..aaaaaa..
+..bbbbbb..
+.bbbabbbb.
+.bbabbabb.
+bbbabbabbb
+bbabbbabbb
+aaaaaaaaaa
+@jeans | jeans trousers blue
+.BBBBBBBB.
+.BYBBBBYB.
+.BBBBUBBB.
+.BBBBUBBB.
+.BBBUUBBB.
+.BBB..BBB.
+.BBB..BBB.
+.BBB..BBB.
+.BBB..BBB.
+.UUU..UUU.
+@orange-shorts | shorts orange
+.OOOOOOOO.
+.OYOOOOYO.
+.OOOODOOO.
+.OOOODOOO.
+.OOO..OOO.
+.DDD..DDD.
+@swimsuit | swimsuit swimming costume
+..R....R..
+..R....R..
+..RR..RR..
+..RRRRRR..
+..RRWWRR..
+...RRRR...
+..RRWWRR..
+..RRRRRR..
+...R..R...
+@pyjamas | pyjamas pajamas striped
+..AAA..AAA..
+.AAAAWWAAAA.
+AABAABABAABA
+AA.ABAAAB.AA
+AA.AAAABA.AA
+...ABAAAA...
+...AAABAA...
+...AB..BA...
+...AA..AA...
+...AB..AB...
+// shoes
+@trainer | trainer sneaker running shoe | a=red
+......bbb...
+.....bbbb...
+....bbWbbb..
+.bbbbWbWbbb.
+bbbbWbbbbbbb
+WWWWWWWWWWWW
+.wwwwwwwwww.
+@rain-boots | rain boots wellies yellow
+.YYYY.YYYY..
+.YEYY.YEYY..
+.YEYY.YEYY..
+.YYYY.YYYY..
+.YYYY.YYYY..
+.YYYYYYYYYYY
+.YYYYYYYYYYY
+.OOOOOOOOOOO
+@high-heel | high heel shoe red
+RR........
+RRR.......
+RRRR......
+RRRRRR....
+RZRRRRRRR.
+R..RRRRRRR
+R....ZZZZZ
+R.........
+@flip-flops | flip flops sandals
+.BBB...BBB.
+BBABB.BBABB
+BA.AB.BA.AB
+BBABB.BBABB
+BBBBB.BBBBB
+BBBBB.BBBBB
+.BBB...BBB.
+@slippers | slippers fluffy pink
+.zzz...zzz.
+zzWzz.zzWzz
+zMMMz.zMMMz
+zMMMz.zMMMz
+zMMMz.zMMMz
+.MMM...MMM.
+@socks | socks pair striped
+.WWWW..WWWW..
+.RRRR..RRRR..
+.WWWW..WWWW..
+.RRRR..RRRR..
+.WWWW..WWWW..
+.WWWWW.WWWWW.
+.WWWWWW.WWWWW
+..wwwww..wwww
+// bags
+@handbag | handbag purse | a=pink
+...aaaa...
+..a....a..
+..a....a..
+bbbbbbbbbb
+bcbbbbbbbb
+bbbbYYbbbb
+bbbbbbbbbb
+.aaaaaaaa.
+@suitcase | suitcase luggage travel | a=teal
+....VVVV....
+....V..V....
+bbbbbbbbbbbb
+bcbbbbbbbbbb
+aaaaaaaaaaaa
+bbYbbbbbbYbb
+bbbbbbbbbbbb
+bbbbbbbbbbbb
+aaaaaaaaaaaa
+.V........V.
+@shopping-bag | shopping bag paper
+...x....x...
+..x......x..
+..x......x..
+.MMMMMMMMMM.
+.MzMMMMMMMM.
+.MMMMWWMMMM.
+.MMMWWWWMMM.
+.MMMMWWMMMM.
+.MMMMMMMMMM.
+.MMMMMMMMMM.
+@briefcase | briefcase office bag
+....CCCC....
+...C....C...
+TTTTTTTTTTTT
+TLTTTTTTTTTT
+TTTTTYYTTTTT
+CCCCCYYCCCCC
+TTTTTTTTTTTT
+TTTTTTTTTTTT
+@gym-bag | gym bag sports bag duffel
+...VVVVVV...
+..V......V..
+.BBBBBBBBBB.
+BBBWWWWWWBBB
+BABBBBBBBBBB
+BBBBBBBBBBBB
+.UUUUUUUUUU.
+// jewellery and glasses
+@pearl-necklace | pearl necklace jewellery
+W........W
+W........W
+.W......W.
+.W......W.
+..W....W..
+...WwwW...
+....AA....
+....AA....
+@diamond-ring | diamond ring engagement
+...AWA...
+...AAA...
+....A....
+..YYYYY..
+.YY...YY.
+.Y.....Y.
+.Y.....Y.
+.YY...YY.
+..YYYYY..
+@earrings | earrings gold jewellery
+.Y.....Y.
+.Y.....Y.
+YYY...YYY
+YRY...YRY
+YYY...YYY
+.Y.....Y.
+@bracelet | bracelet bangle beads
+..RYBGRY..
+.B......B.
+G........G
+Y........R
+R........Y
+.B......G.
+..YRGBYR..
+@wristwatch | wrist watch
+...TTT...
+...TTT...
+..YYYYY..
+.YWWKWWY.
+.YWWKKWY.
+.YWWWWWY.
+..YYYYY..
+...TTT...
+...TTT...
+@tiara | tiara princess crown silver
+.....A.....
+..w..W..w..
+.wMw.W.wMw.
+.wwwwWwwww.
+wwwwwwwwwww
+@eyeglasses | glasses spectacles
+.VVVV...VVVV.
+VAAAAVVVAAAAV
+VAWAAV.VAWAAV
+VAAAAV.VAAAAV
+.VVVV...VVVV.
+@sunglasses | sunglasses shades
+VVVVVVVVVVVVV
+VUUUUUVUUUUUV
+.UBUUU.UBUUU.
+.UUUUU.UUUUU.
+..UUU...UUU..
+@swim-goggles | swimming goggles
+..BBB...BBB..
+VBAAABVBAAABV
+VBAWABVBAWABV
+..BBB...BBB..
+// accessories
+@wool-scarf | scarf woolly striped
+..RRRRRRR..
+.RWRRWRRWR.
+.RRRRRRRRR.
+..RRR.RRW..
+..RWR..RR..
+..RRR..RW..
+..RWR..RR..
+..R.R..R.R.
+@glove | glove winter | a=purple
+..b.b.b...
+..b.b.b.b.
+..bbbbb.b.
+b.bbbbbbb.
+bbbcbbbbb.
+.bbbbbbb..
+..bbbbb...
+..WWWWW...
+..WWWWW...
+@neck-tie | tie necktie red striped
+..RRRR..
+...RR...
+..RRRR..
+..RWRR..
+..RRWR..
+..RWRR..
+..RRWR..
+..RWRR..
+...RR...
+@bow-tie | bow tie | a=red
+bb......bb
+bbbb..bbbb
+bcbbaabbbb
+bbbbaabbbb
+bbbb..bbbb
+bb......bb
+@belt | belt leather buckle
+TTTTTTTTTTTTTT
+TLTYYYYTLTLTLT
+TTTYTTYTTTTTTT
+TLTYYYYTLTLTLT
+TTTTTTTTTTTTTT
+@umbrella | umbrella open rain | a=red
+....bbbbbb....
+..bbbcbbbbbb..
+.bbbcbbbbbbbb.
+bbbcbbbbbbbbbb
+b..b..bT.b...b
+.......T......
+.......T......
+.......T......
+.......T......
+....T..T......
+.....TT.......
+@hair-bow | hair bow ribbon pink
+MM......MM
+MMMM..MMMM
+MzMMRRMMMM
+MMMMRRMMMM
+MMMM..MMMM
+MM.M..M.MM
+...M..M...
+@coat-hanger | coat hanger clothes
+......xx......
+.....x..x.....
+........x.....
+.......x......
+......TT......
+....TTTTTT....
+..TTT....TTT..
+TTT........TTT
+TTTTTTTTTTTTTT
+// dressing up
+@carnival-mask | carnival mask masquerade party
+Y..........Y
+PP...YY...PP
+PPPPPPPPPPPP
+PPKKKPPKKKPP
+PJKKKPPKKKPP
+.PPPPPPPPPP.
+..PPP..PPP..
+@hero-cape | superhero cape red
+..YRRRRRRY..
+..RRRRRRRR..
+..RRIRRRRR..
+.RRRIRRRRRR.
+.RRRIRRRRRR.
+.RRRRRRRRRR.
+RRRRRRRRRRRR
+RRRRRRRRRRRR
+RZRRZRRRZRRZ
+Z..ZZ.Z.ZZ.Z
+@fairy-wings | fairy wings costume
+.AAA....AAA.
+AAJAA..AAJAA
+AJJJAAAAJJJA
+AAJJAWWAJJAA
+.AAAAWWAAAA.
+..AAJAAJAA..
+.AAJA..AJAA.
+.AAA....AAA.
+@bunny-ears | bunny ears headband costume
+.WW....WW.
+.WMW..WMW.
+.WMW..WMW.
+.WMW..WMW.
+.WMW..WMW.
+..WW..WW..
+.VVVVVVVV.
+V........V
+V........V
+@disguise-glasses | disguise fake glasses nose mustache
+.VVVV..VVVV.
+VAAAAVVAAAAV
+VAAAAVVAAAAV
+.VVVVSSVVVV.
+....SSSS....
+..CCCCCCCC..
+.CCC....CCC.
+`);
+
+// ───────────────────────── city and travel ─────────────────────────
+category('city', 'City & travel', 'thing');
+pack(`
+// cars: one body, different paint and fittings
+#car a=red
+......bbbbbbbb......
+.....bAAAbbAAAb.....
+....bbAWAbbAWAbb....
+.bbbbbbbbbbbbbbbbbb.
+bbbbbbbbbbbbbbbbbbbY
+bcccbbbbbbbbbKbbbbbb
+RbbVVVbbbbbbbbVVVbbx
+..VVxVV......VVxVV..
+...VVV........VVV...
+#taxisign y=-2
+.........YY.........
+........YKKY........
+#checker y=5
+..KWKWKWKWKWKWKWKW..
+#lightbar y=-1
+........RRBB........
+#polstripe y=5
+.BBBBBBBBBBBBBBBBBB.
+=car-red | red car | car
+=car-blue | blue car | car | a=blue
+=taxi | yellow taxi cab | car:a=yellow taxisign checker
+=police-car | police car with light bar | car:a=white lightbar polstripe
+@sports-car | red sports car fast | a=red
+.......bbbbbb.......
+.....bbAAAbAAb......
+a..bbbAAAAbAAAbbb...
+bbbbbbbbbbbbbbbbbbb.
+bcccbbbbbbbbbbbbbbbY
+RbVVVbbbbbbbbbVVVbbb
+..VxVV........VxVV..
+...VV..........VV...
+#van a=white
+.bbbbbbbbbbbbbbb....
+.bbbbbbbbbbbbbbbb...
+.bbbbbbbbbbbbAAAbb..
+.bbbbbbbbbbbbAAWAb..
+.bbbbbbbbbbbbAAAAbb.
+.bbbbbbbbbbbbbbbbbbb
+.bbbbbbbbbbbbKbbbbbY
+.accccccccccbbbbbbbb
+RbbVVVbbbbbbbbVVVbbx
+...VxV........VxV...
+...VVV........VVV...
+#parcelmark y=2
+....LLLL....
+....LTTL....
+....LLLL....
+#ambmarks y=-1
+......BB............
+....................
+....................
+.....R..............
+....RRR.............
+.....R..............
+....................
+.RRRRRRRRRRR........
+#roofcone y=-4
+.....zzz......
+....zzMzz.....
+.....LLL......
+......L.......
+#servewin y=1
+..RWRWRWRWR.
+..VAAAAAAAV.
+..VAAAAAAAV.
+..VVVVVVVVV.
+#camperwin y=2
+...AAA.AAA...
+...AAA.AAA...
+....................
+.OOOOOOOOOOOOOOOOOO.
+=delivery-van | delivery van white parcel | van parcelmark
+=ambulance | ambulance emergency | van ambmarks
+=ice-cream-van | ice cream van truck | van:a=rose roofcone servewin
+=camper-van | camper van holiday | van:a=cream camperwin
+@pickup-truck | pickup truck blue | a=blue
+.........bbbbbb.....
+........bbAAAbAb....
+........bAAAAbAAb...
+bbbbbbbbbbbbbbbbbbb.
+bcccccccbbbbbKbbbbbY
+RbbbbbbbbbbbbbbbbbbY
+bbbVVVbbbbbbbbVVVbbx
+...VxV........VxV...
+...VVV........VVV...
+#bus a=red
+.bbbbbbbbbbbbbbbbbbbb.
+bbbbbbbbbbbbbbbbbbbbbb
+bAAAbAAAbAAAbAAAbbAAAb
+bAAAbAAAbAAAbAAAbbAAAb
+bAAAbAAAbAAAbAAAbbAAAb
+bbbbbbbbbbbbbbbbbbAAAb
+bcccccccccccccccbbAAAb
+bbbbbbbbbbbbbbbbbbAAAY
+RbVVVbbbbbbbbbVVVbbbbb
+...VxV........VxV.....
+...VVV........VVV.....
+#busstripe y=6
+.KKKKKKKKKKKKKKK......
+=city-bus | city bus red | bus
+=school-bus | school bus yellow | bus:a=yellow busstripe
+@truck | truck lorry delivery | a=blue
+wwwwwwwwwwwwww........
+wWWWWWWWWWWWWw.bbbbb..
+wWWWWWWWWWWWWw.bAAAbb.
+wWWWWWWWWWWWWw.bAAAAb.
+wWWWWWWWWWWWWw.bbbbbbb
+wWWWWWWWWWWWWw.bbKbbbY
+wwwwwwwwwwwwww.bbbbbbb
+VVVVVVVVVVVVVVVVVVVVVx
+..VVV..VVV.......VVV..
+..VxV..VxV.......VxV..
+..VVV..VVV.......VVV..
+@fire-engine | fire engine fire truck ladder
+..xxxxxxxxxxxxxxx.....
+..x.x.x.x.x.x.x.xB....
+.RRRRRRRRRRRRRRRRRRR..
+.RRWWRRRRRRRRRRRAAARR.
+.RRWWRRYYYYYYRRRAAAAR.
+.RRRRRRRRRRRRRRRRRRRRR
+.RRxxxRRRRRRRRRRRKRRRY
+.WWWWWWWWWWWWWWWWWWWWW
+.RRVVVRRRRRRRRRRVVVRRx
+...VxV..........VxV...
+...VVV..........VVV...
+@dump-truck | dump truck tipper construction
+OOOOOOOOOOOOOO......
+.OOFOOOOOOOOO.YYYYY.
+.OOOOOOOOOOOO.YAAAY.
+..OOOOOOOOOOO.YAAAAY
+..OOOOOOOOOOO.YYYYYY
+...DDDDDDDDDD.YYKYYY
+VVVVVVVVVVVVVVVVVVVx
+..VVV..VVV.....VVV..
+..VxV..VxV.....VxV..
+..VVV..VVV.....VVV..
+@tractor | tractor farm green
+....VVVVVVV.....
+....VAAAAAV..V..
+....VAAAAAV..V..
+....VAAAAAV..V..
+..GGGGGGGGGGGGGG
+.VVVVVGGGGGGHGGG
+VVxxxVVGGGGGGGGY
+VxxYxxVGGGGVVVG.
+VxYYYxVVVVVVxVV.
+VxxYxxV...VxYxV.
+VVxxxVV...VVxVV.
+.VVVVV.....VVV..
+@digger | digger excavator construction yellow
+..........YYYY......
+.........YY..YY.....
+........YY....YY....
+..YYYYYYY......YY...
+..YAAAYY........YY..
+..YAAAYY........YY..
+..YAAAYYYY......VV..
+.YYYYYYYYYY....VVVV.
+.YYYYYYOYYY....V.VV.
+VVVVVVVVVVVV........
+VxVxVxVxVxVV........
+.VVVVVVVVVV.........
+@race-car | racing car formula one
+VV..................
+VVV......WW.........
+BBB....BBWWBB.......
+.BBBBBBBBBBBBBBBB...
+VVVBBYYBBBBBBBVVVBBB
+VxVVBBBBBBBBBVVxVV..
+VVV...........VVV...
+// two wheels and small wheels
+@motorbike | motorbike motorcycle | a=red
+........V.......
+....VVVV.bbb..x.
+...bbbbbbbbbbx..
+..bbbbbbbbcbbxY.
+.VVVbbxxxbbVVV..
+VVxVV.xxx.VVxVV.
+VxxxV.....VxxxV.
+VVxVV.....VVxVV.
+.VVV.......VVV..
+@moped | moped scooter | a=teal
+..........xx..
+...........b..
+..VVVVV...bb..
+.bbbbbbb..bbY.
+.bbbbbbbbbbb..
+.bbcbbbbbbbb..
+.VVVbbbbbVVV..
+VVxVV...VVxVV.
+VVxVV...VVxVV.
+.VVV.....VVV..
+@bicycle | bicycle bike | a=red
+....VVV.....xx..
+.....b......x...
+....bbbbbbbbb...
+...b..b....bb...
+.VVb...b..b.bVV.
+V.b.V...bb.V.b.V
+V.bbVbbbbb.V..bV
+V...V......V...V
+.VVV........VVV.
+@kick-scooter | kick scooter kids
+.......VVV
+........x.
+........x.
+........x.
+........x.
+........x.
+.......xx.
+BBBBBBBBx.
+VV.....VV.
+VV.....VV.
+@pram | pram stroller baby buggy
+..........xx
+....BBBBB.x.
+...BBBBBBx..
+..BBUBBBBx..
+..BUBBBBx...
+AAAAAAAAA...
+AAWAAAAAA...
+.AAAAAAA....
+..x....x....
+.VVV..VVV...
+.VVV..VVV...
+@wheelchair | wheelchair
+..V........
+..V........
+..VBBB.....
+..VBBB.....
+..VBBB.....
+..VVVVVVV..
+.VVVV...V..
+VV..VV..V..
+V.xx.V..VV.
+VV..VV...xx
+.VVVV......
+@shopping-trolley | shopping trolley cart supermarket
+R...........
+RR..........
+.xxxxxxxxxxx
+.x.x.x.x.x.x
+.xxxxxxxxxxx
+.x.x.x.x.xx.
+..xxxxxxxxx.
+..x.........
+..xxxxxxxx..
+..VV....VV..
+..VV....VV..
+// rail, air and water
+@steam-train | steam train locomotive engine
+....www...............
+...wwwww..............
+....VV.........RRRRRR.
+....VV....YY...RAAAAR.
+....VV....YY...RAAAAR.
+..VVVVVVVVVVVVVRRRRRR.
+.VVVVVVVVVVVVVVRRRRRRR
+.VVxVVVVVVVVVVVRRRRRRR
+RRRRRRRRRRRRRRRRRRRRRR
+RVVVVRRVVVVRRVVVVRRRR.
+.VxxV..VxxV..VxxV.....
+.VxxV..VxxV..VxxV.....
+..VV....VV....VV......
+@metro-train | train metro subway tram modern
+..WWWWWWWWWWWWWWWWWW..
+.WWWWWWWWWWWWWWWWWWWW.
+WAAAWWAAAAWWAAAAWWAAAW
+WAAAWWAAAAWWAAAAWWAAAW
+WWWWWWAAAAWWAAAAWWWWWW
+BBBBBBBBBBBBBBBBBBBBBB
+WWWWWWWWWWWWWWWWWWWWWY
+xxxxxxxxxxxxxxxxxxxxxx
+..VVV..VVV....VVV.VVV.
+..VVV..VVV....VVV.VVV.
+@train-carriage | train carriage wagon passenger
+.GGGGGGGGGGGGGGGGGG.
+GGGGGGGGGGGGGGGGGGGG
+GAAAGAAAGAAAGAAAGAAG
+GAAAGAAAGAAAGAAAGAAG
+GGGGGGGGGGGGGGGGGGGG
+GYYYYYYYYYYYYYYYYYYG
+GGGGGGGGGGGGGGGGGGGG
+VVVVVVVVVVVVVVVVVVVV
+..VVV..VVV..VVV.VVV.
+..VVV..VVV..VVV.VVV.
+@airplane | airplane plane airliner jet
+.B....................
+.BB...................
+.BBB..................
+.WBBB....WWWWWWWWW....
+.WWWWWWWWWWWWWWWWWWW..
+WWWAWAWAWAWAWAWAWWAAW.
+WWWWWWWWWWWWWWWWWWWWWW
+.wwwwwwwwWWWWWwwwwww..
+.........BWWWB........
+..........xBWWB.......
+...........xxBB.......
+@small-plane | small plane propeller red
+..RRRRRRRRRRRRR...
+........x.x.......
+R.......x.x.....V.
+RR....RRAARRR...V.
+RRRRRRRRAARRRRRxV.
+.RRRWRRRRRRRRRR.V.
+....RRRRRRRRRRR.V.
+........x.x.......
+.......VV.VV......
+@helicopter | helicopter chopper
+..xxxxxxxxxxxxxxx.
+.........x........
+........RRRRR.....
+x.....RRRAAAARR...
+xx...RRRRAAAAARR..
+.RRRRRRRRAAAAARR..
+x....RRRRRRRRRRR..
+......RRRRRRRRR...
+.......V....V.....
+.....VVVVVVVVVV...
+@rocket | rocket spaceship launch
+....WW....
+...WWWW...
+...WWWW...
+..WWWWWW..
+..WBBBBW..
+..WBAABW..
+..WBAABW..
+..WBBBBW..
+..WWWWWW..
+..WWWWWW..
+.RWWWWWWR.
+RRWWWWWWRR
+RR.VVVV.RR
+R..OYYO..R
+....OO....
+....Y.....
+@speedboat | speedboat motor boat
+.........AAA........
+........AAAAx.......
+...xxxxxAAAAxx......
+WWWWWWWWWWWWWWWWWW..
+.WRRRRRRRRRRRRRRRRRR
+..WWWWWWWWWWWWWWWW..
+V..WWWWWWWWWWWWW....
+@cruise-ship | cruise ship ocean liner
+........RR...RR.......
+........RR...RR.......
+.......VVVV.VVVV......
+.....WWWWWWWWWWWWW....
+.....WAWAWAWAWAWAW....
+...WWWWWWWWWWWWWWWWW..
+...WAWAWAWAWAWAWAWAW..
+WWWWWWWWWWWWWWWWWWWWWW
+.WWKWWKWWKWWKWWKWWKWW.
+..UUUUUUUUUUUUUUUUUU..
+...UUUUUUUUUUUUUUUU...
+@fishing-boat | fishing boat trawler tugboat
+.....x..........
+.....x..VV......
+.....x..VV......
+....WWWWWWW.....
+....WAAWAAW.....
+....WAAWAAW.....
+....WWWWWWW...x.
+BBBBBBBBBBBBBBB.
+.BBWBBBBBBBBBB..
+.BBBBBBBBBBBBB..
+..RRRRRRRRRRR...
+@submarine | submarine yellow
+.........x........
+.........xx.......
+.......YYYY.......
+.......YYYY.......
+V..YYYYYYYYYYYYY..
+VVYYYAAYYAAYYAAYY.
+VVYYYAAYYAAYYAAYYY
+V..YYYYYYYYYYYYYY.
+....OOOOOOOOOOO...
+@kayak | kayak canoe with paddle
+..........TT....
+.........T......
+RR......T.....RR
+.RRRRRRTVVRRRRR.
+..RIIIIIIIIIRR..
+...RRRRRRRRRR...
+// in the street
+#tlight
+.VVVV.
+VVXXVV
+VXXXXV
+VVXXVV
+VVXXVV
+VXXXXV
+VVXXVV
+VVXXVV
+VXXXXV
+VVXXVV
+.VVVV.
+..xx..
+..xx..
+..xx..
+#tl-red x=2 y=1
+RR
+RR
+#tl-amber x=2 y=4
+YY
+YY
+#tl-green x=2 y=7
+GG
+GG
+=traffic-light-red | traffic light red stop | tlight tl-red
+=traffic-light-amber | traffic light amber yellow wait | tlight tl-amber
+=traffic-light-green | traffic light green go | tlight tl-green
+@stop-sign | stop sign road sign
+..RRRRRR..
+.RRRRRRRR.
+RRRRRRRRRR
+RWWWWWWWWR
+RWWWWWWWWR
+RRRRRRRRRR
+.RRRRRRRR.
+..RRRRRR..
+....xx....
+....xx....
+....xx....
+....xx....
+@road-warning-sign | warning road sign triangle
+.....RR.....
+....RRRR....
+....RYYR....
+...RYKKYR...
+...RYKKYR...
+..RYYKKYYR..
+..RYYYYYYR..
+.RYYYKKYYYR.
+.RRRRRRRRRR.
+.....xx.....
+.....xx.....
+.....xx.....
+@crossing-sign | pedestrian crossing sign blue
+BBBBBBBBBB
+BBBBWWBBBB
+BBBBWWBBBB
+BBBWWWWBBB
+BBWBWWBWBB
+BBBBWWBBBB
+BBBWBBWBBB
+BBWBBBBWBB
+BBBBBBBBBB
+....xx....
+....xx....
+....xx....
+@speed-limit-sign | speed limit sign 30
+..RRRRRR..
+.RWWWWWWR.
+RWKKWKKKWR
+RWWKWKWKWR
+RWKKWKWKWR
+RWWKWKWKWR
+RWKKWKKKWR
+.RWWWWWWR.
+..RRRRRR..
+....xx....
+....xx....
+....xx....
+@one-way-sign | one way arrow sign street sign
+BBBBBBBBBBBB
+BBBBBBWBBBBB
+BWWWWWWWBBBB
+BWWWWWWWWBBB
+BWWWWWWWBBBB
+BBBBBBWBBBBB
+BBBBBBBBBBBB
+.....xx.....
+.....xx.....
+.....xx.....
+.....xx.....
+@bus-stop | bus stop shelter
+BBBBBBBBBBBBBB
+.x..........x.
+.xAAAAAAAAAAx.
+.xAAAAAAAAAAx.
+.xAAAAAAAAAAx.
+.x..........x.
+.x.TTTTTTTT.x.
+.x.T......T.x.
+.x..........x.
+@park-bench | park bench green
+V............V
+VGGGGGGGGGGGGV
+VNNNNNNNNNNNNV
+VGGGGGGGGGGGGV
+VVVVVVVVVVVVVV
+GGGGGGGGGGGGGG
+.V..........V.
+.V..........V.
+@post-box | post box red letter box
+..RRRRRR..
+.RRRRRRRR.
+.RRRRRRRR.
+.RVVVVVVR.
+.RRRRRRRR.
+.RRWWWWRR.
+.RRWWWWRR.
+.RRRRRRRR.
+.RRRRRRRR.
+.RRRRRRRR.
+.ZZZZZZZZ.
+VVVVVVVVVV
+@mailbox | mailbox on post letters
+........R.
+.BBBBBB.R.
+BBBBBBBBR.
+BBWWBBBBB.
+BBBBBBBBB.
+BBBBBBBBB.
+...TT.....
+...TT.....
+...TT.....
+...TT.....
+@fire-hydrant | fire hydrant
+...RR...
+..RRRR..
+.RRRRRR.
+..RIRR..
+RRRIRRRR
+RRRxxRRR
+..RxxRR.
+..RIRR..
+..RIRR..
+.RRRRRR.
+.ZZZZZZ.
+@parking-meter | parking meter
+..xxxx..
+.xVVVVx.
+.xVGGVx.
+.xVVVVx.
+.xxRRxx.
+..xxxx..
+...xx...
+...xx...
+...xx...
+...xx...
+...xx...
+..XXXX..
+@phone-box | phone box telephone booth red
+.RRRRRRRR.
+RRRWWWWRRR
+RRRRRRRRRR
+RAARAARAAR
+RAARAARAAR
+RRRRRRRRRR
+RAARAARAAR
+RAARAARAAR
+RRRRRRRRRR
+RAARAARAAR
+RAARAARAAR
+RRRRRRRRRR
+RRRRRRRRRR
+@litter-bin | litter bin street trash can green
+.NNNNNNNN.
+NNNNNNNNNN
+.GVVVVVVG.
+.GGGGGGGG.
+.GGHWWGGG.
+.GGWHWGGG.
+.GGWWHGGG.
+.GGGGGGGG.
+.NNNNNNNN.
+@traffic-cone | traffic cone orange
+....OO....
+....OO....
+...OOOO...
+...WWWW...
+..OOOOOO..
+..OOOOOO..
+.WWWWWWWW.
+.OOOOOOOO.
+DDDDDDDDDD
+@road-barrier | road barrier roadworks
+Y............Y
+RRWWRRWWRRWWRR
+RWWRRWWRRWWRRW
+.x..........x.
+.x..........x.
+.x..........x.
+xxx........xxx
+@billboard | billboard advert sign
+VVVVVVVVVVVVVV
+VYYYYYYYYYYYYV
+VYYRRYYYYOOYYV
+VYRRRRYYOOOOYV
+VYYRRYYYYOOYYV
+VYYYYYYYYYYYYV
+VVVVVVVVVVVVVV
+...x......x...
+...x......x...
+...x......x...
+@atm | atm cash machine
+xxxxxxxxxx
+xBBBBBBBBx
+xBAAAAAABx
+xBAGGAAABx
+xBAAAAAABx
+xBBBBBBBBx
+xVVVVxwwwx
+xVGGVxwKwx
+xxxxxxwwwx
+xXXXXXXXXx
+xXXXXXXXXx
+xxxxxxxxxx
+@news-kiosk | newsstand kiosk
+.GGGGGGGGGGGG.
+GGGGGGGGGGGGGG
+.GWGWGWGWGWGW.
+.NVVVVVVVVVVN.
+.NVVVSSVVVVVN.
+.NVVRRRRVVVVN.
+.NNNNNNNNNNNN.
+.NWRWBWYWRWBN.
+.NWRWBWYWRWBN.
+.NNNNNNNNNNNN.
+.NNNNNNNNNNNN.
+@hot-dog-cart | hot dog cart food stand
+..RWRWRWRWRW..
+.RWRWRWRWRWRW.
+......x.......
+......x.......
+......x.......
+.WWWWWWWWWWW..
+.WWWIIIIWWWWxx
+.WWLLLLLLWWW..
+.WWWWWWWWWWW..
+..VVV...VVV...
+..VVV...VVV...
+@petrol-pump | petrol pump gas station fuel
+.RRRRRRR...
+.RWWWWWR.V.
+.RWKKKWR.VV
+.RWWWWWR..V
+.RRRRRRR..V
+.RRRYRRR..V
+.RRRRRRRVVV
+.RRRRRRR...
+.RRRRRRR...
+.RRRRRRR...
+VVVVVVVVV..
+`);
+
+// modern buildings, 32x32: one routine for ordinary blocks and shops, a few special ones
+function bld(c, o) {
+  const w = o.w || 24, h = o.h || 16, x = 16 - (w >> 1), y = 31 - h, [d, m, l] = ramp(o.wall || 'cream');
+  c.rect(x, y, w, h, m).rect(x + w - 2, y, 2, h, d).rect(x, y, 1, h, l);
+  if (o.brick) for (let j = y + 2; j < 30; j += 3) for (let i = x + 2 + ((j / 3) & 1) * 3; i < x + w - 4; i += 6) c.h(i, j, 2, d);
+  if (o.pitch) roof(c, 16, y - o.pitch, o.pitch, o.top || 4, Math.min(w + 4, 30), o.roof || 'red');
+  else { const [rd, rm] = ramp(o.roof || 'dark'); c.rect(x - 1, y - 2, w + 2, 2, rm).h(x - 1, y - 1, w + 2, rd); }
+  const cols = o.cols || 3;
+  const pane = (wx, wy, k) => c.rect(wx, wy, 3, 3, o.lit && k % 3 === 1 ? 'y2' : 'b3').px(wx, wy, 'w0').h(wx, wy + 3, 3, d);
+  for (let f = 0; f < (o.floors || 0); f++) for (let k = 0; k < cols; k++) pane(x + Math.round((k + 0.5) * w / cols) - 2, 18 - 5 * f, k + f * 2);
+  if (o.shop) for (const gx of [x + 2, x + w - 8]) c.rect(gx, 24, 6, 5, 'g4').rect(gx + 1, 25, 4, 3, 'b3').px(gx + 1, 25, 'w0').px(gx + 2, 26, 'w0');
+  else if (!o.plain) { pane(x + 3, 25, 0); pane(x + w - 6, 25, 0); }
+  if (o.door === 'glass') c.rect(13, 24, 6, 7, 'g4').rect(14, 25, 2, 6, 'b3').rect(16, 25, 2, 6, 'b2').px(14, 25, 'w0');
+  else if (o.door === 'shutter') for (const gx of [x + 3, x + w - 11]) { c.rect(gx, 21, 8, 10, 'g4').rect(gx + 1, 22, 6, 9, o.shutter || 'g1'); for (let j = 24; j < 31; j += 2) c.h(gx + 1, j, 6, 'g2'); }
+  else if (o.door !== 'none') door(c, 14, 24, 4, 7);
+  if (o.awning) { const am = ramp(o.awning)[1]; for (let i = -1; i <= w; i++) { const col = (i >> 1) & 1 ? 'w0' : am; c.v(x + i, 21, 2, col); if (i & 1) c.px(x + i, 23, col); } }
+  if (o.sign) {
+    const sw = Math.max(...o.sign.map((r) => r.length)), sx = 16 - (sw >> 1), sy = o.signy || y + 2;
+    if (o.board !== '') c.rect(sx - 1, sy - 1, sw + 2, o.sign.length + 2, o.board || 'w0');
+    c.stamp(sx, sy, o.sign);
+  }
+  if (o.extra) o.extra(c, x, y, w, h);
+}
+function glassTower(c, o) {
+  const w = o.w, x = 16 - (w >> 1), y = o.top, [d, m, l] = ramp(o.glass || 'blue');
+  c.rect(x, y, w, 31 - y, m);
+  for (let j = y; j < 31; j++) for (let i = x; i < x + w; i++) {
+    if ((j - y) % 3 === 2) c.px(i, j, d);
+    else if ((i - x) % 3 === 2) c.px(i, j, d);
+    else if (((i - x) / 3 | 0) * 5 % 7 === ((j - y) / 3 | 0) % 7) c.px(i, j, l);
+  }
+  c.rect(x + w - 2, y, 2, 31 - y, d).v(x, y, 31 - y, l).rect(x - 1, y - 1, w + 2, 1, 'g2');
+  if (o.step) c.rect(x + 3, y - 4, w - 6, 3, m).h(x + 3, y - 2, w - 6, d).rect(x + 2, y - 5, w - 4, 1, 'g2');
+  if (o.spire) c.v(16, y - (o.step ? 10 : 6), o.step ? 5 : 5, 'g2').px(16, y - (o.step ? 11 : 7), 'r2');
+  c.rect(13, 27, 6, 4, 'g4').rect(14, 28, 2, 3, 'b3').rect(16, 28, 2, 3, 'b3');
+}
+function factory(c) {
+  wall(c, 2, 17, 28, 14, 'grey');
+  for (let t = 0; t < 3; t++) for (let j = 0; j < 5; j++) { c.h(2 + t * 7, 16 - j, 7 - j, 'g3').px(2 + t * 7, 16 - j, 'b3'); }
+  for (const cx of [24, 28]) { c.rect(cx - 1, 7, 3, 10, 'r2').v(cx + 1, 7, 10, 'r1').h(cx - 1, 7, 3, 'g1').h(cx - 1, 10, 3, 'w0'); }
+  c.disc(24, 4, 1.5, 'g1').disc(27, 3, 1.2, 'g1').px(22, 3, 'w0');
+  c.rect(4, 23, 8, 8, 'g4').rect(5, 24, 6, 7, 'g2'); for (let j = 25; j < 31; j += 2) c.h(5, j, 6, 'g3');
+  for (const wx of [15, 20, 25]) c.rect(wx, 21, 3, 3, 'y2').px(wx, 21, 'y3');
+  door(c, 20, 26, 3, 5);
+}
+function stadium(c) {
+  for (let y = 9; y < 31; y++) for (let x = 0; x < 32; x++) {
+    const dx = (x - 15.5) / 14.5, dy = (y - 20) / 10, r = dx * dx + dy * dy;
+    if (r > 1) continue;
+    const ix = (x - 15.5) / 10, iy = (y - 19) / 5.5, ri = ix * ix + iy * iy;
+    if (ri <= 1) c.px(x, y, (x >> 2) & 1 ? 'n2' : 'n3');
+    else if (y > 22 && r > 0.55) c.px(x, y, y > 27 ? 'g3' : 'g2');
+    else c.px(x, y, ['r2', 'b2', 'y2', 'w0', 'r2', 'b3'][(x * 7 + y * 13) % 6]);
+  }
+  c.v(15, 14, 11, 'w0').disc(15.5, 19, 1.6, 'w0').disc(15.5, 19, 0.8, 'n2');
+  for (const fx of [3, 28]) c.v(fx, 3, 8, 'g3').rect(fx - 1, 2, 3, 2, 'y3').px(fx, 2, 'w0');
+  c.rect(13, 28, 5, 3, 'g4');
+}
+function petrolStation(c) {
+  c.rect(1, 9, 22, 3, 'r2').h(1, 10, 22, 'w0').h(1, 12, 22, 'r1');
+  c.rect(3, 13, 2, 18, 'g1').rect(19, 13, 2, 18, 'g1').v(4, 13, 18, 'g2').v(20, 13, 18, 'g2');
+  for (const px of [8, 13]) c.rect(px, 22, 4, 9, 'r2').rect(px + 1, 23, 2, 2, 'w0').h(px, 30, 4, 'g4').px(px + 3, 26, 'g4');
+  wall(c, 23, 17, 8, 14, 'white'); c.rect(22, 15, 9, 2, 'g3'); c.rect(25, 20, 4, 3, 'b3').px(25, 20, 'w0'); door(c, 25, 25, 4, 6);
+  c.rect(24, 12, 6, 3, 'y2').px(26, 13, 'r2').px(27, 13, 'r2');
+}
+function controlTower(c) {
+  for (let y = 12; y < 31; y++) { const w = 6 + ((y - 12) >> 3) * 2, x = 16 - (w >> 1); c.h(x, y, w, 'g1').px(x, y, 'w0').rect(x + w - 2, y, 2, 1, 'g2'); }
+  c.rect(8, 5, 16, 7, 'g2').rect(9, 6, 14, 4, 'b3').h(8, 11, 16, 'g3');
+  for (const x of [12, 16, 20]) c.v(x, 6, 4, 'g2'); c.px(10, 6, 'w0').px(14, 7, 'w0');
+  c.rect(10, 3, 12, 2, 'g3').v(16, 1, 2, 'g3').px(16, 1, 'r2');
+  for (let y = 15; y < 28; y += 4) c.rect(15, y, 2, 2, 'b2');
+  c.rect(14, 28, 4, 3, 'g4');
+}
+function greenhouse(c) {
+  for (let j = 0; j < 7; j++) { const w = 8 + j * 3, x = 16 - (w >> 1); c.h(x, 9 + j, w, 'b3').px(x, 9 + j, 'w0').px(x + w - 1, 9 + j, 'w0'); }
+  c.rect(3, 16, 26, 15, 'b3');
+  for (let x = 3; x < 29; x += 5) c.v(x, 16, 15, 'w0');
+  c.v(28, 16, 15, 'w0').h(3, 16, 26, 'w0').h(3, 23, 26, 'w0').h(3, 30, 26, 'g1').v(16, 9, 7, 'w0');
+  for (const [x, y] of [[5, 27], [10, 26], [20, 27], [25, 26], [6, 20], [24, 20]]) c.rect(x, y, 2, 3, 'n2').px(x, y - 1, 'n3').px(x + 1, y - 1, x % 2 ? 'r2' : 'y2');
+  c.rect(14, 24, 4, 7, 'b2').v(16, 24, 7, 'w0');
+}
+const SIGNS = {
+  cup: ['x.x..', 'TTTT.', 'TTTTT', 'TTTT.'], bread: ['.LLLL.', 'LTLTLL', '.LLLL.'], toys: ['RR.BB', 'RR.BB', '.YY..', '.YY..'],
+  books: ['RRR.BBB', 'RWR.BWB', 'RRR.BBB'], flowers: ['R.M.Y', 'G.G.G'], pizza: ['YYYYY', '.YRY.', '..Y..'],
+  cart: ['W......', '.WWWWW.', '.WWWW..', '..W.W..'], post: ['WWWWWWW', 'WxWWWxW', 'WWxxxWW', 'WWWWWWW'],
+  pharmacy: ['.GG.', 'GGGG', 'GGGG', '.GG.'], cross: ['.RR.', 'RRRR', 'RRRR', '.RR.'], star: ['..Y..', 'YYYYY', '.YYY.', 'Y...Y'],
+  dollar: ['.YYY.', 'YY...', '.YYY.', '...YY', '.YYY.'], h: ['W..W', 'WWWW', 'W..W'], wrench: ['x.x...', 'xxxxxx', '....x.'],
+};
+const clockFace = (c, x, y) => c.rect(x, y, 4, 4, 'w0').px(x + 1, y + 1, 'k').px(x + 2, y + 1, 'k').px(x + 1, y + 2, 'k');
+const B = (slug, name, fn, key) => ND(slug, name, fn, BUILD, key || fn);
+B('modern-house', 'modern house flat roof', (c) => bld(c, { w: 24, h: 15, wall: 'white', roof: 'dark', floors: 0, extra: (c, x, y) => { c.rect(x + 2, y + 2, 9, 5, 'g4').rect(x + 3, y + 3, 7, 3, 'b3').px(x + 3, y + 3, 'w0').px(x + 4, y + 4, 'w0').rect(x + 14, y + 1, 10, 3, 't2').h(x + 14, y + 3, 10, 't1'); } }));
+B('town-house', 'town house terraced brick house', (c) => bld(c, { w: 16, h: 21, wall: 'copper', brick: true, pitch: 7, top: 4, roof: 'dark', floors: 2, cols: 2, lit: true, extra: (c, x, y) => c.rect(x + 11, y - 8, 3, 5, 'r1').h(x + 10, y - 9, 5, 'g3') }));
+B('apartment-block', 'apartment block flats tower block', (c) => bld(c, { w: 22, h: 25, wall: 'tan', floors: 3, cols: 4, lit: true, door: 'glass', extra: (c, x, y) => { for (let f = 0; f < 3; f++) c.h(x + 1, 12 + f * 5, 20, 't2'); c.rect(20, y - 5, 3, 3, 'g2'); } }));
+B('school', 'school building clock', (c) => bld(c, { w: 28, h: 14, wall: 'red', brick: true, roof: 'dark', cols: 4, floors: 1, extra: (c) => { wall(c, 12, 9, 8, 8, 'red'); roof(c, 16, 5, 4, 2, 10, 'dark'); clockFace(c, 14, 11); c.v(16, 1, 4, 'g3').rect(17, 1, 3, 2, 'y2'); door(c, 14, 24, 4, 7); } }));
+B('hospital', 'hospital red cross', (c) => bld(c, { w: 26, h: 23, wall: 'white', roof: 'blue', floors: 2, cols: 4, door: 'glass', sign: SIGNS.cross, signy: 10, extra: (c) => c.rect(10, 21, 12, 2, 'b2').h(10, 22, 12, 'b1') }));
+B('police-station', 'police station', (c) => bld(c, { w: 24, h: 17, wall: 'ice', roof: 'navy', floors: 1, cols: 2, sign: SIGNS.star, board: 'b1', signy: 16, extra: (c) => { c.rect(15, 10, 2, 2, 'b2').px(15, 10, 'b3').rect(11, 22, 10, 1, 'b1'); } }));
+B('fire-station', 'fire station', (c) => bld(c, { w: 26, h: 18, wall: 'red', brick: true, roof: 'dark', door: 'shutter', shutter: 'w0', plain: true, extra: (c, x, y) => { c.rect(11, y + 2, 10, 4, 'w0').stamp(13, y + 3, ['R.O.R', 'OYOYO']); wall(c, 24, 4, 5, 9, 'red'); c.rect(23, 3, 7, 1, 'g3').rect(25, 6, 2, 2, 'y2'); } }));
+B('supermarket', 'supermarket grocery store shop', (c) => bld(c, { w: 28, h: 15, wall: 'white', roof: 'green', shop: true, door: 'glass', awning: 'green', sign: SIGNS.cart, board: 'r2' }));
+B('cafe', 'cafe coffee shop', (c) => bld(c, { w: 20, h: 21, wall: 'cream', brick: true, roof: 'brown', floors: 1, cols: 2, shop: true, awning: 'red', sign: SIGNS.cup, board: 'y3', signy: 12, extra: (c) => { c.rect(3, 28, 3, 1, 'w0').v(4, 29, 2, 'g3').rect(26, 28, 3, 1, 'w0').v(27, 29, 2, 'g3'); } }));
+B('bakery', 'bakery bread shop', (c) => bld(c, { w: 20, h: 16, wall: 'tan', pitch: 5, top: 12, roof: 'brown', shop: true, awning: 'orange', sign: SIGNS.bread, board: 'y3' }));
+B('toy-shop', 'toy shop store', (c) => bld(c, { w: 20, h: 16, wall: 'rose', roof: 'purple', shop: true, awning: 'blue', sign: SIGNS.toys, board: 'w0', extra: (c) => c.px(8, 26, 'r2').px(9, 27, 'y2').px(22, 26, 'n2').px(23, 27, 'r2') }));
+B('book-shop', 'book shop library', (c) => bld(c, { w: 20, h: 21, wall: 'teal', roof: 'dark', floors: 1, cols: 3, shop: true, sign: SIGNS.books, board: 'y3', signy: 12, extra: (c) => c.rect(8, 27, 4, 1, 'r2').rect(21, 27, 4, 1, 'o2') }));
+B('flower-shop', 'flower shop florist', (c) => bld(c, { w: 20, h: 16, wall: 'lime', roof: 'forest', shop: true, awning: 'pink', sign: SIGNS.flowers, board: 'w0', extra: (c) => { for (const [x, col] of [[3, 'r2'], [5, 'y2'], [26, 'm2'], [28, 'r3']]) c.px(x, 28, col).v(x, 29, 2, 'n1'); } }));
+B('pizzeria', 'pizzeria pizza restaurant', (c) => bld(c, { w: 22, h: 16, wall: 'cream', roof: 'red', shop: true, awning: 'green', sign: SIGNS.pizza, board: 'r1' }));
+B('post-office', 'post office mail', (c) => bld(c, { w: 22, h: 16, wall: 'yellow', brick: true, roof: 'blue', shop: true, sign: SIGNS.post, board: 'b1', extra: (c) => c.rect(2, 26, 3, 5, 'r2').h(2, 27, 3, 'g4') }));
+B('pharmacy', 'pharmacy chemist drugstore', (c) => bld(c, { w: 20, h: 16, wall: 'white', roof: 'teal', shop: true, door: 'glass', sign: SIGNS.pharmacy, board: 'w0', extra: (c, x, y) => c.rect(x, 21, 20, 1, 'n2') }));
+B('bank', 'bank building columns', (c) => bld(c, { w: 24, h: 17, wall: 'steel', pitch: 6, top: 2, roof: 'grey', plain: true, sign: SIGNS.dollar, board: '', signy: 9, extra: (c, x, y) => { for (const cx of [x + 2, x + 6, x + 15, x + 19]) c.rect(cx, y + 2, 3, 15, 'w0').v(cx + 2, y + 2, 15, 'g2'); c.rect(x - 1, y, 26, 2, 'g1').rect(x - 1, 30, 26, 1, 'g2'); door(c, 14, 23, 4, 8); } }));
+B('hotel', 'hotel tall building', (c) => bld(c, { w: 18, h: 24, wall: 'maroon', floors: 3, cols: 3, lit: true, door: 'glass', sign: SIGNS.h, board: 'b1', signy: 2, extra: (c) => c.rect(11, 22, 10, 2, 'y2').h(11, 23, 10, 'o2') }));
+B('cinema', 'cinema movie theatre', (c) => bld(c, { w: 24, h: 21, wall: 'purple', roof: 'violet', plain: true, door: 'glass', extra: (c, x, y) => { c.rect(x + 2, y + 2, 20, 7, 'w0').rect(x + 3, y + 3, 18, 5, 'g4'); for (let i = 0; i < 18; i += 2) c.px(x + 3 + i, y + 3, 'y2').px(x + 4 + i, y + 7, 'y2'); c.stamp(x + 7, y + 4, ['R.RR.R.RR', 'RR.R.RR.R']); c.rect(x + 2, 22, 20, 1, 'y2').rect(x + 2, 24, 4, 6, 'r2').rect(x + 18, 24, 4, 6, 'b2').px(x + 3, 26, 'y2').px(x + 19, 26, 'w0'); } }));
+B('warehouse', 'warehouse storage depot', (c) => bld(c, { w: 28, h: 15, wall: 'grey', pitch: 4, top: 20, roof: 'dark', door: 'shutter', shutter: 'b2', plain: true }));
+B('car-garage', 'garage car repair workshop', (c) => bld(c, { w: 24, h: 16, wall: 'cream', roof: 'orange', door: 'shutter', plain: true, sign: SIGNS.wrench, board: 'g4', signy: 17 }));
+B('train-station', 'train station railway', (c) => bld(c, { w: 28, h: 13, wall: 'tan', brick: true, pitch: 4, top: 22, roof: 'teal', cols: 4, extra: (c) => { wall(c, 13, 7, 6, 8, 'tan'); roof(c, 16, 3, 4, 2, 8, 'teal'); clockFace(c, 14, 9); c.rect(12, 23, 8, 8, 'g4').rect(13, 24, 6, 7, 't2').h(13, 23, 6, 'g4').v(16, 24, 7, 't1'); } }));
+B('skyscraper', 'skyscraper tall glass tower', (c) => glassTower(c, { w: 12, top: 12, step: true, spire: true }), 'tower-a');
+B('office-block', 'office block building glass', (c) => glassTower(c, { w: 20, top: 9, glass: 'teal' }), 'tower-b');
+B('factory', 'factory chimneys smoke', factory);
+B('stadium', 'stadium sports arena football', stadium);
+B('petrol-station', 'petrol station gas station garage', petrolStation);
+B('control-tower', 'airport control tower', controlTower);
+B('greenhouse', 'greenhouse glass house plants', greenhouse);
+
+// ───────────────────────── school, office and tech ─────────────────────────
+category('tech', 'School, office & tech', 'thing');
+pack(`
+// school and desk
+@open-book | open book reading
+.WWWWW.WWWWW.
+WWxxxWTWxxxWW
+WWWWWWTWWWWWW
+WWxxxWTWxxxWW
+WWWWWWTWWWWWW
+WWxxxWTWxxWWW
+BWWWWWTWWWWWB
+BBBBBBBBBBBBB
+@notebook | notebook spiral exercise book
+xGGGGGGGG
+GGGGGGGGG
+xGWWWWWGG
+GGWxxxWGG
+xGWWWWWGG
+GGGGGGGGG
+xGGGGGGGG
+GGGGGGGGG
+xGGGGGGGG
+NNNNNNNNN
+@book-stack | stack of books pile
+..RRRRRRRRR.
+..RWWWWWWWZ.
+.BBBBBBBBBB.
+.BYBBBBBBBU.
+.WWWWWWWWWU.
+GGGGGGGGGGG.
+GWWWWWWWWWN.
+GGGGGGGGGGN.
+@pencil | pencil yellow
+.........MM
+........MMM
+.......xxM.
+......YYx..
+.....YYO...
+....YYO....
+...YYO.....
+..YYO......
+.LYO.......
+.LL........
+K..........
+@pen | pen ballpoint blue
+.........BB
+........BBU
+.......BBU.
+......BBU..
+.....BBU...
+....BBU....
+...WWU.....
+..WW.......
+.xx........
+x..........
+@crayons | crayons box colours
+.R.Y.G.B.P.
+.R.Y.G.B.P.
+.R.Y.G.B.P.
+YYYYYYYYYYY
+YOOYYYYYOOY
+YYYGGGYYYYY
+YYYYYYYYYYY
+OOOOOOOOOOO
+@eraser | eraser rubber pink
+...MMMMMM.
+..MMMMMMz.
+.BBBBBBzz.
+BBBBBBBzz.
+BBWBBBBz..
+BBBBBBB...
+@ruler | ruler measure
+YYYYYYYYYYYYYY
+YKYKYKYKYKYKYY
+YKYYYKYYYKYYYY
+YYYYYYYYYYYYYY
+OOOOOOOOOOOOOO
+@scissors | scissors
+.w.....w..
+.ww...ww..
+..ww.ww...
+...wVw....
+...www....
+..RR.RR...
+.R.R.R.R..
+.R.R.R.R..
+..R...R...
+@glue-stick | glue stick
+..WWWW..
+..WWWW..
+.RRRRRR.
+.RRRRRR.
+.YYYYYY.
+.YWWWWY.
+.YYYYYY.
+.YYYYYY.
+.RRRRRR.
+@pencil-case | pencil case
+.PPPPPPPPPPPP.
+PPJPPPPPPPPPPP
+PxxxxxxxxxxxYP
+PPPPPPPPPPPPPP
+PPPPPPPPPPPPPP
+.QQQQQQQQQQQQ.
+@school-bag | school bag backpack rucksack red | a=red
+...VVVV...
+..V....V..
+.bbbbbbbb.
+bbcbbbbbbb
+bbbbbbbbbb
+baaaaaaaab
+bbYYYYYYbb
+bbYbbbbYbb
+bbbbbbbbbb
+.aaaaaaaa.
+@globe | globe world map earth
+...BBBB....
+..BGGBBB.x.
+.BGGGBBGB.x
+.BBGGBGGB.x
+.BBBGBBGB.x
+.BBBGBBBB.x
+..BBBBBB.x.
+...BBBBxx..
+....TT.....
+..TTTTTT...
+@blackboard | blackboard chalkboard school
+TTTTTTTTTTTTTT
+TNNNNNNNNNNNNT
+TNWNWNNNNWWNNT
+TNWWWNWNNNWNNT
+TNWNWNNNNWWNNT
+TNNNNNNNNNNNNT
+TNWWWWWNNNNNNT
+TNNNNNNNNNNNNT
+TTTTTTTTTWWTTT
+.T..........T.
+.T..........T.
+@school-desk | school desk with chair
+........TTTTTT
+........TLLLLL
+...T....T....T
+...T....T....T
+...TTTT.T....T
+...T..T.T....T
+...T..T.T....T
+@calculator | calculator
+VVVVVVVV
+VHHHHHHV
+VHHHHKHV
+VVVVVVVV
+VwVwVwVR
+VVVVVVVV
+VwVwVwVR
+VVVVVVVV
+VwVwVwVO
+VVVVVVVV
+@paperclip | paperclip
+..xxxx..
+.x....x.
+.x.xx.x.
+.x.x.xx.
+.x.x..x.
+.x.x..x.
+.x.x..x.
+.x.x..x.
+...x..x.
+...x..x.
+....xx..
+@stapler | stapler
+.RRRRRRRRRR.
+RRRRRRRRRRRR
+RIRRRRRRRRR.
+.xxxxxxxxx..
+.V..........
+VVVVVVVVVVVV
+@sticky-note | sticky note post-it yellow
+YYYYYYYYY
+YYYYYYYYY
+YKKKKKYYY
+YYYYYYYYY
+YKKKKYYYY
+YYYYYYYYY
+YYYYYYOOO
+YYYYYYOO.
+YYYYYYO..
+@folder | folder files documents
+.FFFFF......
+FFFFFFF.....
+OOOOOOOOOOOO
+OFFFFFFFFFFO
+OFFFFFFFFFFO
+OFFFFFFFFFFO
+OFFFFFFFFFFO
+OOOOOOOOOOOO
+@clipboard | clipboard checklist
+...xxxx...
+.TTxxxxTT.
+.TWWWWWWT.
+.TWGWxxWT.
+.TWWWWWWT.
+.TWGWxxWT.
+.TWWWWWWT.
+.TWRWxxWT.
+.TWWWWWWT.
+.TTTTTTTT.
+@newspaper | newspaper news
+WWWWWWWWWWWW
+WKKKKWKKKKKW
+WWWWWWWWWWWW
+WxxxxWxxWxxW
+WxxxxWWWWWWW
+WxxxxWxxWxxW
+WWWWWWxxWxxW
+WxxWxxWWWWWW
+wwwwwwwwwwww
+@certificate | certificate diploma award
+YYYYYYYYYYYY
+YWWWWWWWWWWY
+YWWKKKKKKWWY
+YWWWWWWWWWWY
+YWxxxxxxxxWY
+YWWWWWWWRRWY
+YWxxxxWRRRRY
+YWWWWWWWRRWY
+YYYYYYYR..RY
+@test-paper | test paper exam homework top marks
+WWWWWWWWW
+WWRRWWWWW
+WRWWRWRWW
+WRRRRRRRW
+WRWWRWRWW
+WWWWWWWWW
+WxxxxxxWW
+WWWWWWWWW
+WxxxxWWWW
+wwwwwwwww
+// screens and gadgets
+@laptop | laptop computer
+.VVVVVVVVVV.
+.VAAAAAAAAV.
+.VAWAAAAAAV.
+.VAAAAAAAAV.
+.VAAAAAAAAV.
+.VVVVVVVVVV.
+xxxxxxxxxxxx
+xwxwxwxwxwxx
+XXXXXXXXXXXX
+@desktop-computer | desktop computer pc monitor
+VVVVVVVVVVVV
+VAAAAAAAAAAV
+VAWAAAAAAAAV
+VAAAAGGAAAAV
+VAAAAAAAAAAV
+VVVVVVVVVVVV
+....xxxx....
+...xxxxxx...
+wwwwwwwwwwww
+wxwxwxwxwxww
+@keyboard | keyboard computer
+wwwwwwwwwwwwww
+wVwVwVwVwVwVww
+wwVwVwVwVwVwVw
+wVwVVVVVVwVwVw
+xxxxxxxxxxxxxx
+@computer-mouse | computer mouse
+....V...
+....V...
+..wwVww.
+.wwwVwww
+.wwxxxww
+.wwwwwww
+.wwwwwww
+.wwwwwww
+..wwwww.
+@smartphone | phone smartphone mobile
+VVVVVVV
+VAAAAAV
+VARABAV
+VAAAAAV
+VAGAYAV
+VAAAAAV
+VAPAOAV
+VAAAAAV
+VVVxVVV
+VVVVVVV
+@telephone | telephone old phone landline red
+.RRRRRRRRRR.
+RRRRRRRRRRRR
+RR.RRRRRR.RR
+...RRRRRR...
+..RRWWWWRR..
+.RRRWKKWRRR.
+.RRRWWWWRRR.
+.RRRRRRRRRR.
+.ZZZZZZZZZZ.
+@tablet | tablet computer touchscreen
+VVVVVVVVVVVV
+VAAAAAAAAAAV
+VARRAGGAYYAV
+VARRAGGAYYAV
+VAAAAAAAAAAV
+VABBAPPAOOAV
+VABBAPPAOOAV
+VAAAAAAAAAAV
+VVVVVVVVVVVV
+@camera | camera photo
+..VVV.......
+.VVVVVVVVRV.
+VVVVxxxxVVVV
+VwVxAAAAxVVV
+VVVxAWAAxVVV
+VVVxAAAAxVVV
+VVVVxxxxVVVV
+.VVVVVVVVVV.
+@video-camera | video camera film movie camera
+..VVV.VVV...
+.VxxxVxxxV..
+..VVV.VVV...
+VVVVVVVVVV.x
+VVRVVVVVVVxx
+VVVVVVVVVVxx
+VVVVVVVVVV.x
+...V..V.....
+..V....V....
+@tv | tv television flat screen
+VVVVVVVVVVVVVV
+VAAAAAAAAAAAAV
+VAAAEAAAAAAAAV
+VAAAAAAAGGAAAV
+VGGAAAAGGGGAAV
+VGGGGGGGGGGGGV
+VVVVVVVVVVVVVV
+......VV......
+....VVVVVV....
+@retro-tv | old tv retro television antenna
+..x......x..
+...x....x...
+....x..x....
+TTTTTTTTTTTT
+TVVVVVVVVTYT
+TVAAAAAAVTTT
+TVAWAAAAVTYT
+TVAAAAAAVTTT
+TVVVVVVVVTxT
+TTTTTTTTTTTT
+.C........C.
+@radio | radio music
+.........x..
+........x...
+.......x....
+RRRRRRRRRRRR
+RVVVVVRWWWWR
+RVxVxVRWRWWR
+RVVVVVRRRRRR
+RVxVxVRYRRYR
+ZZZZZZZZZZZZ
+@headphones | headphones music
+...VVVVVV...
+..VV....VV..
+.VV......VV.
+.V........V.
+.V........V.
+RRV......VRR
+RRV......VRR
+RRV......VRR
+RR........RR
+@speaker | speaker loudspeaker music
+VVVVVVVV
+VVVxxVVV
+VVVxxVVV
+VVVVVVVV
+VVxxxxVV
+VxxVVxxV
+VxVwwVxV
+VxxVVxxV
+VVxxxxVV
+VVVVVVVV
+@game-console | game console video games
+WWWWWWWWWWWW
+WVVVVVVVWBWW
+wwwwwwwwwwww
+.....V......
+.VVVVVVVVVV.
+VVKVVVVVRVBV
+VKKKVVVVVYVV
+VVKVV..VVVVV
+.VVV....VVV.
+@gamepad | gamepad game controller
+.xxxx....xxxx.
+xxxxxxxxxxxxxx
+xxVxxxxxxxxBxx
+xVVVxxwwxxRxYx
+xxVxxxxxxxxGxx
+xxxxx....xxxxx
+xxxx......xxxx
+.xx........xx.
+@handheld-game | handheld game console
+RRRRRRRRRRRRRR
+RVRAAAAAAAARYR
+VVVAAGAAAAARRB
+RVRAAAAAWAARYR
+RRRAAAAAAAARRR
+RRRRRRRRRRRRRR
+@printer | printer office
+...WWWWWW...
+...WxxxxW...
+...WWWWWW...
+wwwwwwwwwwww
+wwwwwwwwwGww
+wVVVVVVVVVVw
+wwWWWWWWWWww
+..WxxxxxxW..
+..WWWWWWWW..
+@usb-stick | usb stick memory flash drive
+..xxxx..
+..xVVx..
+..xxxx..
+.BBBBBB.
+.BBBBBB.
+.BAABBB.
+.BBBBBB.
+.BBBBBB.
+.BBBBBB.
+..UUUU..
+@battery | battery power
+...xx...
+.YYYYYY.
+.YYYYYY.
+.VVVVVV.
+.VVGVVV.
+.VGGGVV.
+.VVGVVV.
+.VVVVVV.
+.VVVVVV.
+.VVVVVV.
+@satellite-dish | satellite dish antenna
+.....wwww...
+...wwWWWWw..
+..wWWWWWWw..
+.wWWWWWWw..R
+.wWWWWWxxxx.
+.wWWWWWw....
+..wWWWw.....
+...www......
+....xx......
+....xx......
+..xxxxxx....
+@drone | drone quadcopter flying camera
+xxxxx....xxxxx
+..V........V..
+..VVVVVVVVVV..
+....VVRVVV....
+....VVVVVV....
+.....VAAV.....
+...V......V...
+@remote-control | remote control tv
+.VVVVV.
+.VRVVV.
+.VVVVV.
+.VwVwV.
+.VVVVV.
+.VwVwV.
+.VVVVV.
+.VwVwV.
+.VVVVV.
+.VVVVV.
+.VVVVV.
+@vr-headset | vr headset virtual reality goggles
+..VVVVVVVVVV..
+VVWWWWWWWWWWVV
+V.WWWWWWWWWW.V
+V.WBBBBBBBBW.V
+..WWWWWWWWWW..
+...WWW..WWW...
+@security-camera | security camera cctv
+x...........
+xx..........
+xxxWWWWWWWW.
+xx.WWWWWWWVV
+x..WWWWWWWVA
+...WWRWWWWVV
+....wwwwww..
+@robot-vacuum | robot vacuum cleaner
+...VVVVVV...
+.VVVVVVVVVV.
+VVVVxxxxVVVV
+VVVxGGxxxVVV
+VVVVxxxxVVVV
+.VVVVVVVVVV.
+..xx....xx..
+// time, post, money and cards
+@wall-clock | wall clock time round
+...BBBB...
+.BBWWWWBB.
+.BWWWKWWB.
+BWWWWKWWWB
+BWWWWKKKWB
+BWWWWWWWWB
+BWWWWWWWWB
+.BWWWWWWB.
+.BBWWWWBB.
+...BBBB...
+@alarm-clock | alarm clock ringing wake up
+.RR....RR.
+RRR.xx.RRR
+.RRRRRRRR.
+.RWWWKWWR.
+RWWWWKWWWR
+RWWWWKKWWR
+RWWWWWWWWR
+.RWWWWWWR.
+.RRRRRRRR.
+.V......V.
+@calendar | calendar date
+.x..x..x..
+RRRRRRRRRR
+RRRRRRRRRR
+WWWWWWWWWW
+WxWxWxWxWW
+WWWWWWWWWW
+WxWRWxWxWW
+WWWWWWWWWW
+WxWxWxWWWW
+wwwwwwwwww
+@postcard | postcard holiday
+WWWWWWWWWWWW
+WAAAAAAWWRRW
+WAAEAAAWWRRW
+WAAAAAAWWWWW
+WGGAAGGWxxxW
+WYYYYYYWxxxW
+WWWWWWWWWWWW
+@parcel | parcel package delivery box
+LLLLLRRLLLLL
+LLLLLRRLLLLL
+LLLLLRRLLLLL
+RRRRRRRRRRRR
+LLLLLRRLLLLL
+LWWWLRRLLLLL
+LWxWLRRLLLLL
+TTTTTZZTTTTT
+@stamp | postage stamp
+W.W.W.W.W
+.WWWWWWW.
+WWBBBBBWW
+.WBAEABW.
+WWBGGGBWW
+.WBBBBBW.
+WWWWWWWWW
+.W.W.W.W.
+@banknote | banknote money cash dollar bill
+GGGGGGGGGGGGGG
+GHHHHHHHHHHHHG
+GHGHHHNNHHHGHG
+GHHHHNHHNHHHHG
+GHGHHHNNHHHGHG
+GHHHHHHHHHHHHG
+GGGGGGGGGGGGGG
+@cash-stack | stack of cash money bundle
+.GGGGGGGGGGGG.
+GHHHHWWWHHHHHG
+GHHHHWWWHHHHHG
+GGGGGWWWGGGGGG
+NHHHHWWWHHHHHN
+GGGGGGGGGGGGGG
+NHHHHHHHHHHHHN
+NNNNNNNNNNNNNN
+@credit-card | credit card bank card
+BBBBBBBBBBBBB
+BBBBBBBBBBBBB
+VVVVVVVVVVVVV
+BBBBBBBBBBBBB
+BYYBBBBBBBBBB
+BYYBBwwwBwwwB
+BBBBBBBBBBBBB
+UUUUUUUUUUUUU
+@wallet | wallet money
+..GGGGGGGG..
+.HHHHHHHHHH.
+TTTTTTTTTTTT
+TLTTTTTTTTTT
+TTTTTTTTYYTT
+TTTTTTTTYYTT
+TTTTTTTTTTTT
+CCCCCCCCCCCC
+@piggy-bank | piggy bank savings
+......YY.....
+.zz..VVVV....
+.zzzzzzzzzz..
+zzzzzzzzzKzz.
+Mzzzzzzzzzzzz
+.zzzzzzzzzzMM
+.zzzzzzzzzzz.
+..zzzzzzzzz..
+..MM....MM...
+@safe | safe vault strongbox
+xxxxxxxxxxxx
+xXXXXXXXXXXx
+xXxxxxxxxxXx
+xXxxxwwxxxXx
+xXxxwVVwxYXx
+xXxxwVVwxYXx
+xXxxxwwxxxXx
+xXxxxxxxxxXx
+xXXXXXXXXXXx
+xxxxxxxxxxxx
+V..........V
+@cash-register | cash register till shop
+.....VVVVVV.
+.....VGGGGV.
+.....VVVVVV.
+xxxxxxxxxxxx
+xwVwVwVxxxxx
+xVwVwVwxRRxx
+xwVwVwVxxxxx
+XXXXXXXXXXXX
+XXXXXYYXXXXX
+XXXXXXXXXXXX
+@price-tag | price tag label sale
+...OOOOOOOO
+..OOOOOOOOO
+.OOOOOWWOWO
+OOVOOOOOOOO
+OOOOOOWOWWO
+.OOOOOOOOOO
+..OOOOOOOOO
+...OOOOOOOO
+@playing-card | playing card ace of hearts
+WWWWWWWWW
+WRWWWWWWW
+WWWWWWWWW
+WWRRWRRWW
+WWRRRRRWW
+WWWRRRWWW
+WWWWRWWWW
+WWWWWWWWW
+WWWWWWWRW
+WWWWWWWWW
+@id-card | id card badge pass
+....VVV.....
+WWWWWWWWWWWW
+WAAAAWWWWWWW
+WACCAWxxxxxW
+WASSAWWWWWWW
+WABBAWxxxxWW
+WAAAAWWWWWWW
+BBBBBBBBBBBB
+@ticket | ticket admit one
+OOOOOOOOOOOOOO
+OYYYYYYYYYWYYO
+.YKKKKKKYYWYY.
+.YYYYYYYYYWYY.
+OYKKKKYYYYWYYO
+OOOOOOOOOOOOOO
+@passport | passport travel document
+UUUUUUUU
+UBBBBBBB
+UBBYYBBB
+UBYBBYBB
+UBYBBYBB
+UBBYYBBB
+UBBBBBBB
+UBYYYYBB
+UBBBBBBB
+UUUUUUUU
+`);
+
 // S() reads the current category when a sprite is drawn, not when it is declared, so the
 // older sprites were all drawn with the last category of the original pack current. Keep it so.
 cat = CATS.find((c) => c.id === 'symbols');
 
 // ───────────────────────── write everything ─────────────────────────
-const EXPECT = 965;   // 500 original sprites + 362 level tiles + 103 level props
+const EXPECT = 1965;   // 500 original sprites + 362 level tiles + 103 level props + 1000 everyday and modern sprites
 function main() {
   const all = CATS.flatMap((c) => c.items);
   const seen = new Set();
@@ -5832,6 +11257,6 @@ function main() {
   const index = { categories: CATS.map((c) => ({ id: c.id, label: c.label, group: c.group, items: c.items.map(({ slug, name, kind, solid }) => ({ slug, name, ...(c.group === 'tile' ? { kind } : {}), ...(solid ? { solid: true } : {}) })) })) };
   fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index, null, 1) + '\n');
   console.log(`${all.length} sprites in ${CATS.length} categories → ${path.relative(process.cwd(), OUT)}`);
-  console.log(CATS.map((c) => `${c.id} ${c.items.length}`).join(', ') + ` | templates ${Object.keys(TPL).length}`);
+  console.log(CATS.map((c) => `${c.id} ${c.items.length}`).join(', ') + ` | templates ${Object.keys(TPL).length} (${NEW_TPL} new, plus ${NEW_FN.size} new drawing routines)`);
 }
 main();

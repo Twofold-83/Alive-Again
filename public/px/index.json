@@ -4510,6 +4510,2686 @@
      "solid": true
     }
    ]
+  },
+  {
+   "id": "people",
+   "label": "Modern people",
+   "group": "char",
+   "items": [
+    {
+     "slug": "man",
+     "name": "man adult blue shirt"
+    },
+    {
+     "slug": "woman",
+     "name": "woman adult red top long hair skirt"
+    },
+    {
+     "slug": "man-beard",
+     "name": "man with beard green jumper"
+    },
+    {
+     "slug": "woman-bun",
+     "name": "woman hair bun yellow dress"
+    },
+    {
+     "slug": "man-afro",
+     "name": "man afro hair orange hoodie"
+    },
+    {
+     "slug": "woman-curly",
+     "name": "woman curly hair purple top"
+    },
+    {
+     "slug": "woman-hijab",
+     "name": "woman hijab headscarf"
+    },
+    {
+     "slug": "man-turban",
+     "name": "man turban beard"
+    },
+    {
+     "slug": "man-bald-glasses",
+     "name": "bald man glasses mustache"
+    },
+    {
+     "slug": "woman-bob-glasses",
+     "name": "woman bob haircut glasses"
+    },
+    {
+     "slug": "mum",
+     "name": "mum mother woman ponytail"
+    },
+    {
+     "slug": "dad",
+     "name": "dad father man mustache"
+    },
+    {
+     "slug": "woman-sunhat",
+     "name": "woman sun hat summer dress"
+    },
+    {
+     "slug": "man-beanie",
+     "name": "man beanie hat scarf winter"
+    },
+    {
+     "slug": "woman-winter",
+     "name": "woman winter coat beanie scarf"
+    },
+    {
+     "slug": "teen-boy",
+     "name": "teen boy teenager hoodie headphones"
+    },
+    {
+     "slug": "teen-girl",
+     "name": "teen girl teenager phone pigtails"
+    },
+    {
+     "slug": "punk",
+     "name": "punk rocker mohawk"
+    },
+    {
+     "slug": "skater",
+     "name": "skater helmet shorts"
+    },
+    {
+     "slug": "kid-boy-cap",
+     "name": "boy kid child with cap"
+    },
+    {
+     "slug": "kid-girl-pigtails",
+     "name": "girl kid child pigtails"
+    },
+    {
+     "slug": "kid-boy-curly",
+     "name": "boy kid child curly hair"
+    },
+    {
+     "slug": "kid-girl-bob",
+     "name": "girl kid child bob hair"
+    },
+    {
+     "slug": "schoolboy",
+     "name": "schoolboy pupil uniform tie"
+    },
+    {
+     "slug": "schoolgirl",
+     "name": "schoolgirl pupil uniform"
+    },
+    {
+     "slug": "kid-balloon",
+     "name": "kid child holding balloon"
+    },
+    {
+     "slug": "birthday-kid",
+     "name": "birthday kid party hat"
+    },
+    {
+     "slug": "kid-football",
+     "name": "kid playing football soccer"
+    },
+    {
+     "slug": "baby",
+     "name": "baby in diaper"
+    },
+    {
+     "slug": "baby-dark",
+     "name": "baby dark skin curly"
+    },
+    {
+     "slug": "grandpa",
+     "name": "grandpa old man cane glasses"
+    },
+    {
+     "slug": "grandma",
+     "name": "grandma old woman glasses"
+    },
+    {
+     "slug": "old-man-cap",
+     "name": "old man flat cap grey beard"
+    },
+    {
+     "slug": "old-woman-cane",
+     "name": "old woman grey curly hair cane"
+    },
+    {
+     "slug": "doctor",
+     "name": "doctor man white coat stethoscope"
+    },
+    {
+     "slug": "doctor-woman",
+     "name": "doctor woman with stethoscope"
+    },
+    {
+     "slug": "nurse",
+     "name": "nurse woman first aid"
+    },
+    {
+     "slug": "nurse-man",
+     "name": "nurse man scrubs clipboard"
+    },
+    {
+     "slug": "surgeon",
+     "name": "surgeon mask scrubs"
+    },
+    {
+     "slug": "paramedic",
+     "name": "paramedic ambulance medic"
+    },
+    {
+     "slug": "police-officer",
+     "name": "police officer man cop"
+    },
+    {
+     "slug": "police-woman",
+     "name": "police officer woman cop"
+    },
+    {
+     "slug": "firefighter",
+     "name": "firefighter with axe"
+    },
+    {
+     "slug": "firefighter-woman",
+     "name": "firefighter woman yellow helmet"
+    },
+    {
+     "slug": "cook",
+     "name": "cook chef white hat mustache"
+    },
+    {
+     "slug": "baker",
+     "name": "baker with bread baguette"
+    },
+    {
+     "slug": "waiter",
+     "name": "waiter with tray bow tie"
+    },
+    {
+     "slug": "waitress",
+     "name": "waitress apron tray"
+    },
+    {
+     "slug": "barista",
+     "name": "barista coffee green apron"
+    },
+    {
+     "slug": "shop-assistant",
+     "name": "shop assistant cashier red apron"
+    },
+    {
+     "slug": "hairdresser",
+     "name": "hairdresser barber scissors"
+    },
+    {
+     "slug": "cleaner",
+     "name": "cleaner janitor broom"
+    },
+    {
+     "slug": "teacher",
+     "name": "teacher woman with book glasses"
+    },
+    {
+     "slug": "teacher-man",
+     "name": "teacher man tie book"
+    },
+    {
+     "slug": "professor",
+     "name": "professor old wild white hair bow tie"
+    },
+    {
+     "slug": "student",
+     "name": "student with backpack and book"
+    },
+    {
+     "slug": "student-girl",
+     "name": "student girl backpack"
+    },
+    {
+     "slug": "graduate",
+     "name": "graduate cap gown graduation"
+    },
+    {
+     "slug": "office-worker",
+     "name": "office worker man tie briefcase"
+    },
+    {
+     "slug": "businesswoman",
+     "name": "businesswoman suit briefcase"
+    },
+    {
+     "slug": "boss",
+     "name": "boss manager black suit gold tie"
+    },
+    {
+     "slug": "programmer",
+     "name": "programmer coder headphones glasses hoodie"
+    },
+    {
+     "slug": "librarian",
+     "name": "librarian woman books glasses"
+    },
+    {
+     "slug": "reporter",
+     "name": "news reporter microphone"
+    },
+    {
+     "slug": "builder",
+     "name": "builder construction worker hard hat"
+    },
+    {
+     "slug": "builder-woman",
+     "name": "builder woman hard hat vest"
+    },
+    {
+     "slug": "engineer",
+     "name": "engineer hard hat clipboard"
+    },
+    {
+     "slug": "mechanic",
+     "name": "mechanic wrench overalls"
+    },
+    {
+     "slug": "plumber",
+     "name": "plumber red cap mustache overalls"
+    },
+    {
+     "slug": "house-painter",
+     "name": "house painter decorator brush"
+    },
+    {
+     "slug": "farmer-overalls",
+     "name": "farmer overalls straw hat pitchfork"
+    },
+    {
+     "slug": "gardener",
+     "name": "gardener woman sun hat flower"
+    },
+    {
+     "slug": "pilot",
+     "name": "pilot airline captain"
+    },
+    {
+     "slug": "flight-attendant",
+     "name": "flight attendant air hostess scarf"
+    },
+    {
+     "slug": "astronaut",
+     "name": "astronaut white space suit"
+    },
+    {
+     "slug": "astronaut-orange",
+     "name": "astronaut orange suit"
+    },
+    {
+     "slug": "ship-captain",
+     "name": "ship captain white beard cap"
+    },
+    {
+     "slug": "bus-driver",
+     "name": "bus driver cap tie"
+    },
+    {
+     "slug": "train-conductor",
+     "name": "train conductor ticket"
+    },
+    {
+     "slug": "mail-carrier",
+     "name": "mail carrier postman letter"
+    },
+    {
+     "slug": "delivery-rider",
+     "name": "delivery rider courier helmet box"
+    },
+    {
+     "slug": "courier",
+     "name": "courier delivery parcel"
+    },
+    {
+     "slug": "crossing-guard",
+     "name": "crossing guard lollipop stop sign"
+    },
+    {
+     "slug": "tourist",
+     "name": "tourist camera hawaiian shirt"
+    },
+    {
+     "slug": "hiker",
+     "name": "hiker backpack walking stick"
+    },
+    {
+     "slug": "scientist",
+     "name": "scientist lab coat flask glasses"
+    },
+    {
+     "slug": "scientist-woman",
+     "name": "scientist woman lab coat"
+    },
+    {
+     "slug": "artist",
+     "name": "artist painter beret palette"
+    },
+    {
+     "slug": "photographer",
+     "name": "photographer with camera"
+    },
+    {
+     "slug": "guitarist",
+     "name": "musician guitar player"
+    },
+    {
+     "slug": "singer",
+     "name": "singer with microphone"
+    },
+    {
+     "slug": "dj",
+     "name": "dj headphones sunglasses"
+    },
+    {
+     "slug": "ballerina",
+     "name": "ballerina dancer tutu"
+    },
+    {
+     "slug": "runner",
+     "name": "athlete runner sprinter number"
+    },
+    {
+     "slug": "footballer",
+     "name": "footballer soccer player ball"
+    },
+    {
+     "slug": "basketball-player",
+     "name": "basketball player"
+    },
+    {
+     "slug": "tennis-player",
+     "name": "tennis player racket"
+    },
+    {
+     "slug": "swimmer",
+     "name": "swimmer swim cap"
+    },
+    {
+     "slug": "boxer",
+     "name": "boxer red gloves"
+    },
+    {
+     "slug": "cyclist",
+     "name": "cyclist bike helmet sunglasses"
+    },
+    {
+     "slug": "referee",
+     "name": "referee striped shirt yellow card"
+    },
+    {
+     "slug": "coach",
+     "name": "coach trainer cap clipboard"
+    },
+    {
+     "slug": "lifeguard",
+     "name": "lifeguard beach sunglasses"
+    },
+    {
+     "slug": "detective",
+     "name": "detective trench coat hat magnifier"
+    },
+    {
+     "slug": "judge",
+     "name": "judge wig gavel robe"
+    },
+    {
+     "slug": "security-guard",
+     "name": "security guard sunglasses"
+    },
+    {
+     "slug": "soldier",
+     "name": "soldier army green helmet"
+    },
+    {
+     "slug": "burglar",
+     "name": "burglar robber striped shirt mask sack"
+    },
+    {
+     "slug": "bride",
+     "name": "bride wedding dress veil bouquet"
+    },
+    {
+     "slug": "groom",
+     "name": "groom wedding suit bow tie"
+    },
+    {
+     "slug": "clown",
+     "name": "clown red nose wig"
+    },
+    {
+     "slug": "magician",
+     "name": "magician top hat wand"
+    },
+    {
+     "slug": "superhero",
+     "name": "superhero cape mask"
+    },
+    {
+     "slug": "superheroine",
+     "name": "superheroine cape mask"
+    },
+    {
+     "slug": "supervillain",
+     "name": "villain supervillain dark cape"
+    },
+    {
+     "slug": "android",
+     "name": "android robot helper humanoid"
+    },
+    {
+     "slug": "robot-helper",
+     "name": "robot helper friendly white"
+    },
+    {
+     "slug": "robot-butler",
+     "name": "robot butler waiter with tray"
+    }
+   ]
+  },
+  {
+   "id": "cast",
+   "label": "Adventure cast",
+   "group": "char",
+   "items": [
+    {
+     "slug": "pirate-captain",
+     "name": "pirate captain hook hat beard"
+    },
+    {
+     "slug": "pirate-girl",
+     "name": "pirate girl bandana sword"
+    },
+    {
+     "slug": "pirate-first-mate",
+     "name": "pirate with parrot striped shirt"
+    },
+    {
+     "slug": "cabin-boy",
+     "name": "cabin boy kid pirate"
+    },
+    {
+     "slug": "cowboy",
+     "name": "cowboy hat lasso"
+    },
+    {
+     "slug": "cowgirl",
+     "name": "cowgirl hat ponytail"
+    },
+    {
+     "slug": "sheriff",
+     "name": "sheriff star badge mustache"
+    },
+    {
+     "slug": "outlaw",
+     "name": "outlaw bandit wild west masked"
+    },
+    {
+     "slug": "prospector",
+     "name": "prospector gold miner beard pickaxe"
+    },
+    {
+     "slug": "space-captain",
+     "name": "space captain starship uniform"
+    },
+    {
+     "slug": "space-trooper",
+     "name": "space trooper soldier white armour blaster"
+    },
+    {
+     "slug": "space-girl",
+     "name": "space girl pink space suit astronaut"
+    },
+    {
+     "slug": "cyborg",
+     "name": "cyborg half robot red eye"
+    },
+    {
+     "slug": "spy",
+     "name": "spy trench coat hat sunglasses"
+    },
+    {
+     "slug": "secret-agent",
+     "name": "secret agent black suit sunglasses"
+    },
+    {
+     "slug": "spy-woman",
+     "name": "spy woman black suit sunglasses"
+    },
+    {
+     "slug": "hacker",
+     "name": "hacker hood laptop"
+    },
+    {
+     "slug": "ninja-red",
+     "name": "red ninja sword"
+    },
+    {
+     "slug": "ninja-blue",
+     "name": "blue ninja"
+    },
+    {
+     "slug": "sensei",
+     "name": "sensei old karate master white beard"
+    },
+    {
+     "slug": "karate-kid",
+     "name": "karate kid white suit black belt"
+    },
+    {
+     "slug": "ringmaster",
+     "name": "circus ringmaster top hat red coat"
+    },
+    {
+     "slug": "acrobat",
+     "name": "circus acrobat hoop"
+    },
+    {
+     "slug": "strongman",
+     "name": "circus strongman dumbbell mustache"
+    },
+    {
+     "slug": "juggler",
+     "name": "juggler juggling balls"
+    },
+    {
+     "slug": "lion-tamer",
+     "name": "lion tamer whip"
+    },
+    {
+     "slug": "scout",
+     "name": "scout kid hat neckerchief camping"
+    },
+    {
+     "slug": "park-ranger",
+     "name": "park ranger hat green uniform"
+    },
+    {
+     "slug": "safari-explorer",
+     "name": "safari explorer pith helmet"
+    },
+    {
+     "slug": "scuba-diver",
+     "name": "scuba diver mask snorkel tank"
+    },
+    {
+     "slug": "mountaineer",
+     "name": "mountaineer climber pickaxe backpack"
+    },
+    {
+     "slug": "santa",
+     "name": "santa claus father christmas sack"
+    },
+    {
+     "slug": "mrs-claus",
+     "name": "mrs claus christmas"
+    },
+    {
+     "slug": "christmas-elf",
+     "name": "christmas elf santa helper"
+    },
+    {
+     "slug": "easter-bunny",
+     "name": "easter bunny rabbit costume basket eggs"
+    },
+    {
+     "slug": "ghost-costume-kid",
+     "name": "kid in ghost sheet costume halloween"
+    },
+    {
+     "slug": "witch-kid",
+     "name": "kid witch costume halloween trick or treat"
+    },
+    {
+     "slug": "vampire-kid",
+     "name": "kid vampire costume halloween"
+    },
+    {
+     "slug": "pumpkin-kid",
+     "name": "kid pumpkin head costume halloween"
+    },
+    {
+     "slug": "leprechaun",
+     "name": "leprechaun green hat orange beard"
+    },
+    {
+     "slug": "mermaid",
+     "name": "mermaid with green tail"
+    },
+    {
+     "slug": "genie",
+     "name": "genie from lamp blue"
+    },
+    {
+     "slug": "fairy",
+     "name": "fairy wings wand"
+    },
+    {
+     "slug": "pharaoh",
+     "name": "pharaoh egypt king"
+    },
+    {
+     "slug": "caveman",
+     "name": "caveman club stone age"
+    },
+    {
+     "slug": "werewolf",
+     "name": "werewolf wolf man"
+    },
+    {
+     "slug": "frankenstein",
+     "name": "frankenstein monster green bolts"
+    }
+   ]
+  },
+  {
+   "id": "creatures",
+   "label": "More creatures",
+   "group": "char",
+   "items": [
+    {
+     "slug": "kitten",
+     "name": "kitten small cat sitting"
+    },
+    {
+     "slug": "cat-sleeping",
+     "name": "cat sleeping curled up"
+    },
+    {
+     "slug": "puppy",
+     "name": "puppy small dog sitting"
+    },
+    {
+     "slug": "dachshund",
+     "name": "dachshund sausage dog"
+    },
+    {
+     "slug": "bulldog",
+     "name": "bulldog pug dog"
+    },
+    {
+     "slug": "poodle",
+     "name": "poodle fluffy dog"
+    },
+    {
+     "slug": "hamster",
+     "name": "hamster pet"
+    },
+    {
+     "slug": "guinea-pig",
+     "name": "guinea pig pet brown"
+    },
+    {
+     "slug": "goldfish-bowl",
+     "name": "goldfish in bowl pet fish"
+    },
+    {
+     "slug": "parrot",
+     "name": "parrot red macaw"
+    },
+    {
+     "slug": "parrot-blue",
+     "name": "blue and gold parrot macaw"
+    },
+    {
+     "slug": "hedgehog",
+     "name": "hedgehog"
+    },
+    {
+     "slug": "rooster",
+     "name": "rooster cockerel"
+    },
+    {
+     "slug": "turkey",
+     "name": "turkey bird thanksgiving"
+    },
+    {
+     "slug": "donkey",
+     "name": "donkey grey long ears"
+    },
+    {
+     "slug": "llama",
+     "name": "llama alpaca"
+    },
+    {
+     "slug": "bull",
+     "name": "bull brown horns nose ring"
+    },
+    {
+     "slug": "goose",
+     "name": "goose grey farm bird"
+    },
+    {
+     "slug": "swan",
+     "name": "swan white bird"
+    },
+    {
+     "slug": "lion",
+     "name": "lion with mane"
+    },
+    {
+     "slug": "tiger",
+     "name": "tiger orange stripes"
+    },
+    {
+     "slug": "leopard",
+     "name": "leopard cheetah spots"
+    },
+    {
+     "slug": "panther",
+     "name": "black panther big cat"
+    },
+    {
+     "slug": "lioness",
+     "name": "lioness female lion"
+    },
+    {
+     "slug": "elephant",
+     "name": "elephant grey trunk"
+    },
+    {
+     "slug": "giraffe",
+     "name": "giraffe tall long neck"
+    },
+    {
+     "slug": "zebra",
+     "name": "zebra striped horse"
+    },
+    {
+     "slug": "hippo",
+     "name": "hippo hippopotamus"
+    },
+    {
+     "slug": "rhino",
+     "name": "rhino rhinoceros horn"
+    },
+    {
+     "slug": "gorilla",
+     "name": "gorilla ape"
+    },
+    {
+     "slug": "panda",
+     "name": "panda bear black and white"
+    },
+    {
+     "slug": "koala",
+     "name": "koala"
+    },
+    {
+     "slug": "kangaroo",
+     "name": "kangaroo"
+    },
+    {
+     "slug": "camel",
+     "name": "camel desert hump"
+    },
+    {
+     "slug": "crocodile",
+     "name": "crocodile alligator"
+    },
+    {
+     "slug": "flamingo",
+     "name": "flamingo pink bird"
+    },
+    {
+     "slug": "ostrich",
+     "name": "ostrich big bird"
+    },
+    {
+     "slug": "peacock",
+     "name": "peacock tail feathers"
+    },
+    {
+     "slug": "sloth",
+     "name": "sloth hanging on branch"
+    },
+    {
+     "slug": "meerkat",
+     "name": "meerkat standing"
+    },
+    {
+     "slug": "raccoon",
+     "name": "raccoon masked"
+    },
+    {
+     "slug": "skunk",
+     "name": "skunk black white stripe"
+    },
+    {
+     "slug": "beaver",
+     "name": "beaver flat tail"
+    },
+    {
+     "slug": "moose",
+     "name": "moose elk antlers"
+    },
+    {
+     "slug": "badger",
+     "name": "badger"
+    },
+    {
+     "slug": "mole",
+     "name": "mole digging out of dirt"
+    },
+    {
+     "slug": "woodpecker",
+     "name": "woodpecker bird on trunk"
+    },
+    {
+     "slug": "eagle",
+     "name": "eagle flying bird of prey"
+    },
+    {
+     "slug": "pigeon",
+     "name": "pigeon city bird"
+    },
+    {
+     "slug": "seagull",
+     "name": "seagull sea bird"
+    },
+    {
+     "slug": "toucan",
+     "name": "toucan tropical bird big beak"
+    },
+    {
+     "slug": "hummingbird",
+     "name": "hummingbird tiny bird"
+    },
+    {
+     "slug": "whale",
+     "name": "blue whale spout"
+    },
+    {
+     "slug": "dolphin",
+     "name": "dolphin jumping"
+    },
+    {
+     "slug": "orca",
+     "name": "orca killer whale black white"
+    },
+    {
+     "slug": "seal",
+     "name": "seal sea lion"
+    },
+    {
+     "slug": "walrus",
+     "name": "walrus tusks"
+    },
+    {
+     "slug": "seahorse",
+     "name": "seahorse"
+    },
+    {
+     "slug": "lobster",
+     "name": "lobster red claws"
+    },
+    {
+     "slug": "shrimp",
+     "name": "shrimp prawn pink"
+    },
+    {
+     "slug": "squid",
+     "name": "squid"
+    },
+    {
+     "slug": "stingray",
+     "name": "stingray manta ray"
+    },
+    {
+     "slug": "pufferfish",
+     "name": "pufferfish blowfish spiky"
+    },
+    {
+     "slug": "clownfish",
+     "name": "clownfish orange white stripes"
+    },
+    {
+     "slug": "angelfish",
+     "name": "angelfish tropical fish yellow stripes"
+    },
+    {
+     "slug": "eel",
+     "name": "eel sea snake"
+    },
+    {
+     "slug": "clam",
+     "name": "clam shell with pearl"
+    },
+    {
+     "slug": "swordfish",
+     "name": "swordfish"
+    },
+    {
+     "slug": "narwhal",
+     "name": "narwhal horned whale"
+    },
+    {
+     "slug": "ant",
+     "name": "ant insect"
+    },
+    {
+     "slug": "caterpillar",
+     "name": "caterpillar green bug"
+    },
+    {
+     "slug": "dragonfly",
+     "name": "dragonfly"
+    },
+    {
+     "slug": "grasshopper",
+     "name": "grasshopper cricket green"
+    },
+    {
+     "slug": "beetle",
+     "name": "beetle bug"
+    },
+    {
+     "slug": "fly",
+     "name": "fly housefly"
+    },
+    {
+     "slug": "mosquito",
+     "name": "mosquito"
+    },
+    {
+     "slug": "firefly",
+     "name": "firefly glowing bug"
+    },
+    {
+     "slug": "slug",
+     "name": "slug slimy"
+    },
+    {
+     "slug": "lizard",
+     "name": "lizard green"
+    },
+    {
+     "slug": "gecko",
+     "name": "gecko orange lizard"
+    },
+    {
+     "slug": "chameleon",
+     "name": "chameleon on branch"
+    },
+    {
+     "slug": "cobra",
+     "name": "cobra snake hooded"
+    },
+    {
+     "slug": "t-rex",
+     "name": "t-rex tyrannosaurus dinosaur"
+    },
+    {
+     "slug": "triceratops",
+     "name": "triceratops dinosaur three horns"
+    },
+    {
+     "slug": "stegosaurus",
+     "name": "stegosaurus dinosaur back plates"
+    },
+    {
+     "slug": "brontosaurus",
+     "name": "brontosaurus long neck dinosaur diplodocus"
+    },
+    {
+     "slug": "pterodactyl",
+     "name": "pterodactyl flying dinosaur"
+    },
+    {
+     "slug": "raptor",
+     "name": "raptor velociraptor dinosaur"
+    },
+    {
+     "slug": "dino-egg",
+     "name": "dinosaur egg spotted"
+    },
+    {
+     "slug": "baby-dino",
+     "name": "baby dinosaur hatching from egg"
+    },
+    {
+     "slug": "alien-green",
+     "name": "alien little green man antenna"
+    },
+    {
+     "slug": "alien-grey",
+     "name": "grey alien big eyes"
+    },
+    {
+     "slug": "alien-blob",
+     "name": "alien blob purple three eyes"
+    },
+    {
+     "slug": "alien-one-eye",
+     "name": "alien one eye teal cyclops"
+    },
+    {
+     "slug": "robot-dog",
+     "name": "robot dog pet"
+    },
+    {
+     "slug": "robot-ball",
+     "name": "round robot ball droid"
+    },
+    {
+     "slug": "robot-tank",
+     "name": "robot on tracks treads claws"
+    },
+    {
+     "slug": "unicorn",
+     "name": "unicorn white horse horn pink mane"
+    },
+    {
+     "slug": "pegasus",
+     "name": "pegasus winged horse"
+    },
+    {
+     "slug": "phoenix",
+     "name": "phoenix fire bird"
+    },
+    {
+     "slug": "sea-serpent",
+     "name": "sea serpent loch ness monster"
+    },
+    {
+     "slug": "swamp-monster",
+     "name": "swamp monster creature green"
+    },
+    {
+     "slug": "furry-monster",
+     "name": "cute furry monster purple one eye horns"
+    },
+    {
+     "slug": "baby-dragon",
+     "name": "baby dragon cute green"
+    }
+   ]
+  },
+  {
+   "id": "home",
+   "label": "Home & garden",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "sofa",
+     "name": "sofa couch red"
+    },
+    {
+     "slug": "sofa-blue",
+     "name": "blue sofa couch"
+    },
+    {
+     "slug": "armchair",
+     "name": "armchair comfy chair"
+    },
+    {
+     "slug": "coffee-table",
+     "name": "coffee table low"
+    },
+    {
+     "slug": "floor-lamp",
+     "name": "floor lamp standing lamp"
+    },
+    {
+     "slug": "table-lamp",
+     "name": "table lamp bedside lamp"
+    },
+    {
+     "slug": "rug",
+     "name": "rug carpet mat"
+    },
+    {
+     "slug": "fireplace",
+     "name": "fireplace hearth fire"
+    },
+    {
+     "slug": "photo-frame",
+     "name": "photo frame family portrait picture"
+    },
+    {
+     "slug": "houseplant",
+     "name": "houseplant potted plant"
+    },
+    {
+     "slug": "vase-flowers",
+     "name": "vase of flowers bouquet"
+    },
+    {
+     "slug": "window-curtains",
+     "name": "window with curtains"
+    },
+    {
+     "slug": "cushion",
+     "name": "cushion pillow purple"
+    },
+    {
+     "slug": "fan",
+     "name": "electric fan"
+    },
+    {
+     "slug": "double-bed",
+     "name": "double bed blue blanket"
+    },
+    {
+     "slug": "bunk-bed",
+     "name": "bunk bed"
+    },
+    {
+     "slug": "crib",
+     "name": "baby crib cot"
+    },
+    {
+     "slug": "wardrobe",
+     "name": "wardrobe closet"
+    },
+    {
+     "slug": "dresser",
+     "name": "dresser chest of drawers"
+    },
+    {
+     "slug": "pillow",
+     "name": "pillow white"
+    },
+    {
+     "slug": "laundry-basket",
+     "name": "laundry basket clothes"
+    },
+    {
+     "slug": "coat-rack",
+     "name": "coat rack stand"
+    },
+    {
+     "slug": "fridge",
+     "name": "fridge refrigerator"
+    },
+    {
+     "slug": "cooker",
+     "name": "cooker stove oven"
+    },
+    {
+     "slug": "microwave",
+     "name": "microwave oven"
+    },
+    {
+     "slug": "toaster",
+     "name": "toaster with toast"
+    },
+    {
+     "slug": "kettle",
+     "name": "kettle red"
+    },
+    {
+     "slug": "blender",
+     "name": "blender mixer smoothie"
+    },
+    {
+     "slug": "kitchen-sink",
+     "name": "kitchen sink tap"
+    },
+    {
+     "slug": "washing-machine",
+     "name": "washing machine laundry"
+    },
+    {
+     "slug": "frying-pan",
+     "name": "frying pan with fried egg"
+    },
+    {
+     "slug": "cooking-pot",
+     "name": "cooking pot saucepan steam"
+    },
+    {
+     "slug": "kitchen-knife",
+     "name": "kitchen knife"
+    },
+    {
+     "slug": "fork",
+     "name": "fork cutlery"
+    },
+    {
+     "slug": "spoon",
+     "name": "spoon cutlery"
+    },
+    {
+     "slug": "plate",
+     "name": "plate dish empty"
+    },
+    {
+     "slug": "bowl",
+     "name": "bowl blue empty"
+    },
+    {
+     "slug": "glass",
+     "name": "glass of water"
+    },
+    {
+     "slug": "teacup",
+     "name": "teacup cup of tea saucer"
+    },
+    {
+     "slug": "teapot",
+     "name": "teapot"
+    },
+    {
+     "slug": "chopping-board",
+     "name": "chopping board cutting board tomato"
+    },
+    {
+     "slug": "rolling-pin",
+     "name": "rolling pin baking"
+    },
+    {
+     "slug": "whisk",
+     "name": "whisk baking"
+    },
+    {
+     "slug": "spatula",
+     "name": "spatula kitchen turner"
+    },
+    {
+     "slug": "oven-glove",
+     "name": "oven glove mitt"
+    },
+    {
+     "slug": "bin",
+     "name": "trash can rubbish bin"
+    },
+    {
+     "slug": "jar",
+     "name": "jar of jam"
+    },
+    {
+     "slug": "salt-pepper",
+     "name": "salt and pepper shakers"
+    },
+    {
+     "slug": "dining-table",
+     "name": "dining table with tablecloth"
+    },
+    {
+     "slug": "bathtub",
+     "name": "bathtub bath bubbles"
+    },
+    {
+     "slug": "shower",
+     "name": "shower"
+    },
+    {
+     "slug": "toilet",
+     "name": "toilet loo"
+    },
+    {
+     "slug": "bathroom-sink",
+     "name": "bathroom sink wash basin"
+    },
+    {
+     "slug": "toilet-paper",
+     "name": "toilet paper roll"
+    },
+    {
+     "slug": "toothbrush",
+     "name": "toothbrush"
+    },
+    {
+     "slug": "toothpaste",
+     "name": "toothpaste tube"
+    },
+    {
+     "slug": "soap",
+     "name": "soap bar bubbles"
+    },
+    {
+     "slug": "towel",
+     "name": "towel folded"
+    },
+    {
+     "slug": "rubber-duck",
+     "name": "rubber duck bath toy"
+    },
+    {
+     "slug": "shampoo",
+     "name": "shampoo bottle"
+    },
+    {
+     "slug": "hairdryer",
+     "name": "hair dryer"
+    },
+    {
+     "slug": "comb",
+     "name": "comb hair"
+    },
+    {
+     "slug": "lawnmower",
+     "name": "lawn mower garden"
+    },
+    {
+     "slug": "watering-can",
+     "name": "watering can garden"
+    },
+    {
+     "slug": "garden-hose",
+     "name": "garden hose coiled"
+    },
+    {
+     "slug": "flower-pot",
+     "name": "flower pot terracotta empty"
+    },
+    {
+     "slug": "wheelbarrow",
+     "name": "wheelbarrow garden"
+    },
+    {
+     "slug": "garden-gnome",
+     "name": "garden gnome red hat"
+    },
+    {
+     "slug": "bird-house",
+     "name": "bird house nest box"
+    },
+    {
+     "slug": "barbecue",
+     "name": "barbecue grill bbq"
+    },
+    {
+     "slug": "deck-chair",
+     "name": "deck chair beach chair striped"
+    },
+    {
+     "slug": "parasol",
+     "name": "beach umbrella parasol"
+    },
+    {
+     "slug": "paddling-pool",
+     "name": "paddling pool kids pool"
+    },
+    {
+     "slug": "swing-set",
+     "name": "swing playground"
+    },
+    {
+     "slug": "slide",
+     "name": "playground slide"
+    },
+    {
+     "slug": "dog-house",
+     "name": "dog house kennel"
+    },
+    {
+     "slug": "hammock",
+     "name": "hammock between posts"
+    },
+    {
+     "slug": "washing-line",
+     "name": "washing line clothes drying"
+    },
+    {
+     "slug": "step-ladder",
+     "name": "step ladder"
+    },
+    {
+     "slug": "paint-can",
+     "name": "paint can tin blue"
+    },
+    {
+     "slug": "tyre",
+     "name": "tyre tire wheel"
+    },
+    {
+     "slug": "fuel-can",
+     "name": "fuel can petrol jerrycan"
+    },
+    {
+     "slug": "cardboard-box",
+     "name": "cardboard box moving box"
+    },
+    {
+     "slug": "vacuum-cleaner",
+     "name": "vacuum cleaner hoover"
+    },
+    {
+     "slug": "iron",
+     "name": "clothes iron"
+    },
+    {
+     "slug": "light-bulb",
+     "name": "light bulb idea"
+    },
+    {
+     "slug": "front-door",
+     "name": "front door house door red"
+    },
+    {
+     "slug": "house-window",
+     "name": "house window glass panes"
+    },
+    {
+     "slug": "doormat",
+     "name": "doormat welcome mat"
+    }
+   ]
+  },
+  {
+   "id": "meals",
+   "label": "Food & drink",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "orange",
+     "name": "orange fruit"
+    },
+    {
+     "slug": "lemon",
+     "name": "lemon yellow fruit"
+    },
+    {
+     "slug": "lime",
+     "name": "lime green fruit"
+    },
+    {
+     "slug": "pear",
+     "name": "pear green fruit"
+    },
+    {
+     "slug": "peach",
+     "name": "peach fruit"
+    },
+    {
+     "slug": "pineapple",
+     "name": "pineapple"
+    },
+    {
+     "slug": "watermelon-slice",
+     "name": "watermelon slice"
+    },
+    {
+     "slug": "kiwi",
+     "name": "kiwi fruit half"
+    },
+    {
+     "slug": "blueberries",
+     "name": "blueberries berries"
+    },
+    {
+     "slug": "coconut",
+     "name": "coconut half"
+    },
+    {
+     "slug": "avocado",
+     "name": "avocado half"
+    },
+    {
+     "slug": "raspberry",
+     "name": "raspberry berry"
+    },
+    {
+     "slug": "green-apple",
+     "name": "green apple"
+    },
+    {
+     "slug": "tomato",
+     "name": "tomato"
+    },
+    {
+     "slug": "potato",
+     "name": "potato"
+    },
+    {
+     "slug": "onion",
+     "name": "onion"
+    },
+    {
+     "slug": "broccoli",
+     "name": "broccoli"
+    },
+    {
+     "slug": "lettuce",
+     "name": "lettuce cabbage green"
+    },
+    {
+     "slug": "cucumber",
+     "name": "cucumber"
+    },
+    {
+     "slug": "bell-pepper",
+     "name": "red bell pepper"
+    },
+    {
+     "slug": "bell-pepper-yellow",
+     "name": "yellow bell pepper"
+    },
+    {
+     "slug": "chili",
+     "name": "chili pepper hot"
+    },
+    {
+     "slug": "eggplant",
+     "name": "eggplant aubergine"
+    },
+    {
+     "slug": "peas",
+     "name": "peas in pod"
+    },
+    {
+     "slug": "garlic",
+     "name": "garlic bulb"
+    },
+    {
+     "slug": "radish",
+     "name": "radish beetroot"
+    },
+    {
+     "slug": "salad-bowl",
+     "name": "salad bowl"
+    },
+    {
+     "slug": "burger",
+     "name": "burger hamburger cheeseburger"
+    },
+    {
+     "slug": "hot-dog",
+     "name": "hot dog sausage in bun"
+    },
+    {
+     "slug": "fries",
+     "name": "fries chips french fries"
+    },
+    {
+     "slug": "pizza-slice",
+     "name": "pizza slice pepperoni"
+    },
+    {
+     "slug": "taco",
+     "name": "taco"
+    },
+    {
+     "slug": "sandwich",
+     "name": "sandwich"
+    },
+    {
+     "slug": "sushi",
+     "name": "sushi roll"
+    },
+    {
+     "slug": "ramen",
+     "name": "ramen noodles bowl chopsticks"
+    },
+    {
+     "slug": "spaghetti",
+     "name": "spaghetti pasta meatballs"
+    },
+    {
+     "slug": "rice-bowl",
+     "name": "rice bowl"
+    },
+    {
+     "slug": "fried-egg",
+     "name": "fried egg sunny side up"
+    },
+    {
+     "slug": "bacon",
+     "name": "bacon rashers"
+    },
+    {
+     "slug": "pancakes",
+     "name": "pancakes stack syrup"
+    },
+    {
+     "slug": "waffle",
+     "name": "waffle"
+    },
+    {
+     "slug": "toast",
+     "name": "toast slice butter"
+    },
+    {
+     "slug": "croissant",
+     "name": "croissant"
+    },
+    {
+     "slug": "pretzel",
+     "name": "pretzel"
+    },
+    {
+     "slug": "soup",
+     "name": "bowl of soup tomato"
+    },
+    {
+     "slug": "steak",
+     "name": "steak meat"
+    },
+    {
+     "slug": "roast-chicken",
+     "name": "roast chicken turkey dinner"
+    },
+    {
+     "slug": "sausage",
+     "name": "sausage"
+    },
+    {
+     "slug": "kebab",
+     "name": "kebab skewer"
+    },
+    {
+     "slug": "dumpling",
+     "name": "dumpling"
+    },
+    {
+     "slug": "popcorn",
+     "name": "popcorn box"
+    },
+    {
+     "slug": "cereal",
+     "name": "cereal bowl milk spoon"
+    },
+    {
+     "slug": "lunchbox",
+     "name": "lunch box"
+    },
+    {
+     "slug": "burrito",
+     "name": "burrito wrap"
+    },
+    {
+     "slug": "cupcake",
+     "name": "cupcake pink frosting cherry"
+    },
+    {
+     "slug": "birthday-cake",
+     "name": "birthday cake with candles"
+    },
+    {
+     "slug": "chocolate-bar",
+     "name": "chocolate bar"
+    },
+    {
+     "slug": "lollipop",
+     "name": "lollipop swirl candy"
+    },
+    {
+     "slug": "ice-lolly",
+     "name": "ice lolly popsicle"
+    },
+    {
+     "slug": "jelly",
+     "name": "jelly jello dessert wobbly"
+    },
+    {
+     "slug": "muffin",
+     "name": "muffin blueberry"
+    },
+    {
+     "slug": "cake-slice",
+     "name": "slice of cake strawberry"
+    },
+    {
+     "slug": "cotton-candy",
+     "name": "cotton candy candyfloss"
+    },
+    {
+     "slug": "honey-pot",
+     "name": "honey pot"
+    },
+    {
+     "slug": "macaron",
+     "name": "macaron sweet pink"
+    },
+    {
+     "slug": "sundae",
+     "name": "ice cream sundae"
+    },
+    {
+     "slug": "gummy-bear",
+     "name": "gummy bear sweet"
+    },
+    {
+     "slug": "coffee-cup",
+     "name": "coffee cup takeaway"
+    },
+    {
+     "slug": "milk-carton",
+     "name": "milk carton"
+    },
+    {
+     "slug": "juice-box",
+     "name": "juice box straw"
+    },
+    {
+     "slug": "orange-juice",
+     "name": "glass of orange juice"
+    },
+    {
+     "slug": "soda-can",
+     "name": "soda can fizzy drink cola"
+    },
+    {
+     "slug": "soda-cup",
+     "name": "soda cup with straw fast food drink"
+    },
+    {
+     "slug": "water-bottle",
+     "name": "water bottle plastic"
+    },
+    {
+     "slug": "milkshake",
+     "name": "milkshake strawberry"
+    },
+    {
+     "slug": "lemonade",
+     "name": "lemonade jug pitcher"
+    },
+    {
+     "slug": "hot-chocolate",
+     "name": "hot chocolate mug marshmallows"
+    },
+    {
+     "slug": "bubble-tea",
+     "name": "bubble tea boba"
+    },
+    {
+     "slug": "baby-bottle",
+     "name": "baby bottle milk"
+    },
+    {
+     "slug": "ketchup",
+     "name": "ketchup bottle"
+    },
+    {
+     "slug": "mustard",
+     "name": "mustard bottle yellow"
+    },
+    {
+     "slug": "butter",
+     "name": "butter block"
+    },
+    {
+     "slug": "egg-carton",
+     "name": "egg carton box of eggs"
+    },
+    {
+     "slug": "flour-bag",
+     "name": "flour bag sack baking"
+    }
+   ]
+  },
+  {
+   "id": "clothes",
+   "label": "Clothes & accessories",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "baseball-cap",
+     "name": "baseball cap red"
+    },
+    {
+     "slug": "top-hat",
+     "name": "top hat black"
+    },
+    {
+     "slug": "cowboy-hat",
+     "name": "cowboy hat brown"
+    },
+    {
+     "slug": "straw-hat",
+     "name": "straw hat sun hat ribbon"
+    },
+    {
+     "slug": "woolly-hat",
+     "name": "woolly hat beanie bobble"
+    },
+    {
+     "slug": "party-hat",
+     "name": "party hat cone"
+    },
+    {
+     "slug": "hard-hat",
+     "name": "hard hat yellow safety helmet"
+    },
+    {
+     "slug": "chef-hat",
+     "name": "chef hat white"
+    },
+    {
+     "slug": "police-cap",
+     "name": "police cap hat"
+    },
+    {
+     "slug": "pirate-hat",
+     "name": "pirate hat skull"
+    },
+    {
+     "slug": "bike-helmet",
+     "name": "bike helmet cycling"
+    },
+    {
+     "slug": "t-shirt",
+     "name": "t-shirt tee red"
+    },
+    {
+     "slug": "t-shirt-blue",
+     "name": "blue t-shirt tee"
+    },
+    {
+     "slug": "striped-shirt",
+     "name": "striped t-shirt sailor top"
+    },
+    {
+     "slug": "hoodie",
+     "name": "hoodie sweatshirt grey"
+    },
+    {
+     "slug": "sweater",
+     "name": "sweater jumper knitted"
+    },
+    {
+     "slug": "jacket",
+     "name": "jacket coat brown leather"
+    },
+    {
+     "slug": "raincoat",
+     "name": "raincoat yellow rain jacket"
+    },
+    {
+     "slug": "pink-dress",
+     "name": "dress pink"
+    },
+    {
+     "slug": "pleated-skirt",
+     "name": "skirt pleated blue"
+    },
+    {
+     "slug": "jeans",
+     "name": "jeans trousers blue"
+    },
+    {
+     "slug": "orange-shorts",
+     "name": "shorts orange"
+    },
+    {
+     "slug": "swimsuit",
+     "name": "swimsuit swimming costume"
+    },
+    {
+     "slug": "pyjamas",
+     "name": "pyjamas pajamas striped"
+    },
+    {
+     "slug": "trainer",
+     "name": "trainer sneaker running shoe"
+    },
+    {
+     "slug": "rain-boots",
+     "name": "rain boots wellies yellow"
+    },
+    {
+     "slug": "high-heel",
+     "name": "high heel shoe red"
+    },
+    {
+     "slug": "flip-flops",
+     "name": "flip flops sandals"
+    },
+    {
+     "slug": "slippers",
+     "name": "slippers fluffy pink"
+    },
+    {
+     "slug": "socks",
+     "name": "socks pair striped"
+    },
+    {
+     "slug": "handbag",
+     "name": "handbag purse"
+    },
+    {
+     "slug": "suitcase",
+     "name": "suitcase luggage travel"
+    },
+    {
+     "slug": "shopping-bag",
+     "name": "shopping bag paper"
+    },
+    {
+     "slug": "briefcase",
+     "name": "briefcase office bag"
+    },
+    {
+     "slug": "gym-bag",
+     "name": "gym bag sports bag duffel"
+    },
+    {
+     "slug": "pearl-necklace",
+     "name": "pearl necklace jewellery"
+    },
+    {
+     "slug": "diamond-ring",
+     "name": "diamond ring engagement"
+    },
+    {
+     "slug": "earrings",
+     "name": "earrings gold jewellery"
+    },
+    {
+     "slug": "bracelet",
+     "name": "bracelet bangle beads"
+    },
+    {
+     "slug": "wristwatch",
+     "name": "wrist watch"
+    },
+    {
+     "slug": "tiara",
+     "name": "tiara princess crown silver"
+    },
+    {
+     "slug": "eyeglasses",
+     "name": "glasses spectacles"
+    },
+    {
+     "slug": "sunglasses",
+     "name": "sunglasses shades"
+    },
+    {
+     "slug": "swim-goggles",
+     "name": "swimming goggles"
+    },
+    {
+     "slug": "wool-scarf",
+     "name": "scarf woolly striped"
+    },
+    {
+     "slug": "glove",
+     "name": "glove winter"
+    },
+    {
+     "slug": "neck-tie",
+     "name": "tie necktie red striped"
+    },
+    {
+     "slug": "bow-tie",
+     "name": "bow tie"
+    },
+    {
+     "slug": "belt",
+     "name": "belt leather buckle"
+    },
+    {
+     "slug": "umbrella",
+     "name": "umbrella open rain"
+    },
+    {
+     "slug": "hair-bow",
+     "name": "hair bow ribbon pink"
+    },
+    {
+     "slug": "coat-hanger",
+     "name": "coat hanger clothes"
+    },
+    {
+     "slug": "carnival-mask",
+     "name": "carnival mask masquerade party"
+    },
+    {
+     "slug": "hero-cape",
+     "name": "superhero cape red"
+    },
+    {
+     "slug": "fairy-wings",
+     "name": "fairy wings costume"
+    },
+    {
+     "slug": "bunny-ears",
+     "name": "bunny ears headband costume"
+    },
+    {
+     "slug": "disguise-glasses",
+     "name": "disguise fake glasses nose mustache"
+    }
+   ]
+  },
+  {
+   "id": "city",
+   "label": "City & travel",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "car-red",
+     "name": "red car"
+    },
+    {
+     "slug": "car-blue",
+     "name": "blue car"
+    },
+    {
+     "slug": "taxi",
+     "name": "yellow taxi cab"
+    },
+    {
+     "slug": "police-car",
+     "name": "police car with light bar"
+    },
+    {
+     "slug": "sports-car",
+     "name": "red sports car fast"
+    },
+    {
+     "slug": "delivery-van",
+     "name": "delivery van white parcel"
+    },
+    {
+     "slug": "ambulance",
+     "name": "ambulance emergency"
+    },
+    {
+     "slug": "ice-cream-van",
+     "name": "ice cream van truck"
+    },
+    {
+     "slug": "camper-van",
+     "name": "camper van holiday"
+    },
+    {
+     "slug": "pickup-truck",
+     "name": "pickup truck blue"
+    },
+    {
+     "slug": "city-bus",
+     "name": "city bus red"
+    },
+    {
+     "slug": "school-bus",
+     "name": "school bus yellow"
+    },
+    {
+     "slug": "truck",
+     "name": "truck lorry delivery"
+    },
+    {
+     "slug": "fire-engine",
+     "name": "fire engine fire truck ladder"
+    },
+    {
+     "slug": "dump-truck",
+     "name": "dump truck tipper construction"
+    },
+    {
+     "slug": "tractor",
+     "name": "tractor farm green"
+    },
+    {
+     "slug": "digger",
+     "name": "digger excavator construction yellow"
+    },
+    {
+     "slug": "race-car",
+     "name": "racing car formula one"
+    },
+    {
+     "slug": "motorbike",
+     "name": "motorbike motorcycle"
+    },
+    {
+     "slug": "moped",
+     "name": "moped scooter"
+    },
+    {
+     "slug": "bicycle",
+     "name": "bicycle bike"
+    },
+    {
+     "slug": "kick-scooter",
+     "name": "kick scooter kids"
+    },
+    {
+     "slug": "pram",
+     "name": "pram stroller baby buggy"
+    },
+    {
+     "slug": "wheelchair",
+     "name": "wheelchair"
+    },
+    {
+     "slug": "shopping-trolley",
+     "name": "shopping trolley cart supermarket"
+    },
+    {
+     "slug": "steam-train",
+     "name": "steam train locomotive engine"
+    },
+    {
+     "slug": "metro-train",
+     "name": "train metro subway tram modern"
+    },
+    {
+     "slug": "train-carriage",
+     "name": "train carriage wagon passenger"
+    },
+    {
+     "slug": "airplane",
+     "name": "airplane plane airliner jet"
+    },
+    {
+     "slug": "small-plane",
+     "name": "small plane propeller red"
+    },
+    {
+     "slug": "helicopter",
+     "name": "helicopter chopper"
+    },
+    {
+     "slug": "rocket",
+     "name": "rocket spaceship launch"
+    },
+    {
+     "slug": "speedboat",
+     "name": "speedboat motor boat"
+    },
+    {
+     "slug": "cruise-ship",
+     "name": "cruise ship ocean liner"
+    },
+    {
+     "slug": "fishing-boat",
+     "name": "fishing boat trawler tugboat"
+    },
+    {
+     "slug": "submarine",
+     "name": "submarine yellow"
+    },
+    {
+     "slug": "kayak",
+     "name": "kayak canoe with paddle"
+    },
+    {
+     "slug": "traffic-light-red",
+     "name": "traffic light red stop"
+    },
+    {
+     "slug": "traffic-light-amber",
+     "name": "traffic light amber yellow wait"
+    },
+    {
+     "slug": "traffic-light-green",
+     "name": "traffic light green go"
+    },
+    {
+     "slug": "stop-sign",
+     "name": "stop sign road sign"
+    },
+    {
+     "slug": "road-warning-sign",
+     "name": "warning road sign triangle"
+    },
+    {
+     "slug": "crossing-sign",
+     "name": "pedestrian crossing sign blue"
+    },
+    {
+     "slug": "speed-limit-sign",
+     "name": "speed limit sign 30"
+    },
+    {
+     "slug": "one-way-sign",
+     "name": "one way arrow sign street sign"
+    },
+    {
+     "slug": "bus-stop",
+     "name": "bus stop shelter"
+    },
+    {
+     "slug": "park-bench",
+     "name": "park bench green"
+    },
+    {
+     "slug": "post-box",
+     "name": "post box red letter box"
+    },
+    {
+     "slug": "mailbox",
+     "name": "mailbox on post letters"
+    },
+    {
+     "slug": "fire-hydrant",
+     "name": "fire hydrant"
+    },
+    {
+     "slug": "parking-meter",
+     "name": "parking meter"
+    },
+    {
+     "slug": "phone-box",
+     "name": "phone box telephone booth red"
+    },
+    {
+     "slug": "litter-bin",
+     "name": "litter bin street trash can green"
+    },
+    {
+     "slug": "traffic-cone",
+     "name": "traffic cone orange"
+    },
+    {
+     "slug": "road-barrier",
+     "name": "road barrier roadworks"
+    },
+    {
+     "slug": "billboard",
+     "name": "billboard advert sign"
+    },
+    {
+     "slug": "atm",
+     "name": "atm cash machine"
+    },
+    {
+     "slug": "news-kiosk",
+     "name": "newsstand kiosk"
+    },
+    {
+     "slug": "hot-dog-cart",
+     "name": "hot dog cart food stand"
+    },
+    {
+     "slug": "petrol-pump",
+     "name": "petrol pump gas station fuel"
+    },
+    {
+     "slug": "modern-house",
+     "name": "modern house flat roof"
+    },
+    {
+     "slug": "town-house",
+     "name": "town house terraced brick house"
+    },
+    {
+     "slug": "apartment-block",
+     "name": "apartment block flats tower block"
+    },
+    {
+     "slug": "school",
+     "name": "school building clock"
+    },
+    {
+     "slug": "hospital",
+     "name": "hospital red cross"
+    },
+    {
+     "slug": "police-station",
+     "name": "police station"
+    },
+    {
+     "slug": "fire-station",
+     "name": "fire station"
+    },
+    {
+     "slug": "supermarket",
+     "name": "supermarket grocery store shop"
+    },
+    {
+     "slug": "cafe",
+     "name": "cafe coffee shop"
+    },
+    {
+     "slug": "bakery",
+     "name": "bakery bread shop"
+    },
+    {
+     "slug": "toy-shop",
+     "name": "toy shop store"
+    },
+    {
+     "slug": "book-shop",
+     "name": "book shop library"
+    },
+    {
+     "slug": "flower-shop",
+     "name": "flower shop florist"
+    },
+    {
+     "slug": "pizzeria",
+     "name": "pizzeria pizza restaurant"
+    },
+    {
+     "slug": "post-office",
+     "name": "post office mail"
+    },
+    {
+     "slug": "pharmacy",
+     "name": "pharmacy chemist drugstore"
+    },
+    {
+     "slug": "bank",
+     "name": "bank building columns"
+    },
+    {
+     "slug": "hotel",
+     "name": "hotel tall building"
+    },
+    {
+     "slug": "cinema",
+     "name": "cinema movie theatre"
+    },
+    {
+     "slug": "warehouse",
+     "name": "warehouse storage depot"
+    },
+    {
+     "slug": "car-garage",
+     "name": "garage car repair workshop"
+    },
+    {
+     "slug": "train-station",
+     "name": "train station railway"
+    },
+    {
+     "slug": "skyscraper",
+     "name": "skyscraper tall glass tower"
+    },
+    {
+     "slug": "office-block",
+     "name": "office block building glass"
+    },
+    {
+     "slug": "factory",
+     "name": "factory chimneys smoke"
+    },
+    {
+     "slug": "stadium",
+     "name": "stadium sports arena football"
+    },
+    {
+     "slug": "petrol-station",
+     "name": "petrol station gas station garage"
+    },
+    {
+     "slug": "control-tower",
+     "name": "airport control tower"
+    },
+    {
+     "slug": "greenhouse",
+     "name": "greenhouse glass house plants"
+    }
+   ]
+  },
+  {
+   "id": "tech",
+   "label": "School, office & tech",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "open-book",
+     "name": "open book reading"
+    },
+    {
+     "slug": "notebook",
+     "name": "notebook spiral exercise book"
+    },
+    {
+     "slug": "book-stack",
+     "name": "stack of books pile"
+    },
+    {
+     "slug": "pencil",
+     "name": "pencil yellow"
+    },
+    {
+     "slug": "pen",
+     "name": "pen ballpoint blue"
+    },
+    {
+     "slug": "crayons",
+     "name": "crayons box colours"
+    },
+    {
+     "slug": "eraser",
+     "name": "eraser rubber pink"
+    },
+    {
+     "slug": "ruler",
+     "name": "ruler measure"
+    },
+    {
+     "slug": "scissors",
+     "name": "scissors"
+    },
+    {
+     "slug": "glue-stick",
+     "name": "glue stick"
+    },
+    {
+     "slug": "pencil-case",
+     "name": "pencil case"
+    },
+    {
+     "slug": "school-bag",
+     "name": "school bag backpack rucksack red"
+    },
+    {
+     "slug": "globe",
+     "name": "globe world map earth"
+    },
+    {
+     "slug": "blackboard",
+     "name": "blackboard chalkboard school"
+    },
+    {
+     "slug": "school-desk",
+     "name": "school desk with chair"
+    },
+    {
+     "slug": "calculator",
+     "name": "calculator"
+    },
+    {
+     "slug": "paperclip",
+     "name": "paperclip"
+    },
+    {
+     "slug": "stapler",
+     "name": "stapler"
+    },
+    {
+     "slug": "sticky-note",
+     "name": "sticky note post-it yellow"
+    },
+    {
+     "slug": "folder",
+     "name": "folder files documents"
+    },
+    {
+     "slug": "clipboard",
+     "name": "clipboard checklist"
+    },
+    {
+     "slug": "newspaper",
+     "name": "newspaper news"
+    },
+    {
+     "slug": "certificate",
+     "name": "certificate diploma award"
+    },
+    {
+     "slug": "test-paper",
+     "name": "test paper exam homework top marks"
+    },
+    {
+     "slug": "laptop",
+     "name": "laptop computer"
+    },
+    {
+     "slug": "desktop-computer",
+     "name": "desktop computer pc monitor"
+    },
+    {
+     "slug": "keyboard",
+     "name": "keyboard computer"
+    },
+    {
+     "slug": "computer-mouse",
+     "name": "computer mouse"
+    },
+    {
+     "slug": "smartphone",
+     "name": "phone smartphone mobile"
+    },
+    {
+     "slug": "telephone",
+     "name": "telephone old phone landline red"
+    },
+    {
+     "slug": "tablet",
+     "name": "tablet computer touchscreen"
+    },
+    {
+     "slug": "camera",
+     "name": "camera photo"
+    },
+    {
+     "slug": "video-camera",
+     "name": "video camera film movie camera"
+    },
+    {
+     "slug": "tv",
+     "name": "tv television flat screen"
+    },
+    {
+     "slug": "retro-tv",
+     "name": "old tv retro television antenna"
+    },
+    {
+     "slug": "radio",
+     "name": "radio music"
+    },
+    {
+     "slug": "headphones",
+     "name": "headphones music"
+    },
+    {
+     "slug": "speaker",
+     "name": "speaker loudspeaker music"
+    },
+    {
+     "slug": "game-console",
+     "name": "game console video games"
+    },
+    {
+     "slug": "gamepad",
+     "name": "gamepad game controller"
+    },
+    {
+     "slug": "handheld-game",
+     "name": "handheld game console"
+    },
+    {
+     "slug": "printer",
+     "name": "printer office"
+    },
+    {
+     "slug": "usb-stick",
+     "name": "usb stick memory flash drive"
+    },
+    {
+     "slug": "battery",
+     "name": "battery power"
+    },
+    {
+     "slug": "satellite-dish",
+     "name": "satellite dish antenna"
+    },
+    {
+     "slug": "drone",
+     "name": "drone quadcopter flying camera"
+    },
+    {
+     "slug": "remote-control",
+     "name": "remote control tv"
+    },
+    {
+     "slug": "vr-headset",
+     "name": "vr headset virtual reality goggles"
+    },
+    {
+     "slug": "security-camera",
+     "name": "security camera cctv"
+    },
+    {
+     "slug": "robot-vacuum",
+     "name": "robot vacuum cleaner"
+    },
+    {
+     "slug": "wall-clock",
+     "name": "wall clock time round"
+    },
+    {
+     "slug": "alarm-clock",
+     "name": "alarm clock ringing wake up"
+    },
+    {
+     "slug": "calendar",
+     "name": "calendar date"
+    },
+    {
+     "slug": "postcard",
+     "name": "postcard holiday"
+    },
+    {
+     "slug": "parcel",
+     "name": "parcel package delivery box"
+    },
+    {
+     "slug": "stamp",
+     "name": "postage stamp"
+    },
+    {
+     "slug": "banknote",
+     "name": "banknote money cash dollar bill"
+    },
+    {
+     "slug": "cash-stack",
+     "name": "stack of cash money bundle"
+    },
+    {
+     "slug": "credit-card",
+     "name": "credit card bank card"
+    },
+    {
+     "slug": "wallet",
+     "name": "wallet money"
+    },
+    {
+     "slug": "piggy-bank",
+     "name": "piggy bank savings"
+    },
+    {
+     "slug": "safe",
+     "name": "safe vault strongbox"
+    },
+    {
+     "slug": "cash-register",
+     "name": "cash register till shop"
+    },
+    {
+     "slug": "price-tag",
+     "name": "price tag label sale"
+    },
+    {
+     "slug": "playing-card",
+     "name": "playing card ace of hearts"
+    },
+    {
+     "slug": "id-card",
+     "name": "id card badge pass"
+    },
+    {
+     "slug": "ticket",
+     "name": "ticket admit one"
+    },
+    {
+     "slug": "passport",
+     "name": "passport travel document"
+    }
+   ]
   }
  ]
 }
