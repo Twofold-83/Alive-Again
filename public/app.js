@@ -1,5 +1,6 @@
 import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetName, loadPack, loadPixel } from './catalog.js';
 import { MOODS, SFX, audio } from './audio.js';
+import { startTitle } from './title.js';
 import { h, clone, clamp, norm, glyphNode, renderStage, playTurn, findWalk, sample } from './stage.js';
 import { openWorkshop, workshopOpen } from './workshop.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
@@ -105,6 +106,7 @@ function onState(s) {
     if (directing()) guidedStart(draft);
     if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('⏰ Time ran out — your turn was sent as it was');
     if (cut) cut.skip();
+    if (prev && !prev.ended && s.ended) audio.sfx('theend');
     if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {  // present what just happened before handing over control
       const by = s.whose === 'director' ? 'player' : 'director';
       if (s.turn === 1 && s.info.title) { const first = s.scene.steps[0] || s.scene; if (!first.card) first.card = s.info.title; }   // the story opens on its title
@@ -208,7 +210,7 @@ async function submit() {
   if (submitting || !myTurn()) return;
   if (cut) cut.skip();
   settleWalk();
-  submitting = true; render();
+  submitting = true; render(); audio.sfx('send');
   const turn = S.turn, me = hero(draft), roll = draft.rollWant || 0;
   const body = S.you === 'director' ? { turn, scene: finalScene(), roll }
     : { answer: draft.reply, act: draft.act, exit: draft.exit, turn, x: me && me.x, y: me && me.y, say: me ? me.say : '', emote: me ? me.emote : '', action: draft.action, target: draft.target, use: draft.use, roll, track: draft.heroTrack };
@@ -427,9 +429,10 @@ function renderChrome() {
   const who = (role, icon) => h('span', { class: 'who' + (S.you === role && !S.hotseat ? ' me' : '') + (!S.ended && S.whose === role ? ' turn' : '') },
     h('i', { class: 'dot' + (S.online[role] ? ' on' : '') }), (S.bot === role ? '🤖' : icon) + ' ', h('b', {}, S.joined[role] ? S.names[role] : '…'));
   $('#top').replaceChildren(
-    who('director', '🎬'), who('player', '🧑'), h('span', { class: 'grow' }), h('span', { class: 'code' }, code),
+    who('director', '🎬'), who('player', '🧑'), h('span', { class: 'grow storyname' }, S.info.title ? `“${S.info.title}”` : ''),
+    h('button', { class: 'code', 'aria-label': 'Copy the invite link', title: 'Copy the invite link', onclick: () => { navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('🔗 Invite link copied'), () => {}); } }, '🔗 ' + code),
     h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, '📖'),
-    h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.toggleMute() ? '🔇' : '🔊'; }, 'aria-label': 'Sound', title: 'Sound' }, audio.muted ? '🔇' : '🔊'));
+    h('button', { onclick: (e) => { audio.unlock(); e.currentTarget.textContent = audio.cycle(); audio.sfx('pop'); }, 'aria-label': 'Sound', title: 'Sound: loud, quiet, off' }, audio.icon));
 
   const b = $('#banner'); let content = null;
   if (!connected) content = ['📡 Reconnecting…'];
@@ -441,6 +444,7 @@ function renderChrome() {
   b.hidden = !content;
   if (content) b.replaceChildren(...content.map((c) => (typeof c === 'string' ? h('span', {}, c) : c)));
 }
+let lastTick = 0;
 function tick() {
   if (!S || !code) return;
   const bar = $('#clock i'), lab = $('#tlabel');
@@ -449,6 +453,8 @@ function tick() {
   const r = S.paused ? S.remainingMs : Math.max(0, localDeadline - performance.now());
   bar.style.width = Math.min(100, (r / full) * 100) + '%';
   bar.className = r < 10000 ? 'low' : '';
+  const sec = Math.ceil(r / 1000);
+  if (!S.paused && myTurn() && sec <= 5 && sec > 0 && sec !== lastTick) { lastTick = sec; audio.sfx('tick'); }
   if (lab) lab.textContent = ' · ' + fmt(Math.min(r, full)) + (S.paused ? ' ⏸' : '');
   if (r <= 0 && !S.paused && myTurn() && !submitting && autoTurn !== S.turn) { autoTurn = S.turn; submit(); }
 }
@@ -839,12 +845,13 @@ function leave(msg) {
   if (es) es.close();
   if (cut) cut.skip();
   es = null; code = null; S = null;
-  audio.setMood('m:none');
+  audio.setMood(HOME_MOOD); $('#homeSound').textContent = audio.icon;
   history.replaceState(null, '', location.pathname);
   $('#story').hidden = true; $('#game').hidden = true; $('#home').hidden = false;
   $('#invite').hidden = true; $('#newBtns').hidden = false; codeEl.value = '';
   errEl.textContent = msg || '';
 }
+const HOME_MOOD = 'm:spooky';
 let storyType = 'free';                                    // chosen once, when the story is created
 for (const b of document.querySelectorAll('#typePick button')) b.onclick = () => { storyType = b.dataset.type; for (const o of document.querySelectorAll('#typePick button')) o.classList.toggle('on', o === b); };
 async function create(role, mode) {
@@ -879,5 +886,13 @@ function boot() {
   $('#joinBtn').classList.add('primary');
 }
 window.addEventListener('hashchange', boot);
-document.addEventListener('pointerdown', () => audio.unlock(), { capture: true });
+document.addEventListener('pointerdown', () => { audio.unlock(); $('#musicHint').hidden = true; }, { capture: true });
+document.addEventListener('keydown', () => audio.unlock(), { capture: true });
+/* a soft click on every button, so the whole interface feels alive */
+document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('button, .ent.hot, select')) audio.sfx('ui'); }, { capture: true });
+/* the start screen: spooky music, a pixel scene, the odd clap of thunder */
+audio.setMood(HOME_MOOD);
+$('#homeSound').textContent = audio.icon;
+$('#homeSound').onclick = (e) => { e.currentTarget.textContent = audio.cycle(); };
+startTitle($('#titleArt'), () => { if (!code) audio.sfx('thunder'); });
 Promise.all([loadPack(), loadPixel()]).then(boot);

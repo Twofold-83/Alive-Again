@@ -1,6 +1,6 @@
 {
   "name": "twofold",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A two-player, turn-based storytelling stage: one Player, one Director.",
   "private": true,
   "scripts": {

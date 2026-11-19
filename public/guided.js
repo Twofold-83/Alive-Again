@@ -13,7 +13,7 @@
  * thing the current question is about.
  */
 import { CATEGORIES, PIXEL, allItems, BACKDROPS, backdropCss, assetLabel } from './catalog.js';
-import { MOODS, SFX } from './audio.js';
+import { MOODS, SFX, SFX_GROUPS } from './audio.js';
 import { h, clone, clamp, glyphNode, actionText } from './stage.js';
 import { FX, EMOTES, WEATHER, BURSTS } from './consts.js';
 
@@ -269,7 +269,8 @@ export function buildGuided(p, c) {
   /* ================= 💥 moment and sound ================= */
   if (top === 'moment') {
     head('Moment and sound', 'Happens once, as this step plays.');
-    p.append(h('small', { class: 'dim' }, 'On screen'), chips(BURSTS, 'burst'), h('small', { class: 'dim' }, 'Sound'), chips(SFX, 'sfx', (v) => { c.audio.unlock(); c.audio.sfx(v); }),
+    p.append(h('small', { class: 'dim' }, 'On screen'), chips(BURSTS, 'burst'), h('small', { class: 'dim' }, 'Sound — click one to hear it'), chips([SFX[0]], 'sfx'),
+      ...SFX_GROUPS.flatMap(([name, list]) => [h('small', { class: 'dim grp' }, name), chips(list, 'sfx', (v) => { c.audio.unlock(); c.audio.sfx(v); })]),
       doneBtn(() => [d.burst && (BURSTS.find((x) => x[0] === d.burst) || [])[1], d.sfx && (SFX.find((x) => x[0] === d.sfx) || [])[1]].filter(Boolean).join(' + ')));
     return;
   }
@@ -306,7 +307,7 @@ export function buildGuided(p, c) {
   }
   if (top === 'scene:weather') { head('The weather'); p.append(chips(WEATHER, 'weather'), doneBtn(() => `Weather: ${(WEATHER.find((w) => w[0] === d.weather) || WEATHER[0])[1]}`)); return; }
   if (top === 'scene:music') {
-    head('The music');
+    head('The music', 'Click a tune to hear it. It keeps playing until you change it.');
     p.append(h('div', { class: 'list' }, MOODS.map((m) => h('button', { 'data-mark': `mood=${m.id}`, class: d.mood === m.id ? 'on' : '', onclick: () => { c.audio.unlock(); d.mood = m.id; c.changed(); } }, m.name))),
       doneBtn(() => `Music: ${(MOODS.find((m) => m.id === d.mood) || MOODS[0]).name}`));
     return;

@@ -80,7 +80,7 @@ const { setup } = require('./lib');
     await D.p.context().close();
     await P.p.waitForFunction(() => /offline/.test(document.querySelector('#banner').textContent) && /⏸/.test(document.querySelector('#tlabel').textContent), null, { timeout: 15000 });
     // the story so far
-    await P.p.click('#top button'); await P.p.waitForSelector('#story:not([hidden])');
+    await P.p.click('#top button[aria-label="Story so far"]'); await P.p.waitForSelector('#story:not([hidden])');
     assert.match(await P.p.textContent('#storyCap'), /Page 3 of 3/);
     assert.deepEqual(t.errors, []);
     console.log('E2E-PLAY OK');

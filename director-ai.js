@@ -20,10 +20,11 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const fin = (v) => typeof v === 'number' && Number.isFinite(v);
 
 const BACKDROPS = 'room darkroom kitchen hall dungeon ship meadow forest mountain lake swamp night graveyard sunset beach desert snow icecave volcano hell clouds street city road cave sea space moon level grid dream alert stage white black'.split(' ');
-const MOODS = 'none calm happy quest tense sad eerie love'.split(' ');
+const MOODS = 'none calm happy town funny love lullaby dream sea quest heroic victory mystery sneaky tense chase battle boss sad eerie spooky dungeon space'.split(' ');
 const WEATHER = ['', 'rain', 'storm', 'snow', 'fog', 'dark', 'night', 'heat', 'sparkle'];
 const BURSTS = ['', 'shake', 'flash', 'hurt', 'confetti'];
-const SFX = ['', 'boom', 'knock', 'bell', 'magic', 'fanfare', 'fail', 'alarm', 'heart', 'laser'];
+const SFX = ('boom hit clash shot laser whoosh jump fall glass magic spell teleport heal coin pickup levelup fanfare fail error knock door slam lock unlock bell clock phone alarm horn steps '
+  + 'thunder wind splash drip bubble bird cat dog wolf growl laugh scream gasp kiss whistle clap drumroll heart ghost evil').split(' ').concat('');
 const FX = ['', 'bounce', 'shake', 'spin', 'pulse', 'float', 'wobble', 'blink', 'glow', 'ghost', 'dark'];
 
 const SYSTEM = `You are the stage hand in Twofold, a storytelling game for two people. One person is the Player and controls only the hero. The other is the Director and controls everything else on a small 2D stage: the cast, the backdrop, the music, what characters say, and the narration. The Director has just described, in their own words, what should happen in their turn. Your job is to turn that description into a short list of stage operations. The Director will see the result on the stage, can still adjust it, and decides when the turn ends.

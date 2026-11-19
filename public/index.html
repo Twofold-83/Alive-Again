@@ -12,10 +12,15 @@
 <body>
 
 <main id="home" class="screen">
-  <div class="homebox">
-    <div class="logo">🎭</div>
-    <h1>Twofold</h1>
+  <button id="homeSound" aria-label="Sound" title="Sound">🔊</button>
+  <div class="titlecol">
+    <canvas id="titleArt" width="200" height="140" aria-hidden="true"></canvas>
+    <h1 class="gametitle">Twofold</h1>
+    <p class="subtitle">The Return of the Four-Armed Boy</p>
     <p class="tag">A story told by two.<br>One plays the hero. One plays the whole world.</p>
+    <p id="musicHint" class="hint">♪ click anywhere for music</p>
+  </div>
+  <div class="homebox">
     <p id="invite" class="invite" hidden></p>
     <input id="name" maxlength="20" placeholder="Your name" autocomplete="nickname" enterkeyhint="done">
     <div id="typePick" class="typepick">

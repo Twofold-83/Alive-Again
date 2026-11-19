@@ -350,18 +350,19 @@ export function playCut(root, before, after, o, done) {
   let t = 0;
   const swap = () => { frame.backdrop = after.backdrop; frame.level = after.level; frame.exits = after.exits; };
   if (after.travel) {                                                   // "Traveling to ..." between two places
-    at(0, () => root.classList.add('fade')); at(380, () => { swap(); view.travel = after.travel; }); at(2300, () => { view.travel = ''; root.classList.remove('fade'); }); t = 2600;
+    at(0, () => { root.classList.add('fade'); if (o.sfx) o.sfx('whoosh'); }); at(380, () => { swap(); view.travel = after.travel; }); at(2300, () => { view.travel = ''; root.classList.remove('fade'); }); t = 2600;
   } else if (before && (before.backdrop !== after.backdrop || JSON.stringify(before.level) !== JSON.stringify(after.level))) {   // fade through black
     at(0, () => root.classList.add('fade')); at(380, swap); at(760, () => root.classList.remove('fade')); t = 760;
   } else swap();
   if (after.card) { at(t, () => { view.card = after.card; }); t += 1900; at(t, () => { view.card = ''; }); t += 200; }
   const tM = t;
+  let popped = false;
   at(tM, () => {                                                       // everything starts moving
     frame.weather = after.weather; frame.drawing = after.drawing; view.newStrokes = newStrokes; frame.cam = after.cam;
     for (const e of frame.entities) {
       const f = fin.get(e.id);
       if (!f) { e.gone = true; continue; }
-      if (e.fresh) e.pop = true;                               // newcomers pop in
+      if (e.fresh) { e.pop = true; if (o.sfx && !after.sfx && !popped) { popped = true; o.sfx('pop'); } }   // newcomers pop in
       e.fresh = false;
       if (e.tracked || f.x !== e.x || f.y !== e.y) { e.walk = true; e.face = Math.sign(f.x - e.x); }   // on the move: bob along, face the way it goes
       Object.assign(e, { scale: f.scale, rot: f.rot, flip: f.flip, fx: f.fx, once: f.once, hp: f.hp, maxHp: f.maxHp, tie: f.tie });
@@ -371,10 +372,10 @@ export function playCut(root, before, after, o, done) {
     if (after.burst) burst(root, after.burst);
     if (after.sfx && o.sfx) o.sfx(after.sfx);
   });
-  if (after.floats.length) { at(tM + 300, () => { view.floats = after.floats; }); at(tM + 1700, () => { view.floats = []; }); }
+  if (after.floats.length) { at(tM + 300, () => { view.floats = after.floats; if (o.sfx && !after.sfx) o.sfx('hit'); }); at(tM + 1700, () => { view.floats = []; }); }
   const camMoved = JSON.stringify(before ? before.cam : null) !== JSON.stringify(after.cam), acting = after.entities.some((e) => e.once) || after.floats.length;
   t = tM + Math.max(trackEnd ? trackEnd + 250 : 0, moved || newStrokes.size || camMoved ? 950 : 300, acting ? 1100 : 0);
-  if (after.award) { at(t, () => { view.award = after.award; if (o.sfx) o.sfx('bell'); }); t += 1600; at(t, () => { view.award = null; }); }
+  if (after.award) { at(t, () => { view.award = after.award; if (o.sfx) o.sfx(after.award.n < 0 ? 'fail' : 'coin'); }); t += 1600; at(t, () => { view.award = null; }); }
   const tEnd = t;
   at(t, () => { for (const e of frame.entities) { e.walk = false; e.face = 0; if (e.tracked) { const f = fin.get(e.id); e.tracked = false; e.x = f.x; e.y = f.y; } } });
   const sayers = after.entities.filter((e) => e.say && !(prev.has(e.id) && prev.get(e.id).say === e.say));
