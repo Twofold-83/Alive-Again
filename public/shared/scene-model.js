@@ -17,28 +17,65 @@
  */
 
 /** A level is a grid of tiles over the backdrop: LEVEL_W x LEVEL_H cells. */
-export const LEVEL_W = 16, LEVEL_H = 12;
+export const LEVEL_W = 16,
+  LEVEL_H = 12;
 export const HERO_ASSET = 'p:hero';
 export const MAX_ENTITIES = 80;
 
 /** Belongs to the step that made it: gone when the next step starts. */
-export function stepFields() { return { tracks: [], burst: '', sfx: '', card: '', travel: '', award: null, floats: [] }; }
+export function stepFields() {
+  return { tracks: [], burst: '', sfx: '', card: '', travel: '', award: null, floats: [] };
+}
 /** What the Player did on their turn (the die they rolled is `roll`, kept separately because either side can roll). */
-export function playerFields() { return { action: '', target: null, point: null, order: [], use: null, answer: null, verb: '', exit: null }; }
+export function playerFields() {
+  return { action: '', target: null, point: null, order: [], use: null, answer: null, verb: '', exit: null };
+}
 
 /** A character or thing on the stage. x and y are fractions of the stage (0..1), y at its feet. */
 export function newEntity(asset, props = {}) {
-  return { id: '', asset, x: 0.5, y: 0.78, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '', solid: false, active: null, tie: null, hp: null, maxHp: null, once: '', temp: false, layer: 0, ...props };
+  return {
+    id: '',
+    asset,
+    x: 0.5,
+    y: 0.78,
+    scale: 1,
+    flip: false,
+    rot: 0,
+    say: '',
+    fx: '',
+    emote: '',
+    solid: false,
+    active: null,
+    tie: null,
+    hp: null,
+    maxHp: null,
+    once: '',
+    temp: false,
+    layer: 0,
+    ...props,
+  };
 }
 export function newScene() {
   return {
-    backdrop: 'b:room', mood: 'm:none', weather: '', drawing: [], level: null, exits: [], sceneId: '',
-    entities: [newEntity(HERO_ASSET, { id: 'hero' })], heroId: 'hero',
-    sheet: { inv: [], stats: [], points: 0 }, battle: null,
+    backdrop: 'b:room',
+    mood: 'm:none',
+    weather: '',
+    drawing: [],
+    level: null,
+    exits: [],
+    sceneId: '',
+    entities: [newEntity(HERO_ASSET, { id: 'hero' })],
+    heroId: 'hero',
+    sheet: { inv: [], stats: [], points: 0 },
+    battle: null,
     ...stepFields(),
-    narration: '', cam: null, steps: [],
-    choices: [], ask: null,
-    ...playerFields(), roll: null,
+    narration: '',
+    cam: null,
+    steps: [],
+    choices: [],
+    ask: null,
+    ...playerFields(),
+    roll: null,
   };
 }
 /** Fill in whatever an older or partial scene lacks, so the rest of the code never has to check. */
@@ -47,15 +84,30 @@ export function normScene(sc) {
   const base = newScene();
   for (const k of Object.keys(base)) if (sc[k] === undefined || (sc[k] === null && Array.isArray(base[k]))) sc[k] = k === 'entities' ? [] : base[k];
   for (const k of ['sceneId', 'travel', 'verb', 'weather', 'burst', 'sfx', 'card', 'narration', 'action']) sc[k] ||= '';
-  sc.sheet.inv ||= []; sc.sheet.stats ||= []; sc.sheet.points ??= 0;
-  sc.entities = sc.entities.map((e) => { const full = newEntity(e.asset, e); full.solid = !!full.solid; full.temp = !!full.temp; full.rot ||= 0; full.layer ||= 0; if (full.hp === undefined) full.hp = null; if (full.maxHp === undefined) full.maxHp = null; return full; });
+  sc.sheet.inv ||= [];
+  sc.sheet.stats ||= [];
+  sc.sheet.points ??= 0;
+  sc.entities = sc.entities.map((e) => {
+    const full = newEntity(e.asset, e);
+    full.solid = !!full.solid;
+    full.temp = !!full.temp;
+    full.rot ||= 0;
+    full.layer ||= 0;
+    if (full.hp === undefined) full.hp = null;
+    if (full.maxHp === undefined) full.maxHp = null;
+    return full;
+  });
   for (const f of sc.steps) normScene(f);
   return sc;
 }
-export function heroOf(scene) { return scene.entities.find((e) => e.id === scene.heroId); }
+export function heroOf(scene) {
+  return scene.entities.find((e) => e.id === scene.heroId);
+}
 
 /** The level cell under a point of the stage. */
-export function cellAt(x, y) { return Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W)); }
+export function cellAt(x, y) {
+  return Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W));
+}
 /** May the hero stand here? Where a level exists only floor tiles will do; solid things block everywhere. */
 export function walkable(scene, x, y) {
   if (scene.level) {
@@ -73,7 +125,8 @@ export function walkable(scene, x, y) {
 export function freeSpot(scene, top = 0.3) {
   let best = null;
   for (let i = 0; i < 24; i++) {
-    const x = 0.1 + Math.random() * 0.8, y = top + Math.random() * (0.92 - top);
+    const x = 0.1 + Math.random() * 0.8,
+      y = top + Math.random() * (0.92 - top);
     const gap = Math.min(9, ...scene.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75)));
     if (!best || gap > best.gap) best = { x, y, gap };
   }

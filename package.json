@@ -1,12 +1,16 @@
 {
   "name": "twofold",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "description": "A two-player, turn-based storytelling stage: one Player, one Director.",
   "private": true,
   "scripts": {
     "start": "node server.js",
     "test": "node test/smoke.mjs && node test/rpg-sim.mjs",
-    "test:e2e": "node test/e2e-play.js && node test/e2e-steps.js && node test/e2e-adventure.js && node test/e2e-rpg.js && node test/e2e-phone.js", "sim": "node test/sim-cuts.js 60", "make-sprites": "node tools/make-sprites.js",
+    "test:e2e": "node test/e2e-play.js && node test/e2e-steps.js && node test/e2e-adventure.js && node test/e2e-rpg.js && node test/e2e-phone.js",
+    "sim": "node test/sim-cuts.js 60",
+    "lint": "eslint .",
+    "format": "prettier --write \"public/**/*.js\" \"server/**/*.js\" server.js \"test/**/*.{js,mjs}\" tools/upgrade-sprites.js",
+    "make-sprites": "node tools/make-sprites.js",
     "upgrade-sprites": "node tools/upgrade-sprites.js"
   },
   "engines": {
@@ -15,5 +19,10 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1"
   }
 }

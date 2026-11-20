@@ -1,14 +1,19 @@
+/* Stories ("rooms"): who is in them, what each side gets to see, keeping them on disk.
+ * The server owns the committed scene, whose turn it is, the clock, the history and custom art;
+ * browsers only edit a local draft and send it when the turn ends. */
 import crypto from 'node:crypto';
 import * as directorAI from './director-ai.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { DATA_DIR, ROOM_TTL_MS } from './config.js';
-import { cleanRules } from './scene.js';
-import { normScene } from '../public/shared/scene-model.js';
+import { DATA_DIR, ROOM_TTL_MS, MAX_ROOMS } from './config.js';
+import { fail, str } from './util.js';
+import { botName } from './bots.js';
+import { cleanRules } from '../public/shared/rules.js';
+import { normScene, newScene } from '../public/shared/scene-model.js';
 
-export const rooms = new Map();   // code -> room
+export const rooms = new Map(); // code -> room
 export const streams = new Map(); // code -> Set<{res, token}>
-export const timers = new Map();  // code -> timeout handle
+export const timers = new Map(); // code -> timeout handle
 export const dirty = new Set();
 
 export function newCode() {
@@ -20,15 +25,75 @@ export function newCode() {
   }
 }
 
-/* ---------- rooms ---------- */
+/** A new story. body: { token, name, role, mode: pair | bot | hotseat, type: free | adventure | rpg }. The kind of story is chosen once, here. */
+export function createRoom(body) {
+  if (rooms.size >= MAX_ROOMS) throw fail(503, 'Server is full, try again later');
+  const role = body.role === 'player' ? 'player' : 'director';
+  const mode = body.mode === 'hotseat' ? 'hotseat' : body.mode === 'bot' || body.bot ? 'bot' : 'pair';
+  const dungeon = body.type === 'rpg';
+  const type = dungeon ? 'rpg' : body.type === 'adventure' || (body.type == null && mode === 'bot' && role === 'player') ? 'adventure' : 'free';
+  const names = () => (dungeon ? { director: 'Overlord', player: 'Hero' } : { director: 'Director', player: 'Player' });
+  const room = {
+    code: newCode(),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    tokens: { director: null, player: null },
+    names: names(),
+    settings: { turnSeconds: dungeon ? 0 : 60 },
+    turn: 0,
+    whose: 'director',
+    deadline: null,
+    remaining: null,
+    ended: false,
+    lastTimeout: false,
+    scene: newScene(),
+    history: [],
+    assets: [],
+    rules: cleanRules({ type }),
+    info: { title: '', text: '' },
+  };
+  if (dungeon) room.rpg = { phase: 'build', mode: 'live', def: null, state: null, run: 0, winner: null };
+  room.tokens[role] = body.token;
+  room.names[role] = str(body.name, 20) || room.names[role];
+  if (mode === 'hotseat') {
+    // one person, one device, both sides
+    room.hotseat = true;
+    room.tokens.director = room.tokens.player = body.token;
+    room.names = names();
+  } else if (mode === 'bot') {
+    // solo play: the other side is played by the computer
+    room.bot = role === 'director' ? 'player' : 'director';
+    room.tokens[room.bot] = 'bot-' + crypto.randomBytes(16).toString('hex');
+    room.names[room.bot] = botName();
+  }
+  rooms.set(room.code, room);
+  touch(room);
+  return { room, role };
+}
+/** Take the free seat of a story (or come back to your own). Returns the role: director, player or spectator. */
+export function joinRoom(room, body) {
+  let role = roleOf(room, body.token);
+  if (role === 'spectator') {
+    if (!room.tokens.director) role = 'director';
+    else if (!room.tokens.player) role = 'player';
+    if (role !== 'spectator') room.tokens[role] = body.token;
+  }
+  if (role !== 'spectator') {
+    const name = str(body.name, 20);
+    if (name) room.names[role] = name;
+    touch(room);
+    broadcast(room);
+  }
+  return role;
+}
 export function roleOf(room, token) {
-  if (room.hotseat && token && token === room.tokens.director) return room.whose;   // one person plays both sides
+  if (room.hotseat && token && token === room.tokens.director) return room.whose; // one person plays both sides
   if (token && token === room.tokens.director) return 'director';
   if (token && token === room.tokens.player) return 'player';
   return 'spectator';
 }
 export function online(room, role) {
-  if (room.bot === role) return true;   // an AI partner never drops off
+  if (room.bot === role) return true; // an AI partner never drops off
   const set = streams.get(room.code);
   if (!set) return false;
   for (const s of set) if (s.token === room.tokens[role]) return true;
@@ -38,18 +103,28 @@ export function online(room, role) {
 function view(room, role) {
   const timed = room.deadline != null || room.remaining != null;
   return {
-    code: room.code, you: role, names: room.names,
+    code: room.code,
+    you: role,
+    names: room.names,
     joined: { director: !!room.tokens.director, player: !!room.tokens.player },
     online: { director: online(room, 'director'), player: online(room, 'player') },
-    settings: room.settings, turn: room.turn, whose: room.whose, ended: room.ended,
+    settings: room.settings,
+    turn: room.turn,
+    whose: room.whose,
+    ended: room.ended,
     remainingMs: room.deadline != null ? Math.max(0, room.deadline - Date.now()) : room.remaining,
     paused: timed && room.deadline == null,
     scene: room.scene,
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
     before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
-    rules: room.rules, info: room.info || { title: '', text: '' }, hotseat: !!room.hotseat, claude: directorAI.available(),
+    rules: room.rules,
+    info: room.info || { title: '', text: '' },
+    hotseat: !!room.hotseat,
+    claude: directorAI.available(),
     scenes: role === 'director' || room.hotseat ? room.scenes || [] : undefined,
-    historyLen: room.history.length, bot: room.bot || null, rpg: room.rpg || null,
+    historyLen: room.history.length,
+    bot: room.bot || null,
+    rpg: room.rpg || null,
     lastTimeout: room.lastTimeout,
   };
 }
@@ -58,11 +133,18 @@ export function broadcast(room) {
   const set = streams.get(room.code);
   if (!set) return;
   for (const s of set) {
-    try { s.res.write(`data: ${JSON.stringify(view(room, roleOf(room, s.token)))}\n\n`); } catch { /* closed */ }
+    try {
+      s.res.write(`data: ${JSON.stringify(view(room, roleOf(room, s.token)))}\n\n`);
+    } catch {
+      /* closed */
+    }
   }
 }
 
-export function touch(room) { room.updatedAt = Date.now(); dirty.add(room.code); }
+export function touch(room) {
+  room.updatedAt = Date.now();
+  dirty.add(room.code);
+}
 
 /* ---------- persistence ---------- */
 export function saveDirty() {
@@ -70,7 +152,9 @@ export function saveDirty() {
     const room = rooms.get(code);
     if (!room) continue;
     const file = path.join(DATA_DIR, code + '.json');
-    fs.writeFile(file + '.tmp', JSON.stringify(room), (err) => { if (!err) fs.rename(file + '.tmp', file, () => {}); });
+    fs.writeFile(file + '.tmp', JSON.stringify(room), (err) => {
+      if (!err) fs.rename(file + '.tmp', file, () => {});
+    });
   }
   dirty.clear();
 }
@@ -80,19 +164,26 @@ export function loadRooms() {
     if (!/^[A-Z]{5}\.json$/.test(f)) continue;
     try {
       const room = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8'));
-      if (room.deadline != null) { room.remaining = Math.max(0, room.deadline - Date.now()); room.deadline = null; }
-      normScene(room.scene);                                   // stories saved by an older version lack newer fields
+      if (room.deadline != null) {
+        room.remaining = Math.max(0, room.deadline - Date.now());
+        room.deadline = null;
+      }
+      normScene(room.scene); // stories saved by an older version lack newer fields
       for (const hst of room.history) normScene(hst.scene);
       room.rules = cleanRules(room.rules);
       rooms.set(room.code, room);
-    } catch (e) { console.error('Could not load', f, e.message); }
+    } catch (e) {
+      console.error('Could not load', f, e.message);
+    }
   }
 }
 export function sweep() {
   const now = Date.now();
   for (const [code, room] of rooms) {
     if (now - room.updatedAt > ROOM_TTL_MS && !(streams.get(code) || { size: 0 }).size) {
-      rooms.delete(code); clearTimeout(timers.get(code)); timers.delete(code);
+      rooms.delete(code);
+      clearTimeout(timers.get(code));
+      timers.delete(code);
       fs.unlink(path.join(DATA_DIR, code + '.json'), () => {});
     }
   }

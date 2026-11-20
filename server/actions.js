@@ -6,8 +6,19 @@ import { actClaude, actSaveScenes, actRandomScene, actAddAsset, actGenerate } fr
 import { actRpgDef, actRpgStart, actRpgAgain, actRpgCmd, actRpgSnap } from './dungeon.js';
 
 const ACTIONS = {
-  submit: actSubmit, settings: actSettings, claude: actClaude, saveScenes: actSaveScenes, randomScene: actRandomScene, end: actEnd, addAsset: actAddAsset, generate: actGenerate,
-  rpgDef: actRpgDef, rpgStart: actRpgStart, rpgAgain: actRpgAgain, rpgCmd: actRpgCmd, rpgSnap: actRpgSnap,
+  submit: actSubmit,
+  settings: actSettings,
+  claude: actClaude,
+  saveScenes: actSaveScenes,
+  randomScene: actRandomScene,
+  end: actEnd,
+  addAsset: actAddAsset,
+  generate: actGenerate,
+  rpgDef: actRpgDef,
+  rpgStart: actRpgStart,
+  rpgAgain: actRpgAgain,
+  rpgCmd: actRpgCmd,
+  rpgSnap: actRpgSnap,
 };
 export async function act(room, token, body) {
   const handler = Object.hasOwn(ACTIONS, body.type) ? ACTIONS[body.type] : null;

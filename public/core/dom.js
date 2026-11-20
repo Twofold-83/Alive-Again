@@ -11,18 +11,41 @@ export function h(tag, props = {}, ...kids) {
   for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
   return el;
 }
-export function clone(o) { return JSON.parse(JSON.stringify(o)); }
-export function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
-/* ---------- small helpers ---------- */
-export function $(s, r = document) { return r.querySelector(s); }
-export function rid() { return Math.random().toString(36).slice(2, 10); }
-export function r3(v) { return Math.round(v * 1000) / 1000; }
-export function fmt(ms) { const s = Math.ceil(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+export function clone(o) {
+  return JSON.parse(JSON.stringify(o));
+}
+export function clamp(v, a, b) {
+  return Math.min(b, Math.max(a, v));
+}
+export function $(s, r = document) {
+  return r.querySelector(s);
+}
+export function rid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+export function r3(v) {
+  return Math.round(v * 1000) / 1000;
+}
+export function fmt(ms) {
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
 let toastTimer;
 export function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.hidden = false;
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400);
+  const t = $('#toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.hidden = true;
+  }, 3400);
 }
 /** Like replaceChildren / append, but nothing is drawn for null, false or '' (so `cond && h(...)` can be passed straight in). */
-export function fill(el, ...kids) { el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== '')); return el; }
-export function add(el, ...kids) { el.append(...kids.flat().filter((k) => k != null && k !== false && k !== '')); return el; }
+export function fill(el, ...kids) {
+  el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
+  return el;
+}
+export function add(el, ...kids) {
+  el.append(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
+  return el;
+}
