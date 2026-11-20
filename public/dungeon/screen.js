@@ -702,7 +702,7 @@ function modePick() {
           uiKey = '';
         },
       },
-      '⚡ Live',
+      'Live',
       h('small', {}, 'Everything moves at once'),
     ),
     h(
@@ -716,7 +716,7 @@ function modePick() {
           uiKey = '';
         },
       },
-      '♟️ Turn-based',
+      'Turn-based',
       h('small', {}, `Hero: ${R.AP} moves, then the Overlord`),
     ),
   );
@@ -761,12 +761,12 @@ function paintBoard() {
       const known = build || lord || r.seen;
       cls = known ? 'room' : 'room unseen';
       if (build) {
-        text = r.t.includes('S') ? '🧍' : r.t.includes('X') ? '👑' : '';
+        text = r.t.includes('S') ? '@' : r.t.includes('X') ? '♛' : '';
         if (k === editKey) cls += ' sel';
         title = 'Edit this room';
       } else {
         const n = st.mobs.filter((m) => m.r === k).length;
-        text = k === st.cur ? '🧍' : known && k === st.goal && (lord || r.seen) ? '👑' : lord && n ? '👾' + n : known ? '' : '';
+        text = k === st.cur ? '@' : known && k === st.goal && (lord || r.seen) ? '♛' : lord && n ? 'x' + n : '';
         if (k === st.cur) cls += ' cur';
         if (lord && k === (viewKey || st.cur)) cls += ' sel';
         if (!known) cls = 'room unseen';
@@ -808,7 +808,7 @@ function side() {
         h(
           'div',
           { class: 'rhead' },
-          h('h3', {}, '🏰 Build your castle'),
+          h('h3', {}, 'Build your castle'),
           h('button', { id: 'rpgUndo', title: 'Undo (Ctrl+Z)', onclick: undoEdit }, '↶ Undo'),
         ),
         h('input', {
@@ -850,7 +850,7 @@ function side() {
                   uiKey = '';
                 },
               },
-              '🧹 Empty this room',
+              'Empty this room',
             ),
             h(
               'button',
@@ -863,7 +863,7 @@ function side() {
                   uiKey = '';
                 },
               },
-              '🗑 Remove room',
+              'Remove room',
             ),
           ),
         ...PALETTE.flatMap(([name, list]) => [
@@ -933,7 +933,7 @@ function side() {
         h(
           'div',
           { class: 'row' },
-          h('button', { id: 'rpgRandom', class: 'grow', onclick: () => setDef(R.randomDef()) }, '🎲 Random castle'),
+          h('button', { id: 'rpgRandom', class: 'grow', onclick: () => setDef(R.randomDef()) }, 'Random castle'),
           h(
             'button',
             {
@@ -945,16 +945,16 @@ function side() {
                 setDef(d);
               },
             },
-            '📄 Start from nothing',
+            'Start from nothing',
           ),
         ),
-        h('button', { id: 'rpgStart', class: 'go primary', onclick: start }, '⚔️ Open the gates'),
+        h('button', { id: 'rpgStart', class: 'go primary', onclick: start }, 'Open the gates'),
       );
       if (S.rpg.phase === 'build' && !S.joined.player && !hot())
         p.prepend(h('p', { class: 'rnote' }, 'A castle is ready below — change anything you like while you wait for your hero.'));
     } else if (soloHero()) {
       showCard(
-        h('h2', {}, '⚔️ The castle awaits'),
+        h('h2', {}, 'The castle awaits'),
         h('p', {}, 'Somewhere inside is the crown. The Overlord does not want you to have it.'),
         modePick(),
         h(
@@ -973,7 +973,7 @@ function side() {
       );
     } else
       showCard(
-        h('h2', {}, '🏰 The Overlord is building the castle…'),
+        h('h2', {}, 'The Overlord is building the castle…'),
         h('p', {}, `${S.names.director} is laying traps, hiding keys and feeding the monsters.`),
         S.you === 'player' ? controls() : null,
       );
@@ -986,7 +986,7 @@ function side() {
       mine = hot() || S.you === 'spectator' ? null : (S.you === 'player') === heroWon,
       s = (st && st.stats) || {};
     showCard(
-      h('h2', {}, heroWon ? '👑 The hero takes the crown!' : '💀 The castle claims another hero'),
+      h('h2', {}, heroWon ? 'The hero takes the crown!' : 'The castle claims another hero'),
       h('p', {}, mine == null ? '' : mine ? 'You win!' : 'You lose — this time.'),
       st &&
         h('p', { class: 'dim' }, `${s.kills || 0} monsters slain · ${s.rooms || 0} rooms explored · ${st.hero.coins} coins · level ${st.hero.lvl}`),
@@ -994,10 +994,10 @@ function side() {
         ? h(
             'button',
             { id: 'rpgAgain', class: 'go primary', onclick: () => act('rpgAgain').catch((e) => toast(e.message)) },
-            '🏰 Back to the castle workshop',
+            'Back to the castle workshop',
           )
         : soloHero()
-          ? h('button', { id: 'rpgAgain', class: 'go primary', onclick: () => act('rpgAgain').catch((e) => toast(e.message)) }, '⚔️ Another castle')
+          ? h('button', { id: 'rpgAgain', class: 'go primary', onclick: () => act('rpgAgain').catch((e) => toast(e.message)) }, 'Another castle')
           : h('p', { class: 'dim' }, 'The Overlord can build a new castle.'),
     );
   }
@@ -1010,8 +1010,8 @@ function side() {
     h(
       'div',
       { class: 'rhead' },
-      h('h3', {}, st.name ? `🏰 ${st.name}` : '🏰 The castle'),
-      h('span', { class: 'dim' }, st.mode === 'turn' ? '♟️ turn-based' : '⚡ live'),
+      h('h3', {}, st.name ? `${st.name}` : 'The castle'),
+      h('span', { class: 'dim' }, st.mode === 'turn' ? 'turn-based' : 'live'),
     ),
   );
   add(
@@ -1028,13 +1028,7 @@ function side() {
     add(
       p,
       h('small', { class: 'dim', id: 'rpgViewing' }, ''),
-      h(
-        'div',
-        { class: 'dread' },
-        h('b', {}, '😈 Dread'),
-        h('div', { class: 'bar' }, h('i', { id: 'rpgDread' })),
-        h('span', { id: 'rpgDreadN' }, ''),
-      ),
+      h('div', { class: 'dread' }, h('b', {}, 'Dread'), h('div', { class: 'bar' }, h('i', { id: 'rpgDread' })), h('span', { id: 'rpgDreadN' }, '')),
       st.mode === 'turn' ? h('button', { id: 'rpgEndTurn', class: 'go primary', onclick: () => command({ k: 'endturn' }) }, 'End my turn ▶') : null,
       h('small', { class: 'dim grp' }, 'Summon a monster — pick one, then click a floor tile'),
       h(
@@ -1084,16 +1078,16 @@ function side() {
           h('b', {}, R.POWERS.spikes.cost),
         ),
         ...[
-          ['dark', '🌑'],
-          ['arrows', '🏹'],
-          ['quake', '🪨'],
-          ['heal', '💚'],
-          ['seal', '🚪'],
+          ['dark', 'candle'],
+          ['arrows', 'arrow'],
+          ['quake', 'rubble'],
+          ['heal', 'potion-green'],
+          ['seal', 'dungeon-door-iron'],
         ].map(([k, e]) =>
           h(
             'button',
             { 'data-cost': R.POWERS[k].cost, 'data-power': k, disabled: live ? null : '', onclick: () => command({ k }) },
-            h('i', {}, e),
+            icon(e),
             h('span', {}, R.POWERS[k].name),
             h('b', {}, R.POWERS[k].cost),
           ),
@@ -1126,7 +1120,7 @@ function controls() {
   return h(
     'div',
     { class: 'rkeys' },
-    h('div', { class: 'touch' }, '🕹️ Slide your thumb on the pad to walk. ⚔️ swings your sword, 🧪 drinks a potion, 💣 drops a bomb — then run.'),
+    h('div', { class: 'touch' }, 'Slide your thumb on the pad to walk. swings your sword, drinks a potion, drops a bomb — then run.'),
     h(
       'div',
       {},
@@ -1231,7 +1225,7 @@ function refresh() {
   if (on && msg.dataset.n !== String(m.n)) {
     msg.dataset.n = m.n;
     msg.className = m.who;
-    msg.textContent = (m.who === 'lord' ? '😈 ' : '') + m.text;
+    msg.textContent = m.text;
   }
   if (st && isLord()) {
     const bar = $('#rpgDread');
@@ -1251,7 +1245,7 @@ function refresh() {
     if (v)
       v.textContent =
         viewKey && viewKey !== st.cur
-          ? 'Looking at another room — click the hero’s room (🧍) to go back'
+          ? 'Looking at another room — click the hero’s room (@) to go back'
           : 'Click any room to look inside. You can set things up ahead of the hero.';
     if (viewKey === st.cur) viewKey = null;
   }

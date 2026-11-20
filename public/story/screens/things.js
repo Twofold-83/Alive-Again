@@ -1,25 +1,13 @@
 /* Director screens about one character or thing: its tools, speaking, moving, adding, tying, active objects, exits. */
-import { CATEGORIES, PIXEL } from '../../core/catalog.js';
-import { h, clone, clamp } from '../../core/dom.js';
+import { PIXEL } from '../../core/catalog.js';
+import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES } from '../../shared/options.js';
 import { G, buildGuided, short } from '../guided.js';
 import { glyphNode } from '../../stage/render.js';
 
-const EMOJI_GROUPS = {
-  char: ['people', 'fantasy', 'animals', 'faces'],
-  thing: ['things', 'tools', 'food', 'vehicles', 'wear', 'nature', 'places', 'body'],
-  tile: ['blocks'],
-  fx: ['effects'],
-};
-/** Categories for one "Add something" branch: pixel art first, then the emoji library. */
+/** Categories of the pixel-art library for one "Add something" branch. */
 function groupCats(g) {
-  return [
-    ...PIXEL.filter((c) => c.group === g),
-    ...EMOJI_GROUPS[g].map((id) => {
-      const c = CATEGORIES.find((k) => k.id === id);
-      return { ...c, label: '😀 ' + c.label };
-    }),
-  ];
+  return PIXEL.filter((c) => c.group === g);
 }
 
 /* ================= a selected character or thing: all its tools in one place ================= */
@@ -31,7 +19,7 @@ export function screenThing(kit) {
   }
   const isHero = sel.id === d.heroId;
   head(lab(sel), 'Drag it on the stage to move it.');
-  const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, icon + ' ' + label);
+  const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, label);
   const lay = (v, label) =>
     h(
       'button',
@@ -45,17 +33,18 @@ export function screenThing(kit) {
       },
       label,
     );
-  p.append(
+  add(
+    p,
     !ws && sayInput('What does it say? (optional)'),
     lookRow(),
     !sel.tie &&
-      h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, '⬇ Behind all'), lay(0, 'By position'), lay(1, '⬆ In front')),
+      h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, 'Behind all'), lay(0, 'By position'), lay(1, 'In front')),
     h('div', { class: 'row' }, pickSel(FX, 'fx', 'Effect'), pickSel([['', 'No emote'], ...EMOTES.map((e) => [e, e])], 'emote', 'Emote')),
     h(
       'div',
       { class: 'thingbtns' },
-      !ws && b('🚶', 'Move / animate', () => enter('move')),
-      b('🔄', 'Turn into…', () => {
+      !ws && b('', 'Move / animate', () => enter('move')),
+      b('', 'Turn into…', () => {
         G.q = '';
         enter('swap');
       }),
@@ -68,7 +57,7 @@ export function screenThing(kit) {
       }),
       !ws &&
         b(
-          '🧑',
+          '',
           'Player’s character',
           () => {
             d.heroId = isHero ? null : sel.id;
@@ -78,7 +67,7 @@ export function screenThing(kit) {
         ),
       ws &&
         b(
-          '🧱',
+          '',
           'Solid',
           () => {
             sel.solid = !sel.solid;
@@ -86,9 +75,9 @@ export function screenThing(kit) {
           },
           sel.solid,
         ),
-      ws && S.rules.type === 'adventure' && !isHero && b('⭐', 'Active object', () => enter('active'), !!sel.active),
+      ws && !isHero && b('', sel.active ? `Clickable: “${sel.active.name}”` : 'Make it clickable', () => enter('active'), !!sel.active),
       b(
-        '🔗',
+        '',
         sel.tie ? 'Tied — change' : 'Tie to…',
         () => {
           G.pick = null;
@@ -99,13 +88,13 @@ export function screenThing(kit) {
       !ws &&
         c.mods().inventory &&
         !isHero &&
-        b('🎒', `Give to ${S.names.player}`, () => {
+        b('', `Give to ${S.names.player}`, () => {
           const l = lab(sel);
           c.giveToPlayer(sel);
           done(`${S.names.player} gets ${l}`);
         }),
       !(ws && isHero) &&
-        b('🗑️', 'Remove', () => {
+        b('', 'Remove', () => {
           const l = lab(sel);
           c.removeEntity(sel);
           done(`${l} disappears`);
@@ -121,7 +110,8 @@ export function screenThing(kit) {
 export function screenSwap(kit) {
   const { p, c, sel, lab, setup, head, searchGrid } = kit;
   head(`Turn ${lab(sel)} into…`, 'It keeps its place and size.');
-  p.append(
+  add(
+    p,
     ...searchGrid((i) => {
       const was = lab(sel);
       sel.asset = i.asset;
@@ -133,12 +123,13 @@ export function screenSwap(kit) {
   return;
 }
 
-/* ================= 💬 speak ================= */
+/* ================= speak ================= */
 export function screenSpeak(kit) {
   const { p, c, sel, lab, head, doneBtn, picker, sayInput } = kit;
   if (!sel) return picker('Who speaks?');
   head(`What does ${lab(sel)} say?`);
-  p.append(
+  add(
+    p,
     sayInput('Type the line…'),
     h('small', { class: 'dim' }, 'With a face (optional)'),
     h(
@@ -163,7 +154,7 @@ export function screenSpeak(kit) {
   return;
 }
 
-/* ================= 🚶 move / animate ================= */
+/* ================= move / animate ================= */
 export function screenMove(kit) {
   const { p, c, sel, me, lab, enter, done, head, opt, picker, walk, comeIn } = kit;
   if (!sel) return picker('Who or what moves?');
@@ -171,24 +162,25 @@ export function screenMove(kit) {
   const far = sel.x < 0.5 ? 0.92 : 0.08,
     edge = sel.x < 0.5 ? 0 : 1,
     moving = c.trackEnd(sel.id);
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'gopts' },
-      opt('✋', 'Put it somewhere', 'Drag it; it glides there', () => enter('move:drag')),
-      opt('🔴', 'Record a path', 'Drag it, your timing is kept', () => enter('move:rec')),
+      opt('waving-hand', 'Put it somewhere', 'Drag it; it glides there', () => enter('move:drag')),
+      opt('button-pressed', 'Record a path', 'Drag it, your timing is kept', () => enter('move:rec')),
       me &&
         sel !== me &&
-        opt('🧑', 'Walk to the hero', '', () => walk('walks up to the hero', clamp(me.x + (sel.x < me.x ? -0.13 : 0.13), 0.05, 0.95), me.y)),
-      opt('↔️', 'Cross the stage', '', () => walk('crosses the stage', far, sel.y)),
-      opt('🚪', 'Walk off to the side', '', () => walk('walks off', edge, sel.y)),
-      opt('➡️', 'Enter from the left', 'Comes in from outside the screen', () => {
+        opt('hero', 'Walk to the hero', '', () => walk('walks up to the hero', clamp(me.x + (sel.x < me.x ? -0.13 : 0.13), 0.05, 0.95), me.y)),
+      opt('runner', 'Cross the stage', '', () => walk('crosses the stage', far, sel.y)),
+      opt('door', 'Walk off to the side', '', () => walk('walks off', edge, sel.y)),
+      opt('arrow-right', 'Enter from the left', 'Comes in from outside the screen', () => {
         if (comeIn(-0.18)) done(`${lab(sel)} enters from the left`);
       }),
-      opt('⬅️', 'Enter from the right', 'Comes in from outside the screen', () => {
+      opt('arrow-left', 'Enter from the right', 'Comes in from outside the screen', () => {
         if (comeIn(1.18)) done(`${lab(sel)} enters from the right`);
       }),
-      opt('⤴️', 'Jump', '', () => {
+      opt('curved-arrow', 'Jump', '', () => {
         if (
           c.autoTrack(sel, [
             [220, sel.x, sel.y - 0.14],
@@ -199,14 +191,14 @@ export function screenMove(kit) {
         )
           done(`${lab(sel)} jumps`);
       }),
-      opt('〰️', 'Tremble', '', () => {
+      opt('dizzy-stars', 'Tremble', '', () => {
         const s = [];
         for (let i = 0; i < 10; i++) s.push([80, sel.x + (i % 2 ? 0.012 : -0.012), sel.y]);
         s.push([80, sel.x, sel.y]);
         if (c.autoTrack(sel, s)) done(`${lab(sel)} trembles`);
       }),
       moving > 0 &&
-        opt('✖', 'Forget its moves', `${(moving / 1000).toFixed(1)} s recorded in this step`, () => {
+        opt('cross', 'Forget its moves', `${(moving / 1000).toFixed(1)} s recorded in this step`, () => {
           c.dropTrack(sel.id);
           c.rebuild();
         }),
@@ -218,7 +210,10 @@ export function screenMove(kit) {
 export function screenMoveDrag(kit) {
   const { p, sel, lab, head, doneBtn } = kit;
   head(`Drag ${lab(sel)} to its new place`, 'It glides there when the step plays.');
-  p.append(doneBtn(() => `${lab(sel)} moves`));
+  add(
+    p,
+    doneBtn(() => `${lab(sel)} moves`),
+  );
   return;
 }
 
@@ -226,7 +221,8 @@ export function screenMoveRec(kit) {
   const { p, c, sel, lab, head, doneBtn } = kit;
   const used = c.trackEnd(sel.id);
   head(`Recording ${lab(sel)}`, 'Drag it across the stage now. Release to stop; drag again to continue.');
-  p.append(
+  add(
+    p,
     h('div', { class: 'meter' }, h('i', { style: `width:${used / 100}%` })),
     h('small', { class: 'dim' }, `${(used / 1000).toFixed(1)} of 10 seconds`),
     h(
@@ -241,7 +237,7 @@ export function screenMoveRec(kit) {
             c.rebuild();
           },
         },
-        '✖ Start over',
+        'x Start over',
       ),
       doneBtn(() => `${lab(sel)} moves along a path`),
     ),
@@ -249,35 +245,36 @@ export function screenMoveRec(kit) {
   return;
 }
 
-/* ================= ➕ add ================= */
+/* ================= + add ================= */
 export function screenAdd(kit) {
   const { p, enter, head, opt } = kit;
   head('Add what?');
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'gopts' },
-      opt('🧑', 'A character', 'Heroes, townsfolk, monsters, animals', () => {
+      opt('hero', 'A character', 'Heroes, townsfolk, monsters, animals', () => {
         G.cat = '';
         enter('add:char');
       }),
-      opt('📦', 'A thing', 'Items, furniture, nature, buildings…', () => {
+      opt('crate', 'A thing', 'Items, furniture, nature, buildings…', () => {
         G.cat = '';
         enter('add:thing');
       }),
-      opt('🧱', 'A level piece', 'Blocks and props to place freely', () => {
+      opt('tile-brick', 'A level piece', 'Blocks and props to place freely', () => {
         G.cat = '';
         enter('add:tile');
       }),
-      opt('✨', 'An effect or sign', 'Explosions, hearts, arrows…', () => {
+      opt('sparkles', 'An effect or sign', 'Explosions, hearts, arrows…', () => {
         G.cat = '';
         enter('add:fx');
       }),
-      opt('🔍', 'Search by name', 'Look through everything', () => {
+      opt('magnifying-glass', 'Search by name', 'Look through everything', () => {
         G.q = '';
         enter('add:search');
       }),
-      opt('🖼️', 'Something of my own', 'A photo, a new creation, any emoji', () => enter('add:own')),
+      opt('photo-frame', 'Something of my own', 'A photo, a new creation, a written sign', () => enter('add:own')),
     ),
   );
   return;
@@ -289,7 +286,8 @@ export function screenAddChar(kit) {
     cat = cats.find((x) => x.id === G.cat) || cats[0];
   head('Pick one', 'It appears on the stage.');
   if (cats.length > 1)
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'chips wrap' },
@@ -308,14 +306,17 @@ export function screenAddChar(kit) {
         ),
       ),
     );
-  p.append(itemGrid(cat.items, (i) => place(i.asset)));
+  add(
+    p,
+    itemGrid(cat.items, (i) => place(i.asset)),
+  );
   return;
 }
 
 export function screenAddSearch(kit) {
   const { p, head, place, searchGrid } = kit;
   head('Search');
-  p.append(...searchGrid((i) => place(i.asset), 'dragon, door, key, angry…'));
+  add(p, ...searchGrid((i) => place(i.asset), 'dragon, door, key, angry…'));
   return;
 }
 
@@ -323,16 +324,18 @@ export function screenAddOwn(kit) {
   const { p, c, S, code, head, place } = kit;
   head('Something of your own');
   const mine = S.assets.filter((a) => a.kind === 'sprite');
-  const any = h('input', { placeholder: 'Any emoji or a short word', maxlength: 24 });
+  const any = h('input', { placeholder: 'A word or two, shown as a sign', maxlength: 24 });
   if (mine.length)
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'grid' },
         mine.map((a) => h('button', { title: a.name, onclick: () => place('c:' + a.id) }, glyphNode(code, 'c:' + a.id))),
       ),
     );
-  p.append(
+  add(
+    p,
     c.maker('sprite', (id) => place('c:' + id)),
     h(
       'div',
@@ -353,17 +356,18 @@ export function screenAddOwn(kit) {
   return;
 }
 
-/* ================= ⭐ active object ================= */
+/* ================= * active object ================= */
 export function screenActive(kit) {
   const { p, c, S, sel, lab, setup, back, head } = kit;
   if (!sel) return back();
   head(
-    `${lab(sel)} as an active object`,
+    `${lab(sel)}: can the Player click it?`,
     `${S.names.player} sees its name when pointing at it, and can click it to choose one of the actions you allow.`,
   );
   const on = !!sel.active,
     VERBS = ['Look at', 'Use', 'Open', 'Talk to', 'Take', 'Push', 'Read', 'Attack'];
-  p.append(
+  add(
+    p,
     h(
       'button',
       {
@@ -374,12 +378,13 @@ export function screenActive(kit) {
           c.rebuild();
         },
       },
-      on ? '⭐ Active — click to switch off' : 'Make it an active object',
+      on ? 'Clickable — press to switch off' : 'Make it clickable',
     ),
   );
   if (on) {
     const custom = h('input', { placeholder: 'Your own action…', maxlength: 16 });
-    p.append(
+    add(
+      p,
       h('input', {
         id: 'activeName',
         placeholder: 'Its name, e.g. “Old oak chest”',
@@ -428,7 +433,8 @@ export function screenActive(kit) {
       ),
     );
   }
-  p.append(
+  add(
+    p,
     h(
       'button',
       {
@@ -445,7 +451,7 @@ export function screenActive(kit) {
   return;
 }
 
-/* ================= 🔗 tie: one thing holds or carries another ================= */
+/* ================= tie: one thing holds or carries another ================= */
 export function screenTie(kit) {
   const { p, c, d, code, sel, lab, setup, back, head } = kit;
   if (!sel) return back();
@@ -463,7 +469,8 @@ export function screenTie(kit) {
       : 'Pick who or what carries it: here, or by clicking on the stage.',
   );
   if (!par)
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'grid' },
@@ -484,7 +491,8 @@ export function screenTie(kit) {
       ),
     );
   else
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'row' },
@@ -498,7 +506,7 @@ export function screenTie(kit) {
               c.rebuild();
             },
           },
-          '⬆ In front',
+          'In front',
         ),
         h(
           'button',
@@ -510,7 +518,7 @@ export function screenTie(kit) {
               c.rebuild();
             },
           },
-          '⬇ Behind',
+          'Behind',
         ),
         h(
           'button',
@@ -523,11 +531,12 @@ export function screenTie(kit) {
               c.rebuild();
             },
           },
-          '✂ Untie',
+          'Untie',
         ),
       ),
     );
-  p.append(
+  add(
+    p,
     h(
       'button',
       {
@@ -543,7 +552,7 @@ export function screenTie(kit) {
   return;
 }
 
-/* ================= 🚪 an exit to another scene ================= */
+/* ================= an exit to another scene ================= */
 export function screenExit(kit) {
   const { p, c, d, S, ws, setup, home, done, head, doneBtn } = kit;
   const ex = d.exits.find((x) => x.id === G.exit);
@@ -552,7 +561,8 @@ export function screenExit(kit) {
     return buildGuided((p.replaceChildren(), p), c);
   }
   head('Exit', 'Drag it on the stage to where the way out is.');
-  p.append(
+  add(
+    p,
     h('input', {
       placeholder: 'Label, e.g. “To the forest”',
       maxlength: 40,
@@ -591,7 +601,7 @@ export function screenExit(kit) {
             c.rebuild();
           },
         },
-        ex.locked ? '🔒 Locked — click to unlock' : '🔓 Open — click to lock',
+        ex.locked ? 'Locked — click to unlock' : 'Open — click to lock',
       ),
       !ws &&
         h(
@@ -604,7 +614,7 @@ export function screenExit(kit) {
               if (doc) done(`Traveling to “${doc.name}”`);
             },
           },
-          '🚶 Travel there now',
+          'Travel there now',
         ),
       h(
         'button',
@@ -616,7 +626,7 @@ export function screenExit(kit) {
             c.rebuild();
           },
         },
-        '🗑',
+        'Remove exit',
       ),
     ),
     doneBtn(''),

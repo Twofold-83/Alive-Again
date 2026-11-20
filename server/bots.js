@@ -59,7 +59,7 @@ function clamp(v, a, b) {
   return Math.min(b, Math.max(a, v));
 }
 function glyph(e) {
-  return e.asset.startsWith('e:') ? e.asset.slice(2) : 'the strange thing';
+  return e.asset.startsWith('p:') ? 'the ' + e.asset.slice(2).replace(/-/g, ' ') : 'the strange thing';
 }
 function dist(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
@@ -68,7 +68,7 @@ function nearest(from, list) {
   return list.slice().sort((a, b) => dist(a, from) - dist(b, from))[0];
 }
 function ent(kind, emoji, x, y, say = '', scale = 1) {
-  return { id: `${kind}-${uid()}`, asset: 'e:' + emoji, x, y, scale, flip: false, rot: 0, say, fx: '', emote: '' };
+  return { id: `${kind}-${uid()}`, asset: 'p:' + emoji, x, y, scale, flip: false, rot: 0, say, fx: '', emote: '' };
 }
 
 /* ====================================================================
@@ -107,7 +107,7 @@ function playerMove({ scene, memory, rules }) {
     target: null,
     use: null,
     roll: 0,
-    emote: chance(0.5) ? pick(['😀', '🤔', '😱', '😡', '😢', '😍']) : '',
+    emote: chance(0.5) ? pick([':)', '?', '!!', '>:(', ':(', '♥']) : '',
   };
 
   const mode = (rules && rules.player) || 'free';
@@ -162,10 +162,10 @@ const PLACES = [
     open: 'You wake in a forest you do not remember entering.',
     arrive: 'The path ends among tall, silent trees.',
     cast: [
-      ['npc', '🧙', 0.7, 0.8, 'Ah. You are finally awake.'],
-      ['obj', '🌲', 0.1, 0.62, '', 2.4],
-      ['obj', '🌲', 0.9, 0.6, '', 2.2],
-      ['obj', '📦', 0.48, 0.93],
+      ['npc', 'mage', 0.7, 0.8, 'Ah. You are finally awake.'],
+      ['obj', 'pine', 0.1, 0.62, '', 2.4],
+      ['obj', 'pine', 0.9, 0.6, '', 2.2],
+      ['obj', 'crate', 0.48, 0.93],
     ],
   },
   {
@@ -176,10 +176,10 @@ const PLACES = [
     open: 'Rain on the window. Someone has been in your room.',
     arrive: 'A dim room. The door clicks shut behind you.',
     cast: [
-      ['npc', '🕵️', 0.72, 0.82, 'Do not touch anything. Where were you last night?'],
-      ['obj', '🚪', 0.12, 0.62, '', 1.8],
-      ['obj', '✉️', 0.45, 0.9, '', 0.7],
-      ['obj', '🕯️', 0.9, 0.6],
+      ['npc', 'detective', 0.72, 0.82, 'Do not touch anything. Where were you last night?'],
+      ['obj', 'door', 0.12, 0.62, '', 1.8],
+      ['obj', 'letter', 0.45, 0.9, '', 0.7],
+      ['obj', 'candle', 0.9, 0.6],
     ],
   },
   {
@@ -190,10 +190,10 @@ const PLACES = [
     open: 'The tide brought you here. The boat is gone.',
     arrive: 'Sand under your feet, and the sound of waves.',
     cast: [
-      ['npc', '🦀', 0.66, 0.9, 'Psst. You. Tall one. Down here.', 0.8],
-      ['obj', '🌴', 0.88, 0.66, '', 2.4],
-      ['obj', '🍾', 0.3, 0.92, '', 0.7],
-      ['obj', '🛶', 0.15, 0.6, '', 1.4],
+      ['npc', 'crab', 0.66, 0.9, 'Psst. You. Tall one. Down here.', 0.8],
+      ['obj', 'palm', 0.88, 0.66, '', 2.4],
+      ['obj', 'message-in-bottle', 0.3, 0.92, '', 0.7],
+      ['obj', 'rowboat', 0.15, 0.6, '', 1.4],
     ],
   },
   {
@@ -204,9 +204,9 @@ const PLACES = [
     open: 'Your ship has landed somewhere it should not have.',
     arrive: 'Stars in every direction. The ground hums.',
     cast: [
-      ['npc', '👽', 0.7, 0.8, 'Visitor. State your purpose.'],
-      ['obj', '🚀', 0.14, 0.72, '', 2],
-      ['obj', '🔮', 0.5, 0.92, '', 0.8],
+      ['npc', 'alien-grey', 0.7, 0.8, 'Visitor. State your purpose.'],
+      ['obj', 'rocket', 0.14, 0.72, '', 2],
+      ['obj', 'crystal-ball', 0.5, 0.92, '', 0.8],
     ],
   },
   {
@@ -217,10 +217,10 @@ const PLACES = [
     open: 'The torch is almost out. Something breathes in the dark.',
     arrive: 'Cold stone, and a slow breathing ahead.',
     cast: [
-      ['npc', '🐉', 0.72, 0.78, 'Who dares wake me?', 1.8],
-      ['obj', '💰', 0.5, 0.92],
-      ['obj', '🪨', 0.12, 0.85, '', 1.4],
-      ['obj', '🗡️', 0.3, 0.6, '', 0.8],
+      ['npc', 'dragon', 0.72, 0.78, 'Who dares wake me?', 1.8],
+      ['obj', 'money-bag', 0.5, 0.92],
+      ['obj', 'rock', 0.12, 0.85, '', 1.4],
+      ['obj', 'sword', 0.3, 0.6, '', 0.8],
     ],
   },
   {
@@ -231,10 +231,10 @@ const PLACES = [
     open: 'Midnight. The village is empty, except for one light.',
     arrive: 'Night has fallen. A single window glows.',
     cast: [
-      ['npc', '👻', 0.68, 0.72, 'You can see me? Nobody has seen me in years.'],
-      ['obj', '🏚️', 0.2, 0.66, '', 2.4],
-      ['obj', '🪦', 0.86, 0.86],
-      ['obj', '🕯️', 0.5, 0.92, '', 0.7],
+      ['npc', 'ghost', 0.68, 0.72, 'You can see me? Nobody has seen me in years.'],
+      ['obj', 'house', 0.2, 0.66, '', 2.4],
+      ['obj', 'gravestone', 0.86, 0.86],
+      ['obj', 'candle', 0.5, 0.92, '', 0.7],
     ],
   },
   {
@@ -245,10 +245,10 @@ const PLACES = [
     open: 'A bright morning. A stranger waves from across the field.',
     arrive: 'Sunlight, tall grass, and somebody waving.',
     cast: [
-      ['npc', '🧑‍🌾', 0.7, 0.82, 'You there! Have you seen a runaway pig?'],
-      ['obj', '🌻', 0.12, 0.88],
-      ['obj', '🏡', 0.86, 0.62, '', 2.2],
-      ['obj', '🪣', 0.45, 0.92, '', 0.8],
+      ['npc', 'farmer', 0.7, 0.82, 'You there! Have you seen a runaway pig?'],
+      ['obj', 'sunflower', 0.12, 0.88],
+      ['obj', 'house', 0.86, 0.62, '', 2.2],
+      ['obj', 'bucket', 0.45, 0.92, '', 0.8],
     ],
   },
   {
@@ -259,10 +259,10 @@ const PLACES = [
     open: 'The great hall is silent. The throne is not empty.',
     arrive: 'Stone pillars. Torchlight. A throne.',
     cast: [
-      ['npc', '🤴', 0.7, 0.74, 'Kneel. Or explain yourself. Quickly.'],
-      ['npc', '💂', 0.9, 0.84, ''],
-      ['obj', '👑', 0.5, 0.93, '', 0.7],
-      ['obj', '🚪', 0.1, 0.64, '', 1.8],
+      ['npc', 'king', 0.7, 0.74, 'Kneel. Or explain yourself. Quickly.'],
+      ['npc', 'guard', 0.9, 0.84, ''],
+      ['obj', 'crown', 0.5, 0.93, '', 0.7],
+      ['obj', 'door', 0.1, 0.64, '', 1.8],
     ],
   },
   {
@@ -273,27 +273,27 @@ const PLACES = [
     open: 'The mud pulls at your boots. Something is laughing.',
     arrive: 'Green fog, black water, and a croaking laugh.',
     cast: [
-      ['npc', '🐸', 0.66, 0.88, 'Ribbit. That is frog for: you owe me a favour.', 0.9],
-      ['obj', '🍄', 0.2, 0.9, '', 0.8],
-      ['obj', '🧳', 0.46, 0.93],
-      ['obj', '🌿', 0.88, 0.8, '', 1.6],
+      ['npc', 'frog', 0.66, 0.88, 'Ribbit. That is frog for: you owe me a favour.', 0.9],
+      ['obj', 'mushroom-brown', 0.2, 0.9, '', 0.8],
+      ['obj', 'suitcase', 0.46, 0.93],
+      ['obj', 'bush', 0.88, 0.8, '', 1.6],
     ],
   },
 ];
 const VISITORS = [
-  ['🧛', 'Good evening. I believe you have something of mine.'],
-  ['👧', 'Are you lost too?'],
-  ['🤖', 'SCANNING. You are not on the list.'],
-  ['🐺', '…'],
-  ['🧚', 'Shh! They will hear you.'],
-  ['💂', 'Halt! Nobody passes without the word.'],
-  ['🧝', 'We have been expecting you, though not so soon.'],
-  ['🐈', 'Mrow.'],
+  ['vampire', 'Good evening. I believe you have something of mine.'],
+  ['girl', 'Are you lost too?'],
+  ['robot', 'SCANNING. You are not on the list.'],
+  ['wolf', '…'],
+  ['fairy', 'Shh! They will hear you.'],
+  ['guard', 'Halt! Nobody passes without the word.'],
+  ['elf', 'We have been expecting you, though not so soon.'],
+  ['cat', 'Mrow.'],
 ];
-const CLUES = ['🗝️', '📜', '👣', '✉️', '💍', '🔦', '🗺️'];
-const LOOT = ['🔑', '💎', '📜', '🗡️', '🐍', '💰', '🧿', '🕷️'];
-const CONTAINERS = ['📦', '🧳', '🎁', '💰', '🏺'];
-const EXITS = ['🚪', '🏚️', '🏡', '🚀', '🛶'];
+const CLUES = ['key-silver', 'scroll', 'footprints', 'letter', 'diamond-ring', 'flashlight', 'map'];
+const LOOT = ['key-gold', 'diamond', 'scroll', 'sword', 'snake', 'money-bag', 'amulet', 'spider'];
+const CONTAINERS = ['crate', 'suitcase', 'gift', 'money-bag', 'urn'];
+const EXITS = ['door', 'house', 'house', 'rocket', 'rowboat'];
 
 function buildPlace(scene, place, hero, narration) {
   scene.backdrop = place.backdrop;
@@ -321,7 +321,7 @@ function directorMove({ scene, memory, turn, rules }) {
   const mods = (rules && rules.modules) || {};
   let hero = scene.entities.find((e) => e.id === scene.heroId);
   if (!hero) {
-    hero = { id: 'hero', asset: 's:person', x: 0.3, y: 0.82, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' };
+    hero = { id: 'hero', asset: 'p:hero', x: 0.3, y: 0.82, scale: 1, flip: false, rot: 0, say: '', fx: '', emote: '' };
     scene.entities.push(hero);
     scene.heroId = hero.id;
   }
@@ -330,8 +330,8 @@ function directorMove({ scene, memory, turn, rules }) {
   const offer = () => {
     // quick choices for the Player's next turn
     const c = [];
-    const box = objs().find((o) => CONTAINERS.includes(glyph(o))),
-      small = objs().find((o) => o.scale < 1.6 && !CONTAINERS.includes(glyph(o))),
+    const box = objs().find((o) => CONTAINERS.includes(o.asset.slice(2))),
+      small = objs().find((o) => o.scale < 1.6 && !CONTAINERS.includes(o.asset.slice(2))),
       who = npcs()[0];
     if (box) c.push(`Open ${glyph(box)}`);
     if (who) c.push(`Talk to ${glyph(who)}`);
@@ -349,8 +349,8 @@ function directorMove({ scene, memory, turn, rules }) {
     buildPlace(scene, place, hero, place.open);
     if (mods.stats && !scene.sheet.stats.length)
       scene.sheet.stats = [
-        { id: 'hp', name: '❤️ Health', value: 5, max: 5 },
-        { id: 'gold', name: '💰 Gold', value: 0, max: null },
+        { id: 'hp', name: 'Health', value: 5, max: 5 },
+        { id: 'gold', name: 'Gold', value: 0, max: null },
       ];
     offer();
     return { scene };
@@ -403,7 +403,7 @@ function directorMove({ scene, memory, turn, rules }) {
   if (item) {
     // the Player used something from the inventory
     scene.sheet.inv = scene.sheet.inv.filter((i) => i !== item);
-    const g = item.asset.startsWith('e:') ? item.asset.slice(2) : item.name || 'it';
+    const g = item.name || (item.asset.startsWith('p:') ? 'the ' + item.asset.slice(2).replace(/-/g, ' ') : 'it');
     if (chance(0.5)) {
       travel(`You use ${g}. Something gives way, and you step through.`);
       moved = true;
@@ -424,13 +424,13 @@ function directorMove({ scene, memory, turn, rules }) {
     scene.burst = 'shake';
     scene.sfx = 'boom';
     if (npc) {
-      fx('💥', npc);
+      fx('explosion', npc);
       if (chance(0.4)) {
         scene.narration = `${glyph(npc)} bolts into the distance. You are alone now.`;
         remove(npc);
       } else {
         npc.say = pick(['Ow! Was that really necessary?', 'So that is how it is going to be.', 'You will regret that.', 'Stop! I am on your side!']);
-        npc.emote = '😡';
+        npc.emote = '>:(';
         npc.fx = 'shake';
         npc.x = clamp(npc.x + (npc.x > hero.x ? 0.12 : -0.12), 0.05, 0.95);
         const hp = stat(/health|hp|life/i);
@@ -448,7 +448,7 @@ function directorMove({ scene, memory, turn, rules }) {
     } else {
       const o = nearest(hero, objs());
       if (o) {
-        fx('💥', o);
+        fx('explosion', o);
         remove(o);
         scene.narration = `${glyph(o)} breaks apart. The noise carries a long way.`;
       } else scene.narration = 'You swing at nothing. The air does not mind.';
@@ -456,13 +456,13 @@ function directorMove({ scene, memory, turn, rules }) {
   } else if (has(/\b(open|unlock|knock|enter|unwrap)/)) {
     const box = nearest(
       hero,
-      objs().filter((o) => CONTAINERS.includes(glyph(o))),
+      objs().filter((o) => CONTAINERS.includes(o.asset.slice(2))),
     );
-    const door = objs().find((o) => EXITS.includes(glyph(o)));
+    const door = objs().find((o) => EXITS.includes(o.asset.slice(2)));
     if (box) {
       const loot = pick(LOOT);
       scene.narration = `It creaks open. Inside: ${loot}`;
-      box.asset = 'e:' + loot;
+      box.asset = 'p:' + loot;
       box.id = 'obj-' + uid();
       box.fx = 'glow';
       scene.sfx = 'bell';
@@ -476,7 +476,7 @@ function directorMove({ scene, memory, turn, rules }) {
       travel('You step through.');
       moved = true;
     } else {
-      scene.entities.push(ent('obj', '🚪', hero.x > 0.5 ? 0.1 : 0.9, 0.66, '', 1.8));
+      scene.entities.push(ent('obj', 'door', hero.x > 0.5 ? 0.1 : 0.9, 0.66, '', 1.8));
       scene.sfx = 'knock';
       scene.narration = 'Nothing here opens. But a door you had not noticed stands in the shadows.';
     }
@@ -515,9 +515,9 @@ function directorMove({ scene, memory, turn, rules }) {
     if (chance(0.6)) visitor();
   } else if (has(/\b(love|kiss|hug|marry|dance|flirt)/)) {
     if (npc) {
-      fx('❤️', npc);
+      fx('heart', npc);
       npc.say = pick(['Oh! This is… unexpected.', 'We have only just met!', 'Well. Nobody has asked me that before.']);
-      npc.emote = '😳';
+      npc.emote = 'o_o';
       scene.mood = 'm:love';
     } else scene.narration = 'A lovely thought, but there is nobody here to share it with.';
   } else if (has(/\b(give|offer|show|hand|pay|trade)/) && npc) {

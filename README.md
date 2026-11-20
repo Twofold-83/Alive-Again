@@ -162,6 +162,26 @@ sits on the left and the tools on the right; Ctrl+Enter ends
 the turn, and with something selected the arrow keys move it, `+`/`-` resize, `r`
 rotates, `f` flips and Delete removes.
 
+## The look
+
+Twofold looks like a game on an old computer in a dark room: one pixel typeface (VT323,
+bundled in `public/fonts`, SIL Open Font License), hard edges, bone-white on near-black with
+amber for what matters, faint scan lines, and a stage whose edges fall into shadow. There
+are no emoji anywhere: the stage uses the pixel-art library only, menus use sprites from it
+as icons, and what the Player did is read out like the log of an old adventure game
+(`SAYS`, `DOES`, `GOES`, `ROLLS`), with a `> command line` on the stage during the replay.
+
+- **Rooms in one click.** Build scene has twelve themes (old house, parlour, kitchen, great
+  hall, cellar, crypt, desert tomb, cave, garden, graveyard, snowfield, street) in four
+  shapes; one press lays walls, floor and a few details. A new story opens in such a room.
+- **Things can be clicked from the start.** Anything placed in Build scene gets a name and
+  the verbs Look at / Use / Take; rename it or change the verbs under "Clickable".
+- **Places with many rooms.** On the Map, "Room next door" adds a connected room in one
+  press, and "Ready-made places" drops a furnished, connected set of rooms (the old house,
+  the crypt, the lost mine) to play at once or change.
+- **Thirty tunes**, eight of them made to unsettle: Dread, Crypt, Broken music box,
+  Whispers, Heartbeat, Church organ, Lament, Drone.
+
 ## Phone or computer
 
 The start screen asks what you are playing on (it guesses the first time and remembers).
@@ -232,6 +252,7 @@ server/                   the server (ES modules, no dependencies except the opt
 public/                   the browser
   main.js                 start-up
   shared/                 used by browser AND server, so rules exist once
+    rooms.js              rooms in one click: themes, shapes, the level they make
     scene-model.js        what a scene is: its fields by lifetime, where the hero may stand
     dungeon-rules.js      all rules of Dungeon mode (no drawing, no network)
   core/                   state.js (one `app` object), net.js, dom.js, history.js (undo),

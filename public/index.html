@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#15131c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Twofold — a story told by two</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
+<link rel="icon" type="image/png" href="px/candle.png">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/home.css">
@@ -21,36 +21,36 @@
 <body>
 
 <main id="home" class="screen">
-  <button id="homeSound" aria-label="Sound" title="Sound">🔊</button>
+  <button id="homeSound" aria-label="Sound" title="Sound"></button>
   <div class="titlecol">
     <canvas id="titleArt" width="200" height="140" aria-hidden="true"></canvas>
     <h1 class="gametitle">Twofold</h1>
     <p class="subtitle">The Return of the Four-Armed Boy</p>
     <p class="tag">A story told by two.<br>One plays the hero. One plays the whole world.</p>
-    <p id="musicHint" class="hint">♪ tap or click anywhere for music</p>
+    <p id="musicHint" class="hint">tap or click anywhere for music</p>
   </div>
   <div class="homebox">
     <div id="devicePick" class="devpick" role="group" aria-label="What are you playing on?">
-      <button data-dev="phone">📱 Phone</button>
-      <button data-dev="computer">💻 Computer</button>
+      <button data-dev="phone">Phone</button>
+      <button data-dev="computer">Computer</button>
     </div>
     <p id="invite" class="invite" hidden></p>
     <input id="name" maxlength="20" placeholder="Your name" autocomplete="nickname" enterkeyhint="done">
     <div id="typePick" class="typepick">
       <span class="dim small">Kind of story</span>
-      <button id="typeFree" class="on" data-type="free">🎭 Free play<small>Just the stage and your imagination</small></button>
-      <button id="typeAdventure" data-type="adventure">🗺️ Adventure<small>Inventory, stats, levels, maps, battles</small></button>
-      <button id="typeRpg" data-type="rpg">⚔️ Dungeon<small>A hero with a sword against the Overlord’s castle — live or turn-based</small></button>
+      <button id="typeFree" class="on" data-type="free">Free play<small>Just the stage and your imagination</small></button>
+      <button id="typeAdventure" data-type="adventure">Adventure<small>Inventory, stats, levels, maps, battles</small></button>
+      <button id="typeRpg" data-type="rpg">Dungeon<small>A hero with a sword against the Overlord’s castle — live or turn-based</small></button>
     </div>
     <div id="newBtns">
-      <button id="newDirector" class="big primary">🎬 Start a story as Director<small>You control the world, the cast and the music</small></button>
-      <button id="newPlayer" class="big">🧑 Start a story as Player<small>You are the hero — your partner directs</small></button>
+      <button id="newDirector" class="big primary">Start a story as Director<small>You control the world, the cast and the music</small></button>
+      <button id="newPlayer" class="big">Start a story as Player<small>You are the hero — your partner directs</small></button>
       <div class="or">or on your own</div>
       <div class="row">
-        <button id="soloPlayer" class="big grow">🤖 Solo Player<small>AI directs</small></button>
-        <button id="soloDirector" class="big grow">🤖 Solo Director<small>AI is the hero</small></button>
+        <button id="soloPlayer" class="big grow">Solo Player<small>AI directs</small></button>
+        <button id="soloDirector" class="big grow">Solo Director<small>AI is the hero</small></button>
       </div>
-      <button id="hotseat" class="big">🎭 Play both sides<small>You take every turn yourself — for trying things out</small></button>
+      <button id="hotseat" class="big">Play both sides<small>You take every turn yourself — for trying things out</small></button>
       <div class="or">or join a story</div>
     </div>
     <div class="row">
@@ -82,9 +82,9 @@
       <div id="rpgPad" hidden>
         <div id="rpgStick" aria-label="Walk"><i></i></div>
         <div id="rpgBtns">
-          <button id="padPotion" aria-label="Drink a potion">🧪<b></b></button>
-          <button id="padBomb" aria-label="Drop a bomb">💣<b></b></button>
-          <button id="padSword" aria-label="Swing your sword">⚔️</button>
+          <button id="padPotion" aria-label="Drink a potion"><b></b></button>
+          <button id="padBomb" aria-label="Drop a bomb"><b></b></button>
+          <button id="padSword" aria-label="Swing your sword"></button>
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@
 </main>
 
 <div id="story" class="overlay" hidden>
-  <header><b>📖 The story so far</b><button id="storyClose" class="icon" aria-label="Close">✕</button></header>
+  <header><b>The story so far</b><button id="storyClose" class="icon" aria-label="Close">✕</button></header>
   <div class="stageWrap"><div id="storyStage" class="stage"></div></div>
   <p id="storyCap"></p>
   <div class="row center">

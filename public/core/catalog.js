@@ -222,7 +222,7 @@ export async function loadPixel() {
     if (!r.ok) return;
     for (const c of (await r.json()).categories) {
       const items = c.items.map((i) => {
-        const it = { name: i.name, asset: 'p:' + i.slug, kind: i.kind, solid: !!i.solid };
+        const it = { name: i.name, asset: 'p:' + i.slug, kind: i.kind, solid: !!i.solid, group: c.group };
         PX.set(i.slug, it);
         return it;
       });
@@ -234,7 +234,7 @@ export async function loadPixel() {
 }
 /** Every searchable built-in sprite, pixel art first. */
 export function allItems() {
-  return [...PIXEL.flatMap((c) => c.items), ...CATEGORIES.flatMap((c) => c.items)];
+  return PIXEL.flatMap((c) => c.items); // the emoji library is still understood (old stories use it) but no longer offered
 }
 
 /* ---------- art packs (higher quality replacements for the placeholders) ---------- */
@@ -278,6 +278,11 @@ export function assetLabel(asset, name) {
 /** Catalog facts about a pixel sprite: { kind: 'floor'|'wall' } for tiles, { solid } for props. */
 export function pixelInfo(asset) {
   return (asset.startsWith('p:') && PX.get(asset.slice(2))) || {};
+}
+/** A plain name for a pixel sprite, good enough to show the Player: 'p:old-oak-chest' -> 'Old oak chest'. */
+export function spriteTitle(asset) {
+  const words = asset.replace(/^[a-z]:/, '').replace(/-/g, ' ');
+  return words ? words[0].toUpperCase() + words.slice(1) : 'Thing';
 }
 export function assetName(asset) {
   const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;

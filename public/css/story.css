@@ -2,11 +2,11 @@
 /* ---- sheet bar under the stage: stats and inventory ---- */
 #sheet { display: flex; gap: 6px; align-items: center; padding: 6px 12px; overflow-x: auto; background: var(--panel); border-top: 1px solid var(--line); flex: none; }
 #sheet > * { flex: none; white-space: nowrap; }
-.chip { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 1px 8px; border-radius: var(--r); background: var(--panel2); border: 1px solid var(--line); font-size: 13px; }
-.chip.label { background: none; border: 0; padding: 0 2px; font-size: 16px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 1px 8px; border-radius: 0; background: var(--panel2); border: 1px solid var(--line); font-size: 17px; }
+.chip.label { background: none; border: 0; padding: 0 2px; font-size: 21px; }
 .chip.stat button { min-height: 22px; min-width: 22px; padding: 0; line-height: 1; }
 .chip.stat button.x { background: none; border: 0; color: var(--dim); min-width: 16px; }
-button.chip.item { font-size: 18px; padding: 0 6px; min-height: 32px; }
+button.chip.item { font-size: 24px; padding: 0 6px; min-height: 32px; }
 button.chip.item img { height: 24px; image-rendering: pixelated; }
 button.chip.item:disabled { opacity: 1; }
 button.chip.item.on { outline: 2px solid var(--accent); }
@@ -21,35 +21,36 @@ button.chip.add { color: var(--dim); }
 .steps { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .stepchip { min-width: 30px; min-height: 28px; padding: 0 6px; font-weight: 600; }
 .stepadd { min-height: 28px; padding: 0 10px; border-style: dashed; }
-.stepbar .row button { min-height: 28px; padding: 2px 6px; font-size: 13px; }
+.stepbar .row button { min-height: 28px; padding: 2px 6px; font-size: 17px; }
 .stepbar + .ghead { top: 62px; position: static; }
 .thingbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .thingbtns button { text-align: left; }
 
 /* the step-by-step flow */
 .gtitle { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.gtitle b { font-size: 16px; }
+.gtitle b { font-size: 21px; }
 .gopts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .gopt { display: flex; align-items: center; gap: 10px; text-align: left; padding: 8px 10px; min-height: 50px; }
-.gopt .gi { font-size: 22px; line-height: 1; flex: none; }
+.gopt .gi { flex: none; width: 32px; height: 32px; display: flex; }
+.gopt .gi img { width: 32px; height: 32px; }
 .gopt .gl { display: flex; flex-direction: column; min-width: 0; }
 .gopt b { font-weight: 600; }
-.gopt small { color: var(--dim); font-size: 12px; line-height: 1.25; }
+.gopt small { color: var(--dim); font-size: 16px; line-height: 1.25; }
 .ghead { display: flex; align-items: center; gap: 10px; padding: 2px 0 6px; border-bottom: 1px solid var(--line); }
 .ghead > div { display: flex; flex-direction: column; min-width: 0; }
-.ghead b { font-size: 15px; }
-.ghead small { color: var(--dim); font-size: 12px; }
+.ghead b { font-size: 20px; }
+.ghead small { color: var(--dim); font-size: 16px; }
 .gback { flex: none; }
-.gdone { min-height: 38px; font-size: 15px; }
+.gdone { min-height: 38px; font-size: 20px; }
 .gevents { gap: 2px; }
 .gevents .row { margin-top: 6px; }
 .statrow button { min-width: 36px; }
 
 /* ---- footer of the tool column: what I say / do, and End turn ---- */
 #foot { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); background: var(--panel); flex: none; }
-#foot .go { min-height: 40px; font-size: 15px; }
+#foot .go { min-height: 40px; font-size: 20px; }
 #foot .status { text-align: center; padding: 8px; color: var(--dim); }
-#foot .emotes button { font-size: 16px; padding: 0 6px; }
+#foot .emotes button { font-size: 21px; padding: 0 6px; }
 #foot .choices button { border-color: var(--accent); }
 #foot .dice { min-width: 52px; min-height: 40px; white-space: nowrap; }
 #tlabel { font-variant-numeric: tabular-nums; }
@@ -62,6 +63,19 @@ button.chip.add { color: var(--dim); }
 /* ---- small pieces of the Director's and the Player's tools ---- */
 button.prep { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
 #wsOpen { text-align: left; }
-.askbox { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--bg); }
+.askbox { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--accent); border-radius: 0; background: var(--bg); }
 button.foe { min-width: 40px; }
 button.foe.on { outline: 2px solid var(--accent); }
+
+/* ---- what the Player just did: the log of an old adventure game ---- */
+.card.told { background: #000; border: 2px solid #5c4514; padding: 0; gap: 0; box-shadow: 4px 4px 0 #000; }
+.toldhead { display: flex; align-items: center; gap: 8px; padding: 3px 8px; background: #2a1f08; color: var(--accent); border-bottom: 2px solid #5c4514; text-transform: uppercase; letter-spacing: .08em; }
+.toldhead img { width: 24px; height: 24px; }
+.toldhead b { color: var(--accent); flex: 1; }
+.toldhead small { color: #8c7340; }
+.toldrow { display: grid; grid-template-columns: 62px 1fr; gap: 8px; padding: 3px 8px; align-items: baseline; }
+.toldrow + .toldrow { border-top: 1px dotted #2c2a25; }
+.toldrow span { color: #8c7340; text-transform: uppercase; letter-spacing: .08em; font-size: .84em; }
+.toldrow p { margin: 0; color: #f1ead6; font-size: 1.12em; line-height: 1.05; }
+.toldrow.says p { color: #fff; }
+.toldrow.none p { color: var(--dim); }

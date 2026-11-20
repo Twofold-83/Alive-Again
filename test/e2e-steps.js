@@ -250,9 +250,9 @@ const { setup } = require('./lib');
     const [px, py] = await x.heroPos();
     assert(Math.abs(px - 6.5 / 16) < 0.03, `the hero starts where the prepared scene says (${px})`);
     // pointing past the wall: the hero finds the gap and walks around. The Player speaks first, then walks: the replay keeps that order
-    await p.fill('#foot input[placeholder^="💬"]', 'Off I go!');
+    await p.fill('#foot input[placeholder^="Say"]', 'Off I go!');
     await x.walk(13.5 / 16, 5.5 / 12);
-    await p.fill('#foot input[placeholder^="✋"]', 'Looks around');
+    await p.fill('#foot input[placeholder^="Do"]', 'Looks around');
     await p.evaluate(() => {
       window.__beats = [];
       let last = null;

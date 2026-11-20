@@ -1,7 +1,7 @@
 /* Drawing a story screen: the stage, the Player's sheet under it, and the tool column for whoever is looking. */
 import { LAYERS as MODULES, STORY_TYPES as TYPES, PLAYER_MODES } from '../shared/rules.js';
 import { audio } from '../core/audio.js';
-import { h, clamp } from '../core/dom.js';
+import { h, clamp, add } from '../core/dom.js';
 import { glyphNode } from '../stage/render.js';
 import { workshopOpen } from '../build/workshop.js';
 import { guidedKey, guidedTool, buildGuided } from './guided.js';
@@ -123,7 +123,7 @@ export function renderSheet() {
           {
             class: 'chip add',
             onclick: () => {
-              const name = (prompt('Name of the stat (an emoji in front looks nice), e.g. “🛡️ Armor”') || '').trim().slice(0, 20);
+              const name = (prompt('Name of the stat, e.g. “Armor”') || '').trim().slice(0, 20);
               if (!name) return;
               const max = parseInt(prompt('Maximum value? Leave empty for no maximum.') || '', 10);
               sc.sheet.stats.push({ id: rid(), name, value: Number.isFinite(max) ? max : 0, max: Number.isFinite(max) ? max : null });
@@ -134,9 +134,9 @@ export function renderSheet() {
         ),
       );
   }
-  if (m.points) kids.push(h('span', { class: 'chip stat', id: 'points' }, h('b', {}, '⭐ Points'), ` ${sc.sheet.points || 0}`));
+  if (m.points) kids.push(h('span', { class: 'chip stat', id: 'points' }, h('b', {}, '* Points'), ` ${sc.sheet.points || 0}`));
   if (m.inventory) {
-    kids.push(h('span', { class: 'chip label' }, '🎒'));
+    kids.push(h('span', { class: 'chip label' }, 'ITEMS'));
     for (const it of sc.sheet.inv) {
       kids.push(
         h(
@@ -169,8 +169,8 @@ export function setRules(patch) {
   const rules = { ...app.S.rules, ...patch };
   if (rules.modules.stats && !app.draft.sheet.stats.length)
     app.draft.sheet.stats = [
-      { id: rid(), name: '❤️ Health', value: 5, max: 5 },
-      { id: rid(), name: '💰 Gold', value: 0, max: null },
+      { id: rid(), name: 'Health', value: 5, max: 5 },
+      { id: rid(), name: 'Gold', value: 0, max: null },
     ];
   app.S.rules = rules;
   saveDraft();
@@ -220,7 +220,8 @@ function buildPanel() {
   const p = $('#panel');
   p.replaceChildren();
   if (app.S.ended)
-    return void p.append(
+    return void add(
+      p,
       h('div', { class: 'card' }, h('h3', {}, 'The story has ended'), h('p', { class: 'dim' }, 'Flip through it together, or start a new one.')),
       recap(app.S.scene) || '',
     );
@@ -235,7 +236,7 @@ function buildPanel() {
                 ? `Write what you want to do. ${app.S.names.director} will make it happen on the stage, and you will see it play out.`
                 : app.S.rules.player === 'limited'
                   ? `Choose one of ${app.S.names.director}’s options. You can also walk once and add a line of speech.`
-                  : `Press “Walk” and click where your hero should go (once per turn).${mods().inventory ? ' Click a thing to reach for it, or a 🎒 item to use it.' : ''} Then say something, do something — or both — and end your turn.`,
+                  : `Press “Walk” and click where your hero should go (once per turn).${mods().inventory ? ' Click a thing to reach for it, or an item to use it.' : ''} Then say something, do something — or both — and end your turn.`,
             ]
           : app.S.you === 'player'
             ? [
@@ -247,21 +248,23 @@ function buildPanel() {
                 'When they finish you can change anything: the cast, the place, the music, what everybody says.',
               ];
     if (app.S.info.text && app.S.you !== 'director')
-      p.append(
-        h('div', { class: 'card', id: 'howto' }, h('h3', {}, '📜 ' + (app.S.info.title || 'How to play')), h('p', { class: 'pre' }, app.S.info.text)),
+      add(
+        p,
+        h('div', { class: 'card', id: 'howto' }, h('h3', {}, '' + (app.S.info.title || 'How to play')), h('p', { class: 'pre' }, app.S.info.text)),
       );
-    if (tips) p.append(h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
+    if (tips) add(p, h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
     if (app.S.you === 'director')
-      p.append(
+      add(
+        p,
         h(
           'div',
           { class: 'row' },
-          h('button', { id: 'wsOpen', class: 'grow', onclick: () => showWorkshop() }, '🏗️ Build scene — while you wait'),
-          h('button', { class: 'grow', onclick: () => showWorkshop({ map: true }) }, '🗺️ Map'),
+          h('button', { id: 'wsOpen', class: 'grow', onclick: () => showWorkshop() }, 'Build scene — while you wait'),
+          h('button', { class: 'grow', onclick: () => showWorkshop({ map: true }) }, 'Map'),
         ),
       );
     const r = recap(app.S.scene);
-    if (r) p.append(r);
+    if (r) add(p, r);
     return;
   }
 

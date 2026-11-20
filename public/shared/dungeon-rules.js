@@ -61,12 +61,12 @@ export const POWERS = {
   seal: { name: 'Slam the doors', cost: 6 },
 };
 export const SPOOKS = [
-  ['thunder', '⛈️ Thunder'],
-  ['evil', '😈 Evil laugh'],
-  ['ghost', '👻 Wail'],
-  ['scream', '😱 Scream'],
-  ['growl', '🐻 Growl'],
-  ['knock', '✊ Knocking'],
+  ['thunder', 'Thunder'],
+  ['evil', 'Evil laugh'],
+  ['ghost', 'Wail'],
+  ['scream', 'Scream'],
+  ['growl', 'Growl'],
+  ['knock', 'Knocking'],
 ];
 
 const BORDER_OK = '#T><AV',
@@ -187,8 +187,8 @@ export function checkDef(def) {
     .map((r) => r.t)
     .join('');
   if (!Object.keys(def.rooms).length) return 'Add at least one room';
-  if (!all.includes('S')) return 'Place the hero’s start (🧍) somewhere';
-  if (!all.includes('X')) return 'Place the crown (👑) for the hero to find';
+  if (!all.includes('S')) return 'Place the hero’s start somewhere (the knight, under “Start & goal”)';
+  if (!all.includes('X')) return 'Place the crown for the hero to find (under “Start & goal”)';
   return '';
 }
 export function cleanDef(d) {

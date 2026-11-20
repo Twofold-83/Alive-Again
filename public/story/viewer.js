@@ -17,7 +17,7 @@ function storyOpts() {
 }
 function caption(i) {
   const fr = story.history[i];
-  return `Page ${i + 1} of ${story.history.length} · ${fr.by === 'director' ? '🎬 ' + story.names.director : '🧑 ' + story.names.player}${fr.timeout ? ' (ran out of time)' : ''}`;
+  return `Page ${i + 1} of ${story.history.length} · ${fr.by === 'director' ? '' + story.names.director : '' + story.names.player}${fr.timeout ? ' (ran out of time)' : ''}`;
 }
 export async function openStory() {
   try {
@@ -72,7 +72,7 @@ $('#storyPlay').onclick = () => {
     return showFrame();
   }
   playing = true;
-  $('#storyPlay').textContent = '⏸ Pause';
+  $('#storyPlay').textContent = 'Pause';
   playFrom(storyAt >= story.history.length - 1 ? 0 : storyAt);
 };
 $('#storyClose').onclick = () => {

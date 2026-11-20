@@ -10,12 +10,14 @@
  * A scene on the bench is added to the map with one button; from then on it saves itself.
  * Scenes on the map are kept with the story and can be saved to a file for another story.
  */
-import { PIXEL, backdropCss, pixelInfo } from '../core/catalog.js';
-import { h, clone, clamp, rid } from '../core/dom.js';
+import { PIXEL, backdropCss, pixelInfo, spriteTitle } from '../core/catalog.js';
+import { h, clone, clamp, rid, fill } from '../core/dom.js';
 import { glyphNode, renderStage } from '../stage/render.js';
 import { setCell } from '../stage/level.js';
-import { LEVEL_W, LEVEL_H, MAX_ENTITIES, cellAt, normScene, newScene, newEntity, freeSpot } from '../shared/scene-model.js';
+import { LEVEL_W, LEVEL_H, MAX_ENTITIES, cellAt, walkable, normScene, newScene, newEntity, freeSpot } from '../shared/scene-model.js';
 import { History } from '../core/history.js';
+import { SCENARIOS } from './scenarios.js';
+import { ROOM_THEMES, ROOM_SHAPES, buildRoom, themeOf, roomScene, roomArea } from '../shared/rooms.js';
 import { resetGuided, guidedPick, guidedMark, buildGuided } from '../story/guided.js';
 
 const W = {
@@ -26,6 +28,8 @@ const W = {
   view: 'build',
   node: null,
   tab: 'tiles',
+  theme: 'oldhouse', // the kind of room "Room in one click" builds
+  shape: 'room',
   tool: 'brush',
   size: 1,
   a: '',
@@ -48,7 +52,7 @@ function $root() {
 }
 
 function blankScene() {
-  return normScene({ ...newScene(), backdrop: 'b:meadow', entities: [W.c.blankHero()] });
+  return roomScene(normScene({ ...newScene(), entities: [W.c.blankHero()] }), W.theme, W.shape); // a new scene starts as a room
 }
 function library() {
   return W.list.map((d) => ({ id: d.id, name: d.name, mx: d.mx, my: d.my, scene: d.scene }));
@@ -311,7 +315,7 @@ function drawBar() {
         },
         label,
       );
-  const kids = [tab('wsBuild', '🏗️ Build scene', 'build'), tab('wsMap', `🗺️ Map (${W.list.length})`, 'map'), h('span', { class: 'sep' })];
+  const kids = [tab('wsBuild', 'Build scene', 'build'), tab('wsMap', `Map (${W.list.length})`, 'map'), h('span', { class: 'sep' })];
   if (W.view === 'build')
     kids.push(
       h('input', {
@@ -326,11 +330,7 @@ function drawBar() {
       }),
       onMap()
         ? h('span', { class: 'dim small', id: 'wsSaved' }, '✓ On the map — saves itself')
-        : h(
-            'button',
-            { class: 'primary', id: 'wsAdd', title: 'Keep this scene: put it on the map', onclick: () => addToMap() },
-            '💾 Add scene to map',
-          ),
+        : h('button', { class: 'primary', id: 'wsAdd', title: 'Keep this scene: put it on the map', onclick: () => addToMap() }, 'Add scene to map'),
       h('span', { class: 'grow' }),
       h('button', { title: 'Undo (Ctrl+Z)', disabled: !W.h.canUndo, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
       h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.h.canRedo, id: 'wsRedo', onclick: () => undo(1) }, '↷ Redo'),
@@ -359,7 +359,7 @@ function drawBar() {
             title: 'Start from a copy of what is on stage right now',
             onclick: () => build({ id: rid(), name: newName(), scene: W.c.stage() }),
           },
-          '🎬 From stage',
+          'From stage',
         ),
       h(
         'button',
@@ -391,9 +391,9 @@ function drawBar() {
             a.click();
           },
         },
-        '⬇ Save to file',
+        'Save to file',
       ),
-      h('button', { title: 'Add the scenes from a file to this map', onclick: importFile }, '⬆ Load from file'),
+      h('button', { title: 'Add the scenes from a file to this map', onclick: importFile }, 'Load from file'),
     );
   const acts = kids.splice(3).filter(Boolean); // on a phone the actions get a row of their own that scrolls sideways
   W.el.bar.replaceChildren(...kids, h('div', { class: 'wsacts' }, acts), h('button', { id: 'wsClose', onclick: close }, 'Close'));
@@ -410,6 +410,70 @@ function connect(a, b) {
   const at = (far) => (side ? { x: far ? 0.94 : 0.06, y: 0.6 } : { x: 0.5, y: far ? 0.95 : 0.16 });
   if (!linked(a, b)) a.scene.exits.push({ id: rid(), to: b.id, label: b.name, locked: false, ...at(side ? dx > 0 : dy > 0) });
   if (!linked(b, a)) b.scene.exits.push({ id: rid(), to: a.id, label: a.name, locked: false, ...at(side ? dx <= 0 : dy <= 0) });
+}
+/** A new room beside this one, with a way through in both directions. */
+function nextDoor(from) {
+  const t = themeOf(W.theme),
+    doc = { id: rid(), name: uniqueName(t.name), ...spot(from), scene: blankScene() };
+  doc.scene.sceneId = doc.id;
+  W.list.push(doc);
+  connect(from, doc);
+  W.node = doc.id;
+  saveNow();
+  draw();
+  W.c.toast(`“${doc.name}” is next to “${from.name}”`);
+}
+function uniqueName(base) {
+  let name = base;
+  for (let n = 2; W.list.some((d) => d.name === name); n++) name = `${base} ${n}`;
+  return name;
+}
+const SMALL_THINGS = /candle|skull$|key|letter|book|bucket|lantern$|doll|shovel|pickaxe|crystal|urn|radio|table-lamp|crow|spider/;
+/** Put a whole ready-made place on the map: its rooms, their furniture, the ways between them. */
+function addScenario(sc) {
+  const made = {},
+    keepTheme = W.theme,
+    keepShape = W.shape;
+  for (const [key, name, theme, shape, at, props] of sc.rooms) {
+    W.theme = theme;
+    W.shape = shape;
+    const doc = { id: rid(), name: uniqueName(name), mx: at[0], my: at[1], scene: blankScene() };
+    doc.scene.sceneId = doc.id;
+    for (const [slug, cx, cy, title, verbs] of props) {
+      const asset = 'p:' + slug,
+        info = pixelInfo(asset);
+      doc.scene.entities.push(
+        newEntity(asset, {
+          id: rid(),
+          x: (cx + 0.5) / LEVEL_W,
+          y: (cy + 0.92) / LEVEL_H,
+          scale: SMALL_THINGS.test(slug) ? 0.6 : 0.95,
+          solid: !!info.solid,
+          active: { name: title || spriteTitle(asset), verbs: verbs || ['Look at', 'Use', 'Take'] },
+        }),
+      );
+    }
+    made[key] = doc;
+    W.list.push(doc);
+  }
+  for (const [a, b, locked] of sc.links) {
+    connect(made[a], made[b]);
+    if (locked)
+      for (const x of [...made[a].scene.exits.filter((e) => e.to === made[b].id), ...made[b].scene.exits.filter((e) => e.to === made[a].id)])
+        x.locked = true;
+  }
+  W.theme = keepTheme;
+  W.shape = keepShape;
+  W.node = made[sc.rooms[0][0]].id;
+  saveNow();
+  draw();
+  W.c.toast(`“${sc.name}” is on the map: ${sc.rooms.length} rooms`);
+}
+/** A small picture of a scene, for the map. */
+function thumb(doc) {
+  const el = h('div', { class: 'stage thumb' });
+  renderStage(el, { ...doc.scene, narration: '', action: '', ask: null }, { code: W.c.code, names: W.c.names });
+  return el;
 }
 function drawMap() {
   const m = W.el.map,
@@ -430,7 +494,8 @@ function drawMap() {
         svg.append(ln);
       }
   const here = W.c.sceneId && W.c.sceneId();
-  m.replaceChildren(
+  fill(
+    m,
     svg,
     ...list.map((d) => {
       const n = h(
@@ -440,9 +505,9 @@ function drawMap() {
           style: `left:${d.mx * 100}%;top:${d.my * 100}%`,
           title: d.id === here ? 'The story is here now' : '',
         },
-        h('i', { style: `background:${backdropCss(W.c.code, d.scene.backdrop)}` }),
+        thumb(d),
         h('b', {}, d.name),
-        d.id === here && h('small', {}, '📍 the story is here'),
+        d.id === here && h('small', {}, 'the story is here'),
       );
       n.dataset.node = d.id;
       n.addEventListener('dblclick', () => build(d));
@@ -486,7 +551,7 @@ function drawMap() {
         'div',
         { class: 'mapempty' },
         h('h3', {}, 'The map is empty'),
-        h('p', { class: 'dim' }, 'Build a scene, then press “💾 Add scene to map”. It will wait here until the story needs it.'),
+        h('p', { class: 'dim' }, 'Build a scene, then press “Add scene to map”. It will wait here until the story needs it.'),
         h(
           'button',
           {
@@ -496,7 +561,7 @@ function drawMap() {
               draw();
             },
           },
-          '🏗️ Go to Build scene',
+          'Go to Build scene',
         ),
       ),
   );
@@ -505,7 +570,7 @@ function mapTools() {
   const list = W.list,
     kids = [],
     hint = document.querySelector('#wsHint'),
-    adv = W.c.adventure;
+    adv = true; // every kind of story can have connected places
   hint.textContent = W.linking
     ? 'Now click the scene to connect it to.'
     : 'Click a scene to select it, double-click to open it in Build scene, drag to arrange.';
@@ -536,7 +601,20 @@ function mapTools() {
           { class: 'dim' },
           `${node.scene.entities.length - 1} things${node.scene.level ? ' · has a level' : ''}${node.scene.exits.length ? ` · ${node.scene.exits.length} exits` : ''}`,
         ),
-        big('mapEdit', '✏️ Edit', 'Open it in Build scene', () => build(node)),
+        big('mapEdit', 'Edit', 'Open it in Build scene', () => build(node)),
+        big('mapNext', '+ Room next door', `A new ${themeOf(W.theme).name.toLowerCase()}, already connected to this one`, () => nextDoor(node)),
+        h(
+          'select',
+          {
+            id: 'mapTheme',
+            title: 'What kind of room “Room next door” builds',
+            onchange: (ev) => {
+              W.theme = ev.target.value;
+              draw();
+            },
+          },
+          ROOM_THEMES.map((t) => h('option', { value: t.id, selected: t.id === W.theme ? '' : null }, 'Next door: ' + t.name)),
+        ),
         big('mapDup', '⧉ Duplicate', 'A copy to change', () => {
           W.node = duplicate(node).id;
           draw();
@@ -544,7 +622,7 @@ function mapTools() {
         adv &&
           big(
             'mapLink',
-            W.linking ? '🔗 Click the other scene…' : '🔗 Connect to another scene',
+            W.linking ? 'Click the other scene…' : 'Connect to another scene',
             'Puts an exit in both scenes',
             () => {
               W.linking = !W.linking;
@@ -559,7 +637,7 @@ function mapTools() {
           () => useNow(node),
           W.c.use ? 'primary' : 'off',
         ),
-        big('mapDel', '🗑 Delete', 'Remove it from the map', () => remove(node), 'danger'),
+        big('mapDel', 'Delete', 'Remove it from the map', () => remove(node), 'danger'),
       ),
     );
   else
@@ -567,7 +645,7 @@ function mapTools() {
       h(
         'div',
         { class: 'card' },
-        h('h3', {}, '🗺️ The map'),
+        h('h3', {}, 'The map'),
         h(
           'p',
           { class: 'dim small' },
@@ -625,7 +703,7 @@ function mapTools() {
                       draw();
                     },
                   },
-                  locked ? '🔒 Locked' : '🔓 Open',
+                  locked ? 'Locked' : 'Open',
                 ),
                 h(
                   'button',
@@ -646,9 +724,37 @@ function mapTools() {
           : h('p', { class: 'dim small' }, 'No connections yet.'),
       ),
     );
+  if (!node)
+    kids.push(
+      h(
+        'div',
+        { class: 'card' },
+        h('h3', {}, 'Ready-made places'),
+        h('p', { class: 'dim small' }, 'A few connected, furnished rooms with things to click. Drop one on the map and change whatever you like.'),
+        SCENARIOS.map((sc) => big('scn-' + sc.id, sc.name, `${sc.rooms.length} rooms — ${sc.blurb}`, () => addScenario(sc))),
+      ),
+    );
   W.el.tools.replaceChildren(...kids.filter(Boolean));
 }
 
+/** Lay out walls and floor for the scene on the bench, and stand the hero on the floor. */
+function makeRoom(theme, shape) {
+  const sc = W.cur.scene,
+    hero = sc.entities.find((e) => e.id === sc.heroId),
+    keepMusic = sc.mood !== 'm:none' && sc.mood !== themeOf(W.theme).mood;
+  W.theme = theme;
+  W.shape = shape;
+  sc.level = buildRoom(theme, shape);
+  sc.backdrop = 'b:black';
+  if (!keepMusic) sc.mood = themeOf(theme).mood;
+  if (hero && !walkable(sc, hero.x, hero.y)) {
+    const a = roomArea(shape);
+    hero.x = (a.x0 + a.x1) / 2;
+    hero.y = a.y0 + (a.y1 - a.y0) * 0.92;
+  }
+  changed();
+  draw();
+}
 function drawTools() {
   if (W.view === 'map') return mapTools();
   const sc = W.cur.scene,
@@ -659,8 +765,8 @@ function drawTools() {
       'div',
       { class: 'tabs' },
       [
-        ['tiles', '🧱', 'Level tiles'],
-        ['things', '🎭', 'Things & scene'],
+        ['tiles', 'tile-brick', 'Level tiles'],
+        ['things', 'chair', 'Things & scene'],
       ].map(([id, icon, label]) =>
         h(
           'button',
@@ -674,7 +780,7 @@ function drawTools() {
               draw();
             },
           },
-          h('span', {}, icon),
+          glyphNode(W.c.code, 'p:' + icon),
           h('small', {}, label),
         ),
       ),
@@ -683,7 +789,35 @@ function drawTools() {
   const hint = document.querySelector('#wsHint');
 
   if (W.tab === 'tiles') {
-    hint.textContent = 'Paint tiles on the 16 × 12 grid. The hero walks on floor tiles only; walls and anything solid block the way.';
+    hint.textContent = 'Pick a room, then paint over it. The hero walks on floor tiles only; walls and anything solid block the way.';
+    kids.push(
+      h(
+        'div',
+        { class: 'card roomcard' },
+        h('h3', {}, 'Room in one click'),
+        h(
+          'div',
+          { class: 'roomgrid' },
+          ROOM_THEMES.map((t) =>
+            h(
+              'button',
+              { 'data-room': t.id, class: W.theme === t.id ? 'on' : '', title: `Build: ${t.name}`, onclick: () => makeRoom(t.id, W.shape) },
+              h('span', {}, glyphNode(W.c.code, 'p:' + t.wall), glyphNode(W.c.code, 'p:' + t.floor)),
+              h('small', {}, t.name),
+            ),
+          ),
+        ),
+        h(
+          'div',
+          { class: 'chips wrap' },
+          ROOM_SHAPES.map((sh) =>
+            h('button', { 'data-shape': sh.id, class: W.shape === sh.id ? 'on' : '', onclick: () => makeRoom(W.theme, sh.id) }, sh.name),
+          ),
+        ),
+        h('small', { class: 'dim' }, 'Walls and floor are laid for you. Paint over them below to change details.'),
+      ),
+      h('small', { class: 'dim grp' }, 'Paint by hand'),
+    );
     const tool = (id, label, title) =>
       h(
         'button',
@@ -711,11 +845,11 @@ function drawTools() {
       h(
         'div',
         { class: 'row' },
-        tool('brush', '🖌 Brush', 'Paint tiles'),
+        tool('brush', 'Brush', 'Paint tiles'),
         tool('rect', '▭ Box', 'Drag out a filled rectangle'),
-        tool('fill', '🪣 Fill', 'Fill an area'),
-        tool('erase', '⌫ Erase', 'Remove tiles'),
-        tool('pick', '💧 Pick', 'Pick a tile from the stage'),
+        tool('fill', 'Fill', 'Fill an area'),
+        tool('erase', '<x Erase', 'Remove tiles'),
+        tool('pick', 'Pick', 'Pick a tile from the stage'),
       ),
       (W.tool === 'brush' || W.tool === 'erase') &&
         h(
@@ -756,8 +890,8 @@ function drawTools() {
         ),
       ...(cat
         ? [
-            ['floor', 'f', '🟩 Floor — the hero can walk here'],
-            ['wall', 'w', '🧱 Walls — these block the hero'],
+            ['floor', 'f', 'Floor — the hero can walk here'],
+            ['wall', 'w', 'Walls — these block the hero'],
           ].map(([kind, k, title]) => {
             const items = cat.items.filter((i) => (i.kind === 'wall' ? 'wall' : 'floor') === kind);
             return items.length
@@ -887,7 +1021,15 @@ function drawTools() {
           W.c.toast('This scene is full');
           return null;
         }
-        const e = newEntity(asset, { id: rid(), ...freeSpot(sc), solid: !!pixelInfo(asset).solid });
+        const info = pixelInfo(asset),
+          isThing = info.group === 'thing';
+        /* a thing put into a place can be clicked by the Player from the start: it has a name and a few verbs */
+        const e = newEntity(asset, {
+          id: rid(),
+          ...freeSpot(sc),
+          solid: !!info.solid,
+          active: isThing ? { name: spriteTitle(asset), verbs: ['Look at', 'Use', 'Take'] } : null,
+        });
         sc.entities.push(e);
         W.sel = e.id;
         return e;

@@ -4,29 +4,29 @@
 
 /** Layers a story can switch on. */
 export const LAYERS = [
-  { id: 'inventory', label: '🎒 Inventory', hint: 'The Player can carry things. You decide what they get.' },
-  { id: 'stats', label: '❤️ Stats', hint: 'Health, gold or anything else you want to keep count of.' },
-  { id: 'dice', label: '🎲 Dice', hint: 'Either of you can roll a die with a turn.' },
-  { id: 'points', label: '⭐ Points', hint: 'You award points for whatever you like.' },
+  { id: 'inventory', label: 'Inventory', hint: 'The Player can carry things. You decide what they get.' },
+  { id: 'stats', label: 'Stats', hint: 'Health, gold or anything else you want to keep count of.' },
+  { id: 'dice', label: 'Dice', hint: 'Either of you can roll a die with a turn.' },
+  { id: 'points', label: '* Points', hint: 'You award points for whatever you like.' },
 ];
 
 /** Kinds of story. `modules` are the layers a kind starts with. */
 export const STORY_TYPES = [
-  { id: 'free', label: '🎭 Free play', hint: 'Just the stage and your imagination.', modules: {} },
+  { id: 'free', label: 'Free play', hint: 'Just the stage and your imagination.', modules: {} },
   {
     id: 'adventure',
-    label: '🗺️ Adventure',
+    label: 'Adventure',
     hint: 'Inventory, stats and dice; levels, maps, active objects and battles.',
     modules: { inventory: true, stats: true, dice: true },
   },
-  { id: 'rpg', label: '⚔️ Dungeon', hint: 'A hero with a sword against the Overlord’s castle. It has its own rules and screen.', modules: {} },
+  { id: 'rpg', label: 'Dungeon', hint: 'A hero with a sword against the Overlord’s castle. It has its own rules and screen.', modules: {} },
 ];
 
 /** How the Player takes part (set by the Director). With free or limited will the hero may walk once per turn. */
 export const PLAYER_MODES = [
-  { id: 'free', label: '🕹️ Free will', hint: 'The Player walks their hero (once per turn), speaks, and types what they do.' },
-  { id: 'limited', label: '🎯 Limited will', hint: 'The Player must pick one of the options you offer each turn. They can still walk and speak.' },
-  { id: 'tell', label: '📝 Narration', hint: 'The Player only writes what they want to do. Nothing moves until you stage it.' },
+  { id: 'free', label: 'Free will', hint: 'The Player walks their hero (once per turn), speaks, and types what they do.' },
+  { id: 'limited', label: 'Limited will', hint: 'The Player must pick one of the options you offer each turn. They can still walk and speak.' },
+  { id: 'tell', label: 'Narration', hint: 'The Player only writes what they want to do. Nothing moves until you stage it.' },
 ];
 
 /** Whatever a client sends becomes a complete, valid set of rules. */

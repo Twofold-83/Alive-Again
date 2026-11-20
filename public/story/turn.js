@@ -45,8 +45,7 @@ export function onState(s) {
     history.reset();
     noteChange();
     if (directing()) guidedStart(app.draft);
-    if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat)
-      toast('⏰ Time ran out — your turn was sent as it was');
+    if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('Time ran out — your turn was sent as it was');
     if (app.cut) app.cut.skip();
     if (prev && !prev.ended && s.ended) audio.sfx('theend');
     if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {
@@ -68,7 +67,7 @@ export function onState(s) {
           camFrame: false,
           by,
           sfx: audio.sfx,
-          who: `${by === 'director' ? '🎬' : '🧑'} ${s.names[by]}`,
+          who: s.names[by],
           stinger: myTurn() ? (s.hotseat ? `${s.whose === 'director' ? 'Director' : 'Player'}’s turn` : 'Your turn') : '',
         },
         () => {

@@ -10,6 +10,7 @@ import { fail, str } from './util.js';
 import { botName } from './bots.js';
 import { cleanRules } from '../public/shared/rules.js';
 import { normScene, newScene } from '../public/shared/scene-model.js';
+import { roomScene } from '../public/shared/rooms.js';
 
 export const rooms = new Map(); // code -> room
 export const streams = new Map(); // code -> Set<{res, token}>
@@ -46,7 +47,7 @@ export function createRoom(body) {
     remaining: null,
     ended: false,
     lastTimeout: false,
-    scene: newScene(),
+    scene: roomScene(newScene()), // a new story opens in a dim old room
     history: [],
     assets: [],
     rules: cleanRules({ type }),

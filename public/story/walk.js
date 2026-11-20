@@ -1,5 +1,5 @@
 /* What the Player does on the stage: walking (once per turn), answering what the Director asked, verbs on active objects. */
-import { clamp, h } from '../core/dom.js';
+import { clamp, h, add } from '../core/dom.js';
 import { findWalk, sample } from '../stage/level.js';
 import { toast, $ } from '../core/dom.js';
 import { hero, heroStart, app } from '../core/state.js';
@@ -93,7 +93,8 @@ export function hideVerbs() {
 export function showVerbs(e, ev) {
   const wrap = $('#stageWrap'),
     r = wrap.getBoundingClientRect();
-  wrap.append(
+  add(
+    wrap,
     h(
       'div',
       { id: 'verbs', style: `left:${Math.min(ev.clientX - r.left, r.width - 220)}px;top:${Math.max(4, ev.clientY - r.top - 70)}px` },

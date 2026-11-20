@@ -123,10 +123,12 @@ export function walkable(scene, x, y) {
 /** Where to put something new: the freest spot, not on top of someone. `top` is how far up the stage it may land
  * (a backdrop has its ground in the lower part; a tile level can be used all over). */
 export function freeSpot(scene, top = 0.3) {
+  const onFloor = (x, y) => !scene.level || (scene.level.pal[parseInt(scene.level.cells[cellAt(x, y)], 36) - 1] || {}).k === 'f';
   let best = null;
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 60; i++) {
     const x = 0.1 + Math.random() * 0.8,
-      y = top + Math.random() * (0.92 - top);
+      y = top + Math.random() * (0.9 - top);
+    if (!onFloor(x, y) && i < 50) continue; // in a room, things stand on the floor
     const gap = Math.min(9, ...scene.entities.map((o) => Math.hypot(o.x - x, (o.y - y) * 0.75)));
     if (!best || gap > best.gap) best = { x, y, gap };
   }

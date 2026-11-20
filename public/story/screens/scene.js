@@ -1,6 +1,6 @@
 /* Director screens about the scene as a whole: moments and sounds, place, weather, music, title cards, narration, drawing, camera. */
 import { SFX, SFX_GROUPS, MOODS } from '../../core/audio.js';
-import { h, clamp } from '../../core/dom.js';
+import { h, clamp, add } from '../../core/dom.js';
 import { BURSTS, WEATHER } from '../../shared/options.js';
 import { G, short } from '../guided.js';
 import { BACKDROPS, backdropCss } from '../../core/catalog.js';
@@ -8,11 +8,12 @@ import { glyphNode } from '../../stage/render.js';
 
 const PENS = ['#ffffff', '#15131c', '#ff5a5a', '#ffb454', '#ffe14d', '#57d38c', '#4db8ff', '#c77dff'];
 
-/* ================= 💥 moment and sound ================= */
+/* ================= moment and sound ================= */
 export function screenMoment(kit) {
   const { p, c, d, head, doneBtn, chips } = kit;
   head('Moment and sound', 'Happens once, as this step plays.');
-  p.append(
+  add(
+    p,
     h('small', { class: 'dim' }, 'On screen'),
     chips(BURSTS, 'burst'),
     h('small', { class: 'dim' }, 'Sound — click one to hear it'),
@@ -31,32 +32,33 @@ export function screenMoment(kit) {
   return;
 }
 
-/* ================= 🌄 scene ================= */
+/* ================= scene ================= */
 export function screenScene(kit) {
   const { p, c, d, S, ws, enter, done, head, opt } = kit;
   head('Change what about the scene?');
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'gopts' },
-      !ws && opt('🗺️', 'Go to a scene from the map', `${(S.scenes || []).length} on the map`, () => enter('scene:prepared')),
-      opt('🌄', 'The place', 'A new backdrop', () => enter('scene:place')),
+      !ws && opt('map', 'Go to a scene from the map', `${(S.scenes || []).length} on the map`, () => enter('scene:prepared')),
+      opt('painting', 'The place', 'A new backdrop', () => enter('scene:place')),
       ws &&
         S.rules.type === 'adventure' &&
-        opt('🚪', 'Add an exit', 'A way out to another prepared scene', () => {
+        opt('door', 'Add an exit', 'A way out to another prepared scene', () => {
           const x = { id: c.rid(), to: '', label: 'Exit', x: 0.9, y: 0.6, locked: false };
           d.exits.push(x);
           G.exit = x.id;
           enter('exit');
         }),
-      opt('🌦️', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
-      opt('🎵', 'The music', '', () => enter('scene:music')),
-      !ws && opt('🎬', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
+      opt('rain-cloud', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
+      opt('music-note', 'The music', '', () => enter('scene:music')),
+      !ws && opt('book-red', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
       !ws &&
-        opt('🎲', 'A surprise scene', 'A ready-made place and cast', async () => {
+        opt('dice', 'A surprise scene', 'A ready-made place and cast', async () => {
           if (await c.randomScene()) done('A whole new scene');
         }),
-      !ws && opt('💡', 'Give me an idea', 'A random story twist', () => c.idea()),
+      !ws && opt('light-bulb', 'Give me an idea', 'A random story twist', () => c.idea()),
     ),
   );
   return;
@@ -66,7 +68,8 @@ export function screenScenePrepared(kit) {
   const { p, c, S, done, head } = kit;
   head('Go to a scene from the map', 'It replaces the place, the level and everything on stage except the hero.');
   const list = S.scenes || [];
-  p.append(
+  add(
+    p,
     list.length
       ? h(
           'div',
@@ -87,7 +90,7 @@ export function screenScenePrepared(kit) {
           ),
         )
       : h('p', { class: 'dim' }, 'The map is empty. Build a scene and add it to the map first.'),
-    h('button', { onclick: () => c.workshop() }, '🏗️ Build scene'),
+    h('button', { onclick: () => c.workshop() }, 'Build scene'),
   );
   return;
 }
@@ -109,7 +112,8 @@ export function screenScenePlace(kit) {
       },
       name,
     );
-  p.append(
+  add(
+    p,
     doneBtn('The place changes'),
     h(
       'div',
@@ -128,7 +132,8 @@ export function screenScenePlace(kit) {
 export function screenSceneWeather(kit) {
   const { p, d, head, doneBtn, chips } = kit;
   head('The weather');
-  p.append(
+  add(
+    p,
     chips(WEATHER, 'weather'),
     doneBtn(() => `Weather: ${(WEATHER.find((w) => w[0] === d.weather) || WEATHER[0])[1]}`),
   );
@@ -138,7 +143,8 @@ export function screenSceneWeather(kit) {
 export function screenSceneMusic(kit) {
   const { p, c, d, head, doneBtn } = kit;
   head('The music', 'Click a tune to hear it. It keeps playing until you change it.');
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'list' },
@@ -166,7 +172,8 @@ export function screenSceneMusic(kit) {
 export function screenSceneCard(kit) {
   const { p, c, d, head, doneBtn } = kit;
   head('Title card', 'Shown full-screen before this step plays.');
-  p.append(
+  add(
+    p,
     h('input', {
       placeholder: '“Chapter 2 — The Cave”',
       maxlength: 60,
@@ -181,7 +188,7 @@ export function screenSceneCard(kit) {
   return;
 }
 
-/* ================= 🎥 camera ================= */
+/* ================= camera ================= */
 export function screenCamera(kit) {
   const { p, c, d, code, head, doneBtn } = kit;
   head('Camera', 'The yellow frame shows what the Player will see. The camera moves there when this step plays.');
@@ -190,7 +197,8 @@ export function screenCamera(kit) {
     d.cam = { x, y, z: d.cam ? d.cam.z : 2 };
     c.rebuild();
   };
-  p.append(
+  add(
+    p,
     h('small', { class: 'dim' }, 'Zoom'),
     h(
       'div',
@@ -232,11 +240,12 @@ export function screenCamera(kit) {
   return;
 }
 
-/* ================= 📝 narrate ================= */
+/* ================= narrate ================= */
 export function screenNarrate(kit) {
   const { p, c, d, head, doneBtn } = kit;
   head('Narrate', 'Appears under the stage in this step. For another line later, start the next step and narrate again.');
-  p.append(
+  add(
+    p,
     h('input', {
       placeholder: '“Suddenly, the lights go out.”',
       maxlength: 240,
@@ -252,11 +261,12 @@ export function screenNarrate(kit) {
   return;
 }
 
-/* ================= ✏️ draw ================= */
+/* ================= draw ================= */
 export function screenDraw(kit) {
   const { p, c, d, head, doneBtn } = kit;
   head('Draw on the stage', 'Drag on the stage to draw. New lines draw themselves when the step plays.');
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'row pens' },

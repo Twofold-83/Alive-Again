@@ -111,7 +111,7 @@ export const guidedCtx = {
   shareLink: () => shareLink(),
   openStory: () => openStory(),
   leave: () => leave(),
-  idea: () => toast('💡 ' + IDEAS[Math.floor(Math.random() * IDEAS.length)]),
+  idea: () => toast('' + IDEAS[Math.floor(Math.random() * IDEAS.length)]),
 };
 /* ---------- prepared scenes and the scene workshop ---------- */
 function blankHero() {
@@ -295,17 +295,17 @@ function maker(kind, onAsset) {
         } catch (e) {
           toast(e.message);
           go.disabled = false;
-          go.textContent = '✨ Create';
+          go.textContent = 'Create';
         }
       },
     },
-    '✨ Create',
+    'Create',
   );
   return h(
     'div',
     { class: 'maker' },
     h('div', { class: 'row' }, promptEl, go),
-    h('div', { class: 'row' }, h('button', { class: 'grow', onclick: () => file.click() }, '📷 Use a photo or image'), file),
+    h('div', { class: 'row' }, h('button', { class: 'grow', onclick: () => file.click() }, 'Use a photo or image'), file),
     h('p', { class: 'hint' }, 'Created assets stay with this story.'),
   );
 }

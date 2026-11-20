@@ -4,42 +4,48 @@ import { spriteView, assetLabel, backdropCss } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 
 /** Fill in fields that older saved scenes do not have. */
+/** How big a thing of scale 1 is drawn, in units of --u (an eighth of the stage width): a person is a tile and a half tall. */
+const SPRITE = 0.74;
+
 export function glyphNode(code, asset, cls = '') {
   const v = spriteView(code, asset);
   return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);
 }
 
-/** The sentence describing what the Player did this turn. */
-export function actionText(scene, names, pendingRoll) {
-  const bits = [];
-  if (scene.said) bits.push(`“${scene.said}”`);
+/** What the Player did this turn, as rows of [kind, text]: says, does, goes, gives, rolls. */
+export function actionParts(scene, pendingRoll) {
+  const parts = [];
+  const name = (e) => (e.active ? e.active.name : assetLabel(e.asset));
+  if (scene.said) parts.push(['says', `“${scene.said}”`]);
   const item = scene.use && scene.sheet.inv.find((i) => i.id === scene.use);
   const t = scene.target && scene.entities.find((e) => e.id === scene.target);
-  const tl = t && (t.active ? t.active.name : assetLabel(t.asset));
   const a = scene.answer;
-  if (item && t)
-    bits.push(`uses ${assetLabel(item.asset, item.name)} on ${tl}`); // use item + on
-  else if (item) bits.push('uses ' + assetLabel(item.asset, item.name));
+  if (item && t) parts.push(['does', `uses ${assetLabel(item.asset, item.name)} on ${name(t)}`]);
+  else if (item) parts.push(['does', 'uses ' + assetLabel(item.asset, item.name)]);
   else if (t && scene.verb)
-    bits.push(`${scene.verb}: ${tl}`); // a verb on an active object
-  else if (t && a && a.kind === 'target') bits.push(`${a.verb}: ${tl}`);
-  else if (t && a && a.kind === 'battle') bits.push(`⚔️ attacks ${tl}`);
-  else if (t) bits.push('reaches for ' + tl);
-  if (a && a.kind === 'battle' && a.move !== 'attack') bits.push(a.move === 'defend' ? '🛡️ defends' : '🏃 tries to flee');
-  if (a && a.kind === 'place') bits.push('goes to ' + a.label);
-  if (a && a.kind === 'discard') bits.push('discards ' + assetLabel(a.asset, a.name));
+    parts.push(['does', `${scene.verb}: ${name(t)}`]); // a verb on a clickable thing
+  else if (t && a && a.kind === 'target') parts.push(['does', `${a.verb}: ${name(t)}`]);
+  else if (t && a && a.kind === 'battle') parts.push(['does', `attacks ${name(t)}`]);
+  else if (t) parts.push(['does', 'reaches for ' + name(t)]);
+  if (a && a.kind === 'battle' && a.move !== 'attack') parts.push(['does', a.move === 'defend' ? 'defends' : 'tries to flee']);
+  if (a && a.kind === 'place') parts.push(['goes', 'goes to ' + a.label]);
+  if (a && a.kind === 'discard') parts.push(['gives', 'discards ' + assetLabel(a.asset, a.name)]);
   const ex = scene.exit && (scene.exits || []).find((x) => x.id === scene.exit);
-  if (ex) bits.push('heads for ' + ex.label);
+  if (ex) parts.push(['goes', 'heads for ' + ex.label]);
   const pt = scene.point,
     pe = pt && pt.id && scene.entities.find((e) => e.id === pt.id); // the action points at something on the stage
-  if (pt) bits.push(`${scene.action || 'Look at'} 👉 ${pe ? (pe.active ? pe.active.name : assetLabel(pe.asset)) : 'that spot'}`);
-  else if (scene.action) bits.push(scene.action);
-  if (scene.roll && scene.roll.by === 'player')
-    bits.push(
-      `🎲 rolls ${scene.roll.value} (d${scene.roll.sides})${a && a.kind === 'roll' && a.dc ? (scene.roll.value >= a.dc ? ` — success (needed ${a.dc})` : ` — fails (needed ${a.dc})`) : ''}`,
-    );
-  else if (pendingRoll) bits.push(`🎲 will roll a d${pendingRoll}`);
-  return bits.length ? `✋ ${names.player}: ${bits.join(' · ')}` : '';
+  if (pt) parts.push(['does', `${scene.action || 'Look at'} → ${pe ? name(pe) : 'that spot'}`]);
+  else if (scene.action) parts.push(['does', scene.action]);
+  if (scene.roll && scene.roll.by === 'player') {
+    const need = a && a.kind === 'roll' && a.dc ? (scene.roll.value >= a.dc ? ` — success (needed ${a.dc})` : ` — fails (needed ${a.dc})`) : '';
+    parts.push(['rolls', `rolls ${scene.roll.value} (d${scene.roll.sides})${need}`]);
+  } else if (pendingRoll) parts.push(['rolls', `will roll a d${pendingRoll}`]);
+  return parts;
+}
+/** The same as one line, for the strip on the stage. */
+export function actionText(scene, names, pendingRoll) {
+  const parts = actionParts(scene, pendingRoll);
+  return parts.length ? `${names.player}: ${parts.map((x) => x[1]).join(' · ')}` : '';
 }
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -142,14 +148,14 @@ export function renderStage(root, scene, o = {}) {
         const d = h(
           'div',
           { class: 'exit' + (x.locked ? ' locked' : '') + (scene.exit === x.id ? ' on' : ''), style: `left:${x.x * 100}%;top:${x.y * 100}%` },
-          (x.locked ? '🔒 ' : '🚪 ') + x.label,
+          (x.locked ? '' : '') + x.label,
         );
         d.dataset.exit = x.id;
         return d;
       }),
-      ...(ptSpot ? [h('div', { class: 'pointmark', style: `left:${ptSpot.x * 100}%;top:${ptSpot.y * 100}%` }, '👉')] : []),
+      ...(ptSpot ? [h('div', { class: 'pointmark', style: `left:${ptSpot.x * 100}%;top:${ptSpot.y * 100}%` }, '→')] : []),
       ...places.map((pl, i) => {
-        const d = h('div', { class: 'place' + (o.pickPlace === i ? ' on' : ''), style: `left:${pl.x * 100}%;top:${pl.y * 100}%` }, '📍 ' + pl.label);
+        const d = h('div', { class: 'place' + (o.pickPlace === i ? ' on' : ''), style: `left:${pl.x * 100}%;top:${pl.y * 100}%` }, '' + pl.label);
         d.dataset.place = i;
         return d;
       }),
@@ -242,7 +248,7 @@ export function renderStage(root, scene, o = {}) {
     }
     el.style.left = at.x * 100 + '%';
     el.style.top = at.y * 100 + '%';
-    el.style.fontSize = `calc(var(--u) * ${e.scale})`;
+    el.style.fontSize = `calc(var(--u) * ${e.scale * SPRITE})`;
     el.style.zIndex = at.z;
   }
   for (const [id, el] of root._els)
@@ -263,24 +269,24 @@ export function renderStage(root, scene, o = {}) {
         {
           class: 'bubble' + (o.pop === e.id ? ' pop' : '') + (o.speaker && o.speaker !== e.id ? ' old' : '') + size(e.sayLen || e.say.length),
           'data-id': e.id,
-          style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * 1.22 + 0.12) * zoom})`,
+          style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * SPRITE * 1.22 + 0.12) * zoom})`,
         },
         e.say,
       );
     }),
   );
-  const droll = scene.roll && scene.roll.by === 'director' ? `🎲 ${scene.roll.value} (d${scene.roll.sides})  ` : '';
+  const droll = scene.roll && scene.roll.by === 'director' ? `${scene.roll.value} (d${scene.roll.sides})  ` : '';
   narrEl.textContent = droll + (scene.narration || '');
   narrEl.className = 'strip narr' + size((scene.narrLen || (scene.narration || '').length) / 2);
   layoutBubbles(root, bubbles, narrEl);
   actEl.textContent = o.noAct ? '' : actionText(scene, o.names || { player: 'Player' }, o.pendingRoll);
-  const card = o.travel ? '🚶 Traveling to\n' + o.travel : o.card || '';
+  const card = o.travel ? 'Traveling to\n' + o.travel : o.card || '';
   if (cardEl.textContent !== card) cardEl.textContent = card;
   cardEl.classList.toggle('travel', !!o.travel);
-  const dice = o.dice ? (o.dice.rolling ? '🎲' : String(o.dice.value)) : '';
+  const dice = o.dice ? (o.dice.rolling ? '' : String(o.dice.value)) : '';
   if (diceEl.textContent !== dice) diceEl.textContent = dice;
   diceEl.classList.toggle('rolling', !!(o.dice && o.dice.rolling));
-  const award = o.award ? `${o.award.n >= 0 ? '+' : ''}${o.award.n} ⭐${o.award.text ? '\n' + o.award.text : ''}` : '';
+  const award = o.award ? `${o.award.n >= 0 ? '+' : ''}${o.award.n} *${o.award.text ? '\n' + o.award.text : ''}` : '';
   if (awardEl.textContent !== award) awardEl.textContent = award;
 }
 

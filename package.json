@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "test": "node test/smoke.mjs && node test/rpg-sim.mjs",
+    "test": "node test/smoke.mjs && node test/rpg-sim.mjs && node test/rooms.mjs",
     "test:e2e": "node test/e2e-play.js && node test/e2e-steps.js && node test/e2e-adventure.js && node test/e2e-rpg.js && node test/e2e-phone.js",
     "sim": "node test/sim-cuts.js 60",
     "lint": "eslint .",

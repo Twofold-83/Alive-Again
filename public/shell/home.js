@@ -49,11 +49,11 @@ let storyType = 'free'; // chosen once, when the story is created
 const HOME_LABELS = {
   // the start buttons speak the language of the chosen kind of story
   rpg: {
-    newDirector: ['😈 Start as the Overlord', 'You build the castle and command its monsters'],
-    newPlayer: ['🗡️ Start as the Hero', 'Sword in hand — your partner is the Overlord'],
-    soloPlayer: ['🤖 Solo Hero', 'AI is the Overlord'],
-    soloDirector: ['🤖 Solo Overlord', 'AI is the hero'],
-    hotseat: ['🎭 Play both sides', 'Keyboard for the hero, mouse for the Overlord'],
+    newDirector: ['Start as the Overlord', 'You build the castle and command its monsters'],
+    newPlayer: ['Start as the Hero', 'Sword in hand — your partner is the Overlord'],
+    soloPlayer: ['Solo Hero', 'AI is the Overlord'],
+    soloDirector: ['Solo Overlord', 'AI is the hero'],
+    hotseat: ['Play both sides', 'Keyboard for the hero, mouse for the Overlord'],
   },
 };
 const homeDefault = Object.fromEntries([...document.querySelectorAll('#newBtns button')].map((b) => [b.id, b.innerHTML]));

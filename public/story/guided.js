@@ -15,7 +15,7 @@
  * and hands it to the screen that is open.
  */
 import { allItems, assetLabel } from '../core/catalog.js';
-import { h, clamp } from '../core/dom.js';
+import { h, clamp, add } from '../core/dom.js';
 import { glyphNode } from '../stage/render.js';
 import { SCREENS } from './screens/index.js';
 
@@ -110,7 +110,8 @@ export function buildGuided(p, c) {
 
   /* ---------- the step bar ---------- */
   if (!setup) {
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'stepbar' },
@@ -158,7 +159,7 @@ export function buildGuided(p, c) {
                 if (d.steps.length === 0 || confirm('Remove every step of this turn and start over?')) c.clearSteps();
               },
             },
-            '🗑 Clear steps',
+            'Clear steps',
           ),
         ),
       ),
@@ -167,7 +168,8 @@ export function buildGuided(p, c) {
 
   /* ---------- building blocks ---------- */
   const head = (title, sub) =>
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'ghead' },
@@ -179,14 +181,15 @@ export function buildGuided(p, c) {
     h(
       'button',
       { class: 'gopt' + (on ? ' on' : ''), onclick: fn },
-      h('span', { class: 'gi' }, icon),
+      h('span', { class: 'gi' }, glyphNode(code, 'p:' + icon)),
       h('span', { class: 'gl' }, h('b', {}, label), hint && h('small', {}, hint)),
     );
   const doneBtn = (label, text = '✓ Done') =>
     h('button', { class: 'primary gdone', onclick: () => done(typeof label === 'function' ? label() : label) }, text);
   const picker = (title) => {
     head(title, 'Pick one here, or click it on the stage.');
-    p.append(
+    add(
+      p,
       d.entities.length
         ? h(
             'div',
@@ -247,10 +250,10 @@ export function buildGuided(p, c) {
     return h(
       'div',
       { class: 'row' },
-      b('➖', 'Smaller', () => {
+      b('-', 'Smaller', () => {
         sel.scale = clamp(sel.scale / 1.3, 0.3, 6);
       }),
-      b('➕', 'Bigger', () => {
+      b('+', 'Bigger', () => {
         sel.scale = clamp(sel.scale * 1.3, 0.3, 6);
       }),
       b('↺', 'Rotate left', () => {
@@ -259,7 +262,7 @@ export function buildGuided(p, c) {
       b('↻', 'Rotate right', () => {
         sel.rot = (sel.rot + 15) % 360;
       }),
-      b('↔️', 'Flip', () => {
+      b('↔', 'Flip', () => {
         sel.flip = !sel.flip;
       }),
     );

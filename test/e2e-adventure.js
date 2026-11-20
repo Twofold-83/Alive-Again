@@ -65,9 +65,10 @@ const { setup } = require('./lib');
     await p.waitForSelector('#wsAdd');
     await p.click('[data-wtab=things]');
     await x.add('treasure chest');
-    await thing('Active object');
-    await p.click('#activeToggle');
+    assert.match(await p.textContent('.thingbtns'), /Clickable: “Chest”/, 'a thing added in Build scene can be clicked from the start');
+    await thing('Clickable');
     await p.fill('#activeName', 'Old chest');
+    await p.click('.wstools .chips button:has-text("Open")');
     await x.done();
     await x.done();
     await p.click('#wsUse');
@@ -89,14 +90,14 @@ const { setup } = require('./lib');
     // a written action can point at a thing or a spot on the stage
     await p.click('#pointBtn');
     await p.click(ent('chest'));
-    assert.match(await act(), /Look at 👉 Old chest/);
+    assert.match(await act(), /Look at → Old chest/);
     {
       const b = await p.locator('#stage').boundingBox();
       await p.click('#pointBtn');
       await p.mouse.click(b.x + b.width * 0.12, b.y + b.height * 0.25);
     }
     await p.waitForSelector('#stage .pointmark');
-    assert.match(await act(), /Look at 👉 that spot/);
+    assert.match(await act(), /Look at → that spot/);
     await p.click('#pointClear');
     assert.equal(await p.locator('#stage .pointmark').count(), 0);
     assert.equal(await p.locator('#pointClear').count(), 0);
@@ -216,7 +217,7 @@ const { setup } = require('./lib');
     await p.waitForTimeout(3500);
     [hx, hy] = await x.heroPos();
     assert(Math.abs(hx - 0.4) < 0.03 && Math.abs(hy - 0.7) < 0.03, `the hero walked to the chosen place (${hx}, ${hy})`);
-    await p.fill('#foot input[placeholder^="✋"]', 'Kick');
+    await p.fill('#foot input[placeholder^="Do"]', 'Kick');
     await p.click('#pointBtn');
     {
       const b = await p.locator(ent('chest')).boundingBox();
@@ -228,7 +229,7 @@ const { setup } = require('./lib');
     assert.match(await p.textContent('.card.told'), /goes to Place 2/);
     assert(sc.point && sc.point.id, 'the action points at the chest');
     assert.equal(sc.action, 'Kick');
-    assert.match(await p.textContent('.card.told'), /Kick 👉 Old chest/);
+    assert.match(await p.textContent('.card.told'), /Kick → Old chest/);
     /* ---- ask: pick a target; then give up an item ---- */
     await x.opt('Ask Player');
     await x.opt('Pick a target');

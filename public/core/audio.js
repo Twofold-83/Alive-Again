@@ -98,7 +98,7 @@ function playStep(m, i, when, d) {
   if (m.bass) {
     const b = m.bass[i % m.bass.length];
     if (b != null) tone(b, d * 7.5, 'sine', 0.5, when, music);
-  } else if (i % 8 === 0) tone((n ?? m.seq[0]) - 12, d * 7.5, 'sine', 0.45, when, music);
+  } else if (i % 8 === 0) tone((n ?? m.seq.find((x) => x != null)) - 12, d * 7.5, 'sine', 0.45, when, music);
   if (m.drum) drumHit(m.drum[i % m.drum.length], when);
   if (m.pad && i % 16 === 0) for (const p of m.pad) tone(p, d * 17, 'sine', 0.1, when, music);
   if (m.air && i % m.seq.length === 0) noise(d * 14, 0.16, 300, { when, swell: true, to: 900, out: music });
@@ -437,7 +437,7 @@ export const audio = {
     return level === 0;
   },
   get icon() {
-    return ['🔇', '🔉', '🔊'][level];
+    return ['♪ OFF', '♪ LOW', '♪ ON'][level];
   },
   /** Steps through full → quiet → off. Returns the new icon. */
   cycle() {

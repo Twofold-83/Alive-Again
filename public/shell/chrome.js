@@ -20,17 +20,20 @@ export function shareLink() {
 }
 export function renderChrome() {
   if (!app.S) return;
-  const who = (role, icon) =>
+  const who = (role) =>
     h(
       'span',
-      { class: 'who' + (app.S.you === role && !app.S.hotseat ? ' me' : '') + (!app.S.ended && app.S.whose === role ? ' turn' : '') },
+      {
+        title: roleName(role),
+        class: 'who' + (app.S.you === role && !app.S.hotseat ? ' me' : '') + (!app.S.ended && app.S.whose === role ? ' turn' : ''),
+      },
       h('i', { class: 'dot' + (app.S.online[role] ? ' on' : '') }),
-      (app.S.bot === role ? '🤖' : icon) + ' ',
       h('b', {}, app.S.joined[role] ? app.S.names[role] : '…'),
+      app.S.bot === role ? h('small', {}, ' cpu') : null,
     );
   $('#top').replaceChildren(
-    who('director', app.S.rpg ? '😈' : '🎬'),
-    who('player', app.S.rpg ? '🗡️' : '🧑'),
+    who('director'),
+    who('player'),
     h('span', { class: 'grow storyname' }, app.S.info.title ? `“${app.S.info.title}”` : ''),
     h(
       'button',
@@ -41,17 +44,17 @@ export function renderChrome() {
         onclick: () => {
           navigator.clipboard &&
             navigator.clipboard.writeText(location.href).then(
-              () => toast('🔗 Invite link copied'),
+              () => toast('Invite link copied'),
               () => {},
             );
         },
       },
-      '🔗',
+      'LINK',
       h('span', { class: 'codetxt' }, ' ' + app.code),
     ),
     app.S.rpg
-      ? h('button', { onclick: () => leave(), 'aria-label': 'Leave', title: 'Back to the title screen' }, '🚪')
-      : h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, '📖'),
+      ? h('button', { onclick: () => leave(), 'aria-label': 'Leave', title: 'Back to the title screen' }, 'EXIT')
+      : h('button', { onclick: openStory, 'aria-label': 'Story so far', title: 'Story so far' }, 'LOG'),
     h(
       'button',
       {
@@ -73,25 +76,25 @@ export function renderChrome() {
         'aria-label': 'Phone or computer layout',
         title: 'Switch between the phone and the computer layout',
       },
-      isPhone() ? '📱' : '💻',
+      isPhone() ? 'PHONE' : 'PC',
     ),
   );
 
   const b = $('#banner');
   let content = null;
-  if (!app.connected) content = ['📡 Reconnecting…'];
-  else if (app.S.ended) content = ['🎬 The End.', h('button', { onclick: openStory }, 'Read the story')];
+  if (!app.connected) content = ['Reconnecting…'];
+  else if (app.S.ended) content = ['The End.', h('button', { onclick: openStory }, 'Read the story')];
   else if (app.S.hotseat && app.S.rpg)
     content = [
       isPhone()
-        ? '🎭 Both sides: the pad moves the hero, the Overlord’s powers are below'
-        : '🎭 You play both sides — the keyboard moves the hero, the panel on the right is the Overlord',
+        ? 'Both sides: the pad moves the hero, the Overlord’s powers are below'
+        : 'You play both sides — the keyboard moves the hero, the panel on the right is the Overlord',
     ];
-  else if (app.S.hotseat) content = [`🎭 You play both sides — now you are the ${app.S.whose === 'director' ? 'Director' : 'Player'}`];
-  else if (app.S.you === 'spectator') content = ['👀 You are watching this story.'];
+  else if (app.S.hotseat) content = [`You play both sides — now you are the ${app.S.whose === 'director' ? 'Director' : 'Player'}`];
+  else if (app.S.you === 'spectator') content = ['You are watching this story.'];
   else if (!app.S.joined[other()])
     content = [`Invite your ${roleName(other())} — code ${app.code}`, h('button', { class: 'primary', onclick: shareLink }, 'Share link')];
-  else if (!app.S.online[other()]) content = [`⏸ ${app.S.names[other()]} is offline${app.S.paused ? ' — the clock is paused' : ''}`];
+  else if (!app.S.online[other()]) content = [`${app.S.names[other()]} is offline${app.S.paused ? ' — the clock is paused' : ''}`];
   b.hidden = !content;
   if (content) b.replaceChildren(...content.map((c) => (typeof c === 'string' ? h('span', {}, c) : c)));
 }
@@ -114,7 +117,7 @@ export function tick() {
     lastTick = sec;
     audio.sfx('tick');
   }
-  if (lab) lab.textContent = ' · ' + fmt(Math.min(r, full)) + (app.S.paused ? ' ⏸' : '');
+  if (lab) lab.textContent = ' · ' + fmt(Math.min(r, full)) + (app.S.paused ? ' (paused)' : '');
   if (r <= 0 && !app.S.paused && myTurn() && !app.submitting && app.autoTurn !== app.S.turn) {
     app.autoTurn = app.S.turn;
     submit();

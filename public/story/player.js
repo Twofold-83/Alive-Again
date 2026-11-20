@@ -1,7 +1,7 @@
 /* The Player's controls under the tool column: speak, act, point, walk, answer, roll, end the turn.
  * (The Director's side of the same footer is just the button that ends the turn.) */
 import { assetLabel } from '../core/catalog.js';
-import { h } from '../core/dom.js';
+import { h, add } from '../core/dom.js';
 import { glyphNode } from '../stage/render.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
@@ -20,17 +20,19 @@ export function buildFoot() {
   const tl = () => h('span', { id: 'tlabel' });
   const side = app.S.hotseat ? (app.S.whose === 'director' ? 'Director' : 'Player') + '’s ' : '';
   if (app.S.ended)
-    return void f.append(
-      h('button', { class: 'go primary', onclick: openStory }, '📖 Read the story'),
+    return void add(
+      f,
+      h('button', { class: 'go primary', onclick: openStory }, 'Read the story'),
       h('button', { class: 'link', onclick: () => leave() }, 'Start a new story'),
     );
-  if (app.S.you === 'spectator') return void f.append(h('div', { class: 'status' }, `${app.S.names[app.S.whose]}'s turn`, tl()));
+  if (app.S.you === 'spectator') return void add(f, h('div', { class: 'status' }, `${app.S.names[app.S.whose]}'s turn`, tl()));
   if (!myTurn())
-    return void f.append(h('div', { class: 'status' }, `⏳ Waiting for ${app.S.joined[other()] ? app.S.names[other()] : 'your partner'}`, tl()));
-  if (app.submitting) return void f.append(h('div', { class: 'status' }, 'Sending…'));
+    return void add(f, h('div', { class: 'status' }, `Waiting for ${app.S.joined[other()] ? app.S.names[other()] : 'your partner'}`, tl()));
+  if (app.submitting) return void add(f, h('div', { class: 'status' }, 'Sending…'));
   if (app.S.you === 'director') {
     const ready = app.S.joined.player;
-    f.append(
+    add(
+      f,
       h(
         'button',
         { class: 'go primary', disabled: !ready, onclick: submit },
@@ -54,7 +56,7 @@ export function buildFoot() {
             rebuild();
           },
         },
-        app.draft.rollWant ? `🎲 d${app.draft.rollWant}` : '🎲',
+        app.draft.rollWant ? `d${app.draft.rollWant}` : '',
       );
     const walkBtn =
       mode !== 'tell' &&
@@ -72,7 +74,7 @@ export function buildFoot() {
                 render();
               },
             },
-            app.walkMode ? 'Click on the stage where to go…' : '🚶 Walk',
+            app.walkMode ? 'Click on the stage where to go…' : 'Walk',
           ));
     const end = (off) =>
       h('div', { class: 'row' }, dice, h('button', { class: 'go primary grow', disabled: !!off, onclick: submit }, `End ${side}turn ▶`, tl()));
@@ -101,8 +103,8 @@ export function buildFoot() {
           app.pointMode
             ? 'Click a thing or a spot on the stage…'
             : app.draft.point
-              ? `👉 ${pointed()} — click to point at something else`
-              : '👉 Point at something on the stage',
+              ? `→ ${pointed()} — click to point at something else`
+              : '→ Point at something on the stage',
         ),
         app.draft.point &&
           h(
@@ -121,7 +123,7 @@ export function buildFoot() {
       );
     const say = () =>
       h('input', {
-        placeholder: '💬 Say something…',
+        placeholder: 'Say something…',
         maxlength: 160,
         value: me ? me.say : '',
         disabled: !me,
@@ -174,7 +176,7 @@ export function buildFoot() {
       let body;
       if (ask.kind === 'roll') {
         answered = !!rp.roll;
-        body = opt(`🎲 Roll the d${ask.sides}${ask.dc ? ` — you need ${ask.dc} or more` : ''}`, rp.roll, () => {
+        body = opt(`Roll the d${ask.sides}${ask.dc ? ` — you need ${ask.dc} or more` : ''}`, rp.roll, () => {
           setReply(rp.roll ? null : { roll: true });
         });
       } else if (ask.kind === 'discard') {
@@ -189,7 +191,7 @@ export function buildFoot() {
       } else if (ask.kind === 'place') {
         answered = rp.index != null;
         body = ask.places.map((pl, i) =>
-          opt('📍 ' + pl.label, rp.index === i, () => {
+          opt(pl.label, rp.index === i, () => {
             setReply({ index: i });
             if (!app.draft.walked) setTimeout(() => walkHero(pl.x, pl.y), 0);
           }),
@@ -207,14 +209,14 @@ export function buildFoot() {
           ...app.draft.entities
             .filter((e) => e.hp != null && e.id !== app.draft.heroId)
             .map((e) =>
-              opt(['⚔️ Attack ', lab(e.id)], rp.move === 'attack' && rp.id === e.id, () => {
+              opt(['Attack ', lab(e.id)], rp.move === 'attack' && rp.id === e.id, () => {
                 setReply({ move: 'attack', id: e.id });
               }),
             ),
-          opt('🛡️ Defend', rp.move === 'defend', () => {
+          opt('Defend', rp.move === 'defend', () => {
             setReply({ move: 'defend' });
           }),
-          opt('🏃 Flee', rp.move === 'flee', () => {
+          opt('Flee', rp.move === 'flee', () => {
             setReply({ move: 'flee' });
           }),
         ];
@@ -233,17 +235,18 @@ export function buildFoot() {
       // narration: only words; the Director stages them
       const ta = h(
         'textarea',
-        { id: 'tellBox', rows: 3, maxlength: 300, placeholder: `✍️ What do you want to do? ${app.S.names.director} will make it happen.` },
+        { id: 'tellBox', rows: 3, maxlength: 300, placeholder: `What do you want to do? ${app.S.names.director} will make it happen.` },
         app.draft.action,
       );
       ta.addEventListener('input', () => {
         app.draft.action = ta.value;
         saveDraft();
       });
-      f.append(ta, pointRow(), end());
+      add(f, ta, pointRow(), end());
     } else if (mode === 'limited' && app.draft.choices.length) {
       // limited will: one of the Director's options
-      f.append(
+      add(
+        f,
         h('div', { class: 'dim small' }, `Choose what you do — ${app.S.names.director} decided the options:`),
         pick(),
         asked,
@@ -253,12 +256,13 @@ export function buildFoot() {
       );
     } else if (mode === 'limited' && ask) {
       // limited will: do exactly what was asked
-      f.append(asked, say(), ask.kind === 'place' ? null : walkBtn, end(must));
+      add(f, asked, say(), ask.kind === 'place' ? null : walkBtn, end(must));
     } else {
-      if (asked) f.append(asked);
-      if (app.draft.choices.length) f.append(pick());
+      if (asked) add(f, asked);
+      if (app.draft.choices.length) add(f, pick());
       if (me)
-        f.append(
+        add(
+          f,
           h(
             'div',
             { class: 'chips emotes' },
@@ -278,10 +282,11 @@ export function buildFoot() {
             ),
           ),
         );
-      f.append(
+      add(
+        f,
         say(),
         h('input', {
-          placeholder: '✋ Do something… (“open the drawer”)',
+          placeholder: 'Do something… (“open the drawer”)',
           maxlength: 160,
           value: app.draft.action,
           enterkeyhint: 'done',

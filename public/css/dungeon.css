@@ -1,30 +1,30 @@
 /* ---- dungeon mode ---- */
 #rpg { flex: 1; min-height: 0; display: flex; }
-#rpgLeft { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #0b0910; }
-#rpgHud { flex: none; min-height: 46px; display: flex; align-items: center; gap: 14px; padding: 6px 12px; background: #15121c; border-bottom: 1px solid var(--line); }
+#rpgLeft { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #0a090c; }
+#rpgHud { flex: none; min-height: 46px; display: flex; align-items: center; gap: 14px; padding: 6px 12px; background: #121115; border-bottom: 1px solid var(--line); }
 #rpgHud img.px, #rpgSide img.px { width: 24px; height: 24px; image-rendering: pixelated; vertical-align: middle; }
 #rpgHud .hearts { display: flex; gap: 2px; } #rpgHud .hearts img { width: 28px; height: 28px; }
 .rstat { display: inline-flex; align-items: center; gap: 4px; }
-.rturn { padding: 3px 10px; border-radius: 99px; background: #23351f; color: #9be28a; font-weight: 600; letter-spacing: 1px; }
-.rturn.lord { background: #35203f; color: #cf9bff; }
+.rturn { padding: 3px 10px; border-radius: 0; background: #1f271d; color: #a7ce9e; font-weight: 600; letter-spacing: 1px; }
+.rturn.lord { background: #29202e; color: #ceb2e9; }
 #rpgHud button { display: inline-flex; align-items: center; gap: 4px; }
 #rpgWrap { flex: 1; min-height: 0; position: relative; display: flex; align-items: center; justify-content: center; padding: 10px; }
-#rpgCanvas { max-width: 100%; max-height: 100%; aspect-ratio: 15 / 11; image-rendering: pixelated; border: 3px solid #2a2338; border-radius: 4px; box-shadow: 0 0 40px rgba(0, 0, 0, .6); touch-action: none; }
-#rpgMsg { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); max-width: 80%; padding: 9px 16px; border-radius: 8px; background: rgba(15, 12, 22, .93); border: 1px solid #4a4360; font-size: 16px; text-align: center; pointer-events: none; animation: rmsg .25s ease-out; }
-#rpgMsg.lord { border-color: #8a4fd0; color: #dcc1ff; font-style: italic; font-family: Georgia, serif; box-shadow: 0 0 24px rgba(138, 79, 208, .45); }
+#rpgCanvas { max-width: 100%; max-height: 100%; aspect-ratio: 15 / 11; image-rendering: pixelated; border: 3px solid #24212a; border-radius: 0; box-shadow: 0 0 40px rgba(0, 0, 0, .6); touch-action: none; }
+#rpgMsg { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); max-width: 80%; padding: 9px 16px; border-radius: 0; background: rgba(15, 12, 22, .93); border: 1px solid #3f3c49; font-size: 21px; text-align: center; pointer-events: none; animation: rmsg .25s ease-out; }
+#rpgMsg.lord { border-color: #8c6cb3; color: #decff1;  font-family: var(--font); box-shadow: 0 0 24px rgba(138, 79, 208, .45); }
 @keyframes rmsg { from { opacity: 0; transform: translate(-50%, 8px); } }
-#rpgCard { position: absolute; inset: 0; margin: auto; width: min(520px, 90%); height: max-content; max-height: 92%; overflow: auto; padding: 22px 26px; text-align: center; background: rgba(21, 18, 30, .96); border: 1px solid #4a4360; border-radius: 12px; box-shadow: 0 16px 60px rgba(0, 0, 0, .7); display: flex; flex-direction: column; gap: 10px; }
-#rpgCard h2 { margin: 0; font: 700 26px Georgia, serif; } #rpgCard p { margin: 0; } #rpgCard .rkeys { text-align: left; margin: 6px auto 0; }
+#rpgCard { position: absolute; inset: 0; margin: auto; width: min(520px, 90%); height: max-content; max-height: 92%; overflow: auto; padding: 22px 26px; text-align: center; background: rgba(21, 18, 30, .96); border: 1px solid #3f3c49; border-radius: 0; box-shadow: 0 16px 60px rgba(0, 0, 0, .7); display: flex; flex-direction: column; gap: 10px; }
+#rpgCard h2 { margin: 0; font: 700 34px var(--font); } #rpgCard p { margin: 0; } #rpgCard .rkeys { text-align: left; margin: 6px auto 0; }
 #rpgSide { width: 380px; flex: none; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid var(--line); background: var(--bg); }
-#rpgSide h3 { margin: 0; font-size: 16px; }
+#rpgSide h3 { margin: 0; font-size: 21px; }
 .rhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.rnote { margin: 0; padding: 8px 10px; border-radius: var(--r); background: #2b2540; border: 1px solid #4b3f77; font-size: 13px; }
+.rnote { margin: 0; padding: 8px 10px; border-radius: 0; background: #26232f; border: 1px solid #433e57; font-size: 17px; }
 .rboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
-.rboard button { aspect-ratio: 15 / 11; min-height: 0; padding: 0; font-size: 15px; background: transparent; border: 1px dashed transparent; }
-.rboard button.add { border-color: #3a3747; color: #6d6880; } .rboard button.add:hover { color: var(--text); }
-.rboard button.room { background: #3a3350; border: 1px solid #5a5175; }
-.rboard button.room.unseen { background: #211e2b; border-style: dashed; color: #6d6880; }
-.rboard button.room.cur { background: #4f6a3a; border-color: #86c15c; }
+.rboard button { aspect-ratio: 15 / 11; min-height: 0; padding: 0; font-size: 20px; background: transparent; border: 1px dashed transparent; }
+.rboard button.add { border-color: #313037; color: #5c5a65; } .rboard button.add:hover { color: var(--text); }
+.rboard button.room { background: #322f3c; border: 1px solid #4d4959; }
+.rboard button.room.unseen { background: #1c1b21; border-style: dashed; color: #5c5a65; }
+.rboard button.room.cur { background: #424e38; border-color: #8aaa73; }
 .rboard button.room.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
 .rboard button:disabled { opacity: 1; cursor: default; }
 .rpal { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; }
@@ -32,17 +32,17 @@
 .rpal button img.px { width: 100%; height: 100%; }
 .rfield { display: flex; flex-direction: column; gap: 3px; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.seg button { text-align: left; padding: 8px 10px; font-weight: 600; } .seg button small { display: block; font-weight: 400; font-size: 11px; opacity: .8; }
-#rpgSide .go { min-height: 42px; font-size: 15px; }
+.seg button { text-align: left; padding: 8px 10px; font-weight: 600; } .seg button small { display: block; font-weight: 400; font-size: 15px; opacity: .8; }
+#rpgSide .go { min-height: 42px; font-size: 20px; }
 .dread { display: flex; align-items: center; gap: 8px; }
-.dread .bar { flex: 1; height: 12px; border-radius: 6px; background: #241b30; overflow: hidden; border: 1px solid #4a3a66; }
-.dread .bar i { display: block; height: 100%; background: linear-gradient(90deg, #7a3fd0, #d04fa8); transition: width .15s linear; }
-.rpow { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.dread .bar { flex: 1; height: 12px; border-radius: 0; background: #1e1a23; overflow: hidden; border: 1px solid #3f384c; }
+.dread .bar i { display: block; height: 100%; background: linear-gradient(90deg, #8060af, #b36c9d); transition: width .15s linear; }
+.rpow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
 .rpow button { display: flex; align-items: center; gap: 6px; padding: 4px 8px; text-align: left; }
 .rpow button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rpow button b { color: #cf9bff; } .rpow button.on b { color: inherit; } .rpow button i { font-style: normal; width: 24px; text-align: center; }
-.rkeys { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
-kbd { display: inline-block; min-width: 22px; padding: 1px 6px; margin-right: 2px; text-align: center; border: 1px solid #5a5570; border-bottom-width: 3px; border-radius: 4px; background: #2b2935; font: 600 12px ui-monospace, monospace; }
+.rpow button b { color: #ceb2e9; } .rpow button.on b { color: inherit; } .rpow button i { font-style: normal; width: 24px; text-align: center; }
+.rkeys { display: flex; flex-direction: column; gap: 6px; font-size: 17px; }
+kbd { display: inline-block; min-width: 22px; padding: 1px 6px; margin-right: 2px; text-align: center; border: 1px solid #4d4b57; border-bottom-width: 3px; border-radius: 0; background: #252429; font: 600 16px var(--font); }
 @media (max-width: 900px) { #rpg { flex-direction: column; overflow-y: auto; } #rpgSide { width: auto; border-left: 0; } #rpgWrap { min-height: 60vw; } }
 /* the thumb pad only exists in phone mode (see phone.css) */
 #rpgPad { display: none; }

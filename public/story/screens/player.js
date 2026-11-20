@@ -1,10 +1,10 @@
 /* Director screens about the Player: what to ask of them, points, their sheet, giving items, battles. */
-import { h, clamp } from '../../core/dom.js';
+import { h, clamp, add } from '../../core/dom.js';
 import { glyphNode } from '../../stage/render.js';
 import { G } from '../guided.js';
 
-/* ================= ❓ choices ================= */
-/* ================= ❓ ask the Player: exactly what they may do next turn ================= */
+/* ================= ? choices ================= */
+/* ================= ? ask the Player: exactly what they may do next turn ================= */
 export function screenAsk(kit) {
   const { p, c, d, S, code, head, opt, doneBtn } = kit;
   const kind = d.ask ? d.ask.kind : d.choices.filter(Boolean).length ? 'choice' : '';
@@ -26,21 +26,23 @@ export function screenAsk(kit) {
     `What may ${S.names.player} do next turn?`,
     S.rules.player === 'limited' ? 'Limited will: they must do this.' : 'Free will: this is offered, they may still do something else.',
   );
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'gopts' },
-      opt('🔘', 'Pick one of these', 'Up to three choices', () => set('choice'), cur === 'choice'),
-      opt('🎲', 'Roll a die', 'd6 or d20, with a number to reach', () => set('roll'), cur === 'roll'),
-      opt('📍', 'Go to a place', 'Mark places on the stage', () => set('place'), cur === 'place'),
-      opt('🎯', 'Pick a target', 'Who to attack, talk to, save…', () => set('target'), cur === 'target'),
-      c.mods().inventory && opt('🗑️', 'Give up an item', 'Discard one thing they carry', () => set('discard'), cur === 'discard'),
-      opt('✖', 'Nothing special', 'Clear the request', () => set(''), !cur),
+      opt('button', 'Pick one of these', 'Up to three choices', () => set('choice'), cur === 'choice'),
+      opt('dice', 'Roll a die', 'd6 or d20, with a number to reach', () => set('roll'), cur === 'roll'),
+      opt('map-pin', 'Go to a place', 'Mark places on the stage', () => set('place'), cur === 'place'),
+      opt('archery-target', 'Pick a target', 'Who to attack, talk to, save…', () => set('target'), cur === 'target'),
+      c.mods().inventory && opt('cross-box', 'Give up an item', 'Discard one thing they carry', () => set('discard'), cur === 'discard'),
+      opt('cross', 'Nothing special', 'Clear the request', () => set(''), !cur),
     ),
   );
   const a = d.ask;
   if (cur && cur !== 'choice')
-    p.append(
+    add(
+      p,
       h('input', {
         id: 'askText',
         placeholder: 'Your question or instruction (optional)',
@@ -64,9 +66,10 @@ export function screenAsk(kit) {
           c.changedQuiet();
         },
       });
-    p.append(inp(0), inp(1), inp(2));
+    add(p, inp(0), inp(1), inp(2));
   } else if (cur === 'roll') {
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'row' },
@@ -81,7 +84,7 @@ export function screenAsk(kit) {
                 c.rebuild();
               },
             },
-            `🎲 d${n}`,
+            `d${n}`,
           ),
         ),
       ),
@@ -106,12 +109,12 @@ export function screenAsk(kit) {
       ),
     );
   } else if (cur === 'place') {
-    p.append(
+    add(
+      p,
       a.places.map((pl, i) =>
         h(
           'div',
           { class: 'row' },
-          h('span', {}, '📍'),
           h('input', {
             maxlength: 30,
             value: pl.label,
@@ -144,10 +147,11 @@ export function screenAsk(kit) {
         },
         '＋ Add a place',
       ),
-      h('p', { class: 'dim small' }, 'Drag the 📍 markers on the stage to where they belong.'),
+      h('p', { class: 'dim small' }, 'Drag the markers on the stage to where they belong.'),
     );
   } else if (cur === 'target') {
-    p.append(
+    add(
+      p,
       h('input', {
         placeholder: 'What for? e.g. Attack, Talk to, Rescue',
         maxlength: 20,
@@ -179,8 +183,9 @@ export function screenAsk(kit) {
       ),
     );
   } else if (cur === 'discard')
-    p.append(h('p', { class: 'dim small' }, `${S.names.player} will choose one of their ${d.sheet.inv.length} item(s) to give up.`));
-  p.append(
+    add(p, h('p', { class: 'dim small' }, `${S.names.player} will choose one of their ${d.sheet.inv.length} item(s) to give up.`));
+  add(
+    p,
     doneBtn(() =>
       cur
         ? `${S.names.player} is asked: ${{ choice: 'pick a choice', roll: 'roll a die', place: 'go to a place', target: 'pick a target', discard: 'give up an item' }[cur]}`
@@ -190,7 +195,7 @@ export function screenAsk(kit) {
   return;
 }
 
-/* ================= ⭐ points ================= */
+/* ================= * points ================= */
 export function screenAward(kit) {
   const { p, c, d, S, head, doneBtn } = kit;
   head('Award points', `${S.names.player} has ${d.sheet.points || 0} points.`);
@@ -200,7 +205,8 @@ export function screenAward(kit) {
     d.award = n ? { n, text: d.award ? d.award.text : '' } : null;
     c.rebuild();
   };
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'chips wrap' },
@@ -227,7 +233,7 @@ export function screenAward(kit) {
   return;
 }
 
-/* ================= ⚔️ battle ================= */
+/* ================= battle ================= */
 export function screenBattle(kit) {
   const { p, c, d, S, code, me, lab, setup, home, head } = kit;
   const foes = d.entities.filter((e) => e.hp != null && e.id !== d.heroId);
@@ -265,7 +271,8 @@ export function screenBattle(kit) {
     G.foes ||= [];
     G.hp ||= 5;
     const cand = d.entities.filter((e) => e.id !== d.heroId && !e.tie);
-    p.append(
+    add(
+      p,
       h('small', { class: 'dim' }, 'Enemies'),
       cand.length
         ? h(
@@ -330,12 +337,12 @@ export function screenBattle(kit) {
             c.rebuild();
           },
         },
-        '⚔️ Begin the battle',
+        'Begin the battle',
       ),
     );
     return;
   }
-  head(`⚔️ Battle — round ${d.battle.round}`, 'One click per event. Each becomes its own step, so they play one after the other.');
+  head(`Battle — round ${d.battle.round}`, 'One click per event. Each becomes its own step, so they play one after the other.');
   const foe = foes.find((e) => e.id === G.foe) || foes.find((e) => e.id === d.target) || foes[0];
   const a = d.answer,
     mv = a && a.kind === 'battle' ? a.move : '';
@@ -365,7 +372,8 @@ export function screenBattle(kit) {
     if (label) G.did = [...(G.did || []), label].slice(-4);
     c.rebuild();
   };
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'card' },
@@ -373,7 +381,7 @@ export function screenBattle(kit) {
       h(
         'div',
         { class: 'row statrow' },
-        h('b', { class: 'grow' }, '🧑 ', S.names.player, `  ❤ ${heroHp() ?? '–'}`),
+        h('b', { class: 'grow' }, '', S.names.player, `  ${heroHp() ?? '–'}`),
         h(
           'button',
           {
@@ -411,7 +419,7 @@ export function screenBattle(kit) {
             },
             glyphNode(code, e.asset, 'mini'),
           ),
-          h('b', { class: 'grow' }, ` ❤ ${e.hp}/${e.maxHp}`),
+          h('b', { class: 'grow' }, ` ${e.hp}/${e.maxHp}`),
           h(
             'button',
             {
@@ -476,7 +484,7 @@ export function screenBattle(kit) {
         if (me) {
           const shot = {
             id: c.rid(),
-            asset: style === 'magic' ? 'e:🔥' : 'e:➤',
+            asset: style === 'magic' ? 'e:' : 'e:',
             x: me.x,
             y: me.y - 0.06,
             scale: 0.6,
@@ -528,7 +536,8 @@ export function screenBattle(kit) {
           [8, '8'],
         ].map(([n, l]) => h('button', { 'data-dmg': n, class: 'grow', onclick: () => fn(n) }, l)),
       );
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'card' },
@@ -560,7 +569,7 @@ export function screenBattle(kit) {
                     c.rebuild();
                   },
                 },
-                '🏃 They get away',
+                'They get away',
               ),
               h('span', { class: 'dim small grow' }, 'or they fail: go on to 2.'),
             )
@@ -576,10 +585,10 @@ export function screenBattle(kit) {
           'div',
           { class: 'chips wrap' },
           [
-            ['strike', '👊 Strike'],
-            ['swing', '🗡️ Sword swing'],
-            ['shoot', '🏹 Shoot'],
-            ['magic', '🔥 Magic'],
+            ['strike', 'Strike'],
+            ['swing', 'Sword swing'],
+            ['shoot', 'Shoot'],
+            ['magic', 'Magic'],
           ].map(([id, l]) =>
             h(
               'button',
@@ -594,7 +603,7 @@ export function screenBattle(kit) {
               l,
             ),
           ),
-          h('button', { 'data-attack': 'roar', onclick: () => strike('roar', 0) }, '😡 Just roars'),
+          h('button', { 'data-attack': 'roar', onclick: () => strike('roar', 0) }, 'Just roars'),
         ),
         h('small', { class: 'dim' }, 'Damage to the hero'),
         dmgRow((n) => strike(G.style, n), 'foeHits'),
@@ -602,7 +611,8 @@ export function screenBattle(kit) {
     );
   }
   if (G.did && G.did.length)
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'card gevents' },
@@ -610,7 +620,8 @@ export function screenBattle(kit) {
         G.did.map((l) => h('div', {}, '• ' + l)),
       ),
     );
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'card' },
@@ -663,7 +674,7 @@ export function screenBattle(kit) {
             c.rebuild();
           },
         },
-        '🏁 End the battle',
+        'End the battle',
       ),
       h(
         'button',
@@ -681,13 +692,14 @@ export function screenBattle(kit) {
   return;
 }
 
-/* ================= 🎒 the Player's sheet ================= */
+/* ================= the Player's sheet ================= */
 export function screenSheet(kit) {
   const { p, c, d, S, code, enter, head, doneBtn, chips } = kit;
   head(`${S.names.player}’s sheet`);
   const m = c.mods();
   if (m.stats) {
-    p.append(
+    add(
+      p,
       h('small', { class: 'dim' }, 'Stats'),
       d.sheet.stats.map((st) =>
         h(
@@ -717,10 +729,11 @@ export function screenSheet(kit) {
         ),
       ),
     );
-    if (!d.sheet.stats.length) p.append(h('p', { class: 'dim small' }, 'No stats yet. Add them with “+ stat” in the bar under the stage.'));
+    if (!d.sheet.stats.length) add(p, h('p', { class: 'dim small' }, 'No stats yet. Add them with “+ stat” in the bar under the stage.'));
   }
   if (m.inventory) {
-    p.append(
+    add(
+      p,
       h('small', { class: 'dim' }, 'Inventory'),
       d.sheet.inv.length
         ? h(
@@ -750,23 +763,24 @@ export function screenSheet(kit) {
             enter('give');
           },
         },
-        '🎒 Give them something from the stage',
+        'Give them something from the stage',
       ),
     );
   }
   if (m.dice)
-    p.append(
+    add(
+      p,
       h('small', { class: 'dim' }, 'Roll a die with this turn'),
       chips(
         [
           [0, 'No roll'],
-          [6, '🎲 d6'],
-          [20, '🎲 d20'],
+          [6, 'd6'],
+          [20, 'd20'],
         ],
         'rollWant',
       ),
     );
-  p.append(doneBtn(''));
+  add(p, doneBtn(''));
   return;
 }
 

@@ -139,7 +139,7 @@ const { setup } = require('./lib');
     assert(await P.p.evaluate(() => /\d:\d\d/.test(document.querySelector('#tlabel').textContent)), 'clock visible');
     await D.p.context().close();
     await P.p.waitForFunction(
-      () => /offline/.test(document.querySelector('#banner').textContent) && /⏸/.test(document.querySelector('#tlabel').textContent),
+      () => /offline/.test(document.querySelector('#banner').textContent) && /paused/.test(document.querySelector('#tlabel').textContent),
       null,
       { timeout: 15000 },
     );

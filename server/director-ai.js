@@ -12,6 +12,7 @@
 import { BACKDROPS as CATALOG_BACKDROPS } from '../public/core/catalog.js';
 import { MOODS as MOOD_LIST, SFX as SFX_LIST } from '../public/shared/sounds.js';
 import { WEATHER as WEATHER_LIST, BURSTS as BURST_LIST, FX as FX_LIST } from '../public/shared/options.js';
+import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -47,11 +48,11 @@ You receive JSON with the Director's request, the current scene, and what the Pl
 The stage:
 - Positions are fractions of the stage: x from 0 (left) to 1 (right), y from 0 (top) to 1 (bottom). A character's x,y is where its feet are. The ground is roughly y 0.6 to 0.95; things in the sky go higher. Keep things at least 0.12 apart so they do not overlap, and keep x between 0.06 and 0.94.
 - scale 1 is a person; a house or tree is 2 to 2.5; a small object is 0.6 to 0.8.
-- Everything on stage is drawn as one emoji, given in "look". Pick the single emoji that best shows the thing.
+- Everything on stage is a small pixel-art sprite. In "look", name the thing in one to three plain English words (for example "old man", "wooden door", "candle", "black cat"); the game picks the closest sprite it has.
 - Speech bubbles are short: one or two sentences, under 120 characters. Narration is one or two sentences, under 200 characters.
 
 Operations (each is one object in "ops", carried out in order):
-- add: put something new on stage. Fields: look (one emoji), x, y, and optionally scale, say, emote, fx, flip, ref. Give it a short "ref" name if a later operation needs to refer to it.
+- add: put something new on stage. Fields: look (a few plain words), x, y, and optionally scale, say, emote, fx, flip, ref. Give it a short "ref" name if a later operation needs to refer to it.
 - edit: change something already there. Fields: id (from the scene) or ref, plus any of look, x, y, scale, rot (degrees), flip, say, emote, fx. Use say "" to clear a line.
 - move: animate something along a path so the Player watches it happen. Fields: id or ref, path (a list of [x, y] points it passes through, ending where it stops), seconds (how long, 0.4 to 4). Use this for walking, running in, flying past, fleeing. All moves in one turn share 10 seconds and play one after another.
 - remove: take something off the stage. Fields: id or ref.
@@ -147,10 +148,43 @@ async function interpret(input) {
   }
 }
 
+/* Claude names a thing in words; the pixel-art library has names too. Pick the sprite whose name fits best. */
+let library = null;
+function spriteFor(words) {
+  if (!library) {
+    try {
+      const index = JSON.parse(fs.readFileSync(new URL('../public/px/index.json', import.meta.url), 'utf8'));
+      library = index.categories
+        .filter((c) => c.group !== 'tile')
+        .flatMap((c) => c.items.map((i) => ({ slug: i.slug, words: new Set(`${i.slug.replace(/-/g, ' ')} ${i.name}`.split(/\s+/)) })));
+    } catch {
+      library = [];
+    }
+  }
+  const want = words
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 6);
+  const exact = library.find((i) => i.slug === want.join('-'));
+  if (exact) return 'p:' + exact.slug;
+  let best = null,
+    score = 0;
+  for (const item of library) {
+    let n = 0;
+    for (const w of want) if (item.words.has(w) || item.words.has(w.replace(/s$/, ''))) n += item.slug.split('-').includes(w) ? 2 : 1;
+    if (n > score || (n === score && n > 0 && item.slug.length < best.slug.length)) {
+      best = item;
+      score = n;
+    }
+  }
+  return 'p:' + (best ? best.slug : 'question');
+}
+
 /** What Claude gets to see: a compact description of the draft scene. */
 function describe({ text, scene, raw, rules, names }) {
-  const looks = (asset) =>
-    asset.startsWith('e:') ? asset.slice(2) : asset.startsWith('s:') ? asset.slice(2).replace(/-/g, ' ') : 'a custom picture';
+  const looks = (asset) => (asset.startsWith('e:') ? asset.slice(2) : /^[sp]:/.test(asset) ? asset.slice(2).replace(/-/g, ' ') : 'a custom picture');
   const hero = scene.entities.find((e) => e.id === scene.heroId);
   const reached = scene.entities.find((e) => e.id === raw.target),
     used = scene.sheet.inv.find((i) => i.id === raw.use);
@@ -190,7 +224,7 @@ function applyOps(scene, ops, rules) {
   const find = (op) =>
     scene.entities.find((e) => e.id === op.id) || scene.entities.find((e) => e.id === refs.get(op.ref) || e.id === refs.get(op.id));
   const tweak = (e, op) => {
-    if (typeof op.look === 'string' && op.look.trim()) e.asset = 'e:' + op.look.trim().slice(0, 16);
+    if (typeof op.look === 'string' && op.look.trim()) e.asset = spriteFor(op.look);
     if (fin(op.x)) e.x = clamp(op.x, 0, 1);
     if (fin(op.y)) e.y = clamp(op.y, 0.08, 1);
     if (fin(op.scale)) e.scale = clamp(op.scale, 0.3, 6);

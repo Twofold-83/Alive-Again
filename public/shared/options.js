@@ -13,22 +13,22 @@ export const FX = [
   ['ghost', 'See-through'],
   ['dark', 'Silhouette'],
 ];
-export const EMOTES = ['😀', '😢', '😡', '😱', '😍', '🤔', '😴', '😈', '❗', '❓', '💤', '❤️'];
+export const EMOTES = ['!', '?', '...', '!!', '♥', '♪', 'zzz', ':)', ':(', '>:(', 'o_o', 'x_x'];
 export const WEATHER = [
-  ['', '☀️ Clear'],
-  ['rain', '🌧️ Rain'],
-  ['storm', '⛈️ Storm'],
-  ['snow', '❄️ Snow'],
-  ['fog', '🌫️ Fog'],
-  ['dark', '🕯️ Darkness'],
-  ['night', '🌙 Night tint'],
-  ['heat', '🔥 Heat'],
-  ['sparkle', '✨ Sparkles'],
+  ['', 'Clear'],
+  ['rain', 'Rain'],
+  ['storm', 'Storm'],
+  ['snow', 'Snow'],
+  ['fog', 'Fog'],
+  ['dark', 'Darkness'],
+  ['night', 'Night tint'],
+  ['heat', 'Heat'],
+  ['sparkle', 'Sparkles'],
 ];
 export const BURSTS = [
   ['', 'None'],
-  ['shake', '📳 Shake'],
-  ['flash', '⚡ Flash'],
-  ['hurt', '🩸 Hurt'],
-  ['confetti', '🎉 Confetti'],
+  ['shake', 'Shake'],
+  ['flash', 'Flash'],
+  ['hurt', 'Hurt'],
+  ['confetti', 'Confetti'],
 ];

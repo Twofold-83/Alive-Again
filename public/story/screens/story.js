@@ -1,25 +1,42 @@
 /* Director screens: the main menu of a step, story settings, and "Tell Claude". */
 import { assetLabel } from '../../core/catalog.js';
-import { h } from '../../core/dom.js';
-import { glyphNode, actionText } from '../../stage/render.js';
+import { h, add } from '../../core/dom.js';
+import { glyphNode, actionParts } from '../../stage/render.js';
 import { G, short } from '../guided.js';
 
 /* ================= root ================= */
 export function screenRoot(kit) {
   const { p, c, d, S, code, lab, ws, setup, stepNo, enter, done, opt } = kit;
   if (!setup) {
-    const did = actionText(d, S.names).replace(/^✋ [^:]*: /, '');
-    p.append(
+    /* what the Player just did: read out like the log of an old adventure game */
+    const parts = actionParts(d),
+      hero = d.entities.find((e) => e.id === d.heroId);
+    add(
+      p,
       h(
         'div',
         { class: 'card told' },
-        h('small', { class: 'dim' }, `🧑 ${S.names.player} just…`),
-        did ? h('div', {}, h('i', {}, did)) : h('div', { class: 'dim' }, S.turn > 1 ? 'moved, and said nothing.' : 'has not done anything yet.'),
+        h(
+          'div',
+          { class: 'toldhead' },
+          hero && glyphNode(code, hero.asset),
+          h('b', {}, S.names.player),
+          h('small', {}, parts.length ? 'last turn' : ''),
+        ),
+        parts.length
+          ? parts.map(([kind, text]) => h('div', { class: 'toldrow ' + kind }, h('span', {}, kind), h('p', {}, text)))
+          : h(
+              'div',
+              { class: 'toldrow none' },
+              h('span', {}, '…'),
+              h('p', {}, S.turn > 1 ? 'moved, and said nothing.' : 'has not done anything yet.'),
+            ),
       ),
     );
     const tgt = d.target && d.entities.find((e) => e.id === d.target);
     if (tgt && c.mods().inventory)
-      p.append(
+      add(
+        p,
         h(
           'div',
           { class: 'card ask' },
@@ -37,7 +54,7 @@ export function screenRoot(kit) {
                   done(`${S.names.player} takes ${l}`);
                 },
               },
-              '🎒 Yes, they take it',
+              'Yes, they take it',
             ),
             h(
               'button',
@@ -55,7 +72,8 @@ export function screenRoot(kit) {
       );
     const ex = d.exit && d.exits.find((x) => x.id === d.exit);
     if (ex)
-      p.append(
+      add(
+        p,
         h(
           'div',
           { class: 'card ask' },
@@ -73,7 +91,7 @@ export function screenRoot(kit) {
                   if (doc) done(`Traveling to “${doc.name}”`);
                 },
               },
-              '🚶 Yes, travel there',
+              'Yes, travel there',
             ),
             h(
               'button',
@@ -90,17 +108,19 @@ export function screenRoot(kit) {
         ),
       );
     if (d.battle)
-      p.append(
+      add(
+        p,
         h(
           'div',
           { class: 'card ask' },
-          h('b', {}, `⚔️ Battle — round ${d.battle.round}`),
+          h('b', {}, `Battle — round ${d.battle.round}`),
           h('button', { class: 'primary', id: 'battleOpen', onclick: () => enter('battle') }, 'Open the battle tools'),
         ),
       );
     const used = d.use && d.sheet.inv.find((i) => i.id === d.use);
     if (used)
-      p.append(
+      add(
+        p,
         h(
           'div',
           { class: 'card ask' },
@@ -135,17 +155,19 @@ export function screenRoot(kit) {
         ),
       );
     if (S.rules.player === 'limited' && !d.choices.filter(Boolean).length && !d.ask)
-      p.append(
+      add(
+        p,
         h(
           'div',
           { class: 'card ask' },
           h('b', {}, `Limited will: ${S.names.player} needs options`),
           h('p', { class: 'dim small' }, 'Write up to three things they may do next turn. Without options they can act freely.'),
-          h('button', { class: 'primary', onclick: () => enter('ask') }, '❓ Decide what they may do'),
+          h('button', { class: 'primary', onclick: () => enter('ask') }, '? Decide what they may do'),
         ),
       );
   }
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'gtitle' },
@@ -162,39 +184,41 @@ export function screenRoot(kit) {
     ),
   );
   if (!ws && setup)
-    p.append(h('div', { class: 'row' }, h('button', { class: 'grow', id: 'undoBtn', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo')));
+    add(p, h('div', { class: 'row' }, h('button', { class: 'grow', id: 'undoBtn', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo')));
   const sheet = c.mods().inventory || c.mods().stats || c.mods().dice;
-  p.append(
+  add(
+    p,
     h(
       'div',
       { class: 'gopts' },
-      opt('➕', 'Add something', 'A character, a thing, an effect', () => enter('add')),
-      !ws && opt('💬', 'Someone speaks', 'Give a character a line', () => enter('speak')),
-      !ws && opt('🚶', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
+      opt('plus', 'Add something', 'A character, a thing, an effect', () => enter('add')),
+      !ws && opt('speech-bubble', 'Someone speaks', 'Give a character a line', () => enter('speak')),
+      !ws && opt('boot', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
       !ws &&
-        opt('📝', 'Narrate', 'Tell what happens in words', () => {
+        opt('scroll', 'Narrate', 'Tell what happens in words', () => {
           d.narration = '';
           enter('narrate');
         }),
-      !ws && opt('💥', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
-      opt('🌄', 'Change the scene', 'Place, weather, music, title', () => enter('scene')),
-      !ws && opt('✏️', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
-      !ws && opt('🏗️', 'Build scene', 'Levels, objects, exits — make a place', () => c.workshop()),
-      !ws && opt('🗺️', 'Map', `${(S.scenes || []).length} scenes — arrange, copy, go there`, () => c.workshop({ map: true })),
-      !ws && sheet && opt('🎒', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
-      !ws && opt('❓', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
-      !ws && opt('🎥', 'Camera', 'Zoom in on something', () => enter('camera')),
-      !ws && c.mods().points && opt('⭐', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
+      !ws && opt('explosion', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
+      opt('painting', 'Change the scene', 'Place, weather, music, title', () => enter('scene')),
+      !ws && opt('pencil', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
+      !ws && opt('hammer', 'Build scene', 'Levels, objects, exits — make a place', () => c.workshop()),
+      !ws && opt('map', 'Map', `${(S.scenes || []).length} scenes — arrange, copy, go there`, () => c.workshop({ map: true })),
+      !ws && sheet && opt('backpack', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
+      !ws && opt('question', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
+      !ws && opt('camera', 'Camera', 'Zoom in on something', () => enter('camera')),
+      !ws && c.mods().points && opt('star', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
       !ws &&
         S.rules.type === 'adventure' &&
-        opt('⚔️', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
-      !ws && opt('🤖', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
-      !ws && opt('⚙️', 'Story settings', 'Type, rules, time, invite', () => enter('rules')),
+        opt('sword', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
+      !ws && opt('robot', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
+      !ws && opt('cog', 'Story settings', 'Type, rules, time, invite', () => enter('rules')),
     ),
   );
-  p.append(h('p', { class: 'dim small' }, 'Tip: click anything on the stage to change it, drag it to move it.'));
+  add(p, h('p', { class: 'dim small' }, 'Tip: click anything on the stage to change it, drag it to move it.'));
   if (G.log.length)
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'card gevents' },
@@ -205,7 +229,7 @@ export function screenRoot(kit) {
   return;
 }
 
-/* ================= ⚙️ settings ================= */
+/* ================= settings ================= */
 export function screenRules(kit) {
   const { p, c, S, code, head, doneBtn } = kit;
   head('Story settings', 'These apply from now on.');
@@ -229,12 +253,13 @@ export function screenRules(kit) {
     clearTimeout(infoT);
     infoT = setTimeout(() => c.setInfo({ ...info }), 500);
   };
-  p.append(
+  add(
+    p,
     c.typeCard(),
     h(
       'div',
       { class: 'card' },
-      h('h3', {}, '📜 Title screen and instructions'),
+      h('h3', {}, 'Title screen and instructions'),
       h('input', {
         id: 'infoTitle',
         placeholder: 'Title of your story',
@@ -268,7 +293,7 @@ export function screenRules(kit) {
     h(
       'div',
       { class: 'card' },
-      h('h3', {}, '⏱ Time per turn'),
+      h('h3', {}, 'Time per turn'),
       time,
       h('p', { class: 'dim small' }, 'Applies from the next turn. The clock pauses if either of you drops off.'),
     ),
@@ -279,8 +304,8 @@ export function screenRules(kit) {
       h(
         'div',
         { class: 'row' },
-        h('button', { class: 'grow', onclick: c.shareLink }, S.bot || S.hotseat ? '🔗 Let someone watch' : '🔗 Copy invite link'),
-        h('button', { class: 'grow', onclick: c.openStory }, '📖 Story so far'),
+        h('button', { class: 'grow', onclick: c.shareLink }, S.bot || S.hotseat ? 'Let someone watch' : 'Copy invite link'),
+        h('button', { class: 'grow', onclick: c.openStory }, 'Story so far'),
       ),
     ),
     h(
@@ -294,7 +319,7 @@ export function screenRules(kit) {
             if (confirm('End the story?')) c.act('end', {}, 3).catch((e) => c.toast(e.message));
           },
         },
-        '🎬 End the story',
+        'End the story',
       ),
       h('button', { class: 'grow', onclick: c.leave }, 'Leave to the start screen'),
     ),
@@ -303,12 +328,13 @@ export function screenRules(kit) {
   return;
 }
 
-/* ================= 🤖 Claude ================= */
+/* ================= Claude ================= */
 export function screenClaude(kit) {
   const { p, c, S, done, head } = kit;
   head('Tell Claude what happens', 'Describe this step in your own words. Claude sets it up on the stage; you can still change it.');
   if (!S.claude) {
-    p.append(
+    add(
+      p,
       h(
         'div',
         { class: 'card' },
@@ -334,7 +360,8 @@ export function screenClaude(kit) {
   ta.addEventListener('input', () => {
     G.ask = ta.value;
   });
-  p.append(
+  add(
+    p,
     ta,
     h(
       'button',
@@ -352,8 +379,8 @@ export function screenClaude(kit) {
             for (const k of Object.keys(r.scene)) if (!['steps', 'action', 'target', 'use', 'roll'].includes(k)) keep[k] = r.scene[k];
             G.note = r.note || 'Done.';
             G.busy = false;
-            c.toast('🤖 ' + G.note);
-            return done(`🤖 ${short(text, 40)}`);
+            c.toast('' + G.note);
+            return done(`${short(text, 40)}`);
           } catch (e) {
             c.toast(e.message);
           }
@@ -361,7 +388,7 @@ export function screenClaude(kit) {
           c.rebuild();
         },
       },
-      G.busy ? '🤖 Claude is setting the stage…' : '🤖 Make it happen',
+      G.busy ? 'Claude is setting the stage…' : 'Make it happen',
     ),
     h('p', { class: 'dim small' }, 'Not happy with the result? “Reset step” at the top undoes it.'),
   );

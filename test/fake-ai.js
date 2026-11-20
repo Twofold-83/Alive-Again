@@ -7,7 +7,7 @@ exports.interpret = async (input) => {
   return {
     note: `Staged: ${input.director_request}`,
     ops: [
-      { op: 'add', look: '🐉', ref: 'dragon', x: 0.9, y: 0.7, scale: 2, say: 'ROAR!', fx: 'shake' },
+      { op: 'add', look: 'red dragon', ref: 'dragon', x: 0.9, y: 0.7, scale: 2, say: 'ROAR!', fx: 'shake' },
       {
         op: 'move',
         ref: 'dragon',
