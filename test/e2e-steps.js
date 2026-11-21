@@ -193,7 +193,7 @@ const { setup } = require('./lib');
     assert(await p.locator('[data-kind=w].on').count(), 'picking a wall tile selects the wall brush');
     await p.click('[data-wtab=things]');
     await x.add('crate'); // the same add-and-change tools as during a turn
-    await p.click('.thingbtns button:has-text("Solid")');
+    if (!(await p.locator('.thingbtns button.on:has-text("Solid")').count())) await p.click('.thingbtns button:has-text("Solid")'); // a crate blocks the way from the start
     const dragWs = async (sel, cx, cy) => {
       const b = await p.locator(sel).boundingBox();
       await p.mouse.move(b.x + b.width / 2, b.y + b.height - 3);
