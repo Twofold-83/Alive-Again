@@ -170,6 +170,89 @@ function saveRoom() {
   }
   draw();
 }
+/* ---------- campaigns: a whole map — every scene, where it lies, the ways between them — kept on this device ---------- */
+function campaigns() {
+  try {
+    const l = JSON.parse(localStorage.getItem('tf.campaigns') || '[]');
+    return Array.isArray(l) ? l : [];
+  } catch {
+    return [];
+  }
+}
+function saveCampaign() {
+  flush();
+  if (!W.list.length) return W.c.toast('Put a scene on the map first');
+  const name = ((document.querySelector('#campName') || {}).value || 'My campaign').trim().slice(0, 40) || 'My campaign';
+  try {
+    localStorage.setItem(
+      'tf.campaigns',
+      JSON.stringify([{ id: rid(), name, at: Date.now(), scenes: clone(library()) }, ...campaigns().filter((c) => c.name !== name)].slice(0, 20)),
+    );
+    W.c.toast(`Campaign “${name}” is saved: ${W.list.length} scenes with their connections`);
+  } catch {
+    W.c.toast('This device has no room left to save it');
+  }
+  draw();
+}
+/** Put a saved campaign on this story's map: the scenes get new ids, the connections between them are kept. */
+function loadCampaign(c) {
+  const ids = new Map(c.scenes.map((s) => [s.id, rid()]));
+  for (const s of c.scenes.slice(0, 60)) {
+    if (!s || !s.scene || !Array.isArray(s.scene.entities)) continue;
+    const d = { id: ids.get(s.id), name: String(s.name || 'Scene').slice(0, 40), mx: s.mx, my: s.my, scene: normScene(clone(s.scene)) };
+    if (!(d.mx >= 0 && d.my >= 0)) Object.assign(d, spot());
+    d.scene.sceneId = d.id;
+    d.scene.exits = (d.scene.exits || []).filter((x) => ids.has(x.to)).map((x) => ({ ...x, id: rid(), to: ids.get(x.to) }));
+    W.list.push(d);
+  }
+  saveNow();
+  W.view = 'map';
+  draw();
+  W.c.toast(`“${c.name}” is on the map`);
+}
+function campaignsCard() {
+  const list = campaigns();
+  return h(
+    'div',
+    { class: 'card', id: 'campaigns' },
+    h('h3', {}, 'Campaigns'),
+    h(
+      'p',
+      { class: 'dim small' },
+      'A campaign is this whole map: every scene, where it lies, and the ways between them. Save it to prepare large sets of levels and use them in any story.',
+    ),
+    h(
+      'div',
+      { class: 'row' },
+      h('input', { id: 'campName', class: 'grow', placeholder: 'Name of the campaign', maxlength: 40 }),
+      h('button', { id: 'campSave', class: 'primary', disabled: !W.list.length, onclick: saveCampaign }, 'Save campaign'),
+    ),
+    list.map((c) =>
+      h(
+        'div',
+        { class: 'row myroom' },
+        h(
+          'button',
+          { class: 'grow', title: 'Put this campaign on the map', onclick: () => loadCampaign(c) },
+          h('b', {}, c.name),
+          h('small', { class: 'dim' }, ` ${c.scenes.length} scenes`),
+        ),
+        h(
+          'button',
+          {
+            title: 'Forget this campaign',
+            onclick: () => {
+              if (!confirm(`Forget the campaign “${c.name}”?`)) return;
+              localStorage.setItem('tf.campaigns', JSON.stringify(campaigns().filter((x) => x.id !== c.id)));
+              draw();
+            },
+          },
+          '✕',
+        ),
+      ),
+    ),
+  );
+}
 function myRoomsCard() {
   const list = myRooms();
   return h(
@@ -808,6 +891,7 @@ function mapTools() {
         SCENARIOS.map((sc) => big('scn-' + sc.id, sc.name, `${sc.rooms.length} rooms — ${sc.blurb}`, () => addScenario(sc))),
       ),
     );
+  kids.push(campaignsCard());
   if (!node) kids.push(myRoomsCard());
   W.el.tools.replaceChildren(...kids.filter(Boolean));
 }

@@ -223,6 +223,10 @@ const { setup } = require('./lib');
     await p.click('.wsmap .node');
     await p.click('#mapDup');
     assert.equal(await p.locator('.wsmap .node').count(), 2);
+    // the whole map is saved as a campaign, and can be put on a map again
+    await p.click('#campSave');
+    assert.equal(await p.locator('#campaigns .myroom').count(), 1);
+    assert.match(await p.evaluate(() => localStorage.getItem('tf.campaigns')), /The river crossing/);
     await p.click('.wsmap .node >> nth=0');
     assert.equal(await p.inputValue('#mapName'), 'The river crossing');
     await p.click('#mapUse'); // bring the prepared scene on stage, in this step
