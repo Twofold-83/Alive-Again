@@ -333,7 +333,8 @@ const { setup } = require('./lib');
     await x.done();
     await x.opt('Battle');
     await p.click('#panel > .grid button >> nth=0');
-    await p.click('.row button:has-text("3")');
+    await p.click('.row button:has-text("3") >> nth=0');
+    await p.click('#btManual'); // this battle is run all by hand
     await p.click('#battleStart');
     assert.equal(
       await p.evaluate(() => getComputedStyle(document.querySelector('#stage .ent:has(img[src*="ghoul"]) .hp')).display),

@@ -55,9 +55,16 @@ export function actionParts(scene, pendingRoll) {
   else if (t && scene.verb)
     parts.push(['does', `${scene.verb}: ${name(t)}`]); // a verb on a clickable thing
   else if (t && a && a.kind === 'target') parts.push(['does', `${a.verb}: ${name(t)}`]);
-  else if (t && a && a.kind === 'battle') parts.push(['does', `attacks ${name(t)}`]);
+  else if (t && a && a.kind === 'battle' && !a.lines && a.move !== 'speak') parts.push(['does', `attacks ${name(t)}`]);
+  else if (t && a && a.kind === 'battle') void 0;
   else if (t) parts.push(['does', 'reaches for ' + name(t)]);
-  if (a && a.kind === 'battle' && a.move !== 'attack') parts.push(['does', a.move === 'defend' ? 'defends' : 'tries to flee']);
+  if (a && a.kind === 'battle' && a.lines) {
+    for (const line of a.lines) parts.push(['battle', line]); // a battle with rules: what the round came to
+  } else if (a && a.kind === 'battle' && a.move !== 'attack')
+    parts.push([
+      'does',
+      { defend: 'defends', flee: 'tries to flee', item: 'uses an item', escape: 'tries to escape', speak: 'speaks' }[a.move] || a.move,
+    ]);
   if (a && a.kind === 'roll' && a.declined) parts.push(['does', 'backs out of the roll']);
   if (a && a.kind === 'place') parts.push(['goes', 'goes to ' + a.label]);
   if (a && a.kind === 'discard') parts.push(['gives', 'discards ' + assetLabel(a.asset, a.name)]);

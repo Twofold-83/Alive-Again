@@ -103,3 +103,13 @@ button.foe.on { outline: 2px solid var(--accent); }
 .tumble.landed { animation: dieland .3s steps(3) both; }
 @keyframes dietumble { 0% { transform: translate(-150px, -70px) rotate(-540deg); } 35% { transform: translate(-60px, 0) rotate(-250deg); } 55% { transform: translate(-20px, -34px) rotate(-120deg); } 75% { transform: translate(8px, 0) rotate(-30deg); } 88% { transform: translate(4px, -10px) rotate(-8deg); } 100% { transform: none; } }
 @keyframes dieland { 0% { transform: translateY(-6px); } 100% { transform: none; } }
+.battlehud { display: flex; flex-direction: column; gap: 3px; }
+.battlehud .bar { position: relative; display: flex; justify-content: space-between; padding: 3px 8px; background: #000; border: 2px solid var(--lo, #000); overflow: hidden; }
+.battlehud .bar b, .battlehud .bar span { position: relative; z-index: 1; font-weight: normal; }
+.battlehud .bar i { position: absolute; inset: 0 auto 0 0; background: #6b2332; }
+.battlehud .bar.hero i { background: #2e4835; }
+.battlecmds { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.battlepick { display: flex; flex-direction: column; gap: 3px; padding-left: 10px; border-left: 3px solid var(--accent); }
+.battlelog { background: #000; border: 2px solid; border-color: #000 var(--hi) var(--hi) #000; padding: 4px 8px; max-height: 6.2em; overflow-y: auto; }
+.battlelog p { margin: 0; color: #cfc9b6; }
+.toldrow.battle p { color: #e9c45a; }

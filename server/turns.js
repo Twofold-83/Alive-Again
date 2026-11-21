@@ -2,6 +2,7 @@
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
 import { timers, online, broadcast, touch, rooms } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
+import { resolveBattle, livingFoes } from '../public/shared/battle.js';
 import { cutEstimate, rollDie, cleanScene, cleanTrackPts, cleanPose, cleanFeel } from './scene.js';
 import { cleanRules } from '../public/shared/rules.js';
 import { walkable, stepFields, playerFields } from '../public/shared/scene-model.js';
@@ -118,6 +119,7 @@ function submitPlayer(room, body) {
   const ask = sc.ask,
     ans = body.answer && typeof body.answer === 'object' ? body.answer : null;
   let answer = null,
+    battleMove = null,
     askRoll = 0,
     askTarget = null;
   if (ask && ask.kind === 'roll' && ask.rolled) {
@@ -138,6 +140,12 @@ function submitPlayer(room, body) {
     else if (ask.kind === 'target' && ask.targets.includes(ans.id)) {
       askTarget = ans.id;
       answer = { kind: 'target', verb: ask.verb || 'chooses' };
+    } else if (ask.kind === 'battle' && sc.battle && typeof sc.battle.auto === 'boolean' && sc.battle.cmds.includes(ans.move)) {
+      /* a battle with rules: the round is settled below, once the hero has spoken and moved */
+      const foe = livingFoes(sc).find((e) => e.id === ans.id);
+      battleMove = { move: ans.move, id: foe ? foe.id : null, item: typeof ans.item === 'string' ? ans.item : '' };
+      answer = { kind: 'battle', move: ans.move };
+      askTarget = foe && (ans.move === 'attack' || ans.move === 'speak') ? foe.id : null;
     } else if (ask.kind === 'battle' && ['attack', 'defend', 'flee'].includes(ans.move)) {
       const foe = sc.entities.find((e) => e.id === ans.id && e.hp != null && e.id !== sc.heroId);
       if (ans.move !== 'attack' || foe) {
@@ -210,6 +218,24 @@ function submitPlayer(room, body) {
   sc.roll = roll ? { by: 'player', ...roll } : null;
   sc.choices = [];
   sc.ask = null;
+  if (battleMove) {
+    const lines = resolveBattle(sc, battleMove, room.names, (e) => assetName(e.asset));
+    sc.answer = { ...answer, lines: lines.slice(0, 8) };
+    const b = sc.battle;
+    if (b.over === 'won' || b.over === 'fled') {
+      for (const e of sc.entities) if (e.id !== sc.heroId && !e.temp) e.hp = e.maxHp = null;
+      sc.card = b.over === 'won' ? 'Victory!' : 'Got away!';
+      sc.sfx = b.over === 'won' ? 'fanfare' : 'teleport';
+      sc.battle = null;
+    } else if (b.over === 'lost') {
+      sc.card = 'Defeated…';
+      sc.sfx = 'fail'; // the Director decides what that means
+    } else sc.ask = { kind: 'battle', text: `Round ${b.round} — what do you do?`, sides: 6, dc: 0, verb: '', places: [], targets: [] };
+  }
+}
+/** A plain name for a library thing, for the battle's lines: 'p:ritual-dagger' -> 'ritual dagger'. */
+function assetName(asset) {
+  return /^p:/.test(asset || '') ? asset.slice(2).replace(/-/g, ' ') : 'it';
 }
 /** The Player rolls the die the Director asked for: at once, so they see how it went before ending the turn. */
 export function actRoll(room, body, who) {

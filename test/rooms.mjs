@@ -46,4 +46,32 @@ assert.equal(parts.length, 500);
 assert.equal(new Set(parts.map((x) => x.id)).size, 500);
 for (const part of parts) assert(fs.existsSync(`public/doll/${part.id}.png`) && part.name, part.id);
 for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.length % 16 === 0, m.id);
+/* battle rules: a round with enemies that fight on their own */
+{
+  const { resolveBattle, cleanBattle, heroHealth } = await import('../public/shared/battle.js');
+  const { newScene, newEntity } = await import('../public/shared/scene-model.js');
+  const sc = newScene();
+  sc.entities.push(
+    newEntity('p:ghoul', { id: 'g', hp: 6, maxHp: 6 }),
+    newEntity('p:dagger-ritual', { id: 'w', tie: { to: 'hero', dx: 0, dy: 0, front: true } }),
+  );
+  sc.sheet.inv.push({ id: 'i1', asset: 'p:potion-poison', name: 'Healing potion' });
+  sc.battle = cleanBattle({ round: 1, auto: true, cmds: ['attack', 'item', 'escape'], atk: 2, foeAtk: 2, flee: 100 });
+  assert.deepEqual(sc.battle.cmds, ['attack', 'item', 'escape']);
+  const names = { player: 'Hero', director: 'D' },
+    label = () => 'ghoul';
+  const lines = resolveBattle(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
+  assert.equal(sc.entities.find((e) => e.id === 'g').hp, 6 - (2 + 2 + 1), 'strength, the tied weapon and the roll');
+  assert.equal(heroHealth(sc).get(), 8 - 3, 'the ghoul struck back');
+  assert(lines.length === 2 && sc.floats.length === 2 && sc.battle.round === 2);
+  resolveBattle(sc, { move: 'item', item: 'i1' }, names, label, () => 0.5);
+  assert.equal(sc.sheet.inv.length, 0, 'the potion is used up');
+  resolveBattle(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
+  assert.equal(sc.battle.over, 'won');
+  sc.entities.find((e) => e.id === 'g').hp = 5;
+  sc.entities.find((e) => e.id === 'g').temp = false;
+  sc.battle.over = '';
+  resolveBattle(sc, { move: 'escape' }, names, label, () => 0.5);
+  assert.equal(sc.battle.over, 'fled');
+}
 console.log(`ROOMS OK (${ROOM_THEMES.length} themes, ${SCENARIOS.length} places, ${MOODS.length - 1} tunes)`);

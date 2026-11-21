@@ -1,4 +1,5 @@
 /* Director screens about the Player: what to ask of them, points, their sheet, giving items, battles. */
+import { BATTLE_CMDS, WEAPON } from '../../shared/battle.js';
 import { h, clamp, add } from '../../core/dom.js';
 import { glyphNode } from '../../stage/render.js';
 import { G } from '../guided.js';
@@ -270,6 +271,32 @@ export function screenBattle(kit) {
     head('Start a battle', 'Pick the enemies. The Player then chooses a move each turn, and you get tools for attacks, damage and checks.');
     G.foes ||= [];
     G.hp ||= 5;
+    G.bt ||= { auto: true, atk: 2, foeAtk: 1, heroHp: 8, flee: 50, cmds: BATTLE_CMDS.map((x) => x[0]) };
+    const bt = G.bt;
+    const chips = (label, key, values, fmt = String) =>
+      h(
+        'div',
+        {},
+        h('small', { class: 'dim' }, label),
+        h(
+          'div',
+          { class: 'row' },
+          values.map((n) =>
+            h(
+              'button',
+              {
+                [`data-${key.toLowerCase()}`]: n,
+                class: 'grow' + (bt[key] === n ? ' on' : ''),
+                onclick: () => {
+                  bt[key] = n;
+                  c.rebuild();
+                },
+              },
+              fmt(n),
+            ),
+          ),
+        ),
+      );
     const cand = d.entities.filter((e) => e.id !== d.heroId && !e.tie);
     add(
       p,
@@ -311,6 +338,67 @@ export function screenBattle(kit) {
           ),
         ),
       ),
+      /* the rules of this battle, decided before it starts */
+      h(
+        'div',
+        { class: 'card', id: 'battleRules' },
+        h('h3', {}, 'Rules of this battle'),
+        h('small', { class: 'dim' }, 'Who moves the enemies?'),
+        h(
+          'div',
+          { class: 'row' },
+          h(
+            'button',
+            { id: 'btAuto', class: 'grow' + (bt.auto === true ? ' on' : ''), onclick: () => ((bt.auto = true), c.rebuild()) },
+            'They fight on their own',
+          ),
+          h(
+            'button',
+            { id: 'btHand', class: 'grow' + (bt.auto === false ? ' on' : ''), onclick: () => ((bt.auto = false), c.rebuild()) },
+            'I move each one',
+          ),
+          h(
+            'button',
+            { id: 'btManual', class: 'grow' + (bt.auto === null ? ' on' : ''), onclick: () => ((bt.auto = null), c.rebuild()) },
+            'All by hand',
+          ),
+        ),
+        h(
+          'small',
+          { class: 'dim' },
+          bt.auto === null
+            ? 'No rules: the Player picks Attack, Defend or Flee, and you decide every blow yourself.'
+            : bt.auto
+              ? 'Each round is settled when the Player ends the turn: their command, then every enemy strikes back. On your turn you can still step in: hurt, heal, add enemies, end it.'
+              : 'The Player’s command is settled at once; then you make each enemy act with the tools here.',
+        ),
+        hpStat
+          ? h('small', { class: 'dim' }, `${S.names.player}’s health is the “${hpStat.name}” stat: ${hpStat.value}`)
+          : chips(`${S.names.player}’s health`, 'heroHp', [5, 8, 12, 20, 30]),
+        chips(`${S.names.player}’s strength (a tied weapon adds ${WEAPON})`, 'atk', [1, 2, 3, 5]),
+        chips('Enemies’ strength', 'foeAtk', [0, 1, 2, 3, 5]),
+        chips('Chance to escape', 'flee', [0, 25, 50, 75, 100], (n) => n + '%'),
+        h('small', { class: 'dim' }, `What ${S.names.player} may do`),
+        h(
+          'div',
+          { class: 'chips wrap' },
+          BATTLE_CMDS.map(([id, label]) =>
+            h(
+              'button',
+              {
+                'data-cmd': id,
+                class: bt.cmds.includes(id) ? 'on' : '',
+                disabled: id === 'attack',
+                onclick: () => {
+                  bt.cmds = bt.cmds.includes(id) ? bt.cmds.filter((x) => x !== id) : [...bt.cmds, id];
+                  c.rebuild();
+                },
+              },
+              label,
+            ),
+          ),
+        ),
+      ),
       h(
         'button',
         {
@@ -323,11 +411,11 @@ export function screenBattle(kit) {
                 e.hp = G.hp;
                 e.maxHp = G.hp;
               }
-            if (!hpStat && me && me.hp == null) {
-              me.hp = 5;
-              me.maxHp = 5;
-            }
-            d.battle = { round: 1 };
+            if (!hpStat && me) me.hp = me.maxHp = bt.heroHp; // a story with a Health stat keeps its own count
+            d.battle =
+              bt.auto === null
+                ? { round: 1 }
+                : { round: 1, auto: bt.auto, cmds: [...bt.cmds], atk: bt.atk, foeAtk: bt.foeAtk, flee: bt.flee, guard: false, log: [], over: '' };
             d.ask = { kind: 'battle', text: 'Battle! What do you do?', sides: 6, dc: 0, verb: '', places: [], targets: [] };
             d.choices = [];
             d.sfx ||= 'alarm';
@@ -342,7 +430,28 @@ export function screenBattle(kit) {
     );
     return;
   }
-  head(`Battle — round ${d.battle.round}`, 'One click per event. Each becomes its own step, so they play one after the other.');
+  const ruled = typeof d.battle.auto === 'boolean';
+  head(
+    `Battle — round ${d.battle.round}`,
+    !ruled
+      ? 'One click per event. Each becomes its own step, so they play one after the other.'
+      : d.battle.auto
+        ? 'The enemies fight on their own. Step in whenever you like: one click per event.'
+        : 'The Player’s command is settled. Now move each enemy: one click per event.',
+  );
+  if (ruled && !d.ask && !d.battle.over)
+    d.ask = { kind: 'battle', text: `Round ${d.battle.round} — what do you do?`, sides: 6, dc: 0, verb: '', places: [], targets: [] };
+  if (ruled && d.battle.log.length)
+    add(
+      p,
+      h(
+        'div',
+        { class: 'battlelog', id: 'battleLog' },
+        d.battle.log.map((l) => h('p', {}, l)),
+      ),
+    );
+  if (ruled && d.battle.over === 'lost')
+    add(p, h('p', { class: 'warn' }, `${S.names.player} is beaten. Decide what happens: heal them, end the battle, or end the story.`));
   const foe = foes.find((e) => e.id === G.foe) || foes.find((e) => e.id === d.target) || foes[0];
   const a = d.answer,
     mv = a && a.kind === 'battle' ? a.move : '';

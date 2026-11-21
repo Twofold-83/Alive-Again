@@ -1,6 +1,7 @@
 /* What the server accepts as a scene: every field a client sends is checked and cut to size here.
  * The shape of a scene itself is defined once, for browser and server, in public/shared/scene-model.js. */
 import { FEELS } from '../public/shared/options.js';
+import { cleanBattle } from '../public/shared/battle.js';
 import { MAX_ENTITIES, playerFields } from '../public/shared/scene-model.js';
 import crypto from 'node:crypto';
 import { arr, num, r3, str, uid, HEX } from './util.js';
@@ -185,7 +186,7 @@ export function cleanScene(s, prev, inner) {
       .slice(0, 12)
       .filter((f) => f && seen.has(f.id))
       .map((f) => ({ id: f.id, text: str(f.text, 12), c: HEX.test(f.c) ? f.c : '#ffffff' })),
-    battle: s.battle && typeof s.battle === 'object' ? { round: Math.round(num(s.battle.round, 1, 999, 1)) } : null,
+    battle: cleanBattle(s.battle),
     steps: inner
       ? []
       : arr(s.steps)

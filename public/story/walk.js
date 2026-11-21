@@ -82,7 +82,7 @@ export function setReply(r) {
   }
   if (ask.kind === 'battle') {
     app.draft.answer = { kind: 'battle', move: r.move };
-    app.draft.target = r.move === 'attack' ? r.id : null;
+    app.draft.target = r.move === 'attack' || r.move === 'speak' ? r.id || null : null;
   }
 }
 /* ---------- active objects: hover shows the name, a click offers what the Director allowed ---------- */
