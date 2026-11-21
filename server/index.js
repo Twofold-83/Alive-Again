@@ -11,6 +11,7 @@ import { fail } from './util.js';
 import { act } from './actions.js';
 import { streams, broadcast, rooms, createRoom, joinRoom, loadRooms, saveDirty, sweep, dirty } from './rooms.js';
 import { MAX_BODY, PUBLIC, MIME, DATA_DIR, PORT } from './config.js';
+import { SPRITE_WIDTH } from '../public/shared/scene-model.js';
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -188,5 +189,12 @@ for (const sig of ['SIGINT', 'SIGTERM']) {
     }
     process.exit(0);
   });
+}
+/* how wide each sprite is: the server checks the hero's walk with the same footprints as the browser */
+try {
+  for (const c of JSON.parse(fs.readFileSync(path.join(PUBLIC, 'px', 'index.json'), 'utf8')).categories)
+    for (const i of c.items) SPRITE_WIDTH.set('p:' + i.slug, i.w || 16);
+} catch {
+  /* no sprite library: every thing counts as one tile wide */
 }
 server.listen(PORT, () => console.log(`Twofold listening on http://localhost:${PORT}  (${rooms.size} stories loaded)`));

@@ -110,6 +110,9 @@ export function heroOf(scene) {
 export function cellAt(x, y) {
   return Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)) * LEVEL_W + Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W));
 }
+/** How wide each library sprite is, in doll pixels (asset id -> width): filled from public/px/index.json by the
+ * browser and by the server, so both agree on how much floor a bed takes up. */
+export const SPRITE_WIDTH = new Map();
 /** May the hero stand here? Where a level exists only floor tiles will do; solid things block everywhere. */
 export function walkable(scene, x, y) {
   if (scene.level) {
@@ -118,7 +121,8 @@ export function walkable(scene, x, y) {
   }
   for (const e of scene.entities) {
     if (!e.solid || e.id === scene.heroId) continue;
-    if (Math.hypot((x - e.x) / (0.065 * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
+    const half = ((SPRITE_WIDTH.get(e.asset) || 16) / 16) * 0.031 + 0.012; // half its width (a tile is 1/16 of the stage) and a little room
+    if (Math.hypot((x - e.x) / (half * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
   }
   return true;
 }

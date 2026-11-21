@@ -18,6 +18,8 @@
  * the asset provider (providers.js), i.e. through whatever paid image service is
  * plugged in. Do not rename an item once stories use it: the slug comes from the name.
  */
+import { SPRITE_WIDTH } from '../shared/scene-model.js';
+
 export const SPRITES = new Map(); // slug -> { glyph, name, asset }
 function cat(id, label, items) {
   return {
@@ -224,6 +226,7 @@ export async function loadPixel() {
       const items = c.items.map((i) => {
         const it = { name: i.name, asset: 'p:' + i.slug, kind: i.kind, solid: !!i.solid, group: c.group, w: i.w || 16, h: i.h || 16 };
         PX.set(i.slug, it);
+        SPRITE_WIDTH.set(it.asset, it.w);
         return it;
       });
       PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items });
