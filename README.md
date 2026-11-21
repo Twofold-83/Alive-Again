@@ -175,6 +175,14 @@ as icons, and what the Player did is read out like the log of an old adventure g
   study, attic, bathroom …), institutions (asylum, morgue, hospital, prison, station, factory)
   and bleak outdoors (dead wood, marsh, moor, cemetery, catacomb, shipwreck, carnival …) — in four
   shapes; one press lays walls, floor and a few details. A new story opens in such a room.
+- **One scale for everything.** One pixel of any picture is the same size on the stage: a person is
+  16 x 33, a floor tile 16 x 16, a bed two tiles wide, a door taller than a person. `tools/make-big.js`
+  redraws the library at that scale from the modules in `tools/big/` (furniture, doors, graveyard and
+  eerie things, apparitions, props, nature, and all 233 ready-made people in the look of the paper
+  dolls); what is not redrawn yet is doubled (creatures, large things) or shown small (keys, cups).
+- **Feelings.** A paper-doll character can feel happy, sad, scared, angry, uneasy, curious, doubtful,
+  surprised, tired or hurt: a few pixels of brow, eye and mouth, drawn for every head. Director and
+  Player choose it in the same Act panel as the ready-made poses; the Director is told what the hero feels.
 - **Things can be clicked from the start.** Anything placed in Build scene gets a name and
   the verbs Look at / Use / Take; rename it or change the verbs under "Clickable".
 - **Places with many rooms.** On the Map, "Room next door" adds a connected room in one

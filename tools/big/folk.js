@@ -2227,6 +2227,11 @@ module.exports = (kit) => {
   void mix;
   void BONE;
 
-  require('./folk-cast.js');
+  /* the people themselves live in three helper files (a leading underscore keeps make-big from loading them as modules) */
+  const api = { P, I, cl, hc, sk, C, K, hex, dark, lite, WHITE, BONE, BLOOD, RED, GOLD, STEEL, WOOD, WOODD, CLOTH, HAIR, SKINS };
+  for (const f of ['_folk-heroes.js', '_folk-people.js', '_folk-cast.js']) {
+    const file = require('path').join(__dirname, f);
+    if (require('fs').existsSync(file)) require(file)(api);
+  }
   return out;
 };
