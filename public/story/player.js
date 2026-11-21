@@ -103,7 +103,7 @@ export function buildFoot() {
                 rebuild();
               },
             },
-            'Pose',
+            'Act',
           ),
         h(
           'button',
@@ -136,10 +136,21 @@ export function buildFoot() {
       app.poseOpen &&
       me &&
       isDoll(me.asset) &&
-      poseEditor(me.asset, me.pose, (pose) => {
-        me.pose = pose;
-        changedQuiet();
-      });
+      poseEditor(
+        me.asset,
+        me.pose,
+        (pose) => {
+          me.pose = pose;
+          changedQuiet();
+        },
+        {
+          feel: me.feel,
+          onFeel: (feel) => {
+            me.feel = feel;
+            changedQuiet();
+          },
+        },
+      );
     const pointRow = () =>
       app.S.rules.type === 'adventure' &&
       h(

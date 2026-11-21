@@ -222,7 +222,7 @@ export async function loadPixel() {
     if (!r.ok) return;
     for (const c of (await r.json()).categories) {
       const items = c.items.map((i) => {
-        const it = { name: i.name, asset: 'p:' + i.slug, kind: i.kind, solid: !!i.solid, group: c.group };
+        const it = { name: i.name, asset: 'p:' + i.slug, kind: i.kind, solid: !!i.solid, group: c.group, w: i.w || 16, h: i.h || 16 };
         PX.set(i.slug, it);
         return it;
       });

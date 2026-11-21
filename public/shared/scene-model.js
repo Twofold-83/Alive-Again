@@ -11,7 +11,7 @@
  *   one step      STEP fields: tracks, burst, sfx, card, travel, award, floats  belong to the step that made them
  *   the telling   narration, cam, steps (the earlier steps of a Director turn)
  *   for the Player  choices, ask                                               what the Director wants next turn
- *   by the Player   PLAYER fields: action, target, point, order, use, answer, verb, exit, plus roll
+ *   by the Player   PLAYER fields: action, target, point, order, use, answer, verb, exit, felt, plus roll
  *                                                                              what the Player did; shown to the
  *                                                                              Director, never sent back
  */
@@ -28,7 +28,7 @@ export function stepFields() {
 }
 /** What the Player did on their turn (the die they rolled is `roll`, kept separately because either side can roll). */
 export function playerFields() {
-  return { action: '', target: null, point: null, order: [], use: null, answer: null, verb: '', exit: null };
+  return { action: '', target: null, point: null, order: [], use: null, answer: null, verb: '', exit: null, felt: '' };
 }
 
 /** A character or thing on the stage. x and y are fractions of the stage (0..1), y at its feet. */
@@ -52,6 +52,7 @@ export function newEntity(asset, props = {}) {
     once: '',
     temp: false,
     layer: 0,
+    feel: '', // what a paper-doll character feels (see FEELS): it shows on the face
     pose: null, // a paper-doll character's joints: [head, left arm, right arm, left leg, right leg] in degrees
     ...props,
   };

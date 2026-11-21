@@ -10,7 +10,7 @@
     "sim": "node test/sim-cuts.js 60",
     "lint": "eslint .",
     "format": "prettier --write \"public/**/*.js\" \"server/**/*.js\" server.js \"test/**/*.{js,mjs}\" tools/upgrade-sprites.js",
-    "make-sprites": "node tools/make-sprites.js",
+    "make-sprites": "node tools/make-sprites.js && node tools/make-big.js",
     "make-dolls": "node tools/make-dolls.js",
     "upgrade-sprites": "node tools/upgrade-sprites.js"
   },

@@ -1,5 +1,6 @@
 /* What the server accepts as a scene: every field a client sends is checked and cut to size here.
  * The shape of a scene itself is defined once, for browser and server, in public/shared/scene-model.js. */
+import { FEELS } from '../public/shared/options.js';
 import { MAX_ENTITIES, playerFields } from '../public/shared/scene-model.js';
 import crypto from 'node:crypto';
 import { arr, num, r3, str, uid, HEX } from './util.js';
@@ -9,6 +10,9 @@ import { arr, num, r3, str, uid, HEX } from './util.js';
  * otherwise a base-36 index into pal (1 = pal[0]). Where a level exists the hero
  * may only stand on floor tiles, and solid things block the way. */
 /** Five joint angles of a paper-doll character, or null. */
+export function cleanFeel(f) {
+  return FEELS.some((x) => x[0] === f) ? f : '';
+}
 export function cleanPose(p) {
   return Array.isArray(p) && p.length === 5 ? p.map((v) => Math.round(num(v, -180, 180, 0))) : null;
 }
@@ -121,6 +125,7 @@ export function cleanScene(s, prev, inner) {
       temp: !!e.temp,
       layer: Math.sign(Math.round(num(e.layer, -1, 1, 0))),
       pose: cleanPose(e.pose), // a paper doll's joints
+      feel: cleanFeel(e.feel),
     });
   }
   const drawing = [];

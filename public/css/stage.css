@@ -70,6 +70,8 @@
 .ent .fxw { display: block; transform-origin: 50% 60%; }
 .ent .glyph { display: block; filter: drop-shadow(0 .04em .03em rgba(0, 0, 0, .45)); transform-origin: 50% 55%; }
 .ent img.glyph { height: 1.15em; width: auto; image-rendering: pixelated; pointer-events: none; }
+/* a library sprite knows its size in doll pixels: one pixel of any picture is the same size on the stage */
+.ent img.glyph.sized { width: calc(.0422em * var(--w)); height: auto; }
 .ent .emote { position: absolute; right: -.25em; top: -.3em; font-size: .45em; line-height: 1; pointer-events: none; }
 .ent .emote:empty { display: none; }
 .ent.hero::before { content: ""; position: absolute; left: -12%; right: -12%; bottom: -.14em; height: .42em; border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 214, 120, .8) 0, rgba(255, 190, 80, .35) 45%, rgba(255, 190, 80, 0) 72%); z-index: -1; }
@@ -189,7 +191,7 @@
 .stage .world { filter: var(--picture, saturate(.82) contrast(1.06)); }
 
 /* ---- paper-doll characters: a figure of six parts that turn at the joints ---- */
-.doll { --dp: .0471em; display: inline-block; position: relative; width: calc(var(--dp) * 16); height: calc(var(--dp) * 33); vertical-align: bottom; flex: none; }
+.doll { --dp: .0422em; display: inline-block; position: relative; width: calc(var(--dp) * 16); height: calc(var(--dp) * 33); vertical-align: bottom; flex: none; }
 .dpart { position: absolute; transition: transform .45s ease; }
 .doll .dpart img { width: 100% !important; height: 100% !important; display: block; image-rendering: pixelated; pointer-events: none; }
 .doll .dpart img.flip { transform: scaleX(-1); }
@@ -202,3 +204,6 @@
 .poser { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .poserstage { width: 100%; display: flex; justify-content: center; padding: 26px 0 12px; background: radial-gradient(ellipse at 50% 100%, #2a2631 0, #0b0a0d 70%); border: 2px solid; border-color: #000 var(--hi) var(--hi) #000; }
 .doll.big { font-size: 150px; }
+.doll .dpart .face { position: absolute; inset: 0; image-rendering: pixelated; background-repeat: no-repeat; pointer-events: none; }
+.actlab { align-self: flex-start; font-weight: normal; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
+.poser .feels button.on { background: var(--accent); color: #000; }

@@ -44,7 +44,7 @@ export function screenThing(kit) {
     h(
       'div',
       { class: 'thingbtns' },
-      isDoll(sel.asset) && b('', 'Pose', () => enter('pose'), !!sel.pose),
+      isDoll(sel.asset) && b('', 'Act', () => enter('pose'), !!sel.pose || !!sel.feel),
       isDoll(sel.asset) && b('', 'Change look', () => c.dollMaker(sel)),
       !ws && b('', 'Move / animate', () => enter('move')),
       b('', 'Turn into…', () => {
@@ -114,14 +114,25 @@ export function screenThing(kit) {
 export function screenPose(kit) {
   const { p, c, sel, lab, back, head, doneBtn } = kit;
   if (!sel || !isDoll(sel.asset)) return back();
-  head(`Pose ${lab(sel)}`, 'It moves into this pose as the step plays.');
+  head(`What ${lab(sel)} does`, 'Choose a feeling and something to do, or drag the limbs. It happens as the step plays.');
   add(
     p,
-    poseEditor(sel.asset, sel.pose, (pose) => {
-      sel.pose = pose;
-      c.changedQuiet();
-    }),
-    doneBtn(() => `${lab(sel)} strikes a pose`),
+    poseEditor(
+      sel.asset,
+      sel.pose,
+      (pose) => {
+        sel.pose = pose;
+        c.changedQuiet();
+      },
+      {
+        feel: sel.feel,
+        onFeel: (feel) => {
+          sel.feel = feel;
+          c.changedQuiet();
+        },
+      },
+    ),
+    doneBtn(() => (sel.feel ? `${lab(sel)} is ${sel.feel}` : `${lab(sel)} strikes a pose`)),
   );
 }
 export function screenSwap(kit) {

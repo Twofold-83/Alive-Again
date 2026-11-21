@@ -1,16 +1,24 @@
 /* Drawing a scene on a stage element: backdrop, level, things, bubbles, strips and overlays.
  * renderStage() can be called as often as you like; it only touches what changed. */
-import { isDoll, dollNode, poseDoll } from '../core/dolls.js';
-import { spriteView, assetLabel, backdropCss } from '../core/catalog.js';
+import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
+import { spriteView, assetLabel, backdropCss, pixelInfo } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 
 /** Fill in fields that older saved scenes do not have. */
 /** How big a thing of scale 1 is drawn, in units of --u (an eighth of the stage width): a person is a tile and a half tall. */
 const SPRITE = 0.74;
 
+/** How tall a thing stands, in em of its own font size (see .doll and img.glyph.sized in stage.css). */
+function tallOf(asset) {
+  if (isDoll(asset)) return 1.5;
+  const h = pixelInfo(asset).h;
+  return h ? h * 0.0422 + 0.12 : 1.22;
+}
 export function glyphNode(code, asset, cls = '') {
   if (isDoll(asset)) return dollNode(asset, cls);
   const v = spriteView(code, asset);
+  const size = cls === 'glyph' && pixelInfo(asset).w; // on the stage a library sprite is drawn at its true size
+  if (v.img && size) return h('img', { class: 'glyph sized', src: v.img, alt: '', draggable: 'false', style: `--w:${size}` });
   return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);
 }
 
@@ -19,6 +27,7 @@ export function actionParts(scene, pendingRoll) {
   const parts = [];
   const name = (e) => (e.active ? e.active.name : assetLabel(e.asset));
   if (scene.said) parts.push(['says', `“${scene.said}”`]);
+  if (scene.felt) parts.push(['feels', 'feels ' + scene.felt]);
   const item = scene.use && scene.sheet.inv.find((i) => i.id === scene.use);
   const t = scene.target && scene.entities.find((e) => e.id === scene.target);
   const a = scene.answer;
@@ -221,7 +230,10 @@ export function renderStage(root, scene, o = {}) {
       el._asset = e.asset;
       fxw.replaceChildren(glyphNode(code, e.asset, 'glyph'));
     }
-    if (isDoll(e.asset)) poseDoll(fxw.firstChild, e.pose);
+    if (isDoll(e.asset)) {
+      poseDoll(fxw.firstChild, e.pose);
+      feelDoll(fxw.firstChild, e.feel);
+    }
     el.className =
       'ent' +
       (e.id === scene.heroId ? ' hero' : '') +
@@ -272,7 +284,7 @@ export function renderStage(root, scene, o = {}) {
         {
           class: 'bubble' + (o.pop === e.id ? ' pop' : '') + (o.speaker && o.speaker !== e.id ? ' old' : '') + size(e.sayLen || e.say.length),
           'data-id': e.id,
-          style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * SPRITE * (isDoll(e.asset) ? 1.75 : 1.22) + 0.12) * zoom})`,
+          style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * SPRITE * tallOf(e.asset) + 0.12) * zoom})`,
         },
         e.say,
       );

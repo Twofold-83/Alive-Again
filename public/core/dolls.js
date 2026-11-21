@@ -6,8 +6,9 @@
  * and whose `pose` holds five angles in degrees: [head, left arm, right arm, left leg, right leg]
  * ("left" is the left side of the picture). 0 means hanging straight down (the head: upright). */
 import { h } from './dom.js';
+import { FEELS } from '../shared/options.js';
 
-export const DOLLS = { heads: [], torsos: [], arms: [], legs: [] };
+export const DOLLS = { heads: [], torsos: [], arms: [], legs: [], feels: [] };
 export async function loadDolls() {
   try {
     const r = await fetch('doll/index.json', { cache: 'no-cache' });
@@ -45,6 +46,12 @@ export const POSES = [
   ['Shrug', [0, 40, -40, 0, 0]],
   ['Hang head', [28, 2, -2, 0, 0]],
   ['Sprawl', [-20, 110, -70, 35, -40]],
+  ['Sit', [0, 24, -24, 82, 82]],
+  ['Creep', [16, -50, -72, 26, -14]],
+  ['Dance', [-8, 124, -40, -22, 26]],
+  ['Hide face', [20, 172, -172, 0, 0]],
+  ['Beg', [-14, 120, -120, 0, 0]],
+  ['Stagger', [-24, 44, -12, -18, 30]],
 ];
 
 export const isDoll = (asset) => typeof asset === 'string' && asset.startsWith('d:');
@@ -60,7 +67,7 @@ export function randomDoll() {
 const u = (n) => `calc(var(--dp) * ${n})`;
 
 /** The figure as an element. It scales with the font size around it (a whole figure is about 1.55em tall). */
-export function dollNode(asset, cls = '', pose) {
+export function dollNode(asset, cls = '', pose, feel) {
   const p = dollParts(asset),
     src = { ll: p.l, lr: p.l, t: p.t, al: p.a, ar: p.a, h: p.h };
   const el = h('span', { class: 'doll ' + cls });
@@ -74,8 +81,23 @@ export function dollNode(asset, cls = '', pose) {
     part.dataset.part = key;
     el.append(part);
   }
+  el.dataset.head = p.h;
   poseDoll(el, pose);
+  feelDoll(el, feel);
   return el;
+}
+/** Put a feeling on the face of a figure made by dollNode ('' for the face the head came with). */
+export function feelDoll(el, feel) {
+  feel = feel || '';
+  if ((el.dataset.feel || '') === feel) return;
+  el.dataset.feel = feel;
+  const head = el.querySelector('.dpart.h'),
+    n = DOLLS.feels.length,
+    i = DOLLS.feels.indexOf(feel);
+  let face = head.querySelector('.face');
+  if (i < 0) return void (face && face.remove());
+  if (!face) head.append((face = h('i', { class: 'face' })));
+  face.style.cssText = `background-image:url("doll/f-${el.dataset.head}.png");background-size:${n * 100}% 100%;background-position:${(i / (n - 1)) * 100}% 0`;
 }
 /** Turn the joints of a figure made by dollNode. */
 export function poseDoll(el, pose) {
@@ -87,10 +109,11 @@ export function poseDoll(el, pose) {
 }
 
 /**
- * A big figure whose head, arms and legs are turned by dragging them, plus the ready-made poses.
- * onChange(pose) is called while dragging and after a preset.
+ * What a character does and feels: a big figure whose head, arms and legs are turned by dragging them, ready-made
+ * things to do, and the feelings that show on the face.
+ * onChange(pose) is called while dragging and after a preset; o.feel is the feeling now, o.onFeel(feel) a new one.
  */
-export function poseEditor(asset, pose, onChange) {
+export function poseEditor(asset, pose, onChange, o = {}) {
   let cur = [...(Array.isArray(pose) && pose.length === 5 ? pose : REST)];
   const figure = dollNode(asset, 'big live', cur);
   const set = (next) => {
@@ -129,11 +152,37 @@ export function poseEditor(asset, pose, onChange) {
   };
   figure.addEventListener('pointerup', stop);
   figure.addEventListener('pointercancel', stop);
+  let feel = o.feel || '';
+  feelDoll(figure, feel);
+  const feels = h('div', { class: 'chips wrap feels' });
+  const drawFeels = () =>
+    feels.replaceChildren(
+      ...[['', 'As usual'], ...FEELS].map(([id, label]) =>
+        h(
+          'button',
+          {
+            'data-feel': id || 'none',
+            class: id === feel ? 'on' : '',
+            onclick: () => {
+              feel = id;
+              feelDoll(figure, feel);
+              drawFeels();
+              o.onFeel(feel);
+            },
+          },
+          label,
+        ),
+      ),
+    );
+  drawFeels();
   return h(
     'div',
     { class: 'poser' },
     h('div', { class: 'poserstage' }, figure),
     h('small', { class: 'dim' }, 'Drag the head, an arm or a leg to turn it.'),
+    o.onFeel && h('b', { class: 'actlab' }, 'Feels'),
+    o.onFeel && feels,
+    h('b', { class: 'actlab' }, 'Does'),
     h(
       'div',
       { class: 'chips wrap' },

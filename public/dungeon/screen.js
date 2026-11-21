@@ -81,7 +81,11 @@ function spr(g, slug, x, y, o = {}) {
   if (o.rot) g.rotate(o.rot);
   if (o.flip) g.scale(-1, 1);
   if (o.alpha != null) g.globalAlpha *= o.alpha;
-  g.drawImage(i, -s / 2, -s / 2, s, s);
+  /* pictures keep their shape: a tall figure stands up out of its tile, a wide thing sits on the tile's floor */
+  const r = i.naturalHeight / i.naturalWidth,
+    dh = r > 1 ? Math.min(s * 1.7, s * r) : s * r,
+    dw = dh / r;
+  g.drawImage(i, -dw / 2, s / 2 - dh, dw, dh);
   g.restore();
 }
 function hash(k, x, y) {

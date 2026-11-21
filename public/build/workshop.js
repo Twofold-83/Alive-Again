@@ -430,7 +430,6 @@ function uniqueName(base) {
   for (let n = 2; W.list.some((d) => d.name === name); n++) name = `${base} ${n}`;
   return name;
 }
-const SMALL_THINGS = /candle|skull$|key|letter|book|bucket|lantern$|doll|shovel|pickaxe|crystal|urn|radio|table-lamp|crow|spider/;
 /** Put a whole ready-made place on the map: its rooms, their furniture, the ways between them. */
 function addScenario(sc) {
   const made = {},
@@ -449,7 +448,7 @@ function addScenario(sc) {
           id: rid(),
           x: (cx + 0.5) / LEVEL_W,
           y: (cy + 0.92) / LEVEL_H,
-          scale: SMALL_THINGS.test(slug) ? 0.6 : 0.95,
+          scale: 1,
           solid: !!info.solid,
           active: { name: title || spriteTitle(asset), verbs: verbs || ['Look at', 'Use', 'Take'] },
         }),

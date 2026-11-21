@@ -143,10 +143,18 @@ function canvas(w, h) {
   return c;
 }
 const parts = { h: [], t: [], a: [], l: [] };
-function emit(kind, name, c) {
+function emit(kind, name, c, faces) {
   const id = kind + String(parts[kind].length + 1).padStart(3, '0');
   parts[kind].push({ id, name });
   fs.writeFileSync(path.join(OUT, id + '.png'), png(c.w, c.h, c.px));
+  if (faces) {
+    /* the same head with each feeling on its face, side by side in one strip: f-<id>.png */
+    const strip = new Array(c.w * faces.length * c.h).fill(null);
+    faces.forEach((f, i) => {
+      for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) strip[y * c.w * faces.length + i * c.w + x] = f.px[y * c.w + x];
+    });
+    fs.writeFileSync(path.join(OUT, 'f-' + id + '.png'), png(c.w * faces.length, c.h, strip));
+  }
 }
 /** A small repeatable random number, so the same sprite comes out every time. */
 const rnd = (seed) => {
@@ -384,6 +392,60 @@ const HATS = {
     c.set(6, 2, RED);
   },
 };
+/* ---------- feelings: a few pixels of brow, eye and mouth, the same for every head ----------
+ * The order here is the order of the frames in f-<id>.png and of `feels` in index.json. */
+const TEAR = hex('#6f8fae');
+const FEELS = {
+  happy: { eyes: 'dot', brows: [], mouth: [[5, 9], [6, 10], [7, 10], [8, 9]] },
+  sad: { eyes: 'dot', brows: [[4, 5], [5, 4], [8, 4], [9, 5]], mouth: [[5, 10], [6, 9], [7, 9], [8, 10]], extra: [[5, 7, TEAR]] },
+  scared: { eyes: 'wide', brows: [[4, 4], [5, 4], [8, 4], [9, 4]], mouth: [[6, 9], [7, 9], [6, 10], [7, 10]] },
+  angry: { eyes: 'dot', brows: [[4, 4], [5, 5], [8, 5], [9, 4]], mouth: [[5, 9], [6, 9], [7, 9], [8, 9]] },
+  uneasy: { eyes: 'side', brows: [[4, 5], [5, 4]], mouth: [[5, 9], [6, 10], [7, 9], [8, 10]], extra: [[9, 4, TEAR]] },
+  curious: { eyes: 'dot', brows: [[4, 4], [5, 4], [8, 5], [9, 5]], mouth: [[7, 9]] },
+  doubtful: { eyes: 'lid', brows: [[4, 5], [5, 5], [8, 4], [9, 4]], mouth: [[6, 9], [7, 9], [8, 10]] },
+  surprised: { eyes: 'tall', brows: [[4, 3], [5, 3], [8, 3], [9, 3]], mouth: [[6, 10], [7, 10]] },
+  tired: { eyes: 'shut', brows: [], mouth: [[6, 9], [7, 9]], extra: [[5, 7, 'bag'], [8, 7, 'bag']] },
+  hurt: { eyes: 'shut', brows: [[4, 5], [5, 5], [8, 5], [9, 5]], mouth: [[5, 9], [6, 9], [7, 9], [8, 9], [6, 10], [7, 10]], extra: [[6, 10, RED], [7, 10, RED]] },
+};
+/** An ordinary face (see face()) with a feeling on it: drawn instead of the head's own expression. */
+function feelFace(c, s, name) {
+  const f = FEELS[name],
+    dd = dark(dark(s));
+  if (f.eyes === 'dot') [5, 8].forEach((x) => c.set(x, 6, K));
+  if (f.eyes === 'wide') [5, 8].forEach((x) => (c.set(x, 5, WHITE), c.set(x, 6, K)));
+  if (f.eyes === 'tall') [5, 8].forEach((x) => (c.set(x, 5, K), c.set(x, 6, K)));
+  if (f.eyes === 'side') [4, 7].forEach((x) => (c.set(x, 6, K), c.set(x + 1, 6, WHITE)));
+  if (f.eyes === 'lid') [5, 8].forEach((x) => (c.set(x, 6, K), c.set(x - 1, 6, dd)));
+  if (f.eyes === 'shut') [4, 8].forEach((x) => c.row(6, x, x + 1, dd));
+  for (const [x, y] of f.brows) if (c.get(x, y)) c.set(x, y, dd);
+  for (const [x, y] of f.mouth) c.set(x, y, K);
+  for (const [x, y, col] of f.extra || []) c.set(x, y, col === 'bag' ? dark(s) : col);
+}
+/** Any other head (a skull, a mask, a pumpkin ...): keep its eyes, put the brows and the mouth of the feeling on it,
+ * dark on light and light on dark, and only where the head has something to draw on. */
+function feelMark(done, name) {
+  const c = canvas(done.w, done.h);
+  done.px.forEach((p, i) => (c.px[i] = p));
+  const f = FEELS[name];
+  const ink = (x, y) => {
+    const p = done.get(x, y);
+    if (!p) return;
+    c.set(x, y, p[0] + p[1] + p[2] < 200 ? BONE : K);
+  };
+  /* wipe the old mouth first: the two mouth rows take the colour of the cheek beside them */
+  for (const y of [9, 10])
+    for (let x = 5; x <= 8; x++) {
+      const cheek = done.get(4, y) || done.get(9, y);
+      if (done.get(x, y) && cheek && cheek !== K) c.set(x, y, cheek);
+    }
+  for (const [x, y] of f.brows) ink(x, y);
+  for (const [x, y] of f.mouth) {
+    const p = c.get(x, y);
+    if (p) c.set(x, y, p[0] + p[1] + p[2] < 200 ? BONE : K);
+  }
+  for (const [x, y, col] of f.extra || []) if (col !== 'bag' && done.get(x, y)) c.set(x, y, col);
+  return c;
+}
 const done = (c, shade = true) => {
   if (shade) c.shade();
   c.outline();
@@ -409,17 +471,21 @@ function makeHeads() {
     const key = [skin, hat || hair, hat ? hatCol : hc, ex].join();
     if (seen.has(key)) continue;
     seen.add(key);
-    const c = canvas(14, 13);
-    face(c, SKINS[skin]);
-    if (hat) {
-      if (hat !== 'hood' && hat !== 'bonnet') HAIRS.cropped(c, HAIR[hc]);
-      HATS[hat](c, CLOTH[hatCol]);
-    } else HAIRS[hair](c, HAIR[hc]);
-    EXPR[ex](c, SKINS[skin]);
+    const draw = (expr) => {
+      const c = canvas(14, 13);
+      face(c, SKINS[skin]);
+      if (hat) {
+        if (hat !== 'hood' && hat !== 'bonnet') HAIRS.cropped(c, HAIR[hc]);
+        HATS[hat](c, CLOTH[hatCol]);
+      } else HAIRS[hair](c, HAIR[hc]);
+      expr(c, SKINS[skin]);
+      return done(c);
+    };
     emit(
       'h',
       `${hat ? hat + ' ' + (hat === 'nurse' || hat === 'crown' ? '' : hatCol) : hair + ' ' + hc + ' hair'} ${skin} ${ex}`.replace(/\s+/g, ' '),
-      done(c),
+      draw(EXPR[ex]),
+      Object.keys(FEELS).map((f) => draw((c, s) => feelFace(c, s, f))),
     );
   }
   /* the others: 25 kinds, two of each */
@@ -427,7 +493,13 @@ function makeHeads() {
     for (let v = 0; v < 2; v++) {
       const c = canvas(14, 13);
       const outlineIt = draw(c, v);
-      emit('h', name + (v ? ' variant' : ''), outlineIt === false ? c : done(c));
+      const head = outlineIt === false ? c : done(c);
+      emit(
+        'h',
+        name + (v ? ' variant' : ''),
+        head,
+        Object.keys(FEELS).map((f) => feelMark(head, f)),
+      );
     }
   };
   special('skull', (c, v) => {
@@ -1311,7 +1383,7 @@ makeLegs();
 const total = Object.values(parts).reduce((n, l) => n + l.length, 0);
 fs.writeFileSync(
   path.join(OUT, 'index.json'),
-  JSON.stringify({ size: { h: [14, 13], t: [12, 11], a: [5, 12], l: [6, 12] }, heads: parts.h, torsos: parts.t, arms: parts.a, legs: parts.l }),
+  JSON.stringify({ size: { h: [14, 13], t: [12, 11], a: [5, 12], l: [6, 12] }, feels: Object.keys(FEELS), heads: parts.h, torsos: parts.t, arms: parts.a, legs: parts.l }),
 );
 console.log(`doll parts: ${parts.h.length} heads, ${parts.t.length} torsos, ${parts.a.length} arms, ${parts.l.length} legs = ${total}`);
 if (total !== EXPECT) {
