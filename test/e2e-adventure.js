@@ -46,7 +46,7 @@ const { setup } = require('./lib');
     await p.click('[data-lay="0"]');
     await x.done();
     // tie a sword to the hero: it is drawn where the hero is, and follows
-    await x.add('iron sword');
+    await x.add('ritual dagger');
     await thing('Tie to');
     await p.click('#panel .grid button >> nth=0');
     await p.waitForSelector('[data-layer=front].on');
@@ -55,7 +55,7 @@ const { setup } = require('./lib');
     await x.done();
     await x.done();
     let [hx, hy] = await pos('#stage .ent.hero'),
-      [sx, sy] = await pos(ent('sword'));
+      [sx, sy] = await pos(ent('dagger'));
     assert(Math.abs(sx - hx) < 0.3 && Math.abs(sy - hy) < 0.3, 'the tied sword sits with the hero');
     // an active object
     // an active object is made in Build scene, where places are made; then the scene is used in the story
@@ -107,7 +107,7 @@ const { setup } = require('./lib');
     await p.click('#verbs button:has-text("Open")');
     assert.match(await act(), /Open: Old chest/);
     await x.walk(0.5, 0.9);
-    [sx, sy] = await pos(ent('sword'));
+    [sx, sy] = await pos(ent('dagger'));
     [hx, hy] = await x.heroPos();
     assert(Math.abs(sx - hx) < 0.3 && Math.abs(sy - hy) < 0.3, 'the sword walked along with the hero');
     await p.evaluate(() => {
@@ -116,7 +116,7 @@ const { setup } = require('./lib');
       const x0 = parseFloat(document.querySelector('#stage .ent.hero').getBoundingClientRect().x);
       setInterval(() => {
         const h = document.querySelector('#stage .ent.hero').getBoundingClientRect(),
-          s = document.querySelector('#stage .ent:has(img[src*="sword"])').getBoundingClientRect();
+          s = document.querySelector('#stage .ent:has(img[src*="dagger"])').getBoundingClientRect();
         window.__gap = Math.max(window.__gap, Math.hypot(h.x - s.x, h.y - s.y));
         window.__moved = Math.max(window.__moved, Math.abs(h.x - x0));
       }, 30);
@@ -145,7 +145,7 @@ const { setup } = require('./lib');
     await p.fill('#askText', 'Can you pick the lock?');
     await p.click('[data-dc="4"]');
     await x.done();
-    await x.add('gold key');
+    await x.add('brass key');
     await thing('Give to');
     await x.opt('Award points');
     await p.click('[data-pts="10"]');
@@ -320,14 +320,14 @@ const { setup } = require('./lib');
 
     /* ---- a battle ---- */
     await toDirector();
-    await x.add('goblin');
+    await x.add('ghoul');
     await x.done();
     await x.opt('Battle');
     await p.click('#panel > .grid button >> nth=0');
     await p.click('.row button:has-text("3")');
     await p.click('#battleStart');
     assert.equal(
-      await p.evaluate(() => getComputedStyle(document.querySelector('#stage .ent:has(img[src*="goblin"]) .hp')).display),
+      await p.evaluate(() => getComputedStyle(document.querySelector('#stage .ent:has(img[src*="ghoul"]) .hp')).display),
       'block',
       'the enemy shows a health bar',
     );
@@ -364,7 +364,7 @@ const { setup } = require('./lib');
     assert.equal(sc.battle.round, 2);
     assert.equal(sc.burst, 'hurt');
     assert.equal(sc.ask.kind, 'battle');
-    assert.equal(sc.entities.find((e) => e.tie && e.asset.includes('sword')).once, '', 'the hero’s sword swing belonged to the first step');
+    assert.equal(sc.entities.find((e) => e.tie && e.asset.includes('dagger')).once, '', 'the hero’s sword swing belonged to the first step');
     assert.equal(sc.steps[0].entities.find((e) => e.tie).once, 'swing', 'the tied sword swung with the hero’s attack');
     // finish it
     await p.click('.askbox button:has-text("Attack")');
@@ -378,7 +378,7 @@ const { setup } = require('./lib');
     await x.walk(0.5, 0.8);
     await toDirector();
     sc = await x.last();
-    assert(!sc.entities.some((e) => e.asset.includes('goblin')), 'the defeated goblin is gone');
+    assert(!sc.entities.some((e) => e.asset.includes('ghoul')), 'the defeated goblin is gone');
     assert.deepEqual(t.errors, []);
     console.log('E2E-ADVENTURE OK');
   } finally {

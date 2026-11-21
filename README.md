@@ -65,7 +65,7 @@ choice → narrower choices.
 
 | Choice | What it does |
 | --- | --- |
-| ➕ Add something | 3,369 pixel sprites and 670 emoji in searchable categories, plus your own photos, generated assets, or any emoji. |
+| ➕ Add something | 1,242 things and people at paper-doll scale, 1,100 tiles and effects and 670 emoji in searchable categories, plus your own photos, generated assets, or any emoji. |
 | 💬 Someone speaks | A line and a face for any character. |
 | 🚶 Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, cross the stage, jump, tremble. Different things move together; one thing's moves follow each other. |
 | 📝 Narrate | One narration per step. |
@@ -177,9 +177,14 @@ as icons, and what the Player did is read out like the log of an old adventure g
   shapes; one press lays walls, floor and a few details. A new story opens in such a room.
 - **One scale for everything.** One pixel of any picture is the same size on the stage: a person is
   16 x 33, a floor tile 16 x 16, a bed two tiles wide, a door taller than a person. `tools/make-big.js`
-  redraws the library at that scale from the modules in `tools/big/` (furniture, doors, graveyard and
-  eerie things, apparitions, props, nature, and all 233 ready-made people in the look of the paper
-  dolls); what is not redrawn yet is doubled (creatures, large things) or shown small (keys, cups).
+  draws the library at that scale from the modules in `tools/big/`: 1,242 things and people of the house
+  and its horrors (furniture, doors, kitchen, bathroom, attic, yard, graveyard, the occult, mad science,
+  old machines, small finds, apparitions, and 233 ready-made people in the look of the paper dolls).
+  Older 16 x 16 icons that do not belong in a house are no longer offered; their files remain for old
+  stories, the menus' own icons and the Dungeon mode.
+- **Save room.** In Build scene, "Save room" keeps a room on the device; "My saved rooms" opens it in any story.
+- **Rolls at once.** When the Director asks for a roll (with the number to reach), the Player presses Roll,
+  sees the die and is told at once whether it was enough; the Director gets the result in words.
 - **Feelings.** A paper-doll character can feel happy, sad, scared, angry, uneasy, curious, doubtful,
   surprised, tired or hurt: a few pixels of brow, eye and mouth, drawn for every head. Director and
   Player choose it in the same Act panel as the ready-made poses; the Director is told what the hero feels.

@@ -353,7 +353,7 @@ const { setup } = require('./lib');
     assert.equal(await p.locator('#stage .ent').count(), 3);
     await p.click('#resetStep');
     assert.equal(await p.locator('#stage .ent').count(), 2, 'reset step undoes what Claude staged');
-    await x.add('gold key');
+    await x.add('brass key');
     const [kx, ky] = await p.evaluate(() => {
       const s = document.querySelector('.ent.sel').style;
       return [parseFloat(s.left) / 100, parseFloat(s.top) / 100];
