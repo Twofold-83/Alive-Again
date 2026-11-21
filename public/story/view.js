@@ -1,4 +1,5 @@
 /* Drawing a story screen: the stage, the Player's sheet under it, and the tool column for whoever is looking. */
+import { assetUrl } from '../core/catalog.js';
 import { LAYERS as MODULES, STORY_TYPES as TYPES, PLAYER_MODES } from '../shared/rules.js';
 import { audio } from '../core/audio.js';
 import { h, clamp, add } from '../core/dom.js';
@@ -18,13 +19,18 @@ export function render() {
   if (!app.S) return;
   $('#right').classList.toggle('pl', app.S.you === 'player' && !app.S.ended); // phones: the Player's controls come first
   const ts = $('#titleScreen'),
-    showTitle = app.S.turn === 0 && !(myTurn() && app.S.you === 'director') && !!(app.S.info.title || app.S.info.text);
+    showTitle = app.S.turn === 0 && !(myTurn() && app.S.you === 'director') && !!(app.S.info.title || app.S.info.text || app.S.info.image);
   ts.hidden = !showTitle;
+  ts.style.backgroundImage =
+    showTitle && app.S.info.image ? `linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.6)), url("${assetUrl(app.code, app.S.info.image)}")` : '';
+  ts.classList.toggle('pic', !!app.S.info.image);
   if (showTitle)
     ts.replaceChildren(
-      h('h2', {}, app.S.info.title || 'A new story'),
-      app.S.info.text && h('p', {}, app.S.info.text),
-      h('small', {}, `${app.S.names.director} is setting the stage…`),
+      ...[
+        !(app.S.info.image && app.S.info.onTop) && h('h2', {}, app.S.info.title || 'A new story'),
+        app.S.info.text && h('p', {}, app.S.info.text),
+        h('small', {}, `${app.S.names.director} is setting the stage…`),
+      ].filter(Boolean),
     );
   const tool = directing() ? guidedTool() : ''; // the stage tool always follows the open Director screen
   app.rec = tool === 'rec';

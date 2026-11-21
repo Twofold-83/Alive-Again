@@ -1,5 +1,5 @@
 /* Director screens: the main menu of a step, story settings, and "Tell Claude". */
-import { assetLabel } from '../../core/catalog.js';
+import { assetLabel, assetUrl } from '../../core/catalog.js';
 import { h, add } from '../../core/dom.js';
 import { glyphNode, actionParts } from '../../stage/render.js';
 import { G, short } from '../guided.js';
@@ -249,7 +249,7 @@ export function screenRules(kit) {
       [600, '10 minutes'],
     ].map(([v, l]) => h('option', { value: v, selected: S.settings.turnSeconds === v }, l)),
   );
-  const info = { title: S.info.title, text: S.info.text };
+  const info = { title: S.info.title, text: S.info.text, image: S.info.image || '', onTop: !!S.info.onTop };
   let infoT = 0;
   const saveInfo = () => {
     clearTimeout(infoT);
@@ -290,6 +290,57 @@ export function screenRules(kit) {
         'p',
         { class: 'dim small' },
         'The Player sees this while you set the stage, the story opens on the title, and the instructions stay in their side panel.',
+      ),
+      /* a title card of your own: any picture you upload or draw fills the title screen */
+      h('b', { class: 'actlab' }, 'Title picture'),
+      h(
+        'div',
+        { class: 'grid', id: 'titlePics' },
+        h(
+          'button',
+          {
+            class: info.image ? '' : 'on',
+            onclick: () => {
+              info.image = '';
+              saveInfo();
+              c.rebuild();
+            },
+          },
+          'None',
+        ),
+        S.assets.map((a) =>
+          h(
+            'button',
+            {
+              class: info.image === 'c:' + a.id ? 'on' : '',
+              title: a.name,
+              onclick: () => {
+                info.image = 'c:' + a.id;
+                saveInfo();
+                c.rebuild();
+              },
+            },
+            h('img', { src: assetUrl(code, 'c:' + a.id), alt: a.name, class: 'ownimg' }),
+          ),
+        ),
+      ),
+      c.maker('backdrop', (id) => {
+        info.image = 'c:' + id;
+        saveInfo();
+        c.rebuild();
+      }),
+      h(
+        'label',
+        { class: 'row' },
+        h('input', {
+          type: 'checkbox',
+          checked: info.onTop,
+          onchange: (ev) => {
+            info.onTop = ev.target.checked;
+            saveInfo();
+          },
+        }),
+        h('span', {}, 'The picture already holds the title: do not write it over the picture'),
       ),
     ),
     h(

@@ -207,3 +207,4 @@
 .doll .dpart .face { position: absolute; inset: 0; image-rendering: pixelated; background-repeat: no-repeat; pointer-events: none; }
 .actlab { align-self: flex-start; font-weight: normal; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
 .poser .feels button.on { background: var(--accent); color: #000; }
+#titleScreen.pic { background-size: cover; background-position: center; image-rendering: auto; } #titleScreen.pic h2, #titleScreen.pic p { text-shadow: 0 2px 0 #000, 0 0 12px #000; }

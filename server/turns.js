@@ -236,6 +236,8 @@ export async function actSettings(room, body, who) {
   if (body.info && typeof body.info === 'object')
     room.info = {
       title: str(body.info.title, 60),
+      image: /^c:[A-Za-z0-9_-]{1,40}$/.test(body.info.image) ? body.info.image : '', // the story's own title picture
+      onTop: !!body.info.onTop,
       text:
         typeof body.info.text === 'string'
           ? body.info.text
