@@ -50,7 +50,7 @@ export function guidedPick(id) {
     G.sel = id;
     return;
   }
-  if (!top || top === 'thing' || top === 'exit') {
+  if (!top || top === 'thing' || top === 'exit' || top.startsWith('add')) {
     G.path = ['thing'];
     G.sel = id;
   }
@@ -58,7 +58,7 @@ export function guidedPick(id) {
 /** A click on an exit marker opens that exit's tools. */
 export function guidedMark(exitId) {
   const top = G.path[G.path.length - 1] || '';
-  if (!top || top === 'thing' || top === 'exit') {
+  if (!top || top === 'thing' || top === 'exit' || top.startsWith('add')) {
     G.path = ['exit'];
     G.sel = null;
     G.exit = exitId;
@@ -306,10 +306,11 @@ export function buildGuided(p, c) {
   const place = (asset) => {
     const e = c.addEntity(asset);
     if (e) {
-      G.sel = e.id;
-      G.path = ['thing'];
+      /* stay in the list: put out as many things as you like, drag them into place; pressing one on the stage opens its settings */
       if (!setup) G.log.push(`${lab(e)} appears`);
       c.select(e.id);
+      window.__lastAdded = e.id;
+      c.toast(`${lab(e)} is on the stage — drag it into place, press it for its settings`);
       c.rebuild();
     }
   };

@@ -78,6 +78,9 @@ exports.setup = async (port, env = {}) => {
         await x.opt('Search by name');
         await p.fill('input[type=search]', name);
         await p.click('.grid button');
+        // the list stays open; pressing the new thing on the stage opens its settings
+        const id = await p.evaluate(() => window.__lastAdded);
+        await p.locator(`.stage:visible .ent[data-id="${id}"]`).last().click({ force: true });
         await p.waitForSelector('.thingbtns');
       },
     };

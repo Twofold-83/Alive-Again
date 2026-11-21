@@ -396,30 +396,46 @@ const HATS = {
  * The order here is the order of the frames in f-<id>.png and of `feels` in index.json. */
 const TEAR = hex('#6f8fae');
 const FEELS = {
-  happy: { eyes: 'dot', brows: [], mouth: [[5, 9], [6, 10], [7, 10], [8, 9]] },
-  sad: { eyes: 'dot', brows: [[4, 5], [5, 4], [8, 4], [9, 5]], mouth: [[5, 10], [6, 9], [7, 9], [8, 10]], extra: [[5, 7, TEAR]] },
+  happy: { eyes: 'dot', brows: [], mouth: [[4, 8], [5, 9], [6, 9], [7, 9], [8, 9], [9, 8]], extra: [[6, 10, 'lip'], [7, 10, 'lip']] },
+  sad: { eyes: 'dot', brows: [[4, 5], [5, 4], [8, 4], [9, 5]], mouth: [[5, 10], [6, 9], [7, 9], [8, 10]], extra: [[5, 7, TEAR], [5, 8, TEAR]] },
   scared: { eyes: 'wide', brows: [[4, 4], [5, 4], [8, 4], [9, 4]], mouth: [[6, 9], [7, 9], [6, 10], [7, 10]] },
-  angry: { eyes: 'dot', brows: [[4, 4], [5, 5], [8, 5], [9, 4]], mouth: [[5, 9], [6, 9], [7, 9], [8, 9]] },
-  uneasy: { eyes: 'side', brows: [[4, 5], [5, 4]], mouth: [[5, 9], [6, 10], [7, 9], [8, 10]], extra: [[9, 4, TEAR]] },
-  curious: { eyes: 'dot', brows: [[4, 4], [5, 4], [8, 5], [9, 5]], mouth: [[7, 9]] },
-  doubtful: { eyes: 'lid', brows: [[4, 5], [5, 5], [8, 4], [9, 4]], mouth: [[6, 9], [7, 9], [8, 10]] },
-  surprised: { eyes: 'tall', brows: [[4, 3], [5, 3], [8, 3], [9, 3]], mouth: [[6, 10], [7, 10]] },
-  tired: { eyes: 'shut', brows: [], mouth: [[6, 9], [7, 9]], extra: [[5, 7, 'bag'], [8, 7, 'bag']] },
-  hurt: { eyes: 'shut', brows: [[4, 5], [5, 5], [8, 5], [9, 5]], mouth: [[5, 9], [6, 9], [7, 9], [8, 9], [6, 10], [7, 10]], extra: [[6, 10, RED], [7, 10, RED]] },
+  angry: { eyes: 'dot', brows: [[4, 4], [5, 5], [8, 5], [9, 4]], mouth: [[5, 9], [6, 9], [7, 9], [8, 9]], extra: [[5, 10, 'lip'], [8, 10, 'lip']] },
+  uneasy: { eyes: 'side', brows: [[4, 5], [5, 4]], mouth: [[5, 9], [6, 10], [7, 9], [8, 10]], extra: [[10, 4, TEAR], [10, 5, TEAR]] },
+  curious: { eyes: 'oneWide', brows: [[4, 5], [5, 5], [8, 3], [9, 3]], mouth: [[6, 9], [7, 9]] },
+  doubtful: { eyes: 'dot', brows: [[4, 5], [5, 5], [8, 5], [9, 5]], mouth: [[5, 9], [6, 9], [7, 10], [8, 10]] },
+  surprised: { eyes: 'tall', brows: [[4, 3], [5, 3], [8, 3], [9, 3]], mouth: [[6, 9], [7, 9], [6, 10], [7, 10]] },
+  tired: { eyes: 'shut', brows: [], mouth: [[6, 9], [7, 9]], extra: [[4, 7, 'bag'], [5, 7, 'bag'], [8, 7, 'bag'], [9, 7, 'bag']] },
+  hurt: { eyes: 'squeeze', brows: [], mouth: [[5, 10], [6, 10], [7, 10], [8, 10]], extra: [[5, 9, WHITE], [6, 9, WHITE], [7, 9, WHITE], [8, 9, WHITE]] },
 };
 /** An ordinary face (see face()) with a feeling on it: drawn instead of the head's own expression. */
 function feelFace(c, s, name) {
   const f = FEELS[name],
     dd = dark(dark(s));
+  const on = (x, y, col) => {
+    if (c.get(x, y)) c.set(x, y, col);
+  };
   if (f.eyes === 'dot') [5, 8].forEach((x) => c.set(x, 6, K));
-  if (f.eyes === 'wide') [5, 8].forEach((x) => (c.set(x, 5, WHITE), c.set(x, 6, K)));
+  if (f.eyes === 'wide') {
+    for (const [x, y] of [[4, 5], [5, 5], [4, 6], [8, 5], [9, 5], [9, 6]]) c.set(x, y, WHITE);
+    c.set(5, 6, K);
+    c.set(8, 6, K);
+  }
+  if (f.eyes === 'oneWide') {
+    c.set(5, 6, K);
+    c.set(8, 5, WHITE);
+    c.set(9, 5, WHITE);
+    c.set(9, 6, WHITE);
+    c.set(8, 6, K);
+  }
   if (f.eyes === 'tall') [5, 8].forEach((x) => (c.set(x, 5, K), c.set(x, 6, K)));
   if (f.eyes === 'side') [4, 7].forEach((x) => (c.set(x, 6, K), c.set(x + 1, 6, WHITE)));
-  if (f.eyes === 'lid') [5, 8].forEach((x) => (c.set(x, 6, K), c.set(x - 1, 6, dd)));
-  if (f.eyes === 'shut') [4, 8].forEach((x) => c.row(6, x, x + 1, dd));
-  for (const [x, y] of f.brows) if (c.get(x, y)) c.set(x, y, dd);
+  if (f.eyes === 'shut') [4, 8].forEach((x) => c.row(6, x, x + 1, K));
+  if (f.eyes === 'squeeze') {
+    for (const [x, y] of [[4, 5], [5, 6], [4, 7], [9, 5], [8, 6], [9, 7]]) c.set(x, y, K);
+  }
+  for (const [x, y] of f.brows) on(x, y, K);
   for (const [x, y] of f.mouth) c.set(x, y, K);
-  for (const [x, y, col] of f.extra || []) c.set(x, y, col === 'bag' ? dark(s) : col);
+  for (const [x, y, col] of f.extra || []) on(x, y, col === 'bag' ? dark(s) : col === 'lip' ? dd : col);
 }
 /** Any other head (a skull, a mask, a pumpkin ...): keep its eyes, put the brows and the mouth of the feeling on it,
  * dark on light and light on dark, and only where the head has something to draw on. */
@@ -443,7 +459,7 @@ function feelMark(done, name) {
     const p = c.get(x, y);
     if (p) c.set(x, y, p[0] + p[1] + p[2] < 200 ? BONE : K);
   }
-  for (const [x, y, col] of f.extra || []) if (col !== 'bag' && done.get(x, y)) c.set(x, y, col);
+  for (const [x, y, col] of f.extra || []) if (col !== 'bag' && col !== 'lip' && done.get(x, y)) c.set(x, y, col);
   return c;
 }
 const done = (c, shade = true) => {
