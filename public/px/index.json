@@ -8630,11 +8630,6 @@
      "kind": "wall"
     },
     {
-     "slug": "rosepaper-wall-window-night",
-     "name": "faded rose wallpaper room wall window night moon dark",
-     "kind": "wall"
-    },
-    {
      "slug": "rosepaper-wall-door",
      "name": "faded rose wallpaper room wall door closed in wall",
      "kind": "wall"
@@ -8720,11 +8715,6 @@
      "kind": "wall"
     },
     {
-     "slug": "stripepaper-wall-crack",
-     "name": "green striped wallpaper room wall crack cracked damage",
-     "kind": "wall"
-    },
-    {
      "slug": "stripepaper-wall-mirror",
      "name": "green striped wallpaper room wall mirror",
      "kind": "wall"
@@ -8777,11 +8767,6 @@
     {
      "slug": "damask-wall-door",
      "name": "dark blue damask wallpaper room wall door closed in wall",
-     "kind": "wall"
-    },
-    {
-     "slug": "damask-wall-portrait",
-     "name": "dark blue damask wallpaper room wall portrait painting person frame",
      "kind": "wall"
     },
     {
@@ -8847,11 +8832,6 @@
     {
      "slug": "panel-wall-portrait",
      "name": "dark wood panelling panelled room wall portrait painting person frame",
-     "kind": "wall"
-    },
-    {
-     "slug": "panel-wall-clock",
-     "name": "dark wood panelling panelled room wall clock",
      "kind": "wall"
     },
     {
@@ -8930,11 +8910,6 @@
      "kind": "wall"
     },
     {
-     "slug": "crackplaster-wall-switch",
-     "name": "cracked plaster room wall light switch",
-     "kind": "wall"
-    },
-    {
      "slug": "crackplaster-wall-lath",
      "name": "cracked plaster room wall hole broken plaster laths",
      "kind": "wall"
@@ -8977,11 +8952,6 @@
     {
      "slug": "nursery-wall-window",
      "name": "pale peeling nursery wallpaper room wall window glass dusk",
-     "kind": "wall"
-    },
-    {
-     "slug": "nursery-wall-window-night",
-     "name": "pale peeling nursery wallpaper room wall window night moon dark",
      "kind": "wall"
     },
     {
@@ -9060,11 +9030,6 @@
      "kind": "wall"
     },
     {
-     "slug": "bathroom-wall-mirror-cracked",
-     "name": "bathroom white tiles wall cracked broken mirror",
-     "kind": "wall"
-    },
-    {
      "slug": "bathroom-wall-stain",
      "name": "bathroom white tiles wall stain damp dirty mould",
      "kind": "wall"
@@ -9077,11 +9042,6 @@
     {
      "slug": "bathroom-wall-towel",
      "name": "bathroom white tiles wall towel rail hanging towel",
-     "kind": "wall"
-    },
-    {
-     "slug": "bathroom-wall-cabinet",
-     "name": "bathroom white tiles wall medicine cabinet mirror cupboard",
      "kind": "wall"
     },
     {
@@ -9102,11 +9062,6 @@
     {
      "slug": "bathroom-floor-bloody",
      "name": "bathroom white tiles floor bloody blood stain",
-     "kind": "floor"
-    },
-    {
-     "slug": "bathroom-floor-puddle",
-     "name": "bathroom white tiles floor puddle water wet",
      "kind": "floor"
     },
     {
@@ -9132,11 +9087,6 @@
     {
      "slug": "library-wall-door",
      "name": "library walls of books bookshelf wall door closed in wall",
-     "kind": "wall"
-    },
-    {
-     "slug": "library-wall-lamp",
-     "name": "library walls of books bookshelf wall wall lamp sconce light",
      "kind": "wall"
     },
     {
@@ -9210,16 +9160,6 @@
      "kind": "wall"
     },
     {
-     "slug": "study-wall-picture",
-     "name": "dark green study room wall picture painting landscape frame",
-     "kind": "wall"
-    },
-    {
-     "slug": "study-wall-clock",
-     "name": "dark green study room wall clock",
-     "kind": "wall"
-    },
-    {
      "slug": "study-wall-lamp",
      "name": "dark green study room wall wall lamp sconce light",
      "kind": "wall"
@@ -9280,18 +9220,8 @@
      "kind": "wall"
     },
     {
-     "slug": "scullery-wall-clock",
-     "name": "old kitchen scullery cream tiles wall clock",
-     "kind": "wall"
-    },
-    {
      "slug": "scullery-wall-stain",
      "name": "old kitchen scullery cream tiles wall stain damp dirty mould",
-     "kind": "wall"
-    },
-    {
-     "slug": "scullery-wall-crack",
-     "name": "old kitchen scullery cream tiles wall crack cracked damage",
      "kind": "wall"
     },
     {
@@ -9367,11 +9297,6 @@
      "kind": "wall"
     },
     {
-     "slug": "attic-wall-stain",
-     "name": "attic bare boards rafters wall stain damp dirty mould",
-     "kind": "wall"
-    },
-    {
      "slug": "attic-wall-bulb",
      "name": "attic bare boards rafters wall bare light bulb hanging wire",
      "kind": "wall"
@@ -9427,18 +9352,8 @@
      "kind": "wall"
     },
     {
-     "slug": "cabin-wall-window-night",
-     "name": "log cabin walls plank floor wall window night moon dark",
-     "kind": "wall"
-    },
-    {
      "slug": "cabin-wall-door",
      "name": "log cabin walls plank floor wall door closed in wall",
-     "kind": "wall"
-    },
-    {
-     "slug": "cabin-wall-hooks",
-     "name": "log cabin walls plank floor wall coat hooks rail coat",
      "kind": "wall"
     },
     {
@@ -9502,18 +9417,8 @@
      "kind": "wall"
     },
     {
-     "slug": "basement-wall-stain",
-     "name": "basement concrete damp wall stain damp dirty mould",
-     "kind": "wall"
-    },
-    {
      "slug": "basement-wall-crack",
      "name": "basement concrete damp wall crack cracked damage",
-     "kind": "wall"
-    },
-    {
-     "slug": "basement-wall-vent",
-     "name": "basement concrete damp wall vent grille air",
      "kind": "wall"
     },
     {
@@ -9562,11 +9467,6 @@
      "kind": "floor"
     },
     {
-     "slug": "basement-floor-stained",
-     "name": "basement concrete damp floor stained dirty",
-     "kind": "floor"
-    },
-    {
      "slug": "cellar-top",
      "name": "cellar brick walls dirt floor wall top dark ceiling edge",
      "kind": "wall"
@@ -9579,16 +9479,6 @@
     {
      "slug": "cellar-wall-crack",
      "name": "cellar brick walls dirt floor wall crack cracked damage",
-     "kind": "wall"
-    },
-    {
-     "slug": "cellar-wall-stain",
-     "name": "cellar brick walls dirt floor wall stain damp dirty mould",
-     "kind": "wall"
-    },
-    {
-     "slug": "cellar-wall-pipe",
-     "name": "cellar brick walls dirt floor wall pipe plumbing",
      "kind": "wall"
     },
     {
@@ -9627,11 +9517,6 @@
      "kind": "floor"
     },
     {
-     "slug": "cellar-floor-dark",
-     "name": "cellar brick walls dirt floor floor dark shadow",
-     "kind": "floor"
-    },
-    {
      "slug": "cellar-floor-hatch",
      "name": "cellar brick walls dirt floor floor with hatch trapdoor",
      "kind": "floor"
@@ -9664,11 +9549,6 @@
     {
      "slug": "barn-wall-door",
      "name": "barn rough planks straw wall door closed in wall",
-     "kind": "wall"
-    },
-    {
-     "slug": "barn-wall-cobweb",
-     "name": "barn rough planks straw wall cobweb spider web corner",
      "kind": "wall"
     },
     {
@@ -9772,11 +9652,6 @@
      "kind": "floor"
     },
     {
-     "slug": "greenhouse-floor-dark",
-     "name": "greenhouse glass panes stone path floor dark shadow",
-     "kind": "floor"
-    },
-    {
      "slug": "greenhouse-floor-weeds",
      "name": "greenhouse glass panes stone path floor weeds overgrown moss",
      "kind": "floor"
@@ -9814,18 +9689,8 @@
      "kind": "wall"
     },
     {
-     "slug": "hotel-wall-mirror",
-     "name": "hotel corridor wallpaper carpet wall mirror",
-     "kind": "wall"
-    },
-    {
      "slug": "hotel-wall-stain",
      "name": "hotel corridor wallpaper carpet wall stain damp dirty mould",
-     "kind": "wall"
-    },
-    {
-     "slug": "hotel-wall-window-night",
-     "name": "hotel corridor wallpaper carpet wall window night moon dark",
      "kind": "wall"
     },
     {
@@ -9904,11 +9769,6 @@
      "kind": "wall"
     },
     {
-     "slug": "theatre-wall-tassel",
-     "name": "theatre red curtain stage wall gold tassel tie back cord",
-     "kind": "wall"
-    },
-    {
      "slug": "theatre-wall-lights",
      "name": "theatre red curtain stage wall dressing room mirror bulbs",
      "kind": "wall"
@@ -9916,11 +9776,6 @@
     {
      "slug": "theatre-floor",
      "name": "theatre red curtain stage floor",
-     "kind": "floor"
-    },
-    {
-     "slug": "theatre-floor-worn",
-     "name": "theatre red curtain stage floor worn scuffed",
      "kind": "floor"
     },
     {
@@ -9964,11 +9819,6 @@
      "kind": "wall"
     },
     {
-     "slug": "chapel-wall-crack",
-     "name": "chapel stone walls flagstones wall crack cracked damage",
-     "kind": "wall"
-    },
-    {
      "slug": "chapel-wall-window",
      "name": "chapel stone walls flagstones wall stained glass window arch",
      "kind": "wall"
@@ -10009,11 +9859,6 @@
      "kind": "floor"
     },
     {
-     "slug": "chapel-floor-dark",
-     "name": "chapel stone walls flagstones floor dark shadow",
-     "kind": "floor"
-    },
-    {
      "slug": "chapel-floor-grave",
      "name": "chapel stone walls flagstones floor grave slab tomb inscription cross",
      "kind": "floor"
@@ -10039,16 +9884,6 @@
      "kind": "wall"
     },
     {
-     "slug": "lab-wall-stain",
-     "name": "laboratory metal walls grated floor wall stain damp dirty mould",
-     "kind": "wall"
-    },
-    {
-     "slug": "lab-wall-window-bars",
-     "name": "laboratory metal walls grated floor wall barred window bars",
-     "kind": "wall"
-    },
-    {
      "slug": "lab-wall-door",
      "name": "laboratory metal walls grated floor wall iron door porthole bulkhead",
      "kind": "wall"
@@ -10071,11 +9906,6 @@
     {
      "slug": "lab-floor",
      "name": "laboratory metal walls grated floor floor",
-     "kind": "floor"
-    },
-    {
-     "slug": "lab-floor-dark",
-     "name": "laboratory metal walls grated floor floor dark shadow",
      "kind": "floor"
     },
     {
@@ -10119,11 +9949,6 @@
      "kind": "wall"
     },
     {
-     "slug": "asylum-wall-vent",
-     "name": "asylum padded cell walls checker floor wall vent grille air",
-     "kind": "wall"
-    },
-    {
      "slug": "asylum-wall-door",
      "name": "asylum padded cell walls checker floor wall cell door hatch steel",
      "kind": "wall"
@@ -10131,11 +9956,6 @@
     {
      "slug": "asylum-wall-tally",
      "name": "asylum padded cell walls checker floor wall tally marks scratched counting days",
-     "kind": "wall"
-    },
-    {
-     "slug": "asylum-wall-torn",
-     "name": "asylum padded cell walls checker floor wall torn padding ripped stuffing",
      "kind": "wall"
     },
     {
@@ -10174,11 +9994,6 @@
      "kind": "floor"
     },
     {
-     "slug": "asylum-floor-dark",
-     "name": "asylum padded cell walls checker floor floor dark shadow",
-     "kind": "floor"
-    },
-    {
      "slug": "morgue-top",
      "name": "morgue steel walls pale tiles wall top dark ceiling edge",
      "kind": "wall"
@@ -10196,16 +10011,6 @@
     {
      "slug": "morgue-wall-clock",
      "name": "morgue steel walls pale tiles wall clock",
-     "kind": "wall"
-    },
-    {
-     "slug": "morgue-wall-switch",
-     "name": "morgue steel walls pale tiles wall light switch",
-     "kind": "wall"
-    },
-    {
-     "slug": "morgue-wall-stain",
-     "name": "morgue steel walls pale tiles wall stain damp dirty mould",
      "kind": "wall"
     },
     {
@@ -10244,11 +10049,6 @@
      "kind": "floor"
     },
     {
-     "slug": "morgue-floor-puddle",
-     "name": "morgue steel walls pale tiles floor puddle water wet",
-     "kind": "floor"
-    },
-    {
      "slug": "morgue-floor-cracked",
      "name": "morgue steel walls pale tiles floor cracked broken",
      "kind": "floor"
@@ -10284,21 +10084,6 @@
      "kind": "wall"
     },
     {
-     "slug": "school-wall-poster",
-     "name": "school classroom green walls linoleum wall poster notice paper",
-     "kind": "wall"
-    },
-    {
-     "slug": "school-wall-hooks",
-     "name": "school classroom green walls linoleum wall coat hooks rail coat",
-     "kind": "wall"
-    },
-    {
-     "slug": "school-wall-switch",
-     "name": "school classroom green walls linoleum wall light switch",
-     "kind": "wall"
-    },
-    {
      "slug": "school-wall-blackboard",
      "name": "school classroom green walls linoleum wall blackboard chalk writing",
      "kind": "wall"
@@ -10321,11 +10106,6 @@
     {
      "slug": "school-floor-worn",
      "name": "school classroom green walls linoleum floor worn scuffed",
-     "kind": "floor"
-    },
-    {
-     "slug": "school-floor-stained",
-     "name": "school classroom green walls linoleum floor stained dirty",
      "kind": "floor"
     },
     {
@@ -10364,11 +10144,6 @@
      "kind": "wall"
     },
     {
-     "slug": "shop-wall-poster",
-     "name": "old shop shelves goods wooden floor wall poster notice paper",
-     "kind": "wall"
-    },
-    {
      "slug": "shop-wall-empty",
      "name": "old shop shelves goods wooden floor wall empty shelves bare dusty",
      "kind": "wall"
@@ -10396,11 +10171,6 @@
     {
      "slug": "shop-floor-worn",
      "name": "old shop shelves goods wooden floor floor worn scuffed",
-     "kind": "floor"
-    },
-    {
-     "slug": "shop-floor-dark",
-     "name": "old shop shelves goods wooden floor floor dark shadow",
      "kind": "floor"
     },
     {
@@ -10988,8 +10758,8 @@
      "solid": true
     },
     {
-     "slug": "door-nailed-shut",
-     "name": "nursery door pale peeling child height marks",
+     "slug": "door-nursery",
+     "name": "nursery door pink pale peeling child height marks",
      "solid": true
     },
     {
@@ -11132,6 +10902,1526 @@
     {
      "slug": "fire-escape",
      "name": "fire escape iron steps outside rusty"
+    }
+   ]
+  },
+  {
+   "id": "furniture",
+   "label": "Old house furniture",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "sofa-worn",
+     "name": "worn old sofa couch faded rose",
+     "solid": true
+    },
+    {
+     "slug": "sofa-torn",
+     "name": "torn sofa ripped couch stuffing green",
+     "solid": true
+    },
+    {
+     "slug": "sofa-sheet",
+     "name": "sofa covered with dust sheet white cloth",
+     "solid": true
+    },
+    {
+     "slug": "armchair-worn",
+     "name": "worn armchair old chair brown",
+     "solid": true
+    },
+    {
+     "slug": "armchair-torn",
+     "name": "torn armchair ripped stuffing",
+     "solid": true
+    },
+    {
+     "slug": "armchair-sheet",
+     "name": "armchair covered dust sheet white cloth",
+     "solid": true
+    },
+    {
+     "slug": "armchair-wing",
+     "name": "wing chair high back red leather",
+     "solid": true
+    },
+    {
+     "slug": "chaise-longue",
+     "name": "chaise longue fainting couch daybed",
+     "solid": true
+    },
+    {
+     "slug": "side-table",
+     "name": "side table small round",
+     "solid": true
+    },
+    {
+     "slug": "side-table-lamp",
+     "name": "side table with old lamp fringed shade",
+     "solid": true
+    },
+    {
+     "slug": "sideboard",
+     "name": "sideboard low cabinet cupboard",
+     "solid": true
+    },
+    {
+     "slug": "display-cabinet",
+     "name": "glass display cabinet curios",
+     "solid": true
+    },
+    {
+     "slug": "grandfather-clock",
+     "name": "grandfather clock tall pendulum",
+     "solid": true
+    },
+    {
+     "slug": "grandfather-clock-stopped",
+     "name": "broken grandfather clock stopped cobweb",
+     "solid": true
+    },
+    {
+     "slug": "piano-upright",
+     "name": "upright piano old keys",
+     "solid": true
+    },
+    {
+     "slug": "piano-grand",
+     "name": "grand piano black lid open",
+     "solid": true
+    },
+    {
+     "slug": "piano-stool",
+     "name": "piano stool round seat",
+     "solid": true
+    },
+    {
+     "slug": "gramophone",
+     "name": "gramophone phonograph horn record player",
+     "solid": true
+    },
+    {
+     "slug": "radio-old",
+     "name": "old radio wireless valve set",
+     "solid": true
+    },
+    {
+     "slug": "tv-old-off",
+     "name": "old television set off dark screen",
+     "solid": true
+    },
+    {
+     "slug": "tv-old-static",
+     "name": "old television static snow noise haunted",
+     "solid": true
+    },
+    {
+     "slug": "fire-tools",
+     "name": "fireplace tools poker shovel brush stand",
+     "solid": true
+    },
+    {
+     "slug": "coat-stand",
+     "name": "coat stand hat stand with coat and hat",
+     "solid": true
+    },
+    {
+     "slug": "umbrella-stand",
+     "name": "umbrella stand umbrellas walking stick",
+     "solid": true
+    },
+    {
+     "slug": "plant-stand",
+     "name": "plant stand fern potted plant",
+     "solid": true
+    },
+    {
+     "slug": "plant-stand-dead",
+     "name": "dead plant withered pot stand",
+     "solid": true
+    },
+    {
+     "slug": "footstool",
+     "name": "footstool ottoman pouffe",
+     "solid": true
+    },
+    {
+     "slug": "bookcase-full",
+     "name": "bookcase full of books tall",
+     "solid": true
+    },
+    {
+     "slug": "bookcase-half",
+     "name": "bookcase half empty few books dusty",
+     "solid": true
+    },
+    {
+     "slug": "bookcase-toppled",
+     "name": "toppled bookcase fallen over books spilled",
+     "solid": true
+    },
+    {
+     "slug": "fireplace-cold",
+     "name": "cold fireplace empty hearth ashes mantel",
+     "solid": true
+    },
+    {
+     "slug": "fireplace-embers",
+     "name": "fireplace glowing embers dying fire",
+     "solid": true
+    },
+    {
+     "slug": "writing-bureau",
+     "name": "writing bureau desk fold down secretaire",
+     "solid": true
+    },
+    {
+     "slug": "folding-screen",
+     "name": "folding screen room divider painted",
+     "solid": true
+    },
+    {
+     "slug": "standing-lamp-old",
+     "name": "old standing lamp fringed shade",
+     "solid": true
+    },
+    {
+     "slug": "card-table",
+     "name": "card table green baize playing cards",
+     "solid": true
+    },
+    {
+     "slug": "bed-single-old",
+     "name": "old single bed iron frame blanket",
+     "solid": true
+    },
+    {
+     "slug": "bed-double-old",
+     "name": "old double bed wooden headboard quilt",
+     "solid": true
+    },
+    {
+     "slug": "bed-fourposter",
+     "name": "four poster bed canopy curtains",
+     "solid": true
+    },
+    {
+     "slug": "bed-child",
+     "name": "child small bed kid nursery blanket stars",
+     "solid": true
+    },
+    {
+     "slug": "bed-unmade",
+     "name": "unmade bed messy rumpled sheets",
+     "solid": true
+    },
+    {
+     "slug": "mattress-stained",
+     "name": "stained mattress dirty blood old bare",
+     "solid": true
+    },
+    {
+     "slug": "bed-iron",
+     "name": "iron hospital bed old ward frame",
+     "solid": true
+    },
+    {
+     "slug": "cradle",
+     "name": "cradle rocking baby wooden",
+     "solid": true
+    },
+    {
+     "slug": "crib-old",
+     "name": "old crib cot bars baby bed empty",
+     "solid": true
+    },
+    {
+     "slug": "wardrobe-old",
+     "name": "old wardrobe closed tall cupboard",
+     "solid": true
+    },
+    {
+     "slug": "wardrobe-open",
+     "name": "wardrobe open clothes hanging coats",
+     "solid": true
+    },
+    {
+     "slug": "wardrobe-eyes",
+     "name": "wardrobe ajar eyes inside something watching monster",
+     "solid": true
+    },
+    {
+     "slug": "dressing-table",
+     "name": "dressing table vanity mirror",
+     "solid": true
+    },
+    {
+     "slug": "chest-of-drawers",
+     "name": "chest of drawers closed dresser",
+     "solid": true
+    },
+    {
+     "slug": "chest-of-drawers-open",
+     "name": "chest of drawers drawer open clothes",
+     "solid": true
+    },
+    {
+     "slug": "nightstand",
+     "name": "nightstand bedside table candle",
+     "solid": true
+    },
+    {
+     "slug": "washstand",
+     "name": "washstand basin jug wash bowl",
+     "solid": true
+    },
+    {
+     "slug": "bedpan",
+     "name": "bedpan chamber pot enamel"
+    },
+    {
+     "slug": "trunk-old",
+     "name": "old travel trunk steamer chest straps",
+     "solid": true
+    },
+    {
+     "slug": "blanket-box",
+     "name": "blanket box linen chest foot of bed",
+     "solid": true
+    },
+    {
+     "slug": "table-long",
+     "name": "long dining table wooden",
+     "solid": true
+    },
+    {
+     "slug": "table-round",
+     "name": "round table pedestal",
+     "solid": true
+    },
+    {
+     "slug": "table-set",
+     "name": "dining table set for dinner plates candles cloth",
+     "solid": true
+    },
+    {
+     "slug": "table-dustsheet",
+     "name": "table covered dust sheet white cloth",
+     "solid": true
+    },
+    {
+     "slug": "chair-dining",
+     "name": "dining chair wooden high back",
+     "solid": true
+    },
+    {
+     "slug": "chair-dining-red",
+     "name": "dining chair red upholstered seat",
+     "solid": true
+    },
+    {
+     "slug": "chair-toppled",
+     "name": "toppled chair fallen over knocked"
+    },
+    {
+     "slug": "chair-broken",
+     "name": "broken chair smashed pieces legs"
+    },
+    {
+     "slug": "highchair",
+     "name": "highchair baby high chair",
+     "solid": true
+    },
+    {
+     "slug": "candelabra",
+     "name": "candelabra candlestick three candles unlit",
+     "solid": true
+    },
+    {
+     "slug": "candelabra-lit",
+     "name": "candelabra lit three candles flames",
+     "solid": true
+    },
+    {
+     "slug": "serving-trolley",
+     "name": "serving trolley tea cart wheels",
+     "solid": true
+    },
+    {
+     "slug": "china-cabinet",
+     "name": "china cabinet plates crockery dresser",
+     "solid": true
+    },
+    {
+     "slug": "bench-church",
+     "name": "church pew bench wooden",
+     "solid": true
+    },
+    {
+     "slug": "desk-tidy",
+     "name": "writing desk tidy study lamp",
+     "solid": true
+    },
+    {
+     "slug": "desk-cluttered",
+     "name": "cluttered desk papers mess books study",
+     "solid": true
+    },
+    {
+     "slug": "typewriter",
+     "name": "typewriter old keys paper"
+    },
+    {
+     "slug": "globe-old",
+     "name": "old globe on stand world antique",
+     "solid": true
+    },
+    {
+     "slug": "telescope-brass",
+     "name": "brass telescope on tripod stargazing",
+     "solid": true
+    },
+    {
+     "slug": "filing-cabinet",
+     "name": "filing cabinet metal drawers office",
+     "solid": true
+    },
+    {
+     "slug": "filing-cabinet-open",
+     "name": "filing cabinet drawer open files papers",
+     "solid": true
+    },
+    {
+     "slug": "safe-shut",
+     "name": "safe closed strongbox iron vault dial",
+     "solid": true
+    },
+    {
+     "slug": "safe-open",
+     "name": "safe open empty door ajar papers",
+     "solid": true
+    },
+    {
+     "slug": "paper-stack",
+     "name": "stack of papers pile documents"
+    },
+    {
+     "slug": "inkwell",
+     "name": "inkwell quill pen ink feather"
+    },
+    {
+     "slug": "telephone-old",
+     "name": "old telephone candlestick phone antique"
+    },
+    {
+     "slug": "reading-lamp",
+     "name": "reading lamp green bankers desk lamp"
+    },
+    {
+     "slug": "lectern",
+     "name": "lectern reading stand open book",
+     "solid": true
+    },
+    {
+     "slug": "map-table",
+     "name": "map table charts compass study",
+     "solid": true
+    },
+    {
+     "slug": "book-pile",
+     "name": "pile of old books stacked dusty"
+    },
+    {
+     "slug": "library-steps",
+     "name": "library steps small step ladder wooden",
+     "solid": true
+    },
+    {
+     "slug": "magnifier",
+     "name": "magnifying glass lens detective"
+    },
+    {
+     "slug": "desk-chair-old",
+     "name": "swivel desk chair leather office old",
+     "solid": true
+    }
+   ]
+  },
+  {
+   "id": "household",
+   "label": "Kitchen, bathroom & cellar",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "stove-iron",
+     "name": "cast iron stove range kitchen stovepipe",
+     "solid": true
+    },
+    {
+     "slug": "oven-old",
+     "name": "old enamel oven cooker gas rings",
+     "solid": true
+    },
+    {
+     "slug": "fridge-old",
+     "name": "old fridge refrigerator rounded rusty",
+     "solid": true
+    },
+    {
+     "slug": "icebox",
+     "name": "icebox wooden ice chest cold store",
+     "solid": true
+    },
+    {
+     "slug": "sink-stone",
+     "name": "stone sink belfast kitchen tap",
+     "solid": true
+    },
+    {
+     "slug": "sink-dirty",
+     "name": "dirty sink piled dishes plates mess",
+     "solid": true
+    },
+    {
+     "slug": "kitchen-counter",
+     "name": "kitchen counter worktop cupboards",
+     "solid": true
+    },
+    {
+     "slug": "kitchen-counter-drawers",
+     "name": "kitchen counter drawers worktop",
+     "solid": true
+    },
+    {
+     "slug": "hanging-pots",
+     "name": "hanging pots pans rack copper"
+    },
+    {
+     "slug": "jar-shelves",
+     "name": "shelves with jars pantry preserves",
+     "solid": true
+    },
+    {
+     "slug": "pantry-shelves",
+     "name": "pantry shelves tins cans boxes",
+     "solid": true
+    },
+    {
+     "slug": "meat-hook",
+     "name": "meat hook hanging meat carcass butcher"
+    },
+    {
+     "slug": "meat-hooks-empty",
+     "name": "empty meat hooks rail butcher"
+    },
+    {
+     "slug": "butchers-block",
+     "name": "butcher block chopping cleaver bloody",
+     "solid": true
+    },
+    {
+     "slug": "knife-block",
+     "name": "knife block kitchen knives"
+    },
+    {
+     "slug": "kettle-copper",
+     "name": "old copper kettle stove"
+    },
+    {
+     "slug": "bread-bin",
+     "name": "bread bin enamel tin"
+    },
+    {
+     "slug": "flour-sack",
+     "name": "sack of flour grain bag",
+     "solid": true
+    },
+    {
+     "slug": "bottle-crate",
+     "name": "crate of bottles wine milk",
+     "solid": true
+    },
+    {
+     "slug": "wine-rack",
+     "name": "wine rack bottles cellar",
+     "solid": true
+    },
+    {
+     "slug": "barrel-wine",
+     "name": "wine barrel cask lying on side tap",
+     "solid": true
+    },
+    {
+     "slug": "barrel-open",
+     "name": "open barrel water butt rain barrel",
+     "solid": true
+    },
+    {
+     "slug": "barrel-smashed",
+     "name": "smashed barrel broken staves hoops"
+    },
+    {
+     "slug": "milk-churn",
+     "name": "milk churn can dairy metal",
+     "solid": true
+    },
+    {
+     "slug": "coal-scuttle",
+     "name": "coal scuttle bucket fireplace coal"
+    },
+    {
+     "slug": "kitchen-scales",
+     "name": "kitchen scales weighing balance brass pans"
+    },
+    {
+     "slug": "mincer",
+     "name": "meat mincer grinder clamp"
+    },
+    {
+     "slug": "dresser-kitchen",
+     "name": "kitchen dresser plates hooks cups",
+     "solid": true
+    },
+    {
+     "slug": "water-pump",
+     "name": "water pump hand pump iron kitchen yard",
+     "solid": true
+    },
+    {
+     "slug": "bathtub-clawfoot",
+     "name": "clawfoot bathtub old bath empty",
+     "solid": true
+    },
+    {
+     "slug": "bathtub-filled",
+     "name": "bathtub filled water full bath",
+     "solid": true
+    },
+    {
+     "slug": "bathtub-stained",
+     "name": "stained bathtub blood rust dirty",
+     "solid": true
+    },
+    {
+     "slug": "toilet-old",
+     "name": "old toilet high cistern chain",
+     "solid": true
+    },
+    {
+     "slug": "toilet-broken",
+     "name": "broken toilet cracked leaking smashed water",
+     "solid": true
+    },
+    {
+     "slug": "toilet-dirty",
+     "name": "filthy toilet dirty stained no seat",
+     "solid": true
+    },
+    {
+     "slug": "washbasin",
+     "name": "washbasin pedestal sink bathroom",
+     "solid": true
+    },
+    {
+     "slug": "washbasin-bloody",
+     "name": "washbasin sink blood bloody water",
+     "solid": true
+    },
+    {
+     "slug": "mirror-cabinet",
+     "name": "bathroom mirror cabinet medicine cupboard",
+     "solid": true
+    },
+    {
+     "slug": "towel-rail",
+     "name": "towel rail stand towels",
+     "solid": true
+    },
+    {
+     "slug": "bucket-and-mop",
+     "name": "bucket and mop cleaning dirty water"
+    },
+    {
+     "slug": "laundry-mangle",
+     "name": "mangle wringer laundry rollers old",
+     "solid": true
+    },
+    {
+     "slug": "washing-tub",
+     "name": "washing tub wash board laundry zinc",
+     "solid": true
+    },
+    {
+     "slug": "clothes-horse",
+     "name": "clothes horse drying rack sheets",
+     "solid": true
+    },
+    {
+     "slug": "boiler",
+     "name": "boiler water heater tank pipes cellar",
+     "solid": true
+    },
+    {
+     "slug": "furnace",
+     "name": "furnace fire door open burning coal",
+     "solid": true
+    },
+    {
+     "slug": "furnace-cold",
+     "name": "cold furnace door shut iron cellar",
+     "solid": true
+    },
+    {
+     "slug": "coal-pile",
+     "name": "pile of coal heap black cellar",
+     "solid": true
+    },
+    {
+     "slug": "workbench",
+     "name": "workbench vice tools carpenter",
+     "solid": true
+    },
+    {
+     "slug": "tool-rack",
+     "name": "tool rack pegboard wall of tools saw hammer",
+     "solid": true
+    },
+    {
+     "slug": "preserve-shelves",
+     "name": "shelves of preserves jars cellar dusty cobweb",
+     "solid": true
+    },
+    {
+     "slug": "pipes-valve",
+     "name": "pipes with valve wheel plumbing cellar",
+     "solid": true
+    },
+    {
+     "slug": "fuse-box-open",
+     "name": "fuse box open wires sparks electric",
+     "solid": true
+    },
+    {
+     "slug": "generator-old",
+     "name": "old generator engine petrol machine",
+     "solid": true
+    },
+    {
+     "slug": "cage-large",
+     "name": "large iron cage bars cell animal",
+     "solid": true
+    },
+    {
+     "slug": "chains-hanging",
+     "name": "hanging chains ceiling hooks"
+    },
+    {
+     "slug": "drain-cover",
+     "name": "drain cover grate floor round iron"
+    },
+    {
+     "slug": "oil-drum",
+     "name": "oil drum rusty barrel metal",
+     "solid": true
+    },
+    {
+     "slug": "pallet",
+     "name": "wooden pallet planks stack"
+    },
+    {
+     "slug": "sump-pit",
+     "name": "sump pit dark water hole cellar floor"
+    },
+    {
+     "slug": "shelf-junk",
+     "name": "shelf unit junk boxes paint tins clutter",
+     "solid": true
+    },
+    {
+     "slug": "stepladder-old",
+     "name": "old stepladder paint splashed wooden"
+    }
+   ]
+  },
+  {
+   "id": "attic",
+   "label": "Nursery & attic",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "rocking-chair",
+     "name": "rocking chair wooden old creaking",
+     "solid": true
+    },
+    {
+     "slug": "rocking-chair-doll",
+     "name": "rocking chair with doll sitting creepy",
+     "solid": true
+    },
+    {
+     "slug": "rocking-horse-old",
+     "name": "old rocking horse toy faded paint worn",
+     "solid": true
+    },
+    {
+     "slug": "toy-chest",
+     "name": "toy chest box closed nursery painted",
+     "solid": true
+    },
+    {
+     "slug": "toy-chest-open",
+     "name": "toy chest open toys spilling doll arm",
+     "solid": true
+    },
+    {
+     "slug": "dolls-house",
+     "name": "dolls house miniature toy house",
+     "solid": true
+    },
+    {
+     "slug": "doll-porcelain",
+     "name": "porcelain doll china dress creepy"
+    },
+    {
+     "slug": "doll-rag",
+     "name": "rag doll cloth button eyes yarn hair"
+    },
+    {
+     "slug": "doll-broken",
+     "name": "broken doll cracked face missing arm eye"
+    },
+    {
+     "slug": "doll-headless",
+     "name": "headless doll body head beside"
+    },
+    {
+     "slug": "teddy-old",
+     "name": "old teddy bear worn threadbare"
+    },
+    {
+     "slug": "teddy-one-eyed",
+     "name": "one eyed teddy bear missing eye stuffing torn"
+    },
+    {
+     "slug": "music-box",
+     "name": "music box closed wooden wind up key"
+    },
+    {
+     "slug": "music-box-open",
+     "name": "music box open ballerina dancer playing"
+    },
+    {
+     "slug": "spinning-top-tin",
+     "name": "spinning top toy tin"
+    },
+    {
+     "slug": "pram-old",
+     "name": "old pram baby carriage perambulator black",
+     "solid": true
+    },
+    {
+     "slug": "furniture-covered",
+     "name": "covered furniture dust sheet shape tall",
+     "solid": true
+    },
+    {
+     "slug": "furniture-covered-figure",
+     "name": "sheet covered figure shape person under dust sheet standing",
+     "solid": true
+    },
+    {
+     "slug": "chest-cobwebbed",
+     "name": "cobwebbed chest old trunk webs dusty",
+     "solid": true
+    },
+    {
+     "slug": "hat-boxes",
+     "name": "hat boxes stacked round striped ribbon"
+    },
+    {
+     "slug": "suitcases-old",
+     "name": "old suitcases stacked luggage leather",
+     "solid": true
+    },
+    {
+     "slug": "suitcase-open",
+     "name": "open suitcase clothes old empty packed"
+    },
+    {
+     "slug": "mannequin",
+     "name": "mannequin shop dummy figure bald",
+     "solid": true
+    },
+    {
+     "slug": "mannequin-broken",
+     "name": "broken mannequin armless cracked head missing",
+     "solid": true
+    },
+    {
+     "slug": "dress-form",
+     "name": "dress form tailors dummy sewing stand",
+     "solid": true
+    },
+    {
+     "slug": "dress-form-gown",
+     "name": "dress form old wedding dress gown yellowed",
+     "solid": true
+    },
+    {
+     "slug": "birdcage-empty",
+     "name": "empty birdcage bird cage open door"
+    },
+    {
+     "slug": "birdcage-bird",
+     "name": "birdcage with bird canary singing"
+    },
+    {
+     "slug": "birdcage-dead",
+     "name": "birdcage dead bird skeleton bones"
+    },
+    {
+     "slug": "chairs-stacked",
+     "name": "stacked chairs pile of chairs attic",
+     "solid": true
+    },
+    {
+     "slug": "jack-in-box-old",
+     "name": "jack in the box clown toy spring"
+    },
+    {
+     "slug": "toy-blocks",
+     "name": "toy blocks alphabet wooden letters"
+    },
+    {
+     "slug": "toy-soldier",
+     "name": "tin toy soldier guard uniform"
+    },
+    {
+     "slug": "toy-train-old",
+     "name": "old toy train tin engine wind up"
+    },
+    {
+     "slug": "marionette",
+     "name": "marionette puppet strings wooden cross"
+    },
+    {
+     "slug": "crib-mobile",
+     "name": "crib mobile hanging stars moon nursery"
+    },
+    {
+     "slug": "carpet-rolled",
+     "name": "rolled up carpet rug tied attic"
+    },
+    {
+     "slug": "picture-frames-stack",
+     "name": "stack of picture frames leaning canvases"
+    },
+    {
+     "slug": "sewing-machine",
+     "name": "treadle sewing machine old singer table",
+     "solid": true
+    },
+    {
+     "slug": "spinning-wheel",
+     "name": "spinning wheel wooden yarn old",
+     "solid": true
+    },
+    {
+     "slug": "box-junk",
+     "name": "cardboard box of junk attic clutter old things"
+    },
+    {
+     "slug": "gramophone-records",
+     "name": "pile of old records vinyl discs sleeves"
+    },
+    {
+     "slug": "christmas-box",
+     "name": "box of old christmas decorations baubles tinsel"
+    },
+    {
+     "slug": "moth-coat",
+     "name": "moth eaten coat on hanger old fur"
+    },
+    {
+     "slug": "water-tank",
+     "name": "attic water tank cistern lead pipes",
+     "solid": true
+    },
+    {
+     "slug": "bat-roost",
+     "name": "bats hanging roosting rafters attic"
+    }
+   ]
+  },
+  {
+   "id": "eerie",
+   "label": "Eerie things",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "portrait-man",
+     "name": "portrait painting old man gold frame ancestor"
+    },
+    {
+     "slug": "portrait-woman",
+     "name": "portrait painting woman lady gold frame"
+    },
+    {
+     "slug": "portrait-child",
+     "name": "portrait painting child girl ribbon frame"
+    },
+    {
+     "slug": "portrait-scratched",
+     "name": "portrait face scratched out clawed painting"
+    },
+    {
+     "slug": "portrait-eyeless",
+     "name": "portrait eyes cut out holes watching painting"
+    },
+    {
+     "slug": "portrait-torn",
+     "name": "torn portrait slashed canvas ripped painting"
+    },
+    {
+     "slug": "portrait-crooked",
+     "name": "crooked portrait hanging askew tilted painting"
+    },
+    {
+     "slug": "portrait-skull",
+     "name": "portrait changed to skull death painting haunted"
+    },
+    {
+     "slug": "family-photo",
+     "name": "family photograph old sepia photo frame group"
+    },
+    {
+     "slug": "family-photo-cracked",
+     "name": "cracked family photograph broken glass face missing"
+    },
+    {
+     "slug": "photo-wedding",
+     "name": "wedding photograph old bride groom oval frame"
+    },
+    {
+     "slug": "mirror-standing",
+     "name": "standing mirror cheval full length old",
+     "solid": true
+    },
+    {
+     "slug": "mirror-standing-cracked",
+     "name": "cracked mirror broken standing bad luck",
+     "solid": true
+    },
+    {
+     "slug": "mirror-covered",
+     "name": "covered mirror black cloth draped mourning",
+     "solid": true
+    },
+    {
+     "slug": "mirror-ghost",
+     "name": "mirror with ghost face reflection apparition",
+     "solid": true
+    },
+    {
+     "slug": "ouija-board",
+     "name": "ouija board spirit seance planchette letters"
+    },
+    {
+     "slug": "pentagram-circle",
+     "name": "pentagram chalk circle ritual summoning floor"
+    },
+    {
+     "slug": "candles-group",
+     "name": "group of candles lit melted wax cluster"
+    },
+    {
+     "slug": "candles-black",
+     "name": "black candles ritual dark flames"
+    },
+    {
+     "slug": "candle-skull",
+     "name": "skull with candle on top wax dripping"
+    },
+    {
+     "slug": "ritual-bowl",
+     "name": "ritual bowl blood offering bronze"
+    },
+    {
+     "slug": "seance-table",
+     "name": "seance table round candle crystal ball cloth",
+     "solid": true
+    },
+    {
+     "slug": "crystal-ball-seance",
+     "name": "crystal ball fortune teller glowing stand"
+    },
+    {
+     "slug": "tarot-cards",
+     "name": "tarot cards spread death card fortune"
+    },
+    {
+     "slug": "voodoo-doll",
+     "name": "voodoo doll pins sackcloth"
+    },
+    {
+     "slug": "spell-book",
+     "name": "old spell book grimoire open strange symbols"
+    },
+    {
+     "slug": "bell-jar",
+     "name": "bell jar glass dome dead moth specimen"
+    },
+    {
+     "slug": "hand-of-glory",
+     "name": "severed hand candle occult relic"
+    },
+    {
+     "slug": "bloodstain",
+     "name": "bloodstain blood pool dried floor"
+    },
+    {
+     "slug": "blood-pool",
+     "name": "fresh pool of blood red puddle"
+    },
+    {
+     "slug": "blood-trail",
+     "name": "blood trail drag marks smeared"
+    },
+    {
+     "slug": "blood-drips",
+     "name": "blood dripping drops spatter wall"
+    },
+    {
+     "slug": "footprints-muddy",
+     "name": "muddy footprints boots tracks mud"
+    },
+    {
+     "slug": "footprints-bloody",
+     "name": "bloody footprints bare feet blood tracks"
+    },
+    {
+     "slug": "scratch-marks",
+     "name": "scratch marks claw marks gouges"
+    },
+    {
+     "slug": "handprint-bloody",
+     "name": "bloody handprint hand print smear"
+    },
+    {
+     "slug": "message-blood",
+     "name": "message written in blood words wall get out"
+    },
+    {
+     "slug": "chalk-outline",
+     "name": "chalk outline body crime scene floor"
+    },
+    {
+     "slug": "bullet-holes",
+     "name": "bullet holes wall shots cracks"
+    },
+    {
+     "slug": "noose",
+     "name": "noose hanging rope gallows"
+    },
+    {
+     "slug": "coffin-shut",
+     "name": "closed coffin wooden casket lid cross",
+     "solid": true
+    },
+    {
+     "slug": "coffin-open",
+     "name": "open coffin empty lining lid off",
+     "solid": true
+    },
+    {
+     "slug": "coffin-body",
+     "name": "open coffin with body corpse pale hands crossed",
+     "solid": true
+    },
+    {
+     "slug": "coffin-child",
+     "name": "small child coffin white little casket",
+     "solid": true
+    },
+    {
+     "slug": "coffin-upright",
+     "name": "upright coffin standing against wall lid ajar",
+     "solid": true
+    },
+    {
+     "slug": "urn-funeral",
+     "name": "funeral urn ashes brass mantel"
+    },
+    {
+     "slug": "urn-spilled",
+     "name": "spilled urn ashes knocked over broken"
+    },
+    {
+     "slug": "specimen-jar-eye",
+     "name": "specimen jar eyeball preserved formaldehyde"
+    },
+    {
+     "slug": "specimen-jar-brain",
+     "name": "specimen jar brain preserved laboratory"
+    },
+    {
+     "slug": "specimen-jar-hand",
+     "name": "specimen jar severed hand preserved"
+    },
+    {
+     "slug": "specimen-jar-creature",
+     "name": "specimen jar strange creature thing tentacles"
+    },
+    {
+     "slug": "specimen-shelf",
+     "name": "shelf of specimen jars laboratory collection",
+     "solid": true
+    },
+    {
+     "slug": "taxidermy-deer",
+     "name": "mounted deer head antlers stag trophy taxidermy"
+    },
+    {
+     "slug": "taxidermy-boar",
+     "name": "mounted boar head tusks trophy taxidermy"
+    },
+    {
+     "slug": "taxidermy-crow",
+     "name": "stuffed crow raven on perch glass eye taxidermy"
+    },
+    {
+     "slug": "stuffed-owl",
+     "name": "stuffed owl taxidermy glass dome staring"
+    },
+    {
+     "slug": "stuffed-fox",
+     "name": "stuffed fox taxidermy snarling on board"
+    },
+    {
+     "slug": "stuffed-cat",
+     "name": "stuffed cat taxidermy black sitting stiff"
+    },
+    {
+     "slug": "key-rack",
+     "name": "key rack board hooks old keys numbered"
+    },
+    {
+     "slug": "locked-box",
+     "name": "locked box padlock small chest secret"
+    },
+    {
+     "slug": "strongbox",
+     "name": "strongbox iron cash box heavy riveted",
+     "solid": true
+    },
+    {
+     "slug": "letters-bundle",
+     "name": "bundle of letters tied ribbon old envelopes"
+    },
+    {
+     "slug": "letter-unsealed",
+     "name": "open letter envelope note handwriting wax seal"
+    },
+    {
+     "slug": "diary-old",
+     "name": "old diary journal locked leather clasp"
+    },
+    {
+     "slug": "photo-pile",
+     "name": "pile of old photographs sepia snapshots scattered"
+    },
+    {
+     "slug": "newspaper-old",
+     "name": "old newspaper headline yellowed"
+    },
+    {
+     "slug": "medicine-bottles",
+     "name": "old medicine bottles poison apothecary brown glass"
+    },
+    {
+     "slug": "pill-box",
+     "name": "pill box tablets spilled pills tin"
+    },
+    {
+     "slug": "syringe-tray",
+     "name": "syringe tray surgical needles kidney dish"
+    },
+    {
+     "slug": "surgical-tools",
+     "name": "surgical tools tray scalpel saw forceps bloody"
+    },
+    {
+     "slug": "bone-saw",
+     "name": "bone saw surgical bloody amputation"
+    },
+    {
+     "slug": "knife-bloody",
+     "name": "bloody knife kitchen blade murder weapon"
+    },
+    {
+     "slug": "axe-bloody",
+     "name": "bloody axe hatchet embedded in block"
+    },
+    {
+     "slug": "straitjacket",
+     "name": "straitjacket asylum restraint straps buckles"
+    },
+    {
+     "slug": "wheelchair-old",
+     "name": "old wheelchair wicker wooden antique asylum",
+     "solid": true
+    },
+    {
+     "slug": "gurney",
+     "name": "gurney hospital trolley stretcher wheels",
+     "solid": true
+    },
+    {
+     "slug": "gurney-body",
+     "name": "gurney with body under sheet corpse morgue",
+     "solid": true
+    },
+    {
+     "slug": "operating-table",
+     "name": "operating table surgery straps lamp steel",
+     "solid": true
+    },
+    {
+     "slug": "electric-chair",
+     "name": "electric chair execution straps wires cap",
+     "solid": true
+    },
+    {
+     "slug": "restraint-bed",
+     "name": "restraint bed straps asylum leather buckles",
+     "solid": true
+    },
+    {
+     "slug": "cell-bunk",
+     "name": "cell bunk prison bed thin mattress chain wall",
+     "solid": true
+    },
+    {
+     "slug": "slop-bucket",
+     "name": "slop bucket cell pail dirty flies"
+    },
+    {
+     "slug": "iv-stand",
+     "name": "iv drip stand hospital bag tube old",
+     "solid": true
+    },
+    {
+     "slug": "dentist-chair",
+     "name": "dentist chair old leather drill frightening",
+     "solid": true
+    },
+    {
+     "slug": "whipping-post",
+     "name": "whipping post shackles chains punishment",
+     "solid": true
+    },
+    {
+     "slug": "rat-trap",
+     "name": "rat trap mouse trap snap cheese"
+    },
+    {
+     "slug": "rat-dead",
+     "name": "dead rat on its back vermin"
+    },
+    {
+     "slug": "flies-swarm",
+     "name": "swarm of flies buzzing insects cloud"
+    },
+    {
+     "slug": "cobweb-large",
+     "name": "large cobweb spider web corner big"
+    },
+    {
+     "slug": "cobweb-hanging",
+     "name": "hanging cobwebs strands dusty ceiling"
+    },
+    {
+     "slug": "spider-thread",
+     "name": "spider dangling on thread web"
+    },
+    {
+     "slug": "cobweb-doorway",
+     "name": "cobweb across doorway thick webs blocked"
+    },
+    {
+     "slug": "floor-hole-boards",
+     "name": "hole in the floor broken floorboards pit"
+    },
+    {
+     "slug": "wall-hole",
+     "name": "hole in the wall broken plaster bricks dark"
+    },
+    {
+     "slug": "loose-floorboard",
+     "name": "loose floorboard lifted hiding place secret"
+    },
+    {
+     "slug": "peephole",
+     "name": "peephole eye in wall watching spy hole"
+    },
+    {
+     "slug": "rat-hole",
+     "name": "rat hole in skirting board mouse hole eyes"
+    },
+    {
+     "slug": "bones-small",
+     "name": "small bones animal skeleton remains"
+    },
+    {
+     "slug": "skeleton-chained",
+     "name": "chained skeleton sitting against wall remains",
+     "solid": true
+    },
+    {
+     "slug": "hanging-cage",
+     "name": "hanging cage gibbet bones iron",
+     "solid": true
+    }
+   ]
+  },
+  {
+   "id": "yard",
+   "label": "Porch, garden & graveyard",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "porch-swing",
+     "name": "porch swing bench hanging chains",
+     "solid": true
+    },
+    {
+     "slug": "garden-bench-old",
+     "name": "old garden bench weathered broken slat",
+     "solid": true
+    },
+    {
+     "slug": "wheelbarrow-old",
+     "name": "old wheelbarrow rusty earth soil",
+     "solid": true
+    },
+    {
+     "slug": "gnome-old",
+     "name": "old garden gnome faded moss creepy",
+     "solid": true
+    },
+    {
+     "slug": "gnome-broken",
+     "name": "broken garden gnome smashed pieces head"
+    },
+    {
+     "slug": "birdbath",
+     "name": "stone birdbath garden water moss",
+     "solid": true
+    },
+    {
+     "slug": "sundial",
+     "name": "sundial stone garden pedestal time",
+     "solid": true
+    },
+    {
+     "slug": "well-cover",
+     "name": "covered well wooden lid boarded old stone",
+     "solid": true
+    },
+    {
+     "slug": "washing-line-sheets",
+     "name": "washing line sheets hanging laundry white"
+    },
+    {
+     "slug": "kennel-old",
+     "name": "old dog kennel empty chain bowl",
+     "solid": true
+    },
+    {
+     "slug": "scarecrow-old",
+     "name": "old scarecrow tattered sack head crow field",
+     "solid": true
+    },
+    {
+     "slug": "cross-wooden",
+     "name": "wooden cross grave marker crooked",
+     "solid": true
+    },
+    {
+     "slug": "grave-open",
+     "name": "open grave dug hole pit earth"
+    },
+    {
+     "slug": "earth-mound",
+     "name": "mound of earth fresh grave soil heap"
+    },
+    {
+     "slug": "shed-tools",
+     "name": "garden tools leaning spade rake fork shed",
+     "solid": true
+    },
+    {
+     "slug": "mailbox-old",
+     "name": "old mailbox letterbox rusty post",
+     "solid": true
+    },
+    {
+     "slug": "dead-tree-small",
+     "name": "small dead tree bare branches leafless",
+     "solid": true
+    },
+    {
+     "slug": "crow-post",
+     "name": "crow perched on fence post raven watching",
+     "solid": true
+    },
+    {
+     "slug": "tyre-swing",
+     "name": "tyre swing rope tree hanging tire",
+     "solid": true
+    },
+    {
+     "slug": "bicycle-rusty",
+     "name": "rusty old bicycle bike leaning",
+     "solid": true
+    },
+    {
+     "slug": "headstone-leaning",
+     "name": "leaning headstone old grave cracked moss",
+     "solid": true
+    },
+    {
+     "slug": "statue-weeping",
+     "name": "weeping angel stone statue wings covering face cemetery",
+     "solid": true
+    },
+    {
+     "slug": "lantern-porch",
+     "name": "porch lantern hanging lit dim"
+    },
+    {
+     "slug": "rain-barrel-moss",
+     "name": "rain barrel mossy water butt drainpipe",
+     "solid": true
+    },
+    {
+     "slug": "bird-table",
+     "name": "bird table feeder garden post",
+     "solid": true
+    },
+    {
+     "slug": "pumpkin-rotten",
+     "name": "rotten pumpkin collapsed mouldy"
+    },
+    {
+     "slug": "garden-roller",
+     "name": "garden roller heavy iron lawn",
+     "solid": true
+    },
+    {
+     "slug": "beehive-old",
+     "name": "old beehive wooden white abandoned",
+     "solid": true
     }
    ]
   }

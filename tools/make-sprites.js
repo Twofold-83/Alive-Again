@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /*
- * Generates the pixel-art sprite pack in public/px/ : 1965 PNGs plus index.json
- * (the original 500 sprites, the level-editor tile sets and level props, then 1000
- * everyday and modern sprites).
+ * Generates the pixel-art sprite pack in public/px/ : 2745 PNGs plus index.json
+ * (the original 500 sprites, the level-editor tile sets and level props, 1000
+ * everyday and modern sprites, then the 780 sprites of the eerie old-house pack).
  *
  *   node tools/make-sprites.js
  *
@@ -14389,8 +14389,8 @@ for (const k of ['q1', 'q2', 'q3', 'v1', 'v2', 'v3', 'u1', 'u2', 'u3', 'h1', 'h2
 //   a b c rose dark/mid/pale   d e f moss/sage/pale sage   g h i indigo/dull blue/pale blue
 //   j k l khaki/cream/bone     m darkest wood   n ochre   o dried blood   p orange-brown
 Object.assign(FIX, { a: 'q1', b: 'q2', c: 'q3', d: 'v1', e: 'v2', f: 'v3', g: 'u1', h: 'u2', i: 'u3', j: 'h1', k: 'h2', l: 'h3', m: 'i1', n: 'j2', o: 'z1', p: 'd2' });
-Object.assign(RAMPS, { oak: ['i1', 't1', 't2'], moss: ['v1', 'v2', 'v3'], dusk: ['u1', 'u2', 'u3'], bone: ['h1', 'h2', 'h3'], rosy: ['q1', 'q2', 'q3'], wine: ['z1', 'r1', 'q2'], soot: ['k', 'g4', 'g3'], ochre: ['t1', 'h1', 'h2'], stage: ['t1', 'd2', 't3'], plum: ['u1', 'p1', 'q2'] });
-const DARKER = { w0: 'g1', g1: 'g2', g2: 'g3', g3: 'g4', g4: 'k', t3: 't2', t2: 't1', t1: 'i1', i1: 'k', h3: 'h2', h2: 'h1', h1: 'g4', v3: 'v2', v2: 'v1', v1: 'g4', u3: 'u2', u2: 'u1', u1: 'k', q3: 'q2', q2: 'q1', q1: 'z1', r2: 'r1', r1: 'z1', z1: 'k', j2: 'h1', d2: 't1', s1: 'd2', c1: 'g4', c2: 'c1', n1: 'g4', b1: 'u1', p1: 'u1', o1: 't1', y3: 'h3', b3: 'u3' };
+Object.assign(RAMPS, { oak: ['i1', 't1', 't2'], moss: ['v1', 'v2', 'v3'], dusk: ['u1', 'u2', 'u3'], bone: ['h1', 'h2', 'h3'], rosy: ['q1', 'q2', 'q3'], wine: ['z1', 'r1', 'q2'], soot: ['k', 'g4', 'g3'], ochre: ['t1', 'h1', 'h2'], stage: ['i1', 't2', 'd2'], board: ['t1', 't2', 'd2'], plum: ['u1', 'p1', 'q2'] });
+const DARKER = { w0: 'g1', g1: 'g2', g2: 'g3', g3: 'g4', g4: 'k', t3: 't2', t2: 't1', t1: 'i1', i1: 'k', h3: 'h2', h2: 'h1', h1: 't1', v3: 'v2', v2: 'v1', v1: 'g4', u3: 'u2', u2: 'u1', u1: 'k', q3: 'q2', q2: 'q1', q1: 'z1', r2: 'r1', r1: 'z1', z1: 'k', j2: 'h1', d2: 't1', s1: 'd2', c1: 'g4', c2: 'c1', n1: 'g4', b1: 'u1', p1: 'u1', o1: 't1', y3: 'h3', b3: 'u3' };
 function dim(c) { each((x, y) => { const k = KEY[c.get(x, y)]; if (DARKER[k]) c.px(x, y, DARKER[k]); }); }
 /** copy a painter's picture, drawn with its own fixed seed, so details share exactly the same background */
 function base(c, seed, fn) { const g = sub(seed, fn); each((x, y) => c.px(x, y, KEY[g[y][x]])); }
@@ -14466,6 +14466,7 @@ const VWORDS = { worn: 'worn scuffed', cracked: 'cracked broken', stained: 'stai
 /** One complete room set. details / variants: names of shared painters, or [name, words, painter(c, o)]. */
 function roomSet(id, words, o) {
   o.fr = o.fr || ['i1', 't1', 't2'];
+  if (o.details.length < 4 || o.details.length > 6 || o.variants.length < 2 || o.variants.length > 4) throw new Error(`room set ${id}: wants 4-6 wall details and 2-4 floor variants`);
   T(`${id}-top`, `${words} wall top dark ceiling edge`, 'wall', (c) => { c.fill(o.top[0]).speck(12, o.top[1]); if (o.top[2]) c.speck(5, o.top[2]); });
   T(`${id}-wall`, `${words} wall plain`, 'wall', o.wall);
   for (const d of o.details) {
@@ -14484,51 +14485,51 @@ category('rooms', 'Rooms: old house', 'tile');
 roomSet('rosepaper', 'faded rose wallpaper room', {
   top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], stainc: 'q2', crackc: 'q1', wornc: 't3',
   wall: (c) => { c.fill('q3'); const p = wrap(c); for (const [x, y] of [[1, 1], [9, 1], [5, 5], [13, 5], [1, 9], [9, 9], [5, 13], [13, 13]]) { p(x + 1, y, 'q2'); p(x, y + 1, 'q2'); p(x + 1, y + 1, 'q1'); p(x + 2, y + 1, 'q2'); p(x + 1, y + 2, 'q2'); p(x + 3, y + 2, 'v2'); p(x + 2, y + 3, 'v2'); } c.speck(5, 'h3'); },
-  details: ['window', 'window-night', 'door', 'portrait', 'lamp', 'stain', ['peeling', 'peeling torn wallpaper plaster', (c) => { c.stamp(8, 0, ['kkkkkk.', 'jkkkkkk', '.jkkkkk', '.jkkkk.', '..jkkk.', '..jckk.', '...cck.', '...ccc.', '....cc.']).px(4, 12, 'h2').px(5, 12, 'h2').px(4, 13, 'h1'); }]],
-  floor: (c) => oldBoards(c, 'brown'),
+  details: ['window', 'door', 'portrait', 'lamp', 'stain', ['peeling', 'peeling torn wallpaper plaster', (c) => { c.stamp(8, 0, ['kkkkkk.', 'jkkkkkk', '.jkkkkk', '.jkkkk.', '..jkkk.', '..jckk.', '...cck.', '...ccc.', '....cc.']).px(4, 12, 'h2').px(5, 12, 'h2').px(4, 13, 'h1'); }]],
+  floor: (c) => oldBoards(c, 'board'),
   variants: ['worn', 'dark', 'rug', 'stained'],
 });
 roomSet('stripepaper', 'green striped wallpaper room', {
   top: ['i1', 'k', 't1'], stainc: 'v1', crackc: 'g4', rug: ['v1', 'v2', 'j2'], wornc: 't2',
   wall: (c) => { each((x, y) => c.px(x, y, ['v1', 'v1', 'v2', 'v2', 'v2', 'v3', 'v2', 'v2'][x % 8])); for (let y = 3; y < 16; y += 8) c.px(0, y, 'j2').px(8, y + 4, 'j2'); },
-  details: ['window', 'window-broken', 'door', 'picture', 'clock', 'crack', 'mirror'],
+  details: ['window', 'window-broken', 'door', 'picture', 'clock', 'mirror'],
   floor: (c) => turned('t', (c2) => oldBoards(c2, 'oak'))(c, 'stripepaper-floor'),
   variants: ['worn', 'dusty', 'rug', 'cracked'],
 });
 roomSet('damask', 'dark blue damask wallpaper room', {
   top: ['k', 'u1', 'g4'], fr: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', rug: ['u1', 'u2', 'j2'], wornc: 't2',
   wall: (c) => each((x, y) => { const s = Math.abs((x % 8) - 3.5) + Math.abs((y % 8) - 3.5); c.px(x, y, s === 3 || s === 4 ? 'u2' : s < 1.5 ? 'u2' : (x % 8 === 7 || x % 8 === 0) && (y % 8 === 7 || y % 8 === 0) ? 'p1' : 'u1'); }),
-  details: ['window-night', 'window-face', 'door', 'portrait', 'portrait-scratched', 'mirror-cracked', 'lamp'],
+  details: ['window-night', 'window-face', 'door', 'portrait-scratched', 'mirror-cracked', 'lamp'],
   floor: (c) => oldBoards(c, 'oak'),
   variants: ['dark', 'rug', 'bloody', 'dusty'],
 });
 roomSet('panel', 'dark wood panelling panelled room', {
   top: ['k', 'i1'], fr: ['k', 'i1', 't1'], door: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', wornc: 't3',
   wall: (c) => each((x, y) => { const a = x % 8; c.px(x, y, a === 0 || y === 0 ? 'i1' : (a === 2 && y >= 2 && y <= 13) || (y === 2 && a >= 2 && a <= 6) ? 'i1' : (a === 6 && y >= 3 && y <= 13) || (y === 13 && a >= 3 && a <= 6) ? 't2' : 't1'); }),
-  details: ['window', 'door', 'portrait', 'clock', 'candle', ['trophy', 'mounted deer head antlers trophy', (c) => ostamp(c, 3, 1, ['l..l..l..l', 'l.ll..ll.l', '.ll....ll.', '..lTTTTl..', '..TKTTKT..', '..TTTTTT..', '...TTTT...', '...TKKT...', '.CCCCCCCC.', '..CCCCCC..'])], ['secret', 'secret panel door ajar hidden', (c) => { c.rect(8, 1, 7, 15, 'k').rect(9, 2, 2, 14, 'i1').v(9, 2, 14, 't1').px(13, 6, 'g4').px(12, 9, 'g4'); }]],
+  details: ['window', 'door', 'portrait', 'candle', ['trophy', 'mounted deer head antlers trophy', (c) => ostamp(c, 3, 1, ['l..l..l..l', 'l.ll..ll.l', '.ll....ll.', '..lTTTTl..', '..TKTTKT..', '..TTTTTT..', '...TTTT...', '...TKKT...', '.CCCCCCCC.', '..CCCCCC..'])], ['secret', 'secret panel door ajar hidden', (c) => { c.rect(8, 1, 7, 15, 'k').rect(9, 2, 2, 14, 'i1').v(9, 2, 14, 't1').px(13, 6, 'g4').px(12, 9, 'g4'); }]],
   floor: (c) => each((x, y) => { const q = ((x >> 3) + (y >> 3)) % 2, k = (q ? x : y) % 4, e = (q ? y : x) % 8; c.px(x, y, k === 3 || e === 7 ? 'i1' : k === 0 ? 't2' : 't1'); }),
   variants: ['worn', 'dark', 'rug', 'hatch'],
 });
 roomSet('crackplaster', 'cracked plaster room', {
   top: ['g4', 'k', 'g3'], fr: ['i1', 't1', 't2'], stainc: 'h1', crackc: 'g4', wornc: 'h1', dustc: 'h2',
   wall: (c) => { c.fill('h2').speck(14, 'h1').speck(8, 'h3'); for (const [x, y] of [[2, 3], [3, 4], [3, 5], [4, 6], [5, 6], [11, 10], [12, 11], [12, 12], [13, 13], [10, 9], [14, 1], [15, 2]]) c.px(x, y, 'h1'); },
-  details: ['window-broken', 'window-boarded', 'door', 'crack', 'stain', 'switch', ['lath', 'hole broken plaster laths', (c) => { blob(c, 8, 7, 3, 'k', 5); for (let y = 5; y < 11; y += 2) for (let x = 4; x < 13; x++) if (c.get(x, y) === PAL.k) c.px(x, y, 't1'); c.px(4, 12, 'h3').px(6, 13, 'h3').px(10, 13, 'h3').px(11, 12, 'h1'); }]],
+  details: ['window-broken', 'window-boarded', 'door', 'crack', 'stain', ['lath', 'hole broken plaster laths', (c) => { blob(c, 8, 7, 3, 'k', 5); for (let y = 5; y < 11; y += 2) for (let x = 4; x < 13; x++) if (c.get(x, y) === PAL.k) c.px(x, y, 't1'); c.px(4, 12, 'h3').px(6, 13, 'h3').px(10, 13, 'h3').px(11, 12, 'h1'); }]],
   floor: (c) => oldBoards(c, 'ochre'),
   variants: ['dusty', 'cracked', 'dark', 'stained'],
 });
 roomSet('nursery', 'pale peeling nursery wallpaper room', {
   top: ['g4', 'k', 'g3'], fr: ['h1', 'h2', 'h3'], door: ['h1', 'h2', 'h3'], stainc: 'h1', crackc: 'g3', rug: ['u2', 'u3', 'h3'], wornc: 'h3',
   wall: (c) => { c.fill('h3'); for (const [x, y] of [[2, 2], [10, 2], [6, 10], [14, 10]]) c.px(x, y, 'q2').px((x + 15) & 15, y, 'q3').px((x + 1) & 15, y, 'q3').px(x, y - 1, 'q3').px(x, y + 1, 'q3'); for (const [x, y] of [[6, 4], [14, 4], [2, 12], [10, 12]]) c.px(x, y, 'u3').px(x + 1, y, 'u3').px(x, y + 1, 'u2'); for (const [x, y] of [[0, 7], [8, 15], [4, 7], [12, 15]]) c.px(x, y, 'v3'); c.stamp(11, 6, ['.kk.', 'kkkj', '.kj.']).stamp(2, 6, ['kk', 'kj']); },
-  details: ['window', 'window-night', 'door', 'crack', ['picture', 'picture animal lamb child frame', (c) => ostamp(c, 4, 3, ['llllllll', 'liiiiiil', 'liiWWiil', 'liWWWWKl', 'lfWfWfll', 'lfffffll', 'llllllll'])], ['handprints', 'small handprints hands child marks', (c) => { for (const [x, y] of [[3, 8], [9, 5]]) c.stamp(x, y, ['a.a.a', 'a.a.a', 'aaaa.', '.aaaa', '.aaa.']); }], ['scribble', 'crayon scribble drawing child scrawl', (c) => c.stamp(3, 5, ['..Z..Z....', '.Z.ZZ.Z...', '.Z....Z.hh', '..ZZZZ.h.h', '..Z..Z.hhh', '.Z....Z...', '....K.K...', '...K.K.K..'])]],
+  details: ['window', 'door', 'crack', ['picture', 'picture animal lamb child frame', (c) => ostamp(c, 4, 3, ['llllllll', 'liiiiiil', 'liiWWiil', 'liWWWWKl', 'lfWfWfll', 'lfffffll', 'llllllll'])], ['handprints', 'small handprints hands child marks', (c) => { for (const [x, y] of [[3, 8], [9, 5]]) c.stamp(x, y, ['a.a.a', 'a.a.a', 'aaaa.', '.aaaa', '.aaa.']); }], ['scribble', 'crayon scribble drawing child scrawl', (c) => c.stamp(3, 5, ['..Z..Z....', '.Z.ZZ.Z...', '.Z....Z.hh', '..ZZZZ.h.h', '..Z..Z.hhh', '.Z....Z...', '....K.K...', '...K.K.K..'])]],
   floor: (c) => oldBoards(c, 'bone'),
   variants: ['worn', 'rug', 'dark', ['blocks', 'toy blocks scattered', (c) => { ostamp(c, 3, 4, ['aa', 'ab']); ostamp(c, 9, 9, ['hh', 'hi']); ostamp(c, 11, 3, ['ee', 'ef']); }]],
 });
 roomSet('bathroom', 'bathroom white tiles', {
   top: ['g4', 'k', 'g3'], fr: ['g3', 'g2', 'g1'], door: ['h1', 'h2', 'h3'], stainc: 'v2', crackc: 'g4', wornc: 'g2',
   wall: (c) => { each((x, y) => c.px(x, y, x % 4 === 3 || y % 4 === 3 ? 'g2' : x % 4 === 0 && y % 4 === 0 ? 'w0' : 'g1')); c.px(5, 6, 'u3').px(13, 2, 'u3').px(10, 13, 'u3'); },
-  details: ['window', 'door', 'mirror', 'mirror-cracked', 'stain', 'pipe', ['towel', 'towel rail hanging towel', (c) => ostamp(c, 3, 4, ['xxxxxxxxxx', '..iiiiii..', '..iiiiii..', '..iWWWWi..', '..iiiiii..', '..iiiiii..', '..hhhhhh..'])], ['cabinet', 'medicine cabinet mirror cupboard', (c) => ostamp(c, 3, 3, ['wwwwwwwwww', 'wiiiiXiiiw', 'wiWiiXiiiw', 'wiiWiXiiix', 'wiiiiXiWix', 'wiiiixxiix', 'wxxxxxxxxx'])]],
+  details: ['window', 'door', 'mirror', 'stain', 'pipe', ['towel', 'towel rail hanging towel', (c) => ostamp(c, 3, 4, ['xxxxxxxxxx', '..iiiiii..', '..iiiiii..', '..iWWWWi..', '..iiiiii..', '..iiiiii..', '..hhhhhh..'])]],
   floor: (c) => each((x, y) => c.px(x, y, ((x >> 1) + (y >> 1)) % 2 ? 'u3' : 'g3')),
-  variants: ['drain', 'stained', 'bloody', 'puddle', 'cracked'],
+  variants: ['drain', 'stained', 'bloody', 'cracked'],
 });
 const BOOKC = ['q1', 'u2', 'v1', 'h1', 'z1', 't2', 'u1', 'v2', 'g3', 'j2', 't1', 'q2'];
 const books = (c, gaps) => {
@@ -14543,7 +14544,7 @@ const books = (c, gaps) => {
 roomSet('library', 'library walls of books bookshelf', {
   top: ['k', 'i1'], fr: ['k', 'i1', 't1'], door: ['k', 'i1', 't1'], wornc: 't3',
   wall: (c) => books(c),
-  details: ['window-night', 'door', 'lamp',
+  details: ['window-night', 'door',
     ['gap', 'missing books gap leaning book', (c) => { c.rect(5, 5, 6, 4, 'k').rect(9, 6, 1, 3, 'q1').px(8, 8, 'q1').px(8, 7, 'q1').px(7, 8, 'q1').px(5, 8, 'h2').px(6, 8, 'h2'); }],
     ['skull', 'skull on shelf books', (c) => { c.rect(4, 5, 8, 4, 'k'); c.stamp(6, 5, ['.ll.', 'llll', 'KlKl', '.ll.']); }],
     ['ladder', 'library ladder leaning', (c) => { for (let y = 0; y < 16; y++) { const x = 4 + (y >> 2); c.px(x, y, 't3').px(x + 5, y, 't3').px(x - 1, y, 'k').px(x + 6, y, 'k'); if (y % 3 === 1) c.h(x + 1, y, 4, 't2'); } }],
@@ -14554,7 +14555,7 @@ roomSet('library', 'library walls of books bookshelf', {
 roomSet('study', 'dark green study room', {
   top: ['k', 'i1'], fr: ['k', 'i1', 't1'], stainc: 'g4', crackc: 'k', rug: ['z1', 'r1', 'j2'], wornc: 't3',
   wall: (c) => { c.fill('v1'); each((x, y) => { if (x % 8 === 3) c.px(x, y, 'g4'); if (x % 8 === 7 && y % 4 === 1) c.px(x, y, 'j2'); }); },
-  details: ['window', 'door', 'portrait', 'picture', 'clock', 'lamp',
+  details: ['window', 'door', 'portrait', 'lamp',
     ['map', 'old map chart pinned', (c) => ostamp(c, 2, 3, ['llllllllllll', 'lkkllllkkkll', 'lkkklllkkkkl', 'llkklllllkkl', 'llkllZllkkll', 'lllllllkklll', 'llllllllllll'])],
     ['safe', 'wall safe hidden strongbox', (c) => ostamp(c, 4, 4, ['XXXXXXXX', 'XxxxxxxV', 'XxxKKxxV', 'XxKwwKnV', 'XxxKKxxV', 'XxxxxxxV', 'XVVVVVVV'])]],
   floor: (c) => each((x, y) => { const d = (x + y) % 8, e = (x - y + 16) % 8, q = (x >> 2) % 2; c.px(x, y, (q ? d : e) === 0 ? 'i1' : x % 4 === 0 ? 'i1' : (q ? d : e) < 4 ? 't1' : 't2'); }),
@@ -14563,7 +14564,7 @@ roomSet('study', 'dark green study room', {
 roomSet('scullery', 'old kitchen scullery cream tiles', {
   top: ['g4', 'k', 'g3'], fr: ['h1', 'h2', 'h3'], door: ['v1', 'v2', 'v3'], stainc: 'h1', crackc: 'g4', wornc: 'h3',
   wall: (c) => { each((x, y) => c.px(x, y, y % 8 === 7 ? 'h1' : (x + (y >> 3) * 4) % 8 === 7 ? 'h1' : y % 8 === 0 ? 'h3' : 'h2')); c.px(3, 4, 'h1').px(12, 11, 'h1').px(9, 3, 'h3'); },
-  details: ['window', 'door', 'clock', 'stain', 'crack',
+  details: ['window', 'door', 'stain',
     ['pots', 'hanging pots pans rail', (c) => ostamp(c, 1, 2, ['XXXXXXXXXXXXXX', '.x....x.....x.', '.x....x.....x.', 'VVV..DDDD..xxx', 'VVV.DDFDDD.xxx', 'VVV.DDDDDD.xxx', '.V...DDDD...x.'])],
     ['shelf', 'shelf jars preserves tins', (c) => ostamp(c, 2, 3, ['.ll..kk..ll.', '.Zo.dddd.no.', '.Zo.deed.no.', '.Zo.dddd.no.', 'TTTTTTTTTTTT', '.C........C.'])],
     ['knives', 'knife rack knives cleaver', (c) => ostamp(c, 2, 4, ['CCCCCCCCCCCC', '.m..m..m.mm.', '.w..w..w.ww.', '.w..w..w.ww.', '.w..w....ww.', '.w.......w..'])]],
@@ -14575,49 +14576,49 @@ category('rooms2', 'Rooms: attic, cellar & yard', 'tile');
 roomSet('attic', 'attic bare boards rafters', {
   top: ['k', 'i1'], fr: ['k', 'i1', 't1'], stainc: 'k', crackc: 'y3', dustc: 'h1', wornc: 't3',
   wall: (c) => { each((x, y) => c.px(x, y, x % 4 === 3 ? 'k' : (x * 7 + y * 3) % 11 === 0 ? 't1' : 'i1')); c.rect(0, 0, 16, 3, 't1').h(0, 0, 16, 't2').h(0, 3, 16, 'k'); for (let x = 2; x < 16; x += 8) c.px(x, 1, 'k'); },
-  details: ['window-round', 'cobweb', 'hooks', 'stain',
+  details: ['window-round', 'cobweb', 'hooks',
     ['bulb', 'bare light bulb hanging wire', (c) => { c.v(7, 0, 6, 'k'); c.px(5, 6, 'j2').px(10, 8, 'j2').px(5, 10, 'j2').px(8, 11, 'j2'); ostamp(c, 7, 6, ['xx', 'EE', 'EY', 'EE']); }],
     ['gap', 'gap in boards light shining through', (c) => { c.v(7, 4, 12, 'y3').v(6, 7, 5, 'j2').px(8, 9, 'j2').px(8, 10, 'j2'); }],
     ['brace', 'rafter beam diagonal brace', (c) => { for (let i = 0; i < 16; i++) c.px(i, 15 - i, 't2').px(i, 16 - i, 't1').px(i, 17 - i, 't1').px(i, 18 - i, 'k'); }]],
-  floor: (c) => { oldBoards(c, 'ochre'); dim(c); for (let y = 1; y < 16; y += 4) c.px((y * 5) % 16, y, 'k').px((y * 5 + 9) % 16, y + 1, 'k'); },
+  floor: (c) => { oldBoards(c, 'oak'); for (let y = 1; y < 16; y += 4) c.px((y * 5) % 16, y, 'k').px((y * 5 + 9) % 16, y + 1, 'k'); },
   variants: ['dusty', 'hatch', 'dark', ['hole', 'hole broken boards', (c) => { blob(c, 8, 8, 3, 'k', 3); c.px(4, 7, 't3').px(12, 9, 't3').px(8, 4, 't3').px(7, 12, 't3'); }]],
 });
 roomSet('cabin', 'log cabin walls plank floor', {
   top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 'd2'], stainc: 'i1', crackc: 'k', rug: ['t1', 'h1', 'h3'], wornc: 't3',
   wall: (c) => { each((x, y) => c.px(x, y, ['d2', 't2', 't1', 'i1'][y % 4])); for (let y = 0; y < 16; y += 4) { const x = (y * 5 + 3) % 16; c.px(x, y + 1, 't1').px((x + 1) & 15, y + 1, 't1').px((x + 7) & 15, y + 2, 'i1').px((x + 11) & 15, y, 't2'); } },
-  details: ['window', 'window-night', 'door', 'hooks', 'shelf',
+  details: ['window', 'door', 'shelf',
     ['antlers', 'antlers mounted skull trophy', (c) => ostamp(c, 3, 3, ['l..l..l..l', 'l.ll..ll.l', '.ll....ll.', '..llllll..', '...lKKl...', '...llll...', '....ll....'])],
     ['lantern', 'oil lantern hanging lamp', (c) => { c.px(4, 6, 'j2').px(11, 6, 'j2').px(5, 10, 'j2').px(10, 10, 'j2'); ostamp(c, 6, 2, ['.XX.', '.X..', 'XXXX', 'XEEX', 'XYEX', 'XEEX', 'XXXX']); }],
     ['rifle', 'rifle gun rack hunting', (c) => ostamp(c, 1, 5, ['.X...........X', 'XXXXXXXXXXTTTT', '.X......X.TTTC', '.X...........X'])]],
-  floor: (c) => turned('t', (c2) => oldBoards(c2, 'brown'))(c, 'cabin-floor'),
+  floor: (c) => turned('t', (c2) => oldBoards(c2, 'board'))(c, 'cabin-floor'),
   variants: ['worn', 'rug', 'hatch', 'bloody'],
 });
 roomSet('basement', 'basement concrete damp', {
   top: ['k', 'g4'], fr: ['k', 'g4', 'g3'], door: ['g4', 'g3', 'g2'], stainc: 'g4', crackc: 'k', wornc: 'g3',
   wall: (c) => { c.fill('g3').speck(16, 'g4').speck(6, 'g2'); for (let x = 0; x < 16; x += 2) c.px(x, 7, 'g4').px(x + 1, 15, 'g4'); c.px(3, 3, 'k').px(11, 11, 'k').px(11, 3, 'k').px(3, 11, 'k'); },
-  details: ['pipe', 'stain', 'crack', 'vent', 'fusebox', 'door', 'window-bars',
+  details: ['pipe', 'crack', 'fusebox', 'door', 'window-bars',
     ['mould', 'black mould damp patch', (c) => { blob(c, 5, 11, 3, 'v1', 5); c.speck(8, 'k', 2, 8, 8, 7).speck(5, 'v2', 2, 8, 8, 7); }]],
   floor: (c) => { c.fill('g4').speck(18, 'g3').speck(8, 'k'); c.px(4, 5, 'u1').px(5, 5, 'u1').px(11, 12, 'u1'); },
-  variants: ['puddle', 'drain', 'cracked', 'bloody', 'stained'],
+  variants: ['puddle', 'drain', 'cracked', 'bloody'],
 });
 roomSet('cellar', 'cellar brick walls dirt floor', {
   top: ['k', 'i1'], fr: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', wornc: 't2',
   wall: (c) => { each((x, y) => { const off = (y >> 2) % 2 ? 4 : 0, bx = (x + off) % 8; c.px(x, y, y % 4 === 3 || bx === 7 ? 'i1' : y % 4 === 0 ? 'r1' : ((x + off) >> 3) % 2 === (y >> 2) % 3 ? 'r1' : 'z1'); }); c.speck(6, 't1'); },
-  details: ['crack', 'stain', 'pipe', 'candle', 'door', 'cobweb',
+  details: ['crack', 'candle', 'door', 'cobweb',
     ['arch', 'bricked up arch doorway sealed', (c) => { c.rect(3, 3, 10, 13, 'k').rect(4, 4, 8, 12, 'g3'); for (let y = 4; y < 16; y++) for (let x = 4; x < 12; x++) if (y % 3 === 0 || (x + (y / 3 | 0) * 2) % 4 === 0) c.px(x, y, 'g4'); c.px(3, 3, 'r1').px(12, 3, 'r1'); }],
     ['chains', 'chains shackles manacles hanging', (c) => { for (const x of [4, 11]) { ostamp(c, x, 1, ['X', 'x', 'X', 'x', 'X', 'x', 'X']); ostamp(c, x - 1, 9, ['xxx', 'x.x', 'xxx']); } }]],
   floor: (c) => { c.fill('t1').speck(20, 'i1').speck(10, 't2').speck(3, 'g3'); },
-  variants: ['puddle', 'dark', 'hatch', ['mound', 'disturbed earth mound dug', (c) => { blob(c, 8, 8, 4, 't2', 3); c.speck(10, 't1', 4, 5, 8, 7).speck(5, 't3', 5, 5, 6, 4); }], ['bones', 'bones in the dirt', (c) => { c.stamp(3, 5, ['l.....l', '.lllll.', 'l.....l']).stamp(8, 10, ['.ll.', 'lKlK', '.ll.']); }]],
+  variants: ['puddle', 'hatch', ['mound', 'disturbed earth mound dug', (c) => { blob(c, 8, 8, 4, 't2', 3); c.speck(10, 't1', 4, 5, 8, 7).speck(5, 't3', 5, 5, 6, 4); }], ['bones', 'bones in the dirt', (c) => { c.stamp(3, 5, ['l.....l', '.lllll.', 'l.....l']).stamp(8, 10, ['.ll.', 'lKlK', '.ll.']); }]],
 });
 roomSet('barn', 'barn rough planks straw', {
   top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 'd2'], stainc: 'i1', crackc: 'y3',
   wall: (c) => { const w = [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0]; each((x, y) => c.px(x, y, x === 3 || x === 7 || x === 10 || x === 13 ? 'k' : w[x] ? 't1' : 't2')); for (const [x, y] of [[1, 4], [5, 11], [9, 2], [14, 8], [11, 13]]) c.px(x, y, 'i1').px(x, y + 1, 'i1'); c.px(0, 9, 't3').px(8, 6, 't3').px(15, 2, 't3'); },
-  details: ['window', 'door', 'cobweb',
+  details: ['window', 'door',
     ['tools', 'tools hanging scythe pitchfork', (c) => { ostamp(c, 2, 2, ['.xxxx', 'x...T', '....T', '....T', '....T', '....T', '....T', '....T', '....T', '....T', '....T']); ostamp(c, 9, 2, ['x.x.x', 'x.x.x', 'xxxxx', '..T..', '..T..', '..T..', '..T..', '..T..', '..T..', '..T..', '..T..']); }],
     ['lantern', 'oil lantern hanging lamp', (c) => { c.px(4, 6, 'j2').px(11, 6, 'j2').px(5, 10, 'j2').px(10, 10, 'j2'); ostamp(c, 6, 2, ['.XX.', '.X..', 'XXXX', 'XEEX', 'XYEX', 'XEEX', 'XXXX']); }],
     ['harness', 'horse harness collar tack', (c) => ostamp(c, 4, 2, ['..x.....', '.CCCCCC.', 'CC....CC', 'C......C', 'C......C', 'CC....CC', '.CCCCCC.', '..C..C..', '..C..C..', '..x..x..'])],
     ['gap', 'gap in planks light through', (c) => { c.v(7, 2, 12, 'y3').px(6, 6, 'j2').px(8, 9, 'j2').v(10, 9, 5, 'j2'); }]],
-  floor: (c) => { c.fill('t1'); for (let i = 0; i < 26; i++) { const x = c.int(16), y = c.int(16), d = c.int(2) ? 1 : -1, col = i % 3 ? 'j2' : 'h2'; c.px(x, y, col).px((x + 1) & 15, (y + d) & 15, col).px((x + 2) & 15, (y + d) & 15, col); } c.speck(8, 'i1'); },
+  floor: (c) => { c.fill('t1'); for (let i = 0; i < 18; i++) { const x = c.int(16), y = c.int(16), d = c.int(2) ? 1 : -1, col = i % 3 ? 'h1' : 'j2'; c.px(x, y, col).px((x + 1) & 15, (y + d) & 15, col).px((x + 2) & 15, (y + d) & 15, col); } c.speck(8, 'i1'); },
   variants: ['dark', 'bloody', 'hatch', ['bare', 'bare earth less straw', (c) => { blob(c, 8, 8, 5, 't1', 4); c.speck(8, 'i1', 3, 3, 10, 10); }]],
 });
 roomSet('greenhouse', 'greenhouse glass panes stone path', {
@@ -14628,8 +14629,8 @@ roomSet('greenhouse', 'greenhouse glass panes stone path', {
     ['vine', 'ivy vine creeping leaves', (c) => { let x = 4; for (let y = 15; y >= 0; y--) { c.px(x, y, 'v1'); if (y % 3 === 0) c.px(x + 1, y, 'v2').px(x + 2, y - 1, 'v2'); if (y % 3 === 1) c.px(x - 1, y, 'v2').px(x - 2, y, 'n1'); x += [1, 0, 1, 0, -1, 1, 0, 1][y % 8]; } }],
     ['handprint', 'handprint on fogged glass condensation', (c) => { c.rect(2, 2, 6, 6, 'u3').rect(10, 2, 5, 6, 'u3').rect(2, 10, 6, 5, 'u3'); c.stamp(3, 2, ['c.c.c', 'c.c.c', 'c1c1c', '.111c', '.111.']).v(11, 3, 5, 'c1').v(13, 2, 3, 'c1'); }],
     ['shelf', 'shelf flower pots dead plants', (c) => ostamp(c, 1, 5, ['.d....e...j...', 'd.d..e.e..j...', 'DDD..DDD..DDD.', '.D....D....D..', 'TTTTTTTTTTTTTT', '.C..........C.'])]],
-  floor: (c) => { slabs(c, FLAGS, 'v1', 'g2', 'g1', 'g3'); c.px(7, 5, 'v2').px(5, 11, 'v2').px(9, 12, 'v2'); },
-  variants: ['cracked', 'puddle', 'dark',
+  floor: (c) => { slabs(c, FLAGS, 'v1', 'g3', 'g2', 'g4'); c.px(7, 5, 'v2').px(5, 11, 'v2').px(9, 12, 'v2'); },
+  variants: ['cracked', 'puddle',
     ['weeds', 'weeds overgrown moss', (c) => { c.speck(14, 'v2').speck(8, 'v1'); c.stamp(4, 6, ['e.e', '.e.', 'ede']).stamp(10, 10, ['.e.', 'ede']); }],
     ['soil', 'spilled soil broken pot', (c) => { blob(c, 8, 9, 3, 't1', 4); ostamp(c, 4, 4, ['DD.', 'DDD', '.DD']); c.px(9, 8, 'v2').px(10, 7, 'v2'); }]],
 });
@@ -14638,7 +14639,7 @@ category('rooms3', 'Rooms: institutions', 'tile');
 roomSet('hotel', 'hotel corridor wallpaper carpet', {
   top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 'd2'], stainc: 'z1', crackc: 'k', curt: ['u1', 'u2', 'u3'],
   wall: (c) => { c.fill('q1'); each((x, y) => { if (x % 8 === 0) c.px(x, y, 'z1'); }); for (const [x, y] of [[4, 2], [12, 6], [4, 10], [12, 14]]) c.px(x, y, 'j2').px(x - 1, (y + 1) & 15, 'j2').px(x + 1, (y + 1) & 15, 'j2').px(x, (y + 2) & 15, 'h1'); },
-  details: ['lamp', 'picture', 'mirror', 'stain', 'window-night',
+  details: ['lamp', 'picture', 'stain',
     ['door', 'hotel room door number', (c, o) => { WD.door(c, o); c.rect(7, 4, 2, 2, 'j2').px(7, 5, 'k'); }],
     ['door-ajar', 'hotel room door ajar open dark', (c, o) => { c.rect(2, 0, 12, 16, 'k').v(3, 1, 15, 't2').v(12, 1, 15, 't1').rect(4, 2, 3, 14, 't1').v(4, 2, 14, 't2').px(6, 8, 'j2'); }],
     ['lift', 'lift elevator doors brass', (c) => { c.rect(2, 1, 12, 15, 'k').rect(3, 2, 5, 14, 'h1').rect(8, 2, 5, 14, 'h1').v(3, 2, 14, 'j2').v(8, 2, 14, 'j2').v(7, 2, 14, 'g4').rect(6, 0, 4, 1, 'j2').px(14, 8, 'j2').px(14, 9, 'k'); for (let y = 4; y < 16; y += 4) c.h(4, y, 3, 'j2').h(9, y, 3, 'j2'); }]],
@@ -14653,77 +14654,75 @@ roomSet('theatre', 'theatre red curtain stage', {
     ['gap', 'curtain parted gap backstage dark', (c) => { c.rect(5, 0, 6, 16, 'k'); for (let y = 0; y < 16; y++) { const w = y < 6 ? 0 : y < 11 ? 1 : 2; c.rect(5, y, 2 - Math.min(2, w), 1, 'r1').rect(9 + Math.min(2, w), y, 2 - Math.min(2, w), 1, 'r1'); } c.px(8, 7, 'h3').px(8, 8, 'k'); }],
     ['masks', 'theatre masks comedy tragedy', (c) => { ostamp(c, 2, 3, ['lllll', 'lKlKl', 'lllll', 'lKKKl', '.lKl.', '.lll.']); ostamp(c, 9, 6, ['kkkkk', 'kKkKk', 'kkkkk', 'kkKkk', '.KkK.', '.kkk.']); }],
     ['rope', 'ropes sandbag rigging', (c) => { c.v(4, 0, 16, 'h2').v(5, 0, 16, 'h1').v(10, 0, 9, 'h2'); ostamp(c, 9, 9, ['.k.', 'kkk', 'kjk', 'kkk', '.j.']); }],
-    ['tassel', 'gold tassel tie back cord', (c) => { for (let i = 0; i < 6; i++) c.px(3 + i, 4 + (i > 2 ? 5 - i : i), 'j2').px(12 - i, 4 + (i > 2 ? 5 - i : i), 'j2'); ostamp(c, 7, 6, ['nn', 'nn', 'jn', 'nj', 'jn']); }],
     ['lights', 'dressing room mirror bulbs', (c) => ostamp(c, 2, 2, ['EnEnEnEnEnEn', 'niiiiiiiiiiE', 'EiWiiiiiiiin', 'niiWiiiiiiiE', 'EiiiiiiiWiin', 'niiiiiiiiiiE', 'EnEnEnEnEnEn'])]],
   floor: (c) => oldBoards(c, 'stage'),
-  variants: ['worn', 'hatch', 'dark', ['mark', 'stage mark cross tape', (c) => { for (let i = 0; i < 5; i++) c.px(6 + i, 6 + i, 'h3').px(10 - i, 6 + i, 'h3'); }], ['spot', 'spotlight pool of light', (c) => { each((x, y) => { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6 && (d < 5 || (x + y) % 2)) { const k = KEY[c.get(x, y)]; c.px(x, y, k === 'd2' ? 't3' : k === 't3' ? 'h3' : k === 't1' ? 't2' : k); } }); }]],
+  variants: ['hatch', 'dark', ['mark', 'stage mark cross tape', (c) => { for (let i = 0; i < 5; i++) c.px(6 + i, 6 + i, 'h3').px(10 - i, 6 + i, 'h3'); }], ['spot', 'spotlight pool of light', (c) => { each((x, y) => { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6 && (d < 5 || (x + y) % 2)) { const k = KEY[c.get(x, y)]; c.px(x, y, k === 't2' ? 'd2' : k === 'd2' ? 't3' : k === 'i1' ? 't1' : k); } }); }]],
 });
 roomSet('chapel', 'chapel stone walls flagstones', {
   top: ['k', 'g4'], fr: ['k', 'g4', 'g3'], door: ['k', 'i1', 't1'], stainc: 'g4', crackc: 'k', rug: ['z1', 'r1', 'j2'], wornc: 'g2',
   wall: (c) => { each((x, y) => { const off = (y >> 2) % 2 ? 4 : 0, bx = (x + off) % 8; c.px(x, y, y % 4 === 3 || bx === 7 ? 'g4' : y % 4 === 0 ? 'g2' : 'g3'); }); c.speck(5, 'g4').px(2, 6, 'v1').px(13, 13, 'v1'); },
-  details: ['cross', 'candle', 'crack',
+  details: ['cross', 'candle',
     ['window', 'stained glass window arch', (c) => { c.rect(4, 2, 8, 13, 'k').h(5, 1, 6, 'k').rect(5, 3, 6, 11, 'u2').h(6, 2, 4, 'u2'); c.stamp(5, 3, ['aahhaa', 'ahnnha', 'hhnnhh', 'ddhhdd', 'dhaahd', 'hhaahh', 'aahhdd', 'ahddha', 'hhddhh', 'ddhhaa', 'dahhad']); c.v(7, 2, 12, 'k').h(5, 6, 6, 'k').h(5, 10, 6, 'k').px(8, 2, 'k'); }],
     ['door', 'arched church door iron studs', (c) => { c.rect(3, 2, 10, 14, 'k').h(4, 1, 8, 'k').rect(4, 3, 8, 13, 't1').h(5, 2, 6, 't1').v(7, 2, 14, 'i1').v(4, 3, 13, 't2'); for (let y = 5; y < 16; y += 4) c.h(4, y, 8, 'g4').px(5, y, 'g2').px(10, y, 'g2'); c.px(9, 9, 'j2'); }],
     ['plaque', 'memorial plaque inscription stone', (c) => ostamp(c, 3, 4, ['wwwwwwwwww', 'wxXXxXXXxX', 'wxxxxxxxxX', 'wxXXXXxXxX', 'wxxxxxxxxX', 'wxXXxXXxxX', 'XXXXXXXXXX'])],
     ['niche', 'niche alcove statue saint', (c) => { c.rect(4, 3, 8, 12, 'k').h(5, 2, 6, 'k'); c.stamp(6, 5, ['.ww.', '.ww.', 'xwwx', 'xwwx', '.ww.', '.ww.', '.xx.', 'xxxx', 'XXXX']); }]],
   floor: (c) => slabs(c, FLAGS, 'k', 'g3', 'g2', 'g4'),
-  variants: ['cracked', 'rug', 'bloody', 'dark', ['grave', 'grave slab tomb inscription cross', (c) => { c.rect(2, 1, 12, 14, 'k').rect(3, 2, 10, 12, 'g2').h(3, 2, 10, 'g1').v(12, 3, 11, 'g3'); c.stamp(6, 4, ['.X.', 'XXX', '.X.', '.X.']).h(5, 10, 6, 'g3').h(6, 12, 4, 'g3'); }]],
+  variants: ['cracked', 'rug', 'bloody', ['grave', 'grave slab tomb inscription cross', (c) => { c.rect(2, 1, 12, 14, 'k').rect(3, 2, 10, 12, 'g2').h(3, 2, 10, 'g1').v(12, 3, 11, 'g3'); c.stamp(6, 4, ['.X.', 'XXX', '.X.', '.X.']).h(5, 10, 6, 'g3').h(6, 12, 4, 'g3'); }]],
 });
 roomSet('lab', 'laboratory metal walls grated floor', {
   top: ['k', 'g4'], fr: ['k', 'g4', 'g2'], door: ['g4', 'g3', 'g2'], stainc: 't2', crackc: 'k',
   wall: (c) => { each((x, y) => c.px(x, y, x % 8 === 0 || y % 8 === 0 ? 'g4' : x % 8 === 1 || y % 8 === 1 ? 'g2' : 'g3')); for (const [x, y] of [[2, 2], [6, 2], [2, 6], [6, 6]]) c.px(x, y, 'g1').px(x + 8, y, 'g1').px(x, y + 8, 'g1').px(x + 8, y + 8, 'g1'); },
-  details: ['vent', 'pipe', 'stain', 'window-bars',
+  details: ['vent', 'pipe',
     ['door', 'iron door porthole bulkhead', (c) => { c.rect(2, 0, 12, 16, 'k').rect(3, 1, 10, 15, 'g3').v(3, 1, 15, 'g2').v(12, 1, 15, 'g4').rect(6, 3, 4, 4, 'k').rect(7, 4, 2, 2, 'c1').px(7, 4, 'c2'); for (const y of [2, 8, 14]) c.px(4, y, 'g1').px(11, y, 'g1'); c.rect(9, 9, 2, 3, 'g1').px(10, 11, 'k').h(4, 12, 4, 'j2').h(4, 13, 4, 'k'); }],
     ['screen', 'monitor screen green readout', (c) => ostamp(c, 3, 3, ['XXXXXXXXXX', 'XKKKKKKKKV', 'XK2K22K2KV', 'XKKKKKKKKV', 'XK222K22KV', 'XKKKK2KKKV', 'XK2KKKKKKV', 'XVVVVVVVVV', '.X.Z.n.xX.'])],
     ['gauges', 'gauges dials pressure meters', (c) => { for (const [x, y, n] of [[2, 3, 'Z'], [9, 3, 'K'], [5, 9, 'K']]) ostamp(c, x, y, ['.xx.', 'xllx', 'xl' + n + 'x', '.xx.']); c.h(6, 5, 3, 'g4').v(7, 7, 2, 'g4'); }],
     ['lever', 'big lever switch power', (c) => { ostamp(c, 5, 3, ['XXXXXX', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XVVVVV']); ostamp(c, 7, 2, ['ZZ', 'ZZ', 'xx', 'xx', 'xx']); c.px(6, 12, 'n2').px(9, 12, 'r1'); }]],
   floor: (c) => each((x, y) => c.px(x, y, x % 4 < 2 && y % 4 < 2 ? 'k' : y % 4 === 2 || x % 4 === 2 ? 'g3' : 'g4')),
-  variants: ['dark', 'bloody', 'hatch',
+  variants: ['bloody', 'hatch',
     ['plate', 'metal floor plate rivets', (c) => { c.rect(0, 0, 16, 16, 'g3').h(0, 0, 16, 'g2').v(0, 0, 16, 'g2').h(0, 15, 16, 'g4').v(15, 0, 16, 'g4'); for (const [x, y] of [[2, 2], [13, 2], [2, 13], [13, 13]]) c.px(x, y, 'g1').px(x, y + 1, 'g4'); for (let i = 4; i < 12; i += 2) c.px(i, i, 'g2').px(i + 1, i, 'g4').px(15 - i, i, 'g2'); }],
     ['spill', 'chemical spill green slime', (c) => { blob(c, 8, 8, 3, 'n1', 4); c.px(7, 7, 'n2').px(8, 7, 'n2').px(9, 9, 'n3').px(12, 12, 'n1'); }]],
 });
 roomSet('asylum', 'asylum padded cell walls checker floor', {
   top: ['g4', 'k', 'g3'], fr: ['g4', 'g3', 'g2'], door: ['g4', 'g3', 'g2'], stainc: 'h1', crackc: 'g4',
   wall: (c) => each((x, y) => { const s = Math.abs((x % 8) - 3.5) + Math.abs((y % 8) - 3.5); c.px(x, y, s > 3.4 ? 'h1' : s < 1.6 ? 'h3' : 'h2'); }),
-  details: ['window-bars', 'stain', 'vent',
+  details: ['window-bars', 'stain',
     ['door', 'cell door hatch steel', (c) => { c.rect(2, 0, 12, 16, 'k').rect(3, 1, 10, 15, 'g3').v(3, 1, 15, 'g2').v(12, 1, 15, 'g4').rect(5, 3, 6, 3, 'k').v(7, 3, 3, 'g2').v(9, 3, 3, 'g2').rect(5, 11, 6, 2, 'g4').h(5, 11, 6, 'g2').px(11, 8, 'g1').px(11, 9, 'k'); for (const y of [2, 14]) c.px(4, y, 'g1').px(11, y, 'g1'); }],
     ['tally', 'tally marks scratched counting days', (c) => { const g = ['V.V.V.V', 'V.V.VVV', 'V.VVV.V', 'VVV.V.V']; c.stamp(1, 2, g).stamp(8, 2, g).stamp(1, 9, g).v(9, 9, 4, 'g4').v(11, 9, 4, 'g4'); }],
-    ['torn', 'torn padding ripped stuffing', (c) => { c.stamp(4, 3, ['..K....', '.KKK...', '.KwKK..', 'KKwwK..', '.KKwKK.', '..KKwK.', '...KKK.', '....K..']); c.px(7, 12, 'g1').px(8, 13, 'g1').px(6, 14, 'w0'); }],
     ['writing', 'writing on wall scrawled blood words', (c) => c.stamp(1, 4, ['o.o.ooo.o..oo.', 'o.o.o...o..o.o', 'ooo.oo..o..oo.', 'o.o.o...o..o..', 'o.o.ooo.oo.o..', '..............', '...o.o.ooo....', '...ooo.o......', '...o.o.ooo....'])],
     ['restraint', 'wall restraint straps ring', (c) => { ostamp(c, 6, 2, ['.xx.', 'x..x', 'x..x', '.xx.']); c.v(7, 6, 6, 't1').v(8, 6, 6, 't2'); ostamp(c, 6, 11, ['TTTT', 'TxxT', 'TTTT']); }]],
   floor: (c) => each((x, y) => c.px(x, y, ((x >> 2) + (y >> 2)) % 2 ? 'g4' : (x % 4 === 0 || y % 4 === 0) ? 'h3' : 'h2')),
-  variants: ['bloody', 'stained', 'drain', 'cracked', 'dark'],
+  variants: ['bloody', 'stained', 'drain', 'cracked'],
 });
 roomSet('morgue', 'morgue steel walls pale tiles', {
   top: ['k', 'g4'], fr: ['g4', 'g3', 'g2'], door: ['g4', 'g3', 'g2'], stainc: 'h1', crackc: 'g4',
   wall: (c) => { each((x, y) => c.px(x, y, x % 8 === 0 ? 'g3' : x % 8 === 1 ? 'g1' : (y * 5 + x * 3) % 7 === 0 ? 'g2' : 'u3')); c.h(0, 0, 16, 'g3'); for (let x = 0; x < 16; x += 8) c.px(x + 1, 0, 'g2').px(x + 4, 1, 'g1'); },
-  details: ['vent', 'clock', 'switch', 'stain', 'door',
+  details: ['vent', 'clock', 'door',
     ['drawers', 'body drawers cold chamber lockers', (c) => { c.rect(1, 1, 14, 14, 'k'); for (const [x, y] of [[2, 2], [8, 2], [2, 8], [8, 8]]) c.rect(x, y, 6, 6, 'g2').rect(x, y, 5, 5, 'g1').rect(x + 1, y + 1, 4, 4, 'u3').h(x + 2, y + 3, 2, 'g4').px(x + 1, y + 1, 'h3'); }],
     ['drawer-open', 'body drawer open feet toe tag corpse', (c) => { c.rect(1, 1, 14, 14, 'k'); for (const [x, y] of [[2, 2], [8, 2], [8, 8]]) c.rect(x, y, 6, 6, 'g2').rect(x, y, 5, 5, 'g1').rect(x + 1, y + 1, 4, 4, 'u3').h(x + 2, y + 3, 2, 'g4'); c.rect(2, 8, 6, 6, 'k').rect(2, 12, 6, 2, 'g2').h(2, 12, 6, 'g1'); c.stamp(3, 9, ['ll.ll', 'll.ll', 'll.ll']).px(7, 10, 'h2').px(7, 11, 'j2'); }],
     ['hose', 'hose reel tap wash down', (c) => { ostamp(c, 4, 3, ['.xxxxx.', 'xdddddx', 'xdxxxdx', 'xdxKxdx', 'xdxxxdx', 'xdddddx', '.xxxxx.']); c.v(10, 10, 5, 'v1').px(11, 14, 'v1').px(12, 14, 'j2'); }]],
   floor: (c) => { each((x, y) => c.px(x, y, x % 8 === 7 || y % 8 === 7 ? 'g2' : x % 8 === 0 || y % 8 === 0 ? 'h3' : 'v3')); c.px(4, 5, 'h3').px(12, 11, 'g1'); },
-  variants: ['drain', 'bloody', 'puddle', 'cracked', ['trail', 'blood trail drag marks smear', (c) => { for (let y = 0; y < 16; y++) { const x = 6 + [0, 0, 1, 1, 0, 0, -1, 0][y % 8]; c.px(x, y, 'z1').px(x + 3, y, y % 3 ? 'z1' : 'r1'); if (y % 4 === 1) c.px(x + 1, y, 'z1'); if (y % 5 === 2) c.px(x + 2, y, 'r1'); } }]],
+  variants: ['drain', 'bloody', 'cracked', ['trail', 'blood trail drag marks smear', (c) => { for (let y = 0; y < 16; y++) { const x = 6 + [0, 0, 1, 1, 0, 0, -1, 0][y % 8]; c.px(x, y, 'z1').px(x + 3, y, y % 3 ? 'z1' : 'r1'); if (y % 4 === 1) c.px(x + 1, y, 'z1'); if (y % 5 === 2) c.px(x + 2, y, 'r1'); } }]],
 });
 roomSet('school', 'school classroom green walls linoleum', {
   top: ['g4', 'k', 'g3'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 't2'], stainc: 'g4', crackc: 'g4', wornc: 'h3',
   wall: (c) => { c.fill('v1').speck(10, 'g4').speck(4, 'v2'); c.h(0, 3, 16, 'v2').h(0, 4, 16, 'g4'); },
-  details: ['window', 'door', 'clock', 'poster', 'hooks', 'switch',
+  details: ['window', 'door', 'clock',
     ['blackboard', 'blackboard chalk writing', (c) => { c.rect(0, 3, 16, 10, 'k').rect(1, 4, 14, 7, 'g4').h(0, 11, 16, 't2').h(0, 12, 16, 't1'); c.stamp(2, 5, ['w.ww.w.w..ww', '............', 'ww.w.www.w..', '............', '.w.ww..w....']).px(12, 10, 'w0').px(13, 10, 'w0').px(3, 10, 'q3'); }],
     ['map', 'wall map chart roller', (c) => ostamp(c, 2, 2, ['TTTTTTTTTTTT', 'liiiiiiiiiil', 'liieeiiieeil', 'lieeeiieeeel', 'liieiiiieeil', 'liiieiiieiil', 'liiiiiiiiiil', 'llllllllllll', '.....K......'])],
     ['lockers', 'lockers metal row', (c) => { c.rect(0, 1, 16, 15, 'k'); for (let x = 1; x < 16; x += 5) { c.rect(x, 2, 4, 13, 'u2').v(x, 2, 13, 'u3').h(x + 1, 4, 2, 'k').h(x + 1, 5, 2, 'k').px(x + 3, 9, 'g1'); } c.rect(6, 6, 4, 9, 'k').v(6, 6, 9, 'u1'); }]],
   floor: (c) => { each((x, y) => c.px(x, y, ((x >> 3) + (y >> 3)) % 2 ? 'h1' : 'h2')); c.speck(10, 'g3').speck(6, 'h3'); },
-  variants: ['worn', 'stained', 'dark', 'cracked', ['chalk', 'chalk outline hopscotch marks', (c) => { c.h(3, 2, 10, 'h3').h(3, 13, 10, 'h3').v(3, 2, 12, 'h3').v(12, 2, 12, 'h3').h(3, 7, 10, 'h3').v(8, 2, 5, 'h3'); }]],
+  variants: ['worn', 'dark', 'cracked', ['chalk', 'chalk outline hopscotch marks', (c) => { c.h(3, 2, 10, 'h3').h(3, 13, 10, 'h3').v(3, 2, 12, 'h3').v(12, 2, 12, 'h3').h(3, 7, 10, 'h3').v(8, 2, 5, 'h3'); }]],
 });
 roomSet('shop', 'old shop shelves goods wooden floor', {
   top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['v1', 'v2', 'v3'], stainc: 'i1', crackc: 'k', wornc: 't3',
   wall: (c) => { pat(c, ['mlllmmjjjjmmhhmm', 'mZoomXxxxXmhhhhm', 'mZoomXxxxXmhiihm', 'mZoomXxxxXmhhhhm', 'TTTTTTTTTTTTTTTT', 'mmmmmmmmmmmmmmmm', 'mmkkkkmmddmddmmm', 'mmknnkmmdemdemmm', 'mmkkkkmmdemdemmm', 'TTTTTTTTTTTTTTTT', 'mmmmmmmmmmmmmmmm', 'mmmjjmmmaaammmmm', 'mxmjjmxmabamllml', 'mxmjjmxmaaamlkml', 'mxmjjmxmaaamllml', 'CCCCCCCCCCCCCCCC']); },
-  details: ['door', 'clock', 'poster',
+  details: ['door', 'clock',
     ['empty', 'empty shelves bare dusty', (c) => { for (const [y, h] of [[0, 4], [5, 4], [10, 5]]) c.rect(0, y, 16, h, 'i1'); c.px(3, 3, 'h1').px(4, 3, 'h1').px(11, 8, 'h1').stamp(8, 12, ['.kk.', 'kkkk', 'kkkk']).px(2, 14, 'g3'); }],
     ['window', 'shop window display blind', (c) => { c.rect(1, 1, 14, 14, 'k').rect(2, 2, 12, 12, 'u1').rect(2, 2, 12, 4, 'h2').h(2, 5, 12, 'h1').px(8, 6, 'h1').px(8, 7, 'h2').stamp(3, 9, ['.l...kk...', 'lll.kkkk.Z', 'lKl.kkkk.Z']).h(2, 12, 12, 't1').h(2, 13, 12, 't2').v(13, 2, 10, 'u2'); }],
     ['drawers', 'apothecary drawers small labelled', (c) => { c.rect(0, 0, 16, 16, 'i1'); for (let y = 1; y < 15; y += 5) for (let x = 1; x < 15; x += 5) c.rect(x, y, 4, 4, 't1').h(x, y, 4, 't2').h(x + 1, y + 1, 2, 'h3').px(x + 1, y + 2, 'j2').px(x + 2, y + 2, 'j2'); }],
     ['sign', 'shop sign closed notice board', (c) => { c.px(5, 2, 'g3').px(10, 2, 'g3').px(4, 3, 'g3').px(11, 3, 'g3'); ostamp(c, 3, 4, ['llllllllll', 'lKlKlKKlKl', 'lKlKlKllKl', 'lKKllKKlKl', 'llllllllll']); }]],
-  floor: (c) => oldBoards(c, 'brown'),
-  variants: ['worn', 'dark', 'hatch', 'dusty', ['glass', 'broken glass shards on floor', (c) => { for (const [x, y] of [[3, 4], [7, 9], [11, 5], [5, 12], [12, 12]]) c.px(x, y, 'u3').px(x + 1, y, 'w0').px(x, y + 1, 'u2'); c.px(9, 3, 'w0').px(2, 9, 'u3'); }]],
+  floor: (c) => oldBoards(c, 'board'),
+  variants: ['worn', 'hatch', 'dusty', ['glass', 'broken glass shards on floor', (c) => { for (const [x, y] of [[3, 4], [7, 9], [11, 5], [5, 12], [12, 12]]) c.px(x, y, 'u3').px(x + 1, y, 'w0').px(x, y + 1, 'u2'); c.px(9, 3, 'w0').px(2, 9, 'u3'); }]],
 });
 
 
@@ -14770,7 +14769,7 @@ function props(src) {
   for (const line of src.split('\n')) {
     const l = line.trim();
     if (!l || l.startsWith('//')) continue;
-    if (l[0] !== '@') { cur.rows.push(l); continue; }
+    if (l[0] !== '@') { if (cur.rows.length && l.length !== cur.rows[0].length) throw new Error(`${cur.slug}: ragged row "${l}"`); cur.rows.push(l); continue; }
     flush();
     const f = l.slice(1).split('|').map((s) => s.trim());
     const o = optsOf(f[2]);
@@ -14959,18 +14958,18 @@ CLTCCCCTTC
 CLTTTTTTTC
 @door-bloody* | door bloody handprint blood smear
 XXXXXXXXXX
-XWllllllllX
+XWlllllllX
 XWlXXXXllX
 XWlXllXllX
 XWoXolXllX
 XWoXooXllX
-XWooooolnX
+XWoooollnX
 XWloooXllX
 XWlXolXllX
 XWlXloXllX
 XWlXllXllX
 XWlXXXXllX
-XWlllollX
+XWllllollX
 @door-arched* | arched door church oak iron studs
 ..CCCCCC..
 .CLTTCTTC.
@@ -14985,7 +14984,7 @@ CLwTTCTTwC
 CLTTTCTTTC
 CLTTTCTTTC
 CVVVVCVVVC
-@door-nailed-shut* | nursery door pale peeling child height marks
+@door-nursery* | nursery door pink pale peeling child height marks
 XXXXXXXXXX
 XWcccccccX
 XWcbbbbccX
@@ -15178,7 +15177,7 @@ LLLLLLLLLLLL
 @window-frame-dark* | window dark night unlit
 CCCCCCCCCCCC
 CTTTTTTTTTTC
-CTgigggCggggC
+CTgiggCggggC
 CTgiggCggggC
 CTggggCggggC
 CTCCCCCCCCCC
@@ -15216,15 +15215,15 @@ LLLLLLLLLLLL
 .CCCCCCCCCC.
 @window-frame-shutters* | window closed shutters louvre green
 CCCCCCCCCCCC
-CdddddCdddddC
-CdeeedCdeeedC
-CdddddCdddddC
-CdeeedCdeeedC
-CdddddCdddddC
-CdeeedCdeeedC
-CdddddCdddddC
-CdeeedCdeeedC
-CdddddCdddddC
+CdddddCddddC
+CdeeedCdeedC
+CdddddCddddC
+CdeeedCdeedC
+CdddddCddddC
+CdeeedCdeedC
+CdddddCddddC
+CdeeedCdeedC
+CdddddCddddC
 LLLLLLLLLLLL
 .CCCCCCCCCC.
 @window-frame-curtains* | window drawn curtains closed drapes
@@ -15392,6 +15391,3757 @@ XXXXXXXXXXXX
 XXXXXXXXXXXX
 V..........V
 `);
+
+
+category('furniture', 'Old house furniture', 'thing');
+props(`
+// ── living room ──
+@sofa-worn* | worn old sofa couch faded rose
+..aaaaaaaaaa..
+.abbbbbbbbbba.
+.abbjbbbbbbba.
+aaabbbbbbjbaaa
+abaccccccccaba
+abacccjccccaba
+abaaaaaaaaaaba
+aaaaaaaaaaaaaa
+.C..........C.
+@sofa-torn* | torn sofa ripped couch stuffing green
+..dddddddddd..
+.deeeeeeeeeed.
+.deeKeeeeeeed.
+dddeeKleeeeddd
+dedffKllfffded
+dedffffKfffded
+dedddddddddded
+dddddddddddddd
+.C..........C.
+@sofa-sheet* | sofa covered with dust sheet white cloth
+..llllllllll..
+.lWWWWWWWWWWk.
+.lWWWkWWWWWWk.
+llWWWkWWWkWWkk
+lWWWWWkWWkWWWk
+lWWkWWWWWWkWWk
+lWWkWWWWWWkWWk
+lkWWkWWkWWWkkk
+.kkkkkkkkkkkk.
+@armchair-worn* | worn armchair old chair brown
+..CCCCCC..
+.CTTTTTTC.
+.CTTjTTTC.
+.CTTTTTTC.
+CCTTTTTTCC
+CTCppppCTC
+CTCppjpCTC
+CTCCCCCCTC
+CCCCCCCCCC
+.m......m.
+@armchair-torn* | torn armchair ripped stuffing
+..gggggg..
+.ghhhhhhg.
+.ghKhhhhg.
+.ghhKlhhg.
+gghhhKhhgg
+ghgiiiighg
+ghgiKlighg
+ghgggggghg
+gggggggggg
+.m......m.
+@armchair-sheet* | armchair covered dust sheet white cloth
+..llllll..
+.lWWWWWWk.
+.lWWkWWWk.
+.lWWWWWWk.
+llWWWWkWkk
+lWWkWWWWWk
+lWWkWWkWWk
+lWWWWWkWWk
+lkkWkkWkkk
+.kkkkkkkk.
+@armchair-wing* | wing chair high back red leather
+.oooooooo.
+oZZZZZZZZo
+oZaZZZZaZo
+oZZZZZZZZo
+oZZZZZZZZo
+ooZZZZZZoo
+oZoaaaaoZo
+oZoaaaaoZo
+oZooooooZo
+oooooooooo
+.m......m.
+@chaise-longue* | chaise longue fainting couch daybed
+ddd...........
+deed..........
+deeed.........
+deeeddddddddd.
+deefffffffffed
+dddddddddddddd
+.m..........m.
+@side-table* | side table small round
+.CCCCCCCC.
+CLLLLLLLLC
+.CCCCCCCC.
+....TC....
+....TC....
+....TC....
+...CTCC...
+..CC..CC..
+@side-table-lamp* | side table with old lamp fringed shade
+...jkkkj....
+..jkkkkkj...
+..jklkkkj...
+..n.n.n.n...
+.....X......
+.....X......
+.CCCCCCCCCC.
+CLLLLLLLLLLC
+.CCCCCCCCCC.
+.....TC.....
+.....TC.....
+....CTCC....
+...CC..CC...
+@sideboard* | sideboard low cabinet cupboard
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+CTTTTTTCTTTTTC
+CTCCCCTCTCCCTC
+CTCTTCnCnCTCTC
+CTCTTCTCTCTCTC
+CTCCCCTCTCCCTC
+CTTTTTTCTTTTTC
+CCCCCCCCCCCCCC
+.m..........m.
+@display-cabinet* | glass display cabinet curios
+CCCCCCCCCC
+CLTTTTTTTC
+ChhhhChhhC
+ChlhhChZhC
+CTTTTCTTTC
+ChhhhChhhC
+ChxxhChnhC
+CTTTTCTTTC
+ChhhhChhhC
+ChdhhChlhC
+CTTTTCTTTC
+CTTTTTTTTC
+CCCCCCCCCC
+@grandfather-clock* | grandfather clock tall pendulum
+..CCCC..
+.CLTTTC.
+.CllllC.
+.ClKllC.
+.ClKKlC.
+.CllllC.
+.CTTTTC.
+.CTmmTC.
+.CTnmTC.
+.CTnmTC.
+.CTmnTC.
+.CTmmTC.
+CLTTTTTC
+CCCCCCCC
+@grandfather-clock-stopped* | broken grandfather clock stopped cobweb
+..CCCC..
+.CLTTTC.
+.CllKlC.
+.ClKllC.
+.CKKllC.
+.CllKlC.
+.CTTTTC.
+wCTmmTC.
+.wTmmTC.
+wCwmmTC.
+.CTmmTC.
+.CTnnTC.
+CLTTTTTC
+CCCCCCCC
+@piano-upright* | upright piano old keys
+CCCCCCCCCCCCCC
+CLTTTTTTTTTTTC
+CTTTTTTTTTTTTC
+CTTTllllllTTTC
+CTTTlXXXXlTTTC
+CTTTTTTTTTTTTC
+mmmmmmmmmmmmmm
+mlKlKllKlKlKlm
+mllllllllllllm
+CmmmmmmmmmmmmC
+CTC........CTC
+CTC........CTC
+CCC........CCC
+@piano-grand* | grand piano black lid open
+.......KKKKKK.
+.....KKVVVVVK.
+...KKVVVVVVK..
+..KVVVVVVVK...
+.KKKKKKKKKKKK.
+KVVVVVVVVVVVVK
+KlKlKllKlKlKlK
+KllllllllllllK
+KKKKKKKKKKKKKK
+.K....nn....K.
+.K....K.....K.
+.K..........K.
+@piano-stool* | piano stool round seat
+.oZZZZo.
+oZZZZZZo
+.oooooo.
+...CC...
+...CC...
+..CCCC..
+.CC..CC.
+@gramophone* | gramophone phonograph horn record player
+......nnnn..
+.....nnEEnn.
+....nnnEEnnn
+.....jnnnnn.
+......jnnj..
+.......j....
+...KKK.j....
+.CCKxKCjCC..
+CLTTTTTTTTC.
+CTTTTTTTnTC.
+CCCCCCCCCCC.
+@radio-old* | old radio wireless valve set
+..CCCCCCCC..
+.CLTTTTTTTC.
+CLTTTTTTTTTC
+CTjjjjjTllTC
+CTjKjKjTlKTC
+CTjjKjjTllTC
+CTjKjKjTTTTC
+CTjjjjjTnTnC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+@tv-old-off* | old television set off dark screen
+...X....X...
+....X..X....
+CCCCCCCCCCCC
+CLTTTTTTTTTC
+CTKKKKKKKTnC
+CTKVVgggKTTC
+CTKVggggKTnC
+CTKgggggKTTC
+CTKKKKKKKTxC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+.m........m.
+@tv-old-static* | old television static snow noise haunted
+...X....X...
+....X..X....
+CCCCCCCCCCCC
+CLTTTTTTTTTC
+CTKKKKKKKTnC
+CTKwXWxXKTTC
+CTKXWxwXKTnC
+CTKWxXWwKTTC
+CTKKKKKKKTxC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+.m........m.
+@fire-tools* | fireplace tools poker shovel brush stand
+..n...n...n.
+..X...X...X.
+VVXVVVXVVVXV
+..X...X...X.
+..X...X...X.
+..X...X...X.
+..X...X...X.
+..X..XXX.CCC
+.XXX.XXX.CCC
+.XXX..X..CCC
+....VVVV....
+..VVVVVVVV..
+@coat-stand* | coat stand hat stand with coat and hat
+...C.C.C...
+....CCC....
+..VVVC.....
+.VVVVC.jj..
+.....Cjjjj.
+.....Cjkjj.
+.....Cjkjj.
+.....Cjjj..
+.....C.....
+.....C.....
+.....C.....
+...CCCCC...
+..CC...CC..
+@umbrella-stand* | umbrella stand umbrellas walking stick
+..K...C.
+..K..C.C
+.gK..C..
+.gg..C..
+ngg.nCnn
+nggnnCnn
+jnnnnnnj
+jnnjnnnj
+jnnjnnnj
+jnnnnnnj
+.jjjjjj.
+@plant-stand* | plant stand fern potted plant
+..e..d..e.
+.e.ed.de..
+..edddde.e
+.e.dded.e.
+...dDDd...
+...DDDD...
+...DDDD...
+..CCCCCC..
+....TC....
+....TC....
+...CTCC...
+..CC..CC..
+@plant-stand-dead* | dead plant withered pot stand
+....j.....
+...j..j...
+..j.jj....
+....j..j..
+....jj....
+...DDDD...
+...DDDD...
+..CCCCCC..
+....TC....
+....TC....
+...CTCC...
+..CC..CC..
+@footstool* | footstool ottoman pouffe
+.aaaaaaaa.
+abbbbbbbba
+abbbbbbbba
+aaaaaaaaaa
+.m......m.
+@bookcase-full* | bookcase full of books tall
+CCCCCCCCCCCC
+CaahedZjgheC
+CaahedZjgheC
+CTTTTTTTTTTC
+CgdZjahhedaC
+CgdZjahhedaC
+CTTTTTTTTTTC
+ChZadegjZhdC
+ChZadegjZhdC
+CTTTTTTTTTTC
+CdjhgZaedhZC
+CdjhgZaedhZC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+@bookcase-half* | bookcase half empty few books dusty
+CCCCCCCCCCCC
+CaahmmmmmmeC
+CaahmmmmmheC
+CTTTTTTTTTTC
+CmmmmmmmmmmC
+CmmmlmmddddC
+CTTTTTTTTTTC
+ChZammmmmmmC
+ChZadmmmmmmC
+CTTTTTTTTTTC
+CmmmmmmmwmmC
+CmmjjjmmmwmC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+@bookcase-toppled* | toppled bookcase fallen over books spilled
+............ah
+CCCCCCCCCCCCdd
+CTmmTmmTmmTmCa
+CTmmTmmTmmTmCh
+CTamThmTmmTmCZ
+CTaeTdZTmmTmCj
+CCCCCCCCCCCCCC
+.hhh.aa..lll..
+@fireplace-cold* | cold fireplace empty hearth ashes mantel
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+.XxxxxxxxxxxX.
+.XxXXXXXXXXxX.
+.XxXKKKKKKXxX.
+.XxXKKKKKKXxX.
+.XxXKKKKKKXxX.
+.XxXKKKKKKXxX.
+.XxXKVVXVKXxX.
+.XxXVXVVXVXxX.
+XXXXXXXXXXXXXX
+@fireplace-embers* | fireplace glowing embers dying fire
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+.XxxxxxxxxxxX.
+.XxXXXXXXXXxX.
+.XxXKKKKKKXxX.
+.XxXKKKKKKXxX.
+.XxXKKKKKKXxX.
+.XxXKKDKKKXxX.
+.XxXKDZDKDXxX.
+.XxXCZDZCZXxX.
+XXXXXXXXXXXXXX
+@writing-bureau* | writing bureau desk fold down secretaire
+CCCCCCCCCC.
+CLTTTTTTTC.
+CTmCmCmCTC.
+CTmCmCmCTC.
+CLLLLLLLLC.
+CllTTTTTTCC
+CTTTTTTTTTC
+CTCCCCCCCTC
+CTCTnnTCCTC
+CTCCCCCCCTC
+CTCTnnTCCTC
+CCCCCCCCCCC
+.m.......m.
+@folding-screen* | folding screen room divider painted
+CCCC.CCCC.CCCC
+CjjCCCjjCCCjjC
+CjdCCCjjCCCdjC
+CjjCCCajCCCjjC
+CjjCCCjjCCCjjC
+CdjCCCjjCCCjaC
+CjjCCCjdCCCjjC
+CjjCCCjjCCCjjC
+CjaCCCjjCCCjjC
+CjjCCCjjCCCjjC
+CCCC.CCCC.CCCC
+C..C.C..C.C..C
+@standing-lamp-old* | old standing lamp fringed shade
+..jkkkj..
+.jkkkkkj.
+.jklkkkj.
+jkkkkkkkj
+n.n.n.n.n
+....X....
+....X....
+....X....
+....X....
+....X....
+....X....
+..VVXVV..
+.VVVVVVV.
+@card-table* | card table green baize playing cards
+CCCCCCCCCCCC
+CdddlddddddC
+CddlKlddlZdC
+CdddlddddddC
+CCCCCCCCCCCC
+.T........T.
+.T........T.
+.T........T.
+.C........C.
+// ── bedroom ──
+@bed-single-old* | old single bed iron frame blanket
+VV..........VV
+VX..........XV
+VXlllWWWWWWWXV
+VXlkllWWWWWWXV
+VXhhhhhhhhhhXV
+VXhihhhhhihhXV
+VXhhhhhhhhhhXV
+VXhhhihhhhhhXV
+VXhhhhhhhhhhXV
+VXggggggggggXV
+VV..........VV
+@bed-double-old* | old double bed wooden headboard quilt
+CCCCCCCCCCCCCC
+CLTTTTCCTTTTTC
+CTTTTTCCTTTTTC
+CllllllllllllC
+ClWWWlllWWWllC
+ClkkklllkkkllC
+CaaaaaaaaaaaaC
+CabbabbabbabbC
+CabbabbabbabbC
+CaaaaaaaaaaaaC
+CabbabbabbabbC
+CaaaaaaaaaaaaC
+CCCCCCCCCCCCCC
+@bed-fourposter* | four poster bed canopy curtains
+oooooooooooooo
+oZZoZZoZZoZZZo
+CoZ........ZoC
+CoZ........ZoC
+CZ..........ZC
+CZllllllllllZC
+CZlWWllWWlllZC
+CoaaaaaaaaaaoC
+CoabbbbbbbbaoC
+CoabbbbbbbbaoC
+CoaaaaaaaaaaoC
+CCCCCCCCCCCCCC
+C............C
+@bed-child* | child small bed kid nursery blanket stars
+CC......CC
+CLLLLLLLLC
+CTTTTTTTTC
+CllllllllC
+ClWWWWlllC
+ChhhhhhhhC
+ChlhhhhlhC
+ChhhhlhhhC
+ChhhhhhhhC
+CCCCCCCCCC
+C........C
+@bed-unmade* | unmade bed messy rumpled sheets
+CCCCCCCCCCCC
+CLTTTTTTTTTC
+CllllllllllC
+ClWWlllkkllC
+CllkkllllWlC
+CllllhhhllkC
+CkhhhhhhhhlC
+ChhhiihhhhlC
+CllhhhhhhhhC
+ChhhhhkllhhC
+CCCCCCCCCCCC
+C..........C
+@mattress-stained* | stained mattress dirty blood old bare
+.llllllllll.
+lWWWWWWWWWWk
+lWlWlWlWlWlk
+lWWWjjWWWWWk
+lWljjjjlWlWk
+lWWjooojWWWk
+lWlWjojWlWlk
+lWWWWjWWWWWk
+lWlWlWlWlWlk
+lWWWWWWWWWWk
+.kkkkkkkkkk.
+@bed-iron* | iron hospital bed old ward frame
+x..........x
+xxxxxxxxxxxx
+x.x.x..x.x.x
+xxxxxxxxxxxx
+xWWWWllllllx
+xWWWWllllllx
+xllllllllllx
+xiiiiiiiiiix
+xiiiiiiiiiix
+xllllllllllx
+xxxxxxxxxxxx
+x..........x
+V..........V
+@cradle* | cradle rocking baby wooden
+.CC.......
+CLLC......
+CTTC......
+CTTCCCCCCC
+CTllllllTC
+CTlWWllkTC
+CTTTTTTTTC
+.CTTTTTTC.
+C.CCCCCC.C
+CCC....CCC
+@crib-old* | old crib cot bars baby bed empty
+C..........C
+CCCCCCCCCCCC
+CL.L.L.L.L.C
+CL.L.L.L.L.C
+CL.L.L.L.L.C
+CLlLlLlLlLlC
+CLlLlLlLlLlC
+CCCCCCCCCCCC
+C..........C
+C..........C
+@wardrobe-old* | old wardrobe closed tall cupboard
+.CCCCCCCCCC.
+CLLLLLLLLLLC
+CTTTTTCTTTTC
+CTCCCTCTCCCC
+CTCTCTCTCTCC
+CTCTCTCTCTCC
+CTCTCnCnCTCC
+CTCTCTCTCTCC
+CTCTCTCTCTCC
+CTCCCTCTCCCC
+CTTTTTCTTTTC
+CLLLLLLLLLLC
+CTTTTnnTTTTC
+CCCCCCCCCCCC
+@wardrobe-open* | wardrobe open clothes hanging coats
+.CCCCCCCCCC.
+CLLLLLLLLLLC
+CTCxxxxxxCTC
+CTCgKaKdKCTC
+CTCgKaKdKCTC
+CTCgKaKdKCTC
+CTCgKaKdKCTC
+CTCgKaKdKCTC
+CTCKKaKKKCTC
+CTCKKKKKKCTC
+CTCKKKKKKCTC
+CLLLLLLLLLLC
+CTTTTnnTTTTC
+CCCCCCCCCCCC
+@wardrobe-eyes* | wardrobe ajar eyes inside something watching monster
+.CCCCCCCCCC.
+CLLLLLLLLLLC
+CTTTTTCKKTTC
+CTCCCTCKKCTC
+CTCTCTCKKCTC
+CTCTCTCEKCTC
+CTCTCTCKKCTC
+CTCTCTCEKCTC
+CTCTCTCKKCTC
+CTCCCTCKKCTC
+CTTTTTCKKTTC
+CLLLLLLLLLLC
+CTTTTnnTTTTC
+CCCCCCCCCCCC
+@dressing-table* | dressing table vanity mirror
+...nnnnnn...
+..niiiiiin..
+..niWiiiin..
+..niiWiiin..
+..niiiiiin..
+...nnnnnn...
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CTnTCTTCTnTC
+CTTTC..CTTTC
+CTnTC..CTnTC
+CCCCC..CCCCC
+@chest-of-drawers* | chest of drawers closed dresser
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CTTTTTTTTTTC
+CTnTTTTTTnTC
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTnTTTTTTnTC
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTnTTTTTTnTC
+CCCCCCCCCCCC
+.m........m.
+@chest-of-drawers-open* | chest of drawers drawer open clothes
+CCCCCCCCCCCC.
+CLLLLLLLLLLC.
+CTTTTTTTTTTC.
+CTnTTTTTTnTC.
+CCCCCCCCCCCC.
+ClliihhaalKC.
+CCCCCCCCCCCCC
+CLLLLLLLLLLLC
+CTTnTTTTTnTTC
+CCCCCCCCCCCCC
+CTnTTTTTTnTC.
+CCCCCCCCCCCC.
+.m........m..
+@nightstand* | nightstand bedside table candle
+....E.....
+....l.....
+....l.....
+CCCCCCCCCC
+CLLLLLLLLC
+CTTTTTTTTC
+CTTTnnTTTC
+CCCCCCCCCC
+CTTTTTTTTC
+CTTTnnTTTC
+CCCCCCCCCC
+.m......m.
+@washstand* | washstand basin jug wash bowl
+......ii....
+.....iWi....
+.....iii.i..
+..iiiiiiii..
+..iWiiiiii..
+...iiiiii...
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+.T........T.
+.TCCCCCCCCT.
+.T........T.
+.C........C.
+@bedpan | bedpan chamber pot enamel
+..wwwwww....
+.wXXXXXXw...
+wWwwwwwwwwww
+wWwwwwwwwxxw
+.wwwwwwwx...
+..xxxxxx....
+@trunk-old* | old travel trunk steamer chest straps
+.CCCCCCCCCCCC.
+CLTTnTTTTnTTTC
+CTTTnTTTTnTTTC
+CCCCnCCCCnCCCC
+CTTTnTTnnnTTTC
+CTTTnTTnKnTTTC
+CTTTnTTTTnTTTC
+CTTTnTTTTnTTTC
+CCCCCCCCCCCCCC
+@blanket-box* | blanket box linen chest foot of bed
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CCCCCCCCCCCC
+CTTCCCCCCTTC
+CTTCTTTTCTTC
+CTTCCCCCCTTC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+// ── dining room ──
+@table-long* | long dining table wooden
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+CTTTTTTTTTTTTC
+CCCCCCCCCCCCCC
+.CT........TC.
+.CT........TC.
+.CT........TC.
+.CT........TC.
+.CC........CC.
+@table-round* | round table pedestal
+..CCCCCCCC..
+.CLLLLLLLLC.
+CLLTTTTTTTTC
+CTTTTTTTTTTC
+.CCCCCCCCCC.
+.....TC.....
+.....TC.....
+.....TC.....
+...CCTCCC...
+..CC....CC..
+@table-set* | dining table set for dinner plates candles cloth
+....E....E....
+....l....l....
+.lWl.lWWl.lWl.
+llllllllllllll
+lWWWWWWWWWWWWl
+lkWkkWWkkWWkWl
+.kT.k..k.k.Tk.
+..T........T..
+..T........T..
+..C........C..
+@table-dustsheet* | table covered dust sheet white cloth
+.llllllllllll.
+lWWWWWWWWWWWWk
+lWWkWWWWWkWWWk
+lWWkWWkWWkWWWk
+lWWWWWkWWWWkWk
+lWkWWWkWWWWkWk
+lWkWWWWWkWWWWk
+.kkWkkkWkkkWk.
+..k...k....k..
+@chair-dining* | dining chair wooden high back
+CCCCCC..
+CLTTTC..
+CTCCTC..
+CTCCTC..
+CLTTTC..
+CTTTTC..
+CLLLLLLC
+CTTTTTTC
+CCCCCCCC
+C.C..C.C
+C.C..C.C
+C.C..C.C
+@chair-dining-red* | dining chair red upholstered seat
+CCCCCC..
+CoZZoC..
+CoZZoC..
+CoZZoC..
+CoooC...
+CTTTTC..
+CZZZZZZC
+CooooooC
+CCCCCCCC
+C.C..C.C
+C.C..C.C
+C.C..C.C
+@chair-toppled | toppled chair fallen over knocked
+........CCCC
+CCCCCCCCLTTC
+CTTTTCTCTTTC
+CTCCTCTCCCCC
+CTCCTCTC....
+CTTTTCTCCCCC
+CCCCCCLTTTTC
+........CCCC
+@chair-broken | broken chair smashed pieces legs
+....C.......
+...CTC....C.
+..CTCCC..CT.
+.CTCTTTCCT..
+CTC.CTTTC...
+CC..CCCCCC..
+.....C..CTC.
+..CC.....CTC
+.CTTC.....CC
+..CC........
+@highchair* | highchair baby high chair
+.CCCCCC.
+.CLTTTC.
+.CTTTTC.
+.CTTTTC.
+CCCCCCCC
+CllllllC
+CCCCCCCC
+.C....C.
+.C....C.
+.CCCCCC.
+.C....C.
+C......C
+C......C
+@candelabra* | candelabra candlestick three candles unlit
+l...l...l
+l...l...l
+l...l...l
+n...n...n
+nn..n..nn
+.nnnnnnn.
+....n....
+....n....
+...nnn...
+....n....
+..nnnnn..
+.nnnnnnn.
+@candelabra-lit* | candelabra lit three candles flames
+E...E...E
+F...F...F
+l...l...l
+l...l...l
+n...n...n
+nn..n..nn
+.nnnnnnn.
+....n....
+....n....
+...nnn...
+....n....
+..nnnnn..
+.nnnnnnn.
+@serving-trolley* | serving trolley tea cart wheels
+x.........xx
+xxxxxxxxxxx.
+x.lWl.ii..x.
+xxxxxxxxxxx.
+x.........x.
+x.dd..Zl..x.
+xxxxxxxxxxx.
+x.........x.
+VV.......VV.
+VV.......VV.
+@china-cabinet* | china cabinet plates crockery dresser
+CCCCCCCCCCCC
+CLTTTTTTTTTC
+CmlmlmmlmlmC
+CllllllllllC
+CTTTTTTTTTTC
+CmimmlmmimmC
+CmimllllmimC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+CTTTTCTTTTTC
+CTTTnCnTTTTC
+CTTTTCTTTTTC
+CCCCCCCCCCCC
+@bench-church* | church pew bench wooden
+CC..........CC
+CLCCCCCCCCCCLC
+CTLTTTTTTTTTTC
+CTLTTTTTTTTTTC
+CTCCCCCCCCCCTC
+CLLLLLLLLLLLLC
+CTTTTTTTTTTTTC
+CCCCCCCCCCCCCC
+CC..........CC
+// ── study and library ──
+@desk-tidy* | writing desk tidy study lamp
+.dd.........
+dddd........
+.XX....lll..
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CTTTCCCCTTTC
+CTnTC..CTnTC
+CTTTC..CTTTC
+CTnTC..CTnTC
+CTTTC..CTTTC
+CCCCC..CCCCC
+@desk-cluttered* | cluttered desk papers mess books study
+.....l...h..
+.ll.lll.hhl.
+llllXllkaall
+CCCCCCCCCCCC
+CLLlLLLLLLLC
+CTTllCCCTTTC
+CTnTC..CTnTC
+CTTTC..CTTTC
+CTnTC..CTnTC
+CTTTC..CTTTC
+CCCCC..CCCCC
+@typewriter | typewriter old keys paper
+...llllll...
+...lXXXXl...
+..VVVVVVVV..
+.VXXXXXXXXV.
+.VVVVVVVVVV.
+VxKxKxKxKxKV
+VKxKxKxKxKxV
+VVVVVVVVVVVV
+@globe-old* | old globe on stand world antique
+...jjjj...
+..jkkdkj..
+.jkddkkkj.
+.jkdddkkjn
+.jkkdkddjn
+.jkkkkdkjn
+..jkkkkj.n
+...jjjjnn.
+....nn....
+....CC....
+..CCCCCC..
+@telescope-brass* | brass telescope on tripod stargazing
+.........nn
+.......nnnE
+.....nnnn..
+...jnnn....
+..jjnC.....
+.....C.....
+....CCC....
+...C.C.C...
+...C.C.C...
+..C..C..C..
+..C..C..C..
+@filing-cabinet* | filing cabinet metal drawers office
+XXXXXXXX
+XxxxxxxV
+XxllxxxV
+XxxxwwxV
+XVVVVVVV
+XxxxxxxV
+XxllxxxV
+XxxxwwxV
+XVVVVVVV
+XxxxxxxV
+XxllxxxV
+XxxxwwxV
+XVVVVVVV
+@filing-cabinet-open* | filing cabinet drawer open files papers
+XXXXXXXX..
+XxxxxxxV..
+XxllxxxV..
+XxxxwwxV..
+XVVVVVVV..
+XKlklklXXX
+XKlklklxxV
+XVVXxllxxV
+XxxXxxwwxV
+XxlVVVVVVV
+XxxxwwxV..
+XVVVVVVV..
+@safe-shut* | safe closed strongbox iron vault dial
+VVVVVVVVVVVV
+VXXXXXXXXXXV
+VXxxxxxxxxXV
+VXxxwwxxxxXV
+VXxwKKwxnnXV
+VXxwKKwxnxXV
+VXxxwwxxnxXV
+VXxxxxxxxxXV
+VXXXXXXXXXXV
+VVVVVVVVVVVV
+VV........VV
+@safe-open* | safe open empty door ajar papers
+VVVVVVVVVVVVVV
+VXXXXXXXXXXVxV
+VXKKKKKKKKXVxV
+VXKKKKKKKKXVwV
+VXKVVVVVVKXVxV
+VXKlllKnnKXVxV
+VXKlllKnnKXVxV
+VXKKKKKKKKXVxV
+VXXXXXXXXXXVxV
+VVVVVVVVVVVVVV
+VV........VV..
+@paper-stack | stack of papers pile documents
+..llllllll.
+.lWWWWWWWl.
+.lWXXXXWWlk
+llWWWWWWWlk
+lkllllllllk
+lWlkkkkkklk
+lkllllllllk
+lWlkkkkkkl.
+.kkkkkkkkk.
+@inkwell | inkwell quill pen ink feather
+.......ll
+......lWl
+.....lWl.
+....lWl..
+....ll...
+...Xl....
+.VVXVV...
+VgggggV..
+VggggKV..
+.VVVVV...
+@telephone-old | old telephone candlestick phone antique
+...VVV....
+..VV.VV...
+..V...V.V.
+..VV.VV.VV
+...VVV..VV
+...VV...V.
+...VV..V..
+...VVVV...
+...VV.....
+..VVVV....
+.VVnnVV...
+VVVVVVVV..
+@reading-lamp | reading lamp green bankers desk lamp
+.ddddddd.
+deeeeeeed
+dEEEEEEEd
+....n....
+....n....
+....n....
+..nnnnn..
+.nnnnnnn.
+@lectern* | lectern reading stand open book
+.llllllll.
+lWXXlXXXWl
+lWXXlXXWWl
+CCCCCCCCCC
+.CCTTTTCC.
+...CTTC...
+...CTTC...
+...CTTC...
+...CTTC...
+..CCTTCC..
+.CCCCCCCC.
+@map-table* | map table charts compass study
+CCCCCCCCCCCCCC
+ClllkkllllllkC
+ClkkklllkklZlC
+CllkllnlkkkllC
+ClllllllkklllC
+CCCCCCCCCCCCCC
+.CT........TC.
+.CT........TC.
+.CT........TC.
+.CC........CC.
+@book-pile | pile of old books stacked dusty
+...aaaaaa..
+...allllb..
+..hhhhhhh..
+..hllllli..
+.ddddddd...
+.dlllllle..
+ZZZZZZZZZ..
+ZlllllllZ..
+ZZZZZZZZZ..
+@library-steps* | library steps small step ladder wooden
+......CCCC
+......CLLC
+......CTTC
+...CCCCTTC
+...CLLLTTC
+...CTTTTTC
+CCCCTTTTTC
+CLLLTTTTTC
+CTTTTTTTTC
+CCCCCCCCCC
+@magnifier | magnifying glass lens detective
+..XXXX....
+.XiiiiX...
+XiWiiiiX..
+XiiiiiiX..
+XiiiiiiX..
+.XiiiiX...
+..XXXXC...
+.......C..
+........C.
+.........C
+@desk-chair-old* | swivel desk chair leather office old
+.oooooo.
+oZZZZZZo
+oZZZZZZo
+oZZZZZZo
+.oooooo.
+...VV...
+oooooooo
+oZZZZZZo
+...VV...
+...VV...
+.VVVVVV.
+V..VV..V
+`);
+
+
+category('household', 'Kitchen, bathroom & cellar', 'thing');
+props(`
+// ── kitchen and pantry ──
+@stove-iron* | cast iron stove range kitchen stovepipe
+......VV....
+......VV....
+......VV....
+VVVVVVVVVVVV
+VXXKXXXXKXXV
+VVVVVVVVVVVV
+VXXXXXVXXXXV
+VXVVVXVXnnXV
+VXVDVXVXXXXV
+VXVVVXVXXXXV
+VXXXXXVXXXXV
+VVVVVVVVVVVV
+V..........V
+@oven-old* | old enamel oven cooker gas rings
+llllllllllll
+lKKKllllKKKl
+jjjjjjjjjjjj
+lWnlnlnlnllk
+lllllllllllk
+lXXXXXXXXXlk
+lXKKKKKKKXlk
+lXKVVVVVKXlk
+lXKKKKKKKXlk
+lXXXXXXXXXlk
+jjjjjjjjjjjj
+j..........j
+@fridge-old* | old fridge refrigerator rounded rusty
+.llllllll.
+lWlllllllk
+lWlllllllk
+lWllllXllk
+lWllllXllk
+lWlllllllk
+jjjjjjjjjj
+lWllllXllk
+lWllllXllk
+lWlllDlllk
+lWlDlllllk
+lWlllllDlk
+jjjjjjjjjj
+@icebox* | icebox wooden ice chest cold store
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CTTTTTCTTTTC
+CTxxTTCTTxxC
+CTTTTTCTTTTC
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTxxTTTTTTTC
+CTTTTTTTTTTC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+.m........m.
+@sink-stone* | stone sink belfast kitchen tap
+.....xx.....
+....xx.x....
+.......x....
+llllllllllll
+lWWWWWWWWWWk
+lWkkkkkkkkWk
+lWkkkkkkkkWk
+llllllllllkk
+.jT......Tj.
+.jT......Tj.
+.jT......Tj.
+.jC......Cj.
+@sink-dirty* | dirty sink piled dishes plates mess
+..ll.xx.....
+.lWWlx.x.i..
+.kllk..x.ii.
+llllllllllll
+lWWlWlWWiWWk
+lWkkWkkkikWk
+lWkkkkdkkkWk
+llllllllllkk
+.jT......Tj.
+.jT......Tj.
+.jT......Tj.
+.jC......Cj.
+@kitchen-counter* | kitchen counter worktop cupboards
+llllllllllllll
+jjjjjjjjjjjjjj
+CTTTTTTCTTTTTC
+CTCCCCTCTCCCTC
+CTCTTCnCnCTCTC
+CTCTTCTCTCTCTC
+CTCTTCTCTCTCTC
+CTCCCCTCTCCCTC
+CTTTTTTCTTTTTC
+CCCCCCCCCCCCCC
+@kitchen-counter-drawers* | kitchen counter drawers worktop
+llllllllllllll
+jjjjjjjjjjjjjj
+CTTTTTTTTTTTTC
+CTTTTnnnnTTTTC
+CCCCCCCCCCCCCC
+CTTTTTTTTTTTTC
+CTTTTnnnnTTTTC
+CCCCCCCCCCCCCC
+CTTTTnnnnTTTTC
+CCCCCCCCCCCCCC
+@hanging-pots | hanging pots pans rack copper
+XXXXXXXXXXXXXX
+.x...x....x...
+.x...x....x...
+VVV.DDDD..xxx.
+VVVDDFDDD.xxx.
+VVVDDDDDD.xxxx
+.V..DDDD..xxx.
+@jar-shelves* | shelves with jars pantry preserves
+CCCCCCCCCCCC
+C.ll.kk.ll.C
+C.Zo.dd.no.C
+C.Zo.de.no.C
+CTTTTTTTTTTC
+C.kk.ll.kk.C
+C.hh.aa.jj.C
+C.hi.ab.jk.C
+CTTTTTTTTTTC
+C.ll.kk.ll.C
+C.dd.oo.hh.C
+C.de.oZ.hi.C
+CTTTTTTTTTTC
+C..........C
+@pantry-shelves* | pantry shelves tins cans boxes
+CCCCCCCCCCCC
+CxxXwwXxxXkC
+CxZXwdXxhXkC
+CTTTTTTTTTTC
+CjjjjmmkkkkC
+CjnnjmmklkkC
+CTTTTTTTTTTC
+CmmxxXmmmmmC
+CllxZXmmjjjC
+CTTTTTTTTTTC
+ClllmmxxXmmC
+ClKlmmxdXmmC
+CTTTTTTTTTTC
+C..........C
+@meat-hook | meat hook hanging meat carcass butcher
+...xx.....
+...x......
+...xx.....
+..oZZo....
+.oZaZZo...
+.oZZaZo...
+.oZaZZo...
+.oZZZZo...
+.oZaZZo...
+..oZZo....
+..olZo....
+...ll.....
+@meat-hooks-empty | empty meat hooks rail butcher
+XXXXXXXXXXXXXX
+..x....x....x.
+..x....x....x.
+..x....x....x.
+..x....x....x.
+x.x..x.x..x.x.
+xxx..xxx..xxx.
+@butchers-block* | butcher block chopping cleaver bloody
+.....xx.....
+....xwwx.T..
+....xwwxTT..
+llllxwwxllll
+lkoklxxlkklk
+lkkooklkkklk
+llllllllllll
+.jT......Tj.
+.jT......Tj.
+.jT......Tj.
+.jC......Cj.
+@knife-block | knife block kitchen knives
+.x.x.x..
+.x.x.x..
+.m.m.m..
+CTTTTTC.
+CLTTTTTC
+CLTTTTTC
+.CLTTTTC
+.CCCCCCC
+@kettle-copper | old copper kettle stove
+....VVVV....
+...V....V...
+..pppppp....
+.ppDppppp.pp
+ppDpppppppp.
+pppppppppp..
+ppppppppp...
+.ppppppp....
+@bread-bin | bread bin enamel tin
+.llllllllll.
+lWWWWWWWWWWk
+lWllllllllwk
+lWlXXlXXXllk
+lWllllllllwk
+lWllllnllllk
+.kkkkkkkkkk.
+@flour-sack* | sack of flour grain bag
+...kkkk...
+..kllllk..
+...jnnj...
+..kllllk..
+.kllllllk.
+kllXXXlllk
+klllXllllk
+kllllllllk
+kllllllljk
+.kllllljk.
+..kkkkkk..
+@bottle-crate* | crate of bottles wine milk
+.d.d.d.d.d..
+.d.d.d.d.d..
+.e.e.e.e.e..
+CCCCCCCCCCCC
+CTdTdTdTdTTC
+CLLLLLLLLLLC
+CTTTTTTTTTTC
+CTCCCCCCCCTC
+CCCCCCCCCCCC
+@wine-rack* | wine rack bottles cellar
+CCCCCCCCCCCC
+CdnCdnCKKCdC
+CdnCdnCKKCdC
+CCCCCCCCCCCC
+CKKCdnCdnCKC
+CKKCdnCdnCKC
+CCCCCCCCCCCC
+CdnCKKCdnCdC
+CdnCKKCdnCdC
+CCCCCCCCCCCC
+CdnCdnCKKCdC
+CdnCdnCKKCdC
+CCCCCCCCCCCC
+@barrel-wine* | wine barrel cask lying on side tap
+...CCCCCC...
+..CTTTTTTC..
+.CTLTTTTTTC.
+.XTLTTTTTTX.
+CTTLTTTTTTTC
+CTTTTTnTTTTC
+CTTTTnnTTTTC
+.XTTTTnTTTX.
+.CTTTTTTTTC.
+..CTTTTTTC..
+.CCCCCCCCCC.
+.CC......CC.
+@barrel-open* | open barrel water butt rain barrel
+.CCCCCCCC.
+CggghhgggC
+CTgggggiTC
+XXXXXXXXXX
+CLTTCTTCTC
+CLTTCTTCTC
+CLTTCTTCTC
+XXXXXXXXXX
+CLTTCTTCTC
+.CTTCTTCC.
+..CCCCCC..
+@barrel-smashed | smashed barrel broken staves hoops
+.......C....
+..C...CT....
+.CT...TC..C.
+.TC.xXTC.CT.
+CTC.X.CCCTC.
+CLTTCTxXTC..
+CLTTCTTXCC..
+XXXXXXXXX...
+.CTTCTTCC.T.
+..CCCCCC.CTC
+@milk-churn* | milk churn can dairy metal
+..xxxx..
+.xwwwwx.
+..xXXx..
+.xwxxxX.
+xwwxxxxX
+xwxxxxxX
+xwxxxxxX
+xwxxxxxX
+xwxxxxxX
+xwxxxxxX
+.XXXXXX.
+@coal-scuttle | coal scuttle bucket fireplace coal
+....VV....
+...V..V...
+..V.KK.V..
+.VKKKVKKX.
+VXKKKKKKXV
+VXXXXXXXXV
+.VXXXXXXV.
+.VXXXXXXV.
+..VXXXXV..
+..VVVVVV..
+@kitchen-scales | kitchen scales weighing balance brass pans
+.....nn.....
+nnnnnnnnnnnn
+n....nn....n
+n....nn....n
+nnn..nn..xxx
+jjjj.nn.xxxx
+.....nn.....
+...nnnnnn...
+..jjjjjjjj..
+@mincer | meat mincer grinder clamp
+..xxxx....
+..xKKx....
+.xxxxxx.C.
+xwxxxxxxC.
+xwxxxxXXC.
+.xxxxxx...
+...xx.....
+...xx.....
+..xxxx....
+.CCCCCCCC.
+@dresser-kitchen* | kitchen dresser plates hooks cups
+CCCCCCCCCCCC
+ClWlmlWlmlWC
+ClllmlllmllC
+CTTTTTTTTTTC
+CmimimimimmC
+CTTTTTTTTTTC
+CLLLLLLLLLLC
+CTTTTCTTTTTC
+CTTnTCTnTTTC
+CTTTTCTTTTTC
+CCCCCCCCCCCC
+.m........m.
+@water-pump* | water pump hand pump iron kitchen yard
+....VV.VVVV
+...VXXVV...
+...VXXV....
+.VVVXXV....
+.V.VXXV....
+...VXXV....
+...VXXV....
+...VXXV....
+...VXXV....
+..VVXXVV...
+.VVVVVVVV..
+// ── bathroom ──
+@bathtub-clawfoot* | clawfoot bathtub old bath empty
+x.............
+x.............
+xx............
+llllllllllllll
+lWWWWWWWWWWWWk
+.lWlllllllllk.
+.lWlllllllllk.
+..lllllllllk..
+..kkkkkkkkkk..
+..n........n..
+.nn........nn.
+@bathtub-filled* | bathtub filled water full bath
+x.............
+x.............
+xx............
+llllllllllllll
+lhhihhhhhihhhk
+.lWlllllllllk.
+.lWlllllllllk.
+..lllllllllk..
+..kkkkkkkkkk..
+..n........n..
+.nn........nn.
+@bathtub-stained* | stained bathtub blood rust dirty
+x.............
+x.............
+xx............
+llllllllllllll
+lWoooZoooWWjWk
+.lWloollllljk.
+.lWllollljllk.
+..lljllollok..
+..kkkkkkkkkk..
+..n........n..
+.nn........nn.
+@toilet-old* | old toilet high cistern chain
+.CCCCCC.
+.CLTTTC.
+.CCCCCC.
+...xx..n
+...xx..n
+...xx..n
+...xx...
+.llllll.
+lWKKKKlk
+lWKKKKlk
+.lllllk.
+..lllk..
+..lWlk..
+.llllkk.
+@toilet-broken* | broken toilet cracked leaking smashed water
+.llllll.
+.lWlKlk.
+.lWKllk.
+.llllll.
+lWKKKKlk
+lWKKKKKk
+.lllKlk.
+..llKk..
+h.lWlk.h
+hhlllkhh
+.hhhhhh.
+@toilet-dirty* | filthy toilet dirty stained no seat
+.llllll.
+.lWljlk.
+.lWlllk.
+.lljlll.
+lWKKKKlk
+ljKjjKlk
+.ljllkj.
+..lllk..
+..lWjk..
+.lljlkk.
+@washbasin* | washbasin pedestal sink bathroom
+...x..x...
+..xx..xx..
+llllllllll
+lWWWWWWWWk
+lWllllllkk
+.llllllkk.
+...llkk...
+...lWk....
+...lWk....
+...lWk....
+..llllk...
+@washbasin-bloody* | washbasin sink blood bloody water
+...x..x...
+..xx..xx..
+llllllllll
+lWoZoooWWk
+lWlooollkk
+.lllolokk.
+...llkk...
+...lWk....
+...lWk..o.
+...lWk....
+..llllk.oo
+@mirror-cabinet* | bathroom mirror cabinet medicine cupboard
+llllllllllll
+lWiiiilWiiik
+lWiWiilWiiik
+lWiiWilWiWik
+lWiiiilWiiik
+lWiiiinniiik
+lWiiiilWiiik
+lWiiiilWiiik
+lkkkkkkkkkkk
+@towel-rail* | towel rail stand towels
+xxxxxxxxxxxx
+x.iiii.cc..x
+x.iWii.cc..x
+x.iiii.cb..x
+xxiiiixccxxx
+x.iiii.cc..x
+x.ihhi.....x
+x..........x
+x..........x
+X..........X
+@bucket-and-mop | bucket and mop cleaning dirty water
+.......T..
+.......T..
+.......T..
+.x....xT..
+x.xxxx.x..
+xxxxxxxx..
+xwhhhhxXT.
+xwxxxxxXT.
+.xwxxxX.T.
+.xwxxxXkkk
+..XXXX.kjk
+@laundry-mangle* | mangle wringer laundry rollers old
+.....VV.....
+..VVVVVVVV.x
+.VXXXXXXXXVx
+.VLLLLLLLLVx
+.VTTTTTTTTV.
+.VLLLLLLLLV.
+.VTTTTTTTTV.
+.VXXXXXXXXV.
+.VV......VV.
+.V........V.
+.V........V.
+VVV......VVV
+@washing-tub* | washing tub wash board laundry zinc
+...........T
+..........TT
+.........Txx
+xxxxxxxxxTxx
+xiiWiiiiiiTx
+XxxxxxxxxxxX
+.XxwxxxxxxX.
+.XxwxxxxxxX.
+.XxwxxxxxxX.
+..XXXXXXXX..
+@clothes-horse* | clothes horse drying rack sheets
+CCCCCCCCCCCC
+C.llll.ii..C
+CCllllCiiCCC
+C.llll.ii..C
+CCllllCCCCCC
+C.llkl.....C
+C..........C
+C..........C
+C..........C
+// ── cellar and utility ──
+@boiler* | boiler water heater tank pipes cellar
+..XX...VV.
+..XX...VV.
+.pppppppp.
+pDpppppppp
+pDpppppppp
+pppppxxppp
+pDpppxKppp
+pDpppppppp
+pppppppppp
+VVVVVVVVVV
+VXKKKKKKXV
+VXKDZDKKXV
+VVVVVVVVVV
+@furnace* | furnace fire door open burning coal
+....VVVV....
+....VXXV....
+.VVVVXXVVVV.
+VXXXXXXXXXXV
+VXXVVVVVVXXV
+VXVKDZDKKVXV
+VXVDZFZDKVXV
+VXVZFEFZDVXV
+VXXVVVVVVXXV
+VXXXXXXXXXXV
+VXXxxxxxxXXV
+VVVVVVVVVVVV
+@furnace-cold* | cold furnace door shut iron cellar
+....VVVV....
+....VXXV....
+.VVVVXXVVVV.
+VXXXXXXXXXXV
+VXXVVVVVVXXV
+VXVXxXXXXVXV
+VXVXXXXnXVXV
+VXVXXXXXXVXV
+VXXVVVVVVXXV
+VXXXXXXXXXXV
+VXXxKxKxKXXV
+VVVVVVVVVVVV
+@coal-pile* | pile of coal heap black cellar
+.....KK.....
+....KVKK....
+...KKKVKK...
+..KVKKKKVK..
+.KKKKVKKKKK.
+KKVKKKKVKKVK
+KKKKVKKKKKKK
+@workbench* | workbench vice tools carpenter
+..X.....T...
+.XXX....Tx..
+.XVX..xxxx..
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CCCCCCCCCCCC
+.CT.CCCC.TC.
+.CT.CTnC.TC.
+.CT.CCCC.TC.
+.CT......TC.
+.CC......CC.
+@tool-rack* | tool rack pegboard wall of tools saw hammer
+CCCCCCCCCCCCCC
+CjjjjjjjjjjjjC
+CjxxxxxxjjTjjC
+CjxKxKxTjjTjjC
+CjjjjjjjjxxxjC
+CjTjjjxjjxxxjC
+CjTjjxjxjjjjjC
+CjTjjjxjjXXjjC
+CxxxjjxjjXjjjC
+CjjjjjjjjjjjjC
+CCCCCCCCCCCCCC
+@preserve-shelves* | shelves of preserves jars cellar dusty cobweb
+CCCCCCCCCCCC
+Cw.kk.ll.kkC
+C.woZ.dd.ZoC
+Cw.oZ.de.ZoC
+CTTTTTTTTTTC
+C.ll.kk...KC
+C.jj.oo..KKC
+C.jn.oZ.xXKC
+CTTTTTTTTTTC
+C.kk.ll.kk.C
+C.dd.hh.Zo.C
+C.de.hi.Zo.C
+CTTTTTTTTTTC
+C..........C
+@pipes-valve* | pipes with valve wheel plumbing cellar
+.xX...xX..
+.xX...xX..
+.xX...xX..
+.xXxxxxX..
+.xXXXXxX..
+.xX..ZxZ..
+.xX.ZZZZZ.
+.xX..ZxZ..
+.xX...xX..
+xxXX..xX..
+.xX...xX1.
+.xX...xX..
+.xX...xX1.
+@fuse-box-open* | fuse box open wires sparks electric
+VVVVVVVVVV..
+VXXXXXXXVxx.
+VXKKKKKXVxx.
+VXKZKnKXVxx.
+VXKKKKKXVxx.
+VXKnKKEXVxx.
+VXKKKEKXVxx.
+VXKKKKKXVxx.
+VXXXXXXXVxx.
+VVVVVVVVVV..
+..o..K......
+..o...K.....
+@generator-old* | old generator engine petrol machine
+....VV......
+...VXXV..X..
+VVVVVVVVVX..
+VppppppVXXX.
+VpDppppVKKXV
+VppppKpVXKXV
+VppppppVKKXV
+VVVVVVVVVVVV
+.VV......VV.
+VVVV....VVVV
+@cage-large* | large iron cage bars cell animal
+VVVVVVVVVVVVVV
+VX.X.X.X.X.X.V
+VX.X.X.X.X.X.V
+VX.X.X.X.X.X.V
+VX.X.X.X.X.X.V
+VXXXXXXXXXXXXV
+VX.X.X.X.X.X.V
+VX.X.X.X.XnX.V
+VX.X.X.X.X.X.V
+VX.X.X.X.X.X.V
+VVVVVVVVVVVVVV
+@chains-hanging | hanging chains ceiling hooks
+.X....X....X
+.x....x....x
+.X....X....X
+.x....x....x
+.X....X....X
+.x....x....x
+.X....X..xxx
+.x....x..x.x
+......X...x.
+......x.....
+.....xxx....
+.....x.x....
+@drain-cover | drain cover grate floor round iron
+...VVVVVV...
+.VVXKXKXXVV.
+VXXKXKXKXKXV
+VXKXKXKXKXXV
+VXXKXKXKXKXV
+.VVXKXKXXVV.
+...VVVVVV...
+@oil-drum* | oil drum rusty barrel metal
+.XXXXXXXX.
+XxxxxxxxxV
+XXXXXXXXXV
+XxxDxxxxXV
+XxxxxxDxXV
+XXXXXXXXXV
+XxxxxxxxXV
+XxDDxxxxXV
+XxxDxxxxXV
+XXXXXXXXXV
+XxxxxxxxXV
+.VVVVVVVV.
+@pallet | wooden pallet planks stack
+LLLLLLLLLLLLLL
+TTTTTTTTTTTTTT
+C....CC.....C.
+LLLLLLLLLLLLLL
+TTTTTTTTTTTTTT
+C....CC.....C.
+@sump-pit | sump pit dark water hole cellar floor
+..XXXXXXXX..
+.XxKKKKKKxX.
+XxKKgggKKKxX
+XxKggihggKxX
+XxKKgggKKKxX
+.XxKKKKKKxX.
+..XXXXXXXX..
+@shelf-junk* | shelf unit junk boxes paint tins clutter
+CCCCCCCCCCCC
+C.jjjj.xx..C
+C.jkkj.xZ..C
+CTTTTTTTTTTC
+C.x.....kkkC
+C.xxT.h.kjkC
+CTTTTTTTTTTC
+CjjjjjjXXX.C
+CjkkkkjXxX.C
+CTTTTTTTTTTC
+C..........C
+@stepladder-old | old stepladder paint splashed wooden
+....CC....
+...CLLC...
+...T..T...
+..CLLLLC..
+..T....T..
+.CLLlLLLC.
+.T......T.
+CLLLLLLLLC
+T........T
+T........T
+`);
+
+
+category('attic', 'Nursery & attic', 'thing');
+props(`
+@rocking-chair* | rocking chair wooden old creaking
+.CCCCC....
+.CLTLC....
+.CTCTC....
+.CLCLC....
+.CTCTC....
+.CLTLCCCC.
+.CTTTTTTC.
+.CCCCCCCC.
+.C.....C..
+.C.....C..
+C.C...C.C.
+.CCCCCCC..
+@rocking-chair-doll* | rocking chair with doll sitting creepy
+.CCCCC....
+.CLTLC....
+.CmmmC....
+.CmSmC....
+.CKSKC....
+.CccccCCC.
+.CcbbcSTC.
+.CCCCCCCC.
+.C.....C..
+.C.....C..
+C.C...C.C.
+.CCCCCCC..
+@rocking-horse-old* | old rocking horse toy faded paint worn
+.........jj..
+........jkkj.
+.......jkkKkj
+..j...jkkkj..
+.jjjjjjkkj...
+.jkkkookkj...
+.jkkkkkkkj...
+.jj.....jj...
+.j.......j...
+CC.......CC..
+.CC.....CC...
+..CCCCCCC....
+@toy-chest* | toy chest box closed nursery painted
+CCCCCCCCCCCC
+ChhhhhhhhhhC
+CiiiiiiiiiiC
+CCCCCnnCCCCC
+ChhahhhhdhhC
+ChaaahhdddhC
+ChhahhhhdhhC
+ChhhhhhhhhhC
+CCCCCCCCCCCC
+@toy-chest-open* | toy chest open toys spilling doll arm
+CCCCCCCCCCCC
+ChhhhhhhhhhC
+CiiiiiiiiiiC
+CCCCCCCCCCCC
+.K.S.aa.j.K.
+.KSSdaaejjK.
+CCCCCCCCCCCC
+ChhahhhhdhhC
+ChaaahhdddhC
+ChhhhhhhhhhC
+CCCCCCCCCCCC
+@dolls-house* | dolls house miniature toy house
+.....aa.....
+....abba....
+...abbbba...
+..abbbbbba..
+.abbbbbbbba.
+CCCCCCCCCCCC
+ClKKlllKKllC
+ClKElllKKllC
+CTTTTTTTTTTC
+ClKKlCClKKlC
+ClKKlCnlKElC
+CCCCCCCCCCCC
+@doll-porcelain | porcelain doll china dress creepy
+..mmmm..
+.mmmmmm.
+.mlllm..
+.lKlKl..
+.llZll..
+..ccc...
+.ccccc..
+lcbcbcl.
+.ccccc..
+.cbcbc..
+ccccccc.
+..l.l...
+..K.K...
+@doll-rag | rag doll cloth button eyes yarn hair
+.o.oo.o.
+ooooooo.
+.kkkkk..
+.kKkKk..
+.kkokk..
+..hhh...
+khhhhhk.
+k.hhh.k.
+..hhh...
+.hhhhh..
+..k.k...
+..k.k...
+@doll-broken | broken doll cracked face missing arm eye
+..mmmm..
+.mmmmmm.
+.mlllKm.
+.lKlKK..
+.llZKl..
+..ccc...
+.ccccc..
+.cbcbcl.
+.ccccc..
+.cbcbc..
+ccccccc.
+..l.....
+..K...l.
+@doll-headless | headless doll body head beside
+..ccc.......
+.ccccc......
+lcbcbcl.....
+.ccccc......
+.cbcbc...mm.
+ccccccc.mmmm
+..l.l...lKlK
+..K.K...llZl
+@teddy-old | old teddy bear worn threadbare
+.CC...CC.
+CTTCCCTTC
+.CTTTTTC.
+.TKTTTKT.
+.TTTpTTT.
+..TTKTT..
+.CTTTTTC.
+TTTppTTTT
+TCTpppTCT
+..TpppT..
+.TTC.CTT.
+.CC...CC.
+@teddy-one-eyed | one eyed teddy bear missing eye stuffing torn
+.CC...CC.
+CTTCCCTTC
+.CTTTTTC.
+.TKTTTlT.
+.TTTpTTl.
+..TTKTT..
+.CTTTTTC.
+TTTplTTTT
+TCTpllTC.
+..TpppT..
+.TTC.CTT.
+.CC...CC.
+@music-box | music box closed wooden wind up key
+.CCCCCCCCCC...
+CLLLLLLLLLLC..
+CTTnTTTTnTTC..
+CCCCCCCCCCCCn.
+CTTTTTTTTTTCnn
+CTTTaaaaTTTCn.
+CTTTTTTTTTTC..
+CCCCCCCCCCCC..
+@music-box-open | music box open ballerina dancer playing
+.CCCCCCCCCC.
+CiiiiiiiiiiC
+CiiiilliiiiC
+CiiiicciiiiC
+CCCCcccccCCC
+....l..l....
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTTTaaaaTTTC
+CCCCCCCCCCCC
+@spinning-top-tin | spinning top toy tin
+....n.....
+....n.....
+..ZZZZZ...
+.ZaaaaaZ..
+hhhhhhhhh.
+.dddddddd.
+..nnnnnn..
+...ZZZZ...
+....ZZ....
+....x.....
+@pram-old* | old pram baby carriage perambulator black
+....VVVVV...
+...VVgggVV..
+..VVggggg...
+.VVgggggg..x
+VVVVVVVVVVx.
+VggggggggV..
+VggggggggV..
+.VVVVVVVV...
+..x.x..x.x..
+.xVx....xVx.
+.VxV....VxV.
+..x......x..
+@furniture-covered* | covered furniture dust sheet shape tall
+....llll....
+...lWWWWk...
+..lWWWWWWk..
+..lWWkWWWk..
+.lWWWkWWWWk.
+.lWWWWWWkWk.
+.lWkWWWWkWk.
+lWWkWWkWWWWk
+lWWWWWkWWkWk
+lWkWWWkWWkWk
+lkkWkkkWkkkk
+.kkkkkkkkkk.
+@furniture-covered-figure* | sheet covered figure shape person under dust sheet standing
+....llll....
+...lWWWWk...
+...lWWWWk...
+...lWWWWk...
+..lWWWWWWk..
+.lWWWkWWWWk.
+.lWWWkWWWWk.
+.lWkWWWWkWk.
+.lWkWWWWkWk.
+.lWWWkWWWWk.
+.lWWWkWWkWk.
+.lkkWkkkWkk.
+..kkkkkkkk..
+@chest-cobwebbed* | cobwebbed chest old trunk webs dusty
+w.w.........
+.wCCCCCCCCC.
+wCLTTwTTTTTC
+.CTTwTwTTTTC
+wCCCCwCCnCCC
+.CTTTTwTnTTC
+.CTTTTTwTTTC
+.CTTTTTTwTTC
+.CCCCCCCCCCC
+@hat-boxes | hat boxes stacked round striped ribbon
+...aaaaaa...
+..abbbbbba..
+..aacaacaa..
+..abcbbcba..
+.dddddddddd.
+deeeeeeeeeed
+ddddnndddddd
+deeeneeeeeed
+deeeeeeeeeed
+.dddddddddd.
+@suitcases-old* | old suitcases stacked luggage leather
+...CCCCCCCC.
+...CTTxxTTC.
+...CTTTTTTC.
+..jjjjjjjjj.
+.jkkkxxkkkkj
+.jkkkkkkkkkj
+CCCCCCCCCCCC
+CTpTTxxTTpTC
+CTpTTTTTTpTC
+CTpTTTTTTpTC
+CCCCCCCCCCCC
+@suitcase-open | open suitcase clothes old empty packed
+CCCCCCCCCCCC
+CaaaaaaaaaaC
+CabababababC
+CaaaaaaaaaaC
+CCCCCCCCCCCC
+ClliihhhcccC
+ClliihhhcccC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+@mannequin* | mannequin shop dummy figure bald
+...lll...
+..lllll..
+..lllll..
+...lll...
+..lllll..
+.lllllll.
+l.lllll.l
+l.lllll.l
+l..lll..l
+...l.l...
+...l.l...
+...l.l...
+....X....
+..XXXXX..
+@mannequin-broken* | broken mannequin armless cracked head missing
+.........
+....K....
+...lKl...
+..lllll..
+.lllllll.
+..lllKl.l
+..llKll.l
+...lKl..l
+...l.l...
+...l.l...
+...l.l...
+....X....
+..XXXXX..
+@dress-form* | dress form tailors dummy sewing stand
+....n....
+...kkk...
+..kkkkk..
+.kklkkkk.
+.kklkkkk.
+..kkkkk..
+..kkkkk..
+.kkkkkkk.
+.kkkkkkk.
+....C....
+....C....
+....C....
+..CCCCC..
+.C..C..C.
+@dress-form-gown* | dress form old wedding dress gown yellowed
+....n....
+...lll...
+..lWWWl..
+.lWWlWWl.
+..lWWWl..
+..lWWWl..
+.lWWkWWl.
+.lWkWWWl.
+lWWkWWkWl
+lWWWkWkWl
+lWkWWWkWl
+lkWkWkWkl
+.kkkkkkk.
+@birdcage-empty | empty birdcage bird cage open door
+....nn....
+...n..n...
+..nnnnnn..
+.n.n..n.n.
+n..n..n..n
+n..n..n..n
+n..n..n..n
+n..n..nnnn
+n..n..n...
+nnnnnnnnnn
+.nnnnnnnn.
+@birdcage-bird | birdcage with bird canary singing
+....nn....
+...n..n...
+..nnnnnn..
+.n.n..n.n.
+n..nEEn..n
+n..EEKnD.n
+n..EEEn..n
+n.nnnnnn.n
+n..n..n..n
+nnnnnnnnnn
+.nnnnnnnn.
+@birdcage-dead | birdcage dead bird skeleton bones
+....nn....
+...n..n...
+..nnnnnn..
+.n.n..n.n.
+n..n..n..n
+n..n..n..n
+n..n..n..n
+n.lnllnK.n
+nlKlllnl.n
+nnnnnnnnnn
+.nnnnnnnn.
+@chairs-stacked* | stacked chairs pile of chairs attic
+..C.CCCC....
+..C.CTTC....
+..CCCCCC.C..
+..C.C..CCCC.
+.CCCCC.CTTC.
+.CTTTC.CCCC.
+.CCCCCCC..C.
+.C...CCTTC..
+CCCCCCCCCC..
+CTTTTC...C..
+CCCCCC......
+C....C......
+@jack-in-box-old | jack in the box clown toy spring
+...ZZ.....
+..ZZZZ....
+.llllll...
+.lKllKl...
+.llZZll...
+..llll....
+...xx.....
+..xx......
+...xx.....
+hhhhhhhh..
+hiahhaihh.
+hihaahihh.
+hhhhhhhh..
+@toy-blocks | toy blocks alphabet wooden letters
+....aaaa....
+....aKKa....
+....aKaa....
+....aaaa....
+.hhhhdddd...
+.hKhhdKKd...
+.hKKhdKdd...
+.hhhhdddd...
+@toy-soldier | tin toy soldier guard uniform
+..KK..
+..KK..
+..KK..
+..SS..
+.ZZZZ.
+ZZnnZZ
+S.ZZ.S
+..gg..
+..gg..
+..gg..
+..KK..
+@toy-train-old | old toy train tin engine wind up
+..VV........
+..VV....ZZZZ
+.VVVV...ZiiZ
+dddddddddddZ
+dnddddddddZZ
+ddddddddddZZ
+.VV..VV..VV.
+.VV..VV..VV.
+@marionette | marionette puppet strings wooden cross
+..C.....C.
+...C...C..
+CCCCCCCCC.
+.x..x..x..
+.x.lll.x..
+.x.lKl.x..
+.x..l..x..
+.lZZZZZl..
+...ZZZ....
+...h.h....
+...h.h....
+...C.C....
+@crib-mobile | crib mobile hanging stars moon nursery
+....xx....
+....x.....
+.xxxxxxxx.
+.x..x...x.
+.x..x...x.
+.E..x...h.
+EEE.l..hhh
+.E.ll...h.
+...l......
+@carpet-rolled | rolled up carpet rug tied attic
+..aaaaaaaaaa..
+.abbbkbbbkbba.
+aZabbkbbbkbbba
+aZabbkbbbkbbba
+.abbbkbbbkbba.
+..aaaaaaaaaa..
+@picture-frames-stack | stack of picture frames leaning canvases
+...nnnnnnnn
+...nmmmmmmn
+.jjjjjjjjmn
+.jllllllljn
+CCCCCCCClnn
+CmmmmmmCln.
+CmmmmmmClj.
+CmmmmmmCj..
+CmmmmmmC...
+CCCCCCCC...
+@sewing-machine* | treadle sewing machine old singer table
+..VVVVVVV...
+.VVnVVVVVV..
+.VV.....VV..
+.VV.....xV..
+.VV.....x...
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+.V........V.
+.V.VVVVVV.V.
+.V.V.VV.V.V.
+.V.VVVVVV.V.
+VVV......VVV
+@spinning-wheel* | spinning wheel wooden yarn old
+...CCCC.....
+..C.C..C....
+.C..C...C.k.
+.CCCCCCCC.kk
+.C..C...C.k.
+..C.C..C..C.
+...CCCC...C.
+....C.....C.
+.CCCCCCCCCC.
+.C........C.
+C..........C
+@box-junk | cardboard box of junk attic clutter old things
+..x...l.....
+.xx..lll.a..
+.jjjjjjjjjj.
+jkkkkkkkkkkj
+jkkjjjjjkkkj
+jkkkkkkkkkkj
+jkkkkkkkkkkj
+jkkkkkkkkkkj
+.jjjjjjjjjj.
+@gramophone-records | pile of old records vinyl discs sleeves
+..KKKKKK....
+.KVVVVVVK...
+KVVKaaKVVK..
+KVVKaaKVVK..
+.KVVVVVVK.l.
+lllllllllll.
+lkkkkkkkkkl.
+lllllllllll.
+@christmas-box | box of old christmas decorations baubles tinsel
+..Z..n..h...
+.ZZZnnnhhh..
+.jZjjnjjhjj.
+jkkkkkkkkkkj
+jkkkdkkkkkkj
+jkkdddkkkkkj
+jkkkdkkkkkkj
+.jjjjjjjjjj.
+@moth-coat | moth eaten coat on hanger old fur
+....xx....
+....x.....
+...xxx....
+..CCCCCC..
+.CTTCCTTC.
+CTTTCCTTTC
+CTKTCCTTTC
+CTTTCCTKTC
+CTTTCCTTTC
+.CTTCCTKC.
+.CTKCCTTC.
+.CCCCCCCC.
+@water-tank* | attic water tank cistern lead pipes
+....x.......
+....x.....x.
+xxxxxxxxxxxx
+xXXXXXXXXXXV
+xXhhihhhhhXV
+xXXXXXXXXXXV
+xXXXXXXXXXXV
+xXXDXXXXXXXV
+xXXXXXXXXXXV
+VVVVVVVVVVVV
+.C........C.
+@bat-roost | bats hanging roosting rafters attic
+CCCCCCCCCCCCCC
+..V.....V.....
+.VVV...VVV....
+.VVV...VVV..V.
+.VZV...VZV.VVV
+..V.....V..VZV
+............V.
+`);
+
+
+category('eerie', 'Eerie things', 'thing');
+props(`
+// ── portraits and mirrors ──
+@portrait-man | portrait painting old man gold frame ancestor
+nnnnnnnnnn
+nmmmVVmmmj
+nmmVVVVmmj
+nmmyyyymmj
+nmmKyyKmmj
+nmmyyyymmj
+nmmxyyxmmj
+nmVVllVVmj
+nVVVVlVVVj
+nVVVVVVVVj
+njjjjjjjjj
+@portrait-woman | portrait painting woman lady gold frame
+nnnnnnnnnn
+nmmCCCCmmj
+nmCCCCCCmj
+nmCyyyyCmj
+nmCKyyKCmj
+nmCyyyyCmj
+nmmyZZymmj
+nmaayyaamj
+naaaaaaaaj
+naaalaaaaj
+njjjjjjjjj
+@portrait-child | portrait painting child girl ribbon frame
+nnnnnnnnnn
+nmmmmmmmmj
+nmcTTTTcmj
+nmTTTTTTmj
+nmTyyyyTmj
+nmTKyyKTmj
+nmmyyyymmj
+nmmlyylmmj
+nmlllllllj
+nmlllllllj
+njjjjjjjjj
+@portrait-scratched | portrait face scratched out clawed painting
+nnnnnnnnnn
+nmmmVVmmmj
+nmmVVVVmmj
+nmKyKyKymj
+nmmKyKyKmj
+nmKyKyKmmj
+nmmKyKyKmj
+nmVVllVVmj
+nVVVVlVVVj
+nVVVVVVVVj
+njjjjjjjjj
+@portrait-eyeless | portrait eyes cut out holes watching painting
+nnnnnnnnnn
+nmmCCCCmmj
+nmCCCCCCmj
+nmCyyyyCmj
+nmKKyyKKmj
+nmKKyyKKmj
+nmmyZZymmj
+nmaayyaamj
+naaaaaaaaj
+naaalaaaaj
+njjjjjjjjj
+@portrait-torn | torn portrait slashed canvas ripped painting
+nnnnnnnnnn
+nmmmVVmKKj
+nmmVVVKKmj
+nmmyyKKmmj
+nmmKKKyKmj
+nmKKKyymmj
+nKKmxyyxmj
+nKmVVllVVj
+nVVVVlVVVj
+nVVVVVVVVj
+njjjjjjjjj
+@portrait-crooked | crooked portrait hanging askew tilted painting
+.nnnn.......
+.nmmmnnnn...
+nnmCCmmmmnn.
+nmCyyCmmmmjj
+nmCKyKCmmmj.
+nmmyyyymmmj.
+.nmayyaammj.
+.naaaaaaamj.
+.njjaaaaaajj
+...jjjjaaaj.
+.......jjjj.
+@portrait-skull | portrait changed to skull death painting haunted
+nnnnnnnnnn
+nmmmmmmmmj
+nmmllllmmj
+nmllllllmj
+nmlKKlKKmj
+nmlKKlKKmj
+nmmllKlmmj
+nmmlKlKmmj
+nVVVlllVVj
+nVVVVVVVVj
+njjjjjjjjj
+@family-photo | family photograph old sepia photo frame group
+CCCCCCCCCCCC
+CllllllllllC
+ClkkjkkjkklC
+ClkjjjjjjklC
+ClkjjjjjjklC
+CljjjjjjjjlC
+CllllllllllC
+CCCCCCCCCCCC
+@family-photo-cracked | cracked family photograph broken glass face missing
+CCCCCCCCCCCC
+CllllKlllllC
+ClkkjKkjkklC
+ClkjjjKKjklC
+ClkjjKjKKklC
+CljjKjjjjKlC
+CllKlllllllC
+CCCCCCCCCCCC
+@photo-wedding | wedding photograph old bride groom oval frame
+..nnnnnn..
+.nllllllj.
+nllkllVllj
+nlklllVllj
+nllWlVVVlj
+nlWWWVVVlj
+nlWWWVVVlj
+.jllllllj.
+..jjjjjj..
+@mirror-standing* | standing mirror cheval full length old
+..CCCCCC..
+.CiiiiiiC.
+CiiWiiiiiC
+CiWiiiiiiC
+CiiiiiiiiC
+CiiiiiiiiC
+CiiiiiWiiC
+CiiiiWiiiC
+CiiiiiiiiC
+.CiiiiiiC.
+..CCCCCC..
+.CC....CC.
+CC......CC
+@mirror-standing-cracked* | cracked mirror broken standing bad luck
+..CCCCCC..
+.CiiiKiiC.
+CiiWKiiiiC
+CiWiKiiiiC
+CiiKKKiiiC
+CiKiiKKKKC
+CKiiiKWiiC
+CiiiiKiiiC
+CiiiiKiiiC
+.CiiiiKiC.
+..CCCCCC..
+.CC....CC.
+CC......CC
+@mirror-covered* | covered mirror black cloth draped mourning
+..VVVVVV..
+.VVVXVVVV.
+VVVXVVVVVV
+VVVXVVVXVV
+VVVVVVVXVV
+VVXVVVVXVV
+VVXVVVVVVV
+VVXVVXVVVV
+VVVVVXVVVV
+.VVVVXVVC.
+..CVVVVC..
+.CC....CC.
+CC......CC
+@mirror-ghost* | mirror with ghost face reflection apparition
+..CCCCCC..
+.CiiiiiiC.
+CiiilliiiC
+CiillllliC
+CiilKlKliC
+CiillllliC
+CiiilKliiC
+CiiilllliC
+CiilllllgC
+.CilllllC.
+..CCCCCC..
+.CC....CC.
+CC......CC
+// ── occult ──
+@ouija-board | ouija board spirit seance planchette letters
+CCCCCCCCCCCCCC
+ClnllllllllnlC
+ClKlKlKlKlKllC
+CllKlKlKlKlKlC
+CllllllllllllC
+ClllKKlTTlKKlC
+CllllllTxTlllC
+CCCCCCCCCCCCCC
+@pentagram-circle | pentagram chalk circle ritual summoning floor | o=false
+.....lllll.....
+...ll..l..ll...
+..l...l.l...l..
+.l....l.l....l.
+.lllllllllllll.
+l..l.l...l.l..l
+l...ll...ll...l
+l...l.l.l.l...l
+.l.l...l...l.l.
+.l.l..l.l..l.l.
+..ll.l...l.ll..
+...ll.....ll...
+.....lllll.....
+@candles-group | group of candles lit melted wax cluster
+..E.........
+..F...E.....
+..l...F..E..
+..l...l..F..
+E.l...l..l..
+F.l.E.l..l..
+l.l.F.l..l.E
+l.l.l.l..l.F
+lkl.l.lk.l.l
+lklklklkklkl
+kkkkkkkkkkkk
+@candles-black | black candles ritual dark flames
+....E.....
+....F..E..
+.E..V..F..
+.F..V..V..
+.V..V..V..
+.V..V..V..
+.V..V..V..
+VVVVVVVVV.
+@candle-skull | skull with candle on top wax dripping
+....E.....
+....F.....
+....l.....
+..lllll...
+.lllllll..
+.lKKlKKl..
+.lKKlKKl..
+.lllKlll..
+..lllll...
+..lKlKl...
+@ritual-bowl | ritual bowl blood offering bronze
+............
+.nnnnnnnnnn.
+nZZoZZZZoZZj
+njZZZZZZZZjj
+.njjjjjjjj..
+..nnjjjjj...
+....njj.....
+...nnjjj....
+@seance-table* | seance table round candle crystal ball cloth
+.....ii.....
+....iWii....
+.E..iiii..E.
+.l...jj...l.
+.QQQQQQQQQQ.
+QQPQQQQQQPQQ
+QQQQQQQQQQQQ
+.QQPQQQQPQQ.
+.QQQQQQQQQQ.
+..QQ.CC.QQ..
+.....CC.....
+....CCCC....
+@crystal-ball-seance | crystal ball fortune teller glowing stand
+...iiii...
+..iiWiii..
+.iiWiihii.
+.iiiihhii.
+.iiihhhii.
+..iihhii..
+...iiii...
+..nnnnnn..
+.nnjjjjnn.
+@tarot-cards | tarot cards spread death card fortune
+llll.llll.llll
+lKKl.lhhl.llZl
+lKKl.lhll.llZl
+llll.lhhl.lZZl
+lKKl.llll.llZl
+llll.llll.llll
+@voodoo-doll | voodoo doll pins sackcloth
+....x.....
+..x.kk....
+...kkkk.x.
+...kKkKk..
+...kkkk...
+.x..kk....
+..kkkkkk..
+.k.kkZk.k.
+...kkkk.x.
+...kkkk...
+...k..k...
+...k..k...
+@spell-book | old spell book grimoire open strange symbols
+.llllll.llllll.
+lWWWWWWlWWWWWWl
+lWKKWKWlWWKKWWl
+lWWWWWWlWKWWKWl
+lWKWKKWlWKWWKWl
+lWWWWWWlWWKKWWl
+lWKKKWWlWWWWWWl
+QQQQQQQQQQQQQQQ
+.QQQQQQQQQQQQQ.
+@bell-jar | bell jar glass dome dead moth specimen
+...iiii...
+..i....i..
+.i......i.
+.i.j..j.i.
+.i.jjjj.i.
+.i..KK..i.
+.i.jjjj.i.
+.i.j..j.i.
+.i......i.
+CCCCCCCCCC
+.CCCCCCCC.
+@hand-of-glory | severed hand candle occult relic
+.E..E.E...
+.F..F.F.E.
+.l..l.l.F.
+.l..l.l.l.
+.ll.l.l.l.
+l.lllllll.
+ll.llllll.
+.llllllll.
+..llllll..
+...llll...
+...oooo...
+// ── blood and marks ──
+@bloodstain | bloodstain blood pool dried floor | o=false
+....ooo.....
+..oooooooo..
+.oooZZoooooo
+oooZZZZooooo
+oooooZZoooo.
+.ooooooooo..
+...oooo.....
+@blood-pool | fresh pool of blood red puddle | o=false
+............
+...ZZZZZ....
+.ZZZRRZZZZ..
+ZZRRZZZZZZZ.
+ZZZZZZZRRZZZ
+.ZZZZZZZZZZ.
+..ZZZZZZZ...
+o...ZZZ.....
+@blood-trail | blood trail drag marks smeared | o=false
+.oo...........
+ooZoo.........
+.ooZZoo.......
+...ooZZoo..o..
+.....ooZZooo..
+.o.....ooZZoo.
+.........ooZoo
+...........oo.
+@blood-drips | blood dripping drops spatter wall | o=false
+ZZZZZZZZZZZZ
+ZoZZoZZZoZZo
+Z.oZ.oZ..oZ.
+Z..Z..Z...Z.
+o..Z..o...Z.
+...o......Z.
+..........o.
+...Z........
+..........Z.
+@footprints-muddy | muddy footprints boots tracks mud | o=false
+..CC......
+.CCCC.....
+.CCCC.....
+..CC......
+..........
+..CC..CC..
+......CCCC
+......CCCC
+.......CC.
+..........
+.......CC.
+@footprints-bloody | bloody footprints bare feet blood tracks | o=false
+.o.o......
+oooo......
+.ooo......
+.ooo......
+..oo......
+......o.o.
+......oooo
+......ooo.
+......ooo.
+......oo..
+@scratch-marks | scratch marks claw marks gouges | o=false
+K...K...K..
+K...K...K..
+.K..K...K..
+.K...K..K..
+.K...K...K.
+..K..K...K.
+..K..K...K.
+..K...K..K.
+...K..K...K
+@handprint-bloody | bloody handprint hand print smear | o=false
+o.o.o.....
+o.o.o.o...
+o.o.o.o...
+ooooo.o...
+ooooooo...
+.oooooo.o.
+.ooooooo..
+..ooooo...
+..oooo....
+...o.o....
+...o......
+@message-blood | message written in blood words wall get out | o=false
+oo.ooo.ooo....
+o..o....o.....
+o.oooo..o.....
+ooo.ooo.o.....
+..............
+.ooo.o.o.ooo..
+.o.o.o.o..o...
+.o.o.o.o..o...
+.ooo.ooo..o.o.
+...........o..
+@chalk-outline | chalk outline body crime scene floor | o=false
+....lll.......
+...l...l......
+...l...l......
+.ll.lll.lll...
+l...........l.
+.lll.....lll..
+....l...l.....
+....l...l.....
+...l..l..l....
+..l..l.l..l...
+..lll...lll...
+@bullet-holes | bullet holes wall shots cracks | o=false
+..x.........
+.xKx....x...
+..x....xKx..
+........x...
+....x.......
+...xKx......
+....x....x..
+........xKx.
+.........x..
+// ── death ──
+@noose | noose hanging rope gallows
+....jj....
+....jj....
+....jj....
+....jj....
+...jkkj...
+....jj....
+...j..j...
+..j....j..
+..j....j..
+..j....j..
+...j..j...
+....jj....
+@coffin-shut* | closed coffin wooden casket lid cross
+...CCCCCC...
+..CLTTTTTC..
+.CLTTnnTTTC.
+CLTTTnnTTTTC
+CLTnnnnnnTTC
+CLTTTnnTTTTC
+.CTTTnnTTTC.
+.CLTTnnTTTC.
+..CTTnnTTC..
+..CLTTTTTC..
+...CTTTTC...
+...CCCCCC...
+@coffin-open* | open coffin empty lining lid off
+...CCCCCC...
+..CaaaaaaC..
+.CabbbbbbaC.
+CabbllllbbaC
+CabbllllbbaC
+CabbbbbbbbaC
+.CabbbbbbaC.
+.CabbbbbbaC.
+..CabbbbaC..
+..CabbbbaC..
+...CaaaaC...
+...CCCCCC...
+@coffin-body* | open coffin with body corpse pale hands crossed
+...CCCCCC...
+..CaallaaC..
+.CaalKKlaaC.
+CabblllllbaC
+CabVVVVVVbaC
+CabVllllVbaC
+.CaVVVVVVaC.
+.CaVVVVVVaC.
+..CaVVVVaC..
+..CaVVVVaC..
+...CaVVaC...
+...CCCCCC...
+@coffin-child* | small child coffin white little casket
+..llllll..
+.lWWWWWWk.
+lWWWnnWWWk
+lWWnnnnWWk
+lWWWnnWWWk
+.lWWnnWWk.
+.lWWWWWWk.
+..kkkkkk..
+@coffin-upright* | upright coffin standing against wall lid ajar
+..CCCCCC..
+.CLTTTKKC.
+CLTTTTKKKC
+CLTTTTKKKC
+CLTTTTKlKC
+CLTTTTKKKC
+.CLTTTKKC.
+.CLTTTKKC.
+.CLTTTKKC.
+..CLTTKC..
+..CLTTKC..
+..CCCCCC..
+@urn-funeral | funeral urn ashes brass mantel
+...nnnn...
+..nnjjnn..
+...nnnn...
+..nnnnnn..
+.nEnnnnnj.
+.nEnnnnnj.
+.nnnnnnjj.
+..nnnnjj..
+...njjj...
+..nnnnnn..
+@urn-spilled | spilled urn ashes knocked over broken
+........xx..
+..nnnn.xxxx.
+.nEnnnnxXxxx
+nnnnnnjxxXxx
+.nnnnjj.xxx.
+..jjjj..x...
+@specimen-jar-eye | specimen jar eyeball preserved formaldehyde
+.VVVVVV.
+.XXXXXX.
+ffffffff
+fefffffe
+fefWWffe
+feWhKWfe
+fefWWffe
+feffZffe
+feefZfee
+.eeeeee.
+@specimen-jar-brain | specimen jar brain preserved laboratory
+.VVVVVV.
+.XXXXXX.
+ffffffff
+fefffffe
+fefccbfe
+feccbccb
+febccbce
+fefcbcfe
+feefffee
+.eeeeee.
+@specimen-jar-hand | specimen jar severed hand preserved
+.VVVVVV.
+.XXXXXX.
+ffffffff
+fellflfe
+fellflfe
+felllffe
+fellllfe
+fefllffe
+feefoeee
+.eeeeee.
+@specimen-jar-creature | specimen jar strange creature thing tentacles
+.VVVVVV.
+.XXXXXX.
+ffffffff
+fefaafe.
+feaKaKae
+feaaaaae
+fefaaafe
+feafafae
+feefafee
+.eeeeee.
+@specimen-shelf* | shelf of specimen jars laboratory collection
+CCCCCCCCCCCC
+C.XX.XX.XX.C
+C.ff.ff.ff.C
+C.fl.fa.fW.C
+C.ff.ff.ff.C
+CTTTTTTTTTTC
+C.XX.XX.XX.C
+C.ff.ff.ff.C
+C.fZ.fd.fl.C
+C.ff.ff.ff.C
+CTTTTTTTTTTC
+C..........C
+@taxidermy-deer | mounted deer head antlers stag trophy taxidermy
+l..l....l..l
+l.ll....ll.l
+.ll......ll.
+..lTTTTTTl..
+.TTTTTTTTTT.
+...TKTTKT...
+...TTTTTT...
+....TTTT....
+....TKKT....
+..CCCCCCCC..
+...CCCCCC...
+@taxidermy-boar | mounted boar head tusks trophy taxidermy
+.CC......CC.
+.CTCCCCCCTC.
+..CTTTTTTC..
+..CKTTTTKC..
+..CTTTTTTC..
+.lCTTppTTCl.
+.l.TpKKpT.l.
+....pppp....
+..mmmmmmmm..
+...mmmmmm...
+@taxidermy-crow | stuffed crow raven on perch glass eye taxidermy
+...VVV....
+..VVEVV...
+.nVVVVV...
+...VVVVV..
+..VVVVVVV.
+..VVVVVVVV
+...VVVVVVV
+....V.V..V
+CCCCCCCCC.
+....CC....
+..CCCCCC..
+@stuffed-owl | stuffed owl taxidermy glass dome staring
+..C....C..
+.CTCCCCTC.
+.TEETTEET.
+.TEKTTEKT.
+.TTTnnTTT.
+.TpTpTpTT.
+.TTpTpTpT.
+.TpTpTpTT.
+..TTTTTT..
+..nn..nn..
+CCCCCCCCCC
+@stuffed-fox | stuffed fox taxidermy snarling on board
+........p...
+.p.p...ppp..
+.ppp..pppp..
+pKppppppppl.
+lpppppppp.l.
+.llpppppp...
+..p.p.p.p...
+..p.p.p.p...
+CCCCCCCCCCC.
+@stuffed-cat | stuffed cat taxidermy black sitting stiff
+.V...V...
+.VV.VVV..
+.VVVVVV..
+.VEVVEV..
+.VVVzVV..
+..VVVV...
+.VVVVVV..
+.VVVVVVV.
+.VVVVVVVV
+.VV.VV.VV
+CCCCCCCCC
+// ── keys, boxes and papers ──
+@key-rack | key rack board hooks old keys numbered
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+CTxTTnTTxTTTTC
+CTxTTnTTxTTxTC
+CCxCCnCCxCCxCC
+.xxx.nnnxxx.x.
+.x.x.n.nx.x...
+.xxx.nnnxxx...
+@locked-box | locked box padlock small chest secret
+.CCCCCCCCCC.
+CLTTTTTTTTTC
+CTTTTxxTTTTC
+CCCCxCCxCCCC
+CTTTnnnnTTTC
+CTTTnKKnTTTC
+CTTTnnnnTTTC
+CCCCCCCCCCCC
+@strongbox* | strongbox iron cash box heavy riveted
+VVVVVVVVVVVV
+VXXXXXXXXXXV
+VXwXXXXXXwXV
+VVVVVVVVVVVV
+VXXXXnnXXXXV
+VXwXXnKXXwXV
+VXXXXXXXXXXV
+VVVVVVVVVVVV
+@letters-bundle | bundle of letters tied ribbon old envelopes
+.llllllllll.
+lWWWWWZWWWWk
+lWkkkWZWkkWk
+lZZZZZZZZZZk
+lWkkkWZWkkWk
+lWWWWWZWWWWk
+.kkkkkkkkkk.
+@letter-unsealed | open letter envelope note handwriting wax seal
+..llllllll..
+..lWXXXXWl..
+..lWXXWWWl..
+.llWXXXXWll.
+lkllWWWWllkl
+lWkkllllkkWl
+lWWWkZZkWWWl
+lWWWWZZWWWWl
+llllllllllll
+@diary-old | old diary journal locked leather clasp
+.ooooooooo.
+oZZZZZZZZoj
+oZnnnnnZZoj
+oZnZZZnZnnj
+oZnnnnnZnnj
+oZZZZZZZZoj
+oZZZZZZZZoj
+ooooooooooj
+.jjjjjjjjj.
+@photo-pile | pile of old photographs sepia snapshots scattered
+....llllll..
+.lllljjjjl..
+.lkjljjkjl..
+.lkjllllllll
+.lkkkljkkkjl
+.llllljkjjjl
+...lkkljjjjl
+...lkjllllll
+...lllll....
+@newspaper-old | old newspaper headline yellowed
+kkkkkkkkkkkk
+kKKKKkKKKKKk
+kkkkkkkkkkkk
+kXXXXkjjjjjk
+kkkkkkjjjjjk
+kXXXXkjjjjjk
+kXXXkkkkkkkk
+kkkkkkXXXXXk
+kXXXXkXXXkkk
+kkkkkkkkkkkk
+@medicine-bottles | old medicine bottles poison apothecary brown glass
+....m.......
+...mm...VV..
+..CCCC..dd..
+..CllC.dddd.
+m.CllC.dlld.
+CCCCCC.dlld.
+ClCTTC.dKKd.
+CCCTTC.dddd.
+@pill-box | pill box tablets spilled pills tin
+...........l
+.xxxxxxxx.l.
+xwwwwwwwwX..
+xwllZwllwX.l
+xwwwwwwwwX..
+.XXXXXXXX.l.
+@syringe-tray | syringe tray surgical needles kidney dish
+............
+.xxxxxxxxxx.
+xwwwwwwwwwwX
+xwXxxxxfwwwX
+xwwwwwwwwKwX
+xwfffxxXxwwX
+xwwwwwwwwwwX
+.XXXXXXXXXX.
+@surgical-tools | surgical tools tray scalpel saw forceps bloody
+.xxxxxxxxxxxx.
+xwwwwwwwwwwwwX
+xwxxxxxxKKKwwX
+xwwwwwwwwwwwwX
+xwXwXwXwXKKwwX
+xwxxxxxxxKKwwX
+xwwwwwowwwwwwX
+xwxxKxxxxwoowX
+.XXXXXXXXXXXX.
+@bone-saw | bone saw surgical bloody amputation
+.CCC........
+CTTTxxxxxxxx
+CT.TxwwwwwwX
+CTTTxXoXoXoX
+.CCC.X.X.o.X
+@knife-bloody | bloody knife kitchen blade murder weapon
+.........xw
+........xww
+.......xww.
+......xww..
+.....oww...
+....oow....
+...Coo.....
+..CTC......
+.CTC.......
+CTC..o.....
+@axe-bloody | bloody axe hatchet embedded in block
+.....T......
+....T.......
+.oxxT.......
+ooxxxT......
+.oxxT.......
+..CTCCCCCC..
+.CLLLLLLLLC.
+.CTTTTTTTTC.
+.CTTTTTTTTC.
+.CCCCCCCCCC.
+@straitjacket | straitjacket asylum restraint straps buckles
+...llll...
+..lllllll.
+.lllkklll.
+lllllllllk
+lTTlllTTlk
+lllTTTlllk
+lTTlllTTlk
+.llTTTllk.
+.lllllllk.
+.lkk..kkk.
+// ── institutions ──
+@wheelchair-old* | old wheelchair wicker wooden antique asylum
+.CC........
+.CC........
+.CjC.......
+.CkC.......
+.CjC.......
+.CkCCCCCC..
+.CCjkjkjC..
+.xxxxx..C..
+xX.x.Xx.C..
+x.xxx.x.CC.
+xX.x.Xx..xx
+.xxxxx...xx
+@gurney* | gurney hospital trolley stretcher wheels
+..............
+llllllllllllll
+lWWWWllllllllk
+xxxxxxxxxxxxxx
+.x..........x.
+.xx........xx.
+.x.x......x.x.
+.x..xxxxxx..x.
+VV..........VV
+VV..........VV
+@gurney-body* | gurney with body under sheet corpse morgue
+....lll.....ll
+..lllWllllllWl
+lllWWWWWWWWlll
+lWWWlllllllllk
+xxxxxxxxxxxxxx
+.x..........x.
+.xx........xx.
+.x.x......x.x.
+VV..........VV
+VV..........VV
+@operating-table* | operating table surgery straps lamp steel
+....xxxxxx....
+...xEEEEEEx...
+......xx......
+xxxxxxxxxxxxxx
+xwwCwwwwwwCwwX
+XXXXXXXXXXXXXX
+......xX......
+......xX......
+......xX......
+....xxxxXX....
+...XXXXXXXX...
+@electric-chair* | electric chair execution straps wires cap
+..xxxx....
+..x..x..V.
+.CCCCCC.V.
+.CLTTTC.V.
+.CTmmTC.V.
+.CTTTTC.V.
+.CTmmTCVV.
+CCCCCCCC..
+CmTTTTmC..
+CCCCCCCC..
+C.C..C.C..
+CmC..CmC..
+C.C..C.C..
+@restraint-bed* | restraint bed straps asylum leather buckles
+x..........x
+xxxxxxxxxxxx
+xWWWlllllllx
+xllllllllllx
+xTTnTTTTnTTx
+xllllllllllx
+xTTnTTTTnTTx
+xllllllllllx
+xxxxxxxxxxxx
+x..........x
+V..........V
+@cell-bunk* | cell bunk prison bed thin mattress chain wall
+x..........x
+.x........x.
+..x......x..
+XXXXXXXXXXXX
+XkkkkjkkkkkX
+XjjjjjjjjjjX
+XXXXXXXXXXXX
+V..........V
+@slop-bucket | slop bucket cell pail dirty flies
+..K....K..
+....xx....
+..xx..xx..
+.x......x.
+xXXXXXXXXx
+xwjjjjjjXV
+.xwxxxxXV.
+.xwxxxxXV.
+.xwxxxxXV.
+..XXXXXV..
+@iv-stand* | iv drip stand hospital bag tube old
+..xxxxx..
+..x...x..
+.fff..x..
+.fZf..x..
+.fZf..x..
+..f...x..
+..x...x..
+..x...x..
+...x..x..
+......x..
+......x..
+..xxxxxxx
+..V..V..V
+@dentist-chair* | dentist chair old leather drill frightening
+.........xx.
+.oooo...x..x
+oZZZZo..x...
+oZZZZo..x...
+oZZZZo......
+.oZZZoooooo.
+..oZZZZZZZZo
+..oooooooooo
+.....VV.....
+.....VV.....
+...VVVVVV...
+..VVVVVVVV..
+@whipping-post* | whipping post shackles chains punishment
+...CCCC...
+...CLTC...
+.x.CLTC.x.
+.xxCLTCxx.
+.x.CLTC.x.
+xxxCLTCxxx
+x.xCLTCx.x
+xxxCLTCxxx
+...CLTC...
+...CLTC...
+..CCLTCC..
+.CCCCCCCC.
+// ── vermin, webs and holes ──
+@rat-trap | rat trap mouse trap snap cheese
+..xxxxxxxx..
+.x........x.
+CCCCCCCCCCCC
+CLLxxLLLnLLC
+CTTxxTTTTTTC
+CCCCCCCCCCCC
+@rat-dead | dead rat on its back vermin
+............
+..VV........
+.VXXVVVVV...
+VXKXXXXXXVc.
+.VVXXXXXXVcc
+...V.V.V...c
+@flies-swarm | swarm of flies buzzing insects cloud | o=false
+..K.....K...
+.....K......
+.K.......K..
+....K..K....
+..K.........
+.......K..K.
+.K..K.......
+.........K..
+...K..K.....
+@cobweb-large | large cobweb spider web corner big | o=false
+wwwwwwwwwwwwww
+w.w..w...w....
+ww.w..w...ww..
+w.w.w..ww.....
+w..w.ww..w....
+ww..w..w..w...
+w.w.w...w.....
+w..w.w...w....
+w...w.w.......
+ww...w........
+w.w...w.......
+w..w..........
+w.............
+@cobweb-hanging | hanging cobwebs strands dusty ceiling | o=false
+wwwwwwwwwwwwww
+w.w.w..w.w..ww
+w.w.ww.w.w..w.
+w..w.w.w..w.w.
+w..w...w..w...
+...w...w..w...
+...w......w...
+..........w...
+@spider-thread | spider dangling on thread web | o=false
+....w....
+....w....
+....w....
+....w....
+K...w...K
+.K.KKK.K.
+..KKKKK..
+.K.KZK.K.
+K...K...K
+@cobweb-doorway | cobweb across doorway thick webs blocked | o=false
+ww.w....w...ww
+w.ww...w..ww.w
+w...ww.w.w...w
+.w....www...w.
+..w..w.w.ww.w.
+...ww..w...w..
+..w..w.w..w.w.
+.w....www....w
+w...ww.w.ww..w
+w.ww...w...www
+ww.....w....ww
+@floor-hole-boards | hole in the floor broken floorboards pit
+..CCCCCCCCC...
+.CTTKKKKKTTC..
+CTTKKKKKKKTTC.
+CTKKKKKKKKKTC.
+CLLKKKKKKKTTTC
+.CTTKKKKKKTTC.
+..CTTTKKKTTC..
+...CCCCCCCC...
+@wall-hole | hole in the wall broken plaster bricks dark
+...llllll...
+.llKKKKKKll.
+llKKKKKKKKKl
+lKKKKZoKKKKl
+lKKKKKKKKKKl
+llKKKKKKKKll
+.lloKKKKZll.
+...llllll...
+.....kk..k..
+@loose-floorboard | loose floorboard lifted hiding place secret
+.....CCCCCCCC.
+....CLLLLLLLC.
+...CTTTTTTTC..
+CCCCCCCCCCCCCC
+CTTTCKKKKKKCTC
+CTTTCKnnKKKCTC
+CCCCCCCCCCCCCC
+@peephole | peephole eye in wall watching spy hole
+..llllll..
+.llKKKKll.
+llKlWWlKll
+lKlWhKWlKl
+llKlWWlKll
+.llKKKKll.
+..llllll..
+@rat-hole | rat hole in skirting board mouse hole eyes
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTTTKKKKTTTC
+CTTKKKKKKTTC
+CTTKEKKEKTTC
+CTTKKKKKKTTC
+CCCCCCCCCCCC
+@bones-small | small bones animal skeleton remains
+............
+.ll......l..
+lKll..l.l.l.
+llll.lllll..
+.l.l..l.l.l.
+......l..l..
+@skeleton-chained* | chained skeleton sitting against wall remains
+.x........x.
+.x..llll..x.
+.x.lKllKl.x.
+.x..llll..x.
+.xl..ll..lx.
+..llllllll..
+....lKKl....
+....llll....
+...ll..ll...
+..ll....ll..
+..l......l..
+@hanging-cage* | hanging cage gibbet bones iron
+.....xx.....
+.....xx.....
+...XXXXXX...
+..X.X..X.X..
+..X.XllX.X..
+..X.lKKl.X..
+..X.XllX.X..
+..X.X..X.X..
+..X.Xl.X.X..
+..XXXXXXXX..
+...XXXXXX...
+`);
+
+
+category('yard', 'Porch, garden & graveyard', 'thing');
+props(`
+@porch-swing* | porch swing bench hanging chains
+x..........x
+x..........x
+x..........x
+xCCCCCCCCCCx
+xCLTLTLTLTCx
+xCTTTTTTTTCx
+CCCCCCCCCCCC
+CLLLLLLLLLLC
+CCCCCCCCCCCC
+@garden-bench-old* | old garden bench weathered broken slat
+CC........CC
+CjjjjjjjjjjC
+C..........C
+Cjjjjj.jjjjC
+C..........C
+CkkkkkkkkkkC
+CjjjjjjjjjjC
+CC........CC
+C..........C
+@wheelbarrow-old* | old wheelbarrow rusty earth soil
+...........C
+XXXXXXXXXX.C
+XCCCTCCTCXC.
+.XDxxxxxXC..
+.XxxxDxxX...
+..XXXXXX....
+.VVV..C.....
+VXxXV.C.....
+.VVV........
+@gnome-old* | old garden gnome faded moss creepy
+...Z....
+..ZZZ...
+..ZZZ...
+.ZZZZZ..
+.lSSSl..
+.lKSKl..
+.lllll..
+..lll...
+.hhhhh..
+dhhhhhS.
+.hhhhh..
+.dd.dd..
+.KK.KK..
+@gnome-broken | broken garden gnome smashed pieces head
+............
+.....hhh....
+....hhhhh...
+...dhhhhhK..
+....hKhh....
+....dd.dd...
+.ZZ.KK.KK...
+ZZZl........
+.lKSl..h....
+..ll........
+@birdbath* | stone birdbath garden water moss
+xxxxxxxxxx
+xihhhhhhiX
+.xxxxxxXX.
+...xwXX...
+...xwX....
+...xwX....
+...xdX....
+..xxdXX...
+.xxwwXXX..
+@sundial* | sundial stone garden pedestal time
+....nn....
+...nn.....
+.xxxxxxxx.
+.XXXXXXXX.
+...xwX....
+...xwX....
+...xwX....
+...xdX....
+..xxwXX...
+.xxwwXXX..
+@well-cover* | covered well wooden lid boarded old stone
+.CCCCCCCCCC.
+CLTLTLTLTLTC
+CTTTTTTTTTTC
+CXXXXXXXXXXC
+xwxxwxxwxxwX
+xxwxxwxxwxxX
+xwxxwxxwxxwX
+XXXXXXXXXXXX
+@washing-line-sheets | washing line sheets hanging laundry white
+C............C
+CxxxxxxxxxxxxC
+C.llll.lllll.C
+C.lWWl.lWWWl.C
+C.lWWl.lWWWl.C
+C.lWWl.lWoWl.C
+C.lWWl.lWWWl.C
+C.kkkk.lWWWl.C
+C......kkkkk.C
+C............C
+C............C
+@kennel-old* | old dog kennel empty chain bowl
+....CCCC....
+...CTTTTC...
+..CTTTTTTC..
+.CTTTTTTTTC.
+CCCCCCCCCCCC
+.CTTKKKKTTC.
+.CTKKKKKKTC.
+.CTKKKKKKTC.
+.CTKKKKKKTC.
+.CCKKKKKKCCx
+..........xx
+@scarecrow-old* | old scarecrow tattered sack head crow field
+...CCCC....
+..CCCCCC...
+...kkkk..K.
+...kKKk.KK.
+...kkok....
+jCCaaaaCCj.
+j..aaaa..j.
+...aaha....
+...aaaa....
+...j..j....
+....CC.....
+....CC.....
+....CC.....
+@cross-wooden* | wooden cross grave marker crooked
+....CC....
+....TC....
+....TC....
+.CCCTCCCC.
+.TTTTTTTC.
+....TC....
+....TC....
+....TC....
+....TC....
+....TC....
+...mTCm...
+..mmmmmm..
+@grave-open | open grave dug hole pit earth
+.mmmmmmmmmmmm.
+mCCCCCCCCCCCCm
+mCKKKKKKKKKKCm
+mCKKKKKKKKKKCm
+mCKKKKKKKKKKCm
+mCKKKKKKKKKKCm
+mTTCCCCCCCCTTm
+.mmmmmmmmmmmm.
+@earth-mound | mound of earth fresh grave soil heap
+....CCCC....
+..CCTTTCCC..
+.CTTTCTTTCC.
+CTTCTTTTCTTC
+CCTTTCTTTTCC
+.CCCCCCCCCC.
+@shed-tools* | garden tools leaning spade rake fork shed
+.x....x.x.x.
+xXx...xxxxx.
+xXx.....T...
+.T......T...
+.T..XX..T...
+.T.XxxX.T...
+.T..TT..T...
+.T..T...T...
+.T..T...T...
+.T..T...T...
+.T..T...T...
+@mailbox-old* | old mailbox letterbox rusty post
+.XXXXXX..
+XxxxxxxX.
+XxxDxxxXZ
+XxxxxxxXZ
+XXXXXXXX.
+...TC....
+...TC....
+...TC....
+...TC....
+...TC....
+...TC....
+@dead-tree-small* | small dead tree bare branches leafless
+C....C...C
+.C...C..C.
+..C.CC.C..
+C..CC.C...
+.C..CC..C.
+..C.CCCC..
+...CCC....
+....CC....
+....CC....
+....CC....
+...CCCC...
+..CC..CC..
+@crow-post* | crow perched on fence post raven watching
+...VV.....
+..VVKV....
+.VVVVVn...
+VVVVVV....
+.VVVVV....
+..V.V.....
+..CCCC....
+..CLTC....
+..CTTC....
+..CLTC....
+..CTTC....
+..CTTC....
+@tyre-swing* | tyre swing rope tree hanging tire
+....jj....
+....jj....
+....jj....
+....jj....
+....jj....
+..VVjjVV..
+.VVVVVVVV.
+VVV....VVV
+VV......VV
+VVV....VVV
+.VVVVVVVV.
+..VVVVVV..
+@bicycle-rusty* | rusty old bicycle bike leaning
+....X.......
+..XXX....XD.
+....X....X..
+....XDXXXX..
+...X.X..X.X.
+.VVX..XD.VVV
+V..VX..XV..V
+V.DV....VX.V
+V..V....V..V
+.VV......VV.
+@headstone-leaning* | leaning headstone old grave cracked moss
+....xxxxx..
+...xwwwwxX.
+..xwwwwwxX.
+..xwXXwwxX.
+..xwwKwwxX.
+.xwwXKXwxX.
+.xwwwwKwxX.
+.xwdwwwwxX.
+xdddwwddxX.
+ddXXXXXXdd.
+@statue-weeping* | weeping angel stone statue wings covering face cemetery
+.x...xx...x.
+xw..xwwx..wx
+xww.xwwx.wwx
+xwwxwwwwxwwx
+.xwwwXXwwwx.
+.xwwwXXwwwx.
+..xwwwwwwx..
+...xwwwwx...
+...xwwwwx...
+..xwwwwwwx..
+..xwwwwwwx..
+.XXXXXXXXXX.
+@lantern-porch | porch lantern hanging lit dim
+...xx...
+...x....
+..VVVV..
+.VVVVVV.
+.VnEEnV.
+.VnEEnV.
+.VnnnnV.
+.VVVVVV.
+..VVVV..
+@rain-barrel-moss* | rain barrel mossy water butt drainpipe
+xx........
+.xx.......
+..xCCCCCC.
+..CggghggC
+..XXXXXXXX
+..CLTdCTTC
+..CLTTCTTC
+..XXXXXXXX
+..CLdTCTdC
+..CddTCddC
+...CCCCCC.
+@bird-table* | bird table feeder garden post
+..CCCCCC..
+.CTTTTTTC.
+CCCCCCCCCC
+.C......C.
+CCCCCCCCCC
+....TC....
+....TC....
+....TC....
+....TC....
+....TC....
+...CTCC...
+@pumpkin-rotten | rotten pumpkin collapsed mouldy
+....d.......
+...dd.......
+..ppppppp...
+.ppppKpppp..
+pppKppppdpp.
+ppDpppKpppp.
+pdppppppppK.
+.KppdppppK..
+@garden-roller* | garden roller heavy iron lawn
+.......C..
+......C...
+.....C....
+....C.....
+.XXXC.....
+XxxxXX....
+XxwxxX....
+XxxxxX....
+.XXXX.....
+@beehive-old* | old beehive wooden white abandoned
+..llllll..
+.lllllllk.
+llllllllkk
+.lWWWWWWk.
+.jjjjjjjj.
+.lWWWWWWk.
+.jjjjjjjj.
+.lWWKKWWk.
+.jjjjjjjj.
+.C......C.
+`);
 // ═════════════════════════ end of the old house pack ═════════════════════════
 
 // S() reads the current category when a sprite is drawn, not when it is declared, so the
@@ -15399,7 +19149,7 @@ V..........V
 cat = CATS.find((c) => c.id === 'symbols');
 
 // ───────────────────────── write everything ─────────────────────────
-const EXPECT = 1965;   // 500 original sprites + 362 level tiles + 103 level props + 1000 everyday and modern sprites
+const EXPECT = 2745;   // 500 original sprites + 362 level tiles + 103 level props + 1000 everyday and modern sprites + 780 old house sprites
 function main() {
   const all = CATS.flatMap((c) => c.items);
   const seen = new Set();
