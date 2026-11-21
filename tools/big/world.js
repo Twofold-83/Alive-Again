@@ -665,8 +665,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
   def('portcullis', 24, 38, (c) => {
     arch(c, 1, 1, 22, 36, C.stone);
     arch(c, 4, 4, 19, 36, C.night);
-    ring(c, 1, 1, 22, 22, C.stoneLight, 1);
-    c.clearRect(1, 12, 22, 12); c.rect(1, 12, 3, 12, C.stone); c.rect(20, 12, 22, 12, C.stone);
+    c.col(1, 12, 36, C.stoneLight);
     for (const y of [10, 18, 26]) { c.row(y, 1, 3, C.stoneDark); c.row(y + 4, 20, 22, C.stoneDark); }
     for (let x = 5; x <= 18; x += 3) { c.col(x, 5, 35, C.iron); c.set(x, 36, C.steel); }
     for (const y of [9, 16, 23, 30]) c.row(y, 4, 19, C.ironDark);
@@ -741,6 +740,815 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     }
   };
   def('fountain', 42, 34, (c) => fountain(c, 42, 32), solid);
+
+
+  /* ================= nature ================= */
+  const AUTUMN = hex('#a8642c'), BLOSSOM = hex('#a98089'), BARK = blend(C.wood, C.stoneDark, 0.35);
+  const tree = (c, col, seed, fruit) => {
+    c.rect(19, 34, 24, 59, C.wood);
+    c.col(19, 34, 59, C.woodLight);
+    c.rect(23, 34, 24, 59, C.woodDark);
+    c.rect(17, 58, 26, 59, C.wood);
+    c.rect(16, 59, 27, 59, C.woodDark);
+    c.line(21, 42, 12, 33, C.woodDark);
+    c.line(22, 42, 31, 32, C.woodDark);
+    pts(c, [[21, 46], [22, 52], [20, 55]], C.woodDark);
+    leaves(c, 21, 20, 14, 13, col, seed);
+    if (fruit) { const r = rnd(seed + 5); for (let i = 0; i < 40; i++) { const x = 8 + Math.floor(r() * 9) * 3, y = 8 + Math.floor(r() * 8) * 3; if (i % 3) continue; if (c.get(x, y) && c.get(x + 1, y + 1) && c.get(x - 1, y - 1)) { c.rect(x, y, x + 1, y + 1, fruit); c.set(x, y, L(fruit)); } } }
+  };
+  def('tree', 44, 62, (c) => tree(c, C.leafLight, 2), solid);
+  def('tree-autumn', 44, 62, (c) => tree(c, AUTUMN, 3), solid);
+  def('tree-cherry', 44, 62, (c) => tree(c, BLOSSOM, 4), solid);
+  def('tree-apple', 44, 62, (c) => tree(c, C.leaf, 6, C.red), solid);
+  const pine = (c, snow) => {
+    c.rect(15, 50, 18, 59, C.woodDark);
+    c.col(15, 50, 59, C.wood);
+    const col = C.leaf, tiers = [[2, 17, 6], [11, 29, 9], [21, 41, 12], [32, 52, 15]];
+    lump(c, (t) => { for (const [ty, by, hw] of tiers) t.poly([[16, ty], [17, ty], [17 + hw, by], [16 - hw, by]], col); t.rect(16, 1, 17, 2, col); }, col, { seed: 4, noise: 0.5 });
+    for (const [ty, by, hw] of tiers) {
+      for (let x = 16 - hw; x <= 17 + hw; x++) if ((x * 3) % 4 < 2) c.set(x, by, DD(col)); else if (c.get(x, by + 1)) c.set(x, by + 1, DD(col));
+      if (snow) {
+        c.poly([[16, ty], [17, ty], [17 + hw * 0.5, ty + (by - ty) * 0.5], [16 - hw * 0.55, ty + (by - ty) * 0.55]], X.snow);
+        for (let x = 16 - hw + 1; x <= 16; x += 2) c.set(x, by - 1, X.snow);
+        c.line(16 - hw * 0.55, ty + (by - ty) * 0.55, 16 - hw + 1, by - 1, X.snow);
+        pts(c, [[14, ty + (by - ty) * 0.6], [19, ty + (by - ty) * 0.62]], X.snow);
+      }
+    }
+    if (snow) c.rect(16, 1, 17, 2, C.white);
+  };
+  def('pine', 34, 62, (c) => pine(c, false), solid);
+  def('pine-snow', 34, 62, (c) => pine(c, true), solid);
+  def('palm', 42, 58, (c) => {
+    for (let y = 55; y >= 14; y--) {
+      const x = 16 + Math.round(5 * Math.sin(((55 - y) / 41) * 1.6));
+      c.rect(x, y, x + 3, y, y % 4 === 0 ? C.woodDark : C.woodPale);
+      c.set(x, y, L(C.woodPale));
+      c.set(x + 3, y, C.wood);
+    }
+    c.rect(15, 55, 20, 56, C.wood);
+    const cx = 23, cy = 13;
+    for (const [ex, ey, up] of [[3, 20, 9], [39, 21, 9], [2, 9, 7], [40, 10, 7], [10, 2, 3], [34, 2, 3], [21, 27, -2]]) {
+      for (let i = 0; i <= 24; i++) {
+        const t = i / 24, mx = (cx + ex) / 2, my = Math.min(cy, ey) - up;
+        const x = Math.round((1 - t) * (1 - t) * cx + 2 * t * (1 - t) * mx + t * t * ex), y = Math.round((1 - t) * (1 - t) * cy + 2 * t * (1 - t) * my + t * t * ey);
+        c.set(x, y, C.leafLight);
+        c.set(x, y + 1, C.leaf);
+        if (i % 2 === 0 && t > 0.15) { c.set(x, y + 2, C.leaf); if (t < 0.85) c.set(x, y + 3, D(C.leaf)); }
+      }
+    }
+    disc(c, 21, 15, 1, C.woodDark);
+    disc(c, 24, 16, 1, C.wood);
+  }, solid);
+  const branch = (c, x, y, a, len, w, col, r, depth) => {
+    const ex = x + Math.cos(a) * len, ey = y - Math.sin(a) * len;
+    for (let t = 0; t < w; t++) c.line(x + t, y, ex + t, ey, t === 0 && w > 1 ? L(col) : col);
+    if (depth > 0) {
+      branch(c, ex, ey, a + 0.45 + r() * 0.4, len * 0.68, Math.max(1, w - 1), col, r, depth - 1);
+      branch(c, ex, ey, a - 0.4 - r() * 0.4, len * 0.7, Math.max(1, w - 1), col, r, depth - 1);
+    }
+  };
+  def('dead-tree', 40, 56, (c) => {
+    const r = rnd(7);
+    c.poly([[15, 53], [17, 30], [21, 30], [24, 53]], BARK);
+    c.line(16, 53, 18, 30, L(BARK));
+    c.line(22, 53, 20, 32, D(BARK));
+    c.rect(13, 53, 26, 53, D(BARK));
+    branch(c, 17, 31, 2.1, 12, 3, BARK, r, 3);
+    branch(c, 19, 31, 1.0, 13, 3, BARK, r, 3);
+    branch(c, 21, 40, 0.5, 8, 2, BARK, r, 1);
+    c.oval(18, 38, 20, 41, K);
+  }, solid);
+  const bush = (c, berry) => {
+    leaves(c, 11, 8, 8, 5, C.leaf, 9);
+    c.clearRect(0, 14, 23, 20);
+    c.row(13, 4, 18, DD(C.leaf));
+    if (berry) pts(c, [[6, 6], [10, 4], [14, 7], [8, 10], [16, 10], [12, 9], [4, 9], [18, 6]], C.red);
+  };
+  def('bush', 23, 15, (c) => bush(c, false), solid);
+  def('bush-berry', 23, 15, (c) => bush(c, true), solid);
+  def('rock', 20, 14, (c) => boulder(c, 1, 1, 18, 12, C.stone, 3), solid);
+  def('rock-mossy', 20, 14, (c) => {
+    boulder(c, 1, 1, 18, 12, C.stone, 5);
+    for (let x = 2; x <= 16; x++) for (let y = 1; y <= 5 + ((x * 5) % 3); y++) if (c.get(x, y) && (x + y) % 5 !== 0 && y < 7 - Math.abs(x - 8) / 3) c.set(x, y, y < 3 ? L(C.moss) : C.moss);
+  }, solid);
+  def('rock-small', 9, 7, (c) => boulder(c, 1, 1, 7, 5, C.stone, 2, { plain: true, grain: 2 }));
+  const flower = (c, col, mid, o = {}) => {
+    const h = o.h || 11, cx = 3;
+    c.col(cx, 4, h - 2, C.leafLight);
+    c.set(cx - 1, h - 4, C.leaf); c.set(cx - 2, h - 5, C.leaf);
+    c.set(cx + 1, h - 5, C.leaf); c.set(cx + 2, h - 6, C.leaf);
+    if (o.tulip) { c.rect(2, 1, 4, 4, col); c.set(3, 1, null); c.clear(3, 1); c.col(2, 1, 4, L(col)); c.set(3, 4, D(col)); }
+    else { c.rect(2, 1, 4, 5, col); c.rect(1, 2, 5, 4, col); c.set(3, 3, mid); c.set(2, 2, L(col)); }
+  };
+  def('flower-red', 7, 12, (c) => flower(c, C.red, C.flameLight));
+  def('flower-blue', 7, 12, (c) => flower(c, X.sky, C.flameLight));
+  def('flower-white', 7, 12, (c) => flower(c, C.white, C.mustard));
+  def('tulip', 7, 12, (c) => flower(c, BLOSSOM, 0, { tulip: true }));
+  def('sunflower', 11, 24, (c) => {
+    c.rect(5, 9, 5, 22, C.leafLight);
+    c.rect(2, 14, 4, 15, C.leaf); c.rect(6, 17, 8, 18, C.leaf);
+    disc(c, 5, 5, 4, X.yellow);
+    pts(c, [[1, 2], [9, 2], [1, 8], [9, 8]], null);
+    c.clear(2, 2); c.clear(8, 2); c.clear(2, 8); c.clear(8, 8);
+    disc(c, 5, 5, 2, C.woodDark);
+    c.set(4, 4, C.wood);
+  });
+  const mushroom = (c, cap, spot) => {
+    c.rect(4, 5, 6, 8, C.bone);
+    c.col(6, 5, 8, D(C.bone));
+    c.oval(1, 1, 9, 8, cap);
+    c.clearRect(0, 6, 3, 9); c.clearRect(7, 6, 10, 9);
+    c.row(5, 1, 9, D(cap));
+    c.row(1, 4, 6, L(cap));
+    pts(c, [[3, 3], [7, 2], [6, 4]], spot);
+  };
+  def('mushroom-brown', 11, 10, (c) => mushroom(c, C.rust, C.woodPale));
+  def('mushroom-glow', 11, 10, (c) => mushroom(c, hex('#4f8aa8'), C.glassLight), noShade);
+  const tuft = (c, w, col) => {
+    for (let x = 1; x < w - 1; x++) {
+      const h = 2 + ((x * 7) % 5);
+      c.col(x, 6 - h + 1, 6, x % 2 ? col : D(col));
+      if (x % 3 === 0) c.set(x, 6 - h + 1, L(col));
+    }
+  };
+  def('grass', 11, 8, (c) => tuft(c, 11, C.leafLight));
+  def('cactus', 16, 26, (c) => {
+    const g = hex('#4f6e44');
+    c.rect(6, 2, 9, 24, g); c.rect(7, 1, 8, 1, g);
+    c.rect(1, 8, 3, 14, g); c.rect(1, 13, 6, 15, g); c.clear(1, 8); c.clear(3, 8); c.set(2, 7, g);
+    c.rect(12, 5, 14, 12, g); c.rect(9, 11, 14, 13, g); c.set(13, 4, g);
+    c.col(6, 2, 24, L(g)); c.col(1, 9, 14, L(g)); c.col(12, 6, 11, L(g));
+    c.col(8, 2, 24, D(g));
+    pts(c, [[7, 4], [7, 9], [7, 14], [7, 19], [2, 11], [13, 8]], C.bone);
+    c.set(7, 1, BLOSSOM);
+  }, solid);
+  def('stump', 18, 12, (c) => {
+    c.rect(3, 3, 14, 10, C.wood);
+    c.rect(1, 9, 16, 10, C.wood); c.clearRect(5, 10, 6, 10);
+    c.oval(3, 1, 14, 5, C.woodPale);
+    ring(c, 5, 2, 12, 4, C.woodLight, 1);
+    c.set(8, 3, C.wood);
+    for (const x of [5, 8, 12]) c.col(x, 6, 10, C.woodDark);
+    c.col(3, 4, 10, C.woodLight);
+  }, solid);
+  def('log', 26, 10, (c) => {
+    c.rect(4, 1, 23, 8, C.wood);
+    c.row(1, 4, 21, C.woodLight);
+    for (const [x0, x1, y] of [[6, 12, 3], [14, 20, 5], [7, 16, 7]]) c.row(y, x0, x1, C.woodDark);
+    c.oval(1, 1, 7, 8, C.woodPale);
+    ring(c, 2, 2, 6, 7, C.woodLight, 1);
+    c.set(4, 4, C.wood);
+    c.rect(15, 1, 16, 1, C.moss);
+  }, solid);
+  def('lily-pad', 16, 8, (c) => {
+    c.oval(1, 3, 14, 7, C.leafLight);
+    c.oval(2, 3, 13, 5, L(C.leafLight));
+    c.poly([[8, 5], [14, 3], [14, 5]], null); c.clearRect(11, 4, 14, 4);
+    c.rect(4, 1, 7, 3, BLOSSOM); c.set(5, 0, BLOSSOM); c.clear(5, 0);
+    c.rect(5, 2, 6, 2, C.flameLight);
+    c.row(7, 3, 12, C.leaf);
+  }, noShade);
+  const cluster = (c, col) => {
+    shard(c, 2, 16, 4, 8, -1, D(col));
+    shard(c, 12, 16, 5, 10, 1, D(col));
+    shard(c, 6, 16, 6, 16, 0, col);
+    shard(c, 4, 16, 3, 5, 0, col);
+    shard(c, 10, 16, 4, 7, 1, col);
+    c.rect(2, 16, 16, 16, DD(col));
+  };
+  def('crystal-purple', 19, 19, (c) => cluster(c, X.purple), noShade);
+  const stalag = (c, x0, x1, yb, h, col = C.stoneDark) => {
+    const m = (x0 + x1) / 2;
+    c.poly([[x0, yb], [m - 0.5, yb - h + 1], [m + 0.5, yb - h + 1], [x1, yb]], col);
+    c.line(x0 + 1, yb, Math.floor(m), yb - h + 2, L(col));
+    c.line(Math.ceil(m) + 1, yb - h * 0.5, x1 - 1, yb, D(col));
+    for (let y = yb - 2; y > yb - h + 4; y -= 4) c.set(Math.round(m), y, D(col));
+  };
+  def('stalagmite', 12, 22, (c) => { stalag(c, 1, 10, 20, 20, C.stone); c.rect(1, 20, 10, 20, C.stoneDark); }, solid);
+  def('snowman', 18, 28, (c) => {
+    disc(c, 8, 20, 6, X.snow); c.clearRect(0, 26, 17, 27); c.row(25, 5, 11, C.ash);
+    disc(c, 8, 11, 4, X.snow);
+    disc(c, 8, 5, 3, X.snow);
+    c.rect(6, 1, 10, 2, C.black); c.row(3, 4, 12, C.black);
+    pts(c, [[7, 5], [9, 5]], K);
+    c.rect(9, 6, 11, 6, X.orange);
+    c.row(8, 5, 11, C.wine); c.col(10, 9, 11, C.wine);
+    pts(c, [[8, 11], [8, 14], [8, 18]], K);
+    c.line(4, 11, 1, 8, C.woodDark); c.line(12, 11, 15, 8, C.woodDark);
+    for (let y = 16; y < 25; y++) c.set(13 - (y > 22 ? y - 22 : 0), y, C.ash);
+  }, solid);
+  def('hay-bale', 22, 15, (c) => {
+    c.rect(1, 2, 20, 13, C.straw);
+    c.row(1, 2, 19, L(C.straw));
+    c.speckle(1, 2, 20, 13, D(C.straw), 4, 2);
+    c.speckle(1, 2, 20, 13, L(C.straw), 6, 5);
+    c.col(6, 1, 13, C.earth); c.col(15, 1, 13, C.earth);
+    c.row(13, 1, 20, D(C.straw));
+    pts(c, [[2, 14], [9, 14], [18, 14]], C.straw); c.clearRect(0, 14, 21, 14);
+  }, solid);
+  /** A span of picket fence: posts at the ends, two rails. */
+  const fence = (c, w, o = {}) => {
+    const col = o.col || C.woodLight, yb = 12;
+    if (!o.noRails) { c.rect(o.x0 == null ? 1 : o.x0, 4, o.x1 == null ? w - 2 : o.x1, 5, col); c.rect(o.x0 == null ? 1 : o.x0, 8, o.x1 == null ? w - 2 : o.x1, 9, col); c.row(5, o.x0 == null ? 1 : o.x0, o.x1 == null ? w - 2 : o.x1, C.wood); c.row(9, o.x0 == null ? 1 : o.x0, o.x1 == null ? w - 2 : o.x1, C.wood); }
+    for (const x of o.posts || [1, w - 4]) {
+      c.rect(x, 2, x + 2, yb, col);
+      c.set(x + 1, 1, col);
+      c.col(x, 2, yb, L(col));
+      c.col(x + 2, 2, yb, C.wood);
+      c.set(x + 1, 5, C.iron); c.set(x + 1, 9, C.iron);
+    }
+  };
+  def('fence', 18, 14, (c) => fence(c, 18, { posts: [1, 7, 14] }), solid);
+  def('wheat', 14, 20, (c) => {
+    for (const [x, t] of [[2, 4], [5, 1], [8, 3], [11, 2]]) {
+      c.col(x, t + 4, 18, C.straw);
+      c.rect(x - 1, t, x + 1, t + 4, C.gold); c.clear(x - 1, t); c.clear(x + 1, t);
+      c.set(x, t + 1, C.flameLight); c.set(x, t + 3, C.mustard);
+      c.set(x + 1, 14 + (x % 3), C.leafLight);
+    }
+  });
+  def('scarecrow', 26, 40, (c) => {
+    pole(c, 12, 10, 37, C.wood);
+    c.rect(2, 13, 23, 14, C.wood);
+    c.rect(6, 12, 19, 25, C.rust);
+    c.rect(2, 12, 6, 16, C.rust); c.rect(19, 12, 23, 16, C.rust);
+    c.col(6, 12, 25, L(C.rust));
+    c.rect(11, 14, 13, 24, C.earth);
+    pts(c, [[1, 13], [1, 15], [24, 13], [24, 15], [1, 14], [24, 14]], C.straw);
+    for (let x = 6; x <= 19; x += 2) c.col(x, 26, 27 + (x % 3), C.straw);
+    c.rect(8, 4, 16, 11, C.straw); c.clear(8, 4); c.clear(16, 4);
+    c.col(8, 5, 11, L(C.straw));
+    pts(c, [[10, 7], [14, 7]], K); c.row(9, 10, 14, K); pts(c, [[11, 10], [13, 10]], K);
+    c.poly([[12, 0], [12, 0]], null);
+    c.rect(6, 4, 18, 4, C.woodDark); c.rect(9, 1, 15, 3, C.woodDark); c.row(1, 10, 14, C.wood);
+    c.rect(11, 12, 13, 12, C.wine);
+  }, solid);
+  def('coral', 16, 16, (c) => {
+    const r = rnd(3), col = hex('#b07a84');
+    c.rect(6, 11, 9, 14, col);
+    branch(c, 6, 11, 2.2, 5, 2, col, r, 2);
+    branch(c, 8, 11, 1.2, 6, 2, col, r, 2);
+    branch(c, 7, 12, 1.6, 7, 2, col, r, 1);
+    c.rect(4, 14, 11, 14, D(col));
+  });
+  def('shell', 10, 8, (c) => {
+    c.poly([[1, 4], [4, 1], [6, 1], [8, 4], [6, 6], [3, 6]], C.bone);
+    for (const x of [2, 4, 6]) c.line(4.5, 6, x + 0.5, 2, D(C.bone));
+    c.row(1, 4, 5, C.white);
+    c.rect(4, 6, 5, 6, BLOSSOM);
+  });
+  def('starfish', 12, 11, (c) => {
+    const col = hex('#b5703a');
+    c.poly([[5, 1], [6, 1], [7, 4], [10, 4], [8, 6], [9, 9], [5.5, 7], [2, 9], [3, 6], [1, 4], [4, 4]], col);
+    pts(c, [[5, 3], [5, 5], [3, 5], [8, 5], [4, 7], [7, 7]], L(col));
+  });
+  def('cloud', 42, 16, (c) => {
+    const w = hex('#b9bcc0');
+    c.oval(2, 6, 16, 14, w); c.oval(10, 2, 26, 14, w); c.oval(22, 5, 34, 14, w); c.oval(30, 8, 40, 14, w);
+    c.rect(4, 11, 38, 14, w);
+    c.oval(12, 3, 22, 8, L(w)); c.oval(4, 7, 10, 10, L(w)); c.oval(24, 6, 30, 9, L(w));
+    c.row(14, 5, 37, D(w)); c.row(13, 9, 30, D(w));
+  }, flat);
+
+
+  /* ================= level props ================= */
+  const SANDSTONE = hex('#a88d62');
+  /** A column: base on row yb, capital at row y0, w wide (even), on a canvas where x0 is its left edge. */
+  const pillar = (c, x0, y0, yb, w, col, o = {}) => {
+    const x1 = x0 + w - 1;
+    c.rect(x0 + 2, y0, x1 - 2, yb, col);
+    for (let x = x0 + 4; x < x1 - 2; x += 2) c.col(x, y0 + 4, yb - 4, D(col));
+    c.col(x0 + 2, y0, yb, L(col));
+    c.col(x1 - 2, y0, yb, D(col));
+    if (!o.broken) { c.rect(x0, y0, x1, y0 + 1, L(col)); c.rect(x0 + 1, y0 + 2, x1 - 1, y0 + 3, col); c.row(y0 + 3, x0 + 1, x1 - 1, D(col)); }
+    else { for (let x = x0 + 2; x <= x1 - 2; x++) c.clearRect(x, y0, x, y0 + ((x * 5 + 1) % 4)); }
+    c.rect(x0 + 1, yb - 3, x1 - 1, yb - 2, col);
+    c.row(yb - 3, x0 + 1, x1 - 1, L(col));
+    c.rect(x0, yb - 1, x1, yb, D(col));
+    c.row(yb - 1, x0, x1, col);
+    if (o.cracks) { c.line(x0 + 5, y0 + 8, x0 + 7, y0 + 14, DD(col)); c.line(x0 + 7, y0 + 14, x0 + 6, y0 + 18, DD(col)); }
+  };
+  const chips = (c, list, col) => list.forEach(([x, y, w]) => { c.rect(x, y, x + w - 1, y + 1, col); c.row(y, x, x + w - 1, L(col)); });
+  def('pillar-short', 14, 36, (c) => pillar(c, 1, 1, 34, 12, C.stone, { cracks: true }), solid);
+  def('pillar-sandstone', 14, 36, (c) => { pillar(c, 1, 1, 34, 12, SANDSTONE); c.rect(3, 7, 10, 8, D(SANDSTONE)); pts(c, [[4, 6], [6, 6], [8, 6], [10, 6]], D(SANDSTONE)); c.rect(3, 27, 10, 28, D(SANDSTONE)); }, solid);
+  def('pillar-short-broken', 20, 18, (c) => { pillar(c, 1, 3, 16, 12, C.stone, { broken: true }); chips(c, [[14, 15, 4], [15, 12, 3]], C.stone); c.speckle(1, 8, 12, 16, C.moss, 9, 2); }, solid);
+  def('statue-knight', 22, 44, (c) => {
+    const s = C.stoneLight;
+    pedestal(c, 2, 32, 19, 42, C.stone);
+    figure(c, 5, 31, s);
+    c.rect(8, 4, 13, 6, C.stone); c.row(6, 9, 12, DD(s)); c.col(10, 6, 9, D(s)); // helm with visor
+    c.rect(10, 2, 11, 4, s);
+    c.rect(17, 8, 18, 31, s); c.col(17, 8, 31, L(s)); c.rect(15, 14, 20, 14, C.stone); c.rect(17, 6, 18, 7, s); // sword, point down
+    c.poly([[2, 15], [9, 15], [9, 22], [5.5, 26], [2, 22]], C.stone); c.frame(3, 16, 8, 21, C.stoneDark); c.col(5, 17, 23, s); c.row(18, 4, 7, s); // shield
+  }, solid);
+  def('statue-angel', 30, 46, (c) => {
+    const s = C.stoneLight;
+    pedestal(c, 6, 34, 23, 44, C.stone);
+    for (const d of [1, -1]) {
+      const X0 = d > 0 ? 9 : 20;
+      c.poly([[X0, 12], [X0 - d * 6, 3], [X0 - d * 8, 8], [X0 - d * 7, 20], [X0 - d * 4, 27], [X0, 22]], d > 0 ? s : C.stone);
+      for (let i = 0; i < 4; i++) c.line(X0 - d * (2 + i * 2), 9 + i, X0 - d * (2 + i * 1.5), 21 - i, C.stoneDark);
+    }
+    figure(c, 9, 33, s);
+    c.rect(12, 20, 17, 22, s); c.row(22, 12, 17, D(s)); // hands folded
+    c.speckle(2, 3, 27, 44, C.moss, 16, 5);
+  }, solid);
+  def('statue-broken', 26, 26, (c) => {
+    pedestal(c, 1, 14, 16, 24, C.stone);
+    c.poly([[5, 6], [8, 4], [10, 7], [12, 5], [13, 8], [14, 13], [3, 13]], C.stoneLight);
+    c.line(6, 8, 5, 13, C.stoneDark); c.line(10, 8, 11, 13, C.stoneDark);
+    c.oval(18, 18, 24, 24, C.stoneLight); pts(c, [[20, 21], [23, 21]], DD(C.stoneLight)); c.row(23, 20, 22, C.stoneDark);
+    c.line(6, 16, 9, 20, C.stoneDark); c.line(9, 20, 8, 23, C.stoneDark);
+    chips(c, [[17, 14, 3]], C.stone);
+  }, solid);
+  def('fountain-small', 30, 34, (c) => fountain(c, 30, 32), solid);
+  /** A round well wall seen from the side, with its mouth as a thin ellipse. */
+  const wellWall = (c, x0, y0, x1, yb, inside) => {
+    bricks(c, x0, y0 + 2, x1, yb, C.stone, 5, 3);
+    c.col(x0, y0 + 2, yb, C.stoneLight);
+    c.oval(x0, y0, x1, y0 + 4, C.stoneLight);
+    c.oval(x0 + 2, y0 + 1, x1 - 2, y0 + 3, inside);
+    c.row(yb, x0, x1, C.stoneDark);
+  };
+  def('well-stone', 30, 42, (c) => {
+    pole(c, 3, 8, 30, C.wood); pole(c, 25, 8, 30, C.wood);
+    c.rect(4, 14, 25, 15, C.woodDark); c.row(14, 4, 25, C.wood);
+    c.col(14, 16, 24, C.straw);
+    c.rect(12, 24, 17, 27, C.woodLight); c.row(26, 12, 17, C.iron);
+    c.poly([[1, 9], [14, 1], [15, 1], [28, 9]], X.tile);
+    c.line(1, 9, 14, 1, L(X.tile)); c.row(9, 1, 28, D(X.tile)); c.row(5, 8, 21, D(X.tile));
+    wellWall(c, 2, 28, 27, 40, C.night);
+  }, solid);
+  def('well-water', 26, 14, (c) => { wellWall(c, 1, 1, 24, 12, C.water); c.row(2, 8, 12, C.glassLight); }, solid);
+  def('well-dry', 26, 14, (c) => { wellWall(c, 1, 1, 24, 12, K); c.line(15, 6, 17, 10, C.stoneDark); pts(c, [[5, 7], [20, 9]], C.moss); }, solid);
+  const skull = (c, x, y, col = C.bone) => {
+    // 7 wide, 7 tall
+    c.rect(x + 1, y, x + 5, y, col); c.rect(x, y + 1, x + 6, y + 4, col); c.rect(x + 1, y + 5, x + 5, y + 6, col);
+    c.rect(x + 1, y + 2, x + 2, y + 3, K); c.rect(x + 4, y + 2, x + 5, y + 3, K);
+    c.set(x + 3, y + 4, DD(col)); pts(c, [[x + 2, y + 6], [x + 4, y + 6]], DD(col));
+    c.set(x + 1, y, L(col)); c.set(x, y + 1, L(col));
+  };
+  def('sign-warning', 16, 26, (c) => {
+    pole(c, 7, 12, 24, C.wood);
+    c.box(1, 1, 14, 13, C.woodLight);
+    skull(c, 4, 3);
+    c.line(2, 11, 4, 9, C.bone); c.line(13, 11, 11, 9, C.bone);
+    pts(c, [[2, 2], [13, 2]], C.iron);
+  });
+  def('sign-board', 28, 30, (c) => {
+    pole(c, 3, 6, 28, C.wood); pole(c, 23, 6, 28, C.wood);
+    c.poly([[1, 5], [13, 1], [14, 1], [26, 5]], C.woodDark); c.line(1, 5, 13, 1, C.wood);
+    c.box(2, 6, 25, 20, C.woodLight);
+    for (const [x, y, w, h, col] of [[4, 8, 6, 7, C.paper], [12, 7, 5, 5, C.parchment], [18, 9, 6, 8, C.paper], [11, 13, 6, 6, C.white]]) {
+      c.rect(x, y, x + w - 1, y + h - 1, col);
+      for (let j = y + 2; j < y + h - 1; j += 2) scribble(c, x + 1, j, x + w - 2, C.stoneDark);
+      c.set(x + (w >> 1), y, C.red);
+    }
+  });
+  def('street-lamp', 16, 56, (c) => {
+    pole(c, 4, 6, 52, C.ironDark);
+    ring(c, 4, 2, 13, 11, C.ironDark, 1.5); c.clearRect(4, 7, 13, 11); c.rect(4, 6, 5, 12, C.ironDark);
+    c.rect(11, 6, 13, 7, C.ironDark);
+    disc(c, 12, 10, 2, C.glow); c.set(12, 10, C.white); c.row(13, 11, 13, C.ironDark);
+    c.rect(3, 46, 6, 52, C.iron); c.rect(2, 53, 7, 54, C.ironDark); c.col(3, 46, 52, C.steel);
+    c.col(4, 13, 45, C.iron);
+  }, solid);
+  const lantern = (c, cx, y, lit = true) => {
+    // 5 wide, 8 tall, hangs from row y
+    c.set(cx, y, C.iron); c.rect(cx - 2, y + 1, cx + 2, y + 1, C.ironDark);
+    c.rect(cx - 2, y + 2, cx + 2, y + 6, lit ? C.glow : D(C.glass));
+    if (lit) c.rect(cx, y + 4, cx, y + 5, C.flame);
+    c.col(cx - 2, y + 2, y + 6, C.iron); c.col(cx + 2, y + 2, y + 6, C.iron);
+    c.rect(cx - 2, y + 7, cx + 2, y + 7, C.ironDark);
+  };
+  def('lantern-post', 16, 36, (c) => {
+    pole(c, 3, 2, 34, C.wood);
+    c.rect(3, 4, 12, 5, C.wood); c.row(4, 3, 12, C.woodLight);
+    c.line(5, 10, 9, 6, C.woodDark);
+    lantern(c, 11, 6);
+    c.rect(2, 33, 6, 34, C.woodDark);
+  }, solid);
+  const brazier = (c, lit) => {
+    c.line(3, 13, 1, 25, C.ironDark); c.line(12, 13, 14, 25, C.ironDark); c.col(7, 14, 25, C.iron); c.col(8, 14, 25, C.ironDark);
+    c.row(20, 3, 12, C.ironDark);
+    c.poly([[1, 9], [14, 9], [11, 13], [4, 13]], C.iron);
+    c.row(9, 1, 14, C.steel);
+    if (lit) { c.row(8, 3, 12, C.flame); flame(c, 6, 8, 8, 6); flame(c, 10, 8, 6, 5); }
+    else { c.row(8, 3, 12, C.black); pts(c, [[4, 7], [5, 7], [8, 7], [10, 7], [11, 7], [7, 8]], C.ironDark); pts(c, [[6, 8], [10, 8]], C.rust); }
+  };
+  def('brazier-lit', 16, 27, (c) => brazier(c, true), noShade);
+  def('brazier-unlit', 16, 27, (c) => brazier(c, false));
+  def('torch-stand', 10, 36, (c) => {
+    pole(c, 4, 10, 32, C.iron);
+    c.poly([[2, 7], [7, 7], [6, 11], [3, 11]], C.wood); c.row(7, 2, 7, C.iron);
+    flame(c, 4.5, 6, 6, 5);
+    c.rect(2, 33, 7, 34, C.ironDark); c.row(32, 3, 6, C.iron);
+  }, noShade);
+  def('stalagmite-tall', 14, 36, (c) => { stalag(c, 1, 12, 34, 34, C.stone); stalag(c, 8, 12, 34, 10, C.stoneDark); c.row(34, 1, 12, C.stoneDark); }, solid);
+  def('stalagmites', 24, 16, (c) => { stalag(c, 1, 7, 14, 9, C.stoneDark); stalag(c, 14, 22, 14, 11, C.stoneDark); stalag(c, 6, 14, 14, 14, C.stone); stalag(c, 18, 22, 14, 5, C.stone); c.row(14, 1, 22, DD(C.stone)); }, solid);
+  def('crystal-blue', 19, 19, (c) => cluster(c, hex('#4a78a0')), noShade);
+  def('crystal-green', 19, 19, (c) => cluster(c, hex('#3f8a5e')), noShade);
+  def('crystal-red', 19, 19, (c) => cluster(c, hex('#a03a3c')), noShade);
+  def('rubble', 26, 12, (c) => {
+    boulder(c, 12, 4, 23, 10, C.stoneDark, 4, { plain: true });
+    boulder(c, 1, 5, 10, 10, C.stone, 2, { plain: true });
+    boulder(c, 7, 1, 17, 10, C.stone, 6);
+    chips(c, [[20, 9, 4], [3, 9, 3]], C.stoneLight);
+  }, solid);
+  def('rubble-wood', 28, 13, (c) => {
+    for (const [x0, y0, x1, y1, col] of [[1, 10, 20, 5, C.wood], [6, 11, 26, 8, C.woodLight], [3, 5, 16, 11, C.woodDark], [12, 2, 22, 10, C.wood]]) {
+      c.line(x0, y0, x1, y1, col); c.line(x0, y0 - 1, x1, y1 - 1, col); c.line(x0, y0 - 2, x1, y1 - 2, L(col));
+    }
+    c.rect(2, 10, 25, 11, C.woodDark); c.row(10, 4, 22, C.wood);
+    pts(c, [[8, 6], [18, 5], [22, 9]], C.iron);
+  }, solid);
+  const bone = (c, x0, y0, x1, y1, col = C.bone) => { c.line(x0, y0, x1, y1, col); for (const [x, y] of [[x0, y0], [x1, y1]]) { c.set(x, y - 1, col); c.set(x, y + 1, col); } };
+  def('bones-pile', 24, 12, (c) => {
+    bone(c, 2, 8, 12, 4); bone(c, 6, 4, 19, 9); bone(c, 10, 9, 21, 5, D(C.bone)); bone(c, 2, 5, 9, 9, D(C.bone));
+    c.rect(4, 9, 19, 10, D(C.bone)); c.row(9, 5, 18, C.bone);
+    skull(c, 13, 1);
+    for (let x = 5; x < 11; x += 2) c.col(x, 6, 8, C.bone);
+  });
+  def('skull-pile', 24, 17, (c) => {
+    c.rect(2, 12, 21, 15, DD(C.bone));
+    skull(c, 1, 9, D(C.bone)); skull(c, 16, 9, D(C.bone)); skull(c, 8, 9);
+    skull(c, 5, 4); skull(c, 12, 5, D(C.bone)); skull(c, 9, 1);
+  }, solid);
+  const cobweb = (c, flip) => {
+    const col = hex('#b9b9b4'), d = D(col), X_ = (x) => (flip ? 19 - x : x);
+    for (const [ex, ey] of [[19, 0], [18, 7], [13, 13], [7, 18], [0, 19]]) c.line(X_(0), 0, X_(ex), ey, col);
+    for (const r of [6, 11, 16]) for (let a = 0; a < 4; a++) {
+      const p = [[r, 0], [r * 0.9, r * 0.36], [r * 0.66, r * 0.66], [r * 0.36, r * 0.9], [0, r]];
+      const m = [(p[a][0] + p[a + 1][0]) / 2 * 0.86, (p[a][1] + p[a + 1][1]) / 2 * 0.86];
+      c.line(X_(p[a][0]), p[a][1], X_(m[0]), m[1], d); c.line(X_(m[0]), m[1], X_(p[a + 1][0]), p[a + 1][1], d);
+    }
+  };
+  def('cobweb-corner', 20, 20, (c) => cobweb(c, false), flat);
+  def('cobweb-corner-right', 20, 20, (c) => cobweb(c, true), flat);
+  def('floor-cracks', 24, 9, (c) => {
+    const k = hex('#1c1820');
+    c.line(1, 4, 7, 3, k); c.line(7, 3, 12, 6, k); c.line(12, 6, 18, 4, k); c.line(18, 4, 22, 5, k);
+    c.line(7, 3, 9, 0, k); c.line(12, 6, 11, 8, k); c.line(18, 4, 20, 1, k); c.line(4, 4, 3, 7, k);
+    c.row(5, 10, 13, k);
+  }, flat);
+  def('puddle', 26, 8, (c) => {
+    c.oval(1, 1, 24, 6, C.water); c.oval(14, 3, 25, 7, C.water);
+    c.row(2, 6, 12, C.glass); c.row(4, 16, 21, C.glass); pts(c, [[8, 3], [9, 3]], C.glassLight);
+  }, flat);
+  def('scorch-mark', 26, 9, (c) => {
+    const k = hex('#1c1820');
+    c.oval(3, 2, 22, 7, k);
+    for (let x = 1; x < 25; x += 2) { c.set(x, 4 + ((x * 3) % 3) - 1, k); c.set(x + 1, x % 3 ? 1 : 8, k); }
+    c.oval(8, 3, 17, 5, hex('#3a3238')); pts(c, [[10, 4], [14, 4], [12, 3]], C.ash);
+  }, flat);
+  def('floor-hole', 24, 9, (c) => {
+    c.oval(1, 1, 22, 7, hex('#3a2a22')); c.oval(2, 2, 21, 7, K);
+    pts(c, [[3, 1], [12, 0], [20, 2], [1, 5]], hex('#3a2a22'));
+  }, flat);
+  def('grass-tuft', 14, 8, (c) => tuft(c, 14, C.moss));
+  def('flower-patch', 24, 11, (c) => {
+    for (let x = 1; x < 23; x++) { const h = 2 + ((x * 7) % 3); c.col(x, 9 - h + 1, 9, x % 2 ? C.leafLight : C.leaf); }
+    for (const [x, y, col] of [[3, 4, C.red], [8, 2, X.yellow], [13, 4, BLOSSOM], [18, 3, C.red], [21, 5, X.yellow]]) {
+      c.col(x, y + 2, 8, C.leaf); c.rect(x - 1, y, x + 1, y + 2, col); c.clear(x - 1, y); c.clear(x + 1, y); c.clear(x - 1, y + 2); c.clear(x + 1, y + 2); c.set(x, y + 1, col === X.yellow ? C.wood : C.flameLight);
+    }
+  });
+  def('stairs-wood', 32, 28, (c) => {
+    for (let i = 0; i < 6; i++) {
+      const x = 1 + i * 5, y = 22 - i * 4;
+      vplanks(c, x, y, 30, 26, C.wood, 5);
+      c.rect(x, y, 30, y + 1, C.woodLight);
+      c.row(y, x, 30, L(C.woodLight));
+      c.row(y + 2, x, x + 4, C.woodDark);
+    }
+    for (let i = 0; i < 6; i++) c.rect(1 + i * 5 + 5, 22 - i * 4, 30, 22 - i * 4 + 1, C.wood);
+    for (let i = 1; i < 6; i++) c.col(1 + i * 5, 22 - i * 4 + 4, 26, C.woodDark);
+    c.rect(26, 2, 30, 26, C.wood); c.rect(27, 6, 29, 24, C.woodDark); c.col(26, 2, 26, C.woodLight);
+    c.row(26, 1, 30, C.woodDark);
+  }, solid);
+  def('ladder-hole', 24, 20, (c) => {
+    c.oval(1, 11, 22, 18, hex('#3a2a22')); c.oval(2, 12, 21, 18, K);
+    c.rect(8, 1, 9, 15, C.woodLight); c.rect(14, 1, 15, 15, C.wood);
+    for (const y of [3, 7, 11, 14]) c.row(y, 9, 14, C.woodLight);
+    c.row(15, 8, 15, C.woodDark);
+  }, { shade: false, outline: false });
+  const floorLever = (c, on) => {
+    c.rect(1, 13, 10, 15, C.stoneDark); c.row(13, 1, 10, C.stone);
+    c.rect(4, 11, 7, 12, C.iron);
+    const tx = on ? 10 : 1;
+    c.line(5, 11, tx, 3, C.steel); c.line(6, 11, tx + (on ? -1 : 1), 3, C.iron);
+    c.rect(tx - 1, 1, tx + 1, 3, on ? X.green : C.red); c.set(tx - 1, 1, L(on ? X.green : C.red));
+  };
+  def('lever-floor-off', 12, 17, (c) => floorLever(c, false));
+  def('lever-floor-on', 12, 17, (c) => floorLever(c, true));
+  def('floor-switch', 16, 7, (c) => { c.rect(1, 4, 14, 5, C.stone); c.row(4, 1, 14, C.stoneLight); c.rect(4, 1, 11, 3, C.red); c.row(1, 5, 10, L(C.red)); c.clear(4, 1); c.clear(11, 1); });
+  def('floor-switch-pressed', 16, 7, (c) => { c.rect(1, 4, 14, 5, C.stone); c.row(4, 1, 14, C.stoneLight); c.rect(4, 3, 11, 3, X.green); });
+  const block = (c, col, o = {}) => {
+    c.box(1, 1, 16, 16, col);
+    c.frame(3, 3, 14, 14, D(col));
+    c.row(4, 4, 13, L(col)); c.col(4, 4, 13, L(col));
+    if (o.rune) { c.frame(7, 7, 10, 10, D(col)); c.set(8, 8, DD(col)); }
+    if (o.ice) { c.line(5, 10, 10, 5, C.white); c.line(8, 12, 12, 8, C.white); c.line(4, 7, 6, 5, C.white); }
+    if (o.gold) { c.poly([[8.5, 5], [12, 8.5], [8.5, 12], [5, 8.5]], L(col)); c.rect(8, 8, 9, 9, C.brass); }
+  };
+  def('push-block', 18, 18, (c) => { block(c, C.stone, { rune: true }); c.speckle(2, 2, 15, 15, C.stoneDark, 14, 2); }, solid);
+  def('push-block-ice', 18, 18, (c) => block(c, X.ice, { ice: true }), solid);
+  def('push-block-gold', 18, 18, (c) => block(c, C.gold, { gold: true }), solid);
+  def('boulder-round', 28, 26, (c) => boulder(c, 1, 1, 26, 24, C.stone, 8), solid);
+  def('boulder-mossy', 28, 26, (c) => {
+    boulder(c, 1, 1, 26, 24, C.stone, 9);
+    for (let x = 2; x <= 25; x++) for (let y = 1; y <= 12; y++) if (c.get(x, y) && y < 9 - Math.abs(x - 12) / 2.5 + ((x * 7) % 4) && (x * 3 + y * 5) % 7 !== 0) c.set(x, y, y < 4 ? L(C.moss) : (x + y) % 3 ? C.moss : D(C.moss));
+  }, solid);
+  def('boulder-snowy', 28, 26, (c) => {
+    boulder(c, 1, 1, 26, 24, C.stoneDark, 10);
+    for (let x = 2; x <= 25; x++) for (let y = 1; y <= 12; y++) if (c.get(x, y) && y < 8 - Math.abs(x - 12) / 2.5 + ((x * 7) % 3)) c.set(x, y, y > 5 && x > 14 ? D(X.snow) : X.snow);
+  }, solid);
+  def('boulder-sandstone', 28, 26, (c) => { boulder(c, 1, 1, 26, 24, SANDSTONE, 11); for (const y of [9, 15, 20]) for (let x = 2; x < 26; x++) if (c.get(x, y) && (x + y) % 6) c.set(x, y, D(SANDSTONE)); }, solid);
+  /** A mine cart 22 wide: tub on row y0..y0+9, wheels under it. */
+  const minecart = (c, x, yb, fill) => {
+    const t = yb - 13;
+    if (fill) { c.oval(x + 2, t - 3, x + 19, t + 4, fill); pts(c, [[x + 6, t - 2], [x + 11, t - 3], [x + 15, t - 1], [x + 8, t]], L(fill)); pts(c, [[x + 9, t - 1], [x + 14, t - 2], [x + 5, t], [x + 17, t]], D(fill)); }
+    else c.rect(x + 2, t, x + 19, t + 1, K);
+    c.poly([[x, t + 1], [x + 21, t + 1], [x + 19, yb - 4], [x + 2, yb - 4]], C.iron);
+    c.rect(x, t + 1, x + 21, t + 2, C.steel);
+    c.row(t + 3, x + 1, x + 20, C.ironDark);
+    for (const k of [5, 10, 15]) c.col(x + k, t + 4, yb - 5, C.ironDark);
+    pts(c, [[x + 2, t + 2], [x + 8, t + 2], [x + 13, t + 2], [x + 19, t + 2]], C.ironDark);
+    c.speckle(x + 1, t + 4, x + 20, yb - 5, C.rust, 7, 3);
+    c.rect(x + 3, yb - 4, x + 18, yb - 3, C.ironDark);
+    wheel(c, x + 5, yb - 2, 2, C.ironDark, C.steel); wheel(c, x + 16, yb - 2, 2, C.ironDark, C.steel);
+  };
+  def('minecart-rails', 32, 22, (c) => {
+    for (let x = 2; x < 30; x += 5) c.rect(x, 19, x + 2, 20, C.woodDark);
+    c.row(18, 1, 30, C.steel); c.row(19, 1, 30, C.iron);
+    minecart(c, 5, 18);
+  }, solid);
+  const hoard = (c, x0, x1, yb, h) => {
+    const m = (x0 + x1) / 2;
+    lump(c, (t) => { t.poly([[x0, yb], [x0 + 2, yb - h * 0.4], [m - 2, yb - h + 1], [m + 2, yb - h + 1], [x1 - 2, yb - h * 0.4], [x1, yb]], C.gold); }, C.gold, { seed: 3, grain: 1, noise: 1.1 });
+    for (let x = x0; x <= x1; x += 3) c.set(x, yb, C.brass);
+  };
+  def('treasure-pile', 24, 12, (c) => { hoard(c, 1, 22, 10, 9); pts(c, [[7, 7], [15, 5]], C.red); c.set(11, 8, C.teal); pts(c, [[12, 3], [5, 8], [18, 8]], C.flameLight); });
+  def('treasure-pile-big', 38, 24, (c) => {
+    hoard(c, 1, 36, 22, 16);
+    c.rect(15, 3, 22, 7, C.gold); c.row(7, 15, 22, C.brass); pts(c, [[15, 2], [18, 2], [19, 2], [22, 2], [15, 1], [22, 1]], C.gold); pts(c, [[17, 5], [20, 5]], C.red); c.col(15, 3, 6, C.flameLight);
+    for (const [x, y, col] of [[8, 16, C.red], [27, 14, C.teal], [13, 19, X.purple], [22, 17, C.red], [30, 19, C.teal], [5, 20, C.glassLight]]) { c.rect(x, y, x + 1, y + 1, col); c.set(x, y, L(col)); }
+    c.rect(25, 9, 28, 14, C.brass); c.rect(24, 8, 29, 8, C.gold); c.rect(25, 15, 28, 15, C.gold); // goblet
+    pts(c, [[10, 12], [20, 10], [32, 17], [4, 18], [17, 14]], C.flameLight);
+  }, solid);
+  def('cage-empty', 18, 22, (c) => {
+    c.rect(1, 1, 16, 2, C.iron); c.row(1, 1, 16, C.steel);
+    c.rect(2, 3, 15, 17, C.night);
+    for (let x = 2; x <= 15; x += 3) c.col(x, 3, 17, C.iron);
+    c.col(15, 3, 17, C.iron);
+    c.rect(9, 8, 14, 17, K); c.col(8, 3, 17, C.steel); // door standing open
+    c.rect(1, 18, 16, 20, C.iron); c.row(18, 1, 16, C.steel);
+  }, solid);
+  const candle = (c, x, yb, h, col = C.bone, lit = true) => { c.rect(x, yb - h + 1, x + 1, yb, col); c.col(x + 1, yb - h + 1, yb, D(col)); if (lit) { c.rect(x, yb - h - 2, x + 1, yb - h, C.flame); c.set(x, yb - h, C.flameLight); c.clear(x + 1, yb - h - 2); } else c.set(x, yb - h, K); };
+  const altar = (c, stone, cloth, darkOne) => {
+    c.rect(4, 13, 27, 21, stone); c.col(4, 13, 21, L(stone));
+    c.rect(2, 21, 29, 22, D(stone)); c.row(21, 2, 29, stone);
+    c.rect(1, 9, 30, 12, stone); c.row(9, 1, 30, L(stone)); c.row(12, 1, 30, D(stone));
+    c.frame(8, 14, 23, 19, D(stone));
+    c.rect(10, 9, 21, 16, cloth); c.row(9, 10, 21, L(cloth)); c.row(16, 10, 21, C.gold); c.col(21, 10, 15, D(cloth));
+    candle(c, 4, 8, 5, darkOne ? C.black : C.bone); candle(c, 26, 8, 4, darkOne ? C.black : C.bone);
+    if (darkOne) { skull(c, 12, 2); c.rect(7, 9, 8, 13, C.blood); c.set(7, 14, C.blood); c.rect(23, 9, 23, 11, C.blood); c.poly([[16, 11], [18, 14], [14, 14]], C.gold); c.set(16, 13, cloth); }
+    else { c.rect(15, 3, 16, 8, C.gold); c.rect(13, 5, 18, 5, C.gold); c.rect(15, 11, 16, 14, C.gold); c.row(12, 14, 17, C.gold); }
+  };
+  def('altar', 32, 24, (c) => altar(c, C.stoneLight, C.cream, false), solid);
+  def('altar-dark', 32, 24, (c) => altar(c, C.stoneDark, C.plum, true), solid);
+  def('throne-stone', 22, 40, (c) => {
+    const s = C.stone;
+    c.rect(4, 3, 17, 24, s); c.rect(6, 1, 15, 2, s); c.col(4, 3, 24, C.stoneLight); c.row(1, 6, 15, C.stoneLight);
+    c.frame(7, 5, 14, 21, C.stoneDark); c.poly([[10.5, 8], [13, 12], [10.5, 16], [8, 12]], C.stoneDark);
+    c.rect(1, 20, 4, 38, s); c.rect(17, 20, 20, 38, s); c.rect(1, 20, 4, 21, C.stoneLight); c.rect(17, 20, 20, 21, C.stoneLight); c.col(1, 22, 38, C.stoneLight);
+    c.rect(5, 25, 16, 27, C.stoneLight); c.rect(5, 28, 16, 38, s); c.row(28, 5, 16, C.stoneDark);
+    c.frame(7, 30, 14, 36, C.stoneDark);
+    c.row(38, 1, 20, C.stoneDark);
+    c.speckle(1, 1, 20, 38, C.stoneDark, 18, 6);
+  }, solid);
+  const stripes = (c, x0, y0, x1, y1, a, b, sw = 4) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) c.set(x, y, Math.floor((x - x0) / sw) % 2 ? b : a); };
+  const stall = (c, w, a, b, goods) => {
+    const h = 38;
+    pole(c, 3, 9, h - 3, C.wood); pole(c, w - 5, 9, h - 3, C.wood);
+    stripes(c, 1, 3, w - 2, 9, a, b); c.row(3, 1, w - 2, L(a));
+    for (let x = 1; x < w - 1; x++) if (Math.floor((x - 1) / 4) % 2 === 0) c.set(x, 10, a); else c.set(x, 10, b);
+    for (let x = 1; x < w - 1; x += 4) c.clear(x + 3, 10);
+    c.rect(1, 22, w - 2, 24, C.woodLight); c.row(22, 1, w - 2, L(C.woodLight));
+    vplanks(c, 2, 25, w - 3, h - 3, C.wood, 5); c.row(h - 3, 2, w - 3, C.woodDark);
+    goods(c, 21);
+  };
+  const produce = (c, yb) => { for (const [x, col] of [[5, C.red], [9, X.orange], [13, C.leafLight], [18, X.yellow], [23, C.red], [27, C.leafLight]]) { c.rect(x, yb - 2, x + 2, yb, col); c.set(x, yb - 2, L(col)); c.set(x + 1, yb - 3, col); } };
+  def('stall-small', 34, 38, (c) => stall(c, 34, C.wine, C.cream, produce), solid);
+  const tent = (c, w, h, col, o = {}) => {
+    const m = w / 2 - 0.5, yb = h - 2;
+    c.poly([[1, yb], [m, 2], [w - 2, yb]], col);
+    c.poly([[1, yb], [m, 2], [m, yb]], L(col));
+    c.poly([[m - w * 0.14, yb], [m, yb - h * 0.55], [m + w * 0.14, yb]], C.night);
+    c.line(m, 2, m + w * 0.14, yb, D(col)); c.line(m, 2, m - w * 0.14, yb, col);
+    c.line(m - w * 0.25, yb, m - w * 0.14, yb - h * 0.35, D(L(col)));
+    c.rect(Math.floor(m), 1, Math.ceil(m), 2, C.wood);
+    if (o.patch) { c.rect(w - 12, yb - 7, w - 9, yb - 5, D(col)); }
+  };
+  def('tent-small', 40, 28, (c) => tent(c, 40, 28, X.canvas, { patch: true }), solid);
+  const stones = (c, cx, yb, rx) => { for (const dx of [-rx, -rx + 4, rx - 6, rx - 2]) { c.rect(cx + dx, yb - 1, cx + dx + 2, yb, C.stone); c.row(yb - 1, cx + dx, cx + dx + 1, C.stoneLight); c.set(cx + dx + 2, yb, C.stoneDark); } };
+  def('campfire-big', 26, 22, (c) => {
+    flame(c, 12, 16, 15, 11); flame(c, 8, 16, 8, 5); flame(c, 17, 16, 9, 6);
+    logs(c, 12, 19); stones(c, 12, 20, 11);
+  }, noShade);
+  def('campfire-out', 26, 20, (c) => {
+    for (let i = 0; i < 12; i++) { const x = 12 + Math.round(Math.sin(i * 0.9) * 2); c.set(x, 13 - i, C.ash); if (i % 3 === 0) c.set(x + 1, 13 - i, C.stoneLight); }
+    logs(c, 12, 17); c.rect(9, 15, 15, 16, C.black); pts(c, [[10, 15], [13, 14], [14, 16]], C.ash);
+    stones(c, 12, 18, 11);
+  });
+  def('bedroll', 32, 10, (c) => {
+    c.rect(4, 4, 30, 8, C.forest); c.row(4, 4, 30, L(C.forest)); c.row(8, 4, 30, D(C.forest));
+    for (const x of [12, 20]) c.col(x, 4, 8, C.earth);
+    c.oval(1, 2, 8, 8, C.cream); c.clearRect(0, 9, 31, 9); c.oval(3, 4, 6, 7, D(C.cream)); c.set(4, 5, C.forest);
+    c.rect(24, 3, 30, 4, C.cream);
+  });
+  const portal = (c, on) => {
+    arch(c, 1, 1, 28, 39, C.stone);
+    arch(c, 5, 5, 24, 39, on ? X.purple : C.night);
+    c.col(1, 14, 39, C.stoneLight);
+    for (let i = 0; i < 9; i++) { const a = 3.14 + (i / 8) * 3.14, x = 14.5 + Math.cos(a) * 12, y = 15 + Math.sin(a) * 12; c.set(x, y, C.stoneDark); c.set(x + (x < 14 ? 1 : -1), y + 1, C.stoneDark); }
+    for (const y of [20, 27, 34]) { c.row(y, 1, 4, C.stoneDark); c.row(y, 25, 28, C.stoneDark); }
+    c.rect(13, 1, 16, 4, on ? X.violet : C.stoneDark); c.set(14, 2, on ? C.white : C.stone);
+    c.rect(1, 38, 4, 39, C.stoneDark); c.rect(25, 38, 28, 39, C.stoneDark);
+    if (on) {
+      for (let i = 0; i < 70; i++) { const a = i * 0.45, r = 1 + i * 0.13, x = Math.round(14.5 + Math.cos(a) * r), y = Math.round(23 + Math.sin(a) * r * 1.5); if (x > 4 && x < 25 && y > 6 && y < 39) c.set(x, y, i % 4 ? X.violet : C.white); }
+      c.rect(14, 22, 15, 24, C.white);
+    } else { c.line(9, 12, 12, 20, DD(C.stone)); pts(c, [[7, 30], [20, 16], [18, 34]], hex('#221d2a')); }
+  };
+  def('portal-gate', 30, 42, (c) => portal(c, true), noShade);
+  def('portal-gate-off', 30, 42, (c) => portal(c, false));
+  def('scifi-crate', 18, 16, (c) => {
+    c.box(1, 1, 16, 14, C.steel);
+    c.rect(1, 6, 16, 8, C.iron); c.rect(3, 3, 5, 4, X.yellow); c.set(14, 3, X.phos);
+    for (let x = 2; x < 16; x += 4) { c.set(x, 7, X.yellow); c.set(x + 1, 7, X.yellow); }
+    c.frame(3, 10, 14, 12, C.slate); pts(c, [[2, 2], [15, 2], [2, 13], [15, 13]], C.ironDark);
+  }, solid);
+  def('console', 22, 26, (c) => {
+    c.rect(2, 12, 19, 24, C.slate); c.col(2, 12, 24, L(C.slate)); c.row(24, 2, 19, C.ironDark);
+    c.poly([[1, 12], [20, 12], [18, 9], [3, 9]], C.steel); c.row(9, 3, 18, L(C.steel));
+    pts(c, [[5, 10], [7, 11], [9, 10], [13, 10]], C.red); pts(c, [[11, 11], [15, 10], [16, 11]], X.phos);
+    c.rect(4, 1, 17, 8, C.iron); c.rect(5, 2, 16, 7, X.screen); scribble(c, 6, 3, 13, X.phos); scribble(c, 6, 5, 10, X.phos); c.row(1, 4, 17, C.steel);
+    c.frame(5, 15, 16, 21, C.ironDark); c.rect(7, 17, 9, 17, X.phos);
+  }, solid);
+  def('generator', 28, 28, (c) => {
+    c.box(1, 8, 26, 24, C.slate); c.rect(2, 25, 5, 26, C.ironDark); c.rect(22, 25, 25, 26, C.ironDark);
+    disc(c, 9, 16, 5, C.ironDark); ring(c, 4, 11, 14, 21, C.steel, 1); disc(c, 9, 16, 2, hex('#5fb3c2')); c.set(9, 16, C.white);
+    for (const y of [11, 14, 17, 20]) c.row(y, 17, 24, C.ironDark);
+    c.rect(4, 3, 7, 7, C.iron); c.rect(3, 2, 8, 2, C.steel); c.rect(18, 4, 23, 7, C.iron); c.set(20, 5, X.phos); c.set(22, 5, C.red);
+    c.line(8, 4, 17, 5, C.rust); c.rect(1, 8, 26, 8, C.steel);
+    for (let x = 3; x < 26; x += 4) c.set(x, 23, X.yellow);
+  }, solid);
+  def('canister', 12, 18, (c) => {
+    c.rect(2, 2, 9, 16, X.toxic); c.col(2, 2, 16, L(X.toxic)); c.col(8, 2, 16, D(X.toxic));
+    c.rect(1, 2, 10, 3, C.iron); c.rect(1, 15, 10, 16, C.iron); c.rect(4, 1, 7, 1, C.steel);
+    c.rect(3, 7, 8, 11, X.yellow); c.poly([[5.5, 8], [7, 10], [4, 10]], K);
+  }, solid);
+  def('urn', 14, 20, (c) => {
+    const u = hex('#a07a4e');
+    c.oval(1, 5, 12, 17, u); c.rect(4, 2, 9, 5, u); c.rect(3, 1, 10, 1, L(u)); c.rect(4, 17, 9, 18, D(u));
+    c.col(3, 8, 14, L(u)); c.row(8, 2, 11, C.rust); c.row(10, 1, 12, C.rust); for (let x = 2; x < 12; x += 2) c.set(x, 9, C.woodDark);
+    ring(c, 0, 5, 3, 9, u, 1); ring(c, 10, 5, 13, 9, D(u), 1); c.clearRect(0, 0, 0, 19); c.clearRect(13, 0, 13, 19);
+  });
+  const bench = (c, col) => {
+    c.rect(2, 2, 3, 15, C.ironDark); c.rect(26, 2, 27, 15, C.ironDark);
+    c.rect(1, 2, 28, 4, col); c.rect(1, 6, 28, 8, col); c.row(2, 1, 28, L(col)); c.row(6, 1, 28, L(col)); c.row(4, 1, 28, D(col)); c.row(8, 1, 28, D(col));
+    c.rect(1, 10, 28, 11, col); c.row(10, 1, 28, L(col));
+    c.rect(1, 15, 4, 15, C.ironDark); c.rect(25, 15, 28, 15, C.ironDark);
+  };
+  def('bench', 30, 17, (c) => bench(c, C.woodLight), solid);
+  def('log-pile', 30, 19, (c) => {
+    const end = (x, y) => { disc(c, x, y, 2, C.woodPale); c.rect(x - 1, y - 2, x + 1, y - 2, L(C.woodPale)); c.set(x, y, C.wood); c.set(x + 1, y + 1, C.woodLight); };
+    c.rect(2, 12, 27, 17, C.woodDark); c.rect(5, 7, 24, 12, C.woodDark); c.rect(8, 2, 21, 7, C.woodDark);
+    for (let i = 0; i < 5; i++) end(4 + i * 5.5, 14.5);
+    for (let i = 0; i < 4; i++) end(7 + i * 5.5, 9.5);
+    for (let i = 0; i < 3; i++) end(9.5 + i * 5.5, 4.5);
+  }, solid);
+  def('banner-stand', 16, 42, (c) => {
+    pole(c, 7, 2, 38, C.wood); disc(c, 7, 1.5, 1, C.gold);
+    c.rect(2, 4, 13, 5, C.wood);
+    c.rect(3, 6, 12, 22, C.wine); c.poly([[3, 22], [7.5, 22], [3, 26]], C.wine); c.poly([[7.5, 22], [12, 22], [12, 26]], C.wine);
+    c.col(3, 6, 25, L(C.wine)); c.rect(6, 10, 9, 15, C.gold); c.rect(7, 12, 8, 13, C.wine); c.row(20, 3, 12, C.gold);
+    c.rect(3, 38, 12, 40, C.stoneDark); c.row(38, 4, 11, C.stone);
+  }, solid);
+
+
+  /* ================= barriers =================
+   * A run of fence goes left-right ("h") or into the picture ("v": a far post and a near post). On the corner
+   * pieces the far row stands on row 12 and the near row on row 18. */
+  const mirrored = (fn) => (c) => { fn(c); const t = canvas(c.w, c.h); t.stamp(c, 0, 0, true); t.px.forEach((p, i) => (c.px[i] = p)); };
+  const FAR = 12, NEAR = 18;
+  const wpost = (c, x, yb, col = C.woodLight) => { c.rect(x, yb - 10, x + 2, yb, col); c.set(x + 1, yb - 11, col); c.col(x, yb - 10, yb, L(col)); c.col(x + 2, yb - 10, yb, C.wood); };
+  const wrails = (c, x0, x1, yb, col = C.woodLight) => { for (const y of [yb - 8, yb - 4]) { c.rect(x0, y, x1, y + 1, col); c.row(y + 1, x0, x1, C.wood); } };
+  const wside = (c, x) => { wpost(c, x, FAR, C.wood); c.col(x + 1, FAR - 8, NEAR - 8, C.woodDark); wpost(c, x, NEAR); };
+  def('fence-h', 18, 14, (c) => { wrails(c, 1, 16, 12); wpost(c, 3, 12); wpost(c, 11, 12); }, solid);
+  def('fence-v', 7, 20, (c) => wside(c, 2), solid);
+  const wcornerT = (c) => { wrails(c, 3, 16, FAR); wpost(c, 11, FAR); wside(c, 2); };
+  const wcornerB = (c) => { wpost(c, 2, FAR, C.wood); wrails(c, 3, 16, NEAR); wpost(c, 11, NEAR); wpost(c, 2, NEAR); };
+  def('fence-corner-tl', 18, 20, wcornerT, solid);
+  def('fence-corner-tr', 18, 20, mirrored(wcornerT), solid);
+  def('fence-corner-bl', 18, 20, wcornerB, solid);
+  def('fence-corner-br', 18, 20, mirrored(wcornerB), solid);
+  def('fence-post', 7, 14, (c) => wpost(c, 2, 12), solid);
+  def('fence-cross', 18, 20, (c) => { wpost(c, 8, FAR, C.wood); wrails(c, 1, 16, 15); wpost(c, 8, NEAR); }, solid);
+  const gateLeaf = (c, x0, x1, yb) => {
+    c.rect(x0, yb - 9, x1, yb - 8, C.woodPale); c.rect(x0, yb - 3, x1, yb - 2, C.woodPale); c.row(yb - 8, x0, x1, C.wood); c.row(yb - 2, x0, x1, C.wood);
+    for (let x = x0; x <= x1; x += 3) c.col(x, yb - 10, yb - 1, C.woodPale);
+    c.line(x0, yb - 3, x1, yb - 8, C.wood);
+  };
+  def('fence-gate', 22, 16, (c) => { gateLeaf(c, 4, 17, 14); wpost(c, 1, 14); wpost(c, 18, 14); c.rect(15, 8, 17, 8, C.iron); pts(c, [[4, 5], [4, 11]], C.iron); c.rect(1, 2, 3, 2, C.wood); c.rect(18, 2, 20, 2, C.wood); }, solid);
+  def('fence-gate-open', 22, 19, (c) => {
+    wpost(c, 1, 14); wpost(c, 18, 14);
+    c.poly([[4, 4], [8, 6], [8, 17], [4, 13]], C.woodPale);
+    c.line(4, 5, 8, 7, C.wood); c.line(4, 11, 8, 15, C.wood); c.col(6, 6, 14, C.wood); c.col(8, 6, 17, C.wood);
+    pts(c, [[4, 6], [4, 11]], C.iron);
+  });
+  def('fence-broken', 20, 14, (c) => {
+    wpost(c, 2, 12);
+    c.rect(5, 4, 9, 5, C.woodLight); c.row(5, 5, 9, C.wood); c.set(10, 4, C.woodLight);
+    c.line(5, 8, 13, 11, C.woodLight); c.line(5, 9, 12, 12, C.wood);
+    c.line(14, 12, 18, 4, C.woodLight); c.line(15, 12, 18, 5, C.wood); c.line(13, 12, 17, 4, L(C.woodLight));
+    pts(c, [[9, 12], [11, 12]], C.wood);
+  }, solid);
+  const ipost = (c, x, yb) => { c.rect(x, yb - 20, x + 1, yb, C.ironDark); c.col(x, yb - 20, yb, C.iron); c.rect(x, yb - 23, x + 1, yb - 22, C.iron); c.set(x, yb - 21, C.ironDark); c.rect(x - 1, yb, x + 2, yb, C.ironDark); };
+  const ibars = (c, x0, x1, yb, o = {}) => {
+    for (let x = x0 + 1; x <= x1; x += 3) { c.col(x, yb - 19, yb, C.iron); c.set(x, yb - 20, C.steel); c.set(x, yb - 21, C.steel); }
+    c.row(yb - 17, x0, x1, C.ironDark); c.row(yb - 3, x0, x1, C.ironDark);
+    if (!o.plain) for (let x = x0 + 1; x <= x1; x += 3) c.set(x, yb - 15, C.steel);
+  };
+  const iside = (c, x) => { ipost(c, x, 24); c.col(x, 5, 9, C.ironDark); ipost(c, x, 30); };
+  def('iron-fence-h', 18, 24, (c) => ibars(c, 1, 16, 22), solid);
+  def('iron-fence-v', 6, 32, (c) => iside(c, 2), solid);
+  const icornerT = (c) => { ibars(c, 3, 16, 24); iside(c, 2); };
+  const icornerB = (c) => { ipost(c, 2, 24); ibars(c, 3, 16, 30); ipost(c, 2, 30); };
+  def('iron-fence-corner-tl', 18, 32, icornerT, solid);
+  def('iron-fence-corner-tr', 18, 32, mirrored(icornerT), solid);
+  def('iron-fence-corner-bl', 18, 32, icornerB, solid);
+  def('iron-fence-corner-br', 18, 32, mirrored(icornerB), solid);
+  def('iron-gate', 30, 36, (c) => {
+    for (let x = 5; x <= 24; x++) {
+      if ((x - 5) % 3 && x !== 14 && x !== 15) continue;
+      const top = 6 + Math.round(Math.abs(x - 14.5) * 0.5);
+      c.col(x, top, 33, C.iron); c.set(x, top - 1, C.steel);
+    }
+    for (let x = 4; x <= 25; x++) { c.set(x, 9 + Math.round(Math.abs(x - 14.5) * 0.5), C.ironDark); }
+    c.row(21, 4, 25, C.ironDark); c.row(31, 4, 25, C.ironDark);
+    c.rect(14, 4, 15, 33, C.ironDark); c.rect(13, 19, 16, 23, C.steel); c.set(14, 21, K);
+    for (const x of [2, 26]) { c.rect(x, 5, x + 1, 34, C.ironDark); c.col(x, 5, 34, C.iron); disc(c, x + 0.5, 3, 1.5, C.iron); c.rect(x - 1, 34, x + 2, 34, C.ironDark); }
+  }, solid);
+  const wallFace = (c, x0, x1, yb) => { bricks(c, x0, yb - 8, x1, yb, C.stone, 6, 3); c.row(yb, x0, x1, C.stoneDark); };
+  const wallCap = (c, x0, y0, x1, y1) => { c.rect(x0, y0, x1, y1, C.stoneLight); c.row(y0, x0, x1, L(C.stoneLight)); for (let x = x0 + 4; x < x1; x += 6) c.set(x, y1, C.stone); };
+  const wallH = (c, x0, x1, yb) => { wallFace(c, x0, x1, yb); wallCap(c, x0, yb - 11, x1, yb - 9); };
+  const wallV = (c, x0, x1) => { wallFace(c, x0, x1, NEAR); wallCap(c, x0, FAR - 11, x1, NEAR - 9); for (let y = FAR - 8; y < NEAR - 9; y += 3) c.row(y, x0 + 1, x1 - 1, C.stone); };
+  def('stone-wall-h', 18, 14, (c) => { wallH(c, 1, 16, 12); pts(c, [[4, 11], [12, 12], [13, 11]], C.moss); }, solid);
+  def('stone-wall-v', 10, 20, (c) => wallV(c, 1, 8), solid);
+  const scornerT = (c) => { wallH(c, 1, 16, FAR); wallV(c, 1, 8); wallCap(c, 1, FAR - 11, 16, FAR - 9); c.rect(1, FAR - 8, 8, NEAR - 9, C.stoneLight); for (let y = FAR - 6; y < NEAR - 9; y += 3) c.row(y, 2, 7, C.stone); };
+  const scornerB = (c) => { wallCap(c, 1, FAR - 11, 8, NEAR - 9); for (let y = FAR - 8; y < NEAR - 11; y += 3) c.row(y, 2, 7, C.stone); wallH(c, 1, 16, NEAR); };
+  def('stone-wall-corner-tl', 18, 20, scornerT, solid);
+  def('stone-wall-corner-tr', 18, 20, mirrored(scornerT), solid);
+  def('stone-wall-corner-bl', 18, 20, scornerB, solid);
+  def('stone-wall-corner-br', 18, 20, mirrored(scornerB), solid);
+  /** A clipped hedge: the top `top` rows are its lit upper face. */
+  const hedge = (c, x0, y0, x1, y1, top, seed = 1) => {
+    lump(c, (t) => { t.rect(x0, y0, x1, y1, C.leaf); for (const [x, y] of [[x0, y0], [x1, y0]]) t.clear(x, y); }, C.leaf, { seed, noise: 1.3, grain: 2 });
+    for (let y = y0; y < y0 + top; y++) for (let x = x0; x <= x1; x++) if (c.get(x, y)) c.set(x, y, (x * 3 + y * 5 + seed) % 4 ? C.leafLight : L(C.leafLight));
+    for (let x = x0; x <= x1; x++) if ((x + seed) % 3) c.set(x, y0 + top, D(C.leaf));
+    c.row(y1, x0, x1, DD(C.leaf));
+  };
+  def('hedge-h', 18, 18, (c) => hedge(c, 1, 1, 16, 16, 3, 1), solid);
+  def('hedge-v', 12, 24, (c) => hedge(c, 1, 1, 10, 22, 9, 2), solid);
+  def('hedge-block', 18, 22, (c) => hedge(c, 1, 1, 16, 20, 7, 3), solid);
+  def('hedge-round', 18, 26, (c) => {
+    c.rect(8, 16, 9, 22, C.woodDark); c.rect(5, 22, 12, 24, CLAY); c.row(22, 4, 13, L(CLAY)); c.clear(5, 24); c.clear(12, 24);
+    leaves(c, 8.5, 9, 6, 6, C.leaf, 12);
+  }, solid);
+  const rpost = (c, x, yb, col = C.wood) => { c.rect(x, yb - 12, x + 1, yb, col); c.col(x, yb - 12, yb, L(col)); c.rect(x, yb - 13, x + 1, yb - 13, C.woodDark); };
+  const sag = (c, x0, x1, y, drop, col) => { for (let x = x0; x <= x1; x++) { const t = (x - x0) / (x1 - x0 || 1); c.set(x, y + Math.round(4 * drop * t * (1 - t)), col); } };
+  def('bridge-rail-h', 18, 17, (c) => { sag(c, 1, 16, 4, 2, C.straw); sag(c, 1, 16, 9, 2, D(C.straw)); rpost(c, 1, 15); rpost(c, 15, 15); c.row(5, 1, 2, C.straw); c.row(5, 15, 16, C.straw); }, solid);
+  def('bridge-rail-v', 6, 23, (c) => { rpost(c, 2, 15, C.woodDark); c.col(2, 4, 10, C.straw); rpost(c, 2, 21); c.row(11, 2, 3, C.straw); }, solid);
+  def('barricade', 32, 22, (c) => {
+    c.rect(2, 13, 29, 15, C.wood); c.row(13, 2, 29, C.woodLight); c.row(15, 2, 29, C.woodDark);
+    for (const x of [5, 13, 21]) {
+      for (const d of [1, -1]) { const bx = x + (d > 0 ? 0 : 6); c.line(bx, 20, bx + d * 7, 2, C.woodLight); c.line(bx + 1, 20, bx + d * 7 + 1, 2, C.wood); c.set(bx + d * 7, 1, C.woodPale); }
+      c.set(x + 3, 13, C.iron); c.set(x + 4, 12, C.straw);
+    }
+  }, solid);
+  def('rope-barrier', 30, 20, (c) => {
+    for (const x of [3, 25]) { c.rect(x, 3, x + 1, 16, C.brass); c.col(x, 3, 16, C.gold); disc(c, x + 0.5, 2, 1.5, C.gold); c.rect(x - 2, 17, x + 3, 18, C.brass); c.row(17, x - 1, x + 2, C.gold); }
+    for (let x = 5; x <= 24; x++) { const t = (x - 5) / 19, y = 5 + Math.round(16 * t * (1 - t)); c.set(x, y, L(C.wine)); c.set(x, y + 1, C.wine); }
+  }, solid);
+  const laser = (c, on) => {
+    for (const x of [1, 19]) { c.rect(x, 2, x + 3, 32, C.steel); c.col(x, 2, 32, L(C.steel)); c.col(x + 3, 2, 32, C.iron); c.rect(x, 1, x + 3, 2, C.iron); c.rect(x - 0, 31, x + 3, 33, C.ironDark); c.rect(x + 1, 4, x + 2, 5, on ? C.red : C.ironDark); }
+    for (let y = 9; y <= 27; y += 6) {
+      c.rect(4, y - 1, 4, y + 1, C.ironDark); c.rect(18, y - 1, 18, y + 1, C.ironDark);
+      if (on) { c.row(y, 5, 17, X.laser); c.row(y, 9, 13, hex('#f0a090')); } else { c.set(4, y, C.blood); c.set(18, y, C.blood); }
+    }
+  };
+  def('laser-gate', 24, 35, (c) => laser(c, true), { solid: true, shade: false });
+  def('laser-gate-off', 24, 35, (c) => laser(c, false));
 
   return S;
 };
