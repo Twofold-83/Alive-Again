@@ -126,6 +126,7 @@ export function cleanScene(s, prev, inner) {
       layer: Math.sign(Math.round(num(e.layer, -1, 1, 0))),
       pose: cleanPose(e.pose), // a paper doll's joints
       feel: cleanFeel(e.feel),
+      view: e.view === 'side' || e.view === 'used' ? e.view : '',
     });
   }
   const drawing = [];

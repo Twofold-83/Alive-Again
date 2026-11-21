@@ -1,6 +1,6 @@
 /* Director screens about one character or thing: its tools, speaking, moving, adding, tying, active objects, exits. */
 import { isDoll, poseEditor } from '../../core/dolls.js';
-import { PIXEL } from '../../core/catalog.js';
+import { PIXEL, pixelInfo } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES } from '../../shared/options.js';
 import { G, buildGuided, short } from '../guided.js';
@@ -21,6 +21,36 @@ export function screenThing(kit) {
   const isHero = sel.id === d.heroId;
   head(lab(sel), 'Drag it on the stage to move it.');
   const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, label);
+  /* a library thing has three pictures: as drawn, turned a quarter, and after someone used it */
+  const viewRow = () => {
+    const info = pixelInfo(sel.asset);
+    if (!info.side) return null;
+    const names = info.long ? ['Side', 'Front'] : ['Front', 'Side'];
+    return h(
+      'div',
+      { class: 'row', id: 'viewRow' },
+      h('span', { class: 'dim small' }, 'View'),
+      [
+        ['', names[0]],
+        ['side', names[1]],
+        ['used', 'Used'],
+      ].map(([v, label]) =>
+        h(
+          'button',
+          {
+            'data-view': v || 'drawn',
+            class: 'grow' + ((sel.view || '') === v ? ' on' : ''),
+            onclick: () => {
+              sel.view = v;
+              c.changedQuiet();
+              c.rebuild();
+            },
+          },
+          label,
+        ),
+      ),
+    );
+  };
   const lay = (v, label) =>
     h(
       'button',
@@ -41,6 +71,7 @@ export function screenThing(kit) {
     !sel.tie &&
       h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, 'Behind all'), lay(0, 'By position'), lay(1, 'In front')),
     h('div', { class: 'row' }, pickSel(FX, 'fx', 'Effect'), pickSel([['', 'No emote'], ...EMOTES.map((e) => [e, e])], 'emote', 'Emote')),
+    viewRow(),
     h(
       'div',
       { class: 'thingbtns' },

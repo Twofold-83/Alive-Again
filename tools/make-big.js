@@ -130,6 +130,7 @@ for (const cat of index.categories)
       it.h = im.h;
     }
   }
+require('./big/_views.js')(kit, index, PX);
 for (const [slug, d] of drawn)
   if (!seen.has(slug)) throw new Error(`${slug} (${d.file}) is not a sprite of the library: only existing slugs can be redrawn`);
 fs.writeFileSync(path.join(PX, 'index.json'), JSON.stringify(index));

@@ -27,7 +27,7 @@ export function playCut(root, before, after, o, done) {
     e.once = '';
     if (p) {
       if (p.x !== e.x || p.y !== e.y || p.scale !== e.scale || p.rot !== e.rot) moved = true;
-      Object.assign(e, { x: p.x, y: p.y, scale: p.scale, rot: p.rot, flip: p.flip, fx: p.fx, pose: p.pose, feel: p.feel });
+      Object.assign(e, { x: p.x, y: p.y, scale: p.scale, rot: p.rot, flip: p.flip, fx: p.fx, pose: p.pose, feel: p.feel, view: p.view });
     } else if (before) {
       e.fresh = true;
       moved = true;

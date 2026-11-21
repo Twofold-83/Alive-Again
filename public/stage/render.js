@@ -14,11 +14,20 @@ function tallOf(asset) {
   const h = pixelInfo(asset).h;
   return h ? h * 0.0422 + 0.12 : 1.22;
 }
-export function glyphNode(code, asset, cls = '') {
+export function glyphNode(code, asset, cls = '', view = '') {
   if (isDoll(asset)) return dollNode(asset, cls);
   const v = spriteView(code, asset);
-  const size = cls === 'glyph' && pixelInfo(asset).w; // on the stage a library sprite is drawn at its true size
-  if (v.img && size) return h('img', { class: 'glyph sized', src: v.img, alt: '', draggable: 'false', style: `--w:${size}` });
+  const info = pixelInfo(asset),
+    alt = view && info[view] && !v.img.startsWith('packs/'), // a thing seen from the side, or after it was used
+    size = cls === 'glyph' && (alt ? info[view][0] : info.w); // on the stage a library sprite is drawn at its true size
+  if (v.img && size)
+    return h('img', {
+      class: 'glyph sized',
+      src: alt ? v.img.replace(/\.png$/, `.${view}.png`) : v.img,
+      alt: '',
+      draggable: 'false',
+      style: `--w:${size}`,
+    });
   return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);
 }
 
@@ -227,9 +236,9 @@ export function renderStage(root, scene, o = {}) {
     }
     const [fxw, emote, hp, fl] = el.children,
       at = spot(e);
-    if (el._asset !== e.asset) {
-      el._asset = e.asset;
-      fxw.replaceChildren(glyphNode(code, e.asset, 'glyph'));
+    if (el._asset !== e.asset + '|' + (e.view || '')) {
+      el._asset = e.asset + '|' + (e.view || '');
+      fxw.replaceChildren(glyphNode(code, e.asset, 'glyph', e.view));
     }
     if (isDoll(e.asset)) {
       poseDoll(fxw.firstChild, e.pose);
