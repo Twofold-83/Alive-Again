@@ -86,7 +86,7 @@ body.phone #story { padding-bottom: env(safe-area-inset-bottom); }
 /* build scene and map */
 body.phone #workshop > header { flex-wrap: wrap; padding: calc(6px + env(safe-area-inset-top)) 8px 6px; gap: 6px; }
 body.phone #workshop > header .sep { display: none; }
-body.phone #workshop > header #wsClose { margin-left: auto; }
+body.phone #workshop > header #wsClose { order: -1; }
 body.phone .wsacts { display: flex; order: 9; width: 100%; gap: 6px; overflow-x: auto; align-items: center; padding-bottom: 2px; }
 body.phone .wsacts > * { flex: none; white-space: nowrap; }
 body.phone .wsacts .grow { display: none; }
@@ -169,3 +169,4 @@ body.phone .dollleft .doll.big { font-size: 74px; }
 body.phone .dollleft .poser small { display: none; }
 body.phone .dollleft .chips, body.phone .dollacts { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; width: 100%; }
 body.phone .dollleft .chips button, body.phone .dollacts button { flex: none; white-space: nowrap; }
+body.phone #wsClose .wide { display: none; }

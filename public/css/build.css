@@ -70,3 +70,5 @@
 .castrow { display: flex; flex-wrap: wrap; gap: 6px; }
 .castitem { display: inline-flex; flex-direction: column; align-items: center; }
 .castitem > button:first-child { font-size: 30px; padding: 4px 6px; min-height: 0; }
+.myroom { gap: 4px; margin-top: 4px; } .myroom button.grow { text-align: left; }
+#workshop > header #wsClose { margin-right: 6px; }

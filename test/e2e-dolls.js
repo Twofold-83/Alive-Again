@@ -17,6 +17,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const last = () => x.last(),
       angle = (sel) => p.evaluate((s) => document.querySelector(s).style.transform, sel);
 
+    /* Build scene: a room is saved on this device for other stories, and Esc leaves */
+    await x.opt('Build scene');
+    await p.waitForSelector('#wsStage');
+    await p.fill('#wsName', 'My cellar');
+    await p.click('#wsSave');
+    assert.equal(await p.locator('#myRooms .myroom').count(), 1, 'the room is kept');
+    assert.match(await p.evaluate(() => localStorage.getItem('tf.savedRooms')), /My cellar/);
+    await p.keyboard.press('Tab');
+    await p.keyboard.press('Escape');
+    await p.waitForSelector('#workshop', { state: 'hidden' });
+    await p.waitForSelector('.gopt');
+
     /* the character maker */
     await x.opt('Character maker');
     await p.waitForSelector('.dollgrid button');

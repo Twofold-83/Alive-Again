@@ -147,6 +147,68 @@ function close() {
   if (W.c.closed) W.c.closed();
 }
 
+/* ---------- my rooms: scenes kept on this device, for any story ---------- */
+function myRooms() {
+  try {
+    const list = JSON.parse(localStorage.getItem('tf.savedRooms') || '[]');
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+function saveRoom() {
+  flush();
+  const name = (W.cur.name || 'A room').trim(),
+    scene = clone(W.cur.scene);
+  Object.assign(scene, { steps: [], exits: [], sceneId: '' }); // a saved room stands alone: its ways out belong to one story's map
+  const list = [{ id: rid(), name, scene, at: Date.now() }, ...myRooms().filter((r) => r.name !== name)].slice(0, 60);
+  try {
+    localStorage.setItem('tf.savedRooms', JSON.stringify(list));
+    W.c.toast(`“${name}” is saved — you find it under “My saved rooms” in every story`);
+  } catch {
+    W.c.toast('This device has no room left to save it');
+  }
+  draw();
+}
+function myRoomsCard() {
+  const list = myRooms();
+  return h(
+    'div',
+    { class: 'card', id: 'myRooms' },
+    h('h3', {}, 'My saved rooms'),
+    list.length
+      ? list.map((r) =>
+          h(
+            'div',
+            { class: 'row myroom' },
+            h(
+              'button',
+              {
+                class: 'grow',
+                title: 'Open a copy of this room in Build scene',
+                onclick: () => build({ id: rid(), name: r.name, scene: normScene(clone(r.scene)) }),
+              },
+              h('b', {}, r.name),
+              h('small', { class: 'dim' }, ` ${r.scene.entities.length - 1} things`),
+            ),
+            h(
+              'button',
+              {
+                title: 'Forget this room',
+                onclick: () => {
+                  if (!confirm(`Forget “${r.name}”?`)) return;
+                  localStorage.setItem('tf.savedRooms', JSON.stringify(myRooms().filter((x) => x.id !== r.id)));
+                  draw();
+                },
+              },
+              '✕',
+            ),
+          ),
+        )
+      : h('p', { class: 'dim small' }, 'Nothing yet. Build a room and press “Save room”: it stays on this device and can be opened in any story.'),
+  );
+}
+
 /* ---------- the bench ---------- */
 function changed() {
   W.h.note(W.cur.scene); // every finished change can be undone
@@ -213,6 +275,7 @@ function remove(doc) {
 }
 function keys(ev) {
   if (!W.open) return;
+  if (ev.key === 'Escape' && !document.querySelector('#dollmaker:not([hidden])')) return close();
   const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName),
     mod = ev.ctrlKey || ev.metaKey,
     key = ev.key.toLowerCase();
@@ -334,6 +397,7 @@ function drawBar() {
         ? h('span', { class: 'dim small', id: 'wsSaved' }, '✓ On the map — saves itself')
         : h('button', { class: 'primary', id: 'wsAdd', title: 'Keep this scene: put it on the map', onclick: () => addToMap() }, 'Add scene to map'),
       h('span', { class: 'grow' }),
+      h('button', { id: 'wsSave', title: 'Keep this room on this device, to use again in any story', onclick: saveRoom }, 'Save room'),
       h('button', { title: 'Undo (Ctrl+Z)', disabled: !W.h.canUndo, id: 'wsUndo', onclick: () => undo(-1) }, '↶ Undo'),
       h('button', { title: 'Redo (Ctrl+Y)', disabled: !W.h.canRedo, id: 'wsRedo', onclick: () => undo(1) }, '↷ Redo'),
       h(
@@ -398,7 +462,16 @@ function drawBar() {
       h('button', { title: 'Add the scenes from a file to this map', onclick: importFile }, 'Load from file'),
     );
   const acts = kids.splice(3).filter(Boolean); // on a phone the actions get a row of their own that scrolls sideways
-  W.el.bar.replaceChildren(...kids, h('div', { class: 'wsacts' }, acts), h('button', { id: 'wsClose', onclick: close }, 'Close'));
+  W.el.bar.replaceChildren(
+    h(
+      'button',
+      { id: 'wsClose', class: 'primary', title: 'Leave Build scene (Esc)', onclick: close },
+      '◀ Back',
+      h('span', { class: 'wide' }, ' to story'),
+    ),
+    ...kids,
+    h('div', { class: 'wsacts' }, acts),
+  );
 }
 
 /* ---------- the map ---------- */
@@ -735,6 +808,7 @@ function mapTools() {
         SCENARIOS.map((sc) => big('scn-' + sc.id, sc.name, `${sc.rooms.length} rooms — ${sc.blurb}`, () => addScenario(sc))),
       ),
     );
+  if (!node) kids.push(myRoomsCard());
   W.el.tools.replaceChildren(...kids.filter(Boolean));
 }
 
@@ -1079,6 +1153,7 @@ function drawTools() {
     kids.push(box);
   }
   const top = t.scrollTop;
+  if (W.tab === 'tiles') kids.push(myRoomsCard());
   t.replaceChildren(...kids.filter(Boolean));
   t.scrollTop = top;
 }
