@@ -183,8 +183,17 @@ const { setup } = require('./lib');
     assert.equal(sc.ask.kind, 'roll');
     assert.equal(sc.sheet.inv.length, 1);
     // the Player: roll as asked, and use the key ON the chest (clicks still land right while zoomed in)
-    assert.match(await p.textContent('.askbox'), /Can you pick the lock\?.*Roll the d6.*4 or more/s);
-    await p.click('.askbox button');
+    // the turn opens on the skill check card: what it is for, what is needed; backing out returns to the turn
+    await p.waitForSelector('#check .checkcard');
+    assert.match(await p.textContent('#check'), /Can you pick the lock\?.*You need 4 or more on a d6/s);
+    await p.click('#checkBack');
+    await p.waitForSelector('#check', { state: 'hidden' });
+    assert.match(await p.textContent('.askbox'), /You backed out/);
+    await p.click('.askbox button'); // roll after all: a die tumbles and lands
+    await p.click('#checkRoll');
+    await p.waitForSelector('#check .tumble.landed .die');
+    assert.match(await p.textContent('#check .verdict'), /success|not enough/);
+    await p.click('#checkDone');
     await p.waitForSelector('#rolled'); // the die falls at once, and the Player is told how it went
     assert.match(await p.textContent('#rolled'), /Success! You needed 4 or more|Failed\. You needed 4 or more/);
     await p.click('#sheet .chip.item');

@@ -3,9 +3,8 @@
 import { isDoll, poseEditor } from '../core/dolls.js';
 import { openDollMaker } from '../build/dollmaker.js';
 import { assetLabel } from '../core/catalog.js';
-import { h, add, toast } from '../core/dom.js';
-import { act } from '../core/net.js';
-import { audio } from '../core/audio.js';
+import { h, add } from '../core/dom.js';
+import { openCheck } from './dice.js';
 import { glyphNode } from '../stage/render.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
@@ -17,6 +16,19 @@ import { openStory } from './viewer.js';
 import { leave } from '../shell/home.js';
 
 /* ---------- footer: what I say / narrate, and the End turn button ---------- */
+/** The card for a roll the Director asked for; what the Player decided goes into the draft. */
+function check(ask) {
+  if (document.querySelector('#check:not([hidden])')) return;
+  openCheck(ask, (r) => {
+    if (r.rolled) {
+      if (app.draft.ask) app.draft.ask.rolled = r.rolled;
+      setReply({ roll: true });
+    } else setReply({ decline: true });
+    saveDraft();
+    rebuild();
+  });
+}
+
 export function buildFoot() {
   const f = $('#foot');
   f.replaceChildren();
@@ -263,30 +275,17 @@ export function buildFoot() {
                     : `Failed. You needed ${ask.dc} or more.`,
               ),
             )
-          : opt(`Roll the d${ask.sides}${ask.dc ? ` — you need ${ask.dc} or more` : ''}`, false, async () => {
-              if (app.rollShow) return;
-              let r;
-              try {
-                r = await act('roll', { turn: app.S.turn }, 3);
-              } catch (e) {
-                return toast(e.message);
-              }
-              if (!r.rolled) return;
-              app.rollShow = { ...r.rolled, rolling: true };
-              audio.sfx('dice');
-              render();
-              setTimeout(() => {
-                app.rollShow = { ...r.rolled };
-                render();
-              }, 700);
-              setTimeout(() => {
-                app.rollShow = null;
-                if (app.draft.ask) app.draft.ask.rolled = r.rolled;
-                setReply({ roll: true });
-                saveDraft();
-                rebuild();
-              }, 1900);
-            });
+          : opt(
+              rp.decline ? 'You backed out — roll after all?' : `Roll the d${ask.sides}${ask.dc ? ` — you need ${ask.dc} or more` : ''}`,
+              false,
+              () => check(ask),
+            );
+        if (rp.decline) answered = true;
+        /* the turn opens on the skill check card, once */
+        if (!got && !rp.decline && app.checkSeen !== app.S.turn) {
+          app.checkSeen = app.S.turn;
+          setTimeout(() => check(ask), 350);
+        }
       } else if (ask.kind === 'discard') {
         answered = !!rp.id || !app.draft.sheet.inv.length;
         body = app.draft.sheet.inv.length

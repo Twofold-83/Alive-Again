@@ -39,6 +39,7 @@ export function actionParts(scene, pendingRoll) {
   else if (t && a && a.kind === 'battle') parts.push(['does', `attacks ${name(t)}`]);
   else if (t) parts.push(['does', 'reaches for ' + name(t)]);
   if (a && a.kind === 'battle' && a.move !== 'attack') parts.push(['does', a.move === 'defend' ? 'defends' : 'tries to flee']);
+  if (a && a.kind === 'roll' && a.declined) parts.push(['does', 'backs out of the roll']);
   if (a && a.kind === 'place') parts.push(['goes', 'goes to ' + a.label]);
   if (a && a.kind === 'discard') parts.push(['gives', 'discards ' + assetLabel(a.asset, a.name)]);
   const ex = scene.exit && (scene.exits || []).find((x) => x.id === scene.exit);
