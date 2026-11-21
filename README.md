@@ -65,7 +65,7 @@ choice → narrower choices.
 
 | Choice | What it does |
 | --- | --- |
-| ➕ Add something | 1,965 pixel sprites and 670 emoji in searchable categories, plus your own photos, generated assets, or any emoji. |
+| ➕ Add something | 3,369 pixel sprites and 670 emoji in searchable categories, plus your own photos, generated assets, or any emoji. |
 | 💬 Someone speaks | A line and a face for any character. |
 | 🚶 Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, cross the stage, jump, tremble. Different things move together; one thing's moves follow each other. |
 | 📝 Narrate | One narration per step. |
@@ -171,8 +171,9 @@ are no emoji anywhere: the stage uses the pixel-art library only, menus use spri
 as icons, and what the Player did is read out like the log of an old adventure game
 (`SAYS`, `DOES`, `GOES`, `ROLLS`), with a `> command line` on the stage during the replay.
 
-- **Rooms in one click.** Build scene has twelve themes (old house, parlour, kitchen, great
-  hall, cellar, crypt, desert tomb, cave, garden, graveyard, snowfield, street) in four
+- **Rooms in one click.** Build scene has 55 themes — old-house rooms (wallpapers, nursery,
+  study, attic, bathroom …), institutions (asylum, morgue, hospital, prison, station, factory)
+  and bleak outdoors (dead wood, marsh, moor, cemetery, catacomb, shipwreck, carnival …) — in four
   shapes; one press lays walls, floor and a few details. A new story opens in such a room.
 - **Things can be clicked from the start.** Anything placed in Build scene gets a name and
   the verbs Look at / Use / Take; rename it or change the verbs under "Clickable".
@@ -327,7 +328,7 @@ and/or `directorMove(ctx)` from a module and start with `BOT_PROVIDER=./my-bot.j
 ## Art: placeholders now, real art later
 
 Scenes only store asset **ids** (`p:knight`, `s:wizard-mage`, `b:forest`, `c:<id>`),
-never pixels. The main library is 1,965 pixel-art sprites in `public/px/` (including 412 level tiles
+never pixels. The main library is 3,369 pixel-art sprites in `public/px/` (including 412 level tiles
 with joining edge and corner pieces) (ids `p:…`),
 drawn by code in `tools/make-sprites.js`; behind it sits the older emoji library
 (ids `s:…`), and every backdrop is a CSS gradient. Two hooks raise the quality without touching the game:

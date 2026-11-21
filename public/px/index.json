@@ -12424,6 +12424,2889 @@
      "solid": true
     }
    ]
+  },
+  {
+   "id": "bleak",
+   "label": "Outdoor dread: woods, moor & shore",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "deadwood-top",
+     "name": "dead forest bare trees wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-wall",
+     "name": "dead forest bare trees wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-wall-hollow",
+     "name": "dead forest bare trees wall hollow tree hole dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-wall-eyes",
+     "name": "dead forest bare trees wall eyes watching between trees dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-wall-noose",
+     "name": "dead forest bare trees wall noose hanging from branch rope",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-wall-owl",
+     "name": "dead forest bare trees wall owl perched branch watching",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-wall-carved",
+     "name": "dead forest bare trees wall carved face in bark tree",
+     "kind": "wall"
+    },
+    {
+     "slug": "deadwood-floor",
+     "name": "dead forest bare trees floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "deadwood-floor-roots",
+     "name": "dead forest bare trees floor tree roots twisted",
+     "kind": "floor"
+    },
+    {
+     "slug": "deadwood-floor-leaves",
+     "name": "dead forest bare trees floor dead leaves pile",
+     "kind": "floor"
+    },
+    {
+     "slug": "deadwood-floor-bones",
+     "name": "dead forest bare trees floor bones half buried",
+     "kind": "floor"
+    },
+    {
+     "slug": "marsh-top",
+     "name": "swamp marsh reeds black water wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-wall",
+     "name": "swamp marsh reeds black water wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-wall-cattails",
+     "name": "swamp marsh reeds black water wall cattails bulrushes",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-wall-eyes",
+     "name": "swamp marsh reeds black water wall eyes in the reeds watching",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-wall-skull",
+     "name": "swamp marsh reeds black water wall skull in the reeds",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-wall-boat",
+     "name": "swamp marsh reeds black water wall sunken boat prow wreck",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-wall-wisp",
+     "name": "swamp marsh reeds black water wall will o wisp ghost light",
+     "kind": "wall"
+    },
+    {
+     "slug": "marsh-floor",
+     "name": "swamp marsh reeds black water floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "marsh-floor-puddle",
+     "name": "swamp marsh reeds black water floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "marsh-floor-planks",
+     "name": "swamp marsh reeds black water floor boardwalk planks rotten walkway",
+     "kind": "floor"
+    },
+    {
+     "slug": "marsh-floor-bubbles",
+     "name": "swamp marsh reeds black water floor bog bubbles sinking mud",
+     "kind": "floor"
+    },
+    {
+     "slug": "moor-top",
+     "name": "moor heather standing stones wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-wall",
+     "name": "moor heather standing stones wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-wall-dolmen",
+     "name": "moor heather standing stones wall dolmen stone table tomb",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-wall-menhir",
+     "name": "moor heather standing stones wall tall standing stone carved spiral",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-wall-cairn",
+     "name": "moor heather standing stones wall cairn pile of stones",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-wall-signpost",
+     "name": "moor heather standing stones wall crooked signpost wooden",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-wall-gibbet",
+     "name": "moor heather standing stones wall gibbet cage on the moor",
+     "kind": "wall"
+    },
+    {
+     "slug": "moor-floor",
+     "name": "moor heather standing stones floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "moor-floor-heather",
+     "name": "moor heather standing stones floor heather purple flowers",
+     "kind": "floor"
+    },
+    {
+     "slug": "moor-floor-path",
+     "name": "moor heather standing stones floor trodden path dirt track",
+     "kind": "floor"
+    },
+    {
+     "slug": "moor-floor-bog",
+     "name": "moor heather standing stones floor peat bog black pool",
+     "kind": "floor"
+    },
+    {
+     "slug": "seashore-top",
+     "name": "grey seashore rocks sand tide wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-wall",
+     "name": "grey seashore rocks sand tide wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-wall-cave",
+     "name": "grey seashore rocks sand tide wall sea cave dark opening",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-wall-seaweed",
+     "name": "grey seashore rocks sand tide wall seaweed kelp draped",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-wall-barnacles",
+     "name": "grey seashore rocks sand tide wall barnacles shells crusted",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-wall-wreck",
+     "name": "grey seashore rocks sand tide wall wreck timbers ribs of ship",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-wall-pool",
+     "name": "grey seashore rocks sand tide wall tide pool rock pool",
+     "kind": "wall"
+    },
+    {
+     "slug": "seashore-floor",
+     "name": "grey seashore rocks sand tide floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "seashore-floor-wet",
+     "name": "grey seashore rocks sand tide floor wet sand dark tide line foam",
+     "kind": "floor"
+    },
+    {
+     "slug": "seashore-floor-shells",
+     "name": "grey seashore rocks sand tide floor shells pebbles",
+     "kind": "floor"
+    },
+    {
+     "slug": "seashore-floor-driftwood",
+     "name": "grey seashore rocks sand tide floor driftwood bleached wood",
+     "kind": "floor"
+    },
+    {
+     "slug": "cornfield-top",
+     "name": "cornfield tall corn furrows wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-wall",
+     "name": "cornfield tall corn furrows wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-wall-scarecrow",
+     "name": "cornfield tall corn furrows wall scarecrow in the corn",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-wall-gap",
+     "name": "cornfield tall corn furrows wall gap trampled path into corn",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-wall-eyes",
+     "name": "cornfield tall corn furrows wall eyes in the corn",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-wall-crow",
+     "name": "cornfield tall corn furrows wall crow on corn stalk",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-wall-sign",
+     "name": "cornfield tall corn furrows wall keep out sign nailed",
+     "kind": "wall"
+    },
+    {
+     "slug": "cornfield-floor",
+     "name": "cornfield tall corn furrows floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "cornfield-floor-stubble",
+     "name": "cornfield tall corn furrows floor stubble cut stalks",
+     "kind": "floor"
+    },
+    {
+     "slug": "cornfield-floor-trampled",
+     "name": "cornfield tall corn furrows floor trampled flattened corn circle",
+     "kind": "floor"
+    },
+    {
+     "slug": "cornfield-floor-mud",
+     "name": "cornfield tall corn furrows floor mud wet earth footprints",
+     "kind": "floor"
+    },
+    {
+     "slug": "snowwood-top",
+     "name": "snowy pine forest winter wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-wall",
+     "name": "snowy pine forest winter wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-wall-eyes",
+     "name": "snowy pine forest winter wall eyes among the pines",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-wall-icicles",
+     "name": "snowy pine forest winter wall icicles hanging ice",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-wall-hollow",
+     "name": "snowy pine forest winter wall dark gap between trees path",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-wall-sign",
+     "name": "snowy pine forest winter wall snow covered sign",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-wall-hanged",
+     "name": "snowy pine forest winter wall frozen figure hanging from tree",
+     "kind": "wall"
+    },
+    {
+     "slug": "snowwood-floor",
+     "name": "snowy pine forest winter floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "snowwood-floor-tracks",
+     "name": "snowy pine forest winter floor footprints tracks in snow",
+     "kind": "floor"
+    },
+    {
+     "slug": "snowwood-floor-ice",
+     "name": "snowy pine forest winter floor ice frozen pond cracked",
+     "kind": "floor"
+    },
+    {
+     "slug": "snowwood-floor-bloody",
+     "name": "snowy pine forest winter floor blood on snow red drops",
+     "kind": "floor"
+    },
+    {
+     "slug": "quarry-top",
+     "name": "quarry cut rock face gravel wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-wall",
+     "name": "quarry cut rock face gravel wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-wall-tunnel",
+     "name": "quarry cut rock face gravel wall tunnel adit dark opening timber",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-wall-ladder",
+     "name": "quarry cut rock face gravel wall ladder against rock face",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-wall-drill",
+     "name": "quarry cut rock face gravel wall drill holes blast marks",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-wall-sign",
+     "name": "quarry cut rock face gravel wall danger sign blasting",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-wall-hook",
+     "name": "quarry cut rock face gravel wall crane hook chain hanging block",
+     "kind": "wall"
+    },
+    {
+     "slug": "quarry-floor",
+     "name": "quarry cut rock face gravel floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "quarry-floor-puddle",
+     "name": "quarry cut rock face gravel floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "quarry-floor-rubble",
+     "name": "quarry cut rock face gravel floor rubble broken rock heap",
+     "kind": "floor"
+    },
+    {
+     "slug": "quarry-floor-rails",
+     "name": "quarry cut rock face gravel floor narrow rails track sleepers",
+     "kind": "floor"
+    },
+    {
+     "slug": "ruin-top",
+     "name": "ruined abbey broken walls weeds wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-wall",
+     "name": "ruined abbey broken walls weeds wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-wall-window",
+     "name": "ruined abbey broken walls weeds wall gothic window empty arch sky",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-wall-arch",
+     "name": "ruined abbey broken walls weeds wall ruined archway doorway dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-wall-ivy",
+     "name": "ruined abbey broken walls weeds wall ivy covered wall creeper",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-wall-niche",
+     "name": "ruined abbey broken walls weeds wall niche headless statue saint",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-wall-fallen",
+     "name": "ruined abbey broken walls weeds wall collapsed wall breach rubble",
+     "kind": "wall"
+    },
+    {
+     "slug": "ruin-floor",
+     "name": "ruined abbey broken walls weeds floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "ruin-floor-weeds",
+     "name": "ruined abbey broken walls weeds floor weeds nettles overgrown",
+     "kind": "floor"
+    },
+    {
+     "slug": "ruin-floor-rubble",
+     "name": "ruined abbey broken walls weeds floor fallen stones rubble",
+     "kind": "floor"
+    },
+    {
+     "slug": "ruin-floor-tomb",
+     "name": "ruined abbey broken walls weeds floor floor tomb slab worn effigy",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "below",
+   "label": "Outdoor dread: graves, tunnels & wrecks",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "cemetery-top",
+     "name": "cemetery graveyard iron fence gravel wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-wall",
+     "name": "cemetery graveyard iron fence gravel wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-wall-gate",
+     "name": "cemetery graveyard iron fence gravel wall cemetery gate closed iron arch",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-wall-broken",
+     "name": "cemetery graveyard iron fence gravel wall bent broken railings gap",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-wall-ivy",
+     "name": "cemetery graveyard iron fence gravel wall ivy on the railings",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-wall-lamp",
+     "name": "cemetery graveyard iron fence gravel wall gate lamp lantern lit dim",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-wall-angel",
+     "name": "cemetery graveyard iron fence gravel wall stone angel beyond the fence",
+     "kind": "wall"
+    },
+    {
+     "slug": "cemetery-floor",
+     "name": "cemetery graveyard iron fence gravel floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "cemetery-floor-grave",
+     "name": "cemetery graveyard iron fence gravel floor grave slab in path",
+     "kind": "floor"
+    },
+    {
+     "slug": "cemetery-floor-mound",
+     "name": "cemetery graveyard iron fence gravel floor fresh grave mound earth",
+     "kind": "floor"
+    },
+    {
+     "slug": "cemetery-floor-flowers",
+     "name": "cemetery graveyard iron fence gravel floor wilted flowers left on path",
+     "kind": "floor"
+    },
+    {
+     "slug": "cemetery-floor-leaves",
+     "name": "cemetery graveyard iron fence gravel floor dead leaves on gravel",
+     "kind": "floor"
+    },
+    {
+     "slug": "sewer-top",
+     "name": "sewer brick tunnel slime wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-wall",
+     "name": "sewer brick tunnel slime wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-wall-pipe",
+     "name": "sewer brick tunnel slime wall outflow pipe dripping sludge",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-wall-grate",
+     "name": "sewer brick tunnel slime wall barred grate eyes behind",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-wall-ladder",
+     "name": "sewer brick tunnel slime wall iron rungs ladder up",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-wall-valve",
+     "name": "sewer brick tunnel slime wall valve wheel rusty",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-wall-hole",
+     "name": "sewer brick tunnel slime wall rat hole broken bricks",
+     "kind": "wall"
+    },
+    {
+     "slug": "sewer-floor",
+     "name": "sewer brick tunnel slime floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "sewer-floor-slime",
+     "name": "sewer brick tunnel slime floor green slime ooze",
+     "kind": "floor"
+    },
+    {
+     "slug": "sewer-floor-channel",
+     "name": "sewer brick tunnel slime floor sewage channel flowing water",
+     "kind": "floor"
+    },
+    {
+     "slug": "sewer-floor-drain",
+     "name": "sewer brick tunnel slime floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "sewer-floor-bones",
+     "name": "sewer brick tunnel slime floor bones rat skeleton in muck",
+     "kind": "floor"
+    },
+    {
+     "slug": "catacomb-top",
+     "name": "catacomb skull walls bone dust wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall",
+     "name": "catacomb skull walls bone dust wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall-niche",
+     "name": "catacomb skull walls bone dust wall burial niche skeleton lying",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall-candle",
+     "name": "catacomb skull walls bone dust wall candle in skull niche",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall-cross",
+     "name": "catacomb skull walls bone dust wall cross made of bones",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall-gate",
+     "name": "catacomb skull walls bone dust wall iron gate crypt door",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall-plaque",
+     "name": "catacomb skull walls bone dust wall stone plaque latin inscription",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-wall-giant",
+     "name": "catacomb skull walls bone dust wall giant skull carved in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "catacomb-floor",
+     "name": "catacomb skull walls bone dust floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "catacomb-floor-bones",
+     "name": "catacomb skull walls bone dust floor scattered bones femur skull",
+     "kind": "floor"
+    },
+    {
+     "slug": "catacomb-floor-cracked",
+     "name": "catacomb skull walls bone dust floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "catacomb-floor-slab",
+     "name": "catacomb skull walls bone dust floor tomb slab lid cross",
+     "kind": "floor"
+    },
+    {
+     "slug": "catacomb-floor-pit",
+     "name": "catacomb skull walls bone dust floor bone pit ossuary hole",
+     "kind": "floor"
+    },
+    {
+     "slug": "mineshaft-top",
+     "name": "mine shaft timber props rock wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-wall",
+     "name": "mine shaft timber props rock wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-wall-lantern",
+     "name": "mine shaft timber props rock wall miners lantern hanging lit",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-wall-ore",
+     "name": "mine shaft timber props rock wall ore vein glinting seam",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-wall-tunnel",
+     "name": "mine shaft timber props rock wall side tunnel dark drift",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-wall-collapse",
+     "name": "mine shaft timber props rock wall collapsed tunnel cave in rubble",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-wall-sign",
+     "name": "mine shaft timber props rock wall danger sign skull crossbones mine",
+     "kind": "wall"
+    },
+    {
+     "slug": "mineshaft-floor",
+     "name": "mine shaft timber props rock floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "mineshaft-floor-rails",
+     "name": "mine shaft timber props rock floor mine cart rails track",
+     "kind": "floor"
+    },
+    {
+     "slug": "mineshaft-floor-puddle",
+     "name": "mine shaft timber props rock floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "mineshaft-floor-planks",
+     "name": "mine shaft timber props rock floor planks over a shaft hole",
+     "kind": "floor"
+    },
+    {
+     "slug": "shipwreck-top",
+     "name": "shipwreck hull planks wet deck wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall",
+     "name": "shipwreck hull planks wet deck wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall-porthole",
+     "name": "shipwreck hull planks wet deck wall porthole brass dark water",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall-breach",
+     "name": "shipwreck hull planks wet deck wall hull breach hole water pouring",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall-lantern",
+     "name": "shipwreck hull planks wet deck wall ship lantern swinging",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall-anchor",
+     "name": "shipwreck hull planks wet deck wall anchor chain hanging rusted",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall-seaweed",
+     "name": "shipwreck hull planks wet deck wall seaweed and barnacles",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-wall-figurehead",
+     "name": "shipwreck hull planks wet deck wall figurehead carved woman rotting",
+     "kind": "wall"
+    },
+    {
+     "slug": "shipwreck-floor",
+     "name": "shipwreck hull planks wet deck floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "shipwreck-floor-puddle",
+     "name": "shipwreck hull planks wet deck floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "shipwreck-floor-hatch",
+     "name": "shipwreck hull planks wet deck floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "shipwreck-floor-seaweed",
+     "name": "shipwreck hull planks wet deck floor seaweed strewn deck",
+     "kind": "floor"
+    },
+    {
+     "slug": "shipwreck-floor-rot",
+     "name": "shipwreck hull planks wet deck floor rotten hole in deck",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "grimtown",
+   "label": "Outdoor dread: grim places",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "carnival-top",
+     "name": "abandoned carnival striped tent sawdust wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall",
+     "name": "abandoned carnival striped tent sawdust wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall-flap",
+     "name": "abandoned carnival striped tent sawdust wall tent flap entrance dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall-poster",
+     "name": "abandoned carnival striped tent sawdust wall freak show poster torn",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall-mirror",
+     "name": "abandoned carnival striped tent sawdust wall funhouse mirror warped reflection",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall-lights",
+     "name": "abandoned carnival striped tent sawdust wall string of bulbs some dead",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall-clown",
+     "name": "abandoned carnival striped tent sawdust wall painted clown face faded grin",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-wall-tear",
+     "name": "abandoned carnival striped tent sawdust wall slashed canvas tear",
+     "kind": "wall"
+    },
+    {
+     "slug": "carnival-floor",
+     "name": "abandoned carnival striped tent sawdust floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "carnival-floor-tickets",
+     "name": "abandoned carnival striped tent sawdust floor torn tickets litter",
+     "kind": "floor"
+    },
+    {
+     "slug": "carnival-floor-mud",
+     "name": "abandoned carnival striped tent sawdust floor churned mud wheel ruts",
+     "kind": "floor"
+    },
+    {
+     "slug": "carnival-floor-ring",
+     "name": "abandoned carnival striped tent sawdust floor circus ring kerb painted",
+     "kind": "floor"
+    },
+    {
+     "slug": "factory-top",
+     "name": "derelict factory rusted machines oily floor wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall",
+     "name": "derelict factory rusted machines oily floor wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall-gauge",
+     "name": "derelict factory rusted machines oily floor wall pressure gauge dial red needle",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall-gears",
+     "name": "derelict factory rusted machines oily floor wall gears cogs seized rusty",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall-furnace",
+     "name": "derelict factory rusted machines oily floor wall furnace door glowing",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall-lever",
+     "name": "derelict factory rusted machines oily floor wall lever switch panel",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall-fan",
+     "name": "derelict factory rusted machines oily floor wall extractor fan vent blades",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-wall-door",
+     "name": "derelict factory rusted machines oily floor wall sliding steel door hazard stripes",
+     "kind": "wall"
+    },
+    {
+     "slug": "factory-floor",
+     "name": "derelict factory rusted machines oily floor floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "factory-floor-oil",
+     "name": "derelict factory rusted machines oily floor floor oil slick puddle sheen",
+     "kind": "floor"
+    },
+    {
+     "slug": "factory-floor-drain",
+     "name": "derelict factory rusted machines oily floor floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "factory-floor-hazard",
+     "name": "derelict factory rusted machines oily floor floor hazard stripes painted worn",
+     "kind": "floor"
+    },
+    {
+     "slug": "factory-floor-cracked",
+     "name": "derelict factory rusted machines oily floor floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "station-top",
+     "name": "old railway station platform tiles wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall",
+     "name": "old railway station platform tiles wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall-timetable",
+     "name": "old railway station platform tiles wall timetable board departures",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall-clock",
+     "name": "old railway station platform tiles wall station clock stopped",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall-poster",
+     "name": "old railway station platform tiles wall faded travel poster seaside",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall-ticket",
+     "name": "old railway station platform tiles wall ticket window closed shutter",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall-door",
+     "name": "old railway station platform tiles wall waiting room door frosted glass",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-wall-sign",
+     "name": "old railway station platform tiles wall station name sign enamel",
+     "kind": "wall"
+    },
+    {
+     "slug": "station-floor",
+     "name": "old railway station platform tiles floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "station-floor-edge",
+     "name": "old railway station platform tiles floor platform edge line",
+     "kind": "floor"
+    },
+    {
+     "slug": "station-floor-cracked",
+     "name": "old railway station platform tiles floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "station-floor-puddle",
+     "name": "old railway station platform tiles floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "station-floor-litter",
+     "name": "old railway station platform tiles floor litter newspaper blown",
+     "kind": "floor"
+    },
+    {
+     "slug": "hospital-top",
+     "name": "old hospital ward walls lino wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall",
+     "name": "old hospital ward walls lino wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall-window",
+     "name": "old hospital ward walls lino wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall-door",
+     "name": "old hospital ward walls lino wall ward double doors portholes swing",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall-chart",
+     "name": "old hospital ward walls lino wall clipboard patient chart hanging",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall-cross",
+     "name": "old hospital ward walls lino wall red cross sign faded",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall-curtain",
+     "name": "old hospital ward walls lino wall bed curtain rail drawn",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-wall-stain",
+     "name": "old hospital ward walls lino wall handprints smeared wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "hospital-floor",
+     "name": "old hospital ward walls lino floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "hospital-floor-bloody",
+     "name": "old hospital ward walls lino floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "hospital-floor-cracked",
+     "name": "old hospital ward walls lino floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "hospital-floor-wheels",
+     "name": "old hospital ward walls lino floor trolley wheel marks tracks",
+     "kind": "floor"
+    },
+    {
+     "slug": "hospital-floor-pills",
+     "name": "old hospital ward walls lino floor spilled pills bottle",
+     "kind": "floor"
+    },
+    {
+     "slug": "prison-top",
+     "name": "old prison stone walls bars wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall",
+     "name": "old prison stone walls bars wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall-bars",
+     "name": "old prison stone walls bars wall cell bars dark cell behind",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall-prisoner",
+     "name": "old prison stone walls bars wall cell bars hands gripping eyes",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall-window",
+     "name": "old prison stone walls bars wall high barred window moonlight",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall-chains",
+     "name": "old prison stone walls bars wall wall chains manacles",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall-torch",
+     "name": "old prison stone walls bars wall wall torch burning low",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-wall-scratch",
+     "name": "old prison stone walls bars wall scratched message names dates",
+     "kind": "wall"
+    },
+    {
+     "slug": "prison-floor",
+     "name": "old prison stone walls bars floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "prison-floor-drain",
+     "name": "old prison stone walls bars floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "prison-floor-bloody",
+     "name": "old prison stone walls bars floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "prison-floor-straw",
+     "name": "old prison stone walls bars floor straw bedding dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "prison-floor-shackle",
+     "name": "old prison stone walls bars floor floor ring shackle chain",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "graveyard",
+   "label": "Graveyard & ruins",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "grave-round",
+     "name": "round headstone gravestone rip old",
+     "solid": true
+    },
+    {
+     "slug": "grave-celtic",
+     "name": "celtic cross gravestone ring cross",
+     "solid": true
+    },
+    {
+     "slug": "grave-obelisk",
+     "name": "obelisk grave monument pointed",
+     "solid": true
+    },
+    {
+     "slug": "grave-broken",
+     "name": "broken gravestone snapped top fallen",
+     "solid": true
+    },
+    {
+     "slug": "grave-child",
+     "name": "small child gravestone lamb carved",
+     "solid": true
+    },
+    {
+     "slug": "grave-skull",
+     "name": "gravestone carved skull crossbones death head",
+     "solid": true
+    },
+    {
+     "slug": "grave-wooden",
+     "name": "wooden grave marker plank painted name",
+     "solid": true
+    },
+    {
+     "slug": "grave-mossy",
+     "name": "mossy overgrown gravestone ivy unreadable",
+     "solid": true
+    },
+    {
+     "slug": "grave-double",
+     "name": "double headstone husband wife two arches",
+     "solid": true
+    },
+    {
+     "slug": "grave-urn-top",
+     "name": "gravestone urn on top draped pedestal",
+     "solid": true
+    },
+    {
+     "slug": "grave-gothic",
+     "name": "pointed gothic gravestone trefoil",
+     "solid": true
+    },
+    {
+     "slug": "grave-sunken",
+     "name": "sunken gravestone leaning half buried",
+     "solid": true
+    },
+    {
+     "slug": "grave-iron-cross",
+     "name": "iron cross grave marker rusted wrought",
+     "solid": true
+    },
+    {
+     "slug": "tomb-chest",
+     "name": "chest tomb table tomb stone box",
+     "solid": true
+    },
+    {
+     "slug": "tomb-effigy",
+     "name": "tomb with knight effigy lying stone figure",
+     "solid": true
+    },
+    {
+     "slug": "tomb-cracked",
+     "name": "cracked tomb broken open lid shifted dark inside",
+     "solid": true
+    },
+    {
+     "slug": "mausoleum-door",
+     "name": "mausoleum door crypt entrance stone pediment",
+     "solid": true
+    },
+    {
+     "slug": "mausoleum-door-open",
+     "name": "mausoleum door open dark steps down crypt"
+    },
+    {
+     "slug": "crypt-lid",
+     "name": "crypt lid stone slab ring closed in ground",
+     "solid": true
+    },
+    {
+     "slug": "crypt-lid-ajar",
+     "name": "crypt lid ajar pushed aside hand creeping out"
+    },
+    {
+     "slug": "angel-praying",
+     "name": "praying angel statue wings hands together",
+     "solid": true
+    },
+    {
+     "slug": "angel-broken",
+     "name": "broken angel statue headless one wing",
+     "solid": true
+    },
+    {
+     "slug": "grave-railing",
+     "name": "low iron grave railing fence spikes",
+     "solid": true
+    },
+    {
+     "slug": "grave-railing-bent",
+     "name": "bent broken grave railing gap"
+    },
+    {
+     "slug": "lychgate",
+     "name": "lych gate roofed churchyard gate wooden",
+     "solid": true
+    },
+    {
+     "slug": "wreath-funeral",
+     "name": "funeral wreath flowers ribbon fresh"
+    },
+    {
+     "slug": "wreath-dead",
+     "name": "dead wreath withered brown ribbon rotted"
+    },
+    {
+     "slug": "grave-lantern",
+     "name": "grave lantern red glass candle memorial"
+    },
+    {
+     "slug": "grave-candles",
+     "name": "grave candles burnt down wax stubs jar"
+    },
+    {
+     "slug": "flowers-wilted",
+     "name": "wilted flowers bouquet left on grave dead roses"
+    },
+    {
+     "slug": "grave-coffin-pit",
+     "name": "open grave with coffin at the bottom lid showing"
+    },
+    {
+     "slug": "grave-hand",
+     "name": "hand reaching out of grave soil undead rising"
+    },
+    {
+     "slug": "coffin-smashed",
+     "name": "smashed coffin broken planks bones spilled"
+    },
+    {
+     "slug": "bone-heap",
+     "name": "heap of bones pile skulls ossuary"
+    },
+    {
+     "slug": "skull-stake",
+     "name": "skull on a stake warning post impaled",
+     "solid": true
+    },
+    {
+     "slug": "dead-tree-tall",
+     "name": "tall dead tree gnarled twisted bare",
+     "solid": true
+    },
+    {
+     "slug": "dead-tree-noose",
+     "name": "hanging tree dead tree with noose rope",
+     "solid": true
+    },
+    {
+     "slug": "tree-stump-old",
+     "name": "old tree stump rings rotten fungus",
+     "solid": true
+    },
+    {
+     "slug": "stump-axe",
+     "name": "tree stump with axe stuck chopping block",
+     "solid": true
+    },
+    {
+     "slug": "crow-headstone",
+     "name": "crow perched on gravestone raven watching",
+     "solid": true
+    },
+    {
+     "slug": "crows-feeding",
+     "name": "crows pecking at something on the ground carrion"
+    },
+    {
+     "slug": "mist-patch",
+     "name": "patch of mist low fog ground graveyard"
+    },
+    {
+     "slug": "standing-stone",
+     "name": "standing stone menhir carved ancient",
+     "solid": true
+    },
+    {
+     "slug": "trilithon",
+     "name": "trilithon stone doorway henge lintel",
+     "solid": true
+    },
+    {
+     "slug": "well-ruined",
+     "name": "ruined well broken roof bucket missing stone",
+     "solid": true
+    },
+    {
+     "slug": "gallows",
+     "name": "gallows gibbet noose scaffold execution",
+     "solid": true
+    },
+    {
+     "slug": "gibbet-cage",
+     "name": "gibbet iron cage hanging post skeleton",
+     "solid": true
+    },
+    {
+     "slug": "scarecrow-ragged",
+     "name": "ragged scarecrow pumpkin head arms out crows",
+     "solid": true
+    },
+    {
+     "slug": "shrine-roadside",
+     "name": "roadside shrine wooden box candle saint figure",
+     "solid": true
+    },
+    {
+     "slug": "ruin-arch",
+     "name": "ruined arch broken gothic arch stones standing",
+     "solid": true
+    },
+    {
+     "slug": "ruin-column",
+     "name": "ruined column broken pillar fluted stump",
+     "solid": true
+    },
+    {
+     "slug": "ruin-column-fallen",
+     "name": "fallen column toppled pillar drums in grass"
+    },
+    {
+     "slug": "spade-mound",
+     "name": "spade stuck in mound of earth gravedigger"
+    },
+    {
+     "slug": "hearse-cart",
+     "name": "hearse hand cart coffin on bier wheels black",
+     "solid": true
+    },
+    {
+     "slug": "grave-bell",
+     "name": "grave bell safety coffin bell on post string buried alive",
+     "solid": true
+    },
+    {
+     "slug": "plague-cart",
+     "name": "plague cart bodies piled shrouds wheel",
+     "solid": true
+    },
+    {
+     "slug": "sundial-skull",
+     "name": "memento mori pedestal skull hourglass stone",
+     "solid": true
+    },
+    {
+     "slug": "bier-candles",
+     "name": "bier coffin stand with tall candles lying in state",
+     "solid": true
+    }
+   ]
+  },
+  {
+   "id": "occult",
+   "label": "Occult & ritual",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "altar-stone",
+     "name": "stone altar sacrificial blood stained slab",
+     "solid": true
+    },
+    {
+     "slug": "altar-cloth",
+     "name": "altar black cloth candles skull ritual table",
+     "solid": true
+    },
+    {
+     "slug": "altar-bone",
+     "name": "altar made of bones and skulls",
+     "solid": true
+    },
+    {
+     "slug": "candle-tall-black",
+     "name": "tall black candle iron holder flame"
+    },
+    {
+     "slug": "candle-melted",
+     "name": "melted candle stub pool of wax dying flame"
+    },
+    {
+     "slug": "candelabra-iron",
+     "name": "iron floor candelabra tall five candles black",
+     "solid": true
+    },
+    {
+     "slug": "grimoire-closed",
+     "name": "grimoire closed spell book clasp eye cover"
+    },
+    {
+     "slug": "grimoire-chained",
+     "name": "chained book locked forbidden tome chains padlock"
+    },
+    {
+     "slug": "grimoire-floating",
+     "name": "floating open book glowing pages levitating"
+    },
+    {
+     "slug": "rune-floor-eye",
+     "name": "rune on floor glowing eye sigil chalk"
+    },
+    {
+     "slug": "rune-floor-triangle",
+     "name": "triangle sigil floor rune red ritual mark"
+    },
+    {
+     "slug": "rune-floor-spiral",
+     "name": "spiral rune carved floor ancient mark"
+    },
+    {
+     "slug": "rune-stone",
+     "name": "rune stone carved glowing runes standing",
+     "solid": true
+    },
+    {
+     "slug": "summoning-circle",
+     "name": "summoning circle candles ring ritual floor glowing"
+    },
+    {
+     "slug": "salt-circle",
+     "name": "circle of salt protection ring white floor"
+    },
+    {
+     "slug": "chalice",
+     "name": "chalice goblet silver blood wine cup"
+    },
+    {
+     "slug": "chalice-spilled",
+     "name": "spilled chalice knocked over blood pool"
+    },
+    {
+     "slug": "dagger-ritual",
+     "name": "ritual dagger wavy blade kris jewelled hilt"
+    },
+    {
+     "slug": "dagger-bone",
+     "name": "bone dagger sacrificial knife carved"
+    },
+    {
+     "slug": "mask-ritual",
+     "name": "ritual mask wooden tribal horns hollow eyes"
+    },
+    {
+     "slug": "mask-plague",
+     "name": "plague doctor mask beak leather goggles"
+    },
+    {
+     "slug": "mask-porcelain",
+     "name": "porcelain mask white cracked smiling"
+    },
+    {
+     "slug": "mask-goat",
+     "name": "goat skull mask horns black sabbath"
+    },
+    {
+     "slug": "idol-stone",
+     "name": "stone idol squat figure ancient grinning"
+    },
+    {
+     "slug": "idol-gold",
+     "name": "golden idol small statue cursed treasure"
+    },
+    {
+     "slug": "idol-tentacle",
+     "name": "tentacled idol green stone elder thing"
+    },
+    {
+     "slug": "effigy-straw",
+     "name": "straw effigy wicker man small bound twine"
+    },
+    {
+     "slug": "effigy-wax",
+     "name": "wax effigy doll with needles melted"
+    },
+    {
+     "slug": "doll-nails",
+     "name": "cursed doll nails driven in cloth stitched mouth"
+    },
+    {
+     "slug": "bones-crossed",
+     "name": "crossed bones arranged pattern skull centre"
+    },
+    {
+     "slug": "bones-circle",
+     "name": "circle of small bones and teeth arranged"
+    },
+    {
+     "slug": "crystal-ball-dark",
+     "name": "dark crystal ball swirling face inside stand",
+     "solid": true
+    },
+    {
+     "slug": "tarot-death",
+     "name": "tarot card death skeleton single card"
+    },
+    {
+     "slug": "tarot-hanged",
+     "name": "tarot card hanged man upside down"
+    },
+    {
+     "slug": "cauldron-bubbling",
+     "name": "cauldron bubbling green brew witch pot",
+     "solid": true
+    },
+    {
+     "slug": "cauldron-bones",
+     "name": "cauldron bones sticking out cannibal stew",
+     "solid": true
+    },
+    {
+     "slug": "potion-shelf",
+     "name": "shelf of potions bottles coloured dusty witch",
+     "solid": true
+    },
+    {
+     "slug": "potion-poison",
+     "name": "poison bottle skull label green stoppered"
+    },
+    {
+     "slug": "potion-black",
+     "name": "black potion vial smoking stopper wax"
+    },
+    {
+     "slug": "relic-box",
+     "name": "reliquary relic box gold glass finger bone"
+    },
+    {
+     "slug": "relic-hand",
+     "name": "mummified hand relic in case glass dome"
+    },
+    {
+     "slug": "incense-burner",
+     "name": "incense burner censer smoke brass chains"
+    },
+    {
+     "slug": "censer-hanging",
+     "name": "hanging censer thurible swinging smoke"
+    },
+    {
+     "slug": "charm-bones",
+     "name": "hanging charm bones feathers string talisman"
+    },
+    {
+     "slug": "charm-witch-ball",
+     "name": "witch ball hanging glass sphere herbs bundle"
+    },
+    {
+     "slug": "dreamcatcher",
+     "name": "dreamcatcher web hoop feathers hanging torn"
+    },
+    {
+     "slug": "ash-bowl",
+     "name": "bowl of ashes and bones offering clay"
+    },
+    {
+     "slug": "hex-bag",
+     "name": "hex bag pouch tied curse sewn symbol"
+    },
+    {
+     "slug": "scrying-mirror",
+     "name": "black scrying mirror obsidian ornate frame hand"
+    },
+    {
+     "slug": "pendulum-crystal",
+     "name": "crystal pendulum chain dowsing swinging"
+    },
+    {
+     "slug": "cursed-painting",
+     "name": "cursed painting weeping eyes bleeding frame"
+    },
+    {
+     "slug": "cursed-music-box",
+     "name": "cursed music box skeleton dancer playing alone"
+    },
+    {
+     "slug": "ouija-planchette",
+     "name": "planchette heart shaped pointer wood hole"
+    },
+    {
+     "slug": "goat-skull",
+     "name": "goat skull horned skull on floor ritual"
+    },
+    {
+     "slug": "black-candle-circle",
+     "name": "ring of black candles around bowl ritual set"
+    },
+    {
+     "slug": "witch-broom",
+     "name": "witch broom besom twigs leaning"
+    },
+    {
+     "slug": "witch-hat-old",
+     "name": "old witch hat crooked pointed dusty"
+    }
+   ]
+  },
+  {
+   "id": "madscience",
+   "label": "Laboratory, asylum & hospital",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "jar-brain-wired",
+     "name": "brain in a jar wires electrodes bubbling tank",
+     "solid": true
+    },
+    {
+     "slug": "jar-head",
+     "name": "head in a jar preserved face floating"
+    },
+    {
+     "slug": "jar-heart",
+     "name": "heart in a jar preserved organ"
+    },
+    {
+     "slug": "jar-snake",
+     "name": "snake coiled in specimen jar"
+    },
+    {
+     "slug": "jar-foetus-twin",
+     "name": "two headed thing in a jar specimen curled"
+    },
+    {
+     "slug": "jar-teeth",
+     "name": "jar full of teeth collection"
+    },
+    {
+     "slug": "jar-eyes-many",
+     "name": "jar of eyeballs staring"
+    },
+    {
+     "slug": "scalpel-set",
+     "name": "scalpels roll surgical knives leather wrap"
+    },
+    {
+     "slug": "forceps",
+     "name": "forceps clamp surgical scissors steel"
+    },
+    {
+     "slug": "trepan-drill",
+     "name": "trepan hand drill skull surgery brace"
+    },
+    {
+     "slug": "lobotomy-pick",
+     "name": "ice pick and mallet lobotomy tools"
+    },
+    {
+     "slug": "machine-dials",
+     "name": "old machine wall of dials meters switches humming",
+     "solid": true
+    },
+    {
+     "slug": "machine-shock",
+     "name": "electroshock machine box dial paddles cables",
+     "solid": true
+    },
+    {
+     "slug": "tesla-coil",
+     "name": "tesla coil sparks lightning arcs electricity",
+     "solid": true
+    },
+    {
+     "slug": "jacobs-ladder",
+     "name": "jacobs ladder two rods climbing spark arc",
+     "solid": true
+    },
+    {
+     "slug": "electrode-helmet",
+     "name": "electrode helmet wires skull cap experiment"
+    },
+    {
+     "slug": "straitjacket-hook",
+     "name": "straitjacket hanging on a hook wall"
+    },
+    {
+     "slug": "bed-wheeled",
+     "name": "wheeled hospital bed crank old rails side view",
+     "solid": true
+    },
+    {
+     "slug": "drip-stand-blood",
+     "name": "drip stand blood bag transfusion bottle",
+     "solid": true
+    },
+    {
+     "slug": "xray-board",
+     "name": "x ray light box skeleton ribs glowing film",
+     "solid": true
+    },
+    {
+     "slug": "xray-skull",
+     "name": "x ray film of a skull with nail in it"
+    },
+    {
+     "slug": "file-cabinets-wall",
+     "name": "wall of patient file drawers records labelled",
+     "solid": true
+    },
+    {
+     "slug": "patient-file",
+     "name": "patient file folder stamped photo paperclip"
+    },
+    {
+     "slug": "cage-animal",
+     "name": "laboratory animal cage small something inside eyes",
+     "solid": true
+    },
+    {
+     "slug": "cage-stack",
+     "name": "stacked cages row empty doors open laboratory",
+     "solid": true
+    },
+    {
+     "slug": "pipes-steam",
+     "name": "steam pipes junction valve leaking hiss",
+     "solid": true
+    },
+    {
+     "slug": "vat-green",
+     "name": "vat of green chemical bubbling tank ladder",
+     "solid": true
+    },
+    {
+     "slug": "vat-body",
+     "name": "glass tank with body floating figure suspended",
+     "solid": true
+    },
+    {
+     "slug": "microscope-brass",
+     "name": "microscope brass old slide"
+    },
+    {
+     "slug": "bunsen-flask",
+     "name": "flask over burner bubbling tripod chemistry blue flame"
+    },
+    {
+     "slug": "test-tubes-old",
+     "name": "rack of test tubes coloured fluids"
+    },
+    {
+     "slug": "retort-still",
+     "name": "alchemy retort still glass coils dripping copper"
+    },
+    {
+     "slug": "computer-mainframe",
+     "name": "old mainframe computer cabinet blinking lights tape",
+     "solid": true
+    },
+    {
+     "slug": "terminal-green",
+     "name": "computer terminal green text screen keyboard glowing",
+     "solid": true
+    },
+    {
+     "slug": "tape-reels",
+     "name": "reel to reel tape computer drive spinning",
+     "solid": true
+    },
+    {
+     "slug": "switchboard",
+     "name": "telephone switchboard plugs cords operator old",
+     "solid": true
+    },
+    {
+     "slug": "oscilloscope",
+     "name": "oscilloscope green wave trace knobs",
+     "solid": true
+    },
+    {
+     "slug": "geiger-counter",
+     "name": "geiger counter clicking dial handle wand"
+    },
+    {
+     "slug": "centrifuge",
+     "name": "centrifuge hand cranked tubes spinning"
+    },
+    {
+     "slug": "autopsy-table",
+     "name": "autopsy table steel drain blood channel sheet",
+     "solid": true
+    },
+    {
+     "slug": "specimen-drawer",
+     "name": "drawer of pinned insects moths beetles collection"
+    },
+    {
+     "slug": "skeleton-teaching",
+     "name": "teaching skeleton on stand anatomical hanging",
+     "solid": true
+    },
+    {
+     "slug": "anatomy-chart",
+     "name": "anatomy chart flayed man poster muscles diagram"
+    },
+    {
+     "slug": "gas-mask",
+     "name": "gas mask rubber round lenses filter hanging"
+    },
+    {
+     "slug": "restraint-chair",
+     "name": "restraint chair straps wooden asylum tranquilizer",
+     "solid": true
+    },
+    {
+     "slug": "isolation-box",
+     "name": "isolation box cabinet head hole asylum treatment",
+     "solid": true
+    },
+    {
+     "slug": "water-therapy-tub",
+     "name": "hydrotherapy tub canvas cover head hole asylum bath",
+     "solid": true
+    },
+    {
+     "slug": "medicine-cart",
+     "name": "medicine cart trolley bottles tray pills ward round",
+     "solid": true
+    },
+    {
+     "slug": "bell-nurse",
+     "name": "nurse call bell brass desk bell ring"
+    },
+    {
+     "slug": "bedside-screen",
+     "name": "folding hospital screen white cloth frame wheels stained",
+     "solid": true
+    },
+    {
+     "slug": "iron-lung",
+     "name": "iron lung machine tank ventilator head sticking out",
+     "solid": true
+    },
+    {
+     "slug": "leech-jar",
+     "name": "jar of leeches black wriggling medical"
+    }
+   ]
+  },
+  {
+   "id": "oldtech",
+   "label": "Machines & old technology",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "computer-beige",
+     "name": "old home computer beige keyboard unit amiga era",
+     "solid": true
+    },
+    {
+     "slug": "monitor-static",
+     "name": "monitor showing static snow noise crt",
+     "solid": true
+    },
+    {
+     "slug": "monitor-text",
+     "name": "monitor green text prompt cursor crt",
+     "solid": true
+    },
+    {
+     "slug": "monitor-face",
+     "name": "monitor with a face in the screen staring ghost in machine",
+     "solid": true
+    },
+    {
+     "slug": "monitor-smashed",
+     "name": "smashed monitor broken screen glass sparks",
+     "solid": true
+    },
+    {
+     "slug": "floppy-disk",
+     "name": "floppy disk blue label 3.5 inch save"
+    },
+    {
+     "slug": "floppy-black",
+     "name": "black floppy disk 5 inch sleeve old data"
+    },
+    {
+     "slug": "joystick",
+     "name": "joystick one button red ball retro game controller"
+    },
+    {
+     "slug": "cassette-deck",
+     "name": "cassette deck tape player buttons spools",
+     "solid": true
+    },
+    {
+     "slug": "reel-player",
+     "name": "reel to reel tape recorder spools turning recording",
+     "solid": true
+    },
+    {
+     "slug": "radio-shortwave",
+     "name": "shortwave radio set dial numbers stations antenna",
+     "solid": true
+    },
+    {
+     "slug": "radio-broken",
+     "name": "broken radio smashed valves wires spilling"
+    },
+    {
+     "slug": "tv-test-card",
+     "name": "television test card bars old set glowing",
+     "solid": true
+    },
+    {
+     "slug": "tv-eye",
+     "name": "television showing a single eye watching",
+     "solid": true
+    },
+    {
+     "slug": "telephone-wall",
+     "name": "wall telephone rotary black hanging receiver cord"
+    },
+    {
+     "slug": "telephone-off-hook",
+     "name": "telephone receiver off the hook dangling voice"
+    },
+    {
+     "slug": "phone-booth",
+     "name": "telephone box booth red old street kiosk",
+     "solid": true
+    },
+    {
+     "slug": "projector-film",
+     "name": "film projector reels beam light cinema old",
+     "solid": true
+    },
+    {
+     "slug": "projector-slide",
+     "name": "slide projector carousel lens beam"
+    },
+    {
+     "slug": "camera-bellows",
+     "name": "old bellows camera plate tripod photographer"
+    },
+    {
+     "slug": "camera-flash",
+     "name": "camera with flash bulb press old flashgun"
+    },
+    {
+     "slug": "generator-diesel",
+     "name": "diesel generator engine exhaust smoke running",
+     "solid": true
+    },
+    {
+     "slug": "boiler-gauge",
+     "name": "boiler riveted pressure gauge steam valve",
+     "solid": true
+    },
+    {
+     "slug": "clockwork",
+     "name": "clockwork mechanism gears springs brass open"
+    },
+    {
+     "slug": "gear-big",
+     "name": "large gear cogwheel rusted iron machine part",
+     "solid": true
+    },
+    {
+     "slug": "gears-small",
+     "name": "small gears cogs pile loose brass"
+    },
+    {
+     "slug": "lever-wall",
+     "name": "big wall lever knife switch frankenstein power",
+     "solid": true
+    },
+    {
+     "slug": "lever-floor",
+     "name": "floor lever points lever railway iron handle",
+     "solid": true
+    },
+    {
+     "slug": "fuse-board",
+     "name": "fuse board panel blown fuses wires burnt",
+     "solid": true
+    },
+    {
+     "slug": "lamp-oil",
+     "name": "oil lamp glass chimney brass burning low"
+    },
+    {
+     "slug": "lamp-bare-bulb",
+     "name": "bare bulb hanging flickering dim light cord"
+    },
+    {
+     "slug": "street-lamp-gas",
+     "name": "gas street lamp iron post foggy glow victorian",
+     "solid": true
+    },
+    {
+     "slug": "street-lamp-broken",
+     "name": "broken street lamp dark smashed glass bent",
+     "solid": true
+    },
+    {
+     "slug": "lighthouse-lamp",
+     "name": "lighthouse lamp lens great light rotating beam",
+     "solid": true
+    },
+    {
+     "slug": "signal-lamp",
+     "name": "railway signal light red post danger stop",
+     "solid": true
+    },
+    {
+     "slug": "signal-semaphore",
+     "name": "semaphore signal arm railway old post",
+     "solid": true
+    },
+    {
+     "slug": "searchlight",
+     "name": "searchlight spotlight on stand beam turning",
+     "solid": true
+    },
+    {
+     "slug": "phonograph-cylinder",
+     "name": "cylinder phonograph wax roll horn edison"
+    },
+    {
+     "slug": "telegraph-key",
+     "name": "telegraph key morse brass wooden base tapping"
+    },
+    {
+     "slug": "typewriter-jammed",
+     "name": "typewriter jammed keys paper same line repeated"
+    },
+    {
+     "slug": "adding-machine",
+     "name": "adding machine crank paper roll old calculator"
+    },
+    {
+     "slug": "wall-clock-stopped",
+     "name": "wall clock stopped cracked glass hands fallen"
+    },
+    {
+     "slug": "metronome",
+     "name": "metronome ticking pendulum wooden pyramid"
+    },
+    {
+     "slug": "vending-old",
+     "name": "old vending machine cigarettes knobs dusty glass",
+     "solid": true
+    },
+    {
+     "slug": "jukebox-dead",
+     "name": "jukebox dead dark arch chrome dusty records",
+     "solid": true
+    }
+   ]
+  },
+  {
+   "id": "apparitions",
+   "label": "Creatures & apparitions",
+   "group": "char",
+   "items": [
+    {
+     "slug": "ghost-sheet",
+     "name": "ghost classic sheet floating pale hollow eyes"
+    },
+    {
+     "slug": "ghost-lady",
+     "name": "white lady ghost woman long hair gown drifting"
+    },
+    {
+     "slug": "ghost-child",
+     "name": "ghost child small girl nightgown translucent"
+    },
+    {
+     "slug": "ghost-headless",
+     "name": "headless ghost carrying own head under arm"
+    },
+    {
+     "slug": "ghost-bride",
+     "name": "ghost bride veil bouquet dead flowers"
+    },
+    {
+     "slug": "ghost-face",
+     "name": "floating ghost face screaming mouth in the dark"
+    },
+    {
+     "slug": "ghost-soldier",
+     "name": "ghost soldier old war uniform bandaged pale"
+    },
+    {
+     "slug": "shadow-man",
+     "name": "shadow man dark figure hat white eyes"
+    },
+    {
+     "slug": "shadow-tall",
+     "name": "tall thin shadow long arms reaching fingers"
+    },
+    {
+     "slug": "shadow-crawler",
+     "name": "shadow crawling on all fours across floor fast"
+    },
+    {
+     "slug": "wraith",
+     "name": "wraith tattered cloak skeletal hands floating no legs"
+    },
+    {
+     "slug": "hooded-figure",
+     "name": "hooded figure robe faceless standing still"
+    },
+    {
+     "slug": "cultist-red",
+     "name": "cultist red robe hood candle chanting"
+    },
+    {
+     "slug": "cultist-dagger",
+     "name": "cultist black robe raised dagger sacrifice"
+    },
+    {
+     "slug": "cultist-mask",
+     "name": "cultist animal mask antlers pale robe"
+    },
+    {
+     "slug": "zombie-shambler",
+     "name": "zombie shambling rotting arms out torn clothes"
+    },
+    {
+     "slug": "zombie-crawler",
+     "name": "zombie crawling legless dragging itself torso"
+    },
+    {
+     "slug": "ghoul",
+     "name": "ghoul hunched long claws grey skin teeth eating"
+    },
+    {
+     "slug": "skeleton-standing",
+     "name": "skeleton standing upright bones grinning"
+    },
+    {
+     "slug": "skeleton-sitting",
+     "name": "skeleton sitting slumped against wall dead long ago"
+    },
+    {
+     "slug": "skeleton-reaching",
+     "name": "skeleton lying reaching arm crawled died floor"
+    },
+    {
+     "slug": "skeleton-armoured",
+     "name": "skeleton in rusted armour helmet old knight dead guard"
+    },
+    {
+     "slug": "mummy-shuffling",
+     "name": "mummy bandages wrapped arms out shuffling"
+    },
+    {
+     "slug": "vampire-count",
+     "name": "vampire cape pale fangs widow peak aristocrat"
+    },
+    {
+     "slug": "vampire-bat-form",
+     "name": "vampire half turned into bat cloak wings fangs"
+    },
+    {
+     "slug": "witch-crone",
+     "name": "old witch crone hunched hat stick warts"
+    },
+    {
+     "slug": "scarecrow-man",
+     "name": "living scarecrow walking sack head straw hands stitched grin"
+    },
+    {
+     "slug": "plague-doctor",
+     "name": "plague doctor beak mask hat long coat cane"
+    },
+    {
+     "slug": "drowned-one",
+     "name": "drowned one bloated wet seaweed dripping blue skin"
+    },
+    {
+     "slug": "faceless-man",
+     "name": "faceless man suit tall no face blank pale tie"
+    },
+    {
+     "slug": "masked-child",
+     "name": "masked child paper bag mask drawn face small"
+    },
+    {
+     "slug": "twins",
+     "name": "twin girls holding hands identical dresses staring"
+    },
+    {
+     "slug": "caretaker",
+     "name": "old caretaker keys lantern stooped cap overalls"
+    },
+    {
+     "slug": "nurse-grim",
+     "name": "grim nurse old uniform cap syringe blood stained apron"
+    },
+    {
+     "slug": "butler",
+     "name": "butler tailcoat tray pale gaunt bald"
+    },
+    {
+     "slug": "sexton",
+     "name": "sexton gravedigger old man spade coat lantern hat"
+    },
+    {
+     "slug": "monk-hooded",
+     "name": "hooded monk brown habit rope belt praying"
+    },
+    {
+     "slug": "monk-skull",
+     "name": "skull faced monk black cowl candle procession"
+    },
+    {
+     "slug": "hanged-figure",
+     "name": "hanged figure swinging from rope dead body"
+    },
+    {
+     "slug": "eyes-in-dark",
+     "name": "pair of eyes glowing in the dark watching unseen"
+    },
+    {
+     "slug": "eyes-many",
+     "name": "many eyes in darkness cluster blinking thing"
+    },
+    {
+     "slug": "hands-floor",
+     "name": "hands reaching up from the floor grasping many"
+    },
+    {
+     "slug": "hand-wall",
+     "name": "arm reaching out of the wall grabbing pale"
+    },
+    {
+     "slug": "black-dog",
+     "name": "black dog hound glowing red eyes omen snarling"
+    },
+    {
+     "slug": "cat-black-arch",
+     "name": "black cat arched back hissing tail up"
+    },
+    {
+     "slug": "cat-watching",
+     "name": "cat sitting watching yellow eyes still silhouette"
+    },
+    {
+     "slug": "rat-giant",
+     "name": "giant rat red eyes bald tail teeth sewer"
+    },
+    {
+     "slug": "rats-swarm",
+     "name": "swarm of rats running many tails"
+    },
+    {
+     "slug": "crow-ragged",
+     "name": "ragged crow standing one white eye carrion bird"
+    },
+    {
+     "slug": "crows-wire",
+     "name": "row of crows sitting on a wire watching"
+    },
+    {
+     "slug": "bat-flying",
+     "name": "bat flying wings spread fangs"
+    },
+    {
+     "slug": "bats-cloud",
+     "name": "cloud of bats swarm flying"
+    },
+    {
+     "slug": "spider-huge",
+     "name": "huge spider hairy legs many eyes fangs"
+    },
+    {
+     "slug": "spider-egg-sac",
+     "name": "spider egg sac nest webs hatching small spiders"
+    },
+    {
+     "slug": "moth-death",
+     "name": "deaths head moth skull marking wings"
+    },
+    {
+     "slug": "worms",
+     "name": "worms writhing mass maggots pale"
+    },
+    {
+     "slug": "centipede-thing",
+     "name": "thing with too many legs long segmented crawling"
+    },
+    {
+     "slug": "legs-thing",
+     "name": "thing too many human legs walking mass wrong"
+    },
+    {
+     "slug": "tentacles",
+     "name": "tentacles rising from hole writhing suckers"
+    },
+    {
+     "slug": "tentacle-door",
+     "name": "tentacle slithering under a door reaching"
+    },
+    {
+     "slug": "sack-thing",
+     "name": "thing in a sack moving bulging tied rope twitching"
+    },
+    {
+     "slug": "doll-walking",
+     "name": "doll walking on its own porcelain cracked knife"
+    },
+    {
+     "slug": "mannequin-reaching",
+     "name": "mannequin moved reaching arm smooth face wrong"
+    },
+    {
+     "slug": "clown-grim",
+     "name": "grim clown faded ruff white face still smile balloon"
+    },
+    {
+     "slug": "organ-grinder",
+     "name": "organ grinder monkey skeletal music box crank"
+    },
+    {
+     "slug": "old-woman-window",
+     "name": "old woman rocking shawl knitting stares"
+    },
+    {
+     "slug": "lantern-bearer",
+     "name": "figure with lantern in fog cloaked distant"
+    },
+    {
+     "slug": "bog-body",
+     "name": "bog body leathery preserved corpse risen peat"
+    },
+    {
+     "slug": "pumpkin-head",
+     "name": "pumpkin headed figure carved grin glowing candle inside"
+    }
+   ]
+  },
+  {
+   "id": "clues",
+   "label": "Clues & small things",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "key-skeleton",
+     "name": "skeleton key old iron long teeth"
+    },
+    {
+     "slug": "key-brass-ornate",
+     "name": "ornate brass key trefoil bow"
+    },
+    {
+     "slug": "key-rusty",
+     "name": "rusty broken key snapped bent"
+    },
+    {
+     "slug": "key-tiny",
+     "name": "tiny key music box diary small silver ribbon"
+    },
+    {
+     "slug": "key-ring",
+     "name": "ring of many keys jailer bunch iron"
+    },
+    {
+     "slug": "key-bone",
+     "name": "key carved from bone skull bow strange"
+    },
+    {
+     "slug": "padlock-heavy",
+     "name": "heavy padlock iron locked rusted"
+    },
+    {
+     "slug": "padlock-open",
+     "name": "padlock open unlocked shackle sprung"
+    },
+    {
+     "slug": "lock-combination",
+     "name": "combination lock dial numbers safe wheel"
+    },
+    {
+     "slug": "torn-page",
+     "name": "torn page diary handwriting ripped edge"
+    },
+    {
+     "slug": "burnt-letter",
+     "name": "burnt letter scorched edges half readable ash"
+    },
+    {
+     "slug": "note-crumpled",
+     "name": "crumpled note ball of paper thrown away"
+    },
+    {
+     "slug": "envelope-sealed",
+     "name": "sealed envelope black wax seal unopened"
+    },
+    {
+     "slug": "telegram",
+     "name": "telegram strip urgent message stop"
+    },
+    {
+     "slug": "diary-bloodstained",
+     "name": "diary bloodstained open last entry trailing off"
+    },
+    {
+     "slug": "photo-torn",
+     "name": "torn photograph ripped in half one person missing"
+    },
+    {
+     "slug": "photo-scratched",
+     "name": "photograph face scratched out sepia portrait"
+    },
+    {
+     "slug": "photo-negative",
+     "name": "photographic negative strip film frames dark"
+    },
+    {
+     "slug": "map-fragment",
+     "name": "fragment of a map torn corner red cross marked"
+    },
+    {
+     "slug": "blueprint",
+     "name": "blueprint floor plan rolled house secret room"
+    },
+    {
+     "slug": "ticket-train",
+     "name": "train ticket one way punched hole old"
+    },
+    {
+     "slug": "ticket-carnival",
+     "name": "carnival ticket admit one red stub"
+    },
+    {
+     "slug": "coin-old",
+     "name": "old coin worn face strange king tarnished"
+    },
+    {
+     "slug": "coins-eyes",
+     "name": "two coins for the eyes of the dead ferryman"
+    },
+    {
+     "slug": "ring-signet",
+     "name": "signet ring gold crest seal family"
+    },
+    {
+     "slug": "ring-finger",
+     "name": "ring still on a severed finger"
+    },
+    {
+     "slug": "locket-open",
+     "name": "open locket tiny portrait lock of hair chain"
+    },
+    {
+     "slug": "locket-closed",
+     "name": "closed locket heart shaped silver chain engraved"
+    },
+    {
+     "slug": "pocket-watch",
+     "name": "pocket watch stopped cracked glass chain time of death"
+    },
+    {
+     "slug": "matchbox",
+     "name": "matchbox matches spilled one struck"
+    },
+    {
+     "slug": "match-lit",
+     "name": "single lit match burning small flame hand held"
+    },
+    {
+     "slug": "lantern-dim",
+     "name": "hand lantern storm lamp dim flame carrying handle"
+    },
+    {
+     "slug": "torch-electric",
+     "name": "electric torch flashlight weak beam flickering"
+    },
+    {
+     "slug": "bottle-laudanum",
+     "name": "laudanum bottle brown poison label cork medicine"
+    },
+    {
+     "slug": "bottle-message-dark",
+     "name": "small vial black liquid moving by itself"
+    },
+    {
+     "slug": "pills-spilled",
+     "name": "spilled pills white tablets scattered bottle on side"
+    },
+    {
+     "slug": "syringe-used",
+     "name": "used syringe needle drop green fluid"
+    },
+    {
+     "slug": "razor-open",
+     "name": "cut throat razor open blade bloody handle"
+    },
+    {
+     "slug": "rope-coil",
+     "name": "coil of rope noose end hemp"
+    },
+    {
+     "slug": "shovel-dirty",
+     "name": "dirty shovel spade earth on blade used recently"
+    },
+    {
+     "slug": "cassette-tape",
+     "name": "audio cassette tape label handwritten play me"
+    },
+    {
+     "slug": "film-reel",
+     "name": "film reel canister 8mm spool unwound strip"
+    },
+    {
+     "slug": "music-box-key",
+     "name": "wind up key brass butterfly from a toy"
+    },
+    {
+     "slug": "toy-soldier-broken",
+     "name": "broken tin soldier head off one leg"
+    },
+    {
+     "slug": "dolls-head",
+     "name": "dolls head porcelain cracked one eye open hair"
+    },
+    {
+     "slug": "dolls-eye",
+     "name": "glass dolls eye rolling blue staring loose"
+    },
+    {
+     "slug": "teeth-pulled",
+     "name": "pulled teeth bloody roots small pile"
+    },
+    {
+     "slug": "tooth-gold",
+     "name": "gold tooth single with root pliers mark"
+    },
+    {
+     "slug": "cloth-bloody",
+     "name": "bloodied cloth rag torn stained bandage"
+    },
+    {
+     "slug": "bone-finger",
+     "name": "finger bones small phalanges row"
+    },
+    {
+     "slug": "bone-jaw",
+     "name": "jawbone with teeth human mandible"
+    },
+    {
+     "slug": "feather-black",
+     "name": "black feather crow quill fallen"
+    },
+    {
+     "slug": "feathers-white",
+     "name": "white feathers bloody scattered dove"
+    },
+    {
+     "slug": "jar-fireflies",
+     "name": "jar of dead fireflies one still glowing"
+    },
+    {
+     "slug": "jar-buttons",
+     "name": "jar of buttons eyes sewing odd collection"
+    },
+    {
+     "slug": "hair-lock",
+     "name": "lock of hair tied black ribbon keepsake"
+    },
+    {
+     "slug": "candle-stub",
+     "name": "candle stub in saucer nearly out last light"
+    },
+    {
+     "slug": "whistle-dog",
+     "name": "brass whistle on cord bent old silent"
+    },
+    {
+     "slug": "chess-piece",
+     "name": "black chess king piece fallen lone"
+    },
+    {
+     "slug": "card-ace-spades",
+     "name": "playing card ace of spades bent bloody corner"
+    },
+    {
+     "slug": "dice-bone",
+     "name": "bone dice pair carved old gambling"
+    },
+    {
+     "slug": "thimble-needle",
+     "name": "thimble needle black thread sewing kit"
+    },
+    {
+     "slug": "spectacles-broken",
+     "name": "broken spectacles cracked lens bent glasses"
+    },
+    {
+     "slug": "glove-single",
+     "name": "single glove black leather left behind"
+    },
+    {
+     "slug": "shoe-child",
+     "name": "childs shoe single small buckle lost muddy"
+    },
+    {
+     "slug": "ribbon-hair",
+     "name": "hair ribbon red dirty bow found"
+    },
+    {
+     "slug": "nail-coffin",
+     "name": "coffin nails bent iron handful"
+    },
+    {
+     "slug": "bell-small",
+     "name": "small hand bell servants bell brass summon"
+    },
+    {
+     "slug": "hourglass-sand",
+     "name": "hourglass sand nearly run out time"
+    },
+    {
+     "slug": "compass-broken",
+     "name": "compass needle spinning cracked brass case"
+    }
+   ]
+  },
+  {
+   "id": "dreadfx",
+   "label": "Eerie effects & signs",
+   "group": "fx",
+   "items": [
+    {
+     "slug": "fog-bank",
+     "name": "fog bank thick rolling grey mist"
+    },
+    {
+     "slug": "mist-low",
+     "name": "low mist ground hugging thin wisps"
+    },
+    {
+     "slug": "mist-tendril",
+     "name": "tendril of mist curling creeping finger"
+    },
+    {
+     "slug": "rain-streaks",
+     "name": "rain streaks falling slanted grey"
+    },
+    {
+     "slug": "rain-heavy",
+     "name": "heavy rain downpour splashes storm"
+    },
+    {
+     "slug": "lightning-fork",
+     "name": "forked lightning bolt pale branching strike"
+    },
+    {
+     "slug": "lightning-flash",
+     "name": "lightning flash window lit white glare burst"
+    },
+    {
+     "slug": "flame-candle",
+     "name": "small candle flame flickering warm"
+    },
+    {
+     "slug": "flame-blue",
+     "name": "blue ghost flame cold fire spirit"
+    },
+    {
+     "slug": "flame-green",
+     "name": "green witch fire sickly flame"
+    },
+    {
+     "slug": "fire-dying",
+     "name": "dying fire low flames embers logs"
+    },
+    {
+     "slug": "embers-rising",
+     "name": "embers rising sparks floating up glowing orange"
+    },
+    {
+     "slug": "smoke-thin",
+     "name": "thin smoke wisp rising curling grey"
+    },
+    {
+     "slug": "smoke-thick",
+     "name": "thick smoke cloud billowing dark"
+    },
+    {
+     "slug": "sparks-electric",
+     "name": "electric sparks crackling arc blue white"
+    },
+    {
+     "slug": "blood-splash",
+     "name": "blood splash spatter burst"
+    },
+    {
+     "slug": "blood-drop",
+     "name": "single drop of blood falling"
+    },
+    {
+     "slug": "blood-smear",
+     "name": "long smear of blood dragged hand"
+    },
+    {
+     "slug": "slime-drip",
+     "name": "slime dripping green ooze strands"
+    },
+    {
+     "slug": "slime-splat",
+     "name": "slime splat puddle green glob"
+    },
+    {
+     "slug": "cobweb-strand",
+     "name": "single cobweb strand drifting thread"
+    },
+    {
+     "slug": "crack-spreading",
+     "name": "crack spreading jagged fracture"
+    },
+    {
+     "slug": "crack-glass",
+     "name": "cracked glass star break shattered"
+    },
+    {
+     "slug": "footprints-wet",
+     "name": "wet footprints bare feet leading away"
+    },
+    {
+     "slug": "shadow-long",
+     "name": "long shadow of a figure stretching no one there"
+    },
+    {
+     "slug": "shadow-hand",
+     "name": "shadow of a hand reaching long fingers"
+    },
+    {
+     "slug": "eyes-red",
+     "name": "red eyes glowing in darkness pair"
+    },
+    {
+     "slug": "eyes-white",
+     "name": "white eyes wide staring pupils pair"
+    },
+    {
+     "slug": "eye-single",
+     "name": "single large eye opening watching"
+    },
+    {
+     "slug": "rune-glow-a",
+     "name": "glowing rune symbol teal magic sign"
+    },
+    {
+     "slug": "rune-glow-b",
+     "name": "glowing rune symbol red curse sign"
+    },
+    {
+     "slug": "rune-glow-c",
+     "name": "glowing rune symbol violet ward sign"
+    },
+    {
+     "slug": "wisp-blue",
+     "name": "will o the wisp blue ghost light floating"
+    },
+    {
+     "slug": "wisp-green",
+     "name": "will o the wisp green marsh light"
+    },
+    {
+     "slug": "ghost-orb",
+     "name": "ghost orb pale light sphere drifting photograph"
+    },
+    {
+     "slug": "sign-question",
+     "name": "question mark sign what is this mystery"
+    },
+    {
+     "slug": "sign-exclaim",
+     "name": "exclamation mark sign danger alert noticed"
+    },
+    {
+     "slug": "sign-arrow-up",
+     "name": "arrow up sign go this way north"
+    },
+    {
+     "slug": "sign-arrow-down",
+     "name": "arrow down sign go this way south"
+    },
+    {
+     "slug": "sign-arrow-left",
+     "name": "arrow left sign go this way west"
+    },
+    {
+     "slug": "sign-arrow-right",
+     "name": "arrow right sign go this way east"
+    },
+    {
+     "slug": "sign-skull",
+     "name": "skull sign death danger poison marker"
+    },
+    {
+     "slug": "sign-eye",
+     "name": "eye sign look examine inspect"
+    },
+    {
+     "slug": "sign-hand",
+     "name": "hand sign use take touch interact"
+    },
+    {
+     "slug": "sign-locked",
+     "name": "locked sign padlock cannot open"
+    },
+    {
+     "slug": "sign-ear",
+     "name": "ear sign listen sound heard noise"
+    },
+    {
+     "slug": "heart-stopping",
+     "name": "heart stopping dark heart cracked fading"
+    },
+    {
+     "slug": "heart-flatline",
+     "name": "heartbeat flat line monitor trace dying"
+    },
+    {
+     "slug": "heart-beating",
+     "name": "heartbeat pulse line spike alive monitor"
+    },
+    {
+     "slug": "static-noise",
+     "name": "static noise interference snow patch"
+    },
+    {
+     "slug": "glitch-bars",
+     "name": "glitch bars displaced lines corruption signal"
+    },
+    {
+     "slug": "glitch-block",
+     "name": "glitch block corrupted square pixels wrong"
+    },
+    {
+     "slug": "breath-cold",
+     "name": "cold breath vapour visible puff"
+    },
+    {
+     "slug": "dust-motes",
+     "name": "dust motes floating in light beam specks"
+    },
+    {
+     "slug": "moths-light",
+     "name": "moths circling fluttering small"
+    },
+    {
+     "slug": "drip-water",
+     "name": "water dripping drops from ceiling ripple"
+    },
+    {
+     "slug": "whisper-marks",
+     "name": "whisper marks unseen voice speech hush"
+    },
+    {
+     "slug": "candle-out",
+     "name": "candle just blown out smoke trail dark"
+    },
+    {
+     "slug": "sign-key-needed",
+     "name": "key sign needs a key locked door hint"
+    },
+    {
+     "slug": "sign-no-entry",
+     "name": "no way sign blocked barred cross mark"
+    }
+   ]
   }
  ]
 }
