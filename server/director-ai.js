@@ -155,7 +155,7 @@ function spriteFor(words) {
     try {
       const index = JSON.parse(fs.readFileSync(new URL('../public/px/index.json', import.meta.url), 'utf8'));
       library = index.categories
-        .filter((c) => c.group !== 'tile')
+        .filter((c) => c.group !== 'tile' && !c.legacy)
         .flatMap((c) => c.items.map((i) => ({ slug: i.slug, words: new Set(`${i.slug.replace(/-/g, ' ')} ${i.name}`.split(/\s+/)) })));
     } catch {
       library = [];

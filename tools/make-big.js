@@ -67,6 +67,29 @@ const SMALL_CATS = new Set(['items', 'food', 'meals', 'clues', 'weapons', 'tools
 const BIG_NAMES =
   /\b(bed|sofa|couch|wardrobe|table|desk|piano|organ|tree|cart|wagon|car|van|truck|bus|boat|ship|statue|bookcase|bookshelf|shelf|shelves|cabinet|cupboard|dresser|door|gate|gateway|arch|grandfather|coffin|tomb|mausoleum|machine|tank|fountain|well|carriage|hearse|stove|oven|fireplace|bath|bathtub|gallows|gibbet|tent|booth|locker|fridge|throne|altar|pillar|column|obelisk|angel|trilithon|generator|boiler|furnace|loom|scaffold|bench|counter|bar|stall|crate stack|haystack|windmill|tower)\b/;
 
+/* Old 16 x 16 icons that have nothing to do with a house and its horrors: no longer offered when you add a thing.
+ * The files stay, because old stories, the menus' own icons and the Dungeon mode still show them. */
+const LEGACY = new Set([
+  'monsters',
+  'animals',
+  'creatures',
+  'weapons',
+  'items',
+  'food',
+  'buildings',
+  'meals',
+  'clothes',
+  'city',
+  'tech',
+  'play',
+  'tools',
+  'adventure',
+  'outdoors',
+]);
+for (const cat of index.categories) {
+  if (LEGACY.has(cat.id)) cat.legacy = true;
+  else delete cat.legacy;
+}
 let nDrawn = 0,
   nDoubled = 0,
   nSmall = 0;

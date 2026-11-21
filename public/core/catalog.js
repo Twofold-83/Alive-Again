@@ -229,7 +229,7 @@ export async function loadPixel() {
         SPRITE_WIDTH.set(it.asset, it.w);
         return it;
       });
-      PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items });
+      if (!c.legacy) PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items }); // old icons are still drawn, not offered
     }
   } catch {
     /* no pixel pack: the emoji library is used */

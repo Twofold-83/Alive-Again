@@ -2291,6 +2291,34 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }) => {
     c.speckle(1, 1, 32, 60, C.rust, 7, 9);
   });
 
-  /*__MORE__*/
+  /* the plainer names of the same pieces of furniture */
+  A['sofa'] = S(36, 20, (c) => sofa(c, hex('#6f6250')));
+  A['sofa-blue'] = S(36, 20, (c) => sofa(c, hex('#39486a')));
+  A['armchair'] = S(18, 20, (c) => sofa(c, hex('#6a3a3a')));
+  A['coffee-table'] = S(26, 11, (c) => table(c, 1, 24, 1, 9, W));
+  A['dining-table'] = S(42, 17, (c) => table(c, 1, 40, 2, 15, WL, { mid: true }));
+  A['dresser'] = S(22, 23, (c) => chestOfDrawers(c, WL));
+  A['step-ladder'] = P(12, 30, (c) => ladder(c, 2, 9, 1, 28, hex('#8a6a48')));
+  A['stepladder-old'] = P(12, 30, (c) => ladder(c, 2, 9, 1, 28, hex('#6a5038'), [3]));
+  A['rocking-chair'] = P(14, 22, (c) => {
+    chair(c, 3, 18, { col: W });
+    c.row(19, 1, 12, WD);
+    c.set(0, 18, WD);
+    c.set(13, 18, WD);
+  });
+  for (const [to, from] of [
+    ['fireplace', 'fireplace-embers'],
+    ['wardrobe', 'wardrobe-old'],
+    ['crib', 'crib-old'],
+    ['double-bed', 'bed-double-old'],
+    ['front-door', 'door-red'],
+    ['house-window', 'window-frame-lit'],
+    ['window-curtains', 'window-frame-curtains'],
+    ['coat-rack', 'coat-stand'],
+    ['floor-lamp', 'standing-lamp-old'],
+    ['table-lamp', 'reading-lamp'],
+  ])
+    A[to] = A[from];
+
   return A;
 };

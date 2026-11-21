@@ -194,7 +194,7 @@ try {
     let ai = await post(`/api/rooms/${code}/act`, { token: 'solo-human-0002', type: 'claude', text: 'A dragon bursts in', scene: base2 });
     assert.equal(ai.status, 200);
     assert.match(ai.note, /dragon bursts in/);
-    const dr = ai.scene.entities.find((e) => e.asset === 'p:dragon-red');
+    const dr = ai.scene.entities.find((e) => e.say === 'ROAR!'); // whatever the library offers for a dragon now
     assert(dr && dr.say === 'ROAR!' && dr.fx === 'shake' && dr.scale === 2);
     assert.deepEqual([dr.x, dr.y], [0.6, 0.8]);
     assert.equal(ai.scene.tracks.length, 1);
