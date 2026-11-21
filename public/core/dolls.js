@@ -56,10 +56,24 @@ export const POSES = [
 
 export const isDoll = (asset) => typeof asset === 'string' && asset.startsWith('d:');
 export function dollParts(asset) {
-  const m = /^d:(h\d+)\.(t\d+)\.(a\d+)\.(l\d+)$/.exec(asset || '');
-  return m ? { h: m[1], t: m[2], a: m[3], l: m[4] } : { h: 'h001', t: 't001', a: 'a001', l: 'l001' };
+  const m = /^d:(h\d+)\.(t\d+)\.(a\d+)\.(l\d+)((?:~[^~]+)*)$/.exec(asset || '');
+  if (!m) return { h: 'h001', t: 't001', a: 'a001', l: 'l001', x: [] };
+  /* mutations: more heads, arms and legs, each "~<part>,<x>,<y>,<turn>,<mirrored>" in figure pixels and degrees */
+  const x = m[5]
+    .split('~')
+    .filter(Boolean)
+    .map((s) => {
+      const [id, px, py, r, f] = s.split(',');
+      return { id, x: +px || 0, y: +py || 0, r: +r || 0, f: f === '1' };
+    })
+    .filter((e) => /^[hal]\d{3}$/.test(e.id))
+    .slice(0, MAX_EXTRA);
+  return { h: m[1], t: m[2], a: m[3], l: m[4], x };
 }
-export const dollAsset = (p) => `d:${p.h}.${p.t}.${p.a}.${p.l}`;
+export const MAX_EXTRA = 6;
+export const dollAsset = (p) =>
+  `d:${p.h}.${p.t}.${p.a}.${p.l}` +
+  (p.x || []).map((e) => `~${e.id},${Math.round(e.x)},${Math.round(e.y)},${Math.round(e.r)},${e.f ? 1 : 0}`).join('');
 export function randomDoll() {
   const pick = (list, fallback) => (list.length ? list[Math.floor(Math.random() * list.length)].id : fallback);
   return dollAsset({ h: pick(DOLLS.heads, 'h001'), t: pick(DOLLS.torsos, 't001'), a: pick(DOLLS.arms, 'a001'), l: pick(DOLLS.legs, 'l001') });
@@ -81,6 +95,21 @@ export function dollNode(asset, cls = '', pose, feel) {
     part.dataset.part = key;
     el.append(part);
   }
+  /* mutations: limbs go behind the body, heads on top; each turns about its own joint */
+  (p.x || []).forEach((e, i) => {
+    const g = RIG[{ h: 'h', a: 'al', l: 'lr' }[e.id[0]]];
+    const part = h(
+      'span',
+      {
+        class: 'dpart x',
+        style: `left:${u(e.x)};top:${u(e.y)};width:${u(g.w)};height:${u(g.h)};transform-origin:${u(g.px)} ${u(g.py)};transform:rotate(${e.r}deg)`,
+      },
+      h('img', { src: `doll/${e.id}.png`, alt: '', draggable: 'false', class: e.f ? 'flip' : '' }),
+    );
+    part.dataset.x = i;
+    if (e.id[0] === 'h') el.append(part);
+    else el.insertBefore(part, el.querySelector('.dpart.t'));
+  });
   el.dataset.head = p.h;
   poseDoll(el, pose);
   feelDoll(el, feel);
@@ -119,7 +148,7 @@ export function feelDoll(el, feel) {
   feel = feel || '';
   if ((el.dataset.feel || '') === feel) return;
   el.dataset.feel = feel;
-  const head = el.querySelector('.dpart.h'),
+  const head = el.querySelector('.dpart.h:not(.x)'),
     n = DOLLS.feels.length,
     i = DOLLS.feels.indexOf(feel);
   let face = head.querySelector('.face');
@@ -131,7 +160,7 @@ export function feelDoll(el, feel) {
 export function poseDoll(el, pose) {
   const a = Array.isArray(pose) && pose.length === 5 ? pose : REST;
   JOINTS.forEach((key, i) => {
-    const part = el.querySelector('.dpart.' + key);
+    const part = el.querySelector('.dpart.' + key + ':not(.x)');
     if (part) part.style.transform = `rotate(${a[i] || 0}deg)`;
   });
 }
@@ -165,7 +194,7 @@ export function poseEditor(asset, pose, onChange, o = {}) {
   };
   figure.addEventListener('pointerdown', (ev) => {
     const part = ev.target.closest('.dpart');
-    if (!part || part.dataset.part === 't') return;
+    if (!part || part.dataset.part === 't' || part.classList.contains('x')) return; // a mutation is moved in the character maker, not posed
     ev.preventDefault();
     drag = part.dataset.part;
     figure.setPointerCapture(ev.pointerId);

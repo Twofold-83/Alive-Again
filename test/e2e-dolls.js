@@ -62,6 +62,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       assert.equal(await p.locator('.dollgrid button').count(), n);
       await p.click('.dollgrid button >> nth=3');
     }
+    // mutations: a second head and a third arm
+    await p.click('#mutHead');
+    await p.click('#mutArm');
+    assert.equal(await p.locator('#dollmaker .poserstage .dpart.x').count(), 2);
     // drag the right arm up: it turns about the shoulder
     const arm = await p.locator('#dollmaker .dpart.ar').boundingBox();
     await p.mouse.move(arm.x + arm.width / 2, arm.y + arm.height * 0.8);
@@ -87,7 +91,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await sleep(400);
     let sc = await last();
     const doll = sc.entities.find((e) => e.asset.startsWith('d:'));
-    assert.match(doll.asset, /^d:h\d{3}\.t\d{3}\.a\d{3}\.l\d{3}$/);
+    assert.match(doll.asset, /^d:h\d{3}\.t\d{3}\.a\d{3}\.l\d{3}(~[hal]\d{3},-?\d+,-?\d+,-?\d+,[01]){2}$/, 'the mutations are part of who it is');
     assert.deepEqual(doll.pose, [0, 160, -160, 0, 0], 'the server keeps the pose');
     assert.equal(doll.feel, 'scared', 'and the feeling');
 

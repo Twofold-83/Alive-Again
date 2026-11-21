@@ -90,7 +90,7 @@ export function cleanScene(s, prev, inner) {
     if (!e || typeof e !== 'object') continue;
     let id = str(e.id, 24) || uid();
     if (seen.has(id)) id = uid();
-    const asset = str(e.asset, 80);
+    const asset = str(e.asset, 160); // a paper doll with mutations has a long name
     if (!asset) continue;
     seen.add(id);
     entities.push({
