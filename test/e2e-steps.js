@@ -158,7 +158,8 @@ const { setup } = require('./lib');
 
     /* ---- the scene workshop: build a level, prepare scenes, use them ---- */
     await settings('[data-pmode=free]');
-    await x.opt('Build scene');
+    await x.opt('Build this room');
+    await p.click('#roomPaint');
     await p.waitForSelector('#wsStage');
     await p.waitForSelector('#wsAdd'); // a scene on the bench is not on the map until you add it
     const ws = await p.locator('#wsStage').boundingBox(),
@@ -296,7 +297,8 @@ const { setup } = require('./lib');
     for (let i = 0; i < tr.length; i += 3)
       assert(!(Math.floor(tr[i + 1] * 16) === 10 && tr[i + 2] < 10 / 12), 'no point of the walk is inside the wall');
     // close the gap in Build scene and use the scene again: the hero starts on the left and cannot cross
-    await x.opt('Build scene');
+    await x.opt('Build this room');
+    await p.click('#roomPaint');
     await p.waitForSelector('#wsStage');
     assert.equal(await p.inputValue('#wsName'), 'The river crossing');
     await tileBtn('wall').click();
@@ -314,7 +316,8 @@ const { setup } = require('./lib');
     assert(qx < 10 / 16, `walled in: the hero stays on its side, as near as it can get (${qx})`);
     await p.click('#walkBtn');
     await toDirector();
-    await x.opt('Build scene');
+    await x.opt('Build this room');
+    await p.click('#roomPaint');
     await p.waitForSelector('#wsStage');
     await p.click('[data-tool=erase]');
     await p.mouse.click(...cell(10, 10)); // an erased tile is a hole: still not walkable

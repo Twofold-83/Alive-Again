@@ -19,6 +19,7 @@ import {
 import {
   screenMoment,
   screenScene,
+  screenRoom,
   screenScenePrepared,
   screenScenePlace,
   screenSceneWeather,
@@ -40,6 +41,7 @@ export const SCREENS = {
   move: screenMove,
   'move:drag': screenMoveDrag,
   'move:rec': screenMoveRec,
+  room: screenRoom,
   add: screenAdd,
   'add:char': screenAddChar,
   'add:thing': screenAddChar,

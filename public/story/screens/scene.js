@@ -5,6 +5,9 @@ import { BURSTS, WEATHER } from '../../shared/options.js';
 import { G, short } from '../guided.js';
 import { BACKDROPS, backdropCss } from '../../core/catalog.js';
 import { glyphNode } from '../../stage/render.js';
+import { ROOM_THEMES, ROOM_SHAPES, buildRoom, themeOf, roomArea } from '../../shared/rooms.js';
+import { walkable, normScene } from '../../shared/scene-model.js';
+import { clone, rid, toast } from '../../core/dom.js';
 
 const PENS = ['#ffffff', '#15131c', '#ff5a5a', '#ffb454', '#ffe14d', '#57d38c', '#4db8ff', '#c77dff'];
 
@@ -330,4 +333,166 @@ export function screenDraw(kit) {
     doneBtn(() => (d.drawing.length ? 'A drawing' : '')),
   );
   return;
+}
+
+/* ================= build this room: walls and floor in one press, on the stage itself; rooms kept for every story ================= */
+function savedRooms() {
+  try {
+    const l = JSON.parse(localStorage.getItem('tf.savedRooms') || '[]');
+    return Array.isArray(l) ? l : [];
+  } catch {
+    return [];
+  }
+}
+export function screenRoom(kit) {
+  const { p, c, d, head, done } = kit;
+  head('Build this room', 'Everything happens on the stage: pick walls and a floor, then add things from “Add something”.');
+  G.roomTheme ||= 'oldhouse';
+  G.roomShape ||= 'room';
+  const hero = d.entities.find((e) => e.id === d.heroId);
+  const lay = (theme, shape) => {
+    G.roomTheme = theme;
+    G.roomShape = shape;
+    d.level = buildRoom(theme, shape);
+    d.backdrop = 'b:black';
+    if (d.mood === 'm:none' || ROOM_THEMES.some((t) => t.mood === d.mood)) d.mood = themeOf(theme).mood;
+    if (hero && !walkable(d, hero.x, hero.y)) {
+      const a = roomArea(shape);
+      hero.x = (a.x0 + a.x1) / 2;
+      hero.y = a.y0 + (a.y1 - a.y0) * 0.92;
+    }
+    c.changedQuiet();
+    c.rebuild();
+  };
+  const name = h('input', {
+    id: 'roomName',
+    class: 'grow',
+    placeholder: 'Name of this room',
+    maxlength: 40,
+    value: G.roomName || '',
+    oninput: () => (G.roomName = name.value),
+  });
+  const rooms = savedRooms();
+  add(
+    p,
+    h(
+      'div',
+      { class: 'card roomcard' },
+      h('h3', {}, 'Room in one click'),
+      h(
+        'div',
+        { class: 'roomgrid' },
+        ROOM_THEMES.map((t) =>
+          h(
+            'button',
+            { 'data-room': t.id, title: t.name, class: d.level && G.roomTheme === t.id ? 'on' : '', onclick: () => lay(t.id, G.roomShape) },
+            glyphNode(kit.code, 'p:' + t.wall),
+          ),
+        ),
+      ),
+      h(
+        'div',
+        { class: 'chips wrap' },
+        ROOM_SHAPES.map((s) =>
+          h('button', { 'data-shape': s.id, class: G.roomShape === s.id ? 'on' : '', onclick: () => lay(G.roomTheme, s.id) }, s.name),
+        ),
+      ),
+      h('div', { class: 'row' }, h('button', { class: 'grow', id: 'roomPaint', onclick: () => c.workshop() }, 'Paint walls and floor by hand…')),
+    ),
+    h(
+      'div',
+      { class: 'card', id: 'roomSaves' },
+      h('h3', {}, 'Save room'),
+      h(
+        'div',
+        { class: 'row' },
+        name,
+        h(
+          'button',
+          {
+            id: 'roomSave',
+            class: 'primary',
+            onclick: () => {
+              const nm = (G.roomName || '').trim() || 'A room',
+                scene = normScene(
+                  clone({
+                    backdrop: d.backdrop,
+                    level: d.level,
+                    weather: d.weather,
+                    mood: d.mood,
+                    drawing: d.drawing,
+                    entities: d.entities,
+                    heroId: d.heroId,
+                    sheet: { inv: [], stats: [], points: 0 },
+                  }),
+                );
+              for (const e of scene.entities) Object.assign(e, { say: '', once: '', emote: '' });
+              try {
+                localStorage.setItem(
+                  'tf.savedRooms',
+                  JSON.stringify([{ id: rid(), name: nm, scene, at: Date.now() }, ...savedRooms().filter((r) => r.name !== nm)].slice(0, 60)),
+                );
+                toast(`“${nm}” is saved for every story`);
+              } catch {
+                toast('This device has no room left to save it');
+              }
+              c.rebuild();
+            },
+          },
+          'Save room',
+        ),
+      ),
+      h('b', { class: 'actlab' }, 'My saved rooms'),
+      rooms.length
+        ? rooms.map((r) =>
+            h(
+              'div',
+              { class: 'row myroom' },
+              h(
+                'button',
+                {
+                  class: 'grow',
+                  title: 'Bring this room on stage',
+                  onclick: () => {
+                    /* the place and its things come on stage; the hero stays who they are and stands where the room's hero stood */
+                    const sc = normScene(clone(r.scene)),
+                      there = sc.entities.find((e) => e.id === sc.heroId);
+                    Object.assign(d, {
+                      backdrop: sc.backdrop,
+                      level: sc.level,
+                      weather: sc.weather,
+                      mood: sc.mood,
+                      drawing: sc.drawing,
+                      exits: [],
+                      sceneId: '',
+                    });
+                    d.entities = [
+                      ...d.entities.filter((e) => e.id === d.heroId || (e.tie && e.tie.to === d.heroId)),
+                      ...sc.entities.filter((e) => e.id !== sc.heroId).map((e) => ({ ...e, id: rid(), tie: null })),
+                    ];
+                    if (hero && there) Object.assign(hero, { x: there.x, y: there.y });
+                    c.changedQuiet();
+                    done(`The scene changes to ${r.name}`);
+                  },
+                },
+                h('b', {}, r.name),
+                h('small', { class: 'dim' }, ` ${r.scene.entities.length - 1} things`),
+              ),
+              h(
+                'button',
+                {
+                  title: 'Forget this room',
+                  onclick: () => {
+                    if (!confirm(`Forget “${r.name}”?`)) return;
+                    localStorage.setItem('tf.savedRooms', JSON.stringify(savedRooms().filter((x) => x.id !== r.id)));
+                    c.rebuild();
+                  },
+                },
+                '✕',
+              ),
+            ),
+          )
+        : h('small', { class: 'dim' }, 'Nothing yet. A saved room stays on this device and can be brought on stage in any story.'),
+    ),
+  );
 }

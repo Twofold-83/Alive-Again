@@ -17,12 +17,21 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const last = () => x.last(),
       angle = (sel) => p.evaluate((s) => document.querySelector(s).style.transform, sel);
 
+    /* build on the stage itself: a room in one press, saved for other stories */
+    await x.opt('Build this room');
+    await p.click('[data-room=crypt]');
+    assert.equal(await p.locator('#stage .level i').count(), 192, 'walls and floor are laid on the live stage');
+    await p.fill('#roomName', 'My crypt');
+    await p.click('#roomSave');
+    assert.equal(await p.locator('#roomSaves .myroom').count(), 1);
+    await p.click('.gback');
     /* Build scene: a room is saved on this device for other stories, and Esc leaves */
-    await x.opt('Build scene');
+    await x.opt('Build this room');
+    await p.click('#roomPaint');
     await p.waitForSelector('#wsStage');
     await p.fill('#wsName', 'My cellar');
     await p.click('#wsSave');
-    assert.equal(await p.locator('#myRooms .myroom').count(), 1, 'the room is kept');
+    assert.equal(await p.locator('#myRooms .myroom').count(), 2, 'the room is kept, next to the one saved from the stage');
     assert.match(await p.evaluate(() => localStorage.getItem('tf.savedRooms')), /My cellar/);
     await p.keyboard.press('Tab');
     await p.keyboard.press('Escape');

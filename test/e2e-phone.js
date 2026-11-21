@@ -53,6 +53,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     assert(await p.evaluate(() => document.body.classList.contains('typing')), 'typing makes room for the keyboard');
     assert((await p.locator('#stage').boundingBox()).width < stage.width * 0.6);
     await p.tap('.grid button');
+    await p.locator('input[type=search]').blur();
+    await sleep(350);
+    await p.locator(`#stage .ent[data-id="${await p.evaluate(() => window.__lastAdded)}"]`).tap({ force: true }); // pressing it on the stage opens its settings
     await p.waitForSelector('.thingbtns');
     await sleep(350);
     assert.equal(await p.locator('#stage .ent').count(), 2);
@@ -60,7 +63,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await p.tap('.gdone');
     await inView('#foot button.go');
     /* build scene on a phone: one row of buttons that scrolls, stage above the tools */
-    await p.tap('.gopt:has-text("Build scene")');
+    await p.tap('.gopt:has-text("Build this room")');
+    await p.tap('#roomPaint');
     await p.waitForSelector('#wsStage');
     await fits('build scene');
     const bar = await p.locator('#workshop > header').boundingBox();

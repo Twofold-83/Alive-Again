@@ -60,7 +60,8 @@ const { setup } = require('./lib');
     // an active object
     // an active object is made in Build scene, where places are made; then the scene is used in the story
     assert.equal(await p.locator('.gopt:has-text("Add an exit")').count(), 0);
-    await x.opt('Build scene');
+    await x.opt('Build this room');
+    await p.click('#roomPaint');
     await p.waitForSelector('#wsStage');
     await p.waitForSelector('#wsAdd');
     await p.click('[data-wtab=things]');

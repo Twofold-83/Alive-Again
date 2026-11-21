@@ -182,6 +182,15 @@ as icons, and what the Player did is read out like the log of an old adventure g
   old machines, small finds, apparitions, and 233 ready-made people in the look of the paper dolls).
   Older 16 x 16 icons that do not belong in a house are no longer offered; their files remain for old
   stories, the menus' own icons and the Dungeon mode.
+- **Build on the stage.** "Build this room" in the Director's menu lays walls and floor on the live stage in
+  one press, saves the room for every story and brings saved rooms back; hand-painting tiles and the map
+  ("Map & campaigns") open the full-screen builder. "Save campaign" keeps a whole map with its connections.
+- **Three pictures per thing.** Front, side and used (`<slug>.side.png`, `<slug>.used.png`, made by
+  `tools/big/_views.js`): a View row on each thing switches between them.
+- **Sprite editor.** Draw a thing pixel by pixel or redraw anything on the stage; drawings are kept under
+  "My drawings" for every story. The character maker has mutations: more heads, arms and legs.
+- **Battles with rules.** Attack, Defend, Item, Escape, Speak; enemies fight on their own or are moved by the
+  Director; a tied thing is a weapon (`public/shared/battle.js`).
 - **Save room.** In Build scene, "Save room" keeps a room on the device; "My saved rooms" opens it in any story.
 - **Rolls at once.** When the Director asks for a roll (with the number to reach), the Player presses Roll,
   sees the die and is told at once whether it was enough; the Director gets the result in words.
