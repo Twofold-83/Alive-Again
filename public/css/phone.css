@@ -153,3 +153,19 @@ body.phone #sheet button, body.phone #sheet .chip { min-height: 34px; }
 body.phone .gopt { min-height: 78px; }
 body.phone #top button { font-size: 17px; white-space: nowrap; padding: 0 6px; min-width: 0; }
 body.phone #top .who { font-size: 17px; }
+
+/* the character maker and the screen-filter menu */
+body.phone #dollmaker > header { flex-wrap: wrap; padding: calc(6px + env(safe-area-inset-top)) 8px 6px; }
+body.phone #dollmaker > header .small { display: none; }
+body.phone .dollbody { flex-direction: column; }
+body.phone .dollleft { flex: none; padding: 8px; gap: 6px; justify-content: flex-start; }
+body.phone .dollleft .doll.big { font-size: 92px; }
+body.phone .dollleft .poserstage { padding: 12px 0 6px; }
+body.phone .dolltools { width: auto; flex: 1; min-height: 0; }
+body.phone .dollgrid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); }
+body.phone #lookMenu { width: min(280px, 92vw); }
+body.phone #lookMenu button { min-height: 44px; }
+body.phone .dollleft .doll.big { font-size: 74px; }
+body.phone .dollleft .poser small { display: none; }
+body.phone .dollleft .chips, body.phone .dollacts { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; width: 100%; }
+body.phone .dollleft .chips button, body.phone .dollacts button { flex: none; white-space: nowrap; }

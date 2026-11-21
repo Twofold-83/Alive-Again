@@ -14375,6 +14375,1025 @@ ND('shout-bubble', 'shout bubble loud yell exclamation', (c) => { burst(c, 7.5, 
 ND('pow-burst', 'pow comic hit burst yellow bang', (c) => { burst(c, 7.5, 7.5, 7.4, ['r2', 'y2', 'y2', 'y3'], 11); c.stamp(4, 6, ['R.R.R.RR', 'RR.R.R.R', 'R.R.R.RR']); }, {}, 'pow');
 ND('explosion-blue', 'blue magic explosion blast', (c) => burst(c, 7.5, 7.5, 7.4, ['b1', 'b2', 'b3', 'w0']), {}, 'blast-blue');
 
+// ═════════════════════════ OLD HOUSE PACK: room tile sets, doors, furniture, eerie things ═════════════════════════
+// The eerie old-house pack: complete room sets (top, wall, wall details, floor, floor
+// variants), more floors and carpets, doors and stairs, and furniture for every room.
+// A few extra muted colours keep it dim; they are only used from here on.
+Object.assign(PAL, {
+  q1: '#6e3f50', q2: '#a8707a', q3: '#c9a3a0', v1: '#3d5540', v2: '#6f8a62', v3: '#a3b396',
+  u1: '#2a2f52', u2: '#4a5f85', u3: '#8fa3b8', h1: '#7d7359', h2: '#a89c7c', h3: '#d2c8a8',
+  i1: '#33211c', j2: '#a88a3c', z1: '#561420',
+});
+for (const k of ['q1', 'q2', 'q3', 'v1', 'v2', 'v3', 'u1', 'u2', 'u3', 'h1', 'h2', 'h3', 'i1', 'j2', 'z1']) { if (KEY[PAL[k]]) throw new Error('colour clash ' + k); KEY[PAL[k]] = k; }
+// stamp letters for them (lower case a-p are free in stamps; templates never see these)
+//   a b c rose dark/mid/pale   d e f moss/sage/pale sage   g h i indigo/dull blue/pale blue
+//   j k l khaki/cream/bone     m darkest wood   n ochre   o dried blood   p orange-brown
+Object.assign(FIX, { a: 'q1', b: 'q2', c: 'q3', d: 'v1', e: 'v2', f: 'v3', g: 'u1', h: 'u2', i: 'u3', j: 'h1', k: 'h2', l: 'h3', m: 'i1', n: 'j2', o: 'z1', p: 'd2' });
+Object.assign(RAMPS, { oak: ['i1', 't1', 't2'], moss: ['v1', 'v2', 'v3'], dusk: ['u1', 'u2', 'u3'], bone: ['h1', 'h2', 'h3'], rosy: ['q1', 'q2', 'q3'], wine: ['z1', 'r1', 'q2'], soot: ['k', 'g4', 'g3'], ochre: ['t1', 'h1', 'h2'], stage: ['t1', 'd2', 't3'], plum: ['u1', 'p1', 'q2'] });
+const DARKER = { w0: 'g1', g1: 'g2', g2: 'g3', g3: 'g4', g4: 'k', t3: 't2', t2: 't1', t1: 'i1', i1: 'k', h3: 'h2', h2: 'h1', h1: 'g4', v3: 'v2', v2: 'v1', v1: 'g4', u3: 'u2', u2: 'u1', u1: 'k', q3: 'q2', q2: 'q1', q1: 'z1', r2: 'r1', r1: 'z1', z1: 'k', j2: 'h1', d2: 't1', s1: 'd2', c1: 'g4', c2: 'c1', n1: 'g4', b1: 'u1', p1: 'u1', o1: 't1', y3: 'h3', b3: 'u3' };
+function dim(c) { each((x, y) => { const k = KEY[c.get(x, y)]; if (DARKER[k]) c.px(x, y, DARKER[k]); }); }
+/** copy a painter's picture, drawn with its own fixed seed, so details share exactly the same background */
+function base(c, seed, fn) { const g = sub(seed, fn); each((x, y) => c.px(x, y, KEY[g[y][x]])); }
+/** repeat a small ASCII pattern (stamp letters) over the whole tile */
+function pat(c, rows) { const h = rows.length, w = rows[0].length; each((x, y) => c.px(x, y, FIX[rows[y % h][x % w]])); return c; }
+function blob(c, cx, cy, r, col, n = 4) { c.disc(cx, cy, r, col); for (let i = 0; i < n; i++) c.disc(cx + c.int(2 * r + 1) - r, cy + c.int(2 * r + 1) - r, r * 0.6, col); return c; }
+function crackLine(c, x, y, len, col, vert = true) {
+  for (let i = 0; i < len; i++) {
+    if (vert) c.px(x, y + i, col); else c.px(x + i, y, col);
+    const r = c.int(3);
+    if (vert) x += r - 1; else y += r - 1;
+    if (i === (len >> 1)) { if (vert) c.px(x + 1, y + i, col).px(x + 2, y + i - 1, col).px(x + 3, y + i - 1, col); else c.px(x + i, y + 1, col).px(x + i - 1, y + 2, col).px(x + i - 1, y + 3, col); }
+  }
+}
+const oldBoards = (c, r = 'oak') => woodH(c, r);
+function slabs(c, list, gap, body, hi, lo) { c.fill(gap); for (const [x, y, w, h] of list) { c.rect(x, y, w, h, body).h(x, y, w, hi).h(x, y + h - 1, w, lo); } }
+const FLAGS = [[0, 0, 7, 5], [8, 0, 8, 7], [0, 6, 5, 5], [6, 8, 10, 4], [0, 12, 9, 4], [10, 13, 6, 3], [6, 6, 1, 1]];
+
+// ── wall details shared by the sets: drawn over the set's own wall. o.fr: frame colours [dark, mid, light] ──
+function winBase(c, o, glass, paint, after) {
+  const [d, m, l] = o.fr;
+  c.rect(3, 2, 10, 11, d).rect(4, 3, 8, 9, glass);
+  if (paint) paint(c);
+  c.v(7, 3, 9, d).v(8, 3, 9, m).h(4, 7, 8, d).h(3, 2, 10, m).v(3, 3, 10, m).h(2, 13, 12, l).h(2, 14, 12, d).h(3, 1, 10, 'k').v(2, 2, 11, 'k').v(13, 2, 11, 'k').px(1, 13, 'k').px(14, 13, 'k').px(1, 14, 'k').px(14, 14, 'k').h(2, 15, 12, 'k');
+  if (after) after(c);
+}
+const FACE = ['.lll.', 'lllll', 'lKlKl', 'lllll', '.lKl.', '.lll.'];
+const WD = {
+  window: (c, o) => winBase(c, o, 'u2', (c) => c.rect(4, 9, 8, 3, 'g3').h(4, 8, 8, 'u3').v(10, 6, 5, 'k').px(9, 7, 'k').px(11, 8, 'k').px(11, 5, 'k').px(5, 4, 'u3').px(6, 4, 'u3')),
+  'window-night': (c, o) => winBase(c, o, 'u1', (c) => c.rect(10, 4, 2, 2, 'h3').px(11, 4, 'u1').px(5, 5, 'u3').px(6, 10, 'u3').px(10, 9, 'u3').px(4, 9, 'u3')),
+  'window-broken': (c, o) => winBase(c, o, 'u2', (c) => c.stamp(4, 3, ['........', '..K.....', '.KKK..K.', 'KKKKK...', '.KKKK...', '..KK.K..', '...K....', '........', '....KK..']).px(9, 5, 'w0').px(10, 6, 'w0').px(11, 7, 'w0').px(9, 9, 'w0').px(4, 4, 'w0').px(6, 9, 'w0'), (c) => c.px(5, 14, 'u3').px(9, 14, 'u3').px(10, 14, 'u3')),
+  'window-boarded': (c, o) => winBase(c, o, 'k', null, (c) => { for (const [x, y, w] of [[2, 3, 12], [3, 7, 11], [2, 10, 12]]) c.rect(x, y, w, 2, 't1').h(x, y, w, 't2').h(x, y + 2, w, 'k').px(x + 1, y + 1, 'g1').px(x + w - 2, y, 'g1'); }),
+  'window-face': (c, o) => winBase(c, o, 'u1', (c) => c.px(11, 4, 'u3').px(4, 10, 'u3'), (c) => c.stamp(5, 4, FACE)),
+  'window-bars': (c, o) => winBase(c, o, 'u2', (c) => c.rect(4, 9, 8, 3, 'g3').px(5, 4, 'u3'), (c) => c.v(5, 3, 9, 'k').v(10, 3, 9, 'k')),
+  'window-round': (c, o) => { c.disc(7.5, 7, 5.2, 'k').disc(7.5, 7, 4.2, 't2').disc(7.5, 7, 3.2, 'u2').v(7, 4, 7, 't1').v(8, 4, 7, 't2').h(4, 7, 8, 't1').px(10, 5, 'h3').px(5, 9, 'u3'); },
+  door: (c, o) => { const [d, m, l] = o.door || ['i1', 't1', 't2']; c.rect(2, 0, 12, 16, 'k').rect(3, 1, 10, 15, o.fr[1]).v(3, 1, 15, o.fr[2]).rect(4, 2, 8, 14, m).rect(5, 3, 6, 4, d).rect(5, 9, 6, 5, d).h(5, 7, 6, l).h(5, 14, 6, l).v(4, 2, 14, l).h(6, 4, 4, m).h(6, 10, 4, m).px(10, 8, 'j2').px(10, 9, 'k'); },
+  picture: (c) => ostamp(c, 3, 3, ['nnnnnnnnnn', 'nhhhhhlhhj', 'nhhhhhhhhj', 'nhhdhhhddj', 'nddddhdddj', 'nddddddddj', 'njjjjjjjjj']),
+  portrait: (c) => ostamp(c, 3, 2, ['nnnnnnnnnn', 'nmmmCCCmmj', 'nmmCyyyCmj', 'nmmyKyKymj', 'nmmyyyyymj', 'nmmmyyymmj', 'nmVVVyVVVj', 'nmVVVVVVVj', 'njjjjjjjjj']),
+  'portrait-scratched': (c) => { WD.portrait(c); c.stamp(5, 3, ['..K...K', '.K.K.K.', 'K.K.K..', '.K.K.K.']); },
+  shelf: (c) => ostamp(c, 2, 4, ['.hh..xx.Z...', '.hh.xXXxZZk.', '.hh.xXXxZZk.', 'TTTTTTTTTTTT', '.C........C.']),
+  crack: (c, o) => { crackLine(c, 6, 0, 16, o.crackc || 'k'); c.px(4, 3, o.crackc || 'k').px(3, 4, o.crackc || 'k'); },
+  stain: (c, o) => { const s = o.stainc || 'g4'; blob(c, 8, 4, 3, s); c.v(5, 6, 6, s).v(8, 7, 8, s).v(11, 5, 4, s).v(9, 6, 4, s); },
+  lamp: (c) => { c.px(5, 3, 'j2').px(10, 3, 'j2').px(4, 6, 'j2').px(11, 6, 'j2').px(7, 2, 'j2'); ostamp(c, 6, 4, ['.ll.', 'lEEl', 'lEEl', 'lEEl', '.xx.', 'XXXX', '.XX.']); },
+  clock: (c) => ostamp(c, 4, 1, ['..CCCC..', '.CllllC.', 'CllKlllC', 'CllKlllC', 'CllKKllC', 'CllllllC', '.CllllC.', '..CCCC..', '..CmmC..', '..CnmC..', '..CmnC..', '..CCCC..']),
+  mirror: (c) => ostamp(c, 4, 2, ['..nnnn..', '.niiiin.', 'niWiiiin', 'niiWiiin', 'niiiiiij', 'niiiiiij', 'niiiiWij', 'niiiiiij', '.jiiiij.', '..jjjj..']),
+  'mirror-cracked': (c) => { WD.mirror(c); c.stamp(5, 3, ['...K..', '..K...', 'KKK...', '..KK..', '...KKK', '..K...', '.K....']); },
+  vent: (c) => ostamp(c, 4, 5, ['XXXXXXXX', 'XKKKKKKX', 'XxxxxxxX', 'XKKKKKKX', 'XxxxxxxX', 'XKKKKKKX', 'XXXXXXXX']),
+  pipe: (c) => { c.rect(9, 0, 5, 16, 'k').rect(10, 0, 3, 16, 'g2').v(10, 0, 16, 'g1').v(12, 0, 16, 'g4').rect(9, 6, 5, 3, 'g3').h(9, 6, 5, 'g2').h(8, 5, 7, 'k').h(8, 9, 7, 'k').px(8, 6, 'k').px(8, 7, 'k').px(8, 8, 'k').px(14, 6, 'k').px(14, 7, 'k').px(14, 8, 'k').px(11, 11, 'o1').px(11, 12, 'o1').px(10, 12, 'o1').px(7, 10, 'c1').px(7, 13, 'c1'); },
+  hooks: (c) => ostamp(c, 2, 3, ['TTTTTTTTTTTT', 'CCCCCCCCCCCC', '.x....x....x', '.x...VVV...x', '....VVVVV...', '....VXVXV...', '....VXVXV...', '....VVVVV...', '....VV.VV...']),
+  curtain: (c, o) => { const [d, m, l] = o.curt || ['z1', 'r1', 'q2']; c.rect(1, 2, 14, 13, 'k').rect(6, 3, 4, 11, 'u1').px(8, 5, 'u3'); for (const x0 of [2, 10]) for (let i = 0; i < 4; i++) c.v(x0 + i, 3, 11, [d, m, l, m][i]); c.px(5, 12, 'k').px(5, 13, 'k').px(10, 12, 'k').px(10, 13, 'k').h(1, 2, 14, 'j2').px(0, 2, 'k').px(15, 2, 'k').h(1, 1, 14, 'k'); },
+  cross: (c) => ostamp(c, 5, 2, ['..TT..', '..TC..', 'TTTTTT', 'CCTCCC', '..TC..', '..TC..', '..TC..', '..TC..', '..TC..', '..CC..']),
+  poster: (c) => ostamp(c, 4, 2, ['llllllll', 'lKKKKKKl', 'llllllll', 'lVVllXXl', 'lVVlllll', 'lVVlXXXl', 'llllllll', 'lXXXXXkl', 'llllllk.', 'lllllk..']),
+  switch: (c) => { c.v(7, 0, 6, 'g4').v(8, 0, 6, 'g3'); ostamp(c, 6, 6, ['llll', 'lKKl', 'lxKl', 'lxxl', 'llll']); },
+  cobweb: (c) => c.stamp(0, 0, ['wwwwwwwww', 'w.w..w...', 'ww.w..w..', 'w.w.w....', 'w..w.w...', 'ww..w....', 'w.w......', 'w........', 'w........']).px(5, 7, 'k').px(5, 6, 'g1'),
+  candle: (c) => { c.px(7, 3, 'j2').px(5, 5, 'j2').px(10, 5, 'j2'); ostamp(c, 6, 4, ['.Y..', 'YEY.', '.l..', '.l..', '.l..', 'xxxx', '.XX.']); },
+  fusebox: (c) => { c.v(7, 0, 4, 'g4').v(11, 12, 4, 'g4'); ostamp(c, 4, 4, ['XXXXXXXX', 'XxxxxxxV', 'XxKKxKKV', 'XxZKxKKV', 'XxxxxxxV', 'XxKKxnKV', 'XxKKxKKV', 'XVVVVVVV']); },
+};
+const DWORDS = { window: 'window glass dusk', 'window-night': 'window night moon dark', 'window-broken': 'broken window smashed glass', 'window-boarded': 'boarded up window planks nailed', 'window-face': 'window with face ghost watching', 'window-bars': 'barred window bars', 'window-round': 'round window porthole', door: 'door closed in wall', picture: 'picture painting landscape frame', portrait: 'portrait painting person frame', 'portrait-scratched': 'portrait scratched out face', lamp: 'wall lamp sconce light', 'mirror-cracked': 'cracked broken mirror', crack: 'crack cracked damage', stain: 'stain damp dirty mould', hooks: 'coat hooks rail coat', pipe: 'pipe plumbing', vent: 'vent grille air', switch: 'light switch', poster: 'poster notice paper', cobweb: 'cobweb spider web corner', candle: 'candle sconce flame', fusebox: 'fuse box electric' };
+// floor variants shared by the sets
+const FV = {
+  worn: (c, o) => c.speck(16, o.wornc || 'h2', 3, 4, 10, 8).speck(6, o.wornc || 'h2', 5, 6, 6, 4),
+  cracked: (c, o) => { crackLine(c, 5, 0, 16, o.crackc || 'k'); crackLine(c, 9, 9, 7, o.crackc || 'k', false); },
+  stained: (c, o) => { blob(c, 8, 8, 3, o.stainc || 'g4'); c.px(3, 4, o.stainc || 'g4').px(12, 12, o.stainc || 'g4'); },
+  dark: (c) => dim(c),
+  bloody: (c) => { blob(c, 7, 8, 3, 'z1'); c.speck(5, 'r1', 5, 6, 5, 4).px(12, 4, 'z1').px(13, 11, 'z1').px(3, 13, 'z1').px(12, 3, 'z1'); },
+  dusty: (c, o) => { c.speck(26, o.dustc || 'h2').speck(8, 'h3'); },
+  rug: (c, o) => { const [d, m, l] = o.rug || ['z1', 'r1', 'q2']; c.rect(2, 3, 12, 10, m).rect(3, 4, 10, 8, d).rect(4, 5, 8, 6, m).rect(7, 7, 2, 2, l).px(5, 6, l).px(10, 6, l).px(5, 9, l).px(10, 9, l); for (let y = 3; y < 13; y += 2) c.px(1, y, 'h2').px(14, y, 'h2'); c.h(2, 13, 12, 'k'); },
+  drain: (c) => { c.rect(4, 4, 8, 8, 'k').rect(5, 5, 6, 6, 'g3').h(5, 5, 6, 'g2'); for (let y = 6; y < 11; y += 2) c.h(6, y, 4, 'k'); c.px(4, 4, 'g4').px(11, 11, 'g4'); },
+  hatch: (c) => { c.rect(2, 2, 12, 12, 'k').rect(3, 3, 10, 10, 't1'); for (let x = 3; x < 13; x += 3) c.v(x, 3, 10, 't2'); c.h(3, 5, 10, 'g3').h(3, 10, 10, 'g3').h(3, 12, 10, 'i1'); c.stamp(7, 7, ['xx', 'xK', 'xx']); },
+  puddle: (c) => { blob(c, 8, 9, 3, 'u1', 5); c.h(6, 8, 3, 'u2').px(10, 10, 'u2').px(5, 10, 'u2'); },
+};
+const VWORDS = { worn: 'worn scuffed', cracked: 'cracked broken', stained: 'stained dirty', dark: 'dark shadow', bloody: 'bloody blood stain', dusty: 'dusty dust', rug: 'with small rug mat', drain: 'with drain grate', hatch: 'with hatch trapdoor', puddle: 'puddle water wet' };
+/** One complete room set. details / variants: names of shared painters, or [name, words, painter(c, o)]. */
+function roomSet(id, words, o) {
+  o.fr = o.fr || ['i1', 't1', 't2'];
+  T(`${id}-top`, `${words} wall top dark ceiling edge`, 'wall', (c) => { c.fill(o.top[0]).speck(12, o.top[1]); if (o.top[2]) c.speck(5, o.top[2]); });
+  T(`${id}-wall`, `${words} wall plain`, 'wall', o.wall);
+  for (const d of o.details) {
+    const [n, w, f] = typeof d === 'string' ? [d, DWORDS[d] || d, WD[d]] : d;
+    T(`${id}-wall-${n}`, `${words} wall ${w}`, 'wall', (c) => { base(c, `${id}-wall`, o.wall); f(c, o); });
+  }
+  T(`${id}-floor`, `${words} floor`, 'floor', o.floor);
+  for (const d of o.variants) {
+    const [n, w, f] = typeof d === 'string' ? [d, VWORDS[d] || d, FV[d]] : d;
+    T(`${id}-floor-${n}`, `${words} floor ${w}`, 'floor', (c) => { base(c, `${id}-floor`, o.floor); f(c, o); });
+  }
+}
+const wrap = (c) => (x, y, col) => c.px(x & 15, y & 15, col);
+
+category('rooms', 'Rooms: old house', 'tile');
+roomSet('rosepaper', 'faded rose wallpaper room', {
+  top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], stainc: 'q2', crackc: 'q1', wornc: 't3',
+  wall: (c) => { c.fill('q3'); const p = wrap(c); for (const [x, y] of [[1, 1], [9, 1], [5, 5], [13, 5], [1, 9], [9, 9], [5, 13], [13, 13]]) { p(x + 1, y, 'q2'); p(x, y + 1, 'q2'); p(x + 1, y + 1, 'q1'); p(x + 2, y + 1, 'q2'); p(x + 1, y + 2, 'q2'); p(x + 3, y + 2, 'v2'); p(x + 2, y + 3, 'v2'); } c.speck(5, 'h3'); },
+  details: ['window', 'window-night', 'door', 'portrait', 'lamp', 'stain', ['peeling', 'peeling torn wallpaper plaster', (c) => { c.stamp(8, 0, ['kkkkkk.', 'jkkkkkk', '.jkkkkk', '.jkkkk.', '..jkkk.', '..jckk.', '...cck.', '...ccc.', '....cc.']).px(4, 12, 'h2').px(5, 12, 'h2').px(4, 13, 'h1'); }]],
+  floor: (c) => oldBoards(c, 'brown'),
+  variants: ['worn', 'dark', 'rug', 'stained'],
+});
+roomSet('stripepaper', 'green striped wallpaper room', {
+  top: ['i1', 'k', 't1'], stainc: 'v1', crackc: 'g4', rug: ['v1', 'v2', 'j2'], wornc: 't2',
+  wall: (c) => { each((x, y) => c.px(x, y, ['v1', 'v1', 'v2', 'v2', 'v2', 'v3', 'v2', 'v2'][x % 8])); for (let y = 3; y < 16; y += 8) c.px(0, y, 'j2').px(8, y + 4, 'j2'); },
+  details: ['window', 'window-broken', 'door', 'picture', 'clock', 'crack', 'mirror'],
+  floor: (c) => turned('t', (c2) => oldBoards(c2, 'oak'))(c, 'stripepaper-floor'),
+  variants: ['worn', 'dusty', 'rug', 'cracked'],
+});
+roomSet('damask', 'dark blue damask wallpaper room', {
+  top: ['k', 'u1', 'g4'], fr: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', rug: ['u1', 'u2', 'j2'], wornc: 't2',
+  wall: (c) => each((x, y) => { const s = Math.abs((x % 8) - 3.5) + Math.abs((y % 8) - 3.5); c.px(x, y, s === 3 || s === 4 ? 'u2' : s < 1.5 ? 'u2' : (x % 8 === 7 || x % 8 === 0) && (y % 8 === 7 || y % 8 === 0) ? 'p1' : 'u1'); }),
+  details: ['window-night', 'window-face', 'door', 'portrait', 'portrait-scratched', 'mirror-cracked', 'lamp'],
+  floor: (c) => oldBoards(c, 'oak'),
+  variants: ['dark', 'rug', 'bloody', 'dusty'],
+});
+roomSet('panel', 'dark wood panelling panelled room', {
+  top: ['k', 'i1'], fr: ['k', 'i1', 't1'], door: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', wornc: 't3',
+  wall: (c) => each((x, y) => { const a = x % 8; c.px(x, y, a === 0 || y === 0 ? 'i1' : (a === 2 && y >= 2 && y <= 13) || (y === 2 && a >= 2 && a <= 6) ? 'i1' : (a === 6 && y >= 3 && y <= 13) || (y === 13 && a >= 3 && a <= 6) ? 't2' : 't1'); }),
+  details: ['window', 'door', 'portrait', 'clock', 'candle', ['trophy', 'mounted deer head antlers trophy', (c) => ostamp(c, 3, 1, ['l..l..l..l', 'l.ll..ll.l', '.ll....ll.', '..lTTTTl..', '..TKTTKT..', '..TTTTTT..', '...TTTT...', '...TKKT...', '.CCCCCCCC.', '..CCCCCC..'])], ['secret', 'secret panel door ajar hidden', (c) => { c.rect(8, 1, 7, 15, 'k').rect(9, 2, 2, 14, 'i1').v(9, 2, 14, 't1').px(13, 6, 'g4').px(12, 9, 'g4'); }]],
+  floor: (c) => each((x, y) => { const q = ((x >> 3) + (y >> 3)) % 2, k = (q ? x : y) % 4, e = (q ? y : x) % 8; c.px(x, y, k === 3 || e === 7 ? 'i1' : k === 0 ? 't2' : 't1'); }),
+  variants: ['worn', 'dark', 'rug', 'hatch'],
+});
+roomSet('crackplaster', 'cracked plaster room', {
+  top: ['g4', 'k', 'g3'], fr: ['i1', 't1', 't2'], stainc: 'h1', crackc: 'g4', wornc: 'h1', dustc: 'h2',
+  wall: (c) => { c.fill('h2').speck(14, 'h1').speck(8, 'h3'); for (const [x, y] of [[2, 3], [3, 4], [3, 5], [4, 6], [5, 6], [11, 10], [12, 11], [12, 12], [13, 13], [10, 9], [14, 1], [15, 2]]) c.px(x, y, 'h1'); },
+  details: ['window-broken', 'window-boarded', 'door', 'crack', 'stain', 'switch', ['lath', 'hole broken plaster laths', (c) => { blob(c, 8, 7, 3, 'k', 5); for (let y = 5; y < 11; y += 2) for (let x = 4; x < 13; x++) if (c.get(x, y) === PAL.k) c.px(x, y, 't1'); c.px(4, 12, 'h3').px(6, 13, 'h3').px(10, 13, 'h3').px(11, 12, 'h1'); }]],
+  floor: (c) => oldBoards(c, 'ochre'),
+  variants: ['dusty', 'cracked', 'dark', 'stained'],
+});
+roomSet('nursery', 'pale peeling nursery wallpaper room', {
+  top: ['g4', 'k', 'g3'], fr: ['h1', 'h2', 'h3'], door: ['h1', 'h2', 'h3'], stainc: 'h1', crackc: 'g3', rug: ['u2', 'u3', 'h3'], wornc: 'h3',
+  wall: (c) => { c.fill('h3'); for (const [x, y] of [[2, 2], [10, 2], [6, 10], [14, 10]]) c.px(x, y, 'q2').px((x + 15) & 15, y, 'q3').px((x + 1) & 15, y, 'q3').px(x, y - 1, 'q3').px(x, y + 1, 'q3'); for (const [x, y] of [[6, 4], [14, 4], [2, 12], [10, 12]]) c.px(x, y, 'u3').px(x + 1, y, 'u3').px(x, y + 1, 'u2'); for (const [x, y] of [[0, 7], [8, 15], [4, 7], [12, 15]]) c.px(x, y, 'v3'); c.stamp(11, 6, ['.kk.', 'kkkj', '.kj.']).stamp(2, 6, ['kk', 'kj']); },
+  details: ['window', 'window-night', 'door', 'crack', ['picture', 'picture animal lamb child frame', (c) => ostamp(c, 4, 3, ['llllllll', 'liiiiiil', 'liiWWiil', 'liWWWWKl', 'lfWfWfll', 'lfffffll', 'llllllll'])], ['handprints', 'small handprints hands child marks', (c) => { for (const [x, y] of [[3, 8], [9, 5]]) c.stamp(x, y, ['a.a.a', 'a.a.a', 'aaaa.', '.aaaa', '.aaa.']); }], ['scribble', 'crayon scribble drawing child scrawl', (c) => c.stamp(3, 5, ['..Z..Z....', '.Z.ZZ.Z...', '.Z....Z.hh', '..ZZZZ.h.h', '..Z..Z.hhh', '.Z....Z...', '....K.K...', '...K.K.K..'])]],
+  floor: (c) => oldBoards(c, 'bone'),
+  variants: ['worn', 'rug', 'dark', ['blocks', 'toy blocks scattered', (c) => { ostamp(c, 3, 4, ['aa', 'ab']); ostamp(c, 9, 9, ['hh', 'hi']); ostamp(c, 11, 3, ['ee', 'ef']); }]],
+});
+roomSet('bathroom', 'bathroom white tiles', {
+  top: ['g4', 'k', 'g3'], fr: ['g3', 'g2', 'g1'], door: ['h1', 'h2', 'h3'], stainc: 'v2', crackc: 'g4', wornc: 'g2',
+  wall: (c) => { each((x, y) => c.px(x, y, x % 4 === 3 || y % 4 === 3 ? 'g2' : x % 4 === 0 && y % 4 === 0 ? 'w0' : 'g1')); c.px(5, 6, 'u3').px(13, 2, 'u3').px(10, 13, 'u3'); },
+  details: ['window', 'door', 'mirror', 'mirror-cracked', 'stain', 'pipe', ['towel', 'towel rail hanging towel', (c) => ostamp(c, 3, 4, ['xxxxxxxxxx', '..iiiiii..', '..iiiiii..', '..iWWWWi..', '..iiiiii..', '..iiiiii..', '..hhhhhh..'])], ['cabinet', 'medicine cabinet mirror cupboard', (c) => ostamp(c, 3, 3, ['wwwwwwwwww', 'wiiiiXiiiw', 'wiWiiXiiiw', 'wiiWiXiiix', 'wiiiiXiWix', 'wiiiixxiix', 'wxxxxxxxxx'])]],
+  floor: (c) => each((x, y) => c.px(x, y, ((x >> 1) + (y >> 1)) % 2 ? 'u3' : 'g3')),
+  variants: ['drain', 'stained', 'bloody', 'puddle', 'cracked'],
+});
+const BOOKC = ['q1', 'u2', 'v1', 'h1', 'z1', 't2', 'u1', 'v2', 'g3', 'j2', 't1', 'q2'];
+const books = (c, gaps) => {
+  c.fill('k');
+  for (let s = 0; s < 3; s++) {
+    const y = s * 5 + (s === 2 ? 0 : 0), hgt = s === 2 ? 5 : 4;
+    for (let x = 1; x < 16; x++) { const k = (x * 7 + s * 5 + (x >> 2)) % BOOKC.length, h = hgt - ((x * 3 + s) % 5 === 0 ? 1 : 0); c.v(x, y + hgt - h, h, BOOKC[k]); if ((x + s * 2) % 5 === 1) c.px(x, y + hgt - 2, 'h3'); if ((x + s) % 7 === 3) c.px(x, y + hgt - h, 'h2'); }
+    c.h(0, y + hgt, 16, 't2');
+  }
+  c.v(0, 0, 16, 't1').h(0, 15, 16, 'i1');
+};
+roomSet('library', 'library walls of books bookshelf', {
+  top: ['k', 'i1'], fr: ['k', 'i1', 't1'], door: ['k', 'i1', 't1'], wornc: 't3',
+  wall: (c) => books(c),
+  details: ['window-night', 'door', 'lamp',
+    ['gap', 'missing books gap leaning book', (c) => { c.rect(5, 5, 6, 4, 'k').rect(9, 6, 1, 3, 'q1').px(8, 8, 'q1').px(8, 7, 'q1').px(7, 8, 'q1').px(5, 8, 'h2').px(6, 8, 'h2'); }],
+    ['skull', 'skull on shelf books', (c) => { c.rect(4, 5, 8, 4, 'k'); c.stamp(6, 5, ['.ll.', 'llll', 'KlKl', '.ll.']); }],
+    ['ladder', 'library ladder leaning', (c) => { for (let y = 0; y < 16; y++) { const x = 4 + (y >> 2); c.px(x, y, 't3').px(x + 5, y, 't3').px(x - 1, y, 'k').px(x + 6, y, 'k'); if (y % 3 === 1) c.h(x + 1, y, 4, 't2'); } }],
+    ['secret', 'secret bookcase door ajar passage', (c) => { c.rect(10, 0, 6, 16, 'k').v(10, 0, 16, 't2').v(11, 0, 16, 't1').px(13, 5, 'g4').px(14, 10, 'g4').px(13, 12, 'g4'); }]],
+  floor: (c) => oldBoards(c, 'oak'),
+  variants: ['rug', 'dark', 'dusty', ['books', 'fallen books scattered pile', (c) => { ostamp(c, 2, 4, ['aaaa', 'alla', 'aaaa']); ostamp(c, 8, 8, ['.hhhh', 'hhhhl', 'dddd.', 'ddddl']); ostamp(c, 10, 2, ['ll.ll', 'lXKXl', 'll.ll']); }]],
+});
+roomSet('study', 'dark green study room', {
+  top: ['k', 'i1'], fr: ['k', 'i1', 't1'], stainc: 'g4', crackc: 'k', rug: ['z1', 'r1', 'j2'], wornc: 't3',
+  wall: (c) => { c.fill('v1'); each((x, y) => { if (x % 8 === 3) c.px(x, y, 'g4'); if (x % 8 === 7 && y % 4 === 1) c.px(x, y, 'j2'); }); },
+  details: ['window', 'door', 'portrait', 'picture', 'clock', 'lamp',
+    ['map', 'old map chart pinned', (c) => ostamp(c, 2, 3, ['llllllllllll', 'lkkllllkkkll', 'lkkklllkkkkl', 'llkklllllkkl', 'llkllZllkkll', 'lllllllkklll', 'llllllllllll'])],
+    ['safe', 'wall safe hidden strongbox', (c) => ostamp(c, 4, 4, ['XXXXXXXX', 'XxxxxxxV', 'XxxKKxxV', 'XxKwwKnV', 'XxxKKxxV', 'XxxxxxxV', 'XVVVVVVV'])]],
+  floor: (c) => each((x, y) => { const d = (x + y) % 8, e = (x - y + 16) % 8, q = (x >> 2) % 2; c.px(x, y, (q ? d : e) === 0 ? 'i1' : x % 4 === 0 ? 'i1' : (q ? d : e) < 4 ? 't1' : 't2'); }),
+  variants: ['rug', 'dark', 'worn', ['papers', 'scattered papers pages', (c) => { ostamp(c, 2, 3, ['.lll', 'lXXl', 'llll', 'lXl.']); ostamp(c, 9, 8, ['lll.', 'lXll', 'lXXl', '.lll']); ostamp(c, 9, 2, ['ll', 'lX', 'll']); }]],
+});
+roomSet('scullery', 'old kitchen scullery cream tiles', {
+  top: ['g4', 'k', 'g3'], fr: ['h1', 'h2', 'h3'], door: ['v1', 'v2', 'v3'], stainc: 'h1', crackc: 'g4', wornc: 'h3',
+  wall: (c) => { each((x, y) => c.px(x, y, y % 8 === 7 ? 'h1' : (x + (y >> 3) * 4) % 8 === 7 ? 'h1' : y % 8 === 0 ? 'h3' : 'h2')); c.px(3, 4, 'h1').px(12, 11, 'h1').px(9, 3, 'h3'); },
+  details: ['window', 'door', 'clock', 'stain', 'crack',
+    ['pots', 'hanging pots pans rail', (c) => ostamp(c, 1, 2, ['XXXXXXXXXXXXXX', '.x....x.....x.', '.x....x.....x.', 'VVV..DDDD..xxx', 'VVV.DDFDDD.xxx', 'VVV.DDDDDD.xxx', '.V...DDDD...x.'])],
+    ['shelf', 'shelf jars preserves tins', (c) => ostamp(c, 2, 3, ['.ll..kk..ll.', '.Zo.dddd.no.', '.Zo.deed.no.', '.Zo.dddd.no.', 'TTTTTTTTTTTT', '.C........C.'])],
+    ['knives', 'knife rack knives cleaver', (c) => ostamp(c, 2, 4, ['CCCCCCCCCCCC', '.m..m..m.mm.', '.w..w..w.ww.', '.w..w..w.ww.', '.w..w....ww.', '.w.......w..'])]],
+  floor: (c) => each((x, y) => c.px(x, y, x % 8 === 7 || y % 8 === 7 ? 'g4' : ((x >> 3) + (y >> 3)) % 2 ? 'd2' : 't1')),
+  variants: ['worn', 'stained', 'bloody', 'drain'],
+});
+
+category('rooms2', 'Rooms: attic, cellar & yard', 'tile');
+roomSet('attic', 'attic bare boards rafters', {
+  top: ['k', 'i1'], fr: ['k', 'i1', 't1'], stainc: 'k', crackc: 'y3', dustc: 'h1', wornc: 't3',
+  wall: (c) => { each((x, y) => c.px(x, y, x % 4 === 3 ? 'k' : (x * 7 + y * 3) % 11 === 0 ? 't1' : 'i1')); c.rect(0, 0, 16, 3, 't1').h(0, 0, 16, 't2').h(0, 3, 16, 'k'); for (let x = 2; x < 16; x += 8) c.px(x, 1, 'k'); },
+  details: ['window-round', 'cobweb', 'hooks', 'stain',
+    ['bulb', 'bare light bulb hanging wire', (c) => { c.v(7, 0, 6, 'k'); c.px(5, 6, 'j2').px(10, 8, 'j2').px(5, 10, 'j2').px(8, 11, 'j2'); ostamp(c, 7, 6, ['xx', 'EE', 'EY', 'EE']); }],
+    ['gap', 'gap in boards light shining through', (c) => { c.v(7, 4, 12, 'y3').v(6, 7, 5, 'j2').px(8, 9, 'j2').px(8, 10, 'j2'); }],
+    ['brace', 'rafter beam diagonal brace', (c) => { for (let i = 0; i < 16; i++) c.px(i, 15 - i, 't2').px(i, 16 - i, 't1').px(i, 17 - i, 't1').px(i, 18 - i, 'k'); }]],
+  floor: (c) => { oldBoards(c, 'ochre'); dim(c); for (let y = 1; y < 16; y += 4) c.px((y * 5) % 16, y, 'k').px((y * 5 + 9) % 16, y + 1, 'k'); },
+  variants: ['dusty', 'hatch', 'dark', ['hole', 'hole broken boards', (c) => { blob(c, 8, 8, 3, 'k', 3); c.px(4, 7, 't3').px(12, 9, 't3').px(8, 4, 't3').px(7, 12, 't3'); }]],
+});
+roomSet('cabin', 'log cabin walls plank floor', {
+  top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 'd2'], stainc: 'i1', crackc: 'k', rug: ['t1', 'h1', 'h3'], wornc: 't3',
+  wall: (c) => { each((x, y) => c.px(x, y, ['d2', 't2', 't1', 'i1'][y % 4])); for (let y = 0; y < 16; y += 4) { const x = (y * 5 + 3) % 16; c.px(x, y + 1, 't1').px((x + 1) & 15, y + 1, 't1').px((x + 7) & 15, y + 2, 'i1').px((x + 11) & 15, y, 't2'); } },
+  details: ['window', 'window-night', 'door', 'hooks', 'shelf',
+    ['antlers', 'antlers mounted skull trophy', (c) => ostamp(c, 3, 3, ['l..l..l..l', 'l.ll..ll.l', '.ll....ll.', '..llllll..', '...lKKl...', '...llll...', '....ll....'])],
+    ['lantern', 'oil lantern hanging lamp', (c) => { c.px(4, 6, 'j2').px(11, 6, 'j2').px(5, 10, 'j2').px(10, 10, 'j2'); ostamp(c, 6, 2, ['.XX.', '.X..', 'XXXX', 'XEEX', 'XYEX', 'XEEX', 'XXXX']); }],
+    ['rifle', 'rifle gun rack hunting', (c) => ostamp(c, 1, 5, ['.X...........X', 'XXXXXXXXXXTTTT', '.X......X.TTTC', '.X...........X'])]],
+  floor: (c) => turned('t', (c2) => oldBoards(c2, 'brown'))(c, 'cabin-floor'),
+  variants: ['worn', 'rug', 'hatch', 'bloody'],
+});
+roomSet('basement', 'basement concrete damp', {
+  top: ['k', 'g4'], fr: ['k', 'g4', 'g3'], door: ['g4', 'g3', 'g2'], stainc: 'g4', crackc: 'k', wornc: 'g3',
+  wall: (c) => { c.fill('g3').speck(16, 'g4').speck(6, 'g2'); for (let x = 0; x < 16; x += 2) c.px(x, 7, 'g4').px(x + 1, 15, 'g4'); c.px(3, 3, 'k').px(11, 11, 'k').px(11, 3, 'k').px(3, 11, 'k'); },
+  details: ['pipe', 'stain', 'crack', 'vent', 'fusebox', 'door', 'window-bars',
+    ['mould', 'black mould damp patch', (c) => { blob(c, 5, 11, 3, 'v1', 5); c.speck(8, 'k', 2, 8, 8, 7).speck(5, 'v2', 2, 8, 8, 7); }]],
+  floor: (c) => { c.fill('g4').speck(18, 'g3').speck(8, 'k'); c.px(4, 5, 'u1').px(5, 5, 'u1').px(11, 12, 'u1'); },
+  variants: ['puddle', 'drain', 'cracked', 'bloody', 'stained'],
+});
+roomSet('cellar', 'cellar brick walls dirt floor', {
+  top: ['k', 'i1'], fr: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', wornc: 't2',
+  wall: (c) => { each((x, y) => { const off = (y >> 2) % 2 ? 4 : 0, bx = (x + off) % 8; c.px(x, y, y % 4 === 3 || bx === 7 ? 'i1' : y % 4 === 0 ? 'r1' : ((x + off) >> 3) % 2 === (y >> 2) % 3 ? 'r1' : 'z1'); }); c.speck(6, 't1'); },
+  details: ['crack', 'stain', 'pipe', 'candle', 'door', 'cobweb',
+    ['arch', 'bricked up arch doorway sealed', (c) => { c.rect(3, 3, 10, 13, 'k').rect(4, 4, 8, 12, 'g3'); for (let y = 4; y < 16; y++) for (let x = 4; x < 12; x++) if (y % 3 === 0 || (x + (y / 3 | 0) * 2) % 4 === 0) c.px(x, y, 'g4'); c.px(3, 3, 'r1').px(12, 3, 'r1'); }],
+    ['chains', 'chains shackles manacles hanging', (c) => { for (const x of [4, 11]) { ostamp(c, x, 1, ['X', 'x', 'X', 'x', 'X', 'x', 'X']); ostamp(c, x - 1, 9, ['xxx', 'x.x', 'xxx']); } }]],
+  floor: (c) => { c.fill('t1').speck(20, 'i1').speck(10, 't2').speck(3, 'g3'); },
+  variants: ['puddle', 'dark', 'hatch', ['mound', 'disturbed earth mound dug', (c) => { blob(c, 8, 8, 4, 't2', 3); c.speck(10, 't1', 4, 5, 8, 7).speck(5, 't3', 5, 5, 6, 4); }], ['bones', 'bones in the dirt', (c) => { c.stamp(3, 5, ['l.....l', '.lllll.', 'l.....l']).stamp(8, 10, ['.ll.', 'lKlK', '.ll.']); }]],
+});
+roomSet('barn', 'barn rough planks straw', {
+  top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 'd2'], stainc: 'i1', crackc: 'y3',
+  wall: (c) => { const w = [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0]; each((x, y) => c.px(x, y, x === 3 || x === 7 || x === 10 || x === 13 ? 'k' : w[x] ? 't1' : 't2')); for (const [x, y] of [[1, 4], [5, 11], [9, 2], [14, 8], [11, 13]]) c.px(x, y, 'i1').px(x, y + 1, 'i1'); c.px(0, 9, 't3').px(8, 6, 't3').px(15, 2, 't3'); },
+  details: ['window', 'door', 'cobweb',
+    ['tools', 'tools hanging scythe pitchfork', (c) => { ostamp(c, 2, 2, ['.xxxx', 'x...T', '....T', '....T', '....T', '....T', '....T', '....T', '....T', '....T', '....T']); ostamp(c, 9, 2, ['x.x.x', 'x.x.x', 'xxxxx', '..T..', '..T..', '..T..', '..T..', '..T..', '..T..', '..T..', '..T..']); }],
+    ['lantern', 'oil lantern hanging lamp', (c) => { c.px(4, 6, 'j2').px(11, 6, 'j2').px(5, 10, 'j2').px(10, 10, 'j2'); ostamp(c, 6, 2, ['.XX.', '.X..', 'XXXX', 'XEEX', 'XYEX', 'XEEX', 'XXXX']); }],
+    ['harness', 'horse harness collar tack', (c) => ostamp(c, 4, 2, ['..x.....', '.CCCCCC.', 'CC....CC', 'C......C', 'C......C', 'CC....CC', '.CCCCCC.', '..C..C..', '..C..C..', '..x..x..'])],
+    ['gap', 'gap in planks light through', (c) => { c.v(7, 2, 12, 'y3').px(6, 6, 'j2').px(8, 9, 'j2').v(10, 9, 5, 'j2'); }]],
+  floor: (c) => { c.fill('t1'); for (let i = 0; i < 26; i++) { const x = c.int(16), y = c.int(16), d = c.int(2) ? 1 : -1, col = i % 3 ? 'j2' : 'h2'; c.px(x, y, col).px((x + 1) & 15, (y + d) & 15, col).px((x + 2) & 15, (y + d) & 15, col); } c.speck(8, 'i1'); },
+  variants: ['dark', 'bloody', 'hatch', ['bare', 'bare earth less straw', (c) => { blob(c, 8, 8, 5, 't1', 4); c.speck(8, 'i1', 3, 3, 10, 10); }]],
+});
+roomSet('greenhouse', 'greenhouse glass panes stone path', {
+  top: ['g4', 'k', 'g3'], fr: ['g3', 'h2', 'h3'], door: ['g3', 'h2', 'h3'], stainc: 'v1', crackc: 'w0',
+  wall: (c) => { c.fill('c1'); each((x, y) => { if ((x + y) % 8 === 2 && x % 8 > 1 && x % 8 < 6) c.px(x, y, 'u2'); }); blob(c, 12, 12, 2, 'v1', 3); blob(c, 3, 13, 1, 'v1', 2); c.px(12, 10, 'v2').px(4, 12, 'v2'); each((x, y) => { if (x % 8 === 0 || y % 8 === 0) c.px(x, y, 'h2'); else if (x % 8 === 1 || y % 8 === 1) c.px(x, y, 'g4'); }); },
+  details: ['door', 'hooks',
+    ['broken', 'broken pane smashed glass', (c) => { c.stamp(2, 2, ['..K...', '.KKK.w', 'KKKKK.', '.KKKK.', '..K.K.', 'w.....']); c.px(9, 15, 'u3').px(4, 9, 'k').px(5, 10, 'k'); }],
+    ['vine', 'ivy vine creeping leaves', (c) => { let x = 4; for (let y = 15; y >= 0; y--) { c.px(x, y, 'v1'); if (y % 3 === 0) c.px(x + 1, y, 'v2').px(x + 2, y - 1, 'v2'); if (y % 3 === 1) c.px(x - 1, y, 'v2').px(x - 2, y, 'n1'); x += [1, 0, 1, 0, -1, 1, 0, 1][y % 8]; } }],
+    ['handprint', 'handprint on fogged glass condensation', (c) => { c.rect(2, 2, 6, 6, 'u3').rect(10, 2, 5, 6, 'u3').rect(2, 10, 6, 5, 'u3'); c.stamp(3, 2, ['c.c.c', 'c.c.c', 'c1c1c', '.111c', '.111.']).v(11, 3, 5, 'c1').v(13, 2, 3, 'c1'); }],
+    ['shelf', 'shelf flower pots dead plants', (c) => ostamp(c, 1, 5, ['.d....e...j...', 'd.d..e.e..j...', 'DDD..DDD..DDD.', '.D....D....D..', 'TTTTTTTTTTTTTT', '.C..........C.'])]],
+  floor: (c) => { slabs(c, FLAGS, 'v1', 'g2', 'g1', 'g3'); c.px(7, 5, 'v2').px(5, 11, 'v2').px(9, 12, 'v2'); },
+  variants: ['cracked', 'puddle', 'dark',
+    ['weeds', 'weeds overgrown moss', (c) => { c.speck(14, 'v2').speck(8, 'v1'); c.stamp(4, 6, ['e.e', '.e.', 'ede']).stamp(10, 10, ['.e.', 'ede']); }],
+    ['soil', 'spilled soil broken pot', (c) => { blob(c, 8, 9, 3, 't1', 4); ostamp(c, 4, 4, ['DD.', 'DDD', '.DD']); c.px(9, 8, 'v2').px(10, 7, 'v2'); }]],
+});
+
+category('rooms3', 'Rooms: institutions', 'tile');
+roomSet('hotel', 'hotel corridor wallpaper carpet', {
+  top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 'd2'], stainc: 'z1', crackc: 'k', curt: ['u1', 'u2', 'u3'],
+  wall: (c) => { c.fill('q1'); each((x, y) => { if (x % 8 === 0) c.px(x, y, 'z1'); }); for (const [x, y] of [[4, 2], [12, 6], [4, 10], [12, 14]]) c.px(x, y, 'j2').px(x - 1, (y + 1) & 15, 'j2').px(x + 1, (y + 1) & 15, 'j2').px(x, (y + 2) & 15, 'h1'); },
+  details: ['lamp', 'picture', 'mirror', 'stain', 'window-night',
+    ['door', 'hotel room door number', (c, o) => { WD.door(c, o); c.rect(7, 4, 2, 2, 'j2').px(7, 5, 'k'); }],
+    ['door-ajar', 'hotel room door ajar open dark', (c, o) => { c.rect(2, 0, 12, 16, 'k').v(3, 1, 15, 't2').v(12, 1, 15, 't1').rect(4, 2, 3, 14, 't1').v(4, 2, 14, 't2').px(6, 8, 'j2'); }],
+    ['lift', 'lift elevator doors brass', (c) => { c.rect(2, 1, 12, 15, 'k').rect(3, 2, 5, 14, 'h1').rect(8, 2, 5, 14, 'h1').v(3, 2, 14, 'j2').v(8, 2, 14, 'j2').v(7, 2, 14, 'g4').rect(6, 0, 4, 1, 'j2').px(14, 8, 'j2').px(14, 9, 'k'); for (let y = 4; y < 16; y += 4) c.h(4, y, 3, 'j2').h(9, y, 3, 'j2'); }]],
+  floor: (c) => pat(c, ['oooZZooo', 'ooZppZoo', 'oZpmmpZo', 'ZpmoompZ', 'ZpmoompZ', 'oZpmmpZo', 'ooZppZoo', 'oooZZooo']),
+  variants: ['worn', 'dark', 'bloody', 'stained'],
+  wornc: 'q1',
+});
+roomSet('theatre', 'theatre red curtain stage', {
+  top: ['k', 'z1'], fr: ['k', 'i1', 't1'], door: ['k', 'i1', 't1'], stainc: 'k', crackc: 'k', wornc: 't3',
+  wall: (c) => { each((x, y) => c.px(x, y, ['k', 'z1', 'r1', 'r1', 'q2', 'r1', 'z1', 'z1'][x % 8])); for (let x = 4; x < 16; x += 8) c.px(x, 5, 'r1').px(x, 13, 'r1').px(x - 2, 9, 'z1').px(x + 1, 2, 'z1'); },
+  details: ['poster', 'door',
+    ['gap', 'curtain parted gap backstage dark', (c) => { c.rect(5, 0, 6, 16, 'k'); for (let y = 0; y < 16; y++) { const w = y < 6 ? 0 : y < 11 ? 1 : 2; c.rect(5, y, 2 - Math.min(2, w), 1, 'r1').rect(9 + Math.min(2, w), y, 2 - Math.min(2, w), 1, 'r1'); } c.px(8, 7, 'h3').px(8, 8, 'k'); }],
+    ['masks', 'theatre masks comedy tragedy', (c) => { ostamp(c, 2, 3, ['lllll', 'lKlKl', 'lllll', 'lKKKl', '.lKl.', '.lll.']); ostamp(c, 9, 6, ['kkkkk', 'kKkKk', 'kkkkk', 'kkKkk', '.KkK.', '.kkk.']); }],
+    ['rope', 'ropes sandbag rigging', (c) => { c.v(4, 0, 16, 'h2').v(5, 0, 16, 'h1').v(10, 0, 9, 'h2'); ostamp(c, 9, 9, ['.k.', 'kkk', 'kjk', 'kkk', '.j.']); }],
+    ['tassel', 'gold tassel tie back cord', (c) => { for (let i = 0; i < 6; i++) c.px(3 + i, 4 + (i > 2 ? 5 - i : i), 'j2').px(12 - i, 4 + (i > 2 ? 5 - i : i), 'j2'); ostamp(c, 7, 6, ['nn', 'nn', 'jn', 'nj', 'jn']); }],
+    ['lights', 'dressing room mirror bulbs', (c) => ostamp(c, 2, 2, ['EnEnEnEnEnEn', 'niiiiiiiiiiE', 'EiWiiiiiiiin', 'niiWiiiiiiiE', 'EiiiiiiiWiin', 'niiiiiiiiiiE', 'EnEnEnEnEnEn'])]],
+  floor: (c) => oldBoards(c, 'stage'),
+  variants: ['worn', 'hatch', 'dark', ['mark', 'stage mark cross tape', (c) => { for (let i = 0; i < 5; i++) c.px(6 + i, 6 + i, 'h3').px(10 - i, 6 + i, 'h3'); }], ['spot', 'spotlight pool of light', (c) => { each((x, y) => { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6 && (d < 5 || (x + y) % 2)) { const k = KEY[c.get(x, y)]; c.px(x, y, k === 'd2' ? 't3' : k === 't3' ? 'h3' : k === 't1' ? 't2' : k); } }); }]],
+});
+roomSet('chapel', 'chapel stone walls flagstones', {
+  top: ['k', 'g4'], fr: ['k', 'g4', 'g3'], door: ['k', 'i1', 't1'], stainc: 'g4', crackc: 'k', rug: ['z1', 'r1', 'j2'], wornc: 'g2',
+  wall: (c) => { each((x, y) => { const off = (y >> 2) % 2 ? 4 : 0, bx = (x + off) % 8; c.px(x, y, y % 4 === 3 || bx === 7 ? 'g4' : y % 4 === 0 ? 'g2' : 'g3'); }); c.speck(5, 'g4').px(2, 6, 'v1').px(13, 13, 'v1'); },
+  details: ['cross', 'candle', 'crack',
+    ['window', 'stained glass window arch', (c) => { c.rect(4, 2, 8, 13, 'k').h(5, 1, 6, 'k').rect(5, 3, 6, 11, 'u2').h(6, 2, 4, 'u2'); c.stamp(5, 3, ['aahhaa', 'ahnnha', 'hhnnhh', 'ddhhdd', 'dhaahd', 'hhaahh', 'aahhdd', 'ahddha', 'hhddhh', 'ddhhaa', 'dahhad']); c.v(7, 2, 12, 'k').h(5, 6, 6, 'k').h(5, 10, 6, 'k').px(8, 2, 'k'); }],
+    ['door', 'arched church door iron studs', (c) => { c.rect(3, 2, 10, 14, 'k').h(4, 1, 8, 'k').rect(4, 3, 8, 13, 't1').h(5, 2, 6, 't1').v(7, 2, 14, 'i1').v(4, 3, 13, 't2'); for (let y = 5; y < 16; y += 4) c.h(4, y, 8, 'g4').px(5, y, 'g2').px(10, y, 'g2'); c.px(9, 9, 'j2'); }],
+    ['plaque', 'memorial plaque inscription stone', (c) => ostamp(c, 3, 4, ['wwwwwwwwww', 'wxXXxXXXxX', 'wxxxxxxxxX', 'wxXXXXxXxX', 'wxxxxxxxxX', 'wxXXxXXxxX', 'XXXXXXXXXX'])],
+    ['niche', 'niche alcove statue saint', (c) => { c.rect(4, 3, 8, 12, 'k').h(5, 2, 6, 'k'); c.stamp(6, 5, ['.ww.', '.ww.', 'xwwx', 'xwwx', '.ww.', '.ww.', '.xx.', 'xxxx', 'XXXX']); }]],
+  floor: (c) => slabs(c, FLAGS, 'k', 'g3', 'g2', 'g4'),
+  variants: ['cracked', 'rug', 'bloody', 'dark', ['grave', 'grave slab tomb inscription cross', (c) => { c.rect(2, 1, 12, 14, 'k').rect(3, 2, 10, 12, 'g2').h(3, 2, 10, 'g1').v(12, 3, 11, 'g3'); c.stamp(6, 4, ['.X.', 'XXX', '.X.', '.X.']).h(5, 10, 6, 'g3').h(6, 12, 4, 'g3'); }]],
+});
+roomSet('lab', 'laboratory metal walls grated floor', {
+  top: ['k', 'g4'], fr: ['k', 'g4', 'g2'], door: ['g4', 'g3', 'g2'], stainc: 't2', crackc: 'k',
+  wall: (c) => { each((x, y) => c.px(x, y, x % 8 === 0 || y % 8 === 0 ? 'g4' : x % 8 === 1 || y % 8 === 1 ? 'g2' : 'g3')); for (const [x, y] of [[2, 2], [6, 2], [2, 6], [6, 6]]) c.px(x, y, 'g1').px(x + 8, y, 'g1').px(x, y + 8, 'g1').px(x + 8, y + 8, 'g1'); },
+  details: ['vent', 'pipe', 'stain', 'window-bars',
+    ['door', 'iron door porthole bulkhead', (c) => { c.rect(2, 0, 12, 16, 'k').rect(3, 1, 10, 15, 'g3').v(3, 1, 15, 'g2').v(12, 1, 15, 'g4').rect(6, 3, 4, 4, 'k').rect(7, 4, 2, 2, 'c1').px(7, 4, 'c2'); for (const y of [2, 8, 14]) c.px(4, y, 'g1').px(11, y, 'g1'); c.rect(9, 9, 2, 3, 'g1').px(10, 11, 'k').h(4, 12, 4, 'j2').h(4, 13, 4, 'k'); }],
+    ['screen', 'monitor screen green readout', (c) => ostamp(c, 3, 3, ['XXXXXXXXXX', 'XKKKKKKKKV', 'XK2K22K2KV', 'XKKKKKKKKV', 'XK222K22KV', 'XKKKK2KKKV', 'XK2KKKKKKV', 'XVVVVVVVVV', '.X.Z.n.xX.'])],
+    ['gauges', 'gauges dials pressure meters', (c) => { for (const [x, y, n] of [[2, 3, 'Z'], [9, 3, 'K'], [5, 9, 'K']]) ostamp(c, x, y, ['.xx.', 'xllx', 'xl' + n + 'x', '.xx.']); c.h(6, 5, 3, 'g4').v(7, 7, 2, 'g4'); }],
+    ['lever', 'big lever switch power', (c) => { ostamp(c, 5, 3, ['XXXXXX', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XKKKKV', 'XVVVVV']); ostamp(c, 7, 2, ['ZZ', 'ZZ', 'xx', 'xx', 'xx']); c.px(6, 12, 'n2').px(9, 12, 'r1'); }]],
+  floor: (c) => each((x, y) => c.px(x, y, x % 4 < 2 && y % 4 < 2 ? 'k' : y % 4 === 2 || x % 4 === 2 ? 'g3' : 'g4')),
+  variants: ['dark', 'bloody', 'hatch',
+    ['plate', 'metal floor plate rivets', (c) => { c.rect(0, 0, 16, 16, 'g3').h(0, 0, 16, 'g2').v(0, 0, 16, 'g2').h(0, 15, 16, 'g4').v(15, 0, 16, 'g4'); for (const [x, y] of [[2, 2], [13, 2], [2, 13], [13, 13]]) c.px(x, y, 'g1').px(x, y + 1, 'g4'); for (let i = 4; i < 12; i += 2) c.px(i, i, 'g2').px(i + 1, i, 'g4').px(15 - i, i, 'g2'); }],
+    ['spill', 'chemical spill green slime', (c) => { blob(c, 8, 8, 3, 'n1', 4); c.px(7, 7, 'n2').px(8, 7, 'n2').px(9, 9, 'n3').px(12, 12, 'n1'); }]],
+});
+roomSet('asylum', 'asylum padded cell walls checker floor', {
+  top: ['g4', 'k', 'g3'], fr: ['g4', 'g3', 'g2'], door: ['g4', 'g3', 'g2'], stainc: 'h1', crackc: 'g4',
+  wall: (c) => each((x, y) => { const s = Math.abs((x % 8) - 3.5) + Math.abs((y % 8) - 3.5); c.px(x, y, s > 3.4 ? 'h1' : s < 1.6 ? 'h3' : 'h2'); }),
+  details: ['window-bars', 'stain', 'vent',
+    ['door', 'cell door hatch steel', (c) => { c.rect(2, 0, 12, 16, 'k').rect(3, 1, 10, 15, 'g3').v(3, 1, 15, 'g2').v(12, 1, 15, 'g4').rect(5, 3, 6, 3, 'k').v(7, 3, 3, 'g2').v(9, 3, 3, 'g2').rect(5, 11, 6, 2, 'g4').h(5, 11, 6, 'g2').px(11, 8, 'g1').px(11, 9, 'k'); for (const y of [2, 14]) c.px(4, y, 'g1').px(11, y, 'g1'); }],
+    ['tally', 'tally marks scratched counting days', (c) => { const g = ['V.V.V.V', 'V.V.VVV', 'V.VVV.V', 'VVV.V.V']; c.stamp(1, 2, g).stamp(8, 2, g).stamp(1, 9, g).v(9, 9, 4, 'g4').v(11, 9, 4, 'g4'); }],
+    ['torn', 'torn padding ripped stuffing', (c) => { c.stamp(4, 3, ['..K....', '.KKK...', '.KwKK..', 'KKwwK..', '.KKwKK.', '..KKwK.', '...KKK.', '....K..']); c.px(7, 12, 'g1').px(8, 13, 'g1').px(6, 14, 'w0'); }],
+    ['writing', 'writing on wall scrawled blood words', (c) => c.stamp(1, 4, ['o.o.ooo.o..oo.', 'o.o.o...o..o.o', 'ooo.oo..o..oo.', 'o.o.o...o..o..', 'o.o.ooo.oo.o..', '..............', '...o.o.ooo....', '...ooo.o......', '...o.o.ooo....'])],
+    ['restraint', 'wall restraint straps ring', (c) => { ostamp(c, 6, 2, ['.xx.', 'x..x', 'x..x', '.xx.']); c.v(7, 6, 6, 't1').v(8, 6, 6, 't2'); ostamp(c, 6, 11, ['TTTT', 'TxxT', 'TTTT']); }]],
+  floor: (c) => each((x, y) => c.px(x, y, ((x >> 2) + (y >> 2)) % 2 ? 'g4' : (x % 4 === 0 || y % 4 === 0) ? 'h3' : 'h2')),
+  variants: ['bloody', 'stained', 'drain', 'cracked', 'dark'],
+});
+roomSet('morgue', 'morgue steel walls pale tiles', {
+  top: ['k', 'g4'], fr: ['g4', 'g3', 'g2'], door: ['g4', 'g3', 'g2'], stainc: 'h1', crackc: 'g4',
+  wall: (c) => { each((x, y) => c.px(x, y, x % 8 === 0 ? 'g3' : x % 8 === 1 ? 'g1' : (y * 5 + x * 3) % 7 === 0 ? 'g2' : 'u3')); c.h(0, 0, 16, 'g3'); for (let x = 0; x < 16; x += 8) c.px(x + 1, 0, 'g2').px(x + 4, 1, 'g1'); },
+  details: ['vent', 'clock', 'switch', 'stain', 'door',
+    ['drawers', 'body drawers cold chamber lockers', (c) => { c.rect(1, 1, 14, 14, 'k'); for (const [x, y] of [[2, 2], [8, 2], [2, 8], [8, 8]]) c.rect(x, y, 6, 6, 'g2').rect(x, y, 5, 5, 'g1').rect(x + 1, y + 1, 4, 4, 'u3').h(x + 2, y + 3, 2, 'g4').px(x + 1, y + 1, 'h3'); }],
+    ['drawer-open', 'body drawer open feet toe tag corpse', (c) => { c.rect(1, 1, 14, 14, 'k'); for (const [x, y] of [[2, 2], [8, 2], [8, 8]]) c.rect(x, y, 6, 6, 'g2').rect(x, y, 5, 5, 'g1').rect(x + 1, y + 1, 4, 4, 'u3').h(x + 2, y + 3, 2, 'g4'); c.rect(2, 8, 6, 6, 'k').rect(2, 12, 6, 2, 'g2').h(2, 12, 6, 'g1'); c.stamp(3, 9, ['ll.ll', 'll.ll', 'll.ll']).px(7, 10, 'h2').px(7, 11, 'j2'); }],
+    ['hose', 'hose reel tap wash down', (c) => { ostamp(c, 4, 3, ['.xxxxx.', 'xdddddx', 'xdxxxdx', 'xdxKxdx', 'xdxxxdx', 'xdddddx', '.xxxxx.']); c.v(10, 10, 5, 'v1').px(11, 14, 'v1').px(12, 14, 'j2'); }]],
+  floor: (c) => { each((x, y) => c.px(x, y, x % 8 === 7 || y % 8 === 7 ? 'g2' : x % 8 === 0 || y % 8 === 0 ? 'h3' : 'v3')); c.px(4, 5, 'h3').px(12, 11, 'g1'); },
+  variants: ['drain', 'bloody', 'puddle', 'cracked', ['trail', 'blood trail drag marks smear', (c) => { for (let y = 0; y < 16; y++) { const x = 6 + [0, 0, 1, 1, 0, 0, -1, 0][y % 8]; c.px(x, y, 'z1').px(x + 3, y, y % 3 ? 'z1' : 'r1'); if (y % 4 === 1) c.px(x + 1, y, 'z1'); if (y % 5 === 2) c.px(x + 2, y, 'r1'); } }]],
+});
+roomSet('school', 'school classroom green walls linoleum', {
+  top: ['g4', 'k', 'g3'], fr: ['i1', 't1', 't2'], door: ['i1', 't1', 't2'], stainc: 'g4', crackc: 'g4', wornc: 'h3',
+  wall: (c) => { c.fill('v1').speck(10, 'g4').speck(4, 'v2'); c.h(0, 3, 16, 'v2').h(0, 4, 16, 'g4'); },
+  details: ['window', 'door', 'clock', 'poster', 'hooks', 'switch',
+    ['blackboard', 'blackboard chalk writing', (c) => { c.rect(0, 3, 16, 10, 'k').rect(1, 4, 14, 7, 'g4').h(0, 11, 16, 't2').h(0, 12, 16, 't1'); c.stamp(2, 5, ['w.ww.w.w..ww', '............', 'ww.w.www.w..', '............', '.w.ww..w....']).px(12, 10, 'w0').px(13, 10, 'w0').px(3, 10, 'q3'); }],
+    ['map', 'wall map chart roller', (c) => ostamp(c, 2, 2, ['TTTTTTTTTTTT', 'liiiiiiiiiil', 'liieeiiieeil', 'lieeeiieeeel', 'liieiiiieeil', 'liiieiiieiil', 'liiiiiiiiiil', 'llllllllllll', '.....K......'])],
+    ['lockers', 'lockers metal row', (c) => { c.rect(0, 1, 16, 15, 'k'); for (let x = 1; x < 16; x += 5) { c.rect(x, 2, 4, 13, 'u2').v(x, 2, 13, 'u3').h(x + 1, 4, 2, 'k').h(x + 1, 5, 2, 'k').px(x + 3, 9, 'g1'); } c.rect(6, 6, 4, 9, 'k').v(6, 6, 9, 'u1'); }]],
+  floor: (c) => { each((x, y) => c.px(x, y, ((x >> 3) + (y >> 3)) % 2 ? 'h1' : 'h2')); c.speck(10, 'g3').speck(6, 'h3'); },
+  variants: ['worn', 'stained', 'dark', 'cracked', ['chalk', 'chalk outline hopscotch marks', (c) => { c.h(3, 2, 10, 'h3').h(3, 13, 10, 'h3').v(3, 2, 12, 'h3').v(12, 2, 12, 'h3').h(3, 7, 10, 'h3').v(8, 2, 5, 'h3'); }]],
+});
+roomSet('shop', 'old shop shelves goods wooden floor', {
+  top: ['i1', 'k', 't1'], fr: ['i1', 't1', 't2'], door: ['v1', 'v2', 'v3'], stainc: 'i1', crackc: 'k', wornc: 't3',
+  wall: (c) => { pat(c, ['mlllmmjjjjmmhhmm', 'mZoomXxxxXmhhhhm', 'mZoomXxxxXmhiihm', 'mZoomXxxxXmhhhhm', 'TTTTTTTTTTTTTTTT', 'mmmmmmmmmmmmmmmm', 'mmkkkkmmddmddmmm', 'mmknnkmmdemdemmm', 'mmkkkkmmdemdemmm', 'TTTTTTTTTTTTTTTT', 'mmmmmmmmmmmmmmmm', 'mmmjjmmmaaammmmm', 'mxmjjmxmabamllml', 'mxmjjmxmaaamlkml', 'mxmjjmxmaaamllml', 'CCCCCCCCCCCCCCCC']); },
+  details: ['door', 'clock', 'poster',
+    ['empty', 'empty shelves bare dusty', (c) => { for (const [y, h] of [[0, 4], [5, 4], [10, 5]]) c.rect(0, y, 16, h, 'i1'); c.px(3, 3, 'h1').px(4, 3, 'h1').px(11, 8, 'h1').stamp(8, 12, ['.kk.', 'kkkk', 'kkkk']).px(2, 14, 'g3'); }],
+    ['window', 'shop window display blind', (c) => { c.rect(1, 1, 14, 14, 'k').rect(2, 2, 12, 12, 'u1').rect(2, 2, 12, 4, 'h2').h(2, 5, 12, 'h1').px(8, 6, 'h1').px(8, 7, 'h2').stamp(3, 9, ['.l...kk...', 'lll.kkkk.Z', 'lKl.kkkk.Z']).h(2, 12, 12, 't1').h(2, 13, 12, 't2').v(13, 2, 10, 'u2'); }],
+    ['drawers', 'apothecary drawers small labelled', (c) => { c.rect(0, 0, 16, 16, 'i1'); for (let y = 1; y < 15; y += 5) for (let x = 1; x < 15; x += 5) c.rect(x, y, 4, 4, 't1').h(x, y, 4, 't2').h(x + 1, y + 1, 2, 'h3').px(x + 1, y + 2, 'j2').px(x + 2, y + 2, 'j2'); }],
+    ['sign', 'shop sign closed notice board', (c) => { c.px(5, 2, 'g3').px(10, 2, 'g3').px(4, 3, 'g3').px(11, 3, 'g3'); ostamp(c, 3, 4, ['llllllllll', 'lKlKlKKlKl', 'lKlKlKllKl', 'lKKllKKlKl', 'llllllllll']); }]],
+  floor: (c) => oldBoards(c, 'brown'),
+  variants: ['worn', 'dark', 'hatch', 'dusty', ['glass', 'broken glass shards on floor', (c) => { for (const [x, y] of [[3, 4], [7, 9], [11, 5], [5, 12], [12, 12]]) c.px(x, y, 'u3').px(x + 1, y, 'w0').px(x, y + 1, 'u2'); c.px(9, 3, 'w0').px(2, 9, 'u3'); }]],
+});
+
+
+category('floors', 'Floors & carpets', 'tile');
+function carpetEdges(prefix, words, r, trim) { for (const f of EDGES) T(`${prefix}-${EDGE_SLUG[f]}`, `${words} carpet rug ${EDGE_NAME[f]}`, 'floor', (c) => carpet(c, f, r, trim)); }
+carpetEdges('carpet-green', 'green', 'green', 'y2');
+carpetEdges('carpet-purple', 'purple royal', 'purple', 'y2');
+carpetSet('carpet-brown', 'brown old', 'oak', 'h2');
+carpetSet('carpet-grey', 'grey gray dark', 'dark', 'g1');
+carpetSet('carpet-maroon', 'maroon dark red wine', 'wine', 'j2');
+carpetSet('carpet-navy', 'navy dark blue', 'dusk', 'h3');
+carpetSet('carpet-moss', 'moss dull green', 'moss', 'h2');
+T('carpet-threadbare', 'threadbare worn out carpet holes', 'floor', (c) => { carpet(c, '', 'wine', 'j2'); blob(c, 5, 6, 2, 'h1', 3); blob(c, 11, 11, 2, 'h1', 3); each((x, y) => { if (c.get(x, y) === PAL.h1 && (x + y) % 2) c.px(x, y, 'g4'); }); c.px(9, 4, 'h1').px(3, 12, 'h1'); });
+T('floor-herringbone', 'herringbone wooden floor parquet zigzag', 'floor', (c) => each((x, y) => { const d = (x + y) % 8, e = (x - y + 16) % 8, q = (x >> 2) % 2, k = q ? d : e; c.px(x, y, k === 0 || x % 4 === 0 ? 't1' : k < 4 ? 't2' : 'd2'); }));
+T('floor-boards-dark', 'dark floorboards old boards black wood', 'floor', (c) => { oldBoards(c, 'oak'); dim(c); c.px(3, 5, 'g4').px(11, 13, 'g4'); });
+T('floor-boards-wide', 'wide floorboards planks old', 'floor', (c) => { c.fill('t2'); for (let y = 0; y < 16; y += 8) { c.h(0, y, 16, 'd2').h(0, y + 7, 16, 'i1'); const x = y ? 11 : 4; c.v(x, y, 7, 'i1').px(x + 1, y + 1, 'g2').px(x - 1, y + 1, 'g2'); c.h((x + 4) & 15, y + 3, 4, 't1').h((x + 9) & 15, y + 5, 3, 't1').px((x + 6) & 15, y + 2, 't1'); } });
+T('floor-boards-rotten', 'rotten floorboards rot mould holes', 'floor', (c) => { oldBoards(c, 'oak'); blob(c, 4, 5, 1, 'k', 3); blob(c, 11, 10, 2, 'k', 3); c.speck(10, 'v1').speck(5, 'v2').px(6, 4, 'h1').px(7, 4, 'h2').px(13, 8, 'h1').px(2, 13, 'h2').px(3, 13, 'h1'); });
+T('floor-boards-missing', 'floorboards missing plank gap hole joists', 'floor', (c) => { oldBoards(c, 'brown'); c.rect(0, 4, 16, 4, 'k').rect(4, 4, 2, 4, 'i1').rect(12, 4, 2, 4, 'i1').h(0, 8, 16, 't3').px(2, 4, 't2').px(3, 4, 't2').px(9, 7, 't1'); });
+T('floor-boards-bloody', 'bloodstained floorboards blood stain', 'floor', (c) => { oldBoards(c, 'brown'); FV.bloody(c); c.v(7, 11, 4, 'z1').px(8, 13, 'z1'); });
+T('floor-boards-scorched', 'scorched burnt floorboards fire damage ash', 'floor', (c) => { oldBoards(c, 'brown'); blob(c, 8, 8, 4, 'g4', 5); blob(c, 8, 8, 2, 'k', 4); c.speck(6, 'g3', 4, 4, 8, 8).px(6, 6, 'o1').px(10, 9, 'o1').px(9, 11, 'r1'); });
+T('floor-boards-patched', 'patched floorboards new plank nails repair', 'floor', (c) => { oldBoards(c, 'oak'); c.rect(4, 4, 9, 3, 'h1').h(4, 4, 9, 'h2').h(4, 7, 9, 'k').v(3, 4, 3, 'k').v(13, 4, 3, 'k').px(5, 5, 'g4').px(11, 5, 'g4'); });
+T('floor-checker-bw', 'checker floor black white tiles hall', 'floor', (c) => { each((x, y) => c.px(x, y, ((x >> 3) + (y >> 3)) % 2 ? (x % 8 === 0 || y % 8 === 0 ? 'g3' : 'g4') : (x % 8 === 7 || y % 8 === 7 ? 'h2' : 'h3'))); c.px(3, 2, 'h2').px(12, 13, 'h2').px(11, 4, 'k'); });
+T('floor-checker-red', 'checker floor red black tiles', 'floor', (c) => { each((x, y) => c.px(x, y, ((x >> 3) + (y >> 3)) % 2 ? (x % 8 === 0 || y % 8 === 0 ? 'g4' : 'k') : (x % 8 === 0 || y % 8 === 0 ? 'q1' : x % 8 === 7 || y % 8 === 7 ? 'z1' : 'r1'))); });
+T('floor-hex', 'hexagon hex tiles floor honeycomb', 'floor', (c) => each((x, y) => { let d1 = 99, d2 = 99; for (const [cx, cy] of [[4, 2], [0, 6], [8, 6], [4, 10], [12, 2], [12, 10], [0, -2], [8, -2], [16, 6], [-4, 2], [-4, 10], [0, 14], [8, 14], [16, 14], [4, 18], [12, 18], [20, 2], [20, 10], [16, -2]]) { const dx = Math.abs(x + 0.5 - cx), dy = Math.abs(y + 0.5 - cy), d = Math.max(dx, dx * 0.5 + dy * 1.0); if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d; } c.px(x, y, d2 - d1 < 0.8 ? 'g3' : 'h3'); }));
+T('floor-mosaic', 'mosaic floor small tiles pattern', 'floor', (c) => { each((x, y) => { const s = Math.abs((x >> 1) - 3.5) + Math.abs((y >> 1) - 3.5); c.px(x, y, ['q1', 'h3', 'u2', 'h3', 'v1', 'h2', 'u1', 'h2'][Math.floor(s)]); }); each((x, y) => { if ((x * 7 + y * 13) % 23 === 0) c.px(x, y, 'h1'); }); });
+T('floor-lino', 'linoleum lino floor brown marbled', 'floor', (c) => { c.fill('q1').speck(30, 'z1').speck(14, 'q2'); c.v(15, 0, 16, 'z1'); for (let i = 0; i < 16; i++) c.px(i, (i * 3 + (i >> 2)) % 16, 'q2'); });
+T('floor-lino-green', 'linoleum lino floor green hospital', 'floor', (c) => { c.fill('v2').speck(26, 'v1').speck(14, 'v3'); c.h(0, 15, 16, 'v1'); });
+T('floor-concrete', 'concrete floor grey cement', 'floor', (c) => { c.fill('g3').speck(18, 'g2').speck(10, 'g4'); c.h(0, 15, 16, 'g4').v(15, 0, 16, 'g4').px(5, 6, 'g4').px(6, 7, 'g4').px(7, 7, 'g4'); });
+T('floor-dirt-cellar', 'dirt cellar floor earth stones', 'floor', (c) => { c.fill('t1').speck(22, 'i1').speck(8, 't2'); for (const [x, y] of [[3, 4], [11, 2], [8, 10], [13, 13], [2, 12]]) c.px(x, y, 'g3').px(x + 1, y, 'g2').px(x, y + 1, 'g4'); });
+T('floor-flagstones', 'flagstones stone slabs floor brown', 'floor', (c) => { slabs(c, FLAGS, 'i1', 'h1', 'h2', 'g4'); c.speck(6, 'g4'); });
+T('floor-terracotta', 'terracotta tiles floor clay', 'floor', (c) => { each((x, y) => c.px(x, y, x % 8 === 7 || y % 8 === 7 ? 'i1' : x % 8 === 0 || y % 8 === 0 ? 's1' : 'd2')); c.speck(8, 't2').px(4, 11, 'i1').px(5, 12, 'i1'); });
+T('floor-cobbles-dark', 'dark cobbles cobblestone cellar yard', 'floor', (c) => boulders(c, 'k', 'g4', 'g3', 'k'));
+T('floor-tiles-broken', 'broken white tiles missing tile floor', 'floor', (c) => { each((x, y) => c.px(x, y, x % 8 === 7 || y % 8 === 7 ? 'g3' : x % 8 === 0 || y % 8 === 0 ? 'w0' : 'g1')); c.rect(8, 8, 7, 7, 'g4').speck(8, 'g3', 8, 8, 7, 7).px(12, 9, 'g1').px(13, 9, 'g1').px(13, 10, 'g1'); crackLine(c, 3, 0, 8, 'g3'); });
+T('floor-brick', 'brick floor herringbone bricks red dark', 'floor', (c) => each((x, y) => { const q = ((x >> 3) + (y >> 3)) % 2, k = (q ? x : y) % 4, e = (q ? y : x) % 8; c.px(x, y, k === 3 || e === 7 ? 'i1' : k === 0 ? 'r1' : 'z1'); }));
+T('floor-ash', 'ash cinders burnt floor soot', 'floor', (c) => { c.fill('g4').speck(30, 'k').speck(14, 'g3').speck(4, 'g2').px(4, 9, 'o1').px(11, 5, 'r1'); });
+T('floor-sawdust', 'sawdust floor butcher workshop', 'floor', (c) => { oldBoards(c, 'oak'); c.speck(46, 'h2').speck(20, 'h3').speck(10, 'j2'); });
+T('floor-grave-earth', 'freshly dug earth grave soil', 'floor', (c) => { c.fill('i1').speck(26, 't1').speck(10, 'k').speck(5, 't2'); c.stamp(9, 10, ['.l.', 'lll']).px(4, 4, 'g3'); });
+
+
+// ── free-standing props for the old house. props(): "@slug* | search name | options" then the picture; * = solid ──
+function props(src) {
+  let cur = null;
+  const flush = () => { if (cur) PA(cur.slug, cur.name, cur.rows.join('\n'), cur.opts); };
+  for (const line of src.split('\n')) {
+    const l = line.trim();
+    if (!l || l.startsWith('//')) continue;
+    if (l[0] !== '@') { cur.rows.push(l); continue; }
+    flush();
+    const f = l.slice(1).split('|').map((s) => s.trim());
+    const o = optsOf(f[2]);
+    if (o.swap) o.swap = String(o.swap).replace(/,/g, ' ');
+    const solid = f[0].endsWith('*');
+    cur = { slug: solid ? f[0].slice(0, -1) : f[0], name: f[1], rows: [], opts: { ...o, ...(solid ? { solid: true } : {}) } };
+  }
+  flush();
+}
+
+category('doors', 'Doors, windows & stairs', 'thing');
+const DOOR_SHUT = `
+CCCCCCCCCC
+CLTTTTTTTC
+CLTCCCCTTC
+CLTCTTCTTC
+CLTCTTCTTC
+CLTCCCCTTC
+CLTTTTTTnC
+CLTCCCCTTC
+CLTCTTCTTC
+CLTCTTCTTC
+CLTCTTCTTC
+CLTCCCCTTC
+CLTTTTTTTC`;
+const DOOR_AJAR = `
+CCCCCCCCCC
+CLTTTTTCKC
+CLTCCCTCKC
+CLTCTCTCKC
+CLTCTCTCKC
+CLTCCCTCKC
+CLTTTTnCKC
+CLTCCCTCKC
+CLTCTCTCKC
+CLTCTCTCKC
+CLTCTCTCKC
+CLTCCCTCKC
+CLTTTTTCKC`;
+const DOOR_OPEN = `
+CCCCCCCCCC
+CTCKKKKKKC
+CTTCKKKKKC
+CLTCKKKKKC
+CLTCKKKKKC
+CLTCKKKKKC
+CLnCKKKKKC
+CLTCKKKKKC
+CLTCKKKKKC
+CLTCKKKKKC
+CLTCKKKKVC
+CLTCKKKVVC
+CLTCKKVVVC`;
+const DOOR_COLS = [['oak', 'brown wooden', null], ['dark', 'dark wood black', 'Cm TC LT'], ['white', 'white painted pale', 'CX Tl LW'], ['green', 'green painted', 'CV Td Le'], ['red', 'dull red painted', 'Cm To LZ'], ['blue', 'blue painted', 'CV Tg Lh']];
+for (const [id, w, swap] of DOOR_COLS) {
+  PA(`door-${id}`, `${w} door closed shut`, DOOR_SHUT, { solid: true, swap: swap || undefined });
+  PA(`door-${id}-ajar`, `${w} door ajar slightly open gap`, DOOR_AJAR, { solid: true, swap: swap || undefined });
+  if (id === 'oak' || id === 'dark' || id === 'white') PA(`door-${id}-open`, `${w} door open doorway`, DOOR_OPEN, { swap: swap || undefined });
+}
+props(`
+@door-double* | double doors closed hall wooden
+CCCCCCCCCCCCCC
+CLTTTTCCLTTTTC
+CLCCCTCCLCCCTC
+CLCTCTCCLCTCTC
+CLCTCTCCLCTCTC
+CLCCCTCCLCCCTC
+CLTTTnCCnTTTTC
+CLCCCTCCLCCCTC
+CLCTCTCCLCTCTC
+CLCTCTCCLCTCTC
+CLCTCTCCLCTCTC
+CLCCCTCCLCCCTC
+CLTTTTCCLTTTTC
+@door-double-open | double doors open wide doorway
+CCCCCCCCCCCCCC
+CTCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLnKKKKKKKKnTC
+CLCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLCKKKKKKKKCTC
+CLCKKVVVVKKCTC
+CLCKVVVVVVKCTC
+@door-glass* | glass door glazed french door
+CCCCCCCCCC
+CLTTTTTTTC
+CLhhhChhTC
+CLhihChhTC
+CLhhhChhTC
+CLCCCCCCTC
+CLhhhChhTC
+CLhhhChinC
+CLhhhChhTC
+CLTTTTTTTC
+CLTCCCCTTC
+CLTCCCCTTC
+CLTTTTTTTC
+@door-cell* | cell door bars prison jail
+XXXXXXXXXX
+XKxKxKxKxX
+XKxKxKxKxX
+XKxKxKxKxX
+XXXXXXXXXX
+XKxKxKxKxX
+XKxKxKnnxX
+XKxKxKnKxX
+XKxKxKxKxX
+XXXXXXXXXX
+XKxKxKxKxX
+XKxKxKxKxX
+XXXXXXXXXX
+@door-cell-open | cell door open bars prison
+XXXXXXXXXX
+XxXKKKKKKX
+XxXKKKKKKX
+XXXKKKKKKX
+XxXKKKKKKX
+XxXKKKKKKX
+XxnKKKKKKX
+XXXKKKKKKX
+XxXKKKKKKX
+XxXKKKKKKX
+XXXKKKKKVX
+XxXKKKKVVX
+XxXKKKVVVX
+@door-iron-riveted* | iron door rivets heavy metal hatch
+VVVVVVVVVV
+VxXXXXXXXV
+VXwXXXXwXV
+VXXXXXXXXV
+VXXVVVVXXV
+VXXVKKVXXV
+VXXVVVVXXV
+VXwXXXXwXV
+VXXXXXXnXV
+VXXXXXXXXV
+VXwXXXXwXV
+VXXXXXXXXV
+VXXXXXXXXV
+@door-boarded* | boarded up door planks nailed shut
+.CCCCCCCCCC.
+.CLTTTTTTTC.
+LLLLLLLLLLLL
+TwTTTTTTTTwT
+.CLTCTTCTTC.
+.CLTCCCCTTC.
+.LLLLLLLLLLL
+LTwTTTTTTwTT
+.CLTCTTCTTC.
+LLLLLLLLLLL.
+TwTTTTTTTwT.
+.CLTCCCCTTC.
+.CLTTTTTTTC.
+@door-broken* | broken door smashed hole splintered
+CCCCCCCCCC
+CLTTTTTTTC
+CLTCCCCTTC
+CLTCKKCTTC
+CLTKKKKKTC
+CLKKKKKKTC
+CLTKKKKKnC
+CLTCKKKTTC
+CLTCTKCTTC
+CLTCTTCTTC
+CLTCTTCTTC
+CLTCCCCTTC
+CLTTTTTTTC
+@door-chained* | chained door padlock locked chain
+CCCCCCCCCC
+CLTTTTTTTC
+CLTCCCCTTC
+CLTCTTCTTC
+CxTCTTCTxC
+CLxXCCxXTC
+CLTTxXTTnC
+CLTCnnCTTC
+CLTCnKCTTC
+CLTCTTCTTC
+CLTCTTCTTC
+CLTCCCCTTC
+CLTTTTTTTC
+@door-bloody* | door bloody handprint blood smear
+XXXXXXXXXX
+XWllllllllX
+XWlXXXXllX
+XWlXllXllX
+XWoXolXllX
+XWoXooXllX
+XWooooolnX
+XWloooXllX
+XWlXolXllX
+XWlXloXllX
+XWlXllXllX
+XWlXXXXllX
+XWlllollX
+@door-arched* | arched door church oak iron studs
+..CCCCCC..
+.CLTTCTTC.
+CLTTTCTTTC
+CLTTTCTTTC
+CVVVVCVVVC
+CLwTTCTTwC
+CLTTTCTTTC
+CLTTnCTTTC
+CVVVVCVVVC
+CLwTTCTTwC
+CLTTTCTTTC
+CLTTTCTTTC
+CVVVVCVVVC
+@door-nailed-shut* | nursery door pale peeling child height marks
+XXXXXXXXXX
+XWcccccccX
+XWcbbbbccX
+XWcbccbccX
+XWcbccbccX
+XWcbbbbccX
+XWccccccnX
+XWcbbbbccX
+XWcbccbccX
+XWcXcXbccX
+XWcbccbccX
+XWcbbbbccX
+XWcccccccX
+@trapdoor-closed | trapdoor closed hatch in floor ring
+CCCCCCCCCCCC
+CLTLTLTLTLTC
+CTTTTTTTTTTC
+CXXXXXXXXXXC
+CTTTTTTTTTTC
+CTTTTxxTTTTC
+CTTTTxKTTTTC
+CXXXXXXXXXXC
+CTTTTTTTTTTC
+CCCCCCCCCCCC
+@trapdoor-open | trapdoor open hatch hole ladder down
+.CCCCCCCCCC.
+.CTLTLTLTTC.
+.CTTTTTTTTC.
+.CXXXXXXXXC.
+CCCCCCCCCCCC
+CKKKKKKKKKKC
+CKKKLKKLKKKC
+CKKKLLLLKKKC
+CKKKLKKLKKKC
+CKKKLLLLKKKC
+CCCCCCCCCCCC
+@cellar-hatch* | cellar hatch doors storm cellar outside
+XXXXXXXXXXXXXX
+XCCCCCCCCCCCCX
+XCTTTTCCTTTTCX
+XCTLTTCCTTLTCX
+XCTTTTxxTTTTCX
+XCTLTTCCTTLTCX
+XCTTTTCCTTTTCX
+XCCCCCCCCCCCCX
+xxxxxxxxxxxxxx
+@cellar-hatch-open | cellar hatch open steps down dark
+XXXXXXXXXXXXXX
+XCKKKKKKKKKKCX
+CTKKKKKKKKKKTC
+CTKKVVVVVVKKTC
+CTKKKKKKKKKKTC
+CTKXXXXXXXXKTC
+CTKKKKKKKKKKTC
+XCxxxxxxxxxxCX
+xxxxxxxxxxxxxx
+@bookcase-door* | secret bookcase door closed hidden
+CCCCCCCCCCCC
+CaahedZjgheC
+CaahedZjgheC
+CTTTTTTTTTTC
+CgdZjahhedaC
+CgdZjahhedaC
+CTTTTTTTTTTC
+ChZadegjZhdC
+ChZadegjZhdC
+CTTTTTTTTTTC
+CdjhgZaedhZC
+CdjhgZaedhZC
+CTTTTTTTTTTC
+@bookcase-door-open | secret bookcase door open passage
+CCCCCCCCCCCCCC
+CaheCKKKKKKKKC
+CaheCKKKKKKKKC
+CTTTCKKKKKKKKC
+CgdZCKKKKKKKKC
+CgdZCKKKKKKKKC
+CTTTCKKKKKKKKC
+ChZaCKKKKKKKKC
+ChZaCKKKKKKKKC
+CTTTCKKKKKKKKC
+CdjhCKKKKKKVVC
+CdjhCKKKKVVVVC
+CTTTCKKVVVVVVC
+@curtain-doorway | curtain doorway red drapes entrance
+nnnnnnnnnnnn
+CoZZaZoZZaZC
+CoZZaZoZZaZC
+CoZZaZoZZaZC
+CoZZaZoZZaZC
+CoZZaZoZZaZC
+CoZZaKKZZaZC
+CoZZKKKKZaZC
+CoZaKKKKoaZC
+CoZaKKKKoaZC
+CoZKKKKKKaZC
+CoZKKKKKKaZC
+CoKKKKKKKKZC
+@bead-curtain | bead curtain doorway strings
+CCCCCCCCCCCC
+CnKjKnKjKnKC
+CjKnKjKnKjKC
+CnKjKnKjKnKC
+CjKnKjKnKjKC
+CnKjKnKjKnKC
+CjKnKjKnKjKC
+CnKjKnKjKnKC
+CjKnKjKnKjKC
+CnKjKKKjKnKC
+CjKnKKKnKjKC
+CnKKKKKKKnKC
+CjKKKKKKKjKC
+@archway-stone | stone archway arch opening
+...xxxxxx...
+.xxwwwwwwxx.
+xwwXKKKKXwwx
+xwXKKKKKKXwx
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xwKKKKKKKKwX
+xXKKKKKKKKXX
+@archway-wood | wooden doorway frame empty opening no door
+CCCCCCCCCCCC
+CLTTTTTTTTCC
+CLCKKKKKKCTC
+CLKKKKKKKKTC
+CLKKKKKKKKTC
+CLKKKKKKKKTC
+CLKKKKKKKKTC
+CLKKKKKKKKTC
+CLKKKKKKKKTC
+CLKKKKKKKKTC
+CLKKKKKKVVTC
+CLKKKKVVVVTC
+CLKKVVVVVVTC
+@garden-gate* | garden gate wooden picket closed
+.L..L..L..L.
+.T..T..T..T.
+LTLLTLLTLLTL
+CTCCTCCTCCTC
+.T..T.nT..T.
+.T..T..T..T.
+LTLLTLLTLLTL
+CTCCTCCTCCTC
+.T..T..T..T.
+@gate-wrought* | wrought iron gate tall closed cemetery
+.....VV.....
+..V.VXXV.V..
+.VXVXVVXVXV.
+VX.X.XX.X.XV
+VX.X.XX.X.XV
+VXVXVXXVXVXV
+VX.X.XX.X.XV
+VX.X.XXnX.XV
+VX.X.XX.X.XV
+VXVXVXXVXVXV
+VX.X.XX.X.XV
+VX.X.XX.X.XV
+@gate-wrought-open | wrought iron gate open cemetery
+V............V
+XV..........VX
+XXV........VXX
+X.X........X.X
+X.X........X.X
+XVX........XVX
+X.X........X.X
+X.X........X.X
+X.X........X.X
+XVX........XVX
+X.X........X.X
+X.X........X.X
+@window-frame-lit* | window lit warm light yellow glowing
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTEEEFCEEEFC
+CTEEFFCEFFFC
+CTFFFFCFFFnC
+CTCCCCCCCCCC
+CTEFFFCFFFnC
+CTFFFnCFFnnC
+CTFnnnCnnnnC
+CTTTTTTTTTTC
+LLLLLLLLLLLL
+.CCCCCCCCCC.
+@window-frame-dark* | window dark night unlit
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTgigggCggggC
+CTgiggCggggC
+CTggggCggggC
+CTCCCCCCCCCC
+CTggggCggggC
+CTggggCggigC
+CTggggCggggC
+CTTTTTTTTTTC
+LLLLLLLLLLLL
+.CCCCCCCCCC.
+@window-frame-broken* | window broken smashed glass shards
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTggKgCggggC
+CTgKKKCgWggC
+CTKKKKCggWgC
+CTCCKCCCCCCC
+CTgKKKCggggC
+CTggKgCgKKgC
+CTggggCKKKKC
+CTTTTTTTTTTC
+LLLLLLLLLLLL
+.CCCCCCCCCC.
+@window-frame-face* | window with pale face watching ghost
+CCCCCCCCCCCC
+CTTTTTTTTTTC
+CTgggllllggC
+CTgglllllllC
+CTgglKllKlgC
+CTCClllllCCC
+CTggllKKlggC
+CTggglllgggC
+CTggggCggggC
+CTTTTTTTTTTC
+LLLLLLLLLLLL
+.CCCCCCCCCC.
+@window-frame-shutters* | window closed shutters louvre green
+CCCCCCCCCCCC
+CdddddCdddddC
+CdeeedCdeeedC
+CdddddCdddddC
+CdeeedCdeeedC
+CdddddCdddddC
+CdeeedCdeeedC
+CdddddCdddddC
+CdeeedCdeeedC
+CdddddCdddddC
+LLLLLLLLLLLL
+.CCCCCCCCCC.
+@window-frame-curtains* | window drawn curtains closed drapes
+CCCCCCCCCCCC
+CnnnnnnnnnnC
+CoZaZooZaZoC
+CoZaZooZaZoC
+CoZaZooZaZoC
+CoZaZooZaZoC
+CoZaZooZaZoC
+CoZaZooZaZoC
+CoZaZooZaZoC
+CTTTTTTTTTTC
+LLLLLLLLLLLL
+.CCCCCCCCCC.
+@staircase-up* | staircase up stairs wooden steps going up
+..CLLLLLLLLC..
+..CTTTTTTTTC..
+..CCCCCCCCCC..
+.CLLLLLLLLLLC.
+.CTTTTTTTTTTC.
+.CCCCCCCCCCCC.
+CLLLLLLLLLLLLC
+CTTTTTTTTTTTTC
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+CTTTTTTTTTTTTC
+CCCCCCCCCCCCCC
+@staircase-down | staircase down stairs descending dark cellar steps
+CCCCCCCCCCCCCC
+CLLLLLLLLLLLLC
+CTTTTTTTTTTTTC
+CCTTTTTTTTTTCC
+.CCCCCCCCCCCC.
+.CCmmmmmmmmCC.
+.CmmmmmmmmmmC.
+..CmmmmmmmmC..
+..CmKKKKKKmC..
+..CKKKKKKKKC..
+..CKKKKKKKKC..
+@staircase-carpet* | grand staircase red carpet runner stairs
+..CLLZZZZLLC..
+..CTToooTTTC..
+..CCCCCCCCCC..
+.CLLLZZZZLLLC.
+.CTTToooTTTTC.
+.CCCCCCCCCCCC.
+CLLLLZZZZLLLLC
+CTTTTooooTTTTC
+CCCCCCCCCCCCCC
+CLLLLZZZZLLLLC
+CTTTTooooTTTTC
+CCCCCCCCCCCCCC
+@ladder-wood | wooden ladder leaning climb
+.T......T.
+.TLLLLLLT.
+.T......T.
+.T......T.
+.TLLLLLLT.
+.T......T.
+.T......T.
+.TLLLLLLT.
+.T......T.
+.T......T.
+.TLLLLLLT.
+.T......T.
+.C......C.
+@ladder-broken | broken ladder snapped rungs missing
+.T........
+.TLLLLL...
+.T......T.
+.T......T.
+.T....LLT.
+.T......T.
+.T......T.
+.TLLLLLLT.
+.T......T.
+.T......T.
+.TLL....T.
+.T......T.
+.C......C.
+@spiral-stairs* | spiral staircase iron winding
+.....VV.....
+...xxVVww...
+..xxxVVwwW..
+.....VVXXXX.
+.....VV.XXX.
+...wwVV.....
+.WwwwVVxx...
+XXXXXVVxxx..
+.XXX.VV.....
+.....VVww...
+...xxVVwwW..
+..xxxVVXXXX.
+.....VV.....
+@banister* | banister railing balusters stair rail
+LLLLLLLLLLLLLL
+CCCCCCCCCCCCCC
+.T..T..T..T..T
+.L..L..L..L..L
+.T..T..T..T..T
+.T..T..T..T..T
+.L..L..L..L..L
+.T..T..T..T..T
+CCCCCCCCCCCCCC
+@banister-post* | newel post banister end stair post
+..LL..
+.LTTC.
+.LTTC.
+..TC..
+.LTTC.
+.LTTC.
+.LTTC.
+.LTTC.
+.LTTC.
+.LTTC.
+.LTTC.
+LTTTTC
+CCCCCC
+@banister-broken* | broken banister railing snapped gap
+LLLL.......LLL
+CCCCC.....CCCC
+.T..T........T
+.L..L........L
+.T..T..T.....T
+.T..T..L.....T
+.L..L..T..L..L
+.T..T..T.TT..T
+CCCCCCCCCCCCCC
+@stairs-attic | attic stairs pull down ladder steep
+.....CCCCCC.
+....CLLLLLC.
+....CTTTTC..
+...CLLLLLC..
+...CTTTTC...
+..CLLLLLC...
+..CTTTTC....
+.CLLLLLC....
+.CTTTTC.....
+CLLLLLC.....
+CTTTTC......
+CCCCCC......
+@dumbwaiter* | dumbwaiter hatch small lift in wall
+CCCCCCCCCC
+CLTTTTTTTC
+CLKKKKKKTC
+CLKxKKxKTC
+CLKxKKxKTC
+CLKVVVVKTC
+CLKXXXXKTC
+CLKKKKKKTC
+CLTTTTTTTC
+CCCCCCCCCC
+@fire-escape | fire escape iron steps outside rusty
+VVVVVVVVVVVV
+V.V.V.V.V.VV
+XXXXXXXXXXXX
+.......DX...
+......XX....
+.....DX.....
+....XX......
+...XD.......
+..XX........
+.XX.........
+XXXXXXXXXXXX
+V..........V
+`);
+// ═════════════════════════ end of the old house pack ═════════════════════════
+
 // S() reads the current category when a sprite is drawn, not when it is declared, so the
 // older sprites were all drawn with the last category of the original pack current. Keep it so.
 cat = CATS.find((c) => c.id === 'symbols');

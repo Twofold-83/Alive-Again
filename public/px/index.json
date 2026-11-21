@@ -8608,6 +8608,2532 @@
      "name": "blue magic explosion blast"
     }
    ]
+  },
+  {
+   "id": "rooms",
+   "label": "Rooms: old house",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "rosepaper-top",
+     "name": "faded rose wallpaper room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall",
+     "name": "faded rose wallpaper room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-window",
+     "name": "faded rose wallpaper room wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-window-night",
+     "name": "faded rose wallpaper room wall window night moon dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-door",
+     "name": "faded rose wallpaper room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-portrait",
+     "name": "faded rose wallpaper room wall portrait painting person frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-lamp",
+     "name": "faded rose wallpaper room wall wall lamp sconce light",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-stain",
+     "name": "faded rose wallpaper room wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-wall-peeling",
+     "name": "faded rose wallpaper room wall peeling torn wallpaper plaster",
+     "kind": "wall"
+    },
+    {
+     "slug": "rosepaper-floor",
+     "name": "faded rose wallpaper room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "rosepaper-floor-worn",
+     "name": "faded rose wallpaper room floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "rosepaper-floor-dark",
+     "name": "faded rose wallpaper room floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "rosepaper-floor-rug",
+     "name": "faded rose wallpaper room floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "rosepaper-floor-stained",
+     "name": "faded rose wallpaper room floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "stripepaper-top",
+     "name": "green striped wallpaper room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall",
+     "name": "green striped wallpaper room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-window",
+     "name": "green striped wallpaper room wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-window-broken",
+     "name": "green striped wallpaper room wall broken window smashed glass",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-door",
+     "name": "green striped wallpaper room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-picture",
+     "name": "green striped wallpaper room wall picture painting landscape frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-clock",
+     "name": "green striped wallpaper room wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-crack",
+     "name": "green striped wallpaper room wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-wall-mirror",
+     "name": "green striped wallpaper room wall mirror",
+     "kind": "wall"
+    },
+    {
+     "slug": "stripepaper-floor",
+     "name": "green striped wallpaper room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "stripepaper-floor-worn",
+     "name": "green striped wallpaper room floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "stripepaper-floor-dusty",
+     "name": "green striped wallpaper room floor dusty dust",
+     "kind": "floor"
+    },
+    {
+     "slug": "stripepaper-floor-rug",
+     "name": "green striped wallpaper room floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "stripepaper-floor-cracked",
+     "name": "green striped wallpaper room floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "damask-top",
+     "name": "dark blue damask wallpaper room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall",
+     "name": "dark blue damask wallpaper room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-window-night",
+     "name": "dark blue damask wallpaper room wall window night moon dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-window-face",
+     "name": "dark blue damask wallpaper room wall window with face ghost watching",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-door",
+     "name": "dark blue damask wallpaper room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-portrait",
+     "name": "dark blue damask wallpaper room wall portrait painting person frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-portrait-scratched",
+     "name": "dark blue damask wallpaper room wall portrait scratched out face",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-mirror-cracked",
+     "name": "dark blue damask wallpaper room wall cracked broken mirror",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-wall-lamp",
+     "name": "dark blue damask wallpaper room wall wall lamp sconce light",
+     "kind": "wall"
+    },
+    {
+     "slug": "damask-floor",
+     "name": "dark blue damask wallpaper room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "damask-floor-dark",
+     "name": "dark blue damask wallpaper room floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "damask-floor-rug",
+     "name": "dark blue damask wallpaper room floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "damask-floor-bloody",
+     "name": "dark blue damask wallpaper room floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "damask-floor-dusty",
+     "name": "dark blue damask wallpaper room floor dusty dust",
+     "kind": "floor"
+    },
+    {
+     "slug": "panel-top",
+     "name": "dark wood panelling panelled room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall",
+     "name": "dark wood panelling panelled room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-window",
+     "name": "dark wood panelling panelled room wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-door",
+     "name": "dark wood panelling panelled room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-portrait",
+     "name": "dark wood panelling panelled room wall portrait painting person frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-clock",
+     "name": "dark wood panelling panelled room wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-candle",
+     "name": "dark wood panelling panelled room wall candle sconce flame",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-trophy",
+     "name": "dark wood panelling panelled room wall mounted deer head antlers trophy",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-wall-secret",
+     "name": "dark wood panelling panelled room wall secret panel door ajar hidden",
+     "kind": "wall"
+    },
+    {
+     "slug": "panel-floor",
+     "name": "dark wood panelling panelled room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "panel-floor-worn",
+     "name": "dark wood panelling panelled room floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "panel-floor-dark",
+     "name": "dark wood panelling panelled room floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "panel-floor-rug",
+     "name": "dark wood panelling panelled room floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "panel-floor-hatch",
+     "name": "dark wood panelling panelled room floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "crackplaster-top",
+     "name": "cracked plaster room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall",
+     "name": "cracked plaster room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-window-broken",
+     "name": "cracked plaster room wall broken window smashed glass",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-window-boarded",
+     "name": "cracked plaster room wall boarded up window planks nailed",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-door",
+     "name": "cracked plaster room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-crack",
+     "name": "cracked plaster room wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-stain",
+     "name": "cracked plaster room wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-switch",
+     "name": "cracked plaster room wall light switch",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-wall-lath",
+     "name": "cracked plaster room wall hole broken plaster laths",
+     "kind": "wall"
+    },
+    {
+     "slug": "crackplaster-floor",
+     "name": "cracked plaster room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "crackplaster-floor-dusty",
+     "name": "cracked plaster room floor dusty dust",
+     "kind": "floor"
+    },
+    {
+     "slug": "crackplaster-floor-cracked",
+     "name": "cracked plaster room floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "crackplaster-floor-dark",
+     "name": "cracked plaster room floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "crackplaster-floor-stained",
+     "name": "cracked plaster room floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "nursery-top",
+     "name": "pale peeling nursery wallpaper room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall",
+     "name": "pale peeling nursery wallpaper room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-window",
+     "name": "pale peeling nursery wallpaper room wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-window-night",
+     "name": "pale peeling nursery wallpaper room wall window night moon dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-door",
+     "name": "pale peeling nursery wallpaper room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-crack",
+     "name": "pale peeling nursery wallpaper room wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-picture",
+     "name": "pale peeling nursery wallpaper room wall picture animal lamb child frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-handprints",
+     "name": "pale peeling nursery wallpaper room wall small handprints hands child marks",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-wall-scribble",
+     "name": "pale peeling nursery wallpaper room wall crayon scribble drawing child scrawl",
+     "kind": "wall"
+    },
+    {
+     "slug": "nursery-floor",
+     "name": "pale peeling nursery wallpaper room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "nursery-floor-worn",
+     "name": "pale peeling nursery wallpaper room floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "nursery-floor-rug",
+     "name": "pale peeling nursery wallpaper room floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "nursery-floor-dark",
+     "name": "pale peeling nursery wallpaper room floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "nursery-floor-blocks",
+     "name": "pale peeling nursery wallpaper room floor toy blocks scattered",
+     "kind": "floor"
+    },
+    {
+     "slug": "bathroom-top",
+     "name": "bathroom white tiles wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall",
+     "name": "bathroom white tiles wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-window",
+     "name": "bathroom white tiles wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-door",
+     "name": "bathroom white tiles wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-mirror",
+     "name": "bathroom white tiles wall mirror",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-mirror-cracked",
+     "name": "bathroom white tiles wall cracked broken mirror",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-stain",
+     "name": "bathroom white tiles wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-pipe",
+     "name": "bathroom white tiles wall pipe plumbing",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-towel",
+     "name": "bathroom white tiles wall towel rail hanging towel",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-wall-cabinet",
+     "name": "bathroom white tiles wall medicine cabinet mirror cupboard",
+     "kind": "wall"
+    },
+    {
+     "slug": "bathroom-floor",
+     "name": "bathroom white tiles floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "bathroom-floor-drain",
+     "name": "bathroom white tiles floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "bathroom-floor-stained",
+     "name": "bathroom white tiles floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "bathroom-floor-bloody",
+     "name": "bathroom white tiles floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "bathroom-floor-puddle",
+     "name": "bathroom white tiles floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "bathroom-floor-cracked",
+     "name": "bathroom white tiles floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "library-top",
+     "name": "library walls of books bookshelf wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall",
+     "name": "library walls of books bookshelf wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-window-night",
+     "name": "library walls of books bookshelf wall window night moon dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-door",
+     "name": "library walls of books bookshelf wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-lamp",
+     "name": "library walls of books bookshelf wall wall lamp sconce light",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-gap",
+     "name": "library walls of books bookshelf wall missing books gap leaning book",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-skull",
+     "name": "library walls of books bookshelf wall skull on shelf books",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-ladder",
+     "name": "library walls of books bookshelf wall library ladder leaning",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-wall-secret",
+     "name": "library walls of books bookshelf wall secret bookcase door ajar passage",
+     "kind": "wall"
+    },
+    {
+     "slug": "library-floor",
+     "name": "library walls of books bookshelf floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "library-floor-rug",
+     "name": "library walls of books bookshelf floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "library-floor-dark",
+     "name": "library walls of books bookshelf floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "library-floor-dusty",
+     "name": "library walls of books bookshelf floor dusty dust",
+     "kind": "floor"
+    },
+    {
+     "slug": "library-floor-books",
+     "name": "library walls of books bookshelf floor fallen books scattered pile",
+     "kind": "floor"
+    },
+    {
+     "slug": "study-top",
+     "name": "dark green study room wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall",
+     "name": "dark green study room wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-window",
+     "name": "dark green study room wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-door",
+     "name": "dark green study room wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-portrait",
+     "name": "dark green study room wall portrait painting person frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-picture",
+     "name": "dark green study room wall picture painting landscape frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-clock",
+     "name": "dark green study room wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-lamp",
+     "name": "dark green study room wall wall lamp sconce light",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-map",
+     "name": "dark green study room wall old map chart pinned",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-wall-safe",
+     "name": "dark green study room wall wall safe hidden strongbox",
+     "kind": "wall"
+    },
+    {
+     "slug": "study-floor",
+     "name": "dark green study room floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "study-floor-rug",
+     "name": "dark green study room floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "study-floor-dark",
+     "name": "dark green study room floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "study-floor-worn",
+     "name": "dark green study room floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "study-floor-papers",
+     "name": "dark green study room floor scattered papers pages",
+     "kind": "floor"
+    },
+    {
+     "slug": "scullery-top",
+     "name": "old kitchen scullery cream tiles wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall",
+     "name": "old kitchen scullery cream tiles wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-window",
+     "name": "old kitchen scullery cream tiles wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-door",
+     "name": "old kitchen scullery cream tiles wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-clock",
+     "name": "old kitchen scullery cream tiles wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-stain",
+     "name": "old kitchen scullery cream tiles wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-crack",
+     "name": "old kitchen scullery cream tiles wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-pots",
+     "name": "old kitchen scullery cream tiles wall hanging pots pans rail",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-shelf",
+     "name": "old kitchen scullery cream tiles wall shelf jars preserves tins",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-wall-knives",
+     "name": "old kitchen scullery cream tiles wall knife rack knives cleaver",
+     "kind": "wall"
+    },
+    {
+     "slug": "scullery-floor",
+     "name": "old kitchen scullery cream tiles floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "scullery-floor-worn",
+     "name": "old kitchen scullery cream tiles floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "scullery-floor-stained",
+     "name": "old kitchen scullery cream tiles floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "scullery-floor-bloody",
+     "name": "old kitchen scullery cream tiles floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "scullery-floor-drain",
+     "name": "old kitchen scullery cream tiles floor with drain grate",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "rooms2",
+   "label": "Rooms: attic, cellar & yard",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "attic-top",
+     "name": "attic bare boards rafters wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall",
+     "name": "attic bare boards rafters wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-window-round",
+     "name": "attic bare boards rafters wall round window porthole",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-cobweb",
+     "name": "attic bare boards rafters wall cobweb spider web corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-hooks",
+     "name": "attic bare boards rafters wall coat hooks rail coat",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-stain",
+     "name": "attic bare boards rafters wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-bulb",
+     "name": "attic bare boards rafters wall bare light bulb hanging wire",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-gap",
+     "name": "attic bare boards rafters wall gap in boards light shining through",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-wall-brace",
+     "name": "attic bare boards rafters wall rafter beam diagonal brace",
+     "kind": "wall"
+    },
+    {
+     "slug": "attic-floor",
+     "name": "attic bare boards rafters floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "attic-floor-dusty",
+     "name": "attic bare boards rafters floor dusty dust",
+     "kind": "floor"
+    },
+    {
+     "slug": "attic-floor-hatch",
+     "name": "attic bare boards rafters floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "attic-floor-dark",
+     "name": "attic bare boards rafters floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "attic-floor-hole",
+     "name": "attic bare boards rafters floor hole broken boards",
+     "kind": "floor"
+    },
+    {
+     "slug": "cabin-top",
+     "name": "log cabin walls plank floor wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall",
+     "name": "log cabin walls plank floor wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-window",
+     "name": "log cabin walls plank floor wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-window-night",
+     "name": "log cabin walls plank floor wall window night moon dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-door",
+     "name": "log cabin walls plank floor wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-hooks",
+     "name": "log cabin walls plank floor wall coat hooks rail coat",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-shelf",
+     "name": "log cabin walls plank floor wall shelf",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-antlers",
+     "name": "log cabin walls plank floor wall antlers mounted skull trophy",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-lantern",
+     "name": "log cabin walls plank floor wall oil lantern hanging lamp",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-wall-rifle",
+     "name": "log cabin walls plank floor wall rifle gun rack hunting",
+     "kind": "wall"
+    },
+    {
+     "slug": "cabin-floor",
+     "name": "log cabin walls plank floor floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "cabin-floor-worn",
+     "name": "log cabin walls plank floor floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "cabin-floor-rug",
+     "name": "log cabin walls plank floor floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "cabin-floor-hatch",
+     "name": "log cabin walls plank floor floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "cabin-floor-bloody",
+     "name": "log cabin walls plank floor floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "basement-top",
+     "name": "basement concrete damp wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall",
+     "name": "basement concrete damp wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-pipe",
+     "name": "basement concrete damp wall pipe plumbing",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-stain",
+     "name": "basement concrete damp wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-crack",
+     "name": "basement concrete damp wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-vent",
+     "name": "basement concrete damp wall vent grille air",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-fusebox",
+     "name": "basement concrete damp wall fuse box electric",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-door",
+     "name": "basement concrete damp wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-window-bars",
+     "name": "basement concrete damp wall barred window bars",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-wall-mould",
+     "name": "basement concrete damp wall black mould damp patch",
+     "kind": "wall"
+    },
+    {
+     "slug": "basement-floor",
+     "name": "basement concrete damp floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "basement-floor-puddle",
+     "name": "basement concrete damp floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "basement-floor-drain",
+     "name": "basement concrete damp floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "basement-floor-cracked",
+     "name": "basement concrete damp floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "basement-floor-bloody",
+     "name": "basement concrete damp floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "basement-floor-stained",
+     "name": "basement concrete damp floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "cellar-top",
+     "name": "cellar brick walls dirt floor wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall",
+     "name": "cellar brick walls dirt floor wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-crack",
+     "name": "cellar brick walls dirt floor wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-stain",
+     "name": "cellar brick walls dirt floor wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-pipe",
+     "name": "cellar brick walls dirt floor wall pipe plumbing",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-candle",
+     "name": "cellar brick walls dirt floor wall candle sconce flame",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-door",
+     "name": "cellar brick walls dirt floor wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-cobweb",
+     "name": "cellar brick walls dirt floor wall cobweb spider web corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-arch",
+     "name": "cellar brick walls dirt floor wall bricked up arch doorway sealed",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-wall-chains",
+     "name": "cellar brick walls dirt floor wall chains shackles manacles hanging",
+     "kind": "wall"
+    },
+    {
+     "slug": "cellar-floor",
+     "name": "cellar brick walls dirt floor floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "cellar-floor-puddle",
+     "name": "cellar brick walls dirt floor floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "cellar-floor-dark",
+     "name": "cellar brick walls dirt floor floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "cellar-floor-hatch",
+     "name": "cellar brick walls dirt floor floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "cellar-floor-mound",
+     "name": "cellar brick walls dirt floor floor disturbed earth mound dug",
+     "kind": "floor"
+    },
+    {
+     "slug": "cellar-floor-bones",
+     "name": "cellar brick walls dirt floor floor bones in the dirt",
+     "kind": "floor"
+    },
+    {
+     "slug": "barn-top",
+     "name": "barn rough planks straw wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall",
+     "name": "barn rough planks straw wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-window",
+     "name": "barn rough planks straw wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-door",
+     "name": "barn rough planks straw wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-cobweb",
+     "name": "barn rough planks straw wall cobweb spider web corner",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-tools",
+     "name": "barn rough planks straw wall tools hanging scythe pitchfork",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-lantern",
+     "name": "barn rough planks straw wall oil lantern hanging lamp",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-harness",
+     "name": "barn rough planks straw wall horse harness collar tack",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-wall-gap",
+     "name": "barn rough planks straw wall gap in planks light through",
+     "kind": "wall"
+    },
+    {
+     "slug": "barn-floor",
+     "name": "barn rough planks straw floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "barn-floor-dark",
+     "name": "barn rough planks straw floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "barn-floor-bloody",
+     "name": "barn rough planks straw floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "barn-floor-hatch",
+     "name": "barn rough planks straw floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "barn-floor-bare",
+     "name": "barn rough planks straw floor bare earth less straw",
+     "kind": "floor"
+    },
+    {
+     "slug": "greenhouse-top",
+     "name": "greenhouse glass panes stone path wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall",
+     "name": "greenhouse glass panes stone path wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall-door",
+     "name": "greenhouse glass panes stone path wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall-hooks",
+     "name": "greenhouse glass panes stone path wall coat hooks rail coat",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall-broken",
+     "name": "greenhouse glass panes stone path wall broken pane smashed glass",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall-vine",
+     "name": "greenhouse glass panes stone path wall ivy vine creeping leaves",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall-handprint",
+     "name": "greenhouse glass panes stone path wall handprint on fogged glass condensation",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-wall-shelf",
+     "name": "greenhouse glass panes stone path wall shelf flower pots dead plants",
+     "kind": "wall"
+    },
+    {
+     "slug": "greenhouse-floor",
+     "name": "greenhouse glass panes stone path floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "greenhouse-floor-cracked",
+     "name": "greenhouse glass panes stone path floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "greenhouse-floor-puddle",
+     "name": "greenhouse glass panes stone path floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "greenhouse-floor-dark",
+     "name": "greenhouse glass panes stone path floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "greenhouse-floor-weeds",
+     "name": "greenhouse glass panes stone path floor weeds overgrown moss",
+     "kind": "floor"
+    },
+    {
+     "slug": "greenhouse-floor-soil",
+     "name": "greenhouse glass panes stone path floor spilled soil broken pot",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "rooms3",
+   "label": "Rooms: institutions",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "hotel-top",
+     "name": "hotel corridor wallpaper carpet wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall",
+     "name": "hotel corridor wallpaper carpet wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-lamp",
+     "name": "hotel corridor wallpaper carpet wall wall lamp sconce light",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-picture",
+     "name": "hotel corridor wallpaper carpet wall picture painting landscape frame",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-mirror",
+     "name": "hotel corridor wallpaper carpet wall mirror",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-stain",
+     "name": "hotel corridor wallpaper carpet wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-window-night",
+     "name": "hotel corridor wallpaper carpet wall window night moon dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-door",
+     "name": "hotel corridor wallpaper carpet wall hotel room door number",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-door-ajar",
+     "name": "hotel corridor wallpaper carpet wall hotel room door ajar open dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-wall-lift",
+     "name": "hotel corridor wallpaper carpet wall lift elevator doors brass",
+     "kind": "wall"
+    },
+    {
+     "slug": "hotel-floor",
+     "name": "hotel corridor wallpaper carpet floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "hotel-floor-worn",
+     "name": "hotel corridor wallpaper carpet floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "hotel-floor-dark",
+     "name": "hotel corridor wallpaper carpet floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "hotel-floor-bloody",
+     "name": "hotel corridor wallpaper carpet floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "hotel-floor-stained",
+     "name": "hotel corridor wallpaper carpet floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "theatre-top",
+     "name": "theatre red curtain stage wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall",
+     "name": "theatre red curtain stage wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-poster",
+     "name": "theatre red curtain stage wall poster notice paper",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-door",
+     "name": "theatre red curtain stage wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-gap",
+     "name": "theatre red curtain stage wall curtain parted gap backstage dark",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-masks",
+     "name": "theatre red curtain stage wall theatre masks comedy tragedy",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-rope",
+     "name": "theatre red curtain stage wall ropes sandbag rigging",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-tassel",
+     "name": "theatre red curtain stage wall gold tassel tie back cord",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-wall-lights",
+     "name": "theatre red curtain stage wall dressing room mirror bulbs",
+     "kind": "wall"
+    },
+    {
+     "slug": "theatre-floor",
+     "name": "theatre red curtain stage floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "theatre-floor-worn",
+     "name": "theatre red curtain stage floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "theatre-floor-hatch",
+     "name": "theatre red curtain stage floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "theatre-floor-dark",
+     "name": "theatre red curtain stage floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "theatre-floor-mark",
+     "name": "theatre red curtain stage floor stage mark cross tape",
+     "kind": "floor"
+    },
+    {
+     "slug": "theatre-floor-spot",
+     "name": "theatre red curtain stage floor spotlight pool of light",
+     "kind": "floor"
+    },
+    {
+     "slug": "chapel-top",
+     "name": "chapel stone walls flagstones wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall",
+     "name": "chapel stone walls flagstones wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-cross",
+     "name": "chapel stone walls flagstones wall cross",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-candle",
+     "name": "chapel stone walls flagstones wall candle sconce flame",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-crack",
+     "name": "chapel stone walls flagstones wall crack cracked damage",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-window",
+     "name": "chapel stone walls flagstones wall stained glass window arch",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-door",
+     "name": "chapel stone walls flagstones wall arched church door iron studs",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-plaque",
+     "name": "chapel stone walls flagstones wall memorial plaque inscription stone",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-wall-niche",
+     "name": "chapel stone walls flagstones wall niche alcove statue saint",
+     "kind": "wall"
+    },
+    {
+     "slug": "chapel-floor",
+     "name": "chapel stone walls flagstones floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "chapel-floor-cracked",
+     "name": "chapel stone walls flagstones floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "chapel-floor-rug",
+     "name": "chapel stone walls flagstones floor with small rug mat",
+     "kind": "floor"
+    },
+    {
+     "slug": "chapel-floor-bloody",
+     "name": "chapel stone walls flagstones floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "chapel-floor-dark",
+     "name": "chapel stone walls flagstones floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "chapel-floor-grave",
+     "name": "chapel stone walls flagstones floor grave slab tomb inscription cross",
+     "kind": "floor"
+    },
+    {
+     "slug": "lab-top",
+     "name": "laboratory metal walls grated floor wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall",
+     "name": "laboratory metal walls grated floor wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-vent",
+     "name": "laboratory metal walls grated floor wall vent grille air",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-pipe",
+     "name": "laboratory metal walls grated floor wall pipe plumbing",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-stain",
+     "name": "laboratory metal walls grated floor wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-window-bars",
+     "name": "laboratory metal walls grated floor wall barred window bars",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-door",
+     "name": "laboratory metal walls grated floor wall iron door porthole bulkhead",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-screen",
+     "name": "laboratory metal walls grated floor wall monitor screen green readout",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-gauges",
+     "name": "laboratory metal walls grated floor wall gauges dials pressure meters",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-wall-lever",
+     "name": "laboratory metal walls grated floor wall big lever switch power",
+     "kind": "wall"
+    },
+    {
+     "slug": "lab-floor",
+     "name": "laboratory metal walls grated floor floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "lab-floor-dark",
+     "name": "laboratory metal walls grated floor floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "lab-floor-bloody",
+     "name": "laboratory metal walls grated floor floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "lab-floor-hatch",
+     "name": "laboratory metal walls grated floor floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "lab-floor-plate",
+     "name": "laboratory metal walls grated floor floor metal floor plate rivets",
+     "kind": "floor"
+    },
+    {
+     "slug": "lab-floor-spill",
+     "name": "laboratory metal walls grated floor floor chemical spill green slime",
+     "kind": "floor"
+    },
+    {
+     "slug": "asylum-top",
+     "name": "asylum padded cell walls checker floor wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall",
+     "name": "asylum padded cell walls checker floor wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-window-bars",
+     "name": "asylum padded cell walls checker floor wall barred window bars",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-stain",
+     "name": "asylum padded cell walls checker floor wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-vent",
+     "name": "asylum padded cell walls checker floor wall vent grille air",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-door",
+     "name": "asylum padded cell walls checker floor wall cell door hatch steel",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-tally",
+     "name": "asylum padded cell walls checker floor wall tally marks scratched counting days",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-torn",
+     "name": "asylum padded cell walls checker floor wall torn padding ripped stuffing",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-writing",
+     "name": "asylum padded cell walls checker floor wall writing on wall scrawled blood words",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-wall-restraint",
+     "name": "asylum padded cell walls checker floor wall wall restraint straps ring",
+     "kind": "wall"
+    },
+    {
+     "slug": "asylum-floor",
+     "name": "asylum padded cell walls checker floor floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "asylum-floor-bloody",
+     "name": "asylum padded cell walls checker floor floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "asylum-floor-stained",
+     "name": "asylum padded cell walls checker floor floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "asylum-floor-drain",
+     "name": "asylum padded cell walls checker floor floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "asylum-floor-cracked",
+     "name": "asylum padded cell walls checker floor floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "asylum-floor-dark",
+     "name": "asylum padded cell walls checker floor floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "morgue-top",
+     "name": "morgue steel walls pale tiles wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall",
+     "name": "morgue steel walls pale tiles wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-vent",
+     "name": "morgue steel walls pale tiles wall vent grille air",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-clock",
+     "name": "morgue steel walls pale tiles wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-switch",
+     "name": "morgue steel walls pale tiles wall light switch",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-stain",
+     "name": "morgue steel walls pale tiles wall stain damp dirty mould",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-door",
+     "name": "morgue steel walls pale tiles wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-drawers",
+     "name": "morgue steel walls pale tiles wall body drawers cold chamber lockers",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-drawer-open",
+     "name": "morgue steel walls pale tiles wall body drawer open feet toe tag corpse",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-wall-hose",
+     "name": "morgue steel walls pale tiles wall hose reel tap wash down",
+     "kind": "wall"
+    },
+    {
+     "slug": "morgue-floor",
+     "name": "morgue steel walls pale tiles floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "morgue-floor-drain",
+     "name": "morgue steel walls pale tiles floor with drain grate",
+     "kind": "floor"
+    },
+    {
+     "slug": "morgue-floor-bloody",
+     "name": "morgue steel walls pale tiles floor bloody blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "morgue-floor-puddle",
+     "name": "morgue steel walls pale tiles floor puddle water wet",
+     "kind": "floor"
+    },
+    {
+     "slug": "morgue-floor-cracked",
+     "name": "morgue steel walls pale tiles floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "morgue-floor-trail",
+     "name": "morgue steel walls pale tiles floor blood trail drag marks smear",
+     "kind": "floor"
+    },
+    {
+     "slug": "school-top",
+     "name": "school classroom green walls linoleum wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall",
+     "name": "school classroom green walls linoleum wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-window",
+     "name": "school classroom green walls linoleum wall window glass dusk",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-door",
+     "name": "school classroom green walls linoleum wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-clock",
+     "name": "school classroom green walls linoleum wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-poster",
+     "name": "school classroom green walls linoleum wall poster notice paper",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-hooks",
+     "name": "school classroom green walls linoleum wall coat hooks rail coat",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-switch",
+     "name": "school classroom green walls linoleum wall light switch",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-blackboard",
+     "name": "school classroom green walls linoleum wall blackboard chalk writing",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-map",
+     "name": "school classroom green walls linoleum wall wall map chart roller",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-wall-lockers",
+     "name": "school classroom green walls linoleum wall lockers metal row",
+     "kind": "wall"
+    },
+    {
+     "slug": "school-floor",
+     "name": "school classroom green walls linoleum floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "school-floor-worn",
+     "name": "school classroom green walls linoleum floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "school-floor-stained",
+     "name": "school classroom green walls linoleum floor stained dirty",
+     "kind": "floor"
+    },
+    {
+     "slug": "school-floor-dark",
+     "name": "school classroom green walls linoleum floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "school-floor-cracked",
+     "name": "school classroom green walls linoleum floor cracked broken",
+     "kind": "floor"
+    },
+    {
+     "slug": "school-floor-chalk",
+     "name": "school classroom green walls linoleum floor chalk outline hopscotch marks",
+     "kind": "floor"
+    },
+    {
+     "slug": "shop-top",
+     "name": "old shop shelves goods wooden floor wall top dark ceiling edge",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall",
+     "name": "old shop shelves goods wooden floor wall plain",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-door",
+     "name": "old shop shelves goods wooden floor wall door closed in wall",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-clock",
+     "name": "old shop shelves goods wooden floor wall clock",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-poster",
+     "name": "old shop shelves goods wooden floor wall poster notice paper",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-empty",
+     "name": "old shop shelves goods wooden floor wall empty shelves bare dusty",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-window",
+     "name": "old shop shelves goods wooden floor wall shop window display blind",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-drawers",
+     "name": "old shop shelves goods wooden floor wall apothecary drawers small labelled",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-wall-sign",
+     "name": "old shop shelves goods wooden floor wall shop sign closed notice board",
+     "kind": "wall"
+    },
+    {
+     "slug": "shop-floor",
+     "name": "old shop shelves goods wooden floor floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "shop-floor-worn",
+     "name": "old shop shelves goods wooden floor floor worn scuffed",
+     "kind": "floor"
+    },
+    {
+     "slug": "shop-floor-dark",
+     "name": "old shop shelves goods wooden floor floor dark shadow",
+     "kind": "floor"
+    },
+    {
+     "slug": "shop-floor-hatch",
+     "name": "old shop shelves goods wooden floor floor with hatch trapdoor",
+     "kind": "floor"
+    },
+    {
+     "slug": "shop-floor-dusty",
+     "name": "old shop shelves goods wooden floor floor dusty dust",
+     "kind": "floor"
+    },
+    {
+     "slug": "shop-floor-glass",
+     "name": "old shop shelves goods wooden floor floor broken glass shards on floor",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "floors",
+   "label": "Floors & carpets",
+   "group": "tile",
+   "items": [
+    {
+     "slug": "carpet-green-edge-top",
+     "name": "green carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-edge-bottom",
+     "name": "green carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-edge-left",
+     "name": "green carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-edge-right",
+     "name": "green carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-corner-tl",
+     "name": "green carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-corner-tr",
+     "name": "green carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-corner-bl",
+     "name": "green carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-green-corner-br",
+     "name": "green carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-edge-top",
+     "name": "purple royal carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-edge-bottom",
+     "name": "purple royal carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-edge-left",
+     "name": "purple royal carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-edge-right",
+     "name": "purple royal carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-corner-tl",
+     "name": "purple royal carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-corner-tr",
+     "name": "purple royal carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-corner-bl",
+     "name": "purple royal carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-purple-corner-br",
+     "name": "purple royal carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown",
+     "name": "brown old carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-edge-top",
+     "name": "brown old carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-edge-bottom",
+     "name": "brown old carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-edge-left",
+     "name": "brown old carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-edge-right",
+     "name": "brown old carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-corner-tl",
+     "name": "brown old carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-corner-tr",
+     "name": "brown old carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-corner-bl",
+     "name": "brown old carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-brown-corner-br",
+     "name": "brown old carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey",
+     "name": "grey gray dark carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-edge-top",
+     "name": "grey gray dark carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-edge-bottom",
+     "name": "grey gray dark carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-edge-left",
+     "name": "grey gray dark carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-edge-right",
+     "name": "grey gray dark carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-corner-tl",
+     "name": "grey gray dark carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-corner-tr",
+     "name": "grey gray dark carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-corner-bl",
+     "name": "grey gray dark carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-grey-corner-br",
+     "name": "grey gray dark carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon",
+     "name": "maroon dark red wine carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-edge-top",
+     "name": "maroon dark red wine carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-edge-bottom",
+     "name": "maroon dark red wine carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-edge-left",
+     "name": "maroon dark red wine carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-edge-right",
+     "name": "maroon dark red wine carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-corner-tl",
+     "name": "maroon dark red wine carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-corner-tr",
+     "name": "maroon dark red wine carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-corner-bl",
+     "name": "maroon dark red wine carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-maroon-corner-br",
+     "name": "maroon dark red wine carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy",
+     "name": "navy dark blue carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-edge-top",
+     "name": "navy dark blue carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-edge-bottom",
+     "name": "navy dark blue carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-edge-left",
+     "name": "navy dark blue carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-edge-right",
+     "name": "navy dark blue carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-corner-tl",
+     "name": "navy dark blue carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-corner-tr",
+     "name": "navy dark blue carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-corner-bl",
+     "name": "navy dark blue carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-navy-corner-br",
+     "name": "navy dark blue carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss",
+     "name": "moss dull green carpet rug centre middle",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-edge-top",
+     "name": "moss dull green carpet rug edge top",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-edge-bottom",
+     "name": "moss dull green carpet rug edge bottom",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-edge-left",
+     "name": "moss dull green carpet rug edge left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-edge-right",
+     "name": "moss dull green carpet rug edge right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-corner-tl",
+     "name": "moss dull green carpet rug corner top left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-corner-tr",
+     "name": "moss dull green carpet rug corner top right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-corner-bl",
+     "name": "moss dull green carpet rug corner bottom left",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-moss-corner-br",
+     "name": "moss dull green carpet rug corner bottom right",
+     "kind": "floor"
+    },
+    {
+     "slug": "carpet-threadbare",
+     "name": "threadbare worn out carpet holes",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-herringbone",
+     "name": "herringbone wooden floor parquet zigzag",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-dark",
+     "name": "dark floorboards old boards black wood",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-wide",
+     "name": "wide floorboards planks old",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-rotten",
+     "name": "rotten floorboards rot mould holes",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-missing",
+     "name": "floorboards missing plank gap hole joists",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-bloody",
+     "name": "bloodstained floorboards blood stain",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-scorched",
+     "name": "scorched burnt floorboards fire damage ash",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-boards-patched",
+     "name": "patched floorboards new plank nails repair",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-checker-bw",
+     "name": "checker floor black white tiles hall",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-checker-red",
+     "name": "checker floor red black tiles",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-hex",
+     "name": "hexagon hex tiles floor honeycomb",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-mosaic",
+     "name": "mosaic floor small tiles pattern",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-lino",
+     "name": "linoleum lino floor brown marbled",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-lino-green",
+     "name": "linoleum lino floor green hospital",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-concrete",
+     "name": "concrete floor grey cement",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-dirt-cellar",
+     "name": "dirt cellar floor earth stones",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-flagstones",
+     "name": "flagstones stone slabs floor brown",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-terracotta",
+     "name": "terracotta tiles floor clay",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-cobbles-dark",
+     "name": "dark cobbles cobblestone cellar yard",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-tiles-broken",
+     "name": "broken white tiles missing tile floor",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-brick",
+     "name": "brick floor herringbone bricks red dark",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-ash",
+     "name": "ash cinders burnt floor soot",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-sawdust",
+     "name": "sawdust floor butcher workshop",
+     "kind": "floor"
+    },
+    {
+     "slug": "floor-grave-earth",
+     "name": "freshly dug earth grave soil",
+     "kind": "floor"
+    }
+   ]
+  },
+  {
+   "id": "doors",
+   "label": "Doors, windows & stairs",
+   "group": "thing",
+   "items": [
+    {
+     "slug": "door-oak",
+     "name": "brown wooden door closed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-oak-ajar",
+     "name": "brown wooden door ajar slightly open gap",
+     "solid": true
+    },
+    {
+     "slug": "door-oak-open",
+     "name": "brown wooden door open doorway"
+    },
+    {
+     "slug": "door-dark",
+     "name": "dark wood black door closed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-dark-ajar",
+     "name": "dark wood black door ajar slightly open gap",
+     "solid": true
+    },
+    {
+     "slug": "door-dark-open",
+     "name": "dark wood black door open doorway"
+    },
+    {
+     "slug": "door-white",
+     "name": "white painted pale door closed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-white-ajar",
+     "name": "white painted pale door ajar slightly open gap",
+     "solid": true
+    },
+    {
+     "slug": "door-white-open",
+     "name": "white painted pale door open doorway"
+    },
+    {
+     "slug": "door-green",
+     "name": "green painted door closed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-green-ajar",
+     "name": "green painted door ajar slightly open gap",
+     "solid": true
+    },
+    {
+     "slug": "door-red",
+     "name": "dull red painted door closed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-red-ajar",
+     "name": "dull red painted door ajar slightly open gap",
+     "solid": true
+    },
+    {
+     "slug": "door-blue",
+     "name": "blue painted door closed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-blue-ajar",
+     "name": "blue painted door ajar slightly open gap",
+     "solid": true
+    },
+    {
+     "slug": "door-double",
+     "name": "double doors closed hall wooden",
+     "solid": true
+    },
+    {
+     "slug": "door-double-open",
+     "name": "double doors open wide doorway"
+    },
+    {
+     "slug": "door-glass",
+     "name": "glass door glazed french door",
+     "solid": true
+    },
+    {
+     "slug": "door-cell",
+     "name": "cell door bars prison jail",
+     "solid": true
+    },
+    {
+     "slug": "door-cell-open",
+     "name": "cell door open bars prison"
+    },
+    {
+     "slug": "door-iron-riveted",
+     "name": "iron door rivets heavy metal hatch",
+     "solid": true
+    },
+    {
+     "slug": "door-boarded",
+     "name": "boarded up door planks nailed shut",
+     "solid": true
+    },
+    {
+     "slug": "door-broken",
+     "name": "broken door smashed hole splintered",
+     "solid": true
+    },
+    {
+     "slug": "door-chained",
+     "name": "chained door padlock locked chain",
+     "solid": true
+    },
+    {
+     "slug": "door-bloody",
+     "name": "door bloody handprint blood smear",
+     "solid": true
+    },
+    {
+     "slug": "door-arched",
+     "name": "arched door church oak iron studs",
+     "solid": true
+    },
+    {
+     "slug": "door-nailed-shut",
+     "name": "nursery door pale peeling child height marks",
+     "solid": true
+    },
+    {
+     "slug": "trapdoor-closed",
+     "name": "trapdoor closed hatch in floor ring"
+    },
+    {
+     "slug": "trapdoor-open",
+     "name": "trapdoor open hatch hole ladder down"
+    },
+    {
+     "slug": "cellar-hatch",
+     "name": "cellar hatch doors storm cellar outside",
+     "solid": true
+    },
+    {
+     "slug": "cellar-hatch-open",
+     "name": "cellar hatch open steps down dark"
+    },
+    {
+     "slug": "bookcase-door",
+     "name": "secret bookcase door closed hidden",
+     "solid": true
+    },
+    {
+     "slug": "bookcase-door-open",
+     "name": "secret bookcase door open passage"
+    },
+    {
+     "slug": "curtain-doorway",
+     "name": "curtain doorway red drapes entrance"
+    },
+    {
+     "slug": "bead-curtain",
+     "name": "bead curtain doorway strings"
+    },
+    {
+     "slug": "archway-stone",
+     "name": "stone archway arch opening"
+    },
+    {
+     "slug": "archway-wood",
+     "name": "wooden doorway frame empty opening no door"
+    },
+    {
+     "slug": "garden-gate",
+     "name": "garden gate wooden picket closed",
+     "solid": true
+    },
+    {
+     "slug": "gate-wrought",
+     "name": "wrought iron gate tall closed cemetery",
+     "solid": true
+    },
+    {
+     "slug": "gate-wrought-open",
+     "name": "wrought iron gate open cemetery"
+    },
+    {
+     "slug": "window-frame-lit",
+     "name": "window lit warm light yellow glowing",
+     "solid": true
+    },
+    {
+     "slug": "window-frame-dark",
+     "name": "window dark night unlit",
+     "solid": true
+    },
+    {
+     "slug": "window-frame-broken",
+     "name": "window broken smashed glass shards",
+     "solid": true
+    },
+    {
+     "slug": "window-frame-face",
+     "name": "window with pale face watching ghost",
+     "solid": true
+    },
+    {
+     "slug": "window-frame-shutters",
+     "name": "window closed shutters louvre green",
+     "solid": true
+    },
+    {
+     "slug": "window-frame-curtains",
+     "name": "window drawn curtains closed drapes",
+     "solid": true
+    },
+    {
+     "slug": "staircase-up",
+     "name": "staircase up stairs wooden steps going up",
+     "solid": true
+    },
+    {
+     "slug": "staircase-down",
+     "name": "staircase down stairs descending dark cellar steps"
+    },
+    {
+     "slug": "staircase-carpet",
+     "name": "grand staircase red carpet runner stairs",
+     "solid": true
+    },
+    {
+     "slug": "ladder-wood",
+     "name": "wooden ladder leaning climb"
+    },
+    {
+     "slug": "ladder-broken",
+     "name": "broken ladder snapped rungs missing"
+    },
+    {
+     "slug": "spiral-stairs",
+     "name": "spiral staircase iron winding",
+     "solid": true
+    },
+    {
+     "slug": "banister",
+     "name": "banister railing balusters stair rail",
+     "solid": true
+    },
+    {
+     "slug": "banister-post",
+     "name": "newel post banister end stair post",
+     "solid": true
+    },
+    {
+     "slug": "banister-broken",
+     "name": "broken banister railing snapped gap",
+     "solid": true
+    },
+    {
+     "slug": "stairs-attic",
+     "name": "attic stairs pull down ladder steep"
+    },
+    {
+     "slug": "dumbwaiter",
+     "name": "dumbwaiter hatch small lift in wall",
+     "solid": true
+    },
+    {
+     "slug": "fire-escape",
+     "name": "fire escape iron steps outside rusty"
+    }
+   ]
   }
  ]
 }
