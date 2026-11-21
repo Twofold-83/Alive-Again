@@ -25,3 +25,24 @@ small.grp { display: block; margin-top: 6px; text-transform: uppercase; letter-s
   #game .stage { width: min(100%, calc(42vh * 4 / 3)); }
   #right { flex: 1; width: auto; border-left: 0; }
 }
+
+/* ---- screen filters: how the picture looks on this device (shell/display.js) ---- */
+#rpgCanvas, #titleArt { filter: var(--picture, none); }
+body.look-clean { --picture: none; }
+body.look-clean .stage .bubbles { box-shadow: none; }
+body.look-green { --picture: grayscale(1) sepia(1) hue-rotate(62deg) saturate(2.6) brightness(.95) contrast(1.18); }
+body.look-amber { --picture: grayscale(1) sepia(1) hue-rotate(-14deg) saturate(2.5) contrast(1.12); }
+body.look-noir { --picture: grayscale(1) contrast(1.4) brightness(.9); }
+body.look-photo { --picture: sepia(.85) contrast(.92) brightness(1.04) blur(.3px); }
+body.look-photo .stage .bubbles { box-shadow: inset 0 0 calc(var(--u) * 2.2) rgba(40, 24, 8, .8); }
+body.look-moon { --picture: grayscale(.55) sepia(.55) hue-rotate(172deg) saturate(1.5) brightness(.82) contrast(1.08); }
+body.look-fever { --picture: sepia(.75) hue-rotate(-38deg) saturate(2.3) contrast(1.15) brightness(.78); }
+body.look-vhs { --picture: saturate(1.3) contrast(1.1) blur(.5px); }
+body.look-vhs::after { background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 3px, rgba(0, 0, 0, .2) 3px 5px); }
+body.look-vhs::before { content: ""; position: fixed; left: 0; right: 0; height: 9vh; top: -10vh; z-index: 9998; pointer-events: none; background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, .07) 45%, rgba(255, 255, 255, .13) 50%, rgba(255, 255, 255, 0)); animation: tracking 7s linear infinite; }
+@keyframes tracking { to { top: 110vh; } }
+#lookMenu { position: fixed; z-index: 200; width: 250px; display: flex; flex-direction: column; gap: 3px; padding: 8px; background: var(--panel); border: 2px solid; border-color: var(--hi) #000 #000 var(--hi); box-shadow: 6px 6px 0 rgba(0, 0, 0, .6); }
+#lookMenu b { text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+#lookMenu button { text-align: left; padding: 3px 8px; min-height: 0; }
+#lookMenu button small { display: block; color: var(--dim); font-size: 15px; }
+#lookMenu button.on small { color: inherit; }

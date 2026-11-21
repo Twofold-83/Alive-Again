@@ -53,3 +53,20 @@
 .wsmap .node .thumb * { pointer-events: none; }
 .wsmap .node .thumb .exit { display: none; }
 .wsmap svg { pointer-events: none; z-index: 0; } .wsmap .node { z-index: 1; }
+
+/* ---- the character maker ---- */
+#dollmaker { z-index: 70; }
+.dollbody { min-height: 0; }
+.dollleft { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 14px; background: #000; overflow-y: auto; }
+.dollleft .poser { width: min(100%, 460px); }
+.dollacts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.dolltools { width: 520px; }
+.dolltools .tabs button img { width: 42px; height: 39px; object-fit: contain; }
+.dollgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 4px; overflow-y: auto; flex: 1; min-height: 160px; align-content: start; }
+.dollgrid button { height: 66px; min-height: 66px; padding: 2px; display: flex; align-items: center; justify-content: center; background: #1a171f; }
+.dollgrid button img { image-rendering: pixelated; height: 52px; width: auto; }
+.dollgrid.k-t button img { height: 44px; } .dollgrid.k-a button img, .dollgrid.k-l button img { height: 56px; }
+.dollgrid button.on { background: var(--accent); }
+.castrow { display: flex; flex-wrap: wrap; gap: 6px; }
+.castitem { display: inline-flex; flex-direction: column; align-items: center; }
+.castitem > button:first-child { font-size: 30px; padding: 4px 6px; min-height: 0; }

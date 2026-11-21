@@ -186,4 +186,19 @@
 
 /* the room is lit from the middle: the edges of the picture fall into the dark */
 .stage .bubbles { box-shadow: inset 0 0 calc(var(--u) * 1.5) rgba(0, 0, 0, .62); }
-.stage .world { filter: saturate(.82) contrast(1.06); }
+.stage .world { filter: var(--picture, saturate(.82) contrast(1.06)); }
+
+/* ---- paper-doll characters: a figure of six parts that turn at the joints ---- */
+.doll { --dp: .0471em; display: inline-block; position: relative; width: calc(var(--dp) * 16); height: calc(var(--dp) * 33); vertical-align: bottom; flex: none; }
+.dpart { position: absolute; transition: transform .45s ease; }
+.doll .dpart img { width: 100% !important; height: 100% !important; display: block; image-rendering: pixelated; pointer-events: none; }
+.doll .dpart img.flip { transform: scaleX(-1); }
+.doll.live .dpart { transition: none; cursor: grab; touch-action: none; }
+.doll.live .dpart.t { cursor: default; }
+.doll.dragging .dpart { cursor: grabbing; }
+.ent.walk .doll .ll, .ent.walk .doll .ar { animation: dswing .42s steps(3) infinite alternate; }
+.ent.walk .doll .lr, .ent.walk .doll .al { animation: dswing .42s steps(3) infinite alternate-reverse; }
+@keyframes dswing { from { rotate: -17deg; } to { rotate: 17deg; } }
+.poser { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.poserstage { width: 100%; display: flex; justify-content: center; padding: 26px 0 12px; background: radial-gradient(ellipse at 50% 100%, #2a2631 0, #0b0a0d 70%); border: 2px solid; border-color: #000 var(--hi) var(--hi) #000; }
+.doll.big { font-size: 150px; }

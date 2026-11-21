@@ -39,3 +39,5 @@ button.big small { display: block; font-weight: 400; font-size: 16px; opacity: .
 
 /* narrow windows */
 @media (max-width: 820px) { #newBtns { grid-template-columns: 1fr; } }
+#lookPick { max-width: 300px; }
+body.phone #lookPick { max-width: none; }

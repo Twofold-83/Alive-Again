@@ -21,7 +21,8 @@ export const app = {
   drawOn: false, // Director: dragging draws
   pointMode: false, // Player: the next click on the stage is what the written action points at
   walkMode: false, // Player: the next click on the stage is where the hero walks
-  walkAnim: 0, // Player: animation frame of a walk being shown
+  walkAnim: 0,
+  poseOpen: false, // Player: the pose tool for a paper-doll hero is showing // Player: animation frame of a walk being shown
 };
 
 if (!app.token) {

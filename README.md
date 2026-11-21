@@ -182,6 +182,30 @@ as icons, and what the Player did is read out like the log of an old adventure g
 - **Thirty tunes**, eight of them made to unsettle: Dread, Crypt, Broken music box,
   Whispers, Heartbeat, Church organ, Lament, Drone.
 
+## Paper-doll characters
+
+Besides the ready-drawn sprites there is a **Character maker** (in the Director's menu, in
+Build scene, and for the Player as "Make my character"). A person is put together from a
+head, a torso, arms and legs — 500 parts in a muted old-home-computer palette (190 heads
+from tired faces to plague doctors and drowned girls, 130 torsos, 90 arms, 90 legs), made by
+`tools/make-dolls.js`.
+
+- **Posing.** Drag the head, an arm or a leg and it turns at the joint; or press a ready
+  pose (Stand, Arms up, Wave, Point, Reach, Cower, Stride, Run, Kick, Shrug, Hang head,
+  Sprawl). The Director poses anyone ("Pose" on a selected figure); the Player poses their
+  own hero. Within a turn the figure swings from the old pose into the new one, and its
+  legs and arms move when it walks.
+- **My cast.** Characters you keep are stored in the browser and offered in every story.
+- On the stage a figure is an ordinary thing: `asset: 'd:h012.t033.a005.l010'` plus
+  `pose: [head, left arm, right arm, left leg, right leg]` in degrees. See `public/core/dolls.js`.
+
+## Screen filters
+
+The **FX** button in the top bar (and the start screen) changes how the picture looks on
+your own device: Old monitor, Clean, Green screen, Amber screen, Black and white, Old
+photograph, Moonlight, Fever, Worn tape. It is remembered in the browser and changes
+nothing for the other person. (`public/shell/display.js`, the looks are CSS.)
+
 ## Phone or computer
 
 The start screen asks what you are playing on (it guesses the first time and remembers).
@@ -266,6 +290,7 @@ public/                   the browser
     guided.js, screens/   the Director's menu: one function per screen
     viewer.js             "the story so far"
   build/workshop.js       Build scene and the Map
+  build/dollmaker.js      the character maker (paper dolls)
   dungeon/screen.js       Dungeon mode: editor, game canvas, controls, Overlord panel
   shell/                  home.js (start screen), chrome.js (top bar, clock), device.js (phone or computer), title.js
   css/                    nine style sheets by area; phone.css holds everything phone mode changes

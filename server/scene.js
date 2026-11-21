@@ -8,6 +8,10 @@ import { arr, num, r3, str, uid, HEX } from './util.js';
  * ({ a: asset, k: 'f' floor | 'w' wall }); cells is 192 characters, '0' for empty,
  * otherwise a base-36 index into pal (1 = pal[0]). Where a level exists the hero
  * may only stand on floor tiles, and solid things block the way. */
+/** Five joint angles of a paper-doll character, or null. */
+export function cleanPose(p) {
+  return Array.isArray(p) && p.length === 5 ? p.map((v) => Math.round(num(v, -180, 180, 0))) : null;
+}
 function cleanLevel(l) {
   if (!l || typeof l !== 'object' || typeof l.cells !== 'string' || !/^[0-9a-z]{192}$/.test(l.cells) || !/[^0]/.test(l.cells)) return null;
   const pal = arr(l.pal)
@@ -116,6 +120,7 @@ export function cleanScene(s, prev, inner) {
       once: str(e.once, 12),
       temp: !!e.temp,
       layer: Math.sign(Math.round(num(e.layer, -1, 1, 0))),
+      pose: cleanPose(e.pose), // a paper doll's joints
     });
   }
   const drawing = [];

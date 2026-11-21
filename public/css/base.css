@@ -34,7 +34,7 @@ b, strong { font-weight: 400; color: #f3eedf; }
 small { font-size: .84em; }
 
 /* the glass of the old monitor: faint scan lines over everything */
-body::after { content: ""; position: fixed; inset: 0; z-index: 9999; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .1) 2px 3px); mix-blend-mode: multiply; }
+body.look-crt::after, body.look-green::after, body.look-amber::after, body.look-vhs::after, body.look-moon::after, body.look-fever::after { content: ""; position: fixed; inset: 0; z-index: 9999; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .1) 2px 3px); mix-blend-mode: multiply; }
 
 /* ---- buttons: raised keys that go down when pressed ---- */
 button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; }

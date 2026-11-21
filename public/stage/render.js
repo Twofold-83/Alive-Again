@@ -1,5 +1,6 @@
 /* Drawing a scene on a stage element: backdrop, level, things, bubbles, strips and overlays.
  * renderStage() can be called as often as you like; it only touches what changed. */
+import { isDoll, dollNode, poseDoll } from '../core/dolls.js';
 import { spriteView, assetLabel, backdropCss } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 
@@ -8,6 +9,7 @@ import { h, clamp } from '../core/dom.js';
 const SPRITE = 0.74;
 
 export function glyphNode(code, asset, cls = '') {
+  if (isDoll(asset)) return dollNode(asset, cls);
   const v = spriteView(code, asset);
   return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);
 }
@@ -219,6 +221,7 @@ export function renderStage(root, scene, o = {}) {
       el._asset = e.asset;
       fxw.replaceChildren(glyphNode(code, e.asset, 'glyph'));
     }
+    if (isDoll(e.asset)) poseDoll(fxw.firstChild, e.pose);
     el.className =
       'ent' +
       (e.id === scene.heroId ? ' hero' : '') +
@@ -269,7 +272,7 @@ export function renderStage(root, scene, o = {}) {
         {
           class: 'bubble' + (o.pop === e.id ? ' pop' : '') + (o.speaker && o.speaker !== e.id ? ' old' : '') + size(e.sayLen || e.say.length),
           'data-id': e.id,
-          style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * SPRITE * 1.22 + 0.12) * zoom})`,
+          style: `left:${clamp(sx, 4, 96)}%;bottom:calc(${100 - sy}% + var(--u) * ${(e.scale * SPRITE * (isDoll(e.asset) ? 1.75 : 1.22) + 0.12) * zoom})`,
         },
         e.say,
       );

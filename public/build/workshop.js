@@ -10,6 +10,8 @@
  * A scene on the bench is added to the map with one button; from then on it saves itself.
  * Scenes on the map are kept with the story and can be saved to a file for another story.
  */
+import { isDoll } from '../core/dolls.js';
+import { openDollMaker } from './dollmaker.js';
 import { PIXEL, backdropCss, pixelInfo, spriteTitle } from '../core/catalog.js';
 import { h, clone, clamp, rid, fill } from '../core/dom.js';
 import { glyphNode, renderStage } from '../stage/render.js';
@@ -1015,6 +1017,34 @@ function drawTools() {
       changedQuiet: () => {
         changed();
         paintStage();
+      },
+      dollMaker(edit) {
+        openDollMaker({
+          asset: edit && isDoll(edit.asset) ? edit.asset : null,
+          pose: edit && edit.pose,
+          actions: [
+            edit
+              ? {
+                  label: 'Use this look',
+                  primary: true,
+                  run: (asset, pose) => {
+                    edit.asset = asset;
+                    edit.pose = pose;
+                    changed();
+                    draw();
+                  },
+                }
+              : {
+                  label: 'Put in this scene',
+                  primary: true,
+                  run: (asset, pose) => {
+                    sc.entities.push(newEntity(asset, { id: rid(), ...freeSpot(sc), pose }));
+                    changed();
+                    draw();
+                  },
+                },
+          ],
+        });
       },
       addEntity(asset) {
         if (sc.entities.length >= MAX_ENTITIES) {

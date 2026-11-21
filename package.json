@@ -6,11 +6,12 @@
   "scripts": {
     "start": "node server.js",
     "test": "node test/smoke.mjs && node test/rpg-sim.mjs && node test/rooms.mjs",
-    "test:e2e": "node test/e2e-play.js && node test/e2e-steps.js && node test/e2e-adventure.js && node test/e2e-rpg.js && node test/e2e-phone.js",
+    "test:e2e": "node test/e2e-play.js && node test/e2e-steps.js && node test/e2e-adventure.js && node test/e2e-rpg.js && node test/e2e-phone.js && node test/e2e-dolls.js",
     "sim": "node test/sim-cuts.js 60",
     "lint": "eslint .",
     "format": "prettier --write \"public/**/*.js\" \"server/**/*.js\" server.js \"test/**/*.{js,mjs}\" tools/upgrade-sprites.js",
     "make-sprites": "node tools/make-sprites.js",
+    "make-dolls": "node tools/make-dolls.js",
     "upgrade-sprites": "node tools/upgrade-sprites.js"
   },
   "engines": {

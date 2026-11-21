@@ -52,6 +52,7 @@ export function newEntity(asset, props = {}) {
     once: '',
     temp: false,
     layer: 0,
+    pose: null, // a paper-doll character's joints: [head, left arm, right arm, left leg, right leg] in degrees
     ...props,
   };
 }

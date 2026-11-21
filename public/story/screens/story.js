@@ -212,6 +212,7 @@ export function screenRoot(kit) {
         S.rules.type === 'adventure' &&
         opt('sword', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
       !ws && opt('robot', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
+      opt('doll', 'Character maker', 'Build a person: head, body, arms, legs', () => c.dollMaker()),
       !ws && opt('cog', 'Story settings', 'Type, rules, time, invite', () => enter('rules')),
     ),
   );

@@ -27,7 +27,7 @@ export function playCut(root, before, after, o, done) {
     e.once = '';
     if (p) {
       if (p.x !== e.x || p.y !== e.y || p.scale !== e.scale || p.rot !== e.rot) moved = true;
-      Object.assign(e, { x: p.x, y: p.y, scale: p.scale, rot: p.rot, flip: p.flip, fx: p.fx });
+      Object.assign(e, { x: p.x, y: p.y, scale: p.scale, rot: p.rot, flip: p.flip, fx: p.fx, pose: p.pose });
     } else if (before) {
       e.fresh = true;
       moved = true;
@@ -128,7 +128,7 @@ export function playCut(root, before, after, o, done) {
           e.walk = true;
           e.face = Math.sign(f.x - e.x);
         } // on the move: bob along, face the way it goes
-        Object.assign(e, { scale: f.scale, rot: f.rot, flip: f.flip, fx: f.fx, once: f.once, hp: f.hp, maxHp: f.maxHp, tie: f.tie });
+        Object.assign(e, { scale: f.scale, rot: f.rot, flip: f.flip, fx: f.fx, once: f.once, hp: f.hp, maxHp: f.maxHp, tie: f.tie, pose: f.pose }); // a paper doll swings into its new pose
         if (!f.say) e.emote = f.emote;
         if (!e.tracked) {
           e.x = f.x;

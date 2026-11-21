@@ -1,4 +1,5 @@
 /* Director screens about one character or thing: its tools, speaking, moving, adding, tying, active objects, exits. */
+import { isDoll, poseEditor } from '../../core/dolls.js';
 import { PIXEL } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES } from '../../shared/options.js';
@@ -43,6 +44,8 @@ export function screenThing(kit) {
     h(
       'div',
       { class: 'thingbtns' },
+      isDoll(sel.asset) && b('', 'Pose', () => enter('pose'), !!sel.pose),
+      isDoll(sel.asset) && b('', 'Change look', () => c.dollMaker(sel)),
       !ws && b('', 'Move / animate', () => enter('move')),
       b('', 'Turn into…', () => {
         G.q = '';
@@ -107,6 +110,20 @@ export function screenThing(kit) {
   return;
 }
 
+/** A paper-doll character: turn its head, arms and legs. Within a step the figure swings from the old pose into the new one. */
+export function screenPose(kit) {
+  const { p, c, sel, lab, back, head, doneBtn } = kit;
+  if (!sel || !isDoll(sel.asset)) return back();
+  head(`Pose ${lab(sel)}`, 'It moves into this pose as the step plays.');
+  add(
+    p,
+    poseEditor(sel.asset, sel.pose, (pose) => {
+      sel.pose = pose;
+      c.changedQuiet();
+    }),
+    doneBtn(() => `${lab(sel)} strikes a pose`),
+  );
+}
 export function screenSwap(kit) {
   const { p, c, sel, lab, setup, head, searchGrid } = kit;
   head(`Turn ${lab(sel)} into…`, 'It keeps its place and size.');

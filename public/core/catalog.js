@@ -270,6 +270,7 @@ export function spriteView(code, asset) {
 }
 /** Short text for an asset, for sentences like "reaches for 🔑". */
 export function assetLabel(asset, name) {
+  if (asset.startsWith('d:')) return name || 'the figure';
   const v = spriteView('', asset);
   if (v.glyph) return v.glyph;
   const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;

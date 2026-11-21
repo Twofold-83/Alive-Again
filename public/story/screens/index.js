@@ -3,6 +3,7 @@ import { screenRoot, screenRules, screenClaude } from './story.js';
 import {
   screenThing,
   screenSwap,
+  screenPose,
   screenSpeak,
   screenMove,
   screenMoveDrag,
@@ -34,6 +35,7 @@ export const SCREENS = {
   root: screenRoot,
   thing: screenThing,
   swap: screenSwap,
+  pose: screenPose,
   speak: screenSpeak,
   move: screenMove,
   'move:drag': screenMoveDrag,

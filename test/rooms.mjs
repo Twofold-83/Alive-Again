@@ -39,5 +39,10 @@ for (const sc of SCENARIOS) {
   }
   for (const [a, b] of sc.links) assert(keys.has(a) && keys.has(b));
 }
+/* paper-doll parts: 500 of them, every one a file */
+const dolls = JSON.parse(fs.readFileSync('public/doll/index.json', 'utf8'));
+const parts = [...dolls.heads, ...dolls.torsos, ...dolls.arms, ...dolls.legs];
+assert.equal(parts.length, 500); assert.equal(new Set(parts.map((x) => x.id)).size, 500);
+for (const part of parts) assert(fs.existsSync(`public/doll/${part.id}.png`) && part.name, part.id);
 for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.length % 16 === 0, m.id);
 console.log(`ROOMS OK (${ROOM_THEMES.length} themes, ${SCENARIOS.length} places, ${MOODS.length - 1} tunes)`);

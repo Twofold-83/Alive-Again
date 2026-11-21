@@ -1,5 +1,7 @@
 /* The Player's controls under the tool column: speak, act, point, walk, answer, roll, end the turn.
  * (The Director's side of the same footer is just the button that ends the turn.) */
+import { isDoll, poseEditor } from '../core/dolls.js';
+import { openDollMaker } from '../build/dollmaker.js';
 import { assetLabel } from '../core/catalog.js';
 import { h, add } from '../core/dom.js';
 import { glyphNode } from '../stage/render.js';
@@ -56,7 +58,7 @@ export function buildFoot() {
             rebuild();
           },
         },
-        app.draft.rollWant ? `d${app.draft.rollWant}` : '',
+        app.draft.rollWant ? `d${app.draft.rollWant}` : 'Die',
       );
     const walkBtn =
       mode !== 'tell' &&
@@ -83,6 +85,61 @@ export function buildFoot() {
         e = pt && pt.id && app.draft.entities.find((x) => x.id === pt.id);
       return e ? (e.active ? e.active.name : assetLabel(e.asset)) : 'that spot';
     };
+    /* a paper-doll hero: strike a pose by dragging the limbs, or decide how the hero looks */
+    const dollRow = () =>
+      mode !== 'tell' &&
+      me &&
+      h(
+        'div',
+        { class: 'row', id: 'dollRow' },
+        isDoll(me.asset) &&
+          h(
+            'button',
+            {
+              id: 'poseBtn',
+              class: 'grow' + (app.poseOpen ? ' on' : ''),
+              onclick: () => {
+                app.poseOpen = !app.poseOpen;
+                rebuild();
+              },
+            },
+            'Pose',
+          ),
+        h(
+          'button',
+          {
+            id: 'lookBtn',
+            class: 'grow',
+            onclick: () =>
+              openDollMaker({
+                title: 'Your character',
+                asset: isDoll(me.asset) ? me.asset : null,
+                pose: me.pose,
+                actions: [
+                  {
+                    label: 'This is me',
+                    primary: true,
+                    run: (asset, pose) => {
+                      me.asset = asset;
+                      me.pose = pose;
+                      app.draft.look = asset;
+                      rebuild();
+                    },
+                  },
+                ],
+              }),
+          },
+          isDoll(me.asset) ? 'Change my look' : 'Make my character',
+        ),
+      );
+    const poser = () =>
+      app.poseOpen &&
+      me &&
+      isDoll(me.asset) &&
+      poseEditor(me.asset, me.pose, (pose) => {
+        me.pose = pose;
+        changedQuiet();
+      });
     const pointRow = () =>
       app.S.rules.type === 'adventure' &&
       h(
@@ -251,6 +308,8 @@ export function buildFoot() {
         pick(),
         asked,
         say(),
+        dollRow(),
+        poser(),
         walkBtn,
         end(!app.draft.choices.includes(app.draft.action) || must),
       );
@@ -296,6 +355,8 @@ export function buildFoot() {
           },
         }),
         pointRow(),
+        dollRow(),
+        poser(),
         walkBtn,
         end(),
       );

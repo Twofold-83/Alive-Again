@@ -79,3 +79,6 @@ button.foe.on { outline: 2px solid var(--accent); }
 .toldrow p { margin: 0; color: #f1ead6; font-size: 1.12em; line-height: 1.05; }
 .toldrow.says p { color: #fff; }
 .toldrow.none p { color: var(--dim); }
+#foot .doll.big { font-size: 96px; }
+#foot .poserstage { padding: 14px 0 8px; }
+#panel .doll.big { font-size: 120px; }

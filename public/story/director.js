@@ -1,5 +1,7 @@
 /* What the Director's menu can do to the turn: the bridge between the question tree (guided.js, screens/)
  * and the draft. Also going to scenes from the map, opening Build scene, and making custom art. */
+import { isDoll } from '../core/dolls.js';
+import { openDollMaker } from '../build/dollmaker.js';
 import { normScene, newEntity, freeSpot, HERO_ASSET, MAX_ENTITIES } from '../shared/scene-model.js';
 import { assetName } from '../core/catalog.js';
 import { rid, toast, $ } from '../core/dom.js';
@@ -29,7 +31,7 @@ import { leave } from '../shell/home.js';
 import { clone, clamp, h } from '../core/dom.js';
 
 import { openWorkshop } from '../build/workshop.js';
-import { resetGuided, guidedStart } from './guided.js';
+import { resetGuided, guidedStart, guidedPick } from './guided.js';
 
 const IDEAS = [
   'A stranger arrives who knows the hero’s name.',
@@ -112,6 +114,7 @@ export const guidedCtx = {
   openStory: () => openStory(),
   leave: () => leave(),
   idea: () => toast('' + IDEAS[Math.floor(Math.random() * IDEAS.length)]),
+  dollMaker: (e) => showDollMaker(e),
 };
 /* ---------- prepared scenes and the scene workshop ---------- */
 function blankHero() {
@@ -225,6 +228,48 @@ export function showWorkshop(o = {}) {
   });
 }
 
+/** The character maker, for a new person or (given a paper doll already on stage) to change how that one looks. */
+function showDollMaker(edit) {
+  const me = hero(app.draft);
+  openDollMaker({
+    asset: edit && isDoll(edit.asset) ? edit.asset : null,
+    pose: edit && edit.pose,
+    actions: edit
+      ? [
+          {
+            label: 'Use this look',
+            primary: true,
+            run: (asset, pose) => {
+              edit.asset = asset;
+              edit.pose = pose;
+              rebuild();
+            },
+          },
+        ]
+      : [
+          {
+            label: 'Put on the stage',
+            primary: true,
+            run: (asset, pose) => {
+              const e = addEntity(asset);
+              if (e) {
+                e.pose = pose;
+                guidedPick(e.id);
+                rebuild();
+              }
+            },
+          },
+          me && {
+            label: 'Make this the Player’s hero',
+            run: (asset, pose) => {
+              me.asset = asset;
+              me.pose = pose;
+              rebuild();
+            },
+          },
+        ].filter(Boolean),
+  });
+}
 function addEntity(asset) {
   if (app.draft.entities.length >= MAX_ENTITIES) return void toast('The stage is full');
   const e = newEntity(asset, { id: rid(), ...freeSpot(app.draft, 0.62) }); // on the ground of the backdrop

@@ -2,7 +2,7 @@
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
 import { timers, online, broadcast, touch, rooms } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
-import { cutEstimate, rollDie, cleanScene, cleanTrackPts } from './scene.js';
+import { cutEstimate, rollDie, cleanScene, cleanTrackPts, cleanPose } from './scene.js';
 import { cleanRules } from '../public/shared/rules.js';
 import { walkable, stepFields, playerFields } from '../public/shared/scene-model.js';
 import { botMove } from './bots.js';
@@ -152,6 +152,9 @@ function submitPlayer(room, body) {
   if (hero && mode !== 'tell') {
     hero.say = str(body.say, 160);
     hero.emote = str(body.emote, 16);
+    /* a paper-doll hero: the Player may strike a pose, and choose how their own character looks */
+    if (/^d:h\d{3}\.t\d{3}\.a\d{3}\.l\d{3}$/.test(body.look)) hero.asset = body.look;
+    if (hero.asset.startsWith('d:') && cleanPose(body.pose)) hero.pose = cleanPose(body.pose);
   }
   if (hero && mode !== 'tell') {
     // free and limited will: the hero may walk

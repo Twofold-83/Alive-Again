@@ -1,5 +1,7 @@
 /* Twofold in the browser. Every screen lives in its own module (see README, "How the code is laid out");
  * this file starts them and wires the few things that belong to no screen in particular. */
+import { initDisplay } from './shell/display.js';
+import { loadDolls } from './core/dolls.js';
 import { audio } from './core/audio.js';
 import { $ } from './core/dom.js';
 import { rpgInit } from './dungeon/screen.js';
@@ -26,7 +28,8 @@ document.addEventListener(
   { capture: true },
 );
 rpgInit();
+initDisplay();
 startTitle($('#titleArt'), () => {
   if (!app.code) audio.sfx('thunder');
 });
-Promise.all([loadPack(), loadPixel()]).then(boot);
+Promise.all([loadPack(), loadPixel(), loadDolls()]).then(boot);

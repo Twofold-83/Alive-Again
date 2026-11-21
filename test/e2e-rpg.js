@@ -70,6 +70,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await P.p.waitForFunction((n) => window.rpgDebug.st.mobs.length === n + 1, mobs0);
     await D.p.fill('#rpgWhisper', 'I see you');
     await D.p.keyboard.press('Enter');
+    await P.p.bringToFront(); // the hero's screen only redraws while it is the one being looked at
     await P.p.waitForFunction(() => /I see you/.test(document.querySelector('#rpgMsg').textContent) && !document.querySelector('#rpgMsg').hidden);
     await D.p.click('[data-power="dark"]');
     await P.p.waitForFunction(() => window.rpgDebug.st.dark > window.rpgDebug.st.t);

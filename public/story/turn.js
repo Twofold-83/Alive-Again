@@ -286,6 +286,8 @@ export async function submit() {
           y: me && me.y,
           say: me ? me.say : '',
           emote: me ? me.emote : '',
+          pose: me ? me.pose : null,
+          look: app.draft.look,
           action: app.draft.action,
           target: app.draft.target,
           point: app.draft.point,

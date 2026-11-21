@@ -1,4 +1,5 @@
 /* Around every game: the top bar, the banner under it, and the turn clock. */
+import { toggleFilterMenu } from './display.js';
 import { toast, $, fmt } from '../core/dom.js';
 import { audio } from '../core/audio.js';
 import { h } from '../core/dom.js';
@@ -67,6 +68,16 @@ export function renderChrome() {
         title: 'Sound: loud, quiet, off',
       },
       audio.icon,
+    ),
+    h(
+      'button',
+      {
+        id: 'fxBtn',
+        'aria-label': 'Screen filter',
+        title: 'Screen filter: how the picture looks on this device',
+        onclick: (e) => toggleFilterMenu(e.currentTarget),
+      },
+      'FX',
     ),
     h(
       'button',
