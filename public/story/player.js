@@ -3,7 +3,9 @@
 import { isDoll, poseEditor } from '../core/dolls.js';
 import { openDollMaker } from '../build/dollmaker.js';
 import { assetLabel } from '../core/catalog.js';
-import { h, add } from '../core/dom.js';
+import { h, add, toast } from '../core/dom.js';
+import { act } from '../core/net.js';
+import { audio } from '../core/audio.js';
 import { glyphNode } from '../stage/render.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
@@ -243,10 +245,48 @@ export function buildFoot() {
       };
       let body;
       if (ask.kind === 'roll') {
-        answered = !!rp.roll;
-        body = opt(`Roll the d${ask.sides}${ask.dc ? ` — you need ${ask.dc} or more` : ''}`, rp.roll, () => {
-          setReply(rp.roll ? null : { roll: true });
-        });
+        /* the die falls at once: the Player sees the number, and whether it was enough */
+        const got = ask.rolled;
+        answered = !!got;
+        body = got
+          ? h(
+              'div',
+              { id: 'rolled', class: 'rolled ' + (!ask.dc ? '' : got.value >= ask.dc ? 'good' : 'bad') },
+              h('b', {}, String(got.value)),
+              h(
+                'span',
+                {},
+                !ask.dc
+                  ? `You rolled ${got.value} on the d${got.sides}.`
+                  : got.value >= ask.dc
+                    ? `Success! You needed ${ask.dc} or more.`
+                    : `Failed. You needed ${ask.dc} or more.`,
+              ),
+            )
+          : opt(`Roll the d${ask.sides}${ask.dc ? ` — you need ${ask.dc} or more` : ''}`, false, async () => {
+              if (app.rollShow) return;
+              let r;
+              try {
+                r = await act('roll', { turn: app.S.turn }, 3);
+              } catch (e) {
+                return toast(e.message);
+              }
+              if (!r.rolled) return;
+              app.rollShow = { ...r.rolled, rolling: true };
+              audio.sfx('dice');
+              render();
+              setTimeout(() => {
+                app.rollShow = { ...r.rolled };
+                render();
+              }, 700);
+              setTimeout(() => {
+                app.rollShow = null;
+                if (app.draft.ask) app.draft.ask.rolled = r.rolled;
+                setReply({ roll: true });
+                saveDraft();
+                rebuild();
+              }, 1900);
+            });
       } else if (ask.kind === 'discard') {
         answered = !!rp.id || !app.draft.sheet.inv.length;
         body = app.draft.sheet.inv.length

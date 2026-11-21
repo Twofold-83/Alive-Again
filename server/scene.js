@@ -207,7 +207,7 @@ export function cutEstimate(scene, before) {
     if (sc.card) ms += 2100;
     if (sc.travel) ms += 2400;
     if (sc.award) ms += 1700;
-    if (sc.roll) ms += 1700;
+    if (sc.roll && !(sc.answer && sc.answer.kind === 'roll')) ms += 1700; // a roll the Director asked for was shown to the Player as it fell
     if (sc.action || sc.target || sc.use || sc.point) ms += 1300;
     total += ms;
     prev = sc;

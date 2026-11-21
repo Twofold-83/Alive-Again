@@ -312,7 +312,10 @@ function stageOpts() {
     code: app.code,
     names: app.S.names,
     selId: directing() ? app.selId : null,
-    pendingRoll: heroTurn() ? app.draft.rollWant || (app.draft.reply && app.draft.reply.roll ? app.draft.ask.sides : 0) : 0,
+    pendingRoll: heroTurn()
+      ? app.draft.rollWant || (app.draft.reply && app.draft.reply.roll && !(app.draft.ask && app.draft.ask.rolled) ? app.draft.ask.sides : 0)
+      : 0,
+    dice: app.rollShow || undefined,
     noAct: heroTurn() && app.S.rules.player === 'tell',
     camFrame: directing(),
     pickId: heroTurn() && app.draft.reply ? app.draft.reply.id : null,

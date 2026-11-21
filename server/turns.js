@@ -120,7 +120,9 @@ function submitPlayer(room, body) {
   let answer = null,
     askRoll = 0,
     askTarget = null;
-  if (ask && ans) {
+  if (ask && ask.kind === 'roll' && ask.rolled) {
+    answer = { kind: 'roll', dc: ask.dc }; // rolled already, in front of the Player (see actRoll)
+  } else if (ask && ans) {
     if (ask.kind === 'roll' && ans.roll) {
       askRoll = ask.sides;
       answer = { kind: 'roll', dc: ask.dc };
@@ -202,10 +204,21 @@ function submitPlayer(room, body) {
   }
   sc.action = action;
   sc.answer = answer;
-  const roll = rollDie(askRoll || body.roll);
+  const roll = (ask && ask.kind === 'roll' && ask.rolled) || rollDie(askRoll || body.roll);
   sc.roll = roll ? { by: 'player', ...roll } : null;
   sc.choices = [];
   sc.ask = null;
+}
+/** The Player rolls the die the Director asked for: at once, so they see how it went before ending the turn. */
+export function actRoll(room, body, who) {
+  if (room.ended || body.turn !== room.turn || who.role !== room.whose || room.whose !== 'player') return { ok: true, stale: true };
+  const ask = room.scene.ask;
+  if (!ask || ask.kind !== 'roll') throw fail(400, 'No roll was asked for');
+  if (!ask.rolled) {
+    ask.rolled = rollDie(ask.sides);
+    touch(room);
+  }
+  return { ok: true, rolled: ask.rolled, dc: ask.dc };
 }
 export async function actSubmit(room, body, who) {
   if (room.ended || body.turn !== room.turn || who.role !== room.whose) return { ok: true, stale: true };

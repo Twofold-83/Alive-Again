@@ -226,7 +226,9 @@ export function playCut(root, before, after, o, done) {
   const acts = { walk: actMove, say: actSay, act: actDo };
   const order = o.by === 'player' ? [...new Set([...(after.order || []).filter((k) => acts[k]), 'walk', 'say', 'act'])] : ['walk', 'say', 'act'];
   for (const k of order) acts[k]();
-  if (after.roll && after.roll.by === o.by) {
+  const asked = o.by === 'player' && after.answer && after.answer.kind === 'roll'; // the Player saw this die fall already; the Director gets the result in words
+  if (after.roll && after.roll.by === o.by && asked) at(t, () => (frame.roll = after.roll));
+  else if (after.roll && after.roll.by === o.by) {
     at(t, () => {
       view.dice = { ...after.roll, rolling: true };
       if (o.sfx) o.sfx('dice');

@@ -82,3 +82,7 @@ button.foe.on { outline: 2px solid var(--accent); }
 #foot .doll.big { font-size: 96px; }
 #foot .poserstage { padding: 14px 0 8px; }
 #panel .doll.big { font-size: 120px; }
+.rolled { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 2px solid var(--hi); background: #000; }
+.rolled b { font-size: 2.2em; line-height: 1; font-weight: normal; min-width: 1.4em; text-align: center; }
+.rolled.good { border-color: #6f9a5a; } .rolled.good b { color: #a7d68c; }
+.rolled.bad { border-color: #9a3b33; } .rolled.bad b { color: #e0766a; }

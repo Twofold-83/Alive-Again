@@ -185,9 +185,11 @@ const { setup } = require('./lib');
     // the Player: roll as asked, and use the key ON the chest (clicks still land right while zoomed in)
     assert.match(await p.textContent('.askbox'), /Can you pick the lock\?.*Roll the d6.*4 or more/s);
     await p.click('.askbox button');
+    await p.waitForSelector('#rolled'); // the die falls at once, and the Player is told how it went
+    assert.match(await p.textContent('#rolled'), /Success! You needed 4 or more|Failed\. You needed 4 or more/);
     await p.click('#sheet .chip.item');
     await p.click(ent('chest'));
-    assert.match(await act(), /uses .* on Old chest.*will roll a d6/s);
+    assert.match(await act(), /uses .* on Old chest/s);
     await toDirector();
     sc = await x.last();
     assert.equal(sc.roll.by, 'player');
