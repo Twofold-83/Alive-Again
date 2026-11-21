@@ -86,6 +86,34 @@ export function dollNode(asset, cls = '', pose, feel) {
   feelDoll(el, feel);
   return el;
 }
+/** The whole figure as one picture (16 x 33, standing at rest), for the sprite editor. */
+export async function dollDataUrl(asset, feel) {
+  const p = dollParts(asset),
+    src = { ll: p.l, lr: p.l, t: p.t, al: p.a, ar: p.a, h: p.h },
+    cv = Object.assign(document.createElement('canvas'), { width: DOLL_W, height: DOLL_H }),
+    g = cv.getContext('2d');
+  const img = (url) =>
+    new Promise((ok) => {
+      const im = new Image();
+      im.onload = () => ok(im);
+      im.onerror = () => ok(null);
+      im.src = url;
+    });
+  for (const key of ['ll', 'lr', 't', 'al', 'ar', 'h']) {
+    const r = RIG[key],
+      fi = key === 'h' ? DOLLS.feels.indexOf(feel) : -1,
+      im = await img(fi >= 0 ? `doll/f-${p.h}.png` : `doll/${src[key]}.png`);
+    if (!im) continue;
+    g.save();
+    if (r.mirror) {
+      g.translate(r.x + r.w, r.y);
+      g.scale(-1, 1);
+    } else g.translate(r.x, r.y);
+    g.drawImage(im, fi >= 0 ? fi * r.w : 0, 0, r.w, r.h, 0, 0, r.w, r.h);
+    g.restore();
+  }
+  return cv.toDataURL('image/png');
+}
 /** Put a feeling on the face of a figure made by dollNode ('' for the face the head came with). */
 export function feelDoll(el, feel) {
   feel = feel || '';

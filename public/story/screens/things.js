@@ -5,6 +5,10 @@ import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES } from '../../shared/options.js';
 import { G, buildGuided, short } from '../guided.js';
 import { glyphNode } from '../../stage/render.js';
+import { openSpriteEditor, ownDrawings, useOwn, forgetOwn } from '../../build/spriteed.js';
+import { spriteView } from '../../core/catalog.js';
+import { dollDataUrl } from '../../core/dolls.js';
+import { toast } from '../../core/dom.js';
 
 /** Categories of the pixel-art library for one "Add something" branch. */
 function groupCats(g) {
@@ -78,6 +82,22 @@ export function screenThing(kit) {
       isDoll(sel.asset) && b('', 'Act', () => enter('pose'), !!sel.pose || !!sel.feel),
       isDoll(sel.asset) && b('', 'Change look', () => c.dollMaker(sel)),
       !ws && b('', 'Move / animate', () => enter('move')),
+      b('', 'Edit drawing', async () => {
+        /* open the picture in the sprite editor; the changed drawing replaces this thing (a paper doll becomes a fixed picture) */
+        const src = isDoll(sel.asset) ? await dollDataUrl(sel.asset, sel.feel) : spriteView(kit.code, sel.asset).img;
+        const info = pixelInfo(sel.asset);
+        openSpriteEditor({
+          src: src && sel.view && info[sel.view] ? src.replace(/\.png$/, `.${sel.view}.png`) : src,
+          name: lab(sel),
+          onSave: (id) => {
+            sel.asset = 'c:' + id;
+            sel.view = '';
+            sel.pose = null;
+            c.changedQuiet();
+            c.rebuild();
+          },
+        });
+      }),
       b('', 'Turn into…', () => {
         G.q = '';
         enter('swap');
@@ -393,6 +413,39 @@ export function screenAddOwn(kit) {
         mine.map((a) => h('button', { title: a.name, onclick: () => place('c:' + a.id) }, glyphNode(code, 'c:' + a.id))),
       ),
     );
+  /* my drawings: made in the sprite editor, kept on this device for every story */
+  const own = ownDrawings();
+  add(
+    p,
+    h('button', { id: 'drawNew', class: 'primary', onclick: () => openSpriteEditor({ onSave: (id) => place('c:' + id) }) }, 'Draw a new thing'),
+    h('b', { class: 'actlab' }, 'My drawings'),
+    own.length
+      ? h(
+          'div',
+          { class: 'grid owngrid' },
+          own.map((d) =>
+            h(
+              'button',
+              {
+                title: d.name + ' (right-click to forget)',
+                onclick: () =>
+                  useOwn(d)
+                    .then((id) => place('c:' + id))
+                    .catch((e) => toast(e.message)),
+                oncontextmenu: (ev) => {
+                  ev.preventDefault();
+                  if (confirm(`Forget “${d.name}”?`)) {
+                    forgetOwn(d.id);
+                    c.rebuild();
+                  }
+                },
+              },
+              h('img', { src: d.dataUrl, alt: d.name, class: 'ownimg' }),
+            ),
+          ),
+        )
+      : h('small', { class: 'dim' }, 'Nothing yet. Draw a thing, or press “Edit drawing” on anything on the stage.'),
+  );
   add(
     p,
     c.maker('sprite', (id) => place('c:' + id)),

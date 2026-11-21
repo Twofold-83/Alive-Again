@@ -28,6 +28,16 @@ export function glyphNode(code, asset, cls = '', view = '') {
       draggable: 'false',
       style: `--w:${size}`,
     });
+  if (v.img && cls === 'glyph' && asset.startsWith('c:')) {
+    /* a drawing of your own is pixel art too: once loaded, a small one is shown at its true size */
+    const im = h('img', { class: cls, src: v.img, alt: '', draggable: 'false' });
+    im.addEventListener('load', () => {
+      if (im.naturalWidth > 64 || im.naturalHeight > 64) return;
+      im.classList.add('sized');
+      im.style.setProperty('--w', im.naturalWidth);
+    });
+    return im;
+  }
   return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);
 }
 

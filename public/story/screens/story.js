@@ -213,6 +213,7 @@ export function screenRoot(kit) {
         opt('sword', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
       !ws && opt('robot', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
       opt('doll', 'Character maker', 'Build a person: head, body, arms, legs', () => c.dollMaker()),
+      opt('paint-can', 'Sprite editor', 'Draw your own things, pixel by pixel', () => enter('add:own')),
       !ws && opt('cog', 'Story settings', 'Type, rules, time, invite', () => enter('rules')),
     ),
   );

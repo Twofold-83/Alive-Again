@@ -29,6 +29,23 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await p.waitForSelector('#workshop', { state: 'hidden' });
     await p.waitForSelector('.gopt');
 
+    /* the sprite editor: draw a thing, save it, it stands on the stage and is kept under My drawings */
+    await x.opt('Sprite editor');
+    await p.click('#drawNew');
+    await p.waitForSelector('#spriteCanvas');
+    const cvb = await p.locator('#spriteCanvas').boundingBox();
+    await p.mouse.move(cvb.x + cvb.width * 0.3, cvb.y + cvb.height * 0.5);
+    await p.mouse.down();
+    await p.mouse.move(cvb.x + cvb.width * 0.7, cvb.y + cvb.height * 0.5, { steps: 5 });
+    await p.mouse.up();
+    await p.fill('#spriteName', 'My line');
+    await p.click('#spriteSave');
+    await p.waitForSelector('#spriteed', { state: 'hidden' });
+    await p.waitForSelector('#stage .ent img[src*="/assets/"]');
+    assert.match(await p.evaluate(() => localStorage.getItem('tf.own')), /My line/);
+    assert.equal(await p.locator('.owngrid button').count(), 1, 'the drawing is listed under My drawings');
+    await p.click('.gback');
+
     /* the character maker */
     await x.opt('Character maker');
     await p.waitForSelector('.dollgrid button');
