@@ -2369,6 +2369,2178 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     },
   });
 
+  /* ---------- beds: the front view is seen from the foot end and a little from above ---------- */
+  /** Head end and mattress of a bed running away from the viewer. Lay the bedding on the returned g
+   *  (x0..x1 across, sy the far end of the mattress, ey its near edge), then call g.foot() for the foot end. */
+  function bedFront(c, o = {}) {
+    const b = c.h - 2,
+      x0 = 1,
+      x1 = o.x1 || c.w - 2,
+      fc = o.frame || W,
+      mh = 8 + (o.thick || 0), // the top of the mattress above the floor
+      ht = o.top || 2, // the top of the headboard
+      sy = ht + o.head - mh,
+      ey = b - mh,
+      tick = o.tick || C.cream,
+      nb = Math.round((x1 - x0) / 4),
+      bars = [];
+    for (let i = 1; i < nb; i++) bars.push(x0 + Math.round((i * (x1 - x0)) / nb)); // far enough apart to see between them
+    if (o.iron) {
+      c.col(x0, ht, sy, fc);
+      c.col(x1, ht, sy, fc);
+      c.row(ht + 1, x0, x1, fc);
+      c.row(ht + 5, x0, x1, D(fc));
+      for (const x of bars) c.col(x, ht + 2, sy, D(fc));
+      c.set(x0, ht - 1, C.brass);
+      c.set(x1, ht - 1, C.brass);
+    } else {
+      c.rect(x0, ht, x1, sy, fc);
+      c.row(ht, x0, x1, L(fc));
+      c.col(x0, ht, sy, L(fc));
+      if (sy - ht > 6) panel(c, x0 + 2, ht + 2, x1 - 2, sy - 2, fc);
+      c.set(x0, ht - 1, fc);
+      c.set(x1, ht - 1, fc);
+    }
+    c.rect(x0 + 1, sy, x1 - 1, ey, tick);
+    c.row(sy, x0 + 1, x1 - 1, D(tick));
+    c.rect(x0 + 1, ey + 1, x1 - 1, ey + mh - 4, D(tick)); // the near end of the mattress
+    c.row(ey + 1, x0 + 1, x1 - 1, tick);
+    return {
+      x0: x0 + 1,
+      x1: x1 - 1,
+      sy,
+      ey,
+      b,
+      tick,
+      foot() {
+        const fb = b - o.foot + 1;
+        if (o.iron) {
+          const rail = b - (o.rail || 4);
+          c.col(x0, fb, b, fc);
+          c.col(x1, fb, b, fc);
+          c.set(x0, fb - 1, C.brass);
+          c.set(x1, fb - 1, C.brass);
+          c.row(fb + 1, x0, x1, fc);
+          c.row(rail, x0, x1, fc);
+          for (const x of bars) c.col(x, fb + 2, rail - 1, D(fc));
+        } else {
+          c.rect(x0, fb, x1, b - 2, fc);
+          c.row(fb, x0, x1, L(fc));
+          c.col(x0, fb, b - 2, L(fc));
+          if (b - 2 - fb > 5) panel(c, x0 + 2, fb + 2, x1 - 2, b - 4, fc);
+          c.row(b - 2, x0, x1, D(fc));
+          legs(c, [x0, x1 - 1], b - 1, b, D(fc));
+          c.set(x0, fb - 1, fc);
+          c.set(x1, fb - 1, fc);
+        }
+      },
+    };
+  }
+  function pillowFront(c, g, x0, x1, col = C.white, dy = 0) {
+    const y0 = g.sy + 1 + dy,
+      y1 = g.sy + 4 + dy;
+    c.rect(x0, y0, x1, y1, col);
+    c.set(x0, y0, g.tick);
+    c.set(x1, y0, g.tick);
+    c.row(y1, x0, x1, D(col));
+    c.set(x0, y1, g.tick);
+    c.set(x1, y1, g.tick);
+  }
+  /** The blanket from `from` rows below the far end down over the foot end; sheet = the turned-down sheet. */
+  function coverFront(c, g, col, o = {}) {
+    const by = g.sy + (o.from || 8);
+    c.rect(g.x0, by, g.x1, g.ey, col);
+    c.row(by, g.x0, g.x1, L(col));
+    c.rect(g.x0, g.ey + 1, g.x1, g.ey + 3, D(col)); // hanging over the foot end
+    if (o.sheet !== false) c.rect(g.x0, by - 2, g.x1, by - 1, o.sheet || g.tick);
+    if (o.sheet !== false) c.row(by - 2, g.x0, g.x1, L(o.sheet || g.tick));
+    return by;
+  }
+  /** ... thrown back: a corner of the blanket folded over, the bare sheet under it. */
+  function coverBack(c, g, col, by) {
+    const ax = g.x1 - 3,
+      k = Math.min(ax - g.x0 - 2, g.ey - by - 2);
+    c.poly([[g.x0, by - 2], [ax, by - 2], [g.x0, by + k]], g.tick);
+    dots(c, D(g.tick), [g.x0 + 2, by, g.x0 + 3, by + 2, g.x0 + 5, by - 1, g.x0 + 1, by + 4, g.x0 + 6, by + 1]);
+    c.poly([[ax, by - 1], [g.x0 + 1, by + k], [ax, by + k]], L(col)); // the blanket's underside
+    c.line(ax, by - 2, g.x0, by + k, D(col));
+    c.line(ax, by, ax, by + k, D(col));
+    c.row(by + k, g.x0 + 1, ax, D(col));
+  }
+  /** In the side view: the blanket lying from xa to xb on a mattress whose top is my, thrown back in a heap. */
+  function coverBackSide(c, xa, xb, my, col, o = {}) {
+    const yb = my + (o.deep || 3),
+      xm = xa + Math.round((xb - xa) * 0.42),
+      tick = o.tick || C.cream;
+    c.clearRect(xa, my - 1, xb, my - 1);
+    mattress(c, xa, xm, my, yb, tick);
+    dots(c, D(tick), [xa + 2, my + 1, xa + 3, my + 2, xa + 6, my + 1, xm - 2, my + 2]);
+    c.poly([[xm, my - 1], [xm + 2, my - 3], [xm + 7, my - 3], [xb, my - 1], [xb, yb], [xm - 1, yb]], col);
+    c.line(xm, my - 1, xm + 2, my - 3, L(col));
+    c.row(my - 3, xm + 2, xm + 7, L(col));
+    c.line(xm + 7, my - 3, xb, my - 1, L(col));
+    c.line(xm + 3, my - 1, xm + 1, yb, D(col));
+    c.line(xm + 8, my - 1, xm + 10, yb - 1, D(col));
+    if (o.stripe) c.row(yb - 1, xm + 3, xb, o.stripe);
+  }
+  const dent = (c, x, y, col = C.white) => dots(c, D(col), [x, y, x + 1, y, x + 2, y + 1]);
+
+  const BLANKET = hex('#5c5a48'),
+    STRIPE = hex('#7a3a34');
+  {
+    // the old single bed: iron ends
+    const front = (used) => (c) => {
+      const g = bedFront(c, { iron: true, frame: C.iron, head: 16, foot: 11 });
+      pillowFront(c, g, g.x0 + 2, g.x1 - 2);
+      const by = coverFront(c, g, BLANKET);
+      c.row(g.ey - 2, g.x0, g.x1, STRIPE);
+      c.row(g.ey - 3, g.x0, g.x1, D(BLANKET));
+      c.row(g.ey + 2, g.x0, g.x1, mix(STRIPE, 0.7));
+      if (used) {
+        coverBack(c, g, BLANKET, by);
+        dent(c, g.x0 + 5, g.sy + 2);
+      }
+      g.foot();
+    };
+    V('bed-single-old', {
+      base: 'side',
+      side: view(20, 37, front(false)),
+      used: view(38, 20, (c) => {
+        const my = ironBed(c, { head: 16, foot: 11 });
+        pillow(c, 5, my - 2, 10, my);
+        dent(c, 7, my - 1);
+        coverBackSide(c, 12, 33, my, BLANKET, { stripe: STRIPE });
+      }),
+      sideUsed: view(20, 37, front(true)),
+    });
+  }
+  {
+    // the hospital bed
+    const ic = hex('#8d8f8a'),
+      bl = hex('#9aa39a'),
+      st = hex('#7d8880');
+    const front = (used) => (c) => {
+      const g = bedFront(c, { iron: true, frame: ic, head: 19, foot: 15, thick: 2, tick: C.white, rail: 6 });
+      pillowFront(c, g, g.x0 + 2, g.x1 - 2, C.cream);
+      const by = coverFront(c, g, bl, { sheet: C.cream });
+      c.row(by + 3, g.x0, g.x1, st);
+      c.row(g.ey - 2, g.x0, g.x1, st);
+      if (used) {
+        coverBack(c, g, bl, by);
+        dent(c, g.x0 + 5, g.sy + 2, C.cream);
+      }
+      g.foot();
+      c.rect(9, g.b - 5, 11, g.b - 4, hex('#6f706c')); // crank
+      dots(c, K, [1, g.b, c.w - 2, g.b]);
+    };
+    V('bed-iron', {
+      base: 'side',
+      side: view(20, 40, front(false)),
+      used: over('bed-iron', (c) => {
+        c.clearRect(11, 8, 33, 9);
+        mattress(c, 3, 33, 10, 13, C.white);
+        pillow(c, 5, 8, 10, 10);
+        dent(c, 7, 9);
+        dots(c, D(C.white), [13, 11, 15, 12, 18, 11]);
+        c.poly([[21, 10], [23, 7], [29, 7], [33, 9], [33, 13], [20, 13]], bl);
+        c.line(21, 10, 23, 7, L(bl));
+        c.row(7, 23, 29, L(bl));
+        c.line(24, 9, 22, 13, st);
+        c.line(29, 9, 31, 12, st);
+      }),
+      sideUsed: view(20, 40, front(true)),
+    });
+  }
+  {
+    // the old double bed with its patchwork quilt
+    const q = [C.wine, C.mustard, C.forest, C.navy, hex('#8a5560')];
+    const front = (used) => (c) => {
+      const g = bedFront(c, { head: 21, foot: 12, thick: 1 });
+      c.rect(1, 2, c.w - 2, 6, WL); // the heavy top of the headboard
+      c.row(2, 1, c.w - 2, L(WL));
+      c.row(6, 1, c.w - 2, D(W));
+      pillowFront(c, g, g.x0 + 2, g.x0 + 12);
+      pillowFront(c, g, g.x1 - 12, g.x1 - 2, C.bone);
+      const by = g.sy + 8;
+      c.rect(g.x0, by - 2, g.x1, by - 1, C.cream);
+      for (let x = g.x0; x <= g.x1; x += 3)
+        for (let y = by; y <= g.ey; y += 3) c.rect(x, y, Math.min(g.x1, x + 2), Math.min(g.ey, y + 2), q[(((x - g.x0) / 3) * 2 + (y - by) / 3) % 5]);
+      c.row(by, g.x0, g.x1, L(C.cream));
+      if (used) {
+        coverBack(c, g, C.wine, by);
+        dent(c, g.x0 + 5, g.sy + 2);
+      }
+      g.foot();
+    };
+    V('bed-double-old', {
+      base: 'side',
+      side: view(32, 41, front(false)),
+      used: over('bed-double-old', (c) => {
+        const my = 15;
+        c.clearRect(14, my - 1, 36, my - 1);
+        mattress(c, 4, 37, my, 19);
+        pillow(c, 5, my - 3, 11, my);
+        pillow(c, 7, my - 4, 12, my - 2, C.bone);
+        dent(c, 8, my - 3, C.bone);
+        dots(c, D(C.cream), [15, my + 1, 17, my + 2, 20, my + 1, 22, my + 3]);
+        c.poly([[24, my - 1], [26, my - 4], [32, my - 4], [37, my - 2], [37, my + 4], [23, my + 4]], C.wine); // the quilt in a heap, lining upwards
+        for (let x = 26; x <= 36; x += 3) c.rect(x, my + 1, Math.min(37, x + 2), my + 3, q[((x - 26) / 3) % 5]);
+        c.line(24, my - 1, 26, my - 4, L(C.wine));
+        c.row(my - 4, 26, 32, L(C.wine));
+        c.row(my + 4, 23, 37, D(C.wine));
+      }),
+      sideUsed: view(32, 41, front(true)),
+    });
+  }
+  {
+    // the unmade bed; used, it has been made
+    const front = (made) => (c) => {
+      const g = bedFront(c, { head: 17, foot: 10, x1: 18 });
+      if (made) {
+        pillowFront(c, g, g.x0 + 2, g.x1 - 2);
+        coverFront(c, g, C.wine);
+      } else {
+        pillowFront(c, g, g.x0 + 1, g.x1 - 4, C.white, 1);
+        c.set(g.x1 - 3, g.sy + 2, C.white);
+        dots(c, D(C.cream), [g.x0 + 3, g.sy + 7, g.x0 + 5, g.sy + 8, g.x1 - 3, g.sy + 6, g.x0 + 8, g.sy + 7]);
+        const t = g.sy + 9;
+        c.poly([[g.x0 + 2, t + 1], [g.x0 + 8, t - 1], [g.x1, t + 2], [g.x1, g.ey], [g.x0, g.ey], [g.x0, t + 4]], C.wine); // the blanket in a heap
+        c.line(g.x0 + 2, t + 1, g.x0 + 8, t - 1, L(C.wine));
+        c.line(g.x0 + 8, t - 1, g.x1, t + 2, L(C.wine));
+        c.line(g.x0 + 5, t + 2, g.x0 + 3, g.ey - 1, D(C.wine));
+        c.line(g.x0 + 10, t + 2, g.x0 + 12, g.ey - 2, D(C.wine));
+        c.poly([[g.x1, t + 3], [g.x1 + 4, t + 6], [g.x1 + 4, g.b], [g.x1 + 2, g.b], [g.x1, g.ey]], C.wine); // and trailing to the floor
+        c.col(g.x1 + 2, t + 6, g.b, D(C.wine));
+      }
+      g.foot();
+    };
+    V('bed-unmade', {
+      base: 'side',
+      side: view(24, 37, front(false)),
+      used: view(38, 22, (c) => {
+        const my = woodBed(c, { head: 17, foot: 10 });
+        pillow(c, 5, my - 2, 10, my);
+        blanket(c, 13, 33, my - 1, my + 3, C.wine);
+        c.rect(13, my - 1, 15, my + 3, C.cream);
+      }),
+      sideUsed: view(24, 37, front(true)),
+    });
+  }
+  {
+    const fc = hex('#8a8272');
+    const front = (used) => (c) => {
+      const g = bedFront(c, { head: 13, foot: 9, frame: fc });
+      pillowFront(c, g, g.x0 + 2, g.x1 - 2);
+      c.clearRect(0, 0, 0, 0);
+      const by = coverFront(c, g, C.navy, { from: 7 });
+      dots(c, C.glow, [g.x0 + 2, by + 2, g.x0 + 7, by + 1, g.x0 + 10, by + 4, g.x0 + 4, by + 5, g.x0 + 8, by + 7, g.x0 + 1, by + 8]);
+      if (used) {
+        coverBack(c, g, C.navy, by);
+        dent(c, g.x0 + 4, g.sy + 2);
+      }
+      g.foot();
+    };
+    V('bed-child', {
+      base: 'side',
+      side: view(16, 31, front(false)),
+      used: view(28, 17, (c) => {
+        const my = woodBed(c, { head: 13, foot: 9, frame: fc });
+        pillow(c, 5, my - 2, 9, my);
+        dent(c, 6, my - 1);
+        coverBackSide(c, 10, 23, my, C.navy);
+        dots(c, C.glow, [19, my, 21, my + 1, 17, my + 2]);
+      }),
+      sideUsed: view(16, 31, front(true)),
+    });
+  }
+  {
+    // the four-poster
+    const dr = hex('#5a2430'),
+      cov = hex('#6a5030');
+    const front = (used) => (c) => {
+      const b = c.h - 2,
+        w = c.w,
+        sy = b - 11 - 14,
+        ey = b - 11,
+        g = { x0: 3, x1: w - 4, sy, ey, b, tick: C.cream };
+      c.rect(3, 5, w - 4, sy, mix(dr, 0.42)); // the cloth behind the head, in the shadow of the tester
+      for (let x = 6; x < w - 4; x += 4) c.col(x, 5, sy, mix(dr, 0.33));
+      c.rect(5, sy - 11, w - 6, sy, W); // headboard
+      c.row(sy - 11, 5, w - 6, WL);
+      panel(c, 7, sy - 9, w - 8, sy - 2, W);
+      c.rect(3, sy, w - 4, ey, C.cream);
+      c.row(sy, 3, w - 4, D(C.cream));
+      pillowFront(c, g, 6, 15);
+      pillowFront(c, g, w - 16, w - 7, C.bone);
+      const by = coverFront(c, g, cov, { from: 7 });
+      c.rect(3, ey + 1, w - 4, ey + 4, D(cov));
+      c.row(ey + 2, 3, w - 4, C.gold);
+      c.row(by + 2, 3, w - 4, C.gold);
+      if (used) {
+        coverBack(c, g, cov, by);
+        dent(c, 9, sy + 2);
+      }
+      c.rect(3, b - 6, w - 4, b - 4, WD);
+      c.row(b - 6, 3, w - 4, W);
+      c.rect(3, b - 3, w - 4, b - 2, dr); // valance
+      for (let x = 4; x < w - 4; x += 3) c.col(x, b - 3, b - 2, D(dr));
+      c.rect(1, 1, w - 2, 4, dr); // tester
+      c.row(1, 1, w - 2, L(dr));
+      for (let x = 1; x <= w - 4; x += 4) {
+        c.rect(x, 5, x + 2, 6, dr);
+        c.set(x + 1, 7, C.gold);
+      }
+      c.rect(1, 5, 2, b, WD); // posts
+      c.rect(w - 3, 5, w - 2, b, WD);
+      c.col(1, 5, b, W);
+      c.col(w - 3, 5, b, W);
+      c.poly([[3, 5], [8, 5], [6, 24], [7, 31], [5, 40], [3, 43]], dr); // curtains tied back
+      c.line(5, 8, 4, 36, D(dr));
+      c.row(31, 3, 7, C.gold);
+      c.poly([[w - 4, 5], [w - 9, 5], [w - 7, 24], [w - 8, 31], [w - 6, 40], [w - 4, 43]], dr);
+      c.line(w - 6, 8, w - 5, 36, D(dr));
+      c.row(31, w - 8, w - 4, C.gold);
+    };
+    V('bed-fourposter', {
+      base: 'side',
+      side: view(36, 60, front(false)),
+      used: over('bed-fourposter', (c) => {
+        c.clearRect(15, 32, 42, 32);
+        mattress(c, 6, 42, 33, 37);
+        pillow(c, 6, 30, 12, 33);
+        pillow(c, 8, 29, 13, 31, C.bone);
+        dent(c, 9, 30, C.bone);
+        dots(c, D(C.cream), [16, 34, 18, 35, 21, 34, 24, 36]);
+        c.poly([[27, 33], [29, 29], [36, 29], [42, 31], [42, 37], [26, 37]], cov);
+        c.line(27, 33, 29, 29, L(cov));
+        c.row(29, 29, 36, L(cov));
+        c.line(30, 31, 28, 37, D(cov));
+        c.line(36, 31, 38, 36, D(cov));
+        c.row(35, 31, 42, C.gold);
+        c.rect(43, 5, 44, 44, WD); // the post again, in front of the heap
+        c.col(43, 5, 44, W);
+        c.poly([[42, 30], [41, 28], [42, 36]], dr);
+      }),
+      sideUsed: view(36, 60, front(true)),
+    });
+  }
+  {
+    // the bare mattress; used, somebody has made a bed of it
+    const t = hex('#a39a7c');
+    const front = (used) => (c) => {
+      c.rect(1, 2, 18, 21, t);
+      c.row(2, 2, 17, L(t));
+      c.clear(1, 2);
+      c.clear(18, 2);
+      for (let y = 5; y < 21; y += 3) c.row(y, 2, 17, hex('#7c8086')); // ticking stripes
+      c.rect(1, 22, 18, 25, D(t));
+      c.row(25, 1, 18, mix(t, 0.5));
+      stain(c, 5, 5, 11, 10, C.blood, 2);
+      stain(c, 9, 14, 14, 18, hex('#6e6238'), 5);
+      c.set(8, 22, C.blood);
+      tear(c, 3, 16, t, 3);
+      if (used) {
+        c.rect(4, 3, 14, 6, C.bone);
+        c.row(6, 4, 14, D(C.bone));
+        c.rect(1, 11, 18, 21, BLANKET);
+        c.row(11, 1, 18, L(BLANKET));
+        c.rect(1, 22, 18, 23, D(BLANKET));
+        c.row(19, 1, 18, STRIPE);
+        c.line(5, 13, 3, 20, D(BLANKET));
+      }
+    };
+    V('mattress-stained', {
+      base: 'side',
+      side: view(20, 28, front(false)),
+      used: over(
+        'mattress-stained',
+        (c) => {
+          pillow(c, 3, 1, 9, 3, C.bone);
+          blanket(c, 14, 34, 2, 6, BLANKET);
+          c.row(5, 14, 34, STRIPE);
+          c.line(17, 3, 15, 6, D(BLANKET));
+          c.rect(31, 7, 34, 8, BLANKET);
+        },
+        { h: 10 },
+      ),
+      sideUsed: view(20, 28, front(true)),
+    });
+  }
+  {
+    // cradle and crib: a small blanket left hanging over the side
+    const front = (used) => (c) => {
+      c.rect(2, 3, 11, 11, W);
+      c.rect(3, 2, 10, 2, WL); // the hood
+      c.row(3, 2, 11, WL);
+      c.col(2, 3, 11, WL);
+      c.rect(4, 4, 9, 6, mix(W, 0.4));
+      c.row(6, 4, 9, C.cream);
+      c.row(7, 2, 11, WL); // foot board
+      panel(c, 4, 8, 9, 10, W);
+      c.row(12, 3, 10, WD);
+      c.rect(2, 13, 3, 14, WD); // the rockers, end on
+      c.rect(10, 13, 11, 14, WD);
+      if (used) {
+        c.rect(11, 6, 13, 12, ROSE);
+        c.col(11, 6, 12, L(ROSE));
+        c.set(13, 6, null);
+        c.clear(13, 6);
+        c.clear(12, 12);
+      }
+    };
+    V('cradle', {
+      base: 'side',
+      side: view(14, 16, front(false)),
+      used: over('cradle', (c) => {
+        c.rect(9, 5, 14, 11, ROSE);
+        c.row(5, 9, 14, L(ROSE));
+        c.col(11, 6, 11, D(ROSE));
+        c.rect(10, 12, 13, 12, ROSE);
+        c.set(12, 13, ROSE);
+      }),
+      sideUsed: view(15, 16, front(true)),
+    });
+    const cc = hex('#8d8a7a');
+    const end = (used) => (c) => {
+      const t = canvas(14, 20);
+      crib(t, cc, { bed: hex('#9c937a') });
+      c.stamp(t, 0, 0);
+      cobweb(c, 3, 5, 1, 1, 4, true);
+      c.speckle(1, 1, 13, 18, hex('#6a5a48'), 9, 3);
+      if (used) {
+        c.rect(12, 3, 14, 11, ROSE);
+        c.col(12, 3, 11, L(ROSE));
+        c.clear(14, 3);
+        c.clear(13, 11);
+      }
+    };
+    V('crib-old', {
+      side: view(14, 20, end(false)),
+      used: over('crib-old', (c) => {
+        c.rect(8, 3, 14, 10, ROSE);
+        c.row(3, 8, 14, L(ROSE));
+        c.col(10, 4, 10, D(ROSE));
+        c.col(13, 4, 9, D(ROSE));
+        c.clear(8, 10);
+        c.clear(11, 10);
+        c.clear(14, 10);
+      }),
+      sideUsed: view(16, 20, end(true)),
+    });
+  }
+
+  /* ---------- wardrobes, drawers, cabinets: from the side a plain narrow case, its front to the right ---------- */
+  function wardrobeSide(c, col, state) {
+    const b = c.h - 2;
+    c.rect(1, 1, 10, 3, L(col)); // cornice
+    c.row(1, 1, 10, L(L(col)));
+    c.row(3, 1, 10, col);
+    c.rect(2, 4, 9, b - 1, col);
+    c.col(2, 4, b - 1, L(col));
+    panel(c, 4, 6, 7, b - 9, col);
+    c.row(b - 7, 2, 9, D(col));
+    c.row(b - 1, 2, 9, D(col));
+    legs(c, [2, 8], b, b, D(col));
+    if (state === 'open') {
+      wardrobeDoor(c, 10, 18, 5, 29, col); // the near door, standing straight out
+      c.col(10, 5, 29, D(col));
+      dots(c, C.brass, [17, 18, 17, 19]);
+    } else if (state === 'ajar') {
+      c.rect(10, 5, 12, 29, col);
+      c.col(10, 5, 29, D(col));
+      c.col(12, 5, 29, L(col));
+      dots(c, hex('#6a6a70'), [13, 21, 13, 23, 13, 25]); // long fingers round the edge of the door
+      c.set(11, 12, C.glow);
+    } else dots(c, C.brass, [10, 18, 10, 19]);
+  }
+  /** The wardrobe with both doors swung wide (on a canvas 30 wide), as 'wardrobe-open' is drawn. */
+  function wardrobeOpen(c, col, coats) {
+    const lc = L(col);
+    wardrobeBody(c, col);
+    c.clearRect(23, 1, 28, 36);
+    c.rect(3, 5, 20, 29, mix(col, 0.3));
+    c.row(7, 3, 20, C.steel);
+    coats.forEach((cc, i) => {
+      const x = 4 + i * 3;
+      c.set(x + 1, 8, C.steel);
+      if (!cc) return;
+      c.rect(x, 9, x + 2, 22 + (i % 2) * 4, cc);
+      c.col(x, 10, 22 + (i % 2) * 4, L(cc));
+      c.clear(x, 9);
+      c.set(x, 9, mix(col, 0.3));
+    });
+    c.rect(1, 5, 2, 29, lc);
+    c.rect(19, 5, 20, 29, mix(col, 0.3));
+    c.rect(21, 4, 21, 29, col);
+    c.rect(22, 5, 27, 30, lc);
+    c.col(22, 5, 30, L(lc));
+    panel(c, 23, 7, 26, 28, lc);
+    c.row(30, 22, 27, D(lc));
+  }
+  V('wardrobe-old', {
+    side: view(12, 38, (c) => wardrobeSide(c, W, 'shut')),
+    used: view(30, 38, (c) => A['wardrobe-open'].draw(c)),
+    sideUsed: view(21, 38, (c) => wardrobeSide(c, W, 'open')),
+  });
+  V('wardrobe-open', {
+    side: view(21, 38, (c) => wardrobeSide(c, W, 'open')),
+    used: view(24, 38, (c) => A['wardrobe-old'].draw(c)),
+    sideUsed: view(12, 38, (c) => wardrobeSide(c, W, 'shut')),
+  });
+  {
+    // the wardrobe with something in it: thrown open, there is nothing there
+    const col = hex('#4f3528');
+    V('wardrobe-eyes', {
+      side: view(15, 38, (c) => wardrobeSide(c, col, 'ajar')),
+      used: view(30, 38, (c) => {
+        wardrobeOpen(c, col, [hex('#4b4438'), null, null, C.navy, null]);
+        c.rect(6, 28, 9, 28, C.black); // one shoe
+        c.line(12, 9, 14, 12, C.steel); // a hanger knocked askew
+      }),
+      sideUsed: view(21, 38, (c) => wardrobeSide(c, col, 'open')),
+    });
+  }
+  function drawersSide(c, col, open) {
+    const b = c.h - 2,
+      n = Math.floor((b - 5) / 4);
+    c.rect(1, 2, 11, 3, L(col));
+    c.row(2, 1, 11, L(L(col)));
+    c.rect(2, 4, 10, b - 1, col);
+    c.col(2, 4, b - 1, L(col));
+    panel(c, 4, 6, 8, b - 3, col);
+    legs(c, [2, 9], b, b, D(col));
+    for (let i = 0; i < n; i++) if (i !== open) c.set(11, 6 + i * 4, C.brass);
+    if (open != null) {
+      const y = 5 + open * 4;
+      c.rect(11, y + 1, 16, y + 4, L(col)); // the drawer, pulled out
+      c.row(y + 1, 11, 16, L(L(col)));
+      c.row(y + 4, 11, 16, col);
+      c.set(17, y + 3, C.brass);
+      c.rect(11, y, 13, y, C.cream); // clothes spilling over
+      c.set(12, y - 1, C.cream);
+      c.rect(14, y, 15, y, C.wine);
+      c.col(14, y, y + 3, C.wine);
+    }
+  }
+  for (const [slug, col] of [['chest-of-drawers', W], ['dresser', WL]])
+    V(slug, {
+      side: view(13, 23, (c) => drawersSide(c, col)),
+      used: view(22, 23, (c) => chestOfDrawers(c, col, 1)),
+      sideUsed: view(19, 23, (c) => drawersSide(c, col, 1)),
+    });
+  V('chest-of-drawers-open', {
+    side: view(19, 23, (c) => drawersSide(c, W, 1)),
+    used: view(22, 23, (c) => chestOfDrawers(c, W)),
+    sideUsed: view(13, 23, (c) => drawersSide(c, W)),
+  });
+
+  /* ---------- bookcases ---------- */
+  /** A bookcase from the side: the plain end board, and past its front edge a sliver of the books. */
+  function bookcaseSide(c, col, fill = 1, seed = 3) {
+    const b = c.h - 2;
+    c.row(1, 1, 9, L(col));
+    c.rect(2, 2, 8, b - 2, col);
+    c.col(2, 2, b - 2, L(col));
+    c.col(5, 4, b - 4, D(col));
+    c.rect(2, b - 1, 8, b, D(col));
+    for (let i = 0; i < 5; i++) {
+      const t = 3 + Math.round((i * 32) / 5),
+        e = 2 + Math.round(((i + 1) * 32) / 5) - 1,
+        f = Array.isArray(fill) ? fill[i] : fill;
+      c.col(8, t, e, mix(col, 0.42));
+      if (f > 0) books(c, 8, 8, e, e - t, seed + i * 7, 1);
+    }
+  }
+  const bookOnFloor = (c, x, y, col) => {
+    c.rect(x, y, x + 5, y + 1, col);
+    c.row(y, x, x + 5, L(col));
+    c.set(x + 5, y + 1, C.paper);
+  };
+  {
+    const gap = (c, x0, x1, t, e, col) => {
+      c.rect(x0, t, x1, e, mix(col, 0.42));
+      c.row(t, x0, x1, mix(col, 0.3));
+    };
+    V('bookcase-full', {
+      side: view(11, 38, (c) => bookcaseSide(c, W)),
+      used: over('bookcase-full', (c) => {
+        gap(c, 9, 12, 9, 14, W); // two books taken, their neighbours leaning into the gap
+        c.line(13, 10, 11, 14, C.navy);
+        gap(c, 16, 18, 22, 27, W);
+        c.line(15, 23, 16, 27, C.mustard);
+        bookOnFloor(c, 14, 35, C.wine);
+      }),
+      sideUsed: view(17, 38, (c) => {
+        bookcaseSide(c, W);
+        c.rect(9, 11, 10, 14, C.mustard); // one half pulled out
+        c.row(11, 9, 10, L(C.mustard));
+        bookOnFloor(c, 10, 35, C.wine);
+      }),
+    });
+    const hc = hex('#5c3f2e');
+    V('bookcase-half', {
+      side: view(11, 38, (c) => {
+        bookcaseSide(c, hc, [0.5, 0, 1, 0, 1], 9);
+        cobweb(c, 2, 2, 1, 1, 4);
+      }),
+      used: over('bookcase-half', (c) => {
+        gap(c, 8, 12, 12, 14, hc); // the book that lay flat is gone
+        gap(c, 4, 8, 25, 27, hc);
+        cobweb(c, 22, 23, -1, 1, 5);
+        bookOnFloor(c, 5, 35, C.parchment);
+        bookOnFloor(c, 12, 35, C.wine);
+        c.row(34, 12, 20, C.ash);
+      }),
+      sideUsed: view(17, 38, (c) => {
+        bookcaseSide(c, hc, [0.5, 0, 1, 0, 0], 9);
+        cobweb(c, 2, 2, 1, 1, 4);
+        bookOnFloor(c, 10, 35, C.parchment);
+        c.rect(11, 33, 15, 34, C.wine);
+        c.row(33, 11, 15, L(C.wine));
+      }),
+    });
+    // the toppled case; used, the books have been picked up and piled
+    const fallen = (c) => {
+      c.rect(1, 6, 30, 16, W);
+      c.row(6, 1, 30, WL);
+      c.row(16, 1, 30, WD);
+      for (let x = 7; x < 30; x += 6) c.col(x, 7, 15, WD);
+      c.line(3, 9, 5, 12, WD);
+      c.line(20, 8, 24, 10, WD);
+    };
+    const pile = (c, x, b, cols) => cols.forEach((col, i) => bookOnFloor(c, x + (i % 2), b - 1 - i * 2, col));
+    const fallenEnd = (c) => {
+      c.rect(1, 6, 9, 16, W); // the top of the case, towards us
+      c.row(6, 1, 9, WL);
+      c.col(1, 6, 16, WL);
+      c.frame(3, 8, 7, 14, WD);
+      c.row(16, 1, 9, WD);
+    };
+    V('bookcase-toppled', {
+      base: 'side',
+      side: view(20, 18, (c) => {
+        fallenEnd(c);
+        c.rect(10, 13, 15, 14, C.wine);
+        c.rect(11, 15, 17, 16, C.navy);
+        c.poly([[13, 9], [16, 10], [14, 13], [12, 12]], C.forest);
+        c.rect(15, 13, 18, 14, C.mustard);
+        c.rect(3, 4, 7, 5, C.plum);
+        c.row(4, 3, 7, L(C.plum));
+      }),
+      used: view(44, 18, (c) => {
+        fallen(c);
+        pile(c, 32, 16, [C.navy, C.wine, C.mustard, C.forest, C.plum, C.teal, C.parchment]);
+      }),
+      sideUsed: view(20, 18, (c) => {
+        fallenEnd(c);
+        pile(c, 11, 16, [C.navy, C.wine, C.mustard, C.forest, C.plum, C.teal, C.parchment]);
+      }),
+    });
+    // the bookcase that is a door
+    const dc = hex('#5f3f2c');
+    const shutSide = (c) => {
+      bookcaseSide(c, dc, 1, 17);
+      c.col(1, 2, 36, NIGHT); // the hairline gap, at the wall
+    };
+    const openSide = (c) => {
+      c.rect(1, 1, 5, 36, C.stoneDark); // the wall, cut through
+      c.col(1, 1, 36, L(C.stoneDark));
+      c.rect(4, 3, 5, 36, NIGHT);
+      dots(c, D(C.stoneDark), [2, 8, 3, 8, 2, 20, 3, 20, 2, 30]);
+      bookcase(c, 8, 2, 22, 36, dc, 1, 17); // the case swung out into the room, books towards us
+      c.rect(6, 2, 7, 36, mix(dc, 0.5));
+      c.rect(15, 16, 16, 21, C.red);
+      c.row(17, 15, 16, C.gold);
+    };
+    V('bookcase-door', {
+      side: view(11, 38, shutSide),
+      used: view(36, 38, (c) => A['bookcase-door-open'].draw(c)),
+      sideUsed: view(25, 38, openSide),
+    });
+    V('bookcase-door-open', {
+      side: view(25, 38, openSide),
+      used: view(26, 38, (c) => A['bookcase-door'].draw(c)),
+      sideUsed: view(11, 38, shutSide),
+    });
+  }
+
+  /* ---------- cabinets and clocks ---------- */
+  {
+    const sbSide = (open) => (c) => {
+      c.rect(1, 2, 12, 3, WL);
+      c.row(2, 1, 12, L(WL));
+      c.rect(2, 4, 11, 15, W);
+      c.col(2, 4, 15, L(W));
+      panel(c, 4, 6, 9, 13, W);
+      c.row(15, 2, 11, WD);
+      legs(c, [2, 10], 16, 17, WD);
+      c.set(12, 6, C.brass);
+      if (open) {
+        c.rect(12, 9, 18, 14, W); // a door standing out
+        c.row(9, 12, 18, L(W));
+        panel(c, 13, 10, 17, 13, W);
+        c.set(17, 11, C.brass);
+      } else c.set(12, 11, C.brass);
+    };
+    V('sideboard', {
+      side: view(14, 19, sbSide(false)),
+      used: over('sideboard', (c) => {
+        c.rect(13, 9, 22, 14, mix(W, 0.3)); // the middle doors open
+        c.row(12, 13, 22, mix(W, 0.55));
+        c.rect(14, 10, 14, 11, C.wine); // a bottle, glasses, plates
+        c.set(14, 9, C.wine);
+        dots(c, C.glassLight, [16, 11, 18, 11, 16, 10, 18, 10]);
+        c.row(14, 15, 20, C.white);
+        c.row(13, 16, 19, C.bone);
+        c.rect(11, 9, 12, 15, WL); // the doors, edge on
+        c.col(11, 9, 15, L(WL));
+        c.rect(23, 9, 24, 15, WL);
+        c.col(23, 9, 15, L(WL));
+      }),
+      sideUsed: view(20, 19, sbSide(true)),
+    });
+    const paneCol = mix(C.glass, 0.6);
+    const dcSide = (open) => (c) => {
+      c.rect(1, 1, 9, 2, WD);
+      c.row(1, 1, 9, W);
+      shelves(c, 2, 3, 8, 26, WD, 3, (i, x0, t, x1, b) => {
+        if (i === 0) {
+          c.rect(x0 + 1, b - 3, x0 + 2, b, C.bone);
+          c.set(x1, b, C.gold);
+        } else if (i === 1) {
+          c.rect(x0 + 2, b - 3, x0 + 3, b, C.wine);
+          c.set(x0, b, C.mustard);
+        } else c.rect(x0 + 1, b - 1, x1 - 1, b, C.stoneLight);
+      });
+      c.line(3, 9, 5, 6, C.glassLight); // the glass side
+      dots(c, C.glass, [6, 14, 4, 20, 6, 23]);
+      c.rect(2, 27, 8, 34, WD);
+      panel(c, 3, 28, 7, 33, WD);
+      legs(c, [2, 7], 35, 36, mix(WD, 0.7));
+      if (open) {
+        c.rect(9, 3, 16, 26, WD); // the glazed door, standing out
+        c.rect(10, 5, 15, 24, paneCol);
+        c.row(14, 10, 15, WD);
+        c.line(11, 11, 13, 8, C.glassLight);
+        c.line(12, 21, 14, 18, C.glass);
+        c.set(15, 15, C.brass);
+      } else c.set(9, 14, C.brass);
+    };
+    V('display-cabinet', {
+      side: view(11, 38, dcSide(false)),
+      used: over(
+        'display-cabinet',
+        (c) => {
+          const inner = mix(WD, 0.42);
+          for (let y = 4; y <= 25; y++)
+            for (let x = 13; x <= 20; x++) {
+              const p = c.get(x, y);
+              if (p === C.glass || p === C.glassLight) c.set(x, y, inner); // no glass in front of this half now
+            }
+          c.rect(16, 13, 18, 17, inner); // and one of the curios taken
+          c.rect(12, 3, 13, 26, inner);
+          c.col(12, 3, 26, WD);
+          c.rect(23, 3, 26, 26, WD); // the door, swung towards us
+          c.col(23, 3, 26, W);
+          c.rect(24, 5, 25, 24, paneCol);
+          c.row(14, 24, 25, WD);
+          dots(c, C.glassLight, [24, 9, 25, 8, 24, 20]);
+        },
+        { w: 28 },
+      ),
+      sideUsed: view(18, 38, dcSide(true)),
+    });
+    const ccSide = (open) => (c) => {
+      c.rect(1, 1, 8, 2, W);
+      c.row(1, 1, 8, WL);
+      c.rect(2, 3, 7, 21, W);
+      c.col(2, 3, 21, L(W));
+      panel(c, 3, 5, 6, 19, W);
+      c.col(8, 3, 21, mix(W, 0.42)); // the open shelves: plates seen edge on
+      for (const [y, col] of [[6, C.white], [12, C.glassLight], [18, C.white]]) c.col(8, y, y + 2, col);
+      c.rect(1, 22, 10, 23, WL);
+      c.row(22, 1, 10, L(WL));
+      c.rect(2, 24, 9, 36, W);
+      c.col(2, 24, 36, L(W));
+      panel(c, 3, 26, 8, 35, W);
+      c.set(10, 26, C.brass);
+      if (open) {
+        c.rect(10, 29, 17, 35, W);
+        c.row(29, 10, 17, L(W));
+        panel(c, 11, 30, 16, 34, W);
+        c.set(16, 32, C.brass);
+        c.clearRect(8, 6, 8, 8);
+        c.col(8, 6, 8, mix(W, 0.42));
+      } else c.set(10, 32, C.brass);
+    };
+    V('china-cabinet', {
+      side: view(12, 38, ccSide(false)),
+      used: over(
+        'china-cabinet',
+        (c) => {
+          c.rect(14, 5, 17, 8, mix(W, 0.42)); // two plates taken down
+          c.rect(9, 11, 12, 14, mix(W, 0.42));
+          c.rect(13, 29, 22, 35, mix(W, 0.3)); // the cupboard below open
+          c.row(32, 13, 22, mix(W, 0.55));
+          c.rect(15, 30, 19, 31, C.white);
+          c.row(31, 15, 19, D(C.white));
+          c.rect(14, 34, 17, 35, C.white);
+          c.rect(19, 33, 20, 35, C.glassLight);
+          c.rect(24, 29, 26, 36, WL); // its door, swung towards us
+          c.col(24, 29, 36, L(WL));
+          c.row(36, 24, 26, D(WL));
+        },
+        { w: 28 },
+      ),
+      sideUsed: view(19, 38, ccSide(true)),
+    });
+    function clockSide(c, stopped, open) {
+      const col = stopped ? hex('#55392a') : W;
+      c.rect(3, 1, 6, 1, col);
+      c.rect(2, 2, 7, 2, col);
+      c.rect(1, 3, 8, 12, col); // hood
+      c.col(1, 3, 12, L(col));
+      c.rect(3, 5, 6, 10, mix(col, 0.35)); // its little side window
+      dots(c, C.brass, [4, 7, 5, 8]);
+      c.col(9, 5, 10, stopped ? C.parchment : C.cream); // the dial, edge on
+      c.rect(2, 13, 7, 28, col); // trunk
+      c.col(2, 13, 28, L(col));
+      panel(c, 4, 15, 5, 26, col);
+      c.rect(1, 29, 8, 36, col); // base
+      c.col(1, 29, 36, L(col));
+      c.row(29, 1, 8, L(col));
+      panel(c, 3, 31, 6, 34, col);
+      c.row(36, 1, 8, D(col));
+      if (stopped) {
+        cobweb(c, 1, 3, 1, 1, 4);
+        cobweb(c, 7, 13, -1, 1, 4);
+      }
+      if (open) {
+        c.rect(8, 13, 13, 28, col); // the long door, standing out
+        c.row(13, 8, 13, L(col));
+        c.rect(10, 15, 11, 26, mix(col, 0.35));
+        c.set(13, 20, C.brass);
+      }
+    }
+    const clockOpen = (slug, stopped) =>
+      over(
+        slug,
+        (c) => {
+          const col = stopped ? hex('#55392a') : W;
+          c.rect(3, 14, 8, 27, mix(col, 0.3)); // the case open: weights and pendulum
+          c.col(3, 14, 17, C.steel);
+          c.rect(3, 18, 3, 21, C.brass);
+          c.col(8, 14, 20, C.steel);
+          c.rect(8, 21, 8, 24, C.brass);
+          if (stopped) {
+            c.line(5, 14, 7, 22, C.brass);
+            c.set(7, 23, C.brass);
+            cobweb(c, 8, 14, -1, 1, 5);
+            c.set(5, 26, C.gold); // and a key at the bottom
+            c.set(6, 27, C.gold);
+            c.set(5, 27, C.gold);
+          } else {
+            c.col(5, 14, 22, C.brass);
+            c.rect(5, 23, 6, 24, C.gold);
+            c.set(4, 23, C.gold);
+          }
+          c.rect(11, 13, 14, 28, L(col)); // its door, swung towards us
+          c.col(11, 13, 28, col);
+          c.rect(12, 15, 13, 26, mix(col, 0.5));
+          c.row(28, 11, 14, D(col));
+        },
+        { w: 16 },
+      );
+    V('grandfather-clock', {
+      side: view(11, 38, (c) => clockSide(c, false)),
+      used: clockOpen('grandfather-clock', false),
+      sideUsed: view(15, 38, (c) => clockSide(c, false, true)),
+    });
+    V('grandfather-clock-stopped', {
+      side: view(11, 38, (c) => clockSide(c, true)),
+      used: clockOpen('grandfather-clock-stopped', true),
+      sideUsed: view(15, 38, (c) => clockSide(c, true, true)),
+    });
+  }
+
+  /* ---------- safe and filing cabinet ---------- */
+  {
+    const safeSide = (open) => (c) => {
+      const col = C.iron;
+      c.rect(1, 1, 12, 17, col);
+      c.row(1, 1, 12, L(col));
+      c.col(1, 1, 17, L(col));
+      c.rect(2, 18, 3, 18, C.ironDark);
+      c.rect(10, 18, 11, 18, C.ironDark);
+      c.frame(3, 3, 10, 15, C.ironDark);
+      dots(c, C.ironDark, [2, 2, 11, 2, 2, 16, 11, 16]);
+      if (open) {
+        c.rect(13, 2, 21, 16, L(col)); // the door, standing out: its inside
+        c.row(2, 13, 21, C.steel);
+        c.frame(15, 4, 20, 14, col);
+        c.rect(17, 7, 18, 11, C.ironDark); // the bolt work
+        c.row(9, 15, 20, C.ironDark);
+        c.col(13, 2, 16, col);
+      } else {
+        c.col(12, 2, 16, L(col));
+        c.set(13, 8, C.steel); // dial and handle
+        c.set(13, 9, C.steel);
+        c.set(13, 11, C.brass);
+      }
+    };
+    V('safe-shut', {
+      side: view(15, 20, safeSide(false)),
+      used: view(18, 20, (c) => safe(c, true)),
+      sideUsed: view(23, 20, safeSide(true)),
+    });
+    V('safe-open', {
+      side: view(23, 20, safeSide(true)),
+      used: view(18, 20, (c) => safe(c, false)),
+      sideUsed: view(15, 20, safeSide(false)),
+    });
+    const fileSide = (open) => (c) => {
+      const col = hex('#5d6660');
+      c.rect(1, 1, 15, 27, col);
+      c.col(1, 1, 27, L(col));
+      c.row(1, 1, 15, L(col));
+      c.row(27, 1, 15, D(col));
+      c.frame(3, 3, 13, 25, D(col));
+      c.col(15, 2, 26, D(col));
+      for (let i = 0; i < 4; i++) if (!(open && i === 1)) c.set(16, 5 + i * 6, C.steel);
+      if (open) {
+        c.rect(16, 10, 24, 14, L(col)); // the second drawer, run right out
+        c.row(10, 16, 24, L(L(col)));
+        c.row(14, 16, 24, col);
+        dots(c, C.paper, [16, 9, 17, 9, 19, 9, 20, 9, 22, 9, 23, 9, 17, 8, 21, 8]);
+        dots(c, C.parchment, [18, 9, 21, 9, 24, 9, 19, 8, 23, 8]);
+        c.rect(25, 8, 26, 14, col);
+        c.col(25, 8, 14, L(col));
+        c.set(27, 11, C.steel);
+      }
+    };
+    V('filing-cabinet', {
+      side: view(18, 30, fileSide(false)),
+      used: view(13, 30, (c) => filing(c, true)),
+      sideUsed: view(29, 30, fileSide(true)),
+    });
+    V('filing-cabinet-open', {
+      side: view(29, 30, fileSide(true)),
+      used: view(13, 30, (c) => filing(c, false)),
+      sideUsed: view(18, 30, fileSide(false)),
+    });
+  }
+
+  /* ---------- sofas and armchairs ---------- */
+  /** A sofa or armchair from the side: the back to the left, the near arm in front of the seat. */
+  function sofaSide(c, col, o = {}) {
+    const b = c.h - 2,
+      top = o.top || 2;
+    c.rect(2, top, 5, b - 2, col); // the back
+    c.col(2, top + 1, b - 2, L(col));
+    c.row(top, 3, 5, L(col));
+    c.clear(2, top);
+    if (o.wing) {
+      c.rect(4, top + 1, 9, b - 11, col);
+      c.row(top + 1, 4, 8, L(col));
+      c.clear(9, top + 1);
+      c.col(9, top + 3, b - 11, D(col));
+    }
+    c.rect(6, b - 8, 13, b - 5, col); // the seat, showing past the arm
+    c.row(b - 8, 6, 13, L(col));
+    c.rect(6, b - 4, 13, b - 2, D(col));
+    c.row(b - 4, 6, 13, mix(col, 0.5));
+    c.rect(3, b - 11, 12, b - 2, col); // the arm
+    c.row(b - 11, 3, 11, L(col));
+    c.row(b - 10, 3, 12, L(col));
+    c.row(b - 9, 3, 12, D(col));
+    c.clear(12, b - 11);
+    c.col(12, b - 8, b - 2, D(col));
+    legs(c, [3, 11], b - 1, b, o.feet || WD);
+  }
+  const THROW = C.mustard;
+  /** A woollen throw left over the back and the seat. */
+  function throwFront(c, x0, x1, top, b) {
+    c.poly([[x0 + 1, top - 1], [x1 - 1, top - 1], [x1, top + 2], [x1, b - 6], [x0, b - 6], [x0, top + 2]], THROW);
+    c.row(top - 1, x0 + 1, x1 - 1, L(THROW));
+    for (let y = top + 2; y < b - 6; y += 3) c.row(y, x0, x1, C.wine);
+    c.col(x0 + 2, top, b - 6, D(THROW));
+    for (let x = x0; x <= x1; x += 2) c.set(x, b - 5, THROW); // fringe
+  }
+  function throwSide(c, top) {
+    c.rect(1, top - 1, 6, top + 6, THROW);
+    c.row(top - 1, 2, 5, L(THROW));
+    c.clear(1, top - 1);
+    c.clear(6, top - 1);
+    for (let y = top + 2; y < top + 6; y += 3) c.row(y, 1, 6, C.wine);
+    for (let x = 1; x <= 6; x += 2) c.set(x, top + 7, THROW);
+  }
+  /** A dust sheet pulled off and left in a heap on the floor. */
+  function sheetHeap(c, x0, x1, t, b, seed = 5) {
+    const m = (x0 + x1) >> 1,
+      r = rnd(seed);
+    c.poly([[x0, b], [x0 + 1, t + 3], [m - 1, t], [m + 2, t + 1], [x1 - 1, t + 4], [x1, b]], SHEET);
+    c.line(x0 + 1, t + 3, m - 1, t, L(SHEET));
+    for (let x = x0 + 1; x < x1; x += 2) if (r() < 0.6) c.col(x, t + 4 + ((r() * 2) | 0), b - ((r() * 2) | 0), FOLD);
+    c.line(m, t + 1, m + 2, b - 1, FOLD);
+  }
+  const seatViews = (slug, w, col, marks, sideMarks, o = {}) => {
+    const h = A[slug].h,
+      top = o.top || 2;
+    V(slug, {
+      side: view(15, h, (c) => {
+        sofaSide(c, col, o);
+        if (sideMarks) sideMarks(c);
+      }),
+      used: over(slug, (c) => throwFront(c, w > 24 ? 21 : 6, w > 24 ? 29 : 11, top, h - 2)),
+      sideUsed: view(15, h, (c) => {
+        sofaSide(c, col, o);
+        if (sideMarks) sideMarks(c);
+        throwSide(c, top);
+      }),
+    });
+  };
+  seatViews('sofa-worn', 36, ROSE, null, (c) => {
+    c.speckle(3, 8, 12, 15, blend(ROSE, C.bone, 0.4), 9, 4);
+    c.rect(6, 9, 9, 9, blend(ROSE, C.bone, 0.35));
+  });
+  seatViews('sofa-torn', 36, FADEDGREEN, null, (c) => {
+    tear(c, 6, 10, FADEDGREEN, 4);
+    c.set(13, 17, C.white);
+    c.set(14, 18, C.bone);
+  });
+  seatViews('armchair-worn', 18, BROWN, null, (c) => c.speckle(3, 8, 12, 15, L(BROWN), 8, 5));
+  seatViews('armchair-torn', 18, hex('#5c5a70'), null, (c) => {
+    tear(c, 6, 10, hex('#5c5a70'), 4);
+    c.set(13, 17, C.white);
+  });
+  seatViews('armchair-wing', 18, LEATHER, null, (c) => {
+    dots(c, D(LEATHER), [6, 5, 7, 8, 6, 11]);
+    dots(c, C.brass, [4, 21, 7, 21, 10, 21]);
+  }, { wing: true });
+  seatViews('sofa', 36, hex('#6f6250'));
+  seatViews('sofa-blue', 36, hex('#39486a'));
+  seatViews('armchair', 18, hex('#6a3a3a'));
+  {
+    // under the dust sheets; used, the sheet has been pulled off
+    const sheetSide = (c) => {
+      drape(c, [[3, 2], [6, 2], [7, 7], [13, 8], [13, 18], [1, 18], [1, 4]], 13);
+      c.row(11, 4, 12, FOLD);
+    };
+    for (const [slug, w, col] of [['sofa-sheet', 36, hex('#6f6250')], ['armchair-sheet', 18, hex('#6a3a3a')]])
+      V(slug, {
+        side: view(15, 20, sheetSide),
+        used: view(w + 8, 20, (c) => {
+          const t = canvas(w, 20);
+          sofa(t, col);
+          c.stamp(t, 0, 0);
+          c.rect(w - 6, 7, w - 2, 10, SHEET); // still caught on the arm
+          c.row(7, w - 6, w - 2, L(SHEET));
+          sheetHeap(c, w - 4, w + 6, 9, 18, w);
+        }),
+        sideUsed: view(22, 20, (c) => {
+          sofaSide(c, col);
+          sheetHeap(c, 11, 20, 10, 18, w);
+        }),
+      });
+  }
+  {
+    // the chaise longue, from its foot end
+    const col = hex('#5a3a52');
+    const front = (used) => (c) => {
+      c.rect(1, 2, 14, 9, col); // the raised head end
+      c.row(2, 2, 13, L(col));
+      c.clear(1, 2);
+      c.clear(14, 2);
+      c.row(9, 1, 14, D(col));
+      dots(c, D(col), [4, 5, 8, 5, 11, 5]);
+      c.rect(2, 10, 13, 24, col); // the long seat, running towards us
+      c.col(2, 10, 24, L(col));
+      for (let y = 12; y < 23; y += 4) dots(c, D(col), [5, y, 10, y]);
+      c.rect(2, 22, 13, 24, col); // the low roll at the foot
+      c.row(22, 2, 13, L(col));
+      c.rect(2, 25, 13, 26, D(col));
+      c.rect(2, 27, 13, 27, W);
+      legs(c, [2, 12], 28, 30, WD);
+      if (used) {
+        c.rect(1, 13, 14, 19, THROW);
+        c.row(13, 1, 14, L(THROW));
+        c.row(16, 1, 14, C.wine);
+        c.rect(13, 20, 14, 24, THROW);
+        c.set(13, 25, THROW);
+      }
+    };
+    V('chaise-longue', {
+      base: 'side',
+      side: view(16, 32, front(false)),
+      used: over('chaise-longue', (c) => {
+        c.rect(14, 9, 23, 14, THROW);
+        c.row(9, 14, 23, L(THROW));
+        c.col(17, 10, 14, C.wine);
+        c.col(21, 10, 14, C.wine);
+        for (let x = 14; x <= 23; x += 2) c.set(x, 15, THROW);
+      }),
+      sideUsed: view(16, 32, front(true)),
+    });
+  }
+  V('footstool', {
+    side: view(12, 9, (c) => A['footstool'].draw(c)),
+    used: turned(12, 9, (c) => A['footstool'].draw(c)),
+    sideUsed: turned(12, 9, (c) => A['footstool'].draw(c), true),
+  });
+
+  /* ---------- tables ---------- */
+  /** Things left on a table whose top is the row below y: a plate, a bottle, a glass, a loaf. */
+  function leftovers(c, y, xs) {
+    const [p, bt, g, l] = xs;
+    if (p != null) {
+      c.row(y, p, p + 3, C.glassLight);
+      c.set(p + 1, y - 1, C.bone);
+      c.set(p + 2, y - 1, C.rust);
+    }
+    if (bt != null) {
+      c.rect(bt, y - 3, bt + 1, y, C.forest);
+      c.set(bt, y - 4, C.forest);
+      c.set(bt, y - 5, C.bone);
+      c.set(bt, y - 2, L(C.forest));
+    }
+    if (g != null) {
+      c.col(g, y - 2, y - 1, C.glassLight);
+      c.set(g, y, C.glass);
+    }
+    if (l != null) {
+      c.rect(l, y - 1, l + 3, y, C.woodPale);
+      c.row(y - 1, l, l + 2, L(C.woodPale));
+      c.set(l + 3, y - 1, C.bone);
+    }
+  }
+  for (const [slug, col] of [['table-long', W], ['dining-table', WL]])
+    V(slug, {
+      side: view(18, 17, (c) => table(c, 1, 16, 2, 15, col)),
+      used: over(slug, (c) => leftovers(c, 7, [6, 15, 19, 28]), { h: 23 }),
+      sideUsed: view(18, 23, (c) => {
+        table(c, 1, 16, 8, 21, col);
+        leftovers(c, 7, [3, 9, 12, null]);
+      }),
+    });
+  V('coffee-table', {
+    side: view(16, 11, (c) => table(c, 1, 14, 1, 9, W)),
+    used: over(
+      'coffee-table',
+      (c) => {
+        c.rect(5, 3, 11, 4, C.paper); // a newspaper and a cup
+        c.row(4, 5, 11, D(C.paper));
+        dots(c, C.slate, [6, 3, 8, 3, 9, 3]);
+        c.rect(16, 2, 18, 4, C.white);
+        c.set(19, 3, C.white);
+        c.row(2, 16, 18, C.rust);
+      },
+      { h: 15 },
+    ),
+    sideUsed: view(16, 15, (c) => {
+      table(c, 1, 14, 5, 13, W);
+      c.rect(3, 3, 7, 4, C.paper);
+      c.row(4, 3, 7, D(C.paper));
+      c.rect(9, 2, 11, 4, C.white);
+      c.set(12, 3, C.white);
+      c.row(2, 9, 11, C.rust);
+    }),
+  });
+  {
+    const teaThings = (c, x, y) => {
+      c.rect(x, y - 3, x + 3, y, C.white); // teapot
+      c.set(x + 4, y - 2, C.white);
+      c.set(x - 1, y - 2, C.white);
+      c.set(x + 1, y - 4, C.white);
+      c.row(y - 1, x, x + 3, hex('#5a6a88'));
+      c.rect(x + 7, y - 1, x + 8, y, C.white); // cup
+      c.set(x + 9, y - 1, C.white);
+    };
+    const round = (h) => over('table-round', (c) => teaThings(c, 6, 6), { h });
+    V('table-round', { side: view(22, 16, (c) => A['table-round'].draw(c)), used: round(21), sideUsed: round(21) });
+    V('side-table', {
+      side: view(12, 14, (c) => A['side-table'].draw(c)),
+      used: over(
+        'side-table',
+        (c) => {
+          c.rect(2, 3, 6, 4, C.wine); // a book and a glass put down on it
+          c.row(3, 2, 6, L(C.wine));
+          c.set(6, 4, C.paper);
+          c.col(8, 2, 3, C.glassLight);
+          c.set(8, 4, C.glass);
+        },
+        { h: 18 },
+      ),
+      sideUsed: over(
+        'side-table',
+        (c) => {
+          c.rect(4, 3, 7, 4, C.wine);
+          c.row(3, 4, 7, L(C.wine));
+          c.set(4, 4, C.paper);
+          c.col(3, 2, 3, C.glassLight);
+          c.set(3, 4, C.glass);
+        },
+        { h: 18 },
+      ),
+    });
+    V('card-table', {
+      side: view(20, 15, (c) => {
+        A['card-table'].draw(c);
+        c.clearRect(4, 1, 15, 1);
+        dots(c, C.white, [3, 1, 4, 1, 9, 1, 10, 1, 14, 1, 15, 1]);
+        c.set(6, 1, C.red);
+      }),
+      used: over(
+        'card-table',
+        (c) => {
+          leftovers(c, 6, [null, 9, 12, null]); // a bottle, a glass, the stakes
+          dots(c, C.gold, [14, 6, 15, 6, 15, 5, 16, 6]);
+        },
+        { h: 20 },
+      ),
+      sideUsed: over(
+        'card-table',
+        (c) => {
+          c.clearRect(4, 6, 15, 6);
+          dots(c, C.white, [3, 6, 4, 6, 14, 6, 15, 6]);
+          leftovers(c, 6, [null, 7, 5, null]);
+          dots(c, C.gold, [10, 6, 11, 6, 11, 5, 12, 6]);
+        },
+        { h: 20 },
+      ),
+    });
+  }
+  {
+    // the table laid for dinner; used, dinner is over
+    const cloth = (c, x0, x1) => {
+      c.rect(x0, 9, x1, 10, C.white);
+      c.row(11, x0, x1, C.cream);
+      for (let x = x0; x <= x1; x += 1) if (x % 4 !== 0) c.set(x, 12, C.cream);
+      c.row(9, x0, x1, L(C.white));
+    };
+    const end = (used) => (c) => {
+      table(c, 1, 16, 9, 22, W);
+      cloth(c, 1, 16);
+      c.row(8, 3, 6, C.glassLight);
+      c.set(12, 8, C.steel);
+      c.rect(13, 6, 13, 8, C.glass);
+      c.col(9, 4, 8, C.brass); // the candelabrum, its three candles in line
+      c.row(8, 8, 10, D(C.brass));
+      if (used) {
+        candle(c, 9, 3, 3, false);
+        dots(c, C.rust, [4, 7, 5, 7]);
+        c.set(4, 8, C.bone);
+        c.rect(12, 10, 14, 11, C.wine);
+      } else candle(c, 9, 2, 3, true);
+    };
+    V('table-set', {
+      side: view(18, 24, end(false)),
+      used: over('table-set', (c) => {
+        for (const [x, y] of [[18, 1], [18, 2], [20, 0], [20, 1], [22, 1], [22, 2], [20, 2], [18, 3], [22, 3]]) c.clear(x, y);
+        dots(c, C.black, [18, 3, 20, 2, 22, 3]); // the candles burnt down
+        for (const x of [5, 14, 25, 34]) dots(c, C.rust, [x + 1, 7, x + 2, 7]); // what is left on the plates
+        dots(c, C.bone, [6, 8, 26, 8, 15, 7]);
+        c.clear(30, 6);
+        c.clear(30, 7);
+        c.row(8, 29, 31, C.glass); // a glass knocked over, and the wine on the cloth
+        c.rect(30, 9, 33, 10, C.wine);
+        c.set(32, 11, C.wine);
+        c.set(31, 12, C.wine);
+      }),
+      sideUsed: view(18, 24, end(true)),
+    });
+    // under its dust sheet; used, the sheet is off
+    V('table-dustsheet', {
+      side: view(18, 17, (c) => {
+        drape(c, [[2, 2], [15, 2], [16, 4], [16, 13], [14, 15], [3, 15], [1, 13], [1, 4]], 31);
+        c.row(4, 2, 15, FOLD);
+        c.clearRect(1, 14, 2, 15);
+        c.clearRect(6, 15, 10, 15);
+        c.clearRect(15, 14, 16, 15);
+        c.rect(3, 14, 4, 15, WD);
+        c.rect(13, 14, 14, 15, WD);
+      }),
+      used: view(48, 17, (c) => {
+        table(c, 1, 40, 2, 15, W, { mid: true });
+        c.rect(35, 1, 40, 3, SHEET); // dragged off one end
+        c.row(1, 35, 40, L(SHEET));
+        sheetHeap(c, 37, 46, 4, 15, 9);
+      }),
+      sideUsed: view(24, 17, (c) => {
+        table(c, 1, 16, 2, 15, W);
+        c.rect(12, 1, 16, 3, SHEET);
+        c.row(1, 12, 16, L(SHEET));
+        sheetHeap(c, 13, 22, 4, 15, 9);
+      }),
+    });
+  }
+
+  /* ---------- chairs: drawn from the side above, so the other view is the front ---------- */
+  function chairFront(c, x, b, o = {}) {
+    const col = o.col || W,
+      sh = o.seat || 9,
+      bh = o.back || 18,
+      x1 = x + (o.w || 9) - 1,
+      pad = o.pad || col;
+    legs(c, [x, x1 - 1], b - bh + 1, b, col); // the posts of the back run down into the legs
+    c.col(x, b - bh + 1, b, L(col));
+    c.rect(x, b - bh + 1, x1, b - bh + 2, col); // top rail
+    c.row(b - bh + 1, x, x1, L(col));
+    c.row(b - bh + 5, x, x1, D(col));
+    if (o.padBack) c.rect(x + 2, b - bh + 3, x1 - 2, b - sh - 3, pad);
+    c.rect(x, b - sh, x1, b - sh + 1, pad);
+    c.row(b - sh, x, x1, L(pad));
+    c.row(b - 3, x + 2, x1 - 2, D(col));
+  }
+  {
+    const red = hex('#7a2b30');
+    const redFront = (c) => {
+      chairFront(c, 1, 19, { col: WD, pad: red, padBack: true });
+      c.rect(1, 9, 9, 10, red);
+      c.row(9, 1, 9, L(red));
+    };
+    const plainFront = (c) => chairFront(c, 1, 19, { col: W });
+    V('chair-dining', {
+      base: 'side',
+      side: view(11, 21, plainFront),
+      used: view(21, 12, (c) => A['chair-toppled'].draw(c)),
+      sideUsed: turned(11, 21, plainFront),
+    });
+    V('chair-dining-red', {
+      base: 'side',
+      side: view(11, 21, redFront),
+      used: turned(11, 21, (c) => A['chair-dining-red'].draw(c)),
+      sideUsed: turned(11, 21, redFront),
+    });
+    V('chair-toppled', {
+      base: 'side',
+      side: turned(11, 21, plainFront),
+      used: view(11, 21, (c) => A['chair-dining'].draw(c)),
+      sideUsed: view(11, 21, plainFront),
+    });
+    V('chair-broken', {
+      base: 'side',
+      side: view(14, 12, (c) => {
+        c.rect(2, 8, 10, 9, W); // the seat, end on, the back flat behind it
+        c.row(8, 2, 10, WL);
+        c.rect(3, 6, 9, 7, W);
+        c.row(6, 3, 9, WL);
+        c.line(8, 8, 10, 3, WD); // one leg in the air
+        c.line(9, 8, 11, 3, W);
+        dots(c, C.woodPale, [10, 2, 11, 2, 4, 10, 7, 10]);
+        c.rect(1, 10, 3, 10, WD);
+        c.set(1, 9, C.woodPale);
+      }),
+    });
+    const shawl = C.plum;
+    const rockFront = (used) => (c) => {
+      chairFront(c, 1, 18, { col: W });
+      c.rect(1, 19, 2, 19, WD); // the rockers, end on
+      c.rect(8, 19, 9, 19, WD);
+      if (used) {
+        c.poly([[1, 1], [9, 1], [9, 4], [5, 9], [1, 4]], shawl);
+        c.row(1, 1, 9, L(shawl));
+        dots(c, L(shawl), [3, 5, 5, 7, 7, 5]);
+      }
+    };
+    V('rocking-chair', {
+      base: 'side',
+      side: view(11, 22, rockFront(false)),
+      used: over('rocking-chair', (c) => {
+        c.rect(2, 1, 5, 8, shawl); // a shawl left over the back
+        c.row(1, 2, 5, L(shawl));
+        c.set(5, 9, shawl);
+        c.set(3, 9, shawl);
+        c.col(2, 2, 8, D(shawl));
+      }),
+      sideUsed: view(11, 22, rockFront(true)),
+    });
+    const highFront = (used) => (c) => {
+      c.rect(2, 1, 8, 4, WL); // the back
+      c.row(1, 2, 8, L(WL));
+      c.rect(2, 5, 8, 10, W);
+      for (const x of [4, 6]) c.col(x, 5, 10, WD);
+      c.rect(1, 8, 9, 8, WL); // tray
+      c.row(9, 1, 9, WD);
+      c.rect(2, 11, 8, 12, W);
+      c.row(11, 2, 8, WL);
+      c.line(2, 13, 1, 23, W);
+      c.line(8, 13, 9, 23, W);
+      c.row(18, 2, 8, WD);
+      c.row(21, 2, 8, W);
+      if (used) {
+        c.rect(4, 6, 6, 7, C.white); // a bowl, and what went over the side
+        c.row(6, 4, 6, C.bone);
+        dots(c, C.bone, [3, 23, 4, 23, 6, 22]);
+        c.set(2, 9, C.bone);
+      }
+    };
+    V('highchair', {
+      base: 'side',
+      side: view(11, 25, highFront(false)),
+      used: over('highchair', (c) => {
+        c.rect(7, 6, 9, 7, C.white);
+        c.row(6, 7, 9, C.bone);
+        c.set(11, 9, C.bone);
+        dots(c, C.bone, [11, 23, 12, 23, 9, 22]);
+      }),
+      sideUsed: view(11, 25, highFront(true)),
+    });
+    // the swivel chair
+    const dc = hex('#5a3028');
+    const swivelSide = (c) => {
+      c.rect(2, 1, 4, 10, dc); // the back, edge on
+      c.col(2, 2, 10, L(dc));
+      c.clear(2, 1);
+      c.rect(4, 9, 10, 9, W); // the arm
+      c.rect(9, 10, 10, 11, W);
+      c.rect(3, 12, 11, 13, dc);
+      c.row(12, 3, 11, L(dc));
+      c.rect(6, 14, 7, 17, C.iron);
+      c.line(6, 17, 2, 19, C.ironDark);
+      c.line(7, 17, 11, 19, C.ironDark);
+      c.col(6, 17, 19, C.ironDark);
+      dots(c, K, [2, 20, 6, 20, 11, 20]);
+    };
+    V('desk-chair-old', {
+      side: view(14, 22, swivelSide),
+      used: turned(14, 22, (c) => A['desk-chair-old'].draw(c)),
+      sideUsed: turned(14, 22, swivelSide),
+    });
+    V('piano-stool', {
+      side: view(10, 10, (c) => A['piano-stool'].draw(c)),
+      used: turned(10, 10, (c) => A['piano-stool'].draw(c)),
+      sideUsed: turned(10, 10, (c) => A['piano-stool'].draw(c), true),
+    });
+    // the pew
+    const pc = hex('#5a3c2a');
+    const pewEnd = (used) => (c) => {
+      c.poly([[2, 1], [5, 1], [6, 9], [10, 10], [10, 18], [2, 18]], pc);
+      c.col(2, 1, 18, L(pc));
+      c.row(1, 2, 5, L(pc));
+      c.line(4, 4, 4, 15, D(pc));
+      c.line(5, 11, 8, 12, D(pc));
+      c.col(8, 12, 16, D(pc));
+      c.row(16, 4, 8, D(pc));
+      c.set(3, 4, C.gold);
+      if (used) {
+        c.rect(11, 16, 16, 18, red);
+        c.row(16, 11, 16, L(red));
+      }
+    };
+    V('bench-church', {
+      side: view(12, 20, pewEnd(false)),
+      used: over('bench-church', (c) => {
+        c.rect(12, 16, 20, 18, red); // a hassock pulled out, a hymn book left on the seat
+        c.row(16, 12, 20, L(red));
+        c.rect(23, 9, 26, 10, C.black);
+        c.row(10, 23, 26, C.paper);
+      }),
+      sideUsed: view(18, 20, pewEnd(true)),
+    });
+  }
+
+  /* ---------- desks ---------- */
+  /** The end of a pedestal desk; the side you sit at is to the right. open: the top drawer pulled out. */
+  function deskSide(c, top, b, col, open) {
+    c.rect(1, top, 14, top + 1, L(col));
+    c.row(top, 1, 14, L(L(col)));
+    c.rect(2, top + 2, 13, b - 1, col);
+    c.col(2, top + 2, b - 1, L(col));
+    panel(c, 4, top + 4, 11, b - 3, col);
+    c.row(b, 2, 13, D(col));
+    const n = Math.floor((b - top - 3) / 4);
+    for (let i = 0; i < n; i++) if (!(open && i === 0)) c.set(14, top + 4 + i * 4, C.brass);
+    if (open) {
+      c.rect(14, top + 4, 19, top + 6, L(col));
+      c.row(top + 4, 14, 19, L(L(col)));
+      c.row(top + 6, 14, 19, col);
+      c.set(20, top + 5, C.brass);
+      c.rect(15, top + 3, 18, top + 3, C.paper);
+      c.set(16, top + 2, C.paper);
+    }
+  }
+  /** In the front view: the top left drawer pulled out, papers in it. */
+  function deskDrawerOut(c, col) {
+    c.rect(3, 11, 8, 12, mix(col, 0.3));
+    c.rect(2, 12, 9, 15, L(col));
+    c.row(12, 2, 9, L(L(col)));
+    c.row(15, 2, 9, col);
+    dots(c, C.brass, [5, 14, 6, 14]);
+    c.rect(4, 10, 7, 11, C.paper);
+    c.row(11, 4, 7, D(C.paper));
+    c.set(8, 11, C.parchment);
+  }
+  {
+    const tidySide = (open) => (c) => {
+      deskSide(c, 8, 22, W, open);
+      c.rect(3, 1, 6, 2, hex('#3d6a4e')); // the lamp, end on
+      c.row(1, 3, 6, hex('#5d8a66'));
+      c.row(3, 4, 5, C.glow);
+      c.col(5, 4, 6, C.brass);
+      c.row(7, 3, 6, C.brass);
+      c.rect(9, 5, 12, 7, C.wine);
+      c.row(5, 9, 12, L(C.wine));
+    };
+    V('desk-tidy', {
+      side: view(16, 24, tidySide(false)),
+      used: over('desk-tidy', (c) => {
+        deskDrawerOut(c, W);
+        c.rect(13, 5, 21, 6, C.paper); // and a book left open on the blotter
+        c.row(4, 13, 21, C.white);
+        c.col(17, 4, 6, D(C.paper));
+        dots(c, D(C.paper), [14, 5, 15, 5, 19, 5, 20, 5]);
+      }),
+      sideUsed: view(22, 24, tidySide(true)),
+    });
+    const cc = hex('#5f4030');
+    const clutterSide = (open) => (c) => {
+      deskSide(c, 8, 22, cc, open);
+      c.rect(2, 4, 7, 7, C.paper);
+      c.row(5, 2, 7, D(C.paper));
+      c.rect(3, 2, 6, 3, C.parchment);
+      c.rect(8, 6, 10, 7, C.navy);
+      c.rect(11, 3, 13, 7, C.black);
+      c.set(12, 2, C.white);
+      c.set(13, 1, C.white);
+      if (open) dots(c, C.paper, [16, 21, 17, 21, 18, 22, 19, 22]);
+    };
+    V('desk-cluttered', {
+      side: view(16, 24, clutterSide(false)),
+      used: over('desk-cluttered', (c) => {
+        deskDrawerOut(c, cc);
+        c.rect(1, 16, 4, 16, C.paper); // gone through in a hurry
+        c.set(2, 17, C.paper);
+        c.rect(19, 21, 23, 22, C.paper);
+        c.set(24, 22, C.parchment);
+      }),
+      sideUsed: view(22, 24, clutterSide(true)),
+    });
+    // the bureau: its fall is open above; used, it is shut
+    const bureauSide = (open) => (c) => {
+      c.rect(2, 1, 6, 2, WL);
+      c.poly([[2, 3], [6, 3], [9, 9], [9, 13], [2, 13]], W);
+      c.col(2, 3, 13, L(W));
+      c.line(6, 3, 9, 9, open ? WD : WL);
+      c.rect(2, 14, 9, 25, W);
+      c.col(2, 14, 25, L(W));
+      panel(c, 3, 16, 8, 24, W);
+      dots(c, C.brass, [10, 16, 10, 20, 10, 24]);
+      legs(c, [2, 8], 26, 26, WD);
+      if (open) {
+        c.rect(10, 12, 15, 13, WL); // the fall, let down
+        c.row(12, 10, 15, L(WL));
+        c.row(14, 10, 13, WD);
+        c.rect(11, 11, 13, 11, C.paper);
+      } else c.line(7, 3, 10, 9, WL);
+    };
+    V('writing-bureau', {
+      side: view(17, 28, bureauSide(true)),
+      used: over('writing-bureau', (c) => {
+        c.rect(2, 3, 19, 13, WL); // the fall shut over the pigeonholes
+        c.row(3, 2, 19, L(WL));
+        c.clear(1, 13);
+        c.clear(20, 13);
+        c.clear(1, 12);
+        c.clear(20, 12);
+        c.clear(1, 11);
+        c.clear(20, 11);
+        c.clear(1, 10);
+        c.clear(20, 10);
+        panel(c, 4, 5, 17, 11, WL);
+        c.row(13, 2, 19, D(WL));
+        c.set(11, 4, C.brass);
+      }),
+      sideUsed: view(12, 28, bureauSide(false)),
+    });
+  }
+
+  /* ---------- doors: from the side a door is its edge in the frame; open, the leaf stands out towards us ---------- */
+  /** The frame of a doorway, cut through and seen edge on (4 wide from x). */
+  function jambSide(c, fr, x = 1) {
+    const b = c.h - 2;
+    c.rect(x, 1, x + 3, b, fr);
+    c.col(x, 1, b, L(fr));
+    c.row(1, x, x + 3, L(fr));
+    c.col(x + 3, 2, b, D(fr));
+  }
+  /** A plain door from the side. state: 'shut' (the edge), 'ajar', 'open' (the whole leaf, its face to us). */
+  function doorSide(c, col, state, o = {}) {
+    const b = c.h - 2,
+      fr = o.frame || mix(col, 0.62),
+      kn = o.knob || C.brass;
+    jambSide(c, fr);
+    if (state === 'shut') {
+      c.col(2, 3, b, col); // the edge of the leaf, between the stops
+      c.col(3, 3, b, D(col));
+      if (o.knob !== false) {
+        c.set(5, 19, kn);
+        c.set(5, 20, D(kn));
+        c.set(0, 19, kn);
+        c.set(0, 20, D(kn));
+      }
+    } else {
+      const x1 = state === 'ajar' ? 9 : 18;
+      c.col(2, 3, b, NIGHT);
+      c.col(3, 3, b, NIGHT);
+      if (state === 'ajar') {
+        c.rect(4, 3, x1, b, col);
+        c.col(4, 3, b, L(col));
+        panel(c, 6, 5, x1 - 1, 17, col);
+        panel(c, 6, 22, x1 - 1, b - 3, col);
+        c.col(x1, 3, b, D(col));
+      } else leaf(c, 5, x1, col, { ...o, knob: false });
+      if (state !== 'ajar') c.col(4, 3, b, D(col));
+      if (o.knob !== false) {
+        c.set(x1 - 1, 19, kn);
+        c.set(x1 - 1, 20, D(kn));
+      }
+    }
+  }
+  const doorShut = (col, o) => view(7, 38, (c) => doorSide(c, col, 'shut', o));
+  const doorAjar = (col, o) => view(11, 38, (c) => doorSide(c, col, 'ajar', o));
+  const doorOpen = (col, o) => view(20, 38, (c) => doorSide(c, col, 'open', o));
+  for (const [k, col] of Object.entries(DOORCOL)) {
+    const o = k === 'oak' ? { frame: WD } : k === 'white' ? { frame: hex('#8a8678') } : {};
+    const front = (state) => view(20, 38, (c) => door(c, col, state, o));
+    V('door-' + k, { side: doorShut(col, o), used: front('open'), sideUsed: doorOpen(col, o) });
+    V('door-' + k + '-ajar', { side: doorAjar(col, o), used: front('open'), sideUsed: doorOpen(col, o) });
+    if (A['door-' + k + '-open']) V('door-' + k + '-open', { side: doorOpen(col, o), used: front('shut'), sideUsed: doorShut(col, o) });
+  }
+
+  /** Cut a hole through whatever is drawn: the pixels inside the shape become see-through. */
+  function hole(c, pts) {
+    const m = [1, 2, 3];
+    c.poly(pts, m);
+    for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) if (c.get(x, y) === m) c.clear(x, y);
+  }
+  V('door-double', {
+    side: doorShut(W, { frame: WD }),
+    used: view(36, 38, (c) => A['door-double-open'].draw(c)),
+    sideUsed: view(21, 38, (c) => {
+      jambSide(c, WD);
+      leaf(c, 5, 19, W);
+      c.col(4, 3, 36, D(W));
+    }),
+  });
+  V('door-double-open', {
+    side: view(21, 38, (c) => {
+      jambSide(c, WD);
+      leaf(c, 5, 19, W);
+      c.col(4, 3, 36, D(W));
+    }),
+    used: view(36, 38, (c) => A['door-double'].draw(c)),
+    sideUsed: doorShut(W, { frame: WD }),
+  });
+  {
+    const col = hex('#9c9684'),
+      fr = hex('#7a7566');
+    V('door-glass', {
+      side: doorShut(col, { frame: fr }),
+      used: view(20, 38, (c) => {
+        door(c, col, 'open', { frame: fr });
+        c.col(4, 5, 31, hex('#3d5560')); // the panes of the leaf, edge on
+      }),
+      sideUsed: view(20, 38, (c) => {
+        jambSide(c, fr);
+        c.rect(5, 3, 18, 36, col);
+        c.col(5, 3, 36, L(col));
+        for (let j = 0; j < 4; j++)
+          for (let i = 0; i < 2; i++) {
+            const x = 7 + i * 6,
+              y = 5 + j * 7;
+            hole(c, [[x, y], [x + 4, y], [x + 4, y + 5], [x, y + 5]]); // you see through the glass
+            c.line(x + 1, y + 3, x + 3, y + 1, C.glassLight);
+          }
+        panel(c, 7, 33, 17, 35, col);
+        dots(c, C.brass, [17, 19, 17, 20]);
+        c.col(4, 3, 36, D(col));
+      }),
+    });
+    // the cell door
+    const cellSide = (open) => (c) => {
+      jambSide(c, C.stoneDark);
+      for (let y = 5; y < 36; y += 6) c.set(1, y, D(C.stoneDark));
+      if (open) {
+        c.col(2, 3, 36, NIGHT);
+        c.col(3, 3, 36, NIGHT);
+        for (let x = 5; x <= 17; x += 3) {
+          c.col(x, 3, 36, C.iron); // the barred leaf, standing out
+          c.set(x, 4, C.steel);
+          for (let y = 6; y < 36; y += 5) c.set(x, y, C.steel);
+        }
+        c.row(8, 5, 17, C.iron);
+        c.row(30, 5, 17, C.iron);
+        c.rect(15, 17, 18, 22, C.ironDark);
+        c.frame(15, 17, 18, 22, C.iron);
+      } else {
+        c.col(2, 3, 36, C.iron);
+        c.col(3, 3, 36, C.ironDark);
+        c.rect(5, 17, 5, 22, C.ironDark); // the lock plate
+        c.set(0, 19, C.iron);
+      }
+    };
+    V('door-cell', {
+      side: view(7, 38, cellSide(false)),
+      used: view(20, 38, (c) => cellDoor(c, true)),
+      sideUsed: view(20, 38, cellSide(true)),
+    });
+    V('door-cell-open', {
+      side: view(20, 38, cellSide(true)),
+      used: view(20, 38, (c) => cellDoor(c, false)),
+      sideUsed: view(7, 38, cellSide(false)),
+    });
+    // the iron door
+    const ic = C.iron;
+    V('door-iron-riveted', {
+      side: view(8, 38, (c) => {
+        jambSide(c, C.ironDark);
+        c.col(2, 3, 36, L(ic));
+        c.col(3, 3, 36, ic);
+        c.rect(5, 18, 5, 21, C.ironDark); // the wheel, edge on
+        c.set(6, 19, C.steel);
+        c.set(6, 20, C.ironDark);
+        c.set(0, 19, C.ironDark);
+      }),
+      used: view(20, 38, (c) => {
+        jamb(c, C.ironDark);
+        beyond(c, 3, 16);
+        c.rect(3, 3, 6, 36, ic); // a hand's breadth of iron, swung in
+        c.col(3, 3, 36, L(ic));
+        c.col(6, 3, 36, C.ironDark);
+        for (const y of [4, 13, 15, 24, 26, 35]) c.set(4, y, C.steel);
+        c.rect(7, 18, 7, 21, C.ironDark);
+        c.set(8, 19, C.steel);
+        c.speckle(3, 26, 6, 36, C.rust, 5, 8);
+      }),
+      sideUsed: view(20, 38, (c) => {
+        jambSide(c, C.ironDark);
+        c.rect(5, 3, 18, 36, ic);
+        c.col(5, 3, 36, L(ic));
+        for (const y of [3, 14, 25, 36]) c.row(y, 5, 18, y === 36 ? C.ironDark : L(ic));
+        for (const y of [4, 13, 15, 24, 26, 35]) for (let x = 6; x <= 18; x += 3) c.set(x, y, C.steel);
+        c.oval(9, 17, 14, 22, C.ironDark);
+        c.oval(10, 18, 13, 21, ic);
+        dots(c, C.steel, [11, 19, 12, 20]);
+        c.speckle(5, 26, 18, 36, C.rust, 6, 8);
+        c.col(4, 3, 36, C.ironDark);
+      }),
+    });
+    // boarded up; used, the boards are off
+    const bd = hex('#553828');
+    V('door-boarded', {
+      side: view(9, 38, (c) => {
+        jambSide(c, mix(bd, 0.62), 2);
+        c.col(3, 3, 36, bd);
+        c.col(4, 3, 36, D(bd));
+        for (const [y, col] of [[5, WP], [15, blend(WP, C.stone, 0.4)], [24, C.woodLight], [31, WP]]) {
+          c.rect(6, y, 6, y + 2, col); // the ends of the planks, nailed across both jambs
+          c.set(7, y + 1, C.ironDark);
+        }
+      }),
+      used: view(22, 38, (c) => {
+        c.rect(2, 1, 19, 36, mix(bd, 0.62));
+        c.row(1, 2, 19, bd);
+        leaf(c, 4, 17, bd, { knob: false });
+        dots(c, C.ironDark, [2, 7, 19, 5, 2, 15, 19, 18, 2, 26, 19, 24, 3, 32, 19, 33]); // where the nails were
+        c.poly([[1, 24], [4, 23], [8, 35], [5, 36]], C.woodLight); // one still hanging by a nail
+        nail(c, 2, 25);
+        c.rect(7, 35, 20, 36, WP); // the rest on the floor
+        c.row(35, 7, 20, L(WP));
+        c.poly([[9, 31], [20, 33], [20, 34], [9, 33]], blend(WP, C.stone, 0.4));
+      }),
+      sideUsed: view(17, 38, (c) => {
+        jambSide(c, mix(bd, 0.62), 2);
+        c.col(3, 3, 36, bd);
+        c.col(4, 3, 36, D(bd));
+        dots(c, C.ironDark, [6, 6, 6, 16, 6, 25, 6, 32]);
+        c.line(7, 27, 10, 36, C.woodLight);
+        c.line(8, 27, 11, 36, D(C.woodLight));
+        c.rect(8, 35, 15, 36, WP);
+        c.row(35, 8, 15, L(WP));
+      }),
+    });
+    // smashed; used, what is left of it swings open
+    const bk = hex('#5a3d2c');
+    V('door-broken', {
+      side: view(7, 38, (c) => {
+        doorSide(c, bk, 'shut', { frame: WD });
+        c.clearRect(2, 10, 3, 21);
+        c.rect(2, 10, 3, 21, NIGHT);
+        dots(c, WP, [5, 9, 5, 12, 0, 15, 5, 16, 0, 22, 5, 23, 5, 35, 5, 36]); // splinters
+      }),
+      used: view(20, 38, (c) => {
+        door(c, bk, 'open', { frame: WD });
+        c.rect(4, 9, 5, 22, NIGHT);
+        dots(c, WP, [4, 8, 5, 9, 4, 23, 5, 22, 6, 12, 6, 18]);
+        dots(c, WP, [7, 35, 8, 36, 11, 36, 14, 35, 15, 36, 10, 34]);
+      }),
+      sideUsed: view(20, 38, (c) => {
+        doorSide(c, bk, 'open', { frame: WD });
+        hole(c, [[8, 10], [12, 7], [16, 9], [17, 15], [14, 22], [10, 24], [7, 18]]);
+        for (const [x0, y0, x1, y1] of [[7, 9, 9, 12], [17, 8, 15, 11], [18, 16, 15, 16], [6, 19, 9, 18], [10, 26, 11, 22], [15, 24, 14, 21]]) c.line(x0, y0, x1, y1, WP);
+        dots(c, WP, [7, 35, 8, 36, 13, 36]);
+      }),
+    });
+    // chained; used, the chain hangs loose and the door stands ajar
+    const cd = hex('#3a2a2c');
+    const links = (c, x, y0, y1) => {
+      for (let y = y0; y <= y1; y++) c.set(x, y, (y - y0) % 2 ? C.steel : C.iron);
+    };
+    V('door-chained', {
+      side: view(7, 38, (c) => {
+        doorSide(c, cd, 'shut');
+        dots(c, C.steel, [5, 13, 0, 13, 5, 16, 0, 22, 5, 22, 0, 17]);
+        dots(c, C.iron, [5, 14, 5, 23, 0, 14, 0, 23]);
+        c.rect(5, 17, 5, 19, C.brass); // the padlock
+        c.set(6, 18, C.brass);
+      }),
+      used: view(20, 38, (c) => {
+        door(c, cd, 'ajar');
+        links(c, 1, 12, 30);
+        links(c, 2, 24, 33);
+        links(c, 18, 13, 27);
+        dots(c, C.ironDark, [1, 12, 18, 13]);
+        c.rect(14, 34, 16, 36, C.brass); // the padlock on the floor, open
+        c.row(34, 14, 16, L(C.brass));
+        dots(c, C.steel, [14, 33, 14, 32, 15, 31]);
+      }),
+      sideUsed: view(11, 38, (c) => {
+        doorSide(c, cd, 'ajar');
+        links(c, 0, 13, 28);
+        c.rect(5, 35, 6, 36, C.brass);
+      }),
+    });
+    // bloody; used, it has been opened and something dragged through
+    const wc = DOORCOL.white,
+      wf = hex('#8a8678');
+    V('door-bloody', {
+      side: view(7, 38, (c) => {
+        doorSide(c, wc, 'shut', { frame: wf });
+        dots(c, C.blood, [5, 21, 4, 12, 4, 13, 4, 14, 4, 15, 5, 36, 4, 30]);
+      }),
+      used: view(20, 38, (c) => {
+        door(c, wc, 'open', { frame: wf });
+        dots(c, C.blood, [4, 11, 4, 12, 5, 12, 4, 14, 3, 15, 4, 18, 5, 21]);
+        c.row(36, 6, 14, C.blood); // the trail over the threshold
+        c.row(35, 8, 12, D(C.blood));
+        dots(c, C.blood, [15, 36, 6, 35, 13, 34, 10, 34]);
+      }),
+      sideUsed: view(20, 38, (c) => {
+        doorSide(c, wc, 'open', { frame: wf });
+        const bl = C.blood;
+        c.rect(10, 12, 13, 15, bl);
+        for (const x of [9, 11, 12, 14]) c.col(x, 9, 12, bl);
+        c.set(8, 13, bl);
+        c.line(12, 16, 11, 27, bl);
+        c.line(13, 16, 13, 24, D(bl));
+        dots(c, bl, [11, 29, 11, 31, 15, 20, 7, 24, 14, 35, 13, 36, 15, 36, 17, 19]);
+      }),
+    });
+    // the nursery door
+    const nc = hex('#b08f8c'),
+      nf = hex('#8f8676'),
+      bare = hex('#7a5a44');
+    V('door-nursery', {
+      side: view(7, 38, (c) => {
+        doorSide(c, nc, 'shut', { frame: nf, knob: C.white });
+        for (const y of [29, 26, 24, 21]) c.set(4, y, K);
+      }),
+      used: view(20, 38, (c) => {
+        door(c, nc, 'open', { frame: nf });
+        c.set(5, 20, C.white);
+        for (const y of [29, 26, 24, 21, 19]) {
+          c.set(17, y, K);
+          c.set(18, y, K);
+        }
+        c.set(18, 23, C.blood);
+        dots(c, bare, [4, 8, 4, 27, 4, 28]);
+      }),
+      sideUsed: view(20, 38, (c) => {
+        doorSide(c, nc, 'open', { frame: nf, knob: C.white });
+        c.poly([[7, 27], [10, 26], [11, 30], [8, 31]], bare);
+        c.rect(14, 7, 15, 9, bare);
+        c.set(16, 8, bare);
+        c.rect(6, 4, 7, 5, bare);
+        dots(c, C.white, [11, 31, 9, 32, 14, 10]);
+        dots(c, C.mustard, [10, 12, 12, 11, 11, 13]);
+      }),
+    });
+    // the church door in its arch
+    const ac = hex('#5a3d2a');
+    const archSide = (open) => (c) => {
+      const st = C.stone;
+      c.rect(1, 3, 6, 40, st);
+      c.rect(2, 1, 5, 2, st);
+      c.col(1, 3, 40, L(st));
+      for (let y = 10; y < 40; y += 6) dots(c, D(st), [1, y, 2, y, 5, y + 3, 6, y + 3]);
+      if (open) {
+        c.rect(3, 6, 4, 40, NIGHT);
+        c.oval(7, 3, 24, 26, ac); // the leaf, standing out
+        c.rect(7, 14, 24, 40, ac);
+        for (let x = 10; x < 24; x += 3) c.col(x, 4, 40, D(ac));
+        c.col(7, 12, 40, L(ac));
+        for (const y of [12, 32]) {
+          c.row(y, 7, 20, C.ironDark);
+          c.set(21, y - 1, C.ironDark);
+          c.set(21, y + 1, C.ironDark);
+        }
+        for (let y = 8; y < 40; y += 4) for (let x = 9; x < 24; x += 6) if (y !== 12 && y !== 32) c.set(x + ((y / 4) % 2) * 3, y, C.iron);
+        c.oval(19, 21, 22, 24, C.ironDark);
+        c.rect(20, 22, 21, 23, ac);
+      } else {
+        c.rect(3, 6, 4, 40, ac);
+        c.col(4, 6, 40, D(ac));
+        c.rect(7, 21, 7, 24, C.ironDark); // the ring
+        dots(c, C.ironDark, [5, 12, 5, 32]);
+      }
+    };
+    V('door-arched', {
+      side: view(9, 42, archSide(false)),
+      used: over('door-arched', (c) => {
+        c.oval(3, 3, 20, 26, NIGHT);
+        c.rect(3, 14, 20, 40, NIGHT);
+        c.row(40, 3, 20, hex('#2c2834'));
+        c.row(39, 4, 20, GLOOM);
+        c.rect(3, 9, 5, 40, D(ac)); // the leaf swung in, edge on
+        c.col(3, 9, 40, ac);
+        c.set(4, 8, D(ac));
+        dots(c, C.ironDark, [4, 12, 5, 12, 4, 32, 5, 32, 6, 22, 6, 23]);
+      }),
+      sideUsed: view(27, 42, archSide(true)),
+    });
+  }
+  {
+    // trapdoor and cellar hatch
+    const trapSide = (open) => (c) => {
+      const b = c.h - 2;
+      if (open) {
+        c.poly([[4, b - 8], [19, b - 8], [22, b], [1, b]], NIGHT); // the hole
+        c.row(b - 8, 4, 19, WD);
+        c.poly([[1, 2], [3, 1], [5, b - 8], [2, b - 8]], W); // the lid stood up on its hinges, edge on
+        c.line(1, 2, 2, b - 8, WL);
+        dots(c, C.iron, [4, 6, 4, 7]);
+        c.col(13, b - 11, b - 3, WP); // the ladder coming up
+        c.col(14, b - 11, b - 3, D(WP));
+        dots(c, WL, [12, b - 9, 15, b - 9, 12, b - 6, 15, b - 6]);
+      } else {
+        c.poly([[4, 1], [19, 1], [22, 8], [1, 8]], W);
+        c.line(4, 1, 19, 1, WL);
+        c.row(3, 4, 19, WD); // the boards run across, seen from this side
+        c.row(5, 3, 20, WD);
+        c.row(8, 1, 22, WD);
+        c.line(8, 1, 6, 8, D(W)); // battens
+        c.line(15, 1, 17, 8, D(W));
+        c.rect(18, 4, 19, 5, C.iron);
+        dots(c, C.ironDark, [3, 3, 2, 6]);
+      }
+    };
+    V('trapdoor-closed', {
+      side: view(24, 10, trapSide(false)),
+      used: view(24, 24, (c) => A['trapdoor-open'].draw(c)),
+      sideUsed: view(24, 24, trapSide(true)),
+    });
+    V('trapdoor-open', {
+      side: view(24, 24, trapSide(true)),
+      used: view(24, 10, (c) => A['trapdoor-closed'].draw(c)),
+      sideUsed: view(24, 10, trapSide(false)),
+    });
+    const hatchSide = (open) => (c) => {
+      const st = C.stone,
+        col = hex('#5a5a48');
+      c.rect(1, 12, 16, 14, st); // kerb
+      c.row(12, 1, 16, L(st));
+      c.poly([[2, 4], [4, 4], [15, 11], [2, 11]], st); // the cheek wall under the sloping doors
+      c.col(2, 4, 11, L(st));
+      dots(c, D(st), [4, 8, 5, 8, 8, 10, 9, 10]);
+      if (open) {
+        c.line(3, 3, 15, 10, NIGHT);
+        c.line(3, 4, 15, 11, NIGHT);
+        c.poly([[3, 5], [15, 12], [15, 14], [3, 8]], col); // the near door, thrown over towards us
+        c.line(3, 5, 15, 12, L(col));
+        dots(c, C.ironDark, [5, 7, 12, 12]);
+        c.poly([[3, 0], [15, 7], [15, 9], [3, 2]], D(col)); // the far one, standing up beyond
+      } else {
+        c.line(3, 2, 15, 9, L(col));
+        c.line(3, 3, 15, 10, col);
+        c.line(3, 4, 15, 11, D(col));
+        dots(c, C.ironDark, [5, 4, 12, 8]);
+        c.speckle(2, 2, 15, 11, C.moss, 9, 4);
+      }
+    };
+    V('cellar-hatch', {
+      side: view(18, 16, hatchSide(false)),
+      used: view(30, 16, (c) => cellarHatch(c, true)),
+      sideUsed: view(18, 16, hatchSide(true)),
+    });
+    V('cellar-hatch-open', {
+      side: view(18, 16, hatchSide(true)),
+      used: view(30, 16, (c) => cellarHatch(c, false)),
+      sideUsed: view(18, 16, hatchSide(false)),
+    });
+  }
+  {
+    // curtains in doorways
+    const dr = hex('#6e2228');
+    const curtSide = (shut) => (c) => {
+      jambSide(c, WD, 2);
+      c.rect(1, 2, 8, 5, dr); // pelmet
+      c.row(2, 1, 8, L(dr));
+      dots(c, C.gold, [1, 6, 4, 6, 7, 6]);
+      if (shut) {
+        c.rect(6, 6, 8, 36, dr);
+        c.col(6, 6, 36, L(dr));
+        c.col(8, 6, 36, D(dr));
+      } else {
+        c.poly([[6, 6], [9, 6], [8, 16], [6, 22], [8, 36], [6, 36]], dr);
+        c.line(8, 7, 7, 20, D(dr));
+        c.row(22, 6, 7, C.gold);
+      }
+    };
+    V('curtain-doorway', {
+      side: view(11, 38, curtSide(false)),
+      used: view(24, 38, (c) => {
+        jamb(c, WD);
+        c.rect(3, 6, 20, 36, dr); // drawn shut
+        for (let x = 4; x <= 20; x += 2) c.col(x, 6, 36, x % 4 ? D(dr) : L(dr));
+        c.col(11, 6, 36, mix(dr, 0.45));
+        c.col(12, 6, 36, mix(dr, 0.45));
+        c.rect(2, 2, 21, 5, dr);
+        c.row(2, 2, 21, L(dr));
+        for (let x = 2; x <= 21; x += 3) c.set(x + 1, 6, C.gold);
+        c.row(36, 3, 20, D(dr));
+      }),
+      sideUsed: view(11, 38, curtSide(true)),
+    });
+    const bc = [C.mustard, hex('#8a4a3a'), C.teal, C.bone, hex('#7a5a8a')];
+    const strand = (c, x0, y0, x1, y1, k) => {
+      const n = y1 - y0;
+      for (let i = 0; i <= n; i++) c.set(x0 + ((x1 - x0) * i) / n, y0 + i, i % 3 === 0 ? bc[(k + ((i / 3) | 0)) % 5] : mix(bc[k % 5], 0.45));
+    };
+    V('bead-curtain', {
+      side: view(8, 38, (c) => {
+        jambSide(c, WD);
+        strand(c, 5, 3, 5, 34, 2);
+        strand(c, 2, 3, 2, 33, 0);
+      }),
+      used: view(20, 38, (c) => {
+        jamb(c, WD);
+        beyond(c, 3, 16);
+        [3, 4, 5, 6, 7].forEach((x, i) => strand(c, x, 3, 3 + (i >> 1), 33 + (i % 2) * 2, i)); // pushed apart, still swinging
+        [16, 15, 14, 13, 12].forEach((x, i) => strand(c, x, 3, 16 - (i >> 1), 33 + (i % 2) * 2, i + 2));
+        strand(c, 9, 3, 6, 30, 1);
+        strand(c, 10, 3, 13, 31, 3);
+      }),
+      sideUsed: view(13, 38, (c) => {
+        jambSide(c, WD);
+        strand(c, 5, 3, 10, 31, 2);
+        strand(c, 5, 3, 7, 33, 4);
+        strand(c, 2, 3, 2, 33, 0);
+      }),
+    });
+    V('archway-stone', {
+      side: view(11, 42, (c) => {
+        const st = C.stone;
+        c.rect(1, 4, 9, 40, st);
+        c.rect(2, 2, 8, 3, st);
+        c.rect(3, 1, 7, 1, L(st));
+        c.col(1, 4, 40, L(st));
+        for (let y = 9; y < 40; y += 5) {
+          c.row(y, 1, 4, D(st));
+          c.row(y + 2, 6, 9, D(st));
+        }
+        c.speckle(1, 26, 9, 40, C.moss, 6, 3);
+      }),
+    });
+    V('archway-wood', {
+      side: view(6, 38, (c) => {
+        jambSide(c, W);
+        dots(c, WD, [2, 14, 3, 26, 2, 9]);
+      }),
+    });
+    // gates
+    const gc = hex('#8f8a78');
+    const pickets = (c) => {
+      for (let x = 4; x <= 18; x += 3) {
+        const t = 3 + Math.abs(x - 11) / 4;
+        c.rect(x, Math.round(t) + 1, x + 1, 15, gc);
+        c.set(x, Math.round(t), gc);
+        c.col(x, Math.round(t), 15, L(gc));
+      }
+      c.row(7, 3, 20, D(gc));
+      c.row(13, 3, 20, D(gc));
+      c.line(4, 13, 19, 7, mix(gc, 0.55));
+      c.speckle(3, 3, 20, 15, C.moss, 14, 6);
+    };
+    const post = (c, x) => {
+      c.rect(x, 2, x + 1, 16, WD);
+      c.set(x, 1, W);
+    };
+    const gateSide = (open) => (c) => {
+      post(c, 1);
+      if (open) {
+        pickets(c);
+        c.set(20, 9, C.iron);
+      } else {
+        c.rect(3, 4, 4, 15, gc);
+        c.col(3, 4, 15, L(gc));
+        c.set(3, 3, gc);
+        c.set(5, 9, C.iron);
+      }
+    };
+    V('garden-gate', {
+      side: view(7, 18, gateSide(false)),
+      used: view(24, 18, (c) => {
+        post(c, 1);
+        post(c, 21);
+        c.rect(3, 4, 5, 15, gc); // swung towards us, edge on
+        c.col(3, 4, 15, L(gc));
+        c.col(5, 4, 15, D(gc));
+        c.set(4, 3, gc);
+        c.set(6, 9, C.iron);
+        c.set(20, 9, C.iron);
+        c.set(4, 16, C.moss);
+      }),
+      sideUsed: view(22, 18, gateSide(true)),
+    });
+    const bare = { outline: false, shade: false };
+    const ironLeaf = (c, x0, x1, step, flip) => {
+      const b = c.h - 2;
+      for (let x = x0; x <= x1; x += step) {
+        const t = flip ? (x - x0) / (x1 - x0) : 1 - (x - x0) / (x1 - x0);
+        ironBar(c, x, 6 - Math.round(t * 3), b);
+      }
+      for (const y of [9, b - 5]) {
+        c.row(y, x0, x1 + 1, C.iron);
+        c.row(y + 1, x0, x1 + 1, K);
+      }
+    };
+    const wroughtSide = (open) => (c) => {
+      const b = c.h - 2;
+      if (open) {
+        ironLeaf(c, 1, 13, 4, false); // a leaf, standing out towards us
+        dots(c, C.iron, [3, 12, 4, 13, 7, 12, 8, 13, 11, 12, 12, 13]);
+      } else {
+        c.rect(1, 2, 2, b, C.iron);
+        c.col(3, 2, b, K);
+        c.col(0, 3, b, K);
+        c.set(1, 1, C.steel);
+        c.set(1, 0, C.iron);
+        c.rect(1, 20, 2, 23, C.ironDark);
+      }
+      c.speckle(0, 0, c.w - 1, b, C.rust, 12, 5);
+    };
+    V('gate-wrought', {
+      side: view(4, 42, wroughtSide(false), bare),
+      used: view(36, 42, (c) => wroughtGate(c, true), bare),
+      sideUsed: view(16, 42, wroughtSide(true), bare),
+    });
+    V('gate-wrought-open', {
+      side: view(16, 42, wroughtSide(true), bare),
+      used: view(34, 42, (c) => wroughtGate(c, false), bare),
+      sideUsed: view(4, 42, wroughtSide(false), bare),
+    });
+  }
+
   /*VIEWS*/
 
   return A;

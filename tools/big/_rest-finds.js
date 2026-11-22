@@ -15,7 +15,6 @@ module.exports = ({ T: T0, vary: vary0, V }) => {
   };
   const T = (slug, rows, o) => ((R[slug] = rows), T0(slug, rows, o));
   const vary = (slug, from, o) => ((R[slug] = pat(R[from], o)), vary0(slug, from, o));
-  const sw = (rows, swap) => pat(rows, { swap });
   T('key-skeleton', ['.tt......', 't..tttttt', 't..t..t.t', '.tt......']);
   vary('key-brass-ornate', 'key-skeleton', { swap: { t: 'G' }, put: [[1, 1, 'g']] });
   vary('key-rusty', 'key-skeleton', { swap: { t: 'u' }, put: [[5, 1, '0']] });
@@ -146,5 +145,120 @@ module.exports = ({ T: T0, vary: vary0, V }) => {
   T('hourglass-sand', ['OOOOO', '.2y2.', '..y..', '.2.2.', '.2y2.', 'OOOOO']);
   T('compass-broken', ['.GGGG.', 'GwwnwG', 'GwRwwG', 'GnwwwG', '.GGGG.']);
   /* ================= the other pictures of each thing: turned a quarter, used, and both ================= */
+  /* small things mostly only change when used */
+  V('key-rusty', {
+    used: {
+      put: [
+        [4, 1, '.'],
+        [5, 1, 'u'],
+        [6, 2, '.'],
+        [8, 2, '.'],
+        [7, 2, 'u'],
+      ],
+    },
+  });
+  V('padlock-heavy', { side: ['.t', '.t', 'III', 'III', 'III', 'III'], used: R['padlock-open'], sideUsed: ['.t', '', 'III', 'III', 'III', 'III'] });
+  V('padlock-open', { side: ['.t', '', 'III', 'III', 'III', 'III'], used: R['padlock-heavy'], sideUsed: ['.t', '.t', 'III', 'III', 'III', 'III'] });
+  V('lock-combination', {
+    used: {
+      put: [
+        [0, 0, '.ttttt'],
+        [0, 1, '.....t'],
+      ],
+    },
+  });
+  V('note-crumpled', { used: ['cccccc', 'cnnncc', 'cccacc', 'cnncnc', 'cacccc', 'ccnncc', 'cccccc'] });
+  V('envelope-sealed', { used: ['.wwwwww', '.wnnnnw', 'cwnnwnwc', 'cacccacc', 'ccarrccc', 'cccccccc', 'cccccccc'] });
+  V('diary-bloodstained', {
+    side: ['vvvvvvv', 'vcccccc', 'vvvvvvv'],
+    used: ['ccccc.ccccc', 'cnnnc.cnrrc', 'cnncc.crrnc', 'cnnnc.cncrc', 'ccccc.ccccc', 'vvvvvVvvvvv'],
+    sideUsed: ['cc.......cc', 'vccc...cccv', '.vvvcVcvvv'],
+  });
+  V('ticket-train', { used: { put: [[4, 1, '.']] } });
+  V('ticket-carnival', { used: R['ticket-carnival'].map((r) => r.slice(0, 4)) });
+  V('locket-closed', { used: R['locket-open'] });
+  V('locket-open', { used: R['locket-closed'] });
+  V('matchbox', { side: ['jjj', 'jwj', 'OOO'], used: ['jjjjjjqqq', 'jwwRwjRRq', 'OOOOOOqqq'], sideUsed: ['jjj', 'jRj', 'OOO'] });
+  V('match-lit', {
+    used: {
+      put: [
+        [0, 0, '.a.'],
+        [0, 1, '...'],
+        [1, 2, 'n'],
+        [1, 3, 'n'],
+      ],
+    },
+  });
+  V('lantern-dim', {
+    used: {
+      put: [
+        [1, 3, 'FFF'],
+        [1, 4, 'FwF'],
+      ],
+    },
+  });
+  V('torch-electric', { used: { swap: { F: '1', R: 'n' } } });
+  V('bottle-laudanum', {
+    used: {
+      put: [
+        [1, 0, '..'],
+        [5, 5, 'OO'],
+      ],
+    },
+  });
+  V('bottle-message-dark', { used: ['O..HHHHHHH', '.nnHHccHHHH', 'nnnHHHHHHH'] });
+  V('razor-open', { used: ['', 'OOOOT', 'OOOO'] });
+  V('cassette-tape', {
+    used: {
+      put: [
+        [1, 4, 'n.nn.n'],
+        [2, 5, 'n..n'],
+        [4, 6, 'nn'],
+      ],
+    },
+  });
+  V('jar-fireflies', {
+    used: {
+      put: [
+        [0, 0, '.....'],
+        [1, 2, '2'],
+        [3, 3, '2'],
+        [2, 4, '2'],
+        [6, 0, 'F'],
+        [7, 2, 'F'],
+      ],
+    },
+  });
+  V('candle-stub', {
+    used: {
+      put: [
+        [1, 0, 'a'],
+        [1, 1, 'n'],
+      ],
+    },
+  });
+  V('chess-piece', { used: ['', '', '', '.n...nn', 'nnnnnnn', 'nnnnnnn', '.n...nn'] });
+  V('card-ace-spades', { side: [...Array(7)].map(() => 'w'), used: ['wwwww', 'wRwRw', 'wwRww', 'wRwRw', 'wwRww', 'wRwRw', 'wwwww'] });
+  V('dice-bone', { used: ['bbbb.bbbb', 'bbbb.bbbb', 'bnbb.bbnb', 'bbbb.bbbb', 'bbbb.bbbb'] });
+  V('bell-small', {
+    used: {
+      put: [
+        [2, 4, '.'],
+        [3, 4, 'n'],
+        [0, 0, 'w'],
+        [4, 0, 'w'],
+      ],
+    },
+  });
+  V('hourglass-sand', {
+    used: {
+      put: [
+        [2, 1, '1'],
+        [2, 2, '2'],
+        [2, 3, 'y'],
+        [1, 4, 'yyy'],
+      ],
+    },
+  });
   //VIEWS
 };

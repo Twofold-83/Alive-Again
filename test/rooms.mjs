@@ -82,4 +82,18 @@ for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.l
   resolveBattle(sc, { move: 'escape' }, names, label, () => 0.5);
   assert.equal(sc.battle.over, 'fled');
 }
+/* every hand-drawn view named in the index is a file */
+{
+  const fs = await import('node:fs');
+  const ix = JSON.parse(fs.readFileSync(new URL('../public/px/index.json', import.meta.url), 'utf8'));
+  const file = { side: '.side', used: '.used', sideUsed: '.side.used' };
+  let n = 0;
+  for (const c of ix.categories)
+    for (const i of c.items)
+      for (const k of Object.keys(i.v || {})) {
+        assert(fs.existsSync(new URL(`../public/px/${i.slug}${file[k]}.png`, import.meta.url)), `${i.slug} ${k}`);
+        n++;
+      }
+  assert(n > 1000, 'the views are built');
+}
 console.log(`ROOMS OK (${ROOM_THEMES.length} themes, ${SCENARIOS.length} places, ${MOODS.length - 1} tunes)`);

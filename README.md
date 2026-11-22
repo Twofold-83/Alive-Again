@@ -185,10 +185,13 @@ as icons, and what the Player did is read out like the log of an old adventure g
 - **Build on the stage.** "Build this room" in the Director's menu lays walls and floor on the live stage in
   one press, saves the room for every story and brings saved rooms back; hand-painting tiles and the map
   ("Map & campaigns") open the full-screen builder. "Save campaign" keeps a whole map with its connections.
-- **Three pictures per thing.** Front, side and used (`<slug>.side.png`, `<slug>.used.png`, made by
-  `tools/big/_views.js`): a View row on each thing switches between them.
-- **Sprite editor.** Draw a thing pixel by pixel or redraw anything on the stage; drawings are kept under
-  "My drawings" for every story. The character maker has mutations: more heads, arms and legs.
+- **Four pictures per thing.** Front and side, and each of them after someone used the thing (an open fridge,
+  an unmade bed, a lit lamp) — all drawn by hand next to the sprite itself (`views` in `tools/big/*.js`, see
+  `tools/make-big.js`; `--dump=<slug>` prints a sprite as text). A View row on each thing switches between them.
+- **Sprite editor.** Draws all four pictures of a thing. An edited library thing is saved as a campaign sprite
+  with its views, or permanently alters the asset on this device; a new object (at most 2 x 2 tiles) goes into
+  "My objects" or any category. Own objects are kept in the browser and sent into the story when used, so the
+  other player sees them. The character maker has mutations: more heads, arms and legs.
 - **Battles with rules.** Attack, Defend, Item, Escape, Speak; enemies fight on their own or are moved by the
   Director; a tied thing is a weapon (`public/shared/battle.js`).
 - **Save room.** In Build scene, "Save room" keeps a room on the device; "My saved rooms" opens it in any story.

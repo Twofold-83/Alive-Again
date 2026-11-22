@@ -1550,5 +1550,1300 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
   def('laser-gate', 24, 35, (c) => laser(c, true), { solid: true, shade: false });
   def('laser-gate-off', 24, 35, (c) => laser(c, false));
 
+
+  /* ================= the other views =================
+   * Every thing above is one picture. Here the other three are drawn by hand: the other perspective (`side`), the
+   * thing after somebody used it (`used`), and both at once (`sideUsed`) — see paintViews in tools/make-big.js.
+   * Round things that look the same from every side (a barrel, a tree) only get `used`. */
+  const views = (slug, v) => {
+    if (!S[slug]) throw new Error('views for a thing that is not drawn in world.js: ' + slug);
+    if (S[slug].views) throw new Error('views given twice in world.js: ' + slug);
+    S[slug].views = v;
+  };
+  /** A view on a fresh canvas. */
+  const pic = (w, h, draw, o) => Object.assign({ w, h, draw }, o);
+  /** The shade and outline settings of a main picture, for a view that should be treated alike. */
+  const flags = (slug) => { const d = S[slug], o = {}; if (d.shade === false) o.shade = false; if (d.outline === false) o.outline = false; return o; };
+  /** Draw the main picture of a thing once more (not yet shaded or outlined), its corner at dx, dy. */
+  const again = (c, slug, dx = 0, dy = 0) => { const d = S[slug], t = canvas(d.w, d.h); d.draw(t); c.stamp(t, dx, dy); };
+  /** The main picture of another thing as a view of this one (door: the open door). */
+  const same = (slug) => pic(S[slug].w, S[slug].h, (c) => S[slug].draw(c), flags(slug));
+  /** The main picture with a change drawn on it. pad = [left, top, right]: extra room around it. fn(c, dx, dy). */
+  const changed = (slug, fn, pad = [0, 0, 0]) => pic(S[slug].w + pad[0] + pad[2], S[slug].h + pad[1], (c) => { again(c, slug, pad[0], pad[1]); fn(c, pad[0], pad[1]); }, flags(slug));
+  /** A drawing of w x h turned a quarter clockwise: a thing knocked over. */
+  const turned = (w, h, draw, o) => pic(h, w, (c) => { const t = canvas(w, h); draw(t); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) c.set(h - 1 - y, x, t.get(x, y)); }, o);
+  /** Slide the columns of what is drawn up and down around column cx: a thing hanging crooked. */
+  const tiltY = (c, k, cx) => { const t = canvas(c.w, c.h); t.stamp(c, 0, 0); c.px.fill(null); for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) c.set(x, y + Math.round((x - cx) * k), t.get(x, y)); };
+  /** Slide the rows of what is drawn sideways, more the higher above row yb: a thing leaning over. */
+  const leanX = (c, k, yb) => { const t = canvas(c.w, c.h); t.stamp(c, 0, 0); c.px.fill(null); for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) c.set(x + Math.round((yb - y) * k), y, t.get(x, y)); };
+  /** A heap of dug earth sitting on row yb. */
+  const heap = (c, x0, x1, yb, h, col = C.earth) => {
+    for (let x = x0; x <= x1; x++) { const t = (x - x0) / (x1 - x0), top = yb - Math.round((h - 1) * Math.sin(t * 3.1416) ** 0.7); c.col(x, top, yb, col); if (t > 0.15 && t < 0.55) c.set(x, top, L(col)); }
+    for (let x = x0 + 2; x < x1; x += 3) c.set(x, yb - ((x * 3) % 2), D(col));
+  };
+  /** A hole dug in the ground, seen a little from above. */
+  const pit = (c, x0, y0, x1, y1) => { c.oval(x0, y0, x1, y1, C.earth); c.oval(x0 + 1, y0 + 1, x1 - 1, y1, C.night); c.row(y0, x0 + 3, x1 - 3, L(C.earth)); };
+  /** A thin wisp of smoke rising from row yb. */
+  const wisp = (c, x, yb, n, col = C.ash) => { for (let i = 0; i < n; i++) { const xx = x + Math.round(Math.sin(i * 0.9) * 1.6); c.set(xx, yb - i, col); if (i % 3 === 1) c.set(xx + 1, yb - i, L(col)); } };
+
+  /* ---------- props ---------- */
+  /** A chest from its short end, 10 deep: the front is on the left, the lid (when open) stands up at the back. */
+  const chestSide = (c, col, band, o = {}) => {
+    const y = o.open ? 5 : 0;
+    if (o.open) {
+      c.poly([[8, 10], [11, 10], [13, 2], [10, 1]], col);
+      c.line(8, 10, 10, 1, DD(col));
+      c.line(9, 10, 11, 1, D(col));
+      c.line(11, 10, 13, 2, band);
+      if (o.fill) {
+        c.rect(2, 9, 8, 10, o.fill);
+        c.row(8, 3, 7, o.fill);
+        c.row(7, 4, 6, o.fill);
+        pts(c, [[4, 7], [6, 8], [3, 9], [7, 9]], L(o.fill));
+        pts(c, [[5, 9], [4, 10], [7, 10]], D(o.fill));
+      } else c.rect(2, 9, 8, 10, C.night);
+    } else {
+      c.row(1, 2, 9, L(col));
+      c.rect(1, 2, 10, 5, col);
+      c.row(2, 1, 10, L(col));
+      c.row(4, 1, 10, D(col));
+    }
+    c.rect(1, y + 6, 10, y + 12, col);
+    c.row(y + 6, 1, 10, DD(col));
+    c.row(y + 9, 1, 10, D(col));
+    c.row(y + 12, 1, 10, D(col));
+    c.col(1, o.open ? y + 6 : 2, y + 12, L(band));
+    c.col(10, o.open ? y + 6 : 2, y + 12, band);
+    c.rect(4, y + 8, 7, y + 8, band);
+    pts(c, [[4, y + 9], [7, y + 9]], band);
+    c.set(1, y + 7, o.lock || band);
+  };
+  /** The four pictures of a chest family: F(state) from the front, E(state) from its end; state 0 shut, 'full', 'empty'. */
+  const chestKind = (col, band, lock, fill, front = () => {}, end = () => {}) => ({
+    F: (st) => pic(18, st ? 19 : 14, (c) => { chest(c, col, band, st ? { open: true, lock, fill: st === 'full' ? fill : null } : { lock }); front(c, st); }, solid),
+    E: (st) => pic(st ? 15 : 12, st ? 19 : 14, (c) => { chestSide(c, col, band, { open: !!st, lock, fill: st === 'full' ? fill : null }); end(c, st); }, solid),
+  });
+  const woodChest = chestKind(C.wood, C.iron, C.brass, C.gold);
+  views('chest', { side: woodChest.E(0), used: woodChest.F('full'), sideUsed: woodChest.E('full') });
+  views('chest-open', { side: woodChest.E('full'), used: woodChest.F('empty'), sideUsed: woodChest.E('empty') });
+  views('chest-empty', { side: woodChest.E('empty'), used: woodChest.F(0), sideUsed: woodChest.E(0) });
+  const goldChest = chestKind(C.gold, C.brass, C.wine, C.flameLight,
+    (c, st) => { if (!st) pts(c, [[6, 3], [11, 3], [6, 10], [11, 10]], C.red); else if (st === 'full') { pts(c, [[6, 8], [11, 9]], C.red); c.set(9, 8, C.teal); } else pts(c, [[6, 15], [11, 15]], C.red); },
+    (c, st) => { if (!st) pts(c, [[5, 3], [3, 11], [8, 11]], C.red); else if (st === 'full') { c.set(5, 8, C.red); c.set(4, 9, C.teal); } else pts(c, [[3, 16], [8, 16]], C.red); });
+  views('chest-gold', { side: goldChest.E(0), used: goldChest.F('full'), sideUsed: goldChest.E('full') });
+  views('chest-gold-open', { side: goldChest.E('full'), used: goldChest.F('empty'), sideUsed: goldChest.E('empty') });
+  const ironChest = chestKind(C.iron, C.ironDark, C.steel, C.parchment,
+    (c, st) => { if (!st) { pts(c, [[1, 3], [6, 3], [11, 3], [16, 3], [1, 10], [6, 10], [11, 10], [16, 10]], C.steel); c.rect(7, 5, 10, 9, C.steel); c.rect(8, 7, 9, 8, K); } else { pts(c, [[1, 15], [6, 15], [11, 15], [16, 15]], C.steel); c.rect(7, 10, 10, 14, C.steel); c.rect(8, 12, 9, 13, K); c.rect(6, 7, 9, 8, C.paper); c.row(7, 10, 12, C.wine); } },
+    (c, st) => { pts(c, st ? [[3, 16], [8, 16]] : [[3, 3], [8, 3], [3, 11], [8, 11]], C.steel); if (st) { c.rect(3, 7, 5, 8, C.paper); c.set(6, 8, C.wine); } });
+  views('chest-iron', { side: ironChest.E(0), used: ironChest.F('full'), sideUsed: ironChest.E('full') });
+
+  views('barrel', {
+    used: changed('barrel', (c) => {
+      // the lid is off and leans against it
+      c.rect(3, 1, 10, 1, C.night);
+      c.row(2, 2, 11, DD(C.wood));
+      c.row(2, 4, 8, C.water);
+      c.set(5, 2, C.glassLight);
+      c.oval(14, 7, 18, 15, C.woodLight);
+      ring(c, 14, 7, 18, 15, C.wood, 1);
+      c.col(16, 9, 13, D(C.woodLight));
+    }, [0, 0, 6]),
+  });
+  views('crate', {
+    used: changed('crate', (c) => {
+      // the lid is prised up, straw inside
+      c.poly([[2, 5], [14, 5], [14, 3]], C.night);
+      pts(c, [[6, 5], [9, 4], [11, 5], [12, 4], [13, 5], [8, 5]], C.straw);
+      c.line(1, 5, 14, 2, C.woodLight);
+      c.line(1, 4, 14, 1, L(C.woodLight));
+      pts(c, [[2, 5], [13, 2]], C.iron);
+    }, [0, 4, 0]),
+  });
+  const shards = (c, yb) => {
+    c.poly([[1, yb], [3, yb - 3], [5, yb]], CLAY); c.poly([[5, yb], [8, yb - 2], [10, yb]], D(CLAY)); c.poly([[9, yb], [11, yb - 3], [12, yb]], CLAY);
+    c.set(3, yb - 3, L(CLAY)); c.set(11, yb - 3, L(CLAY)); c.row(yb, 1, 12, D(CLAY)); c.set(6, yb, C.cream);
+  };
+  views('pot', { used: same('pot-broken') });
+  views('pot-broken', { used: pic(14, 6, (c) => shards(c, 4)) });
+  views('sack', {
+    used: changed('sack', (c) => {
+      // untied: the mouth sags open and grain runs out
+      c.clearRect(3, 1, 9, 2);
+      c.row(3, 3, 9, L(C.straw));
+      c.row(4, 4, 8, C.gold);
+      pts(c, [[5, 4], [7, 4]], C.flameLight);
+      pts(c, [[10, 5], [11, 7], [11, 9], [12, 11]], C.gold);
+      c.poly([[11, 13], [14, 11], [17, 13]], C.gold);
+      pts(c, [[14, 11], [13, 12]], C.flameLight);
+      c.row(13, 12, 16, C.mustard);
+    }, [0, 0, 6]),
+  });
+  views('bucket', { used: same('bucket-water') });
+  views('bucket-water', { used: same('bucket') });
+
+  /** A table from its short end, its top on rows y0+1 .. y0+3. */
+  const tableEnd = (c, y0 = 0) => {
+    c.rect(4, y0 + 4, 6, y0 + 15, C.woodDark);
+    c.rect(13, y0 + 4, 15, y0 + 15, C.woodDark);
+    c.col(4, y0 + 6, y0 + 15, C.wood);
+    c.col(13, y0 + 6, y0 + 15, C.wood);
+    c.rect(3, y0 + 4, 16, y0 + 5, C.wood);
+    c.row(y0 + 5, 3, 16, D(C.wood));
+    c.rect(1, y0 + 1, 18, y0 + 3, C.woodLight);
+    c.row(y0 + 1, 1, 18, L(C.woodLight));
+    c.row(y0 + 3, 1, 18, C.wood);
+  };
+  /** A candle, a plate of bread and a mug standing on row yb. */
+  const supper = (c, yb, xc, xp, xm) => {
+    candle(c, xc, yb, 4);
+    if (xp != null) { c.row(yb, xp, xp + 6, C.white); c.rect(xp + 1, yb - 2, xp + 5, yb - 1, C.woodPale); c.row(yb - 2, xp + 2, xp + 4, L(C.woodPale)); c.set(xp + 5, yb - 1, C.rust); }
+    c.rect(xm, yb - 3, xm + 2, yb, C.steel); c.row(yb - 3, xm, xm + 2, L(C.steel)); c.rect(xm + 3, yb - 2, xm + 3, yb - 1, C.iron);
+  };
+  views('table', {
+    side: pic(20, 17, (c) => tableEnd(c), solid),
+    used: changed('table', (c) => supper(c, 7, 7, 13, 23), [0, 7, 0]),
+    sideUsed: pic(20, 24, (c) => { tableEnd(c, 7); supper(c, 7, 4, null, 12); }, solid),
+  });
+  /** A chair from the side: it faces left, the back is a post on the right. */
+  const chairSide = (c) => {
+    c.rect(8, 1, 9, 19, C.wood);
+    c.col(8, 1, 19, C.woodLight);
+    c.rect(7, 2, 9, 3, C.woodLight);
+    c.rect(2, 12, 3, 19, C.wood);
+    c.col(2, 12, 19, C.woodLight);
+    c.row(12, 2, 8, C.woodDark);
+    c.row(16, 4, 7, C.woodDark);
+    c.rect(1, 10, 9, 11, C.woodLight);
+    c.row(11, 1, 9, C.wood);
+  };
+  views('chair', {
+    side: pic(11, 21, chairSide, solid),
+    used: turned(12, 21, S.chair.draw, solid),
+    sideUsed: turned(11, 21, chairSide, solid),
+  });
+  views('stool', { used: turned(10, 11, S.stool.draw) });
+
+  /** A bed seen from its foot end, running away from the viewer: headboard on top, the foot board nearest. */
+  const bedFront = (c, blanket, slept) => {
+    c.rect(1, 1, 20, 10, C.woodDark);
+    c.row(1, 1, 20, C.wood);
+    c.rect(3, 3, 18, 9, C.wood);
+    c.col(3, 3, 9, C.woodLight);
+    c.rect(1, 11, 20, 30, C.wood);
+    c.rect(2, 10, 19, 30, C.cream);
+    c.rect(5, 11, 16, 15, C.white);
+    c.row(15, 5, 16, D(C.white));
+    c.col(16, 11, 15, D(C.white));
+    if (!slept) {
+      c.rect(2, 18, 19, 30, blanket);
+      c.rect(2, 16, 19, 17, C.white);
+      c.row(18, 2, 19, L(blanket));
+      c.line(7, 21, 6, 28, D(blanket));
+      c.line(14, 20, 15, 27, D(blanket));
+      c.col(19, 18, 30, D(blanket));
+    } else {
+      // the blanket thrown back from the top left corner
+      c.rect(8, 12, 12, 13, D(C.white));
+      c.line(4, 18, 9, 21, D(C.cream));
+      c.line(5, 23, 8, 24, D(C.cream));
+      c.poly([[19, 17], [19, 30], [2, 30], [2, 27], [11, 17]], blanket);
+      c.poly([[11, 17], [2, 27], [8, 28], [16, 20]], L(blanket));
+      c.line(11, 17, 2, 27, C.white);
+      c.line(16, 20, 8, 28, D(blanket));
+      c.line(15, 23, 16, 29, D(blanket));
+      c.col(19, 17, 30, D(blanket));
+    }
+    c.rect(1, 29, 20, 34, C.woodDark);
+    c.row(29, 1, 20, C.wood);
+    c.rect(3, 31, 18, 33, C.wood);
+    c.col(3, 31, 33, C.woodLight);
+    c.rect(1, 35, 2, 36, C.woodDark);
+    c.rect(19, 35, 20, 36, C.woodDark);
+  };
+  const bedSlept = (blanket) => (c) => {
+    bed(c, blanket);
+    // the blanket pushed down to the foot end in a heap, the sheet bare
+    c.clearRect(14, 11, 23, 11);
+    c.rect(13, 12, 23, 15, C.cream);
+    c.line(15, 13, 18, 14, D(C.cream));
+    c.line(20, 13, 22, 13, D(C.cream));
+    c.rect(8, 11, 10, 11, D(C.white));
+    c.rect(13, 16, 23, 16, C.wood);
+    c.rect(24, 9, 28, 16, blanket);
+    c.rect(25, 8, 27, 8, blanket);
+    c.row(9, 24, 28, L(blanket));
+    c.col(24, 10, 15, L(blanket));
+    c.line(26, 11, 27, 15, D(blanket));
+    c.set(24, 16, D(blanket));
+  };
+  for (const [slug, col] of [['bed', C.wine], ['bed-blue', C.navy]])
+    views(slug, {
+      base: 'side',
+      side: pic(22, 38, (c) => bedFront(c, col, false), solid),
+      used: pic(38, 22, bedSlept(col), solid),
+      sideUsed: pic(22, 38, (c) => bedFront(c, col, true), solid),
+    });
+
+  /** A plain cabinet side, w wide (the front is on the left): rails on the given rows, feet if asked. */
+  const cabinetSide = (c, x0, x1, y0, y1, o = {}) => {
+    const col = o.col || C.wood;
+    c.rect(x0, y0 + 1, x1, y1, col);
+    c.rect(x0, y0, x1, y0 + 1, o.top || L(col));
+    c.col(x0, y0 + 2, y1, L(col));
+    for (const [a, b] of o.panels || []) c.frame(x0 + 2, a, x1 - 2, b, D(col));
+    for (const y of o.rails || []) { c.row(y, x0, x1, L(col)); c.row(y + 1, x0, x1, DD(col)); }
+  };
+  /** A cabinet door standing open, seen full on from the side of the cabinet. */
+  const doorLeaf = (c, x0, y0, x1, y1, o = {}) => {
+    const col = o.col || C.wood;
+    c.rect(x0, y0, x1, y1, D(col));
+    c.rect(x0 + 1, y0 + 1, x1 - 1, y1 - 1, col);
+    if (o.glass) { c.rect(x0 + 2, y0 + 2, x1 - 2, y1 - 2, C.glass); c.line(x0 + 3, y0 + 5, x0 + 2, y0 + 8, C.glassLight); }
+    else if (x1 - x0 > 5) c.frame(x0 + 2, y0 + 2, x1 - 2, y1 - 2, D(col));
+    c.col(x0, y0, y1, L(col));
+    if (o.knob !== false) c.set(x0 + 1, (y0 + y1) >> 1, o.knob || C.brass);
+  };
+  const shelfSide = (c, x0) => {
+    c.rect(x0, 1, x0 + 7, 36, C.woodDark);
+    c.rect(x0 + 1, 3, x0 + 7, 35, C.wood);
+    c.frame(x0 + 3, 5, x0 + 5, 33, D(C.wood));
+    c.rect(x0, 1, x0 + 7, 2, C.wood);
+    c.row(1, x0, x0 + 7, C.woodLight);
+    // the open front: the edges of the books
+    for (let i = 0; i < 5; i++) for (let y = 4 + i * 7; y <= 8 + i * 7; y++) c.set(x0, y, (y * 3 + i) % 4 === 0 ? DD(C.wood) : SPINES[(y * 5 + i * 3) % SPINES.length]);
+    c.row(36, x0, x0 + 7, DD(C.wood));
+  };
+  views('bookshelf', {
+    side: pic(10, 38, (c) => shelfSide(c, 1), solid),
+    used: changed('bookshelf', (c) => {
+      // books taken out, the neighbours fallen over
+      c.rect(7, 11, 13, 15, DD(C.wood));
+      c.line(7, 15, 9, 11, C.wine); c.line(8, 15, 10, 11, D(C.wine));
+      c.rect(14, 25, 20, 29, DD(C.wood));
+      c.rect(14, 28, 19, 29, C.cream); c.row(28, 14, 19, C.navy);
+      c.rect(4, 32, 6, 36, DD(C.wood));
+    }),
+    sideUsed: pic(13, 38, (c) => {
+      shelfSide(c, 4);
+      c.rect(1, 12, 4, 14, C.wine); c.row(12, 1, 4, L(C.wine)); c.col(1, 12, 14, C.cream);
+      c.rect(2, 26, 4, 27, C.navy); c.set(2, 26, C.cream);
+      c.col(4, 32, 36, DD(C.wood));
+    }, solid),
+  });
+  const cupboardSide = (c, x0) => {
+    cabinetSide(c, x0, x0 + 9, 1, 36, { top: C.woodLight, panels: [[5, 19], [24, 34]], rails: [21] });
+    c.col(x0, 3, 36, C.woodLight);
+    c.clearRect(x0 + 3, 36, x0 + 6, 36);
+    c.rect(x0 + 1, 36, x0 + 2, 36, C.woodDark); c.rect(x0 + 7, 36, x0 + 8, 36, C.woodDark);
+  };
+  views('cupboard', {
+    side: pic(12, 38, (c) => cupboardSide(c, 1), solid),
+    used: changed('cupboard', (c, dx) => {
+      // both doors stand open: plates and jars on two shelves
+      const x = dx;
+      c.rect(x + 3, 5, x + 20, 19, C.woodDark);
+      c.rect(x + 4, 6, x + 19, 18, C.night);
+      c.row(12, x + 4, x + 19, C.wood);
+      for (const px of [5, 9, 13]) { c.rect(x + px, 9, x + px + 2, 11, C.white); c.set(x + px + 1, 10, D(C.white)); c.clear(x + px, 9); c.set(x + px, 9, C.night); c.set(x + px + 2, 9, C.night); }
+      c.rect(x + 17, 8, x + 18, 11, CLAY); c.row(8, x + 17, x + 18, C.cream);
+      c.rect(x + 5, 15, x + 7, 18, C.glass); c.row(15, x + 5, x + 7, C.brass);
+      c.rect(x + 9, 16, x + 11, 18, C.mustard); c.row(16, x + 9, x + 11, C.brass);
+      c.rect(x + 14, 14, x + 16, 18, C.wine); c.set(x + 15, 13, C.wine); c.col(x + 14, 14, 18, L(C.wine));
+      c.poly([[x + 2, 5], [x - 3, 7], [x - 3, 21], [x + 2, 19]], C.wood);
+      c.line(x - 3, 7, x - 3, 21, C.woodLight); c.line(x + 2, 5, x - 3, 7, C.woodLight); c.frame(x - 1, 8, x, 18, D(C.wood));
+      c.poly([[x + 21, 5], [x + 26, 7], [x + 26, 21], [x + 21, 19]], C.wood);
+      c.line(x + 21, 5, x + 26, 7, C.woodLight); c.frame(x + 23, 8, x + 24, 18, D(C.wood));
+      c.col(x + 2, 5, 19, C.woodDark); c.col(x + 21, 5, 19, C.woodDark);
+    }, [4, 0, 4]),
+    sideUsed: pic(21, 38, (c) => { cupboardSide(c, 10); doorLeaf(c, 1, 5, 10, 19); }, solid),
+  });
+
+  /** A crown lying on a seat: 6 wide, its band on rows yb-2 .. yb. */
+  const crown = (c, x, yb) => { c.rect(x, yb - 2, x + 5, yb, C.gold); pts(c, [[x, yb - 3], [x, yb - 4], [x + 5, yb - 3], [x + 5, yb - 4], [x + 2, yb - 3], [x + 3, yb - 3], [x + 2, yb - 4]], C.gold); c.row(yb, x, x + 5, C.brass); c.set(x + 2, yb - 1, C.red); c.set(x, yb - 2, C.flameLight); c.set(x, yb - 4, C.flameLight); };
+  const throneSide = (c, wood, cloth, trim) => {
+    c.rect(11, 3, 14, 24, wood);
+    c.rect(12, 1, 13, 2, trim);
+    c.rect(11, 4, 14, 5, trim);
+    c.rect(9, 7, 10, 22, cloth);
+    c.col(9, 7, 22, L(cloth));
+    c.rect(12, 23, 14, 37, wood);
+    c.rect(2, 23, 4, 37, wood);
+    c.rect(4, 24, 11, 27, cloth);
+    c.row(24, 4, 11, L(cloth));
+    c.rect(4, 28, 12, 34, wood === C.woodDark ? C.wood : wood);
+    c.frame(6, 29, 10, 33, D(wood));
+    c.rect(3, 20, 11, 22, wood);
+    c.rect(1, 20, 4, 22, trim);
+    c.rect(1, 37, 15, 38, wood);
+    c.row(37, 1, 15, trim);
+  };
+  views('throne', {
+    side: pic(17, 40, (c) => throneSide(c, C.woodDark, C.wine, C.gold), solid),
+    used: changed('throne', (c) => crown(c, 8, 24)),
+    sideUsed: pic(17, 40, (c) => { throneSide(c, C.woodDark, C.wine, C.gold); crown(c, 5, 24); }, solid),
+  });
+
+  const clockSide = (c, x0) => {
+    c.rect(x0 + 1, 12, x0 + 6, 34, C.wood);
+    c.rect(x0, 3, x0 + 7, 12, C.wood);
+    c.poly([[x0, 3], [x0 + 3, 1], [x0 + 4, 1], [x0 + 7, 3]], C.woodDark);
+    c.row(3, x0, x0 + 7, C.woodLight);
+    c.frame(x0 + 2, 5, x0 + 5, 10, D(C.wood));
+    c.col(x0, 5, 11, C.cream);
+    c.rect(x0, 12, x0 + 7, 13, C.woodDark);
+    c.frame(x0 + 3, 16, x0 + 4, 31, D(C.wood));
+    c.col(x0 + 1, 14, 34, C.woodLight);
+    c.rect(x0, 34, x0 + 7, 38, C.woodDark);
+    c.row(34, x0, x0 + 7, C.wood);
+  };
+  views('clock', {
+    side: pic(10, 40, (c) => clockSide(c, 1), solid),
+    used: changed('clock', (c) => {
+      // wound up: the hands at midnight, the pendulum swinging, the case door open
+      disc(c, 6, 8, 3, C.cream); c.oval(3, 5, 10, 11, C.cream);
+      c.line(6, 8, 6, 5, K); c.line(7, 8, 7, 6, K);
+      c.rect(4, 15, 9, 31, C.night);
+      c.line(6, 15, 8, 25, C.brass); c.rect(8, 25, 9, 27, C.gold);
+      c.rect(13, 14, 15, 32, C.wood); c.col(13, 14, 32, C.woodLight); c.col(14, 16, 30, C.glass); c.set(15, 23, C.brass);
+    }, [0, 0, 4]),
+    sideUsed: pic(16, 40, (c) => { clockSide(c, 7); doorLeaf(c, 1, 14, 7, 32, { glass: true }); }, solid),
+  });
+
+  const mirrorEdge = (c) => { c.rect(1, 3, 3, 16, C.gold); c.col(2, 1, 18, C.gold); c.col(1, 3, 16, L(C.gold)); c.col(3, 3, 16, C.brass); c.col(2, 2, 17, C.gold); };
+  views('mirror', {
+    side: pic(5, 20, mirrorEdge),
+    used: changed('mirror', (c) => {
+      const k = DD(C.glass);
+      c.poly([[6, 9], [9, 13], [8, 16], [5, 13]], C.night);
+      c.line(6, 9, 4, 4, k); c.line(6, 9, 10, 6, k); c.line(6, 9, 3, 11, k); c.line(6, 9, 9, 14, k); c.line(6, 9, 7, 3, k);
+      c.set(6, 9, C.white); c.set(5, 6, C.white); c.set(8, 8, C.white);
+    }),
+    sideUsed: pic(5, 20, (c) => { mirrorEdge(c); c.set(1, 9, C.white); c.set(1, 13, DD(C.glass)); }),
+  });
+  views('painting', {
+    side: pic(5, 17, (c) => { c.box(1, 1, 3, 15, C.gold); c.col(2, 2, 14, C.brass); }),
+    used: pic(24, 23, (c) => { again(c, 'painting', 1, 3); tiltY(c, 0.25, 12); }),
+    sideUsed: pic(8, 17, (c) => { c.poly([[1, 1], [3, 1], [6, 15], [4, 15]], C.gold); c.line(2, 2, 5, 14, C.brass); c.line(1, 1, 4, 15, L(C.gold)); }),
+  });
+  views('banner-red', {
+    side: pic(6, 30, (c) => { c.rect(2, 1, 3, 2, C.woodDark); c.set(2, 1, C.wood); c.rect(2, 3, 3, 26, C.wine); c.col(2, 3, 27, L(C.wine)); pts(c, [[2, 4], [3, 4], [2, 22], [3, 22]], C.gold); }),
+    used: changed('banner-red', (c) => {
+      // torn across
+      for (let x = 2; x <= 11; x++) c.clearRect(x, 15 + ((x * 7) % 5) + (x > 6 ? 3 : 0), x, 28);
+      c.line(4, 5, 8, 12, DD(C.wine));
+    }),
+    sideUsed: pic(6, 30, (c) => { c.rect(2, 1, 3, 2, C.woodDark); c.set(2, 1, C.wood); c.rect(2, 3, 3, 17, C.wine); c.col(2, 3, 19, L(C.wine)); pts(c, [[2, 4], [3, 4]], C.gold); }),
+  });
+  const flagPole = (c, x, edge, fy) => {
+    pole(c, x, 3, 35, C.woodLight);
+    disc(c, x, 2, 1, C.gold);
+    if (edge) { c.rect(x + 2, 4 + fy, x + 2, 13 + fy, C.wine); c.set(x + 2, 4 + fy, L(C.wine)); c.rect(x + 3, 6 + fy, x + 3, 14 + fy, D(C.wine)); }
+    else {
+      c.poly([[5, 4 + fy], [11, 5 + fy], [17, 4 + fy], [17, 13 + fy], [11, 14 + fy], [5, 13 + fy]], C.wine);
+      c.line(5, 4 + fy, 17, 4 + fy, L(C.wine)); c.line(9, 6 + fy, 9, 13 + fy, D(C.wine)); c.line(14, 5 + fy, 14, 13 + fy, D(C.wine));
+    }
+    c.rect(x - 2, 35, x + 3, 36, C.stoneDark);
+  };
+  views('flag-red', {
+    side: pic(9, 38, (c) => flagPole(c, 3, true, 0)),
+    used: pic(20, 38, (c) => flagPole(c, 3, false, 14)),
+    sideUsed: pic(9, 38, (c) => flagPole(c, 3, true, 14)),
+  });
+
+  /** The robed stone figure in profile, looking left: 9 wide and 27 tall, feet on row yb. */
+  const figureSide = (c, x, yb, col) => {
+    const t = yb - 26;
+    c.poly([[x + 1, t + 16], [x + 6, t + 16], [x + 8, yb], [x, yb]], col);
+    c.rect(x + 1, t + 9, x + 6, t + 17, col);
+    c.rect(x + 2, t + 8, x + 6, t + 8, col);
+    c.col(x + 1, t + 9, t + 17, L(col));
+    c.col(x + 2, t + 11, t + 17, D(col));
+    c.col(x + 6, t + 10, t + 17, D(col));
+    c.row(t + 17, x + 3, x + 5, D(col));
+    c.line(x + 3, t + 19, x + 2, yb, D(col));
+    c.line(x + 6, t + 19, x + 7, yb, D(col));
+    c.rect(x + 3, t + 7, x + 5, t + 7, D(col));
+    c.oval(x + 1, t, x + 6, t + 6, col);
+    c.set(x, t + 3, col);
+    c.col(x + 1, t + 2, t + 4, L(col));
+    c.set(x + 2, t + 2, DD(col));
+    c.row(t + 5, x + 1, x + 2, D(col));
+  };
+  /** Knock the head off a figure whose feet are on row yb at x (front or profile), and lay it at hx. */
+  const beheaded = (c, x, yb, col, hx, hb) => {
+    c.clearRect(x - 1, yb - 27, x + 12, yb - 20);
+    pts(c, [[x + 4, yb - 20], [x + 6, yb - 20], [x + 7, yb - 21]], col);
+    c.oval(hx, hb - 6, hx + 6, hb, col);
+    pts(c, [[hx + 2, hb - 4], [hx + 2, hb - 2]], DD(col));
+    c.col(hx + 1, hb - 4, hb - 2, L(col));
+    c.col(hx + 4, hb - 4, hb - 1, D(col));
+    c.rect(hx + 6, hb - 4, hx + 6, hb - 2, D(col));
+  };
+  views('statue', {
+    side: pic(18, 42, (c) => { pedestal(c, 1, 30, 16, 40, C.stone); figureSide(c, 5, 29, C.stoneLight); c.speckle(1, 2, 16, 40, C.moss, 14, 3); }, solid),
+    used: pic(27, 42, (c) => { again(c, 'statue'); beheaded(c, 3, 29, C.stoneLight, 19, 40); }, solid),
+    sideUsed: pic(27, 42, (c) => { pedestal(c, 1, 30, 16, 40, C.stone); figureSide(c, 5, 29, C.stoneLight); c.speckle(1, 2, 16, 40, C.moss, 14, 3); beheaded(c, 4, 29, C.stoneLight, 19, 40); }, solid),
+  });
+
+  /** A spade standing in the ground: handle from row y0 down to yb. */
+  const spade = (c, x, y0, yb) => { c.col(x, y0, yb, C.woodLight); c.rect(x - 1, y0, x + 1, y0, C.wood); c.rect(x - 1, yb - 3, x + 1, yb, C.steel); c.col(x - 1, yb - 3, yb, L(C.steel)); };
+  const slabSide = (c, x, y0, yb, col) => { c.rect(x, y0 + 1, x + 3, yb, col); c.rect(x + 1, y0, x + 2, y0, col); c.col(x, y0 + 1, yb, L(col)); c.col(x + 3, y0 + 2, yb, D(col)); c.row(yb, x, x + 3, C.moss); };
+  views('gravestone', {
+    side: pic(6, 18, (c) => slabSide(c, 1, 1, 16, C.stone), solid),
+    used: pic(29, 23, (c) => { again(c, 'gravestone'); spade(c, 21, 5, 16); heap(c, 15, 27, 21, 7); pit(c, 1, 17, 13, 21); }, solid),
+    sideUsed: pic(31, 23, (c) => { spade(c, 9, 4, 13); heap(c, 3, 18, 16, 6); slabSide(c, 25, 1, 16, C.stone); pit(c, 1, 17, 22, 21); }, solid),
+  });
+  const crossFront = (c, x) => { c.rect(x, 1, x + 1, 16, C.wood); c.rect(x - 4, 5, x + 5, 6, C.wood); c.col(x, 1, 16, C.woodLight); c.row(5, x - 4, x + 5, C.woodLight); c.set(x + 1, 6, C.iron); };
+  const crossSide = (c, x) => { c.rect(x, 1, x + 1, 16, C.wood); c.col(x, 1, 16, C.woodLight); c.rect(x - 1, 5, x + 2, 6, C.wood); c.row(5, x - 1, x + 2, C.woodLight); };
+  views('grave-cross', {
+    side: pic(27, 20, (c) => { crossSide(c, 21); heap(c, 1, 24, 18, 5); }, solid),
+    used: pic(29, 23, (c) => { crossFront(c, 6); spade(c, 21, 5, 16); heap(c, 15, 27, 21, 7); pit(c, 1, 17, 13, 21); }, solid),
+    sideUsed: pic(31, 23, (c) => { spade(c, 9, 4, 13); heap(c, 3, 18, 16, 6); crossSide(c, 25); pit(c, 1, 17, 22, 21); }, solid),
+  });
+
+  const coffinSide = (c, x, open) => {
+    c.rect(x + 3, 1, x + 6, 38, C.wood);
+    c.col(x + 6, 1, 38, D(C.wood));
+    pts(c, [[x + 4, 13], [x + 5, 13], [x + 4, 27], [x + 5, 27]], C.iron);
+    if (open) { c.col(x + 2, 2, 37, C.night); c.set(x + 2, 1, C.woodDark); c.set(x + 2, 38, C.woodDark); }
+    else { c.rect(x, 1, x + 1, 38, C.wood); c.col(x, 1, 38, C.woodLight); c.col(x + 2, 1, 38, C.woodDark); c.rect(x, 9, x, 20, C.brass); }
+    c.row(38, x + 3, x + 6, C.woodDark);
+  };
+  views('coffin', {
+    side: pic(9, 40, (c) => coffinSide(c, 1, false), solid),
+    used: pic(36, 40, (c) => {
+      // the lid stands beside it; somebody is still in there
+      const sh = (list, dx) => list.map(([x, y]) => [x + dx, y]);
+      c.poly(sh([[6, 1], [11, 1], [16, 11], [12, 38], [5, 38], [1, 11]], 0), C.wood);
+      c.poly([[7, 3], [10, 3], [14, 11], [11, 36], [6, 36], [3, 11]], C.night);
+      c.line(6, 1, 1, 11, C.woodLight); c.line(1, 11, 5, 38, C.woodLight);
+      skull(c, 5, 5, D(C.bone));
+      c.col(8, 12, 21, D(C.bone));
+      for (const y of [14, 16, 18]) c.row(y, 6, 11, D(C.bone));
+      c.row(22, 7, 10, D(C.bone));
+      c.col(7, 23, 33, D(C.bone)); c.col(10, 23, 33, D(C.bone));
+      pts(c, [[7, 28], [10, 28]], C.night);
+      const t = canvas(26, 40);
+      again(t, 'coffin'); leanX(t, 0.12, 38); c.stamp(t, 12, 0);
+    }, solid),
+    sideUsed: pic(16, 40, (c) => {
+      coffinSide(c, 8, true);
+      c.line(1, 38, 8, 3, C.woodLight); c.line(2, 38, 9, 3, C.wood); c.line(3, 38, 9, 8, C.woodDark);
+    }, solid),
+  });
+
+  views('campfire', {
+    used: pic(18, 17, (c) => { wisp(c, 8, 11, 9); logs(c, 8, 15); c.rect(5, 13, 11, 14, C.black); pts(c, [[6, 13], [9, 12], [10, 14]], C.ash); c.set(8, 13, C.rust); }),
+  });
+  views('cauldron', {
+    used: changed('cauldron', (c, dx, dy) => {
+      // it boils over
+      c.rect(4, dy + 1, 15, dy + 2, X.toxic);
+      c.rect(5, 3, 7, 5, X.toxic); c.set(6, 4, L(X.toxic)); c.set(5, 3, null);
+      c.rect(11, 1, 13, 4, X.toxic); c.set(12, 2, L(X.toxic));
+      c.rect(15, 4, 16, 5, X.toxic); c.set(8, 3, X.toxic);
+      c.col(4, dy + 4, dy + 9, X.toxic); c.col(5, dy + 4, dy + 6, X.toxic);
+      c.col(14, dy + 4, dy + 11, X.toxic); c.set(14, dy + 12, L(X.toxic)); c.col(15, dy + 4, dy + 7, D(X.toxic));
+      c.col(10, dy + 4, dy + 6, X.toxic);
+    }, [0, 4, 0]),
+  });
+  const anvilEnd = (c, y0) => {
+    c.rect(2, y0 + 2, 7, y0 + 5, C.iron); c.row(y0 + 2, 2, 7, C.steel); c.rect(4, y0 + 3, 5, y0 + 4, C.steel);
+    c.rect(3, y0 + 6, 6, y0 + 8, C.ironDark);
+    c.rect(1, y0 + 9, 8, y0 + 11, C.iron); c.row(y0 + 9, 1, 8, C.steel); c.row(y0 + 11, 1, 8, C.ironDark);
+  };
+  views('anvil', {
+    base: 'side',
+    side: pic(10, 13, (c) => anvilEnd(c, 0), solid),
+    used: changed('anvil', (c) => {
+      // a glowing bar and the hammer left lying on it
+      c.rect(9, 4, 18, 4, C.flame); c.rect(9, 4, 13, 4, C.flameLight); c.set(9, 4, C.white);
+      c.rect(2, 2, 4, 4, C.ironDark); c.row(2, 2, 4, C.steel); c.rect(5, 3, 9, 3, C.woodLight);
+    }, [0, 3, 0]),
+    sideUsed: pic(10, 16, (c) => { anvilEnd(c, 3); c.rect(4, 3, 5, 4, C.flameLight); c.set(4, 3, C.white); c.rect(6, 2, 7, 4, C.ironDark); c.row(2, 6, 7, C.steel); }, solid),
+  });
+
+  /** A sign seen edge-on: the post and the thickness of the board, whose top is on row y0. */
+  const signEdge = (c, y0, y1, o = {}) => {
+    pole(c, 3, o.top || 2, o.yb || 22, C.wood);
+    c.rect(1, y0, 2, y1, C.woodLight);
+    c.col(1, y0, y1, L(C.woodLight));
+    c.set(2, (y0 + y1) >> 1, C.iron);
+  };
+  views('signpost', {
+    side: pic(7, 24, (c) => signEdge(c, 3, 11)),
+    used: changed('signpost', (c) => { c.line(3, 4, 12, 10, C.blood); c.line(12, 4, 3, 10, C.blood); c.line(4, 4, 13, 10, C.blood); }),
+    sideUsed: pic(7, 24, (c) => { signEdge(c, 3, 11); c.set(1, 6, C.blood); c.set(1, 9, C.blood); }),
+  });
+  for (const [slug, dir] of [['sign-right', 1], ['sign-left', -1]])
+    views(slug, {
+      side: pic(7, 24, (c) => signEdge(c, 3, 11)),
+      // somebody has turned it round, and it hangs crooked now
+      used: pic(17, 24, (c) => { signboard(c, -dir); tiltY(c, 0.25 * dir, 7.5); }),
+      sideUsed: pic(7, 24, (c) => signEdge(c, 4, 13)),
+    });
+  const leverSide = (c, on) => {
+    c.rect(1, 10, 5, 12, C.iron); c.row(10, 1, 5, C.steel); c.rect(2, 9, 4, 9, C.ironDark);
+    c.col(3, on ? 6 : 4, 9, C.steel);
+    disc(c, 3, on ? 5 : 3, 1, on ? X.green : C.red);
+  };
+  views('lever-left', { side: pic(7, 14, (c) => leverSide(c, false)), used: same('lever-right'), sideUsed: pic(7, 14, (c) => leverSide(c, true)) });
+  views('lever-right', { side: pic(7, 14, (c) => leverSide(c, true)), used: same('lever-left'), sideUsed: pic(7, 14, (c) => leverSide(c, false)) });
+  views('button', { used: same('button-pressed') });
+  views('button-pressed', { used: same('button') });
+
+  /** A door in its frame seen edge-on. */
+  const doorEdge = (c, frame, leaf, knob) => {
+    c.rect(2, 1, 5, 36, frame); c.row(1, 2, 5, L(frame)); c.col(2, 1, 36, L(frame));
+    c.col(3, 3, 36, leaf); c.col(4, 3, 36, D(leaf));
+    if (knob) { c.rect(1, 18, 1, 19, knob); c.rect(6, 18, 6, 19, knob); }
+  };
+  /** The same with the door standing open: the leaf (drawn by fn on x 1..14, y 3..36) seen full on. */
+  const doorSwung = (c, frame, fn) => {
+    fn(c);
+    c.rect(15, 1, 18, 36, frame); c.row(1, 15, 18, L(frame)); c.col(15, 1, 36, L(frame));
+  };
+  const woodLeaf = (c) => {
+    vplanks(c, 1, 3, 14, 36, C.wood, 4);
+    c.frame(3, 5, 12, 15, C.woodDark); c.frame(3, 19, 12, 33, C.woodDark);
+    c.rect(2, 18, 3, 19, C.brass);
+    c.rect(13, 8, 14, 8, C.iron); c.rect(13, 30, 14, 30, C.iron);
+  };
+  const ironLeaf = (c) => {
+    c.rect(1, 3, 14, 36, C.iron); c.col(1, 3, 36, C.steel);
+    for (const y of [5, 14, 23, 32]) { c.row(y, 1, 14, C.ironDark); pts(c, [[2, y + 2], [7, y + 2], [13, y + 2]], C.steel); }
+    c.rect(4, 7, 11, 11, K); for (const x of [6, 9]) c.col(x, 7, 11, C.steel);
+    c.rect(2, 18, 5, 22, C.steel); c.rect(3, 20, 4, 21, K);
+  };
+  const woodDoorEdge = pic(8, 38, (c) => doorEdge(c, C.woodDark, C.wood, C.brass), solid),
+    woodDoorSwung = pic(20, 38, (c) => doorSwung(c, C.woodDark, woodLeaf));
+  views('door', { side: woodDoorEdge, used: same('door-open'), sideUsed: woodDoorSwung });
+  views('door-open', { side: woodDoorSwung, used: same('door'), sideUsed: woodDoorEdge });
+  views('door-iron', {
+    side: pic(8, 38, (c) => doorEdge(c, C.stoneDark, C.iron, C.steel), solid),
+    used: pic(20, 38, (c) => {
+      doorframe(c, C.stoneDark);
+      c.rect(3, 3, 16, 36, C.night);
+      c.poly([[3, 3], [8, 5], [8, 36], [3, 36]], C.iron);
+      c.col(8, 5, 36, C.ironDark); c.col(3, 3, 36, C.steel);
+      for (const y of [7, 16, 25, 33]) { c.row(y, 4, 7, C.ironDark); pts(c, [[5, y + 2], [7, y + 2]], C.steel); }
+      c.rect(5, 9, 6, 13, K);
+      c.rect(9, 35, 16, 36, DD(C.stone));
+    }),
+    sideUsed: pic(20, 38, (c) => doorSwung(c, C.stoneDark, ironLeaf)),
+  });
+  const portcullisEdge = (c, up) => {
+    bricks(c, 1, 1, 8, 36, C.stone, 5, 4);
+    c.col(1, 1, 36, C.stoneLight); c.row(1, 1, 8, C.stoneLight);
+    c.rect(4, 4, 5, 36, C.night);
+    c.col(4, 5, up ? 12 : 35, C.iron); c.col(5, 5, up ? 12 : 35, C.ironDark);
+    for (const y of up ? [9] : [9, 16, 23, 30]) c.set(5, y, C.steel);
+    c.set(4, up ? 13 : 36, C.steel);
+  };
+  views('portcullis', {
+    side: pic(10, 38, (c) => portcullisEdge(c, false), solid),
+    used: changed('portcullis', (c) => {
+      // wound up: only the points still show under the arch
+      arch(c, 4, 4, 19, 36, C.night);
+      for (let x = 5; x <= 18; x += 3) { c.col(x, 5, 11, C.iron); c.set(x, 12, C.steel); }
+      c.row(9, 4, 19, C.ironDark);
+      c.rect(4, 4, 4, 8, C.night);
+      c.rect(5, 35, 18, 36, DD(C.stone));
+    }),
+    sideUsed: pic(10, 38, (c) => portcullisEdge(c, true), solid),
+  });
+  /** Steps seen from the front, each a little narrower than the one below. */
+  const stepsFront = (c, w, n, rise, yb, col, o = {}) => {
+    for (let i = 0; i < n; i++) {
+      const y = yb - (i + 1) * rise + 1, x0 = 1 + i, x1 = w - 2 - i;
+      c.rect(x0, y, x1, y + rise - 1, i % 2 && o.alt ? o.alt : col);
+      c.row(y, x0, x1, o.tread || L(col));
+      if (rise > 3) c.row(y + 1, x0, x1, o.tread || L(col));
+      c.row(y + rise - 1, x0, x1, D(col));
+      c.col(x0, y, y + rise - 1, o.tread || L(col));
+    }
+  };
+  views('stairs', {
+    base: 'side',
+    side: pic(26, 26, (c) => { stepsFront(c, 26, 6, 4, 24, C.stone, { tread: C.stoneLight }); c.speckle(1, 1, 24, 24, C.stoneDark, 12, 4); c.row(24, 1, 24, C.stoneDark); }, solid),
+  });
+  views('lamp-post', { used: changed('lamp-post', (c) => lampHead(c, 6, 1, false)) });
+  views('cage', {
+    used: changed('cage', (c) => {
+      // the door hangs open
+      c.rect(10, 10, 14, 26, K); c.col(9, 9, 27, C.steel);
+      c.frame(17, 10, 21, 26, C.iron); c.col(19, 10, 26, C.iron); c.row(18, 17, 21, C.ironDark); c.col(17, 10, 26, C.steel);
+    }, [0, 0, 5]),
+  });
+  views('fountain', { used: pic(42, 34, (c) => fountain(c, 42, 32, { dry: true }), solid) });
+
+  /* ---------- level props ---------- */
+  views('pillar-short', { used: same('pillar-short-broken') });
+  views('pillar-sandstone', { used: pic(20, 18, (c) => { pillar(c, 1, 3, 16, 12, SANDSTONE, { broken: true }); chips(c, [[14, 15, 4], [15, 12, 3]], SANDSTONE); c.rect(3, 12, 10, 12, D(SANDSTONE)); }, solid) });
+
+  const knight = (c, sword) => {
+    const s = C.stoneLight;
+    pedestal(c, 2, 32, 19, 42, C.stone);
+    figure(c, 5, 31, s);
+    c.rect(8, 4, 13, 6, C.stone); c.row(6, 9, 12, DD(s)); c.col(10, 6, 9, D(s));
+    c.rect(10, 2, 11, 4, s);
+    if (sword) { c.rect(17, 8, 18, 31, s); c.col(17, 8, 31, L(s)); c.rect(15, 14, 20, 14, C.stone); c.rect(17, 6, 18, 7, s); }
+    else { c.rect(15, 17, 17, 19, C.stone); c.set(16, 18, DD(s)); c.rect(16, 31, 18, 31, C.stoneDark); }
+    c.poly([[2, 15], [9, 15], [9, 22], [5.5, 26], [2, 22]], C.stone); c.frame(3, 16, 8, 21, C.stoneDark); c.col(5, 17, 23, s); c.row(18, 4, 7, s);
+  };
+  const knightSide = (c, sword) => {
+    const s = C.stoneLight;
+    pedestal(c, 2, 32, 19, 42, C.stone);
+    figureSide(c, 8, 31, s);
+    c.rect(9, 4, 14, 6, C.stone); c.rect(13, 6, 14, 9, C.stone); c.row(7, 9, 12, DD(s));
+    c.rect(11, 2, 14, 3, s); c.set(14, 4, s);
+    c.rect(6, 16, 10, 18, s); c.row(18, 6, 10, D(s)); c.row(16, 6, 10, L(s));
+    if (sword) { c.rect(4, 10, 5, 31, s); c.col(4, 10, 31, L(s)); c.rect(3, 15, 6, 15, C.stone); c.rect(4, 8, 5, 9, C.stone); }
+    else c.set(6, 17, DD(s));
+  };
+  views('statue-knight', {
+    side: pic(22, 44, (c) => knightSide(c, true), solid),
+    used: pic(22, 44, (c) => knight(c, false), solid),
+    sideUsed: pic(22, 44, (c) => knightSide(c, false), solid),
+  });
+  const angelSide = (c, tears) => {
+    const s = C.stoneLight;
+    pedestal(c, 3, 34, 20, 44, C.stone);
+    c.poly([[13, 13], [21, 3], [24, 9], [23, 21], [19, 28], [14, 24]], C.stone);
+    c.poly([[13, 13], [20, 5], [21, 10], [20, 20], [17, 25], [14, 22]], s);
+    for (let i = 0; i < 4; i++) c.line(15 + i * 2, 11 - i, 15 + i * 1.5, 22 - i, C.stoneDark);
+    figureSide(c, 7, 33, s);
+    c.rect(5, 19, 8, 21, s); c.row(21, 5, 8, D(s)); c.col(5, 19, 20, L(s));
+    c.speckle(2, 3, 24, 44, C.moss, 16, 5);
+    if (tears) { c.col(9, 10, 13, C.blood); c.set(8, 14, C.blood); c.rect(5, 21, 6, 21, C.blood); c.col(6, 22, 25, C.blood); }
+  };
+  views('statue-angel', {
+    side: pic(27, 46, (c) => angelSide(c, false), solid),
+    // it weeps blood
+    used: changed('statue-angel', (c) => { c.col(14, 11, 13, C.blood); c.col(16, 11, 14, C.blood); c.set(13, 14, C.blood); c.rect(13, 21, 16, 21, C.blood); c.col(13, 22, 26, C.blood); c.col(16, 22, 24, C.blood); c.set(14, 28, C.blood); }),
+    sideUsed: pic(27, 46, (c) => angelSide(c, true), solid),
+  });
+  views('fountain-small', { used: pic(30, 34, (c) => fountain(c, 30, 32, { dry: true }), solid) });
+
+  /** The roofed well: from the front (as the main picture) or from the side; `down`: the bucket is let down. */
+  const wellStone = (c, o = {}) => {
+    if (o.side) {
+      if (!o.down) { c.rect(12, 24, 17, 27, C.woodLight); c.row(26, 12, 17, C.iron); }
+      pole(c, 14, 8, 30, C.wood);
+      c.oval(13, 13, 16, 16, C.woodDark); c.set(14, 14, C.wood);
+      c.rect(17, 14, 20, 14, C.iron); c.col(20, o.down ? 11 : 14, o.down ? 14 : 18, C.iron); c.rect(20, o.down ? 10 : 18, 22, o.down ? 10 : 18, C.woodLight);
+      c.rect(1, 2, 28, 9, X.tile); c.row(1, 1, 28, C.woodDark); c.row(2, 1, 28, L(X.tile)); c.row(5, 1, 28, D(X.tile)); c.row(9, 1, 28, D(X.tile));
+      for (let x = 4; x < 28; x += 5) { c.col(x, 3, 4, D(X.tile)); c.col(x - 2, 6, 8, D(X.tile)); }
+    } else {
+      pole(c, 3, 8, 30, C.wood); pole(c, 25, 8, 30, C.wood);
+      c.rect(4, 14, 25, 15, C.woodDark); c.row(14, 4, 25, C.wood);
+      if (!o.down) { c.col(14, 16, 24, C.straw); c.rect(12, 24, 17, 27, C.woodLight); c.row(26, 12, 17, C.iron); }
+      c.poly([[1, 9], [14, 1], [15, 1], [28, 9]], X.tile);
+      c.line(1, 9, 14, 1, L(X.tile)); c.row(9, 1, 28, D(X.tile)); c.row(5, 8, 21, D(X.tile));
+    }
+    wellWall(c, 2, 28, 27, 40, C.night);
+    if (o.down) { c.col(14, o.side ? 17 : 16, 30, C.straw); if (!o.side) for (let x = 9; x <= 19; x += 2) c.set(x, 14, C.straw); }
+  };
+  views('well-stone', {
+    side: pic(30, 42, (c) => wellStone(c, { side: true }), solid),
+    used: pic(30, 42, (c) => wellStone(c, { down: true }), solid),
+    sideUsed: pic(30, 42, (c) => wellStone(c, { side: true, down: true }), solid),
+  });
+  views('well-water', {
+    // a full bucket stands on the rim
+    used: changed('well-water', (c, dx, dy) => { const t = canvas(10, 12); bucket(t, true); c.stamp(t, 13, 1); c.row(dy + 2, 5, 9, C.glassLight); }, [0, 8, 0]),
+  });
+
+  views('sign-warning', {
+    side: pic(7, 26, (c) => signEdge(c, 1, 13, { top: 3, yb: 24 })),
+    // knocked askew
+    used: pic(23, 26, (c) => { again(c, 'sign-warning'); leanX(c, 0.3, 24); }),
+    sideUsed: pic(12, 26, (c) => { signEdge(c, 1, 13, { top: 3, yb: 24 }); leanX(c, 0.2, 24); }),
+  });
+  const boardEdge = (c, torn) => {
+    pole(c, 4, 6, 28, C.wood);
+    c.rect(1, 2, 8, 5, C.woodDark); c.row(2, 1, 8, C.wood);
+    c.rect(2, 6, 3, 20, C.woodLight); c.col(2, 6, 20, L(C.woodLight));
+    c.col(1, 8, 11, C.paper);
+    if (!torn) c.col(1, 14, 18, C.white); else c.set(1, 14, C.white);
+  };
+  views('sign-board', {
+    side: pic(10, 30, (c) => boardEdge(c, false)),
+    // two notices torn off: the pins and a scrap are left
+    used: changed('sign-board', (c) => {
+      c.rect(4, 8, 9, 14, C.woodLight); c.set(7, 8, C.red); c.rect(6, 9, 8, 9, C.paper); c.set(8, 10, C.paper);
+      c.rect(11, 13, 16, 18, C.woodLight); c.set(14, 13, C.red); c.rect(13, 14, 14, 14, C.white);
+      c.row(16, 5, 14, D(C.woodLight));
+    }),
+    sideUsed: pic(10, 30, (c) => boardEdge(c, true)),
+  });
+  const streetLampSide = (c, lit) => {
+    pole(c, 4, 4, 52, C.ironDark);
+    c.rect(4, 2, 5, 4, C.ironDark); c.rect(3, 5, 6, 6, C.ironDark);
+    disc(c, 4.5, 9.5, 2.5, lit ? C.glow : D(C.glass)); if (lit) c.rect(4, 9, 5, 10, C.white); else c.set(4, 9, C.glass);
+    c.rect(3, 13, 6, 13, C.ironDark);
+    c.rect(3, 46, 6, 52, C.iron); c.rect(2, 53, 7, 54, C.ironDark); c.col(3, 46, 52, C.steel);
+    c.col(4, 14, 45, C.iron);
+  };
+  views('street-lamp', {
+    side: pic(10, 56, (c) => streetLampSide(c, true), solid),
+    used: changed('street-lamp', (c) => { disc(c, 12, 10, 2, D(C.glass)); c.set(11, 9, C.glass); c.row(13, 11, 13, C.ironDark); }),
+    sideUsed: pic(10, 56, (c) => streetLampSide(c, false), solid),
+  });
+  const lanternPostSide = (c, lit) => {
+    pole(c, 3, 2, 34, C.wood);
+    c.rect(3, 4, 4, 5, C.woodLight);
+    lantern(c, 4, 6, lit);
+    c.rect(2, 33, 6, 34, C.woodDark);
+  };
+  views('lantern-post', {
+    side: pic(9, 36, (c) => lanternPostSide(c, true), solid),
+    used: changed('lantern-post', (c) => lantern(c, 11, 6, false)),
+    sideUsed: pic(9, 36, (c) => lanternPostSide(c, false), solid),
+  });
+  views('brazier-lit', { used: same('brazier-unlit') });
+  views('brazier-unlit', { used: same('brazier-lit') });
+  views('torch-stand', {
+    used: pic(10, 36, (c) => {
+      wisp(c, 4, 5, 5);
+      pole(c, 4, 10, 32, C.iron);
+      c.poly([[2, 7], [7, 7], [6, 11], [3, 11]], C.wood); c.row(7, 2, 7, C.iron); c.row(6, 3, 6, C.black);
+      c.rect(2, 33, 7, 34, C.ironDark); c.row(32, 3, 6, C.iron);
+    }),
+  });
+  /** The crystal cluster with its tall shard broken off. */
+  const mined = (col) => pic(19, 19, (c) => {
+    shard(c, 2, 16, 4, 8, -1, D(col));
+    shard(c, 12, 16, 5, 10, 1, D(col));
+    c.poly([[6, 16], [6, 11], [8, 12], [9, 10], [11, 13], [11, 16]], col);
+    c.poly([[6, 16], [6, 11], [8, 12], [8, 16]], L(col));
+    c.line(6, 11, 8, 12, blend(L(col), C.white, 0.5)); c.line(9, 10, 11, 13, blend(L(col), C.white, 0.5));
+    shard(c, 4, 16, 3, 5, 0, col);
+    shard(c, 10, 16, 4, 7, 1, col);
+    c.rect(2, 16, 16, 16, DD(col));
+    pts(c, [[15, 15], [16, 15]], L(col));
+  }, noShade);
+  views('crystal-blue', { used: mined(hex('#4a78a0')) });
+  views('crystal-green', { used: mined(hex('#3f8a5e')) });
+  views('crystal-red', { used: mined(hex('#a03a3c')) });
+  views('crystal-purple', { used: mined(X.purple) });
+  views('flower-patch', {
+    // three of them picked
+    used: changed('flower-patch', (c) => { for (const [x, y] of [[8, 2], [13, 4], [18, 3]]) { c.clearRect(x - 1, y, x + 1, y + 1); c.set(x - 1, y + 2, null); c.clear(x - 1, y + 2); c.clear(x + 1, y + 2); c.set(x, y + 2, C.leafLight); } }),
+  });
+  views('stairs-wood', {
+    base: 'side',
+    side: pic(26, 28, (c) => {
+      stepsFront(c, 24, 6, 4, 26, C.wood, { tread: C.woodLight });
+      for (let i = 0; i < 6; i++) for (let x = 5 + i; x < 20 - i; x += 5) c.set(x, 26 - i * 4 - 1, C.woodDark);
+      c.rect(21, 2, 24, 26, C.wood); c.rect(22, 6, 23, 24, C.woodDark); c.col(21, 2, 26, C.woodLight); c.row(2, 21, 24, C.woodLight);
+      c.row(26, 1, 24, C.woodDark);
+    }, solid),
+  });
+  const floorLeverSide = (c, on) => {
+    c.rect(1, 13, 6, 15, C.stoneDark); c.row(13, 1, 6, C.stone);
+    c.rect(2, 11, 5, 12, C.iron);
+    c.col(3, on ? 7 : 5, 11, C.steel); c.col(4, on ? 7 : 5, 11, C.iron);
+    const y = on ? 4 : 2, col = on ? X.green : C.red;
+    c.rect(2, y, 5, y + 2, col); c.set(2, y, L(col));
+  };
+  views('lever-floor-off', { side: pic(8, 17, (c) => floorLeverSide(c, false)), used: same('lever-floor-on'), sideUsed: pic(8, 17, (c) => floorLeverSide(c, true)) });
+  views('lever-floor-on', { side: pic(8, 17, (c) => floorLeverSide(c, true)), used: same('lever-floor-off'), sideUsed: pic(8, 17, (c) => floorLeverSide(c, false)) });
+  views('floor-switch', { used: same('floor-switch-pressed') });
+  views('floor-switch-pressed', { used: same('floor-switch') });
+  /** A push block shoved home: sunk into its socket in the floor, its mark alight. */
+  const blockHome = (col, o, mark) => pic(20, 16, (c) => {
+    const t = canvas(18, 18); block(t, col, o); c.stamp(t, 1, 0);
+    c.clearRect(0, 13, 19, 17);
+    c.rect(1, 12, 18, 14, C.stoneDark); c.row(12, 1, 18, C.stone); c.row(12, 3, 16, D(col));
+    mark(c);
+  }, solid);
+  views('push-block', { used: blockHome(C.stone, { rune: true }, (c) => { c.frame(8, 7, 11, 10, C.glow); c.rect(9, 8, 10, 9, C.white); c.speckle(3, 2, 16, 11, C.stoneDark, 14, 2); }) });
+  views('push-block-ice', { used: blockHome(X.ice, { ice: true }, (c) => { c.rect(9, 7, 10, 8, C.white); c.line(5, 5, 9, 8, hex('#5d8ea0')); c.line(10, 8, 13, 11, hex('#5d8ea0')); }) });
+  views('push-block-gold', { used: blockHome(C.gold, { gold: true }, (c) => { c.rect(9, 8, 10, 9, C.white); c.frame(8, 7, 11, 10, C.flameLight); }) });
+
+  const ORE = blend(C.stoneDark, C.earth, 0.4);
+  const cartEnd = (c, fill) => {
+    c.rect(2, 19, 17, 20, C.woodDark); c.row(19, 2, 17, C.wood);
+    c.rect(4, 17, 5, 18, C.steel); c.rect(14, 17, 15, 18, C.steel);
+    if (fill) { c.oval(5, 2, 14, 8, fill); pts(c, [[7, 3], [10, 2], [12, 4]], L(fill)); pts(c, [[8, 4], [11, 3], [6, 5], [13, 5]], C.gold); }
+    else c.rect(5, 5, 14, 6, K);
+    c.poly([[3, 6], [16, 6], [14, 14], [5, 14]], C.iron);
+    c.rect(3, 6, 16, 7, C.steel);
+    c.row(8, 4, 15, C.ironDark);
+    for (const x of [7, 12]) c.col(x, 9, 13, C.ironDark);
+    pts(c, [[4, 7], [9, 7], [10, 7], [15, 7]], C.ironDark);
+    c.speckle(4, 9, 15, 13, C.rust, 7, 3);
+    c.rect(6, 14, 13, 15, C.ironDark);
+    c.rect(9, 11, 10, 12, C.steel);
+    c.rect(4, 13, 5, 17, C.ironDark); c.rect(14, 13, 15, 17, C.ironDark); c.col(4, 13, 17, C.steel); c.col(14, 13, 17, C.steel);
+  };
+  views('minecart-rails', {
+    base: 'side',
+    side: pic(20, 22, (c) => cartEnd(c, null), solid),
+    // loaded with ore
+    used: pic(32, 22, (c) => {
+      for (let x = 2; x < 30; x += 5) c.rect(x, 19, x + 2, 20, C.woodDark);
+      c.row(18, 1, 30, C.steel); c.row(19, 1, 30, C.iron);
+      minecart(c, 5, 18, ORE);
+      pts(c, [[11, 3], [15, 2], [19, 4], [22, 5], [9, 5]], C.gold);
+    }, solid),
+    sideUsed: pic(20, 22, (c) => cartEnd(c, ORE), solid),
+  });
+  const coins = (c, list) => list.forEach(([x, y]) => { c.rect(x, y, x + 1, y, C.gold); c.set(x, y, C.flameLight); });
+  views('treasure-pile', {
+    // plundered: a handful of coins is left
+    used: pic(24, 6, (c) => { coins(c, [[2, 4], [6, 3], [7, 4], [12, 4], [13, 3], [17, 4], [20, 4]]); c.row(4, 5, 8, C.brass); c.set(14, 4, C.red); }),
+  });
+  views('treasure-pile-big', {
+    used: pic(38, 12, (c) => { hoard(c, 10, 26, 10, 6); coins(c, [[3, 10], [6, 9], [29, 10], [32, 9], [34, 10], [1, 10]]); c.set(15, 8, C.red); c.set(21, 7, C.teal); c.rect(29, 7, 30, 9, C.brass); c.rect(28, 6, 31, 6, C.gold); }),
+  });
+  views('cage-empty', {
+    // shut and locked
+    used: pic(18, 22, (c) => {
+      c.rect(1, 1, 16, 2, C.iron); c.row(1, 1, 16, C.steel);
+      c.rect(2, 3, 15, 17, C.night);
+      for (let x = 2; x <= 15; x += 3) c.col(x, 3, 17, C.iron);
+      c.col(15, 3, 17, C.iron);
+      c.row(10, 2, 15, C.ironDark);
+      c.rect(10, 8, 12, 12, C.steel); c.set(11, 10, K);
+      c.rect(1, 18, 16, 20, C.iron); c.row(18, 1, 16, C.steel);
+    }, solid),
+  });
+
+  /** An altar from its end: the cloth hangs over the front edge on the left. */
+  const altarEnd = (c, stone, cloth, darkOne, dy, o = {}) => {
+    c.rect(3, dy + 13, 14, dy + 21, stone); c.col(3, dy + 13, dy + 21, L(stone));
+    c.rect(2, dy + 21, 15, dy + 22, D(stone)); c.row(dy + 21, 2, 15, stone);
+    c.rect(1, dy + 9, 16, dy + 12, stone); c.row(dy + 9, 1, 16, L(cloth)); c.row(dy + 12, 1, 16, D(stone));
+    c.frame(6, dy + 14, 11, dy + 19, D(stone));
+    c.rect(1, dy + 9, 2, dy + 16, cloth); c.col(1, dy + 9, dy + 16, L(cloth)); c.row(dy + 16, 1, 2, C.gold);
+    candle(c, 5, dy + 8, 5, darkOne ? C.black : C.bone, !o.snuffed);
+    if (o.snuffed) wisp(c, 5, dy + 2, 6);
+    if (darkOne) { skull(c, 9, dy + 2); if (o.blood) { c.col(2, dy + 10, dy + 21, C.blood); c.rect(1, dy + 21, 4, dy + 22, C.blood); c.row(dy + 9, 3, 8, C.blood); } }
+    else c.rect(11, dy + 3, 12, dy + 8, C.gold);
+  };
+  views('altar', {
+    side: pic(18, 24, (c) => altarEnd(c, C.stoneLight, C.cream, false, 0), solid),
+    // the candles are blown out
+    used: changed('altar', (c, dx, dy) => {
+      c.clearRect(4, dy + 1, 5, dy + 3); c.clearRect(26, dy + 2, 27, dy + 4);
+      c.set(4, dy + 3, K); c.set(26, dy + 4, K);
+      wisp(c, 4, dy + 2, 6); wisp(c, 27, dy + 3, 6);
+    }, [0, 5, 0]),
+    sideUsed: pic(18, 29, (c) => altarEnd(c, C.stoneLight, C.cream, false, 5, { snuffed: true }), solid),
+  });
+  views('altar-dark', {
+    side: pic(18, 24, (c) => altarEnd(c, C.stoneDark, C.plum, true, 0), solid),
+    // blood runs over the cloth and down to the floor
+    used: changed('altar-dark', (c) => {
+      c.rect(12, 9, 19, 10, C.blood); c.rect(13, 11, 14, 20, C.blood); c.col(17, 11, 14, C.blood); c.col(19, 11, 12, C.blood); c.set(14, 21, C.blood);
+      c.rect(10, 21, 18, 22, C.blood); c.set(9, 22, C.blood); c.row(21, 12, 16, L(C.blood));
+    }),
+    sideUsed: pic(18, 24, (c) => altarEnd(c, C.stoneDark, C.plum, true, 0, { blood: true }), solid),
+  });
+  views('throne-stone', {
+    side: pic(17, 40, (c) => { throneSide(c, C.stone, C.stoneLight, C.stoneLight); c.col(11, 6, 24, C.stoneLight); c.speckle(1, 1, 15, 38, C.stoneDark, 18, 6); }, solid),
+    used: changed('throne-stone', (c) => crown(c, 8, 26)),
+    sideUsed: pic(17, 40, (c) => { throneSide(c, C.stone, C.stoneLight, C.stoneLight); c.col(11, 6, 24, C.stoneLight); c.speckle(1, 1, 15, 38, C.stoneDark, 18, 6); crown(c, 5, 24); }, solid),
+  });
+  /** A market stall from its end: the awning slopes down to the front on the left. */
+  const stallEnd = (c, a, goods) => {
+    pole(c, 3, 9, 35, C.wood); pole(c, 14, 6, 35, C.wood);
+    c.poly([[1, 8], [18, 3], [18, 6], [1, 11]], a); c.line(1, 8, 18, 3, L(a)); c.line(1, 11, 18, 6, D(a));
+    c.rect(1, 22, 17, 24, C.woodLight); c.row(22, 1, 17, L(C.woodLight));
+    vplanks(c, 2, 25, 16, 35, C.wood, 5); c.row(35, 2, 16, C.woodDark);
+    goods(c, 21);
+  };
+  const soldOut = (x0) => (c, yb) => { coins(c, [[x0, yb], [x0 + 3, yb], [x0 + 1, yb - 1]]); };
+  views('stall-small', {
+    side: pic(20, 38, (c) => stallEnd(c, C.wine, (c, yb) => { for (const [x, col] of [[5, C.red], [9, C.leafLight], [13, X.yellow]]) { c.rect(x, yb - 2, x + 2, yb, col); c.set(x, yb - 2, L(col)); c.set(x + 1, yb - 3, col); } }), solid),
+    // sold out: one last apple and the takings
+    used: pic(34, 38, (c) => stall(c, 34, C.wine, C.cream, (c, yb) => { soldOut(8)(c, yb); c.rect(23, yb - 2, 25, yb, C.red); c.set(23, yb - 2, L(C.red)); c.set(24, yb - 3, C.red); c.rect(14, yb - 1, 19, yb, C.straw); c.row(yb - 1, 14, 19, C.earth); }), solid),
+    sideUsed: pic(20, 38, (c) => stallEnd(c, C.wine, (c, yb) => { soldOut(9)(c, yb); c.rect(4, yb - 2, 6, yb, C.red); c.set(4, yb - 2, L(C.red)); c.set(5, yb - 3, C.red); }), solid),
+  });
+  const GLOWCLOTH = blend(X.canvas, C.glow, 0.55);
+  const tentSide = (c, col, lit) => {
+    c.poly([[2, 26], [7, 3], [32, 3], [37, 26]], col);
+    c.poly([[5, 12], [7, 3], [32, 3], [34, 12]], L(col));
+    if (lit) { c.oval(12, 11, 27, 34, GLOWCLOTH); c.oval(15, 15, 24, 32, blend(GLOWCLOTH, C.glow, 0.6)); c.clearRect(0, 27, 39, 39); c.poly([[19, 26], [18, 19], [20, 16], [22, 19], [21, 26]], D(col)); }
+    c.line(14, 4, 12, 26, D(L(col))); c.line(26, 4, 28, 26, D(col));
+    c.row(26, 2, 37, D(col));
+    c.rect(30, 19, 33, 21, D(col));
+    c.rect(6, 1, 7, 2, C.wood); c.rect(32, 1, 33, 2, C.wood);
+  };
+  views('tent-small', {
+    side: pic(40, 28, (c) => tentSide(c, X.canvas, false), solid),
+    // a lamp is lit inside
+    used: changed('tent-small', (c) => {
+      const m = 19.5, yb = 26;
+      c.poly([[m - 5.6, yb], [m, yb - 15.4], [m + 5.6, yb]], C.glow);
+      c.poly([[m - 3, yb], [m, yb - 9], [m + 3, yb]], C.flameLight);
+      c.rect(19, 22, 20, 25, C.white);
+      c.line(m, 2, m + 5.6, yb, D(X.canvas)); c.line(m, 2, m - 5.6, yb, X.canvas);
+    }),
+    sideUsed: pic(40, 28, (c) => tentSide(c, X.canvas, true), solid),
+  });
+  views('campfire-big', { used: same('campfire-out') });
+  views('campfire-out', { used: same('campfire-big') });
+  views('bedroll', {
+    base: 'side',
+    side: pic(16, 30, (c) => {
+      c.rect(2, 6, 13, 27, C.forest); c.col(2, 6, 27, L(C.forest)); c.col(13, 6, 27, D(C.forest)); c.row(27, 2, 13, D(C.forest));
+      for (const y of [13, 20]) c.row(y, 2, 13, C.earth);
+      c.rect(2, 24, 13, 25, C.cream);
+      c.oval(3, 1, 12, 8, C.cream); c.oval(5, 3, 10, 6, D(C.cream)); c.set(7, 4, C.forest);
+    }),
+    // rolled up and strapped: from here its round end shows
+    used: pic(12, 12, (c) => { c.oval(1, 1, 10, 10, C.forest); ring(c, 1, 1, 10, 10, D(C.forest), 1); ring(c, 3, 3, 8, 8, C.cream, 1); c.rect(5, 5, 6, 6, C.cream); c.set(5, 5, C.forest); c.row(1, 4, 7, L(C.forest)); c.col(1, 4, 7, L(C.forest)); c.set(8, 4, C.forest); c.set(8, 5, C.forest); }),
+    sideUsed: pic(18, 12, (c) => { c.rect(1, 2, 16, 10, C.forest); c.row(2, 1, 16, L(C.forest)); c.row(3, 1, 16, L(C.forest)); c.rect(1, 9, 16, 10, D(C.forest)); for (const x of [4, 12]) { c.col(x, 2, 10, C.earth); c.set(x, 2, L(C.earth)); } c.col(1, 3, 9, C.cream); c.col(16, 3, 9, D(C.cream)); }),
+  });
+  const portalEdge = (c, on) => {
+    c.rect(2, 1, 8, 39, C.stone); c.col(2, 1, 39, C.stoneLight); c.col(8, 1, 39, D(C.stone));
+    for (const y of [6, 13, 20, 27, 34]) c.row(y, 3, 8, C.stoneDark);
+    c.rect(4, 1, 6, 4, on ? X.violet : C.stoneDark); c.set(5, 2, on ? C.white : C.stone);
+    c.rect(2, 38, 8, 39, C.stoneDark);
+    if (on) { c.col(1, 8, 37, X.violet); c.col(9, 8, 37, X.purple); pts(c, [[1, 14], [1, 25], [9, 19], [9, 31], [1, 33]], C.white); }
+  };
+  views('portal-gate', { side: pic(11, 42, (c) => portalEdge(c, true), noShade), used: same('portal-gate-off'), sideUsed: pic(11, 42, (c) => portalEdge(c, false)) });
+  views('portal-gate-off', { side: pic(11, 42, (c) => portalEdge(c, false)), used: same('portal-gate'), sideUsed: pic(11, 42, (c) => portalEdge(c, true), noShade) });
+  views('scifi-crate', {
+    used: changed('scifi-crate', (c) => {
+      // unsealed: the lid stands up, something glows inside
+      c.poly([[2, 5], [16, 5], [16, 2]], C.night);
+      c.row(5, 3, 15, X.phos); pts(c, [[8, 4], [11, 4], [13, 4], [14, 3]], X.phos); pts(c, [[6, 5], [10, 5]], C.white);
+      c.line(1, 5, 16, 2, C.steel); c.line(1, 4, 16, 1, L(C.steel));
+    }, [0, 4, 0]),
+  });
+  const consoleSide = (c, on) => {
+    c.rect(4, 12, 13, 24, C.slate); c.col(4, 12, 24, L(C.slate)); c.row(24, 4, 13, C.ironDark);
+    c.poly([[1, 12], [14, 12], [14, 9], [5, 9]], C.steel); c.line(1, 11, 5, 9, L(C.steel)); c.row(9, 5, 14, L(C.steel));
+    c.rect(8, 1, 14, 8, C.iron); c.row(1, 8, 14, C.steel);
+    c.col(7, 2, 7, on ? X.phos : X.screen); if (on) c.set(6, 4, X.phos);
+    c.frame(6, 15, 11, 21, C.ironDark); c.set(8, 17, on ? X.phos : C.ironDark);
+    c.set(3, 10, on ? C.red : C.ironDark);
+  };
+  views('console', {
+    side: pic(16, 26, (c) => consoleSide(c, true), solid),
+    // switched off
+    used: changed('console', (c) => {
+      c.rect(5, 2, 16, 7, X.screen); c.line(6, 3, 7, 2, D(C.slate));
+      pts(c, [[5, 10], [7, 11], [9, 10], [13, 10], [11, 11], [15, 10], [16, 11]], C.ironDark);
+      c.rect(7, 17, 9, 17, C.ironDark);
+    }),
+    sideUsed: pic(16, 26, (c) => consoleSide(c, false), solid),
+  });
+  const generatorEnd = (c, on) => {
+    c.box(1, 8, 16, 24, C.slate); c.rect(2, 25, 4, 26, C.ironDark); c.rect(13, 25, 15, 26, C.ironDark);
+    for (const y of [12, 15, 18]) c.row(y, 4, 13, C.ironDark);
+    c.rect(6, 3, 11, 7, C.iron); c.rect(5, 2, 12, 2, C.steel); c.col(6, 3, 7, C.steel);
+    c.row(8, 1, 16, C.steel);
+    c.set(14, 10, on ? X.phos : C.ironDark); c.set(3, 10, on ? hex('#5fb3c2') : C.ironDark);
+    for (let x = 3; x < 16; x += 4) c.set(x, 23, X.yellow);
+    c.line(12, 5, 15, 7, C.rust);
+  };
+  views('generator', {
+    side: pic(18, 28, (c) => generatorEnd(c, true), solid),
+    // shut down: the core is dark
+    used: changed('generator', (c) => { disc(c, 9, 16, 2, C.night); c.set(8, 15, C.ironDark); c.set(20, 5, C.ironDark); c.set(22, 5, C.ironDark); }),
+    sideUsed: pic(18, 28, (c) => generatorEnd(c, false), solid),
+  });
+  views('canister', {
+    // the cap is off and it leaks
+    used: changed('canister', (c) => {
+      const g = L(X.toxic);
+      c.clearRect(4, 1, 7, 1); c.rect(4, 2, 7, 2, K);
+      c.col(8, 3, 14, g); c.col(9, 3, 9, g); c.set(7, 3, g);
+      c.rect(8, 15, 15, 16, g); c.rect(10, 14, 13, 14, g); c.row(16, 9, 15, X.toxic); c.set(12, 14, C.white);
+    }, [0, 0, 6]),
+  });
+  const URN = hex('#a07a4e');
+  const urnSide = (c) => {
+    const u = URN;
+    c.oval(1, 5, 12, 17, u); c.rect(4, 2, 9, 5, u); c.rect(3, 1, 10, 1, L(u)); c.rect(4, 17, 9, 18, D(u));
+    c.col(3, 8, 14, L(u)); c.row(8, 2, 11, C.rust); c.row(10, 1, 12, C.rust); for (let x = 2; x < 12; x += 2) c.set(x, 9, C.woodDark);
+    ring(c, 5, 4, 8, 10, D(u), 1); c.rect(6, 5, 7, 9, u); c.col(5, 5, 9, L(u));
+  };
+  const urnCracks = (c) => {
+    const k = DD(URN);
+    c.line(8, 2, 7, 6, k); c.line(7, 6, 9, 10, k); c.line(9, 10, 7, 13, k); c.line(9, 10, 11, 13, k); c.line(7, 13, 8, 16, k);
+    c.poly([[9, 10], [11, 11], [10, 13]], C.night);
+    c.clearRect(9, 1, 10, 1); c.clear(9, 2);
+  };
+  views('urn', {
+    side: pic(14, 20, urnSide),
+    used: changed('urn', urnCracks),
+    sideUsed: pic(14, 20, (c) => { urnSide(c); urnCracks(c); }),
+  });
+  const benchSide = (c, col) => {
+    c.rect(9, 2, 10, 15, C.ironDark); c.col(9, 2, 15, C.iron);
+    c.rect(8, 2, 8, 4, col); c.rect(8, 6, 8, 8, col); c.set(8, 2, L(col)); c.set(8, 6, L(col));
+    c.rect(2, 12, 3, 15, C.ironDark);
+    c.rect(2, 7, 9, 7, C.ironDark); c.col(2, 7, 9, C.ironDark);
+    c.rect(1, 10, 9, 11, col); c.row(10, 1, 9, L(col));
+    c.rect(1, 15, 4, 15, C.ironDark); c.rect(8, 15, 11, 15, C.ironDark);
+  };
+  views('bench', {
+    side: pic(13, 17, (c) => benchSide(c, C.woodLight), solid),
+    // somebody left a newspaper
+    used: changed('bench', (c) => { c.rect(11, 8, 18, 9, C.paper); c.row(8, 11, 18, C.white); scribble(c, 12, 9, 17, C.stoneDark); c.set(14, 8, C.stoneDark); }),
+    sideUsed: pic(13, 17, (c) => { benchSide(c, C.woodLight); c.rect(3, 9, 7, 9, C.paper); c.set(3, 9, C.white); }, solid),
+  });
+  const logEnd = (c, x, y) => { disc(c, x, y, 2, C.woodPale); c.rect(x - 1, y - 2, x + 1, y - 2, L(C.woodPale)); c.set(x, y, C.wood); c.set(x + 1, y + 1, C.woodLight); };
+  const logLong = (c, x0, x1, y) => {
+    c.rect(x0, y, x1, y + 4, C.wood); c.row(y, x0, x1, C.woodLight); c.row(y + 4, x0, x1, C.woodDark);
+    for (let x = x0 + 3; x < x1 - 2; x += 7) c.row(y + 2, x, x + 3, C.woodDark);
+    c.col(x0, y + 1, y + 3, C.woodPale);
+  };
+  views('log-pile', {
+    side: pic(28, 19, (c) => { logLong(c, 2, 25, 12); logLong(c, 4, 23, 7); logLong(c, 3, 24, 2); }, solid),
+    // half of it burnt already
+    used: pic(30, 19, (c) => {
+      c.rect(2, 12, 27, 17, C.woodDark); c.rect(5, 7, 13, 12, C.woodDark);
+      for (let i = 0; i < 5; i++) logEnd(c, 4 + i * 5.5, 14.5);
+      for (let i = 0; i < 2; i++) logEnd(c, 7 + i * 5.5, 9.5);
+    }, solid),
+    sideUsed: pic(28, 19, (c) => { logLong(c, 2, 25, 12); logLong(c, 4, 14, 7); }, solid),
+  });
+  const bannerStandSide = (c, torn) => {
+    pole(c, 3, 2, 38, C.wood); disc(c, 3, 1.5, 1, C.gold);
+    c.rect(2, 4, 5, 5, C.wood);
+    c.rect(2, 6, 2, torn ? 15 : 24, C.wine); c.rect(1, 6, 1, torn ? 13 : 22, L(C.wine));
+    c.rect(1, 38, 6, 40, C.stoneDark); c.row(38, 2, 5, C.stone);
+  };
+  views('banner-stand', {
+    side: pic(8, 42, (c) => bannerStandSide(c, false), solid),
+    used: changed('banner-stand', (c) => {
+      for (let x = 3; x <= 12; x++) c.clearRect(x, 13 + ((x * 7) % 5) + (x > 7 ? 3 : 0), x, 27);
+      pole(c, 7, 17, 38, C.wood);
+    }),
+    sideUsed: pic(8, 42, (c) => bannerStandSide(c, true), solid),
+  });
+
+  /* ---------- barriers: a run seen from its end is the piece that goes into the picture, and the other way round;
+   * a corner seen from the next side is the next corner ---------- */
+  views('fence-h', { side: same('fence-v') });
+  views('fence-v', { side: same('fence-h') });
+  views('iron-fence-h', { side: same('iron-fence-v') });
+  views('iron-fence-v', { side: same('iron-fence-h') });
+  views('stone-wall-h', { side: same('stone-wall-v') });
+  views('stone-wall-v', { side: same('stone-wall-h') });
+  views('hedge-h', { side: same('hedge-v') });
+  views('hedge-v', { side: same('hedge-h') });
+  views('bridge-rail-h', { side: same('bridge-rail-v') });
+  views('bridge-rail-v', { side: same('bridge-rail-h') });
+  for (const kind of ['fence', 'iron-fence', 'stone-wall']) {
+    const turn = { tl: 'tr', tr: 'br', br: 'bl', bl: 'tl' };
+    for (const k of Object.keys(turn)) views(`${kind}-corner-${k}`, { side: same(`${kind}-corner-${turn[k]}`) });
+  }
+  views('fence', { side: pic(7, 20, (c) => { wpost(c, 2, FAR); c.col(3, FAR - 8, NEAR - 8, C.wood); wpost(c, 2, NEAR); }, solid) });
+  /** The garden gate from its end: shut (its leaf between the far and the near post) or swung open towards the viewer. */
+  const gateEnd = (c, open) => {
+    wpost(c, 2, 14, C.wood);
+    if (!open) { c.rect(2, 6, 4, 17, C.woodPale); c.col(2, 6, 17, L(C.woodPale)); c.col(4, 6, 17, C.wood); c.set(3, 8, C.iron); }
+    else { gateLeaf(c, 5, 18, 20); pts(c, [[5, 13], [5, 18]], C.iron); c.rect(16, 14, 18, 14, C.iron); }
+    wpost(c, 2, 20);
+    c.rect(2, 8, 4, 8, C.wood);
+  };
+  const gateShut = pic(7, 22, (c) => gateEnd(c, false), solid), gateSwung = pic(21, 22, (c) => gateEnd(c, true));
+  views('fence-gate', { side: gateShut, used: same('fence-gate-open'), sideUsed: gateSwung });
+  views('fence-gate-open', { side: gateSwung, used: same('fence-gate'), sideUsed: gateShut });
+  const gatePost = (c, x, yb) => { c.rect(x, yb - 29, x + 1, yb, C.ironDark); c.col(x, yb - 29, yb, C.iron); disc(c, x + 0.5, yb - 31, 1.5, C.iron); c.rect(x - 1, yb, x + 2, yb, C.ironDark); };
+  const ironGateEnd = (c, open) => {
+    gatePost(c, 2, 34);
+    if (!open) { c.col(2, 7, 11, C.iron); c.col(3, 7, 11, C.ironDark); }
+    else {
+      for (let x = 5; x <= 14; x += 3) { const top = 12 + Math.round((14 - x) * 0.5); c.col(x, top, 39, C.iron); c.set(x, top - 1, C.steel); }
+      for (let x = 4; x <= 15; x++) c.set(x, 15 + Math.round((14 - x) * 0.5), C.ironDark);
+      c.row(27, 4, 15, C.ironDark); c.row(37, 4, 15, C.ironDark);
+      c.rect(14, 10, 15, 39, C.ironDark); c.rect(13, 25, 15, 29, C.steel); c.set(14, 27, K);
+    }
+    gatePost(c, 2, 40);
+  };
+  views('iron-gate', {
+    side: pic(6, 42, (c) => ironGateEnd(c, false), solid),
+    // both leaves swung inwards
+    used: pic(30, 36, (c) => {
+      for (const d of [1, -1]) {
+        const X0 = d > 0 ? 4 : 25;
+        for (let i = 0; i < 3; i++) { const x = X0 + d * i * 2, top = 7 + i * 2; c.col(x, top, 33 - i, i === 2 ? C.ironDark : C.iron); c.set(x, top - 1, C.steel); }
+        c.line(X0, 10, X0 + d * 4, 14, C.ironDark); c.line(X0, 21, X0 + d * 4, 22, C.ironDark); c.line(X0, 31, X0 + d * 4, 30, C.ironDark);
+        c.set(X0 + d * 4, 22, C.steel);
+      }
+      for (const x of [2, 26]) { c.rect(x, 5, x + 1, 34, C.ironDark); c.col(x, 5, 34, C.iron); disc(c, x + 0.5, 3, 1.5, C.iron); c.rect(x - 1, 34, x + 2, 34, C.ironDark); }
+    }),
+    sideUsed: pic(18, 42, (c) => ironGateEnd(c, true)),
+  });
+  views('barricade', {
+    side: pic(16, 22, (c) => {
+      c.line(2, 20, 11, 2, C.woodLight); c.line(3, 20, 12, 2, C.wood); c.set(11, 1, C.woodPale);
+      c.line(12, 20, 3, 2, C.woodLight); c.line(13, 20, 4, 2, C.wood); c.set(3, 1, C.woodPale);
+      c.oval(5, 11, 9, 15, C.woodPale); ring(c, 5, 11, 9, 15, C.wood, 1); c.set(7, 13, C.wood);
+      c.set(8, 10, C.straw); c.set(6, 10, C.straw);
+    }, solid),
+  });
+  const ropePost = (c, x, yb) => { c.rect(x, yb - 13, x + 1, yb, C.brass); c.col(x, yb - 13, yb, C.gold); disc(c, x + 0.5, yb - 14, 1.5, C.gold); c.rect(x - 2, yb + 1, x + 3, yb + 2, C.brass); c.row(yb + 1, x - 1, x + 2, C.gold); };
+  views('rope-barrier', {
+    side: pic(8, 26, (c) => { ropePost(c, 3, 16); c.col(3, 5, 12, L(C.wine)); c.col(4, 5, 12, C.wine); ropePost(c, 3, 22); }, solid),
+    // unhooked: the rope hangs from one post
+    used: pic(30, 20, (c) => {
+      for (const x of [3, 25]) ropePost(c, x, 16);
+      c.col(5, 5, 15, L(C.wine)); c.col(6, 6, 16, C.wine); c.rect(5, 16, 6, 17, C.gold);
+      c.set(24, 5, C.gold);
+    }),
+    sideUsed: pic(10, 26, (c) => { ropePost(c, 3, 16); ropePost(c, 3, 22); c.col(5, 11, 21, L(C.wine)); c.col(6, 12, 22, C.wine); c.rect(5, 22, 6, 23, C.gold); }),
+  });
+  const laserEnd = (c, on) => {
+    c.rect(2, 2, 5, 32, C.steel); c.col(2, 2, 32, L(C.steel)); c.col(5, 2, 32, C.iron); c.rect(2, 1, 5, 2, C.iron); c.rect(2, 31, 5, 33, C.ironDark);
+    c.rect(3, 4, 4, 5, on ? C.red : C.ironDark);
+    for (let y = 9; y <= 27; y += 6) { c.rect(3, y - 1, 4, y + 1, C.ironDark); c.rect(3, y, 4, y, on ? X.laser : C.blood); if (on) c.set(3, y, hex('#f0a090')); }
+  };
+  views('laser-gate', { side: pic(8, 35, (c) => laserEnd(c, true), { solid: true, shade: false }), used: same('laser-gate-off'), sideUsed: pic(8, 35, (c) => laserEnd(c, false)) });
+  views('laser-gate-off', { side: pic(8, 35, (c) => laserEnd(c, false)), used: same('laser-gate'), sideUsed: pic(8, 35, (c) => laserEnd(c, true), { solid: true, shade: false }) });
+
+  /* ---------- nature: the same from every side, so mostly just what is left when somebody has been at it ---------- */
+  /** A felled tree: its stump with the axe cut, chips, and a few of its leaves lying about. */
+  const felled = (leaf, o = {}) => pic(24, 15, (c) => {
+    again(c, 'stump', 3, 2);
+    // the cut: a pale wedge and the splintered hinge
+    c.poly([[6, 3], [12, 2], [17, 4], [12, 5]], C.woodPale);
+    pts(c, [[14, 2], [15, 1], [16, 2]], C.woodLight); c.set(15, 2, C.woodPale);
+    c.line(7, 4, 15, 4, C.woodLight);
+    if (o.snow) { c.rect(7, 3, 12, 3, X.snow); c.set(6, 4, X.snow); }
+    pts(c, [[1, 12], [21, 12], [22, 11]], C.woodPale);
+    if (leaf) pts(c, [[2, 11], [1, 10], [20, 10], [22, 12], [19, 12], [3, 12]], leaf);
+  }, solid);
+  views('tree', { used: felled(C.leafLight) });
+  views('tree-autumn', { used: felled(AUTUMN) });
+  views('tree-cherry', { used: felled(BLOSSOM) });
+  views('tree-apple', {
+    // picked clean, two windfalls in the grass
+    used: pic(44, 62, (c) => { tree(c, C.leaf, 6); for (const x of [11, 31]) { c.rect(x, 58, x + 1, 59, C.red); c.set(x, 58, L(C.red)); } }, solid),
+  });
+  views('pine', { used: felled(C.leaf) });
+  views('pine-snow', { used: felled(X.snow, { snow: true }) });
+  views('palm', {
+    // the coconuts are down
+    used: changed('palm', (c) => {
+      disc(c, 21, 15, 1, C.leaf); disc(c, 24, 16, 1, D(C.leaf)); c.set(21, 14, C.leafLight); c.set(24, 15, C.leafLight);
+      for (const x of [8, 28]) { c.rect(x, 54, x + 2, 56, C.woodDark); c.set(x, 54, C.wood); }
+    }),
+  });
+  views('bush', {
+    // somebody forced a way through
+    used: changed('bush', (c) => {
+      for (let y = 1; y <= 13; y++) c.clearRect(11 - Math.round((13 - y) * 0.22) - 1, y, 11 + Math.round((13 - y) * 0.22) + 1, y);
+      c.line(8, 12, 10, 7, C.woodDark); c.line(14, 12, 12, 8, C.woodDark); c.set(9, 6, C.wood); c.set(13, 7, C.wood);
+      c.row(13, 9, 13, DD(C.leaf)); pts(c, [[10, 12], [12, 12], [11, 11]], C.leafLight);
+    }),
+  });
+  views('bush-berry', { used: pic(23, 15, (c) => { bush(c, false); c.set(8, 10, C.red); c.set(16, 10, C.red); }, solid) });
+  const picked = (h) => pic(7, 12, (c) => {
+    c.col(3, 6, h - 2, C.leafLight); c.set(3, 6, L(C.leafLight));
+    c.set(2, h - 4, C.leaf); c.set(1, h - 5, C.leaf); c.set(4, h - 5, C.leaf); c.set(5, h - 6, C.leaf);
+  });
+  for (const slug of ['flower-red', 'flower-blue', 'flower-white', 'tulip']) views(slug, { used: picked(11) });
+  views('sunflower', {
+    used: pic(11, 24, (c) => { c.rect(5, 12, 5, 22, C.leafLight); c.set(5, 12, L(C.leafLight)); c.set(6, 11, C.leafLight); c.rect(2, 14, 4, 15, C.leaf); c.rect(6, 17, 8, 18, C.leaf); pts(c, [[2, 21], [8, 22]], X.yellow); }),
+  });
+  const bitten = (c) => { for (const [x, y] of [[6, 1], [7, 1], [7, 2], [8, 2], [8, 3], [9, 3], [9, 4], [6, 2], [7, 3]]) c.clear(x, y); pts(c, [[5, 1], [5, 2], [6, 3], [7, 4], [8, 4]], C.bone); };
+  views('mushroom-brown', { used: changed('mushroom-brown', bitten) });
+  views('mushroom-glow', { used: changed('mushroom-glow', bitten) });
+  views('stump', {
+    // a chopping block now
+    used: changed('stump', (c, dx, dy) => {
+      c.line(10, dy, 15, 2, C.woodLight); c.line(11, dy, 16, 2, C.wood); c.set(16, 1, C.wood);
+      c.poly([[6, dy - 3], [10, dy - 4], [11, dy + 2], [8, dy + 2]], C.steel);
+      c.line(6, dy - 3, 8, dy + 2, L(C.steel)); c.col(10, dy - 3, dy + 1, C.iron);
+    }, [0, 8, 0]),
+  });
+  views('log', {
+    // sawn through
+    used: changed('log', (c) => {
+      c.clearRect(13, 0, 15, 9);
+      c.col(12, 2, 7, C.woodPale); c.col(16, 2, 7, C.woodPale); c.set(12, 2, L(C.woodPale)); c.set(16, 2, L(C.woodPale));
+      pts(c, [[13, 8], [15, 8], [14, 8]], C.woodPale);
+    }),
+  });
+  const snowmanSide = (c) => {
+    disc(c, 8, 20, 6, X.snow); c.clearRect(0, 26, 17, 27); c.row(25, 5, 11, C.ash);
+    disc(c, 8, 11, 4, X.snow);
+    disc(c, 8, 5, 3, X.snow);
+    c.rect(6, 1, 10, 2, C.black); c.row(3, 4, 12, C.black);
+    c.set(6, 5, K);
+    c.rect(2, 6, 5, 6, X.orange); c.set(5, 6, D(X.orange));
+    c.row(8, 5, 11, C.wine); c.rect(11, 9, 12, 12, C.wine);
+    pts(c, [[4, 10], [4, 13], [2, 19]], K);
+    c.line(7, 12, 9, 9, C.woodDark); c.set(8, 11, C.woodDark); c.set(10, 8, C.woodDark); c.set(8, 9, C.woodDark);
+    for (let y = 16; y < 25; y++) c.set(13 - (y > 22 ? y - 22 : 0), y, C.ash);
+  };
+  const melted = (c) => {
+    c.oval(1, 8, 18, 17, X.snow); c.clearRect(0, 13, 19, 18); c.row(12, 3, 16, C.ash);
+    c.oval(5, 6, 13, 12, X.snow);
+    c.rect(5, 3, 9, 5, C.black); c.row(6, 3, 11, C.black);
+    c.rect(12, 8, 15, 8, X.orange);
+    c.rect(4, 9, 8, 9, C.wine); c.set(3, 10, C.wine);
+    pts(c, [[10, 9], [8, 11], [14, 10]], K);
+    c.line(15, 9, 18, 5, C.woodDark); c.set(17, 5, C.woodDark);
+  };
+  views('snowman', {
+    side: pic(18, 28, snowmanSide, solid),
+    // the thaw has been at it
+    used: pic(21, 14, melted),
+    sideUsed: pic(21, 14, mirrored(melted)),
+  });
+  const baleEnd = (c, x0, y0) => {
+    c.rect(x0, y0 + 1, x0 + 12, y0 + 12, C.straw); c.row(y0, x0 + 1, x0 + 11, L(C.straw));
+    c.speckle(x0, y0 + 1, x0 + 12, y0 + 12, D(C.straw), 4, 2); c.speckle(x0, y0 + 1, x0 + 12, y0 + 12, L(C.straw), 6, 5);
+    c.col(x0 + 4, y0, y0 + 12, C.earth); c.col(x0 + 9, y0, y0 + 12, C.earth);
+    c.row(y0 + 12, x0, x0 + 12, D(C.straw));
+  };
+  /** Loose hay pulled out of a bale: a heap on row yb. */
+  const looseHay = (c, x0, x1, yb, h) => { heap(c, x0, x1, yb, h, C.straw); for (let x = x0 + 1; x < x1; x += 2) c.set(x, yb - ((x * 5) % h), L(C.straw)); pts(c, [[x0 + 2, yb - h], [x1 - 3, yb - h + 1]], C.straw); };
+  views('hay-bale', {
+    side: pic(15, 15, (c) => baleEnd(c, 1, 1), solid),
+    // the strings are cut and half of it is pulled out
+    used: pic(31, 15, (c) => {
+      again(c, 'hay-bale');
+      for (const x of [6, 15]) for (let y = 1; y <= 13; y++) c.set(x, y, (x + y) % 3 ? C.straw : D(C.straw));
+      c.clearRect(16, 0, 21, 6); pts(c, [[16, 6], [18, 6], [17, 5], [20, 6]], C.straw);
+      looseHay(c, 19, 29, 13, 6);
+      pts(c, [[3, 14], [22, 7]], C.earth);
+    }, solid),
+    sideUsed: pic(24, 15, (c) => {
+      baleEnd(c, 1, 1);
+      for (const x of [5, 10]) for (let y = 1; y <= 13; y++) c.set(x, y, (x + y) % 3 ? C.straw : D(C.straw));
+      c.clearRect(9, 0, 14, 5); pts(c, [[9, 5], [11, 5], [13, 5], [10, 4]], C.straw);
+      looseHay(c, 13, 22, 13, 6);
+    }, solid),
+  });
+  views('wheat', {
+    // reaped: the stubble
+    used: pic(14, 8, (c) => { for (const [x, t] of [[2, 3], [5, 2], [8, 4], [11, 3]]) { c.col(x, t, 6, C.straw); c.set(x, t, L(C.straw)); c.set(x + 1, 6, C.mustard); } c.rect(6, 6, 7, 6, C.gold); }),
+  });
+  const crow = (c, x, yb) => { c.rect(x, yb - 2, x + 3, yb, C.black); c.rect(x, yb - 3, x + 1, yb - 2, C.black); c.set(x - 1, yb - 2, C.mustard); c.set(x + 4, yb - 1, C.black); c.set(x + 4, yb, C.black); c.set(x, yb - 3, C.slate); c.set(x + 2, yb - 2, C.slate); };
+  const scarecrowSide = (c) => {
+    pole(c, 6, 10, 37, C.wood);
+    c.rect(4, 12, 9, 25, C.rust); c.col(4, 12, 25, L(C.rust));
+    for (let x = 4; x <= 9; x += 2) c.col(x, 26, 27 + (x % 3), C.straw);
+    // the near arm points at the viewer
+    c.rect(5, 12, 8, 16, D(C.rust)); c.rect(6, 13, 7, 15, C.straw); c.set(6, 13, L(C.straw));
+    c.rect(3, 4, 9, 11, C.straw); c.clear(3, 4); c.clear(9, 4);
+    c.col(3, 5, 11, L(C.straw));
+    c.set(4, 7, K); c.row(9, 3, 5, K); c.set(2, 8, C.straw);
+    c.rect(1, 4, 11, 4, C.woodDark); c.rect(3, 1, 9, 3, C.woodDark); c.row(1, 4, 8, C.wood);
+    c.rect(4, 12, 5, 12, C.wine);
+  };
+  views('scarecrow', {
+    side: pic(13, 40, scarecrowSide, solid),
+    // it does not scare them any more
+    used: changed('scarecrow', (c) => crow(c, 3, 11)),
+    sideUsed: pic(13, 44, (c) => { const t = canvas(13, 40); scarecrowSide(t); c.stamp(t, 0, 4); crow(c, 5, 4); }, solid),
+  });
+  views('cloud', {
+    // it rains
+    used: pic(42, 26, (c) => { again(c, 'cloud'); for (let x = 6; x <= 36; x += 3) { const y = 16 + ((x * 7) % 5); c.line(x, y, x - 1, y + 3, (x % 2) ? C.glass : C.glassLight); } }, flat),
+  });
+
   return S;
 };

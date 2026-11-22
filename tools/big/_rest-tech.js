@@ -915,5 +915,1315 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
     '...nnn..................nnn...',
   ]);
   /* ================= the other pictures of each thing: turned a quarter, used, and both ================= */
+  const rep = (n, row) => Array.from({ length: n }, () => row);
+  /* ---------- machine cabinets: a plain side with vents, the lamps and switches of the face sticking out in front ---------- */
+  const cabSide = (b) =>
+    sw(
+      [
+        'IIIIIIII',
+        'IiiiiiiI',
+        'IinnnniIR',
+        'IiiiiiiI',
+        'IinnnniIF',
+        'IiiiiiiI',
+        'IinnnniI',
+        'IiiiiiiIt',
+        'IiiiiiiI',
+        'IiiiiiiI',
+        'IIIIIIII',
+        'IiiiiiiI',
+        'IiiiiiiI',
+        'IIIIIIII',
+        'II....II',
+      ],
+      { i: b },
+    );
+  const lampsOn = (b) => [
+    [3, 7, 'F'],
+    [5, 7, '8'],
+    [7, 7, 'F'],
+    [9, 7, '8'],
+    [12, 7, b + 'It'],
+    [12, 8, 'It' + b],
+  ];
+  const valvesGlow = [
+    [2, 2, 'uffu'],
+    [2, 4, 'uffu'],
+    [2, 6, 'uffu'],
+    [8, 6, '8'],
+    [8, 7, '.'],
+    [8, 8, 't'],
+  ];
+  V('machine-dials', { side: cabSide('i'), used: { put: [...lampsOn('i'), [4, 2, 'R'], [7, 2, 'n']] }, sideUsed: { put: valvesGlow } });
+  V('machine-shock', {
+    side: pat(cabSide('N'), {
+      put: [
+        [3, 8, 'RR'],
+        [4, 9, 'R'],
+        [4, 10, 'R'],
+        [4, 11, 'tt'],
+        [3, 12, 'tt'],
+      ],
+    }),
+    used: { put: [...lampsOn('N'), [4, 2, 'R'], [7, 2, 'n'], [19, 10, '2'], [18, 11, '2'], [15, 12, '2'], [19, 12, '2']] },
+    sideUsed: { put: [...valvesGlow, [6, 11, '2'], [5, 12, '2'], [2, 13, '2']] },
+  });
+  V('switchboard', {
+    side: pat(sw(cabSide('o'), { R: 'G', F: 'G' }), {
+      put: [
+        [8, 9, 'OOO'],
+        [8, 10, 'R'],
+        [8, 11, 'R'],
+        [10, 10, 'R'],
+      ],
+    }),
+    used: {
+      put: [
+        [2, 11, 'O.R.O.R.R.O'],
+        [2, 12, '..R...R.R..'],
+        [12, 2, 'F'],
+        [14, 4, 'F'],
+        [3, 3, 'F'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [8, 2, 'F'],
+        [8, 10, '.'],
+        [8, 11, '.'],
+        [9, 10, 'R'],
+        [9, 11, 'R'],
+      ],
+    },
+  });
+  V('computer-mainframe', {
+    side: pat(cabSide('P'), {
+      put: [
+        [2, 11, 'R8RF'],
+        [2, 12, '8RF8'],
+      ],
+    }),
+    used: {
+      put: [
+        [2, 10, 'nnnnnnnnnn'],
+        [2, 12, 'Rnnnnnnnnn'],
+        [12, 2, 'n'],
+        [14, 2, 'n'],
+        [12, 4, 'n'],
+        [14, 4, 'n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 11, 'nnnn'],
+        [2, 12, 'Rnnn'],
+        [8, 2, 'n'],
+        [8, 4, 'n'],
+      ],
+    },
+  });
+  V('tape-reels', {
+    side: cabSide('P'),
+    used: { put: [...lampsOn('P'), [2, 3, 'nwIwn nwIwn'], [3, 5, 'oooo']] },
+    sideUsed: {
+      put: [
+        [8, 6, '8'],
+        [8, 7, '.'],
+        [8, 8, 't'],
+        [8, 4, '8'],
+      ],
+    },
+  });
+  /* ---------- beds on wheels, seen from the foot end and a little from above ---------- */
+  const wardBed = pat(
+    [
+      '.tttttttttttt.',
+      '.t..........t.',
+      '.tttttttttttt.',
+      '.tcwwwwwwwwct.',
+      '.tcwwwwwwwwct.',
+      '.tcWWWWWWWWct.',
+      '.tcccccccccct.',
+      '.twwwwwwwwwwt.',
+      ...rep(12, '.tcccccccccct.'),
+      '.tttttttttttt.',
+      '.t..........t.',
+      '.tttttttttttt.',
+      ...rep(4, '.t..........t.'),
+      'nnn........nnn',
+      '.n..........n.',
+    ],
+    {},
+  );
+  V('bed-wheeled', {
+    base: 'side',
+    side: wardBed,
+    used: {
+      put: [
+        [6, 2, 'WWWWWWWWWWWWWW'],
+        [6, 3, 'aWWWWWWWWWWWWW'],
+        [20, 0, '.cccc'],
+        [19, 1, 'cccwccc'],
+        [20, 2, 'cccccccc'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 6, 'WWWWWWWWWW'],
+        [2, 7, 'WWWWWWWWWW'],
+        ...[8, 9, 10, 11, 12, 13].map((y) => [2, y, 'WWWWWWWWWW']),
+        [2, 14, 'WcWWWccWWW'],
+        [2, 15, 'ccwccccccW'],
+        [2, 16, 'cwwccwcccc'],
+        [2, 17, 'ccccwwcwcc'],
+      ],
+    },
+  });
+  V('autopsy-table', {
+    base: 'side',
+    side: [
+      '.tttttttttttt.',
+      '.tTTTTTTTTTTt.',
+      ...rep(15, '.tTTTTTtTTTTt.'),
+      '.tTTTTTnTTTTt.',
+      '.tTTTTTTTTTTt.',
+      '.tttttttttttt.',
+      '.tttttttttttt.',
+      '.tttttttttttt.',
+      '.t.....r....t.',
+      '.t.....r....t.',
+      '.t..........t.',
+      '.t..........t.',
+      'III........III',
+      '.I....rrr...I.',
+    ],
+    used: {
+      put: [
+        [5, 0, 'www...............ww'],
+        [4, 1, 'wwwwwwwwwwwwwwwwwwwwww'],
+        [4, 2, 'wWwwwwwwwwwwWwwwwwwwWw'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [5, 2, 'wwww'],
+        [5, 3, 'wwww'],
+        [4, 4, 'wwwwww'],
+        ...[5, 6, 7, 8, 9, 10, 11, 12, 13].map((y) => [3, y, y === 9 ? 'wwwWWwww' : 'wwwwwwww']),
+        [4, 14, 'wwwwww'],
+        [4, 15, 'wwwwww'],
+        [4, 16, 'wWwwWw'],
+      ],
+    },
+  });
+  /* ---------- drawers ---------- */
+  const drawersSide = (edge, face, seam) => [
+    edge.repeat(9),
+    ...Array.from(
+      { length: 14 },
+      (_, i) =>
+        edge + (i === 1 || i === 12 ? face + seam.repeat(5) + face : face + seam + face.repeat(3) + seam + face) + edge + (i % 3 === 1 ? 'G' : ''),
+    ),
+    edge.repeat(9),
+  ];
+  V('file-cabinets-wall', {
+    side: pat(drawersSide('N', 'a', 'A'), {
+      put: [
+        [1, 1, 'aaaaaaa'],
+        [1, 14, 'aaaaaaa'],
+      ],
+    }),
+    used: {
+      put: [
+        [8, 4, 'cycccy'],
+        [8, 5, 'ccyccc'],
+        [7, 6, 'NaaaaaaN'],
+        [7, 7, 'NaaGGaaN'],
+        [7, 8, 'NNNNNNNN'],
+        [7, 9, 'nnnnnnnn'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [9, 3, 'ycycy'],
+        [9, 4, 'aaaaaN'],
+        [9, 5, 'aaaaaNG'],
+        [9, 6, 'NNNNNN'],
+      ],
+    },
+  });
+  V('specimen-drawer', {
+    side: pat(drawersSide('O', 'o', 'O'), {
+      put: [
+        [1, 1, 'ooooooo'],
+        [1, 14, 'ooooooo'],
+        [9, 7, 'b.r.b'],
+        [9, 8, 'oooooO'],
+        [9, 9, 'oooooOG'],
+        [9, 10, 'OOOOOO'],
+      ],
+    }),
+    used: {
+      put: [
+        [1, 1, 'nnnnnn'],
+        [1, 2, 'nwnb2n'],
+        [0, 3, 'OOOOOOOOO'],
+        [0, 4, 'OoooGoooO'],
+        [0, 5, 'OOOOOOOOO'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [9, 1, 'w.b.2'],
+        [9, 2, 'oooooO'],
+        [9, 3, 'oooooOG'],
+        [9, 4, 'OOOOOO'],
+      ],
+    },
+  });
+  /* ---------- cages ---------- */
+  V('cage-animal', {
+    side: ['IIIIIII', 'I.I.I.I', 'I.I.I.I', 'I.I.I.I', 'I.nRn.I', 'InnnnnI', 'IIIIIII'],
+    used: {
+      put: [
+        [1, 1, '.I.I.Innnn'],
+        [1, 2, '.I.I.Innnn'],
+        [1, 3, '.I.I.Innnn'],
+        [1, 4, '.I.I.Innnn'],
+        [1, 5, '.I.I.Innnn'],
+        [12, 0, 'iiii'],
+        [12, 1, '.i.i'],
+        [12, 2, '.i.i'],
+        [12, 3, '.i.i'],
+        [12, 4, '.i.i'],
+        [12, 5, '.i.i'],
+        [12, 6, 'iiii'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 4, '.I.I.'],
+        [1, 5, '.I.I.'],
+        [7, 0, 'iiiii'],
+        [7, 1, '.i.ii'],
+        [7, 2, '.i.ii'],
+        [7, 3, '.i.ii'],
+        [7, 4, '.i.ii'],
+        [7, 5, '.i.ii'],
+        [7, 6, 'iiiii'],
+      ],
+    },
+  });
+  V('cage-stack', {
+    side: [
+      'IIIIIII',
+      'I.I.I.I',
+      'I.Iww.I',
+      'I.wRwwI',
+      'IIIIIII',
+      'I.I.I.I',
+      'I.I.I.I',
+      'I.I.I.I',
+      'IIIIIII',
+      'I.I.I.I',
+      'I.nnI.I',
+      'InnRnnI',
+      'IIIIIII',
+    ],
+    used: {
+      put: [
+        [1, 1, '.I.I.Innnn'],
+        [1, 2, '.I.I.Innnn'],
+        [1, 3, '.I.I.Innnn'],
+        [12, 0, 'iiii'],
+        [12, 1, '.i.i'],
+        [12, 2, '.i.i'],
+        [12, 3, '.i.i'],
+        [12, 4, 'iiii'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 2, '.I.I.'],
+        [1, 3, '.I.I.'],
+        [7, 0, 'iiiii'],
+        [7, 1, '.i.ii'],
+        [7, 2, '.i.ii'],
+        [7, 3, '.i.ii'],
+        [7, 4, 'iiiii'],
+      ],
+    },
+  });
+  /* ---------- vats: the side has the ladder; used, the tank has been drained ---------- */
+  const ladder = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((y) => [9, y, y % 2 ? 'ItI' : 'I I']);
+  const drained = (keep) => [
+    [1, 1, '11111111' + keep + '1'],
+    [1, 2, '12111111' + keep + '1'],
+    ...[3, 4, 5, 6, 7].map((y) => [1, y, '11111111' + keep + '1']),
+    [1, 8, '8L88L888' + keep + '8'],
+  ];
+  V('vat-green', {
+    side: { put: [...ladder, [3, 5, 'L'], [3, 6, 'L'], [2, 5, '2'], [2, 6, '2']] },
+    used: { put: drained('111') },
+    sideUsed: { put: drained('   ') },
+  });
+  const noBody = [4, 5, 6, 7, 8, 9, 10, 11].map((y) => [4, y, 'LLLLLL']);
+  V('vat-body', {
+    side: {
+      put: [
+        ...noBody,
+        ...ladder,
+        [5, 4, 'xxx'],
+        [5, 5, 'xxn'],
+        [5, 6, 'xxx'],
+        [5, 7, 'xx'],
+        [5, 8, 'xxx'],
+        [5, 9, 'xx'],
+        [5, 10, 'xx'],
+        [5, 11, 'xx'],
+        [3, 5, 'L'],
+        [3, 6, 'L'],
+        [2, 5, '2'],
+        [2, 6, '2'],
+      ],
+    },
+    used: {
+      put: [
+        ...noBody,
+        ...drained('111'),
+        [1, 8, '111111111111'],
+        [1, 9, '111111111111'],
+        [1, 10, '8L88L8888L88'],
+        [6, 3, 'w'],
+        [7, 4, 'w'],
+        [6, 5, 'w'],
+        [5, 6, 'w'],
+        [6, 7, 'ww'],
+        [8, 8, 'w'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        ...noBody,
+        ...drained('   '),
+        [1, 8, '11111111 '],
+        [12, 8, '1'],
+        [1, 9, '11111111'],
+        [12, 9, '1'],
+        [1, 10, '8L88L888'],
+        [12, 10, '8'],
+        [5, 3, 'w'],
+        [6, 4, 'w'],
+        [5, 5, 'w'],
+        [4, 6, 'w'],
+        [5, 7, 'ww'],
+      ],
+    },
+  });
+  /* ---------- screens: the tube seen from the side, the glass at the right; used, most are switched off ---------- */
+  const crtSide = (b, v, glow, tv) =>
+    pat(
+      [
+        '..bbbbbbbbb',
+        '.bbbbbbbbvb',
+        'bbvvvvbbbvb' + glow[0],
+        'bbbbbbbbbvb' + glow[1],
+        'bbvvvvbbbvb' + glow[2],
+        'bbbbbbbbbvb' + glow[3],
+        '.bbbbbbbbvb',
+        '..bbbbbbbbb',
+        '....bbbbb',
+        ...(tv ? ['..v......v', '.bbbbbbbbbb', '.bbbbbbbbbb'] : ['.bbbbbbbbbb', '.bbbbbbbbbbnnn', '.bbbbbbbbbbbbbb']),
+      ].map((r) => r.replace(/b/g, 'Q').replace(/v/g, 'Z')),
+      { swap: { Q: b, Z: v } },
+    );
+  const dark = [1, 2, 3, 4, 5, 6].map((y) => [1, y, y === 2 ? 'nNNnnnnnnn' : y === 3 ? 'nNnnnnnnnn' : 'nnnnnnnnnn']);
+  const screen = (slug, b, v, glow, glowUsed, used, tv) =>
+    V(slug, { side: crtSide(b, v, glow, tv), used: { put: used }, sideUsed: crtSide(b, v, glowUsed, tv) });
+  screen('terminal-green', 'P', 'A', '8888', 'nnnn', dark);
+  screen('computer-beige', 'P', 'A', 'hhhh', 'nnnn', dark);
+  screen('monitor-text', 'P', 'A', '9999', 'nnnn', dark);
+  screen('monitor-static', 'P', 'A', 'hnhn', 'nnnn', dark);
+  screen('monitor-face', 'P', 'A', '8n88', '8888', [
+    [1, 1, 'nnnnnnnnnn'],
+    [1, 2, 'n888nn888n'],
+    [1, 3, 'n8n8nn8n8n'],
+    [1, 4, 'n888nn888n'],
+    [1, 5, 'nnn8888nnn'],
+    [1, 6, 'nnn8nn8nnn'],
+  ]);
+  screen('monitor-smashed', 'P', 'A', 'n2nn', 'nFfn', [
+    [6, 4, 'F'],
+    [5, 5, 'F'],
+    [7, 3, 'f'],
+    [4, 6, 'f'],
+    [6, 2, 'F'],
+    [3, 4, 'f'],
+  ]);
+  screen('oscilloscope', 'N', 'n', 'n88n', 'nn8n', [
+    [1, 3, 'nnnnnnnnnn'],
+    [1, 4, '8888888888'],
+    [1, 5, 'nnnnnnnnnn'],
+  ]);
+  screen('tv-test-card', 'o', 'O', 'w9Rj', 'nnnn', dark, true);
+  screen(
+    'tv-eye',
+    'o',
+    'O',
+    'wRwn',
+    'nwwn',
+    [
+      [1, 1, 'nnnnnnnnnn'],
+      [1, 2, 'nnnnnnnnnn'],
+      [1, 3, 'nwnnnnnnwn'],
+      [1, 4, 'nnwwwwwwnn'],
+      [1, 5, 'nnnwnwnwnn'],
+      [1, 6, 'nnnnnnnnnn'],
+    ],
+    true,
+  );
+  /* ---------- telephones ---------- */
+  const phoneSide = ['Ooo', 'Ooonn', 'OooGn', 'Ooo', 'OooI', 'OooII', 'OooII', 'OooI', 'Ooo', '.Onn', '..nn', '..nn'];
+  const phoneSideOff = pat(phoneSide, {
+    put: [
+      [1, 9, 'O..'],
+      [2, 10, '..'],
+      [2, 11, '..'],
+      [3, 9, 'I'],
+      [4, 10, 'I'],
+      [4, 11, 'I'],
+      [4, 12, 'I'],
+      [5, 13, 'I'],
+      [4, 14, 'I'],
+      [4, 15, 'I'],
+      [3, 16, 'nn'],
+      [3, 17, 'nn'],
+      [3, 18, 'nn'],
+      [3, 19, 'nn'],
+    ],
+  });
+  V('telephone-wall', { side: phoneSide, used: R['telephone-off-hook'], sideUsed: phoneSideOff });
+  V('telephone-off-hook', { side: phoneSideOff, used: R['telephone-wall'], sideUsed: phoneSide });
+  {
+    const booth = R['phone-booth'];
+    const side = pat(booth, {
+      put: [
+        [7, 6, '1112'],
+        [7, 7, '1122'],
+        [2, 6, '1nn2'],
+        [2, 7, 'nnnn'],
+      ],
+    });
+    const inside = (y) =>
+      ({
+        6: 'nnnnIIIIIInn',
+        7: 'nNnnIwwwwInn',
+        8: 'nNnnIIGGIInn',
+        9: 'nNnnIGnnGInn',
+        10: 'nNnnIIGGIInn',
+        11: 'nNnnIIIIIInn',
+        12: 'nnInnnnnnnnn',
+        13: 'nnnIIInnnnnn',
+        15: 'nNNNNNNNNNNn',
+        16: 'nnnnnnnnnnNn',
+        33: 'VVVVVVVVVVVV',
+      })[y] || 'nnnnnnnnnnnn';
+    const leaf = (r, y) => (y < 2 || y > 33 ? '' : r[2] === '1' ? 'R' + r[4] + 'R' : r[2] === 'v' ? 'RvR' : 'RRR');
+    V('phone-booth', {
+      side,
+      used: booth.map((r, y) => (y < 3 || y > 33 ? r : 'RR' + inside(y) + 'RR') + leaf(r, y)),
+      sideUsed: side.map((r, y) => (y < 2 || y > 33 ? r : r + booth[y].slice(2, 14) + 'R')),
+    });
+  }
+  /* ---------- vending machine and jukebox ---------- */
+  V('vending-old', {
+    side: [
+      'IIIIIIII',
+      ...rep(3, 'IiiiiiRI'),
+      'Iiiiii1I',
+      'Iiiiii1It',
+      'Iiiiii1I',
+      'Iiiiii1In',
+      ...rep(5, 'Iiiiii1I'),
+      'IIIIIIII',
+      ...rep(4, 'IiiiiiiI'),
+      'IIIIIIII',
+      'IIIIIIII',
+      'IInnnnII',
+      'IIIIIIII',
+      'IInnnnII',
+      'IIIIIIII',
+      'IIIIIIII',
+      'II....II',
+    ],
+    used: {
+      swap: { 1: '2' },
+      put: [
+        [2, 5, '2'],
+        [4, 15, 'RR'],
+        [4, 16, 'RR'],
+        [12, 5, 'n'],
+        [12, 6, 't'],
+        [2, 2, 'FFFFFFFFFF'],
+      ],
+    },
+    sideUsed: {
+      swap: { 1: '2' },
+      put: [
+        [8, 5, '.'],
+        [8, 6, 't'],
+        [6, 2, 'F'],
+      ],
+    },
+  });
+  V('jukebox-dead', {
+    side: [
+      '....ooooo',
+      '..oooooon',
+      '.ooooooon',
+      '.oOOOOoon',
+      'ooOoooOon',
+      'ooOoooOon',
+      'ooOoooOon',
+      'ooOoooOon',
+      'ooOoooOoO',
+      'ooOoooOoI',
+      'ooOoooOoO',
+      'ooOoooOoy',
+      'ooOoooOoy',
+      'ooOoooOoy',
+      'ooOoooOoy',
+      'ooOoooOoy',
+      'ooOOOOOoO',
+      'ooooooooo',
+      'ooooooooo',
+      'OOOOOOOOO',
+      'OO.....OO',
+    ],
+    used: {
+      swap: { n: '9', y: 'F', w: 'c' },
+      put: [
+        [5, 3, 'FFFFFF'],
+        [5, 7, 'FFFFFF'],
+      ],
+    },
+    sideUsed: { swap: { n: '9', y: 'F' } },
+  });
+  /* ---------- the asylum ---------- */
+  V('restraint-chair', {
+    side: [
+      'OO',
+      'Oo',
+      'Ooy',
+      'Oo',
+      'Oo',
+      'Ooy',
+      'Oo',
+      'Oo',
+      'OoOOOOOOO',
+      'Oo.....yO',
+      'OOOOOOOOO',
+      'OOooooooO',
+      'O......O',
+      'O......O',
+      'O......Oy',
+      'O......O',
+      'O......O',
+      'O......O',
+      'OO.....OO',
+    ],
+    used: {
+      put: [
+        [1, 2, 'yOooooooOy'],
+        [1, 3, 'y'],
+        [10, 3, 'y'],
+        [1, 5, 'yOooooooOy'],
+        [1, 6, 'y'],
+        [10, 6, 'y'],
+        [1, 9, 'o'],
+        [10, 9, 'o'],
+        [0, 11, 'y'],
+        [11, 11, 'y'],
+        [0, 12, 'y'],
+        [11, 12, 'y'],
+        [4, 14, '....'],
+        [4, 15, 'y'],
+        [4, 16, 'y'],
+        [7, 15, 'y'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 2, 'yy'],
+        [3, 3, 'y'],
+        [3, 4, 'y'],
+        [2, 5, 'yy'],
+        [3, 6, 'y'],
+        [7, 9, '.'],
+        [9, 9, 'y'],
+        [9, 10, 'y'],
+        [9, 11, 'y'],
+        [8, 14, '.'],
+        [8, 15, 'y'],
+        [8, 16, 'y'],
+        [8, 17, 'y'],
+      ],
+    },
+  });
+  {
+    const box = R['isolation-box'];
+    const side = pat(['IIIIIIIIII', ...rep(28, 'IiiiiiiiiI'), 'IIIIIIIIII'], {
+      put: [
+        [2, 2, 'I'],
+        [7, 2, 'I'],
+        [2, 27, 'I'],
+        [7, 27, 'I'],
+        [3, 5, 'nnnn'],
+        [3, 7, 'nnnn'],
+        [10, 8, 't'],
+        [10, 9, 't'],
+        [10, 10, 't'],
+      ],
+    });
+    const cell = (y) =>
+      ({
+        3: 'nnNnNnNnnnnn',
+        4: 'nnNnNnNnNnnn',
+        5: 'nnNnNnnnNnnn',
+        6: 'nnnnNnnnNnnn',
+        11: 'nyynnnnnnyyn',
+        12: 'nynnnnnnnnyn',
+        18: 'nNNNNNNNNNNn',
+        19: 'nNNNNNNNNNNn',
+        20: 'nNnnnnnnnnNn',
+        21: 'nNnnnnnnnnNn',
+        22: 'nNnyynnyynNn',
+        23: 'nNnnnnnnnnNn',
+        24: 'nNnnnnnnnnNn',
+        25: 'nNnnnnnnnnNn',
+        26: 'nNnnnnnnnnNn',
+        27: 'nNnnnnnnnnNn',
+      })[y] || 'nnnnnnnnnnnn';
+    V('isolation-box', {
+      side,
+      used: box.map(
+        (r, y) =>
+          (y === 0 || y === 29 ? 'III' : y > 1 && y < 5 ? 'InI' : y > 7 && y < 11 ? 'tiI' : 'IiI') + (y === 0 || y === 29 ? r : 'I' + cell(y) + 'I'),
+      ),
+      sideUsed: side.map((r, y) => r.slice(0, 10) + box[y].slice(1)),
+    });
+  }
+  V('medicine-cart', {
+    base: 'side',
+    side: ['.2.L.R', 'tttttttt', 't......t', 't.ww2..t', 'tttttttt', 't......t', 't......t', 't.www..t', 'tttttttt', 't......t', 'nn....nn'],
+    used: {
+      put: [
+        [0, 0, '.....RR...2...'],
+        [2, 3, '..  .  n2'],
+        [1, 7, ' ww.....22'],
+        [4, 10, 'w.L'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, '...RR.'],
+        [2, 3, '...2'],
+        [2, 7, 'w..2'],
+        [3, 10, 'w'],
+      ],
+    },
+  });
+  V('bedside-screen', {
+    side: ['ttttt', ...rep(27, 'tccct'), 'ttttt', 't...t', 'n...n'],
+    used: [
+      'tttttttttttt',
+      ...Array.from({ length: 27 }, (_, i) => (i === 7 ? 'tccrccctctct' : i === 8 ? 'tcrrccctctct' : 'tcccccctctct')),
+      'tttttttttttt',
+      't......t.t.t',
+      'n......n.n.n',
+    ],
+    sideUsed: ['ttttttt', ...rep(27, 'tctctct'), 'ttttttt', 't.t.t.t', 'n.n.n.n'],
+  });
+  V('iron-lung', {
+    base: 'side',
+    side: [
+      '...tttttt',
+      '..tTTTTTTt',
+      '.tTtIIIItTt',
+      '.ttIxxxxItt',
+      '.ttIxxxxItt',
+      '.ttIXxxXItt.GG',
+      '..ttIIIItt..GG',
+      '...tttttt',
+      '..I......I',
+      '..I......I',
+      '..I......I',
+      '..I......I',
+      '.nnn....nnn',
+    ],
+    used: {
+      put: [
+        [0, 2, '...'],
+        [0, 3, '..n'],
+        [0, 4, '...'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [4, 3, 'nnnn'],
+        [4, 4, 'nnnn'],
+        [4, 5, 'nnnn'],
+      ],
+    },
+  });
+  /* ---------- sparks and glass ---------- */
+  V('tesla-coil', {
+    used: {
+      put: [
+        [0, 2, '2'],
+        [0, 1, '2'],
+        [1, 0, '2'],
+        [8, 1, '2'],
+        [9, 0, '2'],
+        [9, 3, '22'],
+        [10, 4, '2'],
+        [10, 5, '2'],
+        [9, 6, '2'],
+        [8, 7, '2'],
+        [0, 5, '2'],
+        [1, 6, '2'],
+        [1, 7, '2'],
+        [0, 8, '2'],
+      ],
+    },
+  });
+  V('jacobs-ladder', {
+    side: ['..t', '..t2', '..t', '..t', '.2t', '..t', '..t', '..t2', '..t', '..t', '.III', '.IRI', 'IIIII'],
+    used: {
+      put: [
+        [2, 1, '.'],
+        [5, 1, '.'],
+        [3, 2, '..'],
+        [3, 4, '.'],
+        [3, 5, '..'],
+        [3, 7, '..'],
+        [3, 11, 'n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [3, 1, '.'],
+        [1, 4, '.'],
+        [3, 7, '.'],
+        [2, 11, 'n'],
+      ],
+    },
+  });
+  V('drip-stand-blood', {
+    used: {
+      swap: { r: '2', R: '1' },
+      put: [
+        [0, 5, 'rrr'],
+        [1, 6, 'r'],
+      ],
+    },
+  });
+  V('xray-board', { side: ['III', ...rep(7, 'IIh'), 'III'], used: { swap: { h: 'N' } }, sideUsed: { swap: { h: 'N' } } });
+  V('test-tubes-old', {
+    side: ['.2', '.2', '.8', '.8', 'ooo', '.8', 'ooo', 'o.o'],
+    used: {
+      put: [
+        [4, 0, '.'],
+        [4, 1, '.'],
+        [4, 2, '.'],
+        [4, 3, '.'],
+        [4, 5, '.'],
+        [0, 2, '2'],
+        [0, 3, '2'],
+        [0, 5, '2'],
+        [8, 2, '2'],
+      ],
+    },
+    sideUsed: { swap: { 8: '2' } },
+  });
+  V('bunsen-flask', {
+    used: {
+      put: [
+        [2, 4, '1111'],
+        [1, 5, '111111'],
+        [1, 6, '188881'],
+        [3, 8, '..'],
+        [3, 9, 'II'],
+      ],
+    },
+  });
+  /* ---------- sound ---------- */
+  V('cassette-deck', {
+    side: ['IIIIII', 'IiiiiI', 'IiiiiI', 'IiiiiI', 'IiiiiIt', 'IIIIII'],
+    used: [
+      '...nnnnnnnn',
+      '...ncccccwn',
+      ...pat(R['cassette-deck'], {
+        put: [
+          [2, 2, 'NNNNNNNNNN'],
+          [1, 1, 'nNNNNNNNNNNn'],
+          [11, 4, '8'],
+          [3, 4, 'n'],
+        ],
+      }),
+    ],
+    sideUsed: ['..nn', '..nn', 'IIIIII', 'IiiiiI', 'IiiiiI', 'IiiiiI', 'IiiiiI', 'IIIIII'],
+  });
+  V('radio-shortwave', {
+    side: ['.....t', 'ooooooo', 'oOOOOOoc', 'oOoooOo', 'oOoooOo', 'oOOOOOot', 'ooooooo'],
+    used: {
+      put: [
+        [1, 1, 'FFFRFFFFFFFF'],
+        [11, 4, '8'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [7, 2, 'F'],
+        [7, 3, 'f'],
+      ],
+    },
+  });
+  V('geiger-counter', {
+    side: ['666666', '6mmmm6w', '6mmmm6w', '6mmmm6', '6mmmm6t', '666666'],
+    used: {
+      put: [
+        [5, 2, 'ww'],
+        [7, 2, 'R'],
+        [8, 1, 'R'],
+        [11, 4, 'F'],
+        [1, 4, 'n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [6, 4, 'F'],
+        [6, 1, 'R'],
+      ],
+    },
+  });
+  V('reel-player', {
+    side: ['IIIIIII', 'IiiiiiIn', 'IiiiiiIn', 'IiiiiiIn', 'IiiiiiIn', 'IiiiiiI', 'IiiiiiI', 'IiiiiiIt', 'IIIIIII'],
+    used: {
+      put: [
+        [2, 2, 'wn'],
+        [2, 3, 'nw'],
+        [10, 2, 'nw'],
+        [10, 3, 'wn'],
+        [3, 5, 'oooooooo'],
+        [4, 4, 'o'],
+        [9, 4, 'o'],
+        [10, 7, 'F'],
+        [1, 7, 'n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [7, 7, 'F'],
+        [7, 2, 'w'],
+        [7, 4, 'w'],
+      ],
+    },
+  });
+  /* ---------- light ---------- */
+  V('projector-film', {
+    base: 'side',
+    side: [
+      '....nn',
+      '...nIIn',
+      '...nIIn',
+      '...nIIn',
+      '....nn',
+      '.IIttttII',
+      '.IItFFtII',
+      '.IIttttII',
+      '.IIIIIIII',
+      '...I..I',
+      '..I....I',
+      '..I....I',
+      '.I......I',
+      '.I......I',
+    ],
+    used: {
+      put: [
+        [15, 6, 't'],
+        [0, 3, 'n'],
+        [0, 4, 'n'],
+        [0, 5, 'n'],
+        [0, 6, 'n'],
+        [0, 7, 'n'],
+        [0, 8, 'nn'],
+        [1, 9, 'n'],
+        [1, 10, 'nn'],
+        [3, 2, 'II'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [4, 6, 'nn'],
+        [2, 3, 'n'],
+        [2, 4, 'n'],
+        [0, 5, 'n'],
+        [0, 6, 'n'],
+        [0, 7, 'n'],
+        [0, 8, 'n'],
+        [0, 9, 'nn'],
+        [1, 10, 'n'],
+        [1, 4, 'n'],
+      ],
+    },
+  });
+  V('lever-wall', {
+    side: ['II', 'In..RR', 'In..RR', 'In.tt', 'Intt', 'In', 'In', 'In', 'II'],
+    used: {
+      put: [
+        [1, 2, 'nnnn'],
+        [1, 3, 'nnnn'],
+        [1, 6, 'nRRn'],
+        [1, 7, 'nRRn'],
+      ],
+    },
+    sideUsed: ['II', 'In', 'In', 'In', 'Intt', 'In.tt', 'In..RR', 'In..RR', 'II'],
+  });
+  V('lever-floor', {
+    base: 'side',
+    side: ['.RR', '.RR', '.tt', '.tt', '.tt', '.tt', '.tt', 'IIII', 'IIII'],
+    used: ['RR', 'RR', '.tt', '.tt', '..tt', '..tt', '...tt', 'IIIIII', 'IIIIII'],
+    sideUsed: ['', '', '', '.RR', '.RR', '.tt', '.tt', 'IIII', 'IIII'],
+  });
+  V('lamp-oil', {
+    used: {
+      put: [
+        [2, 3, '11'],
+        [2, 4, '1n'],
+      ],
+    },
+  });
+  V('lamp-bare-bulb', { used: { swap: { F: '1', w: '2' } } });
+  V('street-lamp-gas', {
+    used: {
+      put: [
+        [3, 2, '1111'],
+        [3, 3, '1111'],
+        [3, 4, '11n1'],
+        [3, 5, '1111'],
+      ],
+    },
+  });
+  V('street-lamp-broken', {
+    used: {
+      put: [
+        [4, 3, 'F'],
+        [4, 4, 'f'],
+        [5, 3, 'f'],
+      ],
+    },
+  });
+  V('lighthouse-lamp', { used: { swap: { F: '1', w: '2' } } });
+  V('signal-lamp', { used: { swap: { F: '8', w: 'M' } } });
+  V('signal-semaphore', {
+    side: pat(R['signal-semaphore'], {
+      put: [
+        [3, 0, 'RR.......'],
+        [3, 1, 'RR.......'],
+      ],
+    }).map((r) => r.slice(0, 6)),
+    used: {
+      put: [
+        [3, 0, '.........'],
+        [3, 1, '.........'],
+        [3, 0, 'R'],
+        [3, 1, 'RRR'],
+        [4, 2, 'RRR'],
+        [5, 3, 'RRR'],
+        [6, 4, 'RRR'],
+        [7, 5, 'RRw'],
+        [8, 6, 'ww'],
+        [3, 4, 'I'],
+        [3, 6, 'M'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [3, 0, 'RR'],
+        [4, 2, 'RR'],
+        [4, 3, 'RR'],
+        [4, 4, 'RR'],
+        [4, 5, 'ww'],
+        [3, 4, 'I'],
+        [3, 6, 'M'],
+      ],
+    },
+  });
+  V('searchlight', {
+    side: [
+      '..IIIIII',
+      '.IIIIIIIF',
+      'IIIIIIIIF',
+      'IIIIIIIIF',
+      '.IIIIIIIF',
+      '..IIIIII',
+      '....II',
+      '...IIII',
+      '..I....I',
+      '..I....I',
+      '.I......I',
+      '.I......I',
+      'I........I',
+    ],
+    used: { swap: { F: 'N', w: '1' } },
+    sideUsed: { swap: { F: 'N' } },
+  });
+  /* ---------- on the desk and on the wall ---------- */
+  V('typewriter-jammed', {
+    side: ['.cc', '.ccII', '.IIIII', 'IIIIItI', 'IIIIIItI', 'IIIIIIInI', 'IIIIIIIInI', 'IIIIIIIIII'],
+    used: {
+      put: [
+        [2, 0, '........'],
+        [1, 1, '..........'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 0, '..'],
+        [1, 1, '..'],
+      ],
+    },
+  });
+  V('wall-clock-stopped', {
+    side: ['.O', 'OOw', 'OOw', 'OOw', 'OOw', 'OOw', 'OOw', 'OOw', '.O'],
+    used: {
+      put: [
+        [4, 2, 'w'],
+        [4, 3, 'w'],
+        [5, 4, 'ww'],
+        [5, 3, 'n'],
+        [6, 2, 'n'],
+        [4, 5, 'n'],
+        [4, 6, 'n'],
+      ],
+    },
+  });
+  V('metronome', {
+    side: ['..oo', '..oo', '.oooo', '.oooo', '.oooo', '.oooo', 'oooooo', 'oooooo', 'oooooo', 'OOOOOO'],
+    used: {
+      put: [
+        [4, 1, 'o'],
+        [3, 2, 'o'],
+        [4, 3, 'o'],
+        [3, 5, 'o'],
+        [4, 6, 'G'],
+        [4, 5, 'G'],
+        [3, 4, 'G'],
+        [3, 3, 'G'],
+        [2, 2, 'G'],
+        [1, 1, 'GG'],
+        [1, 0, 'G'],
+      ],
+    },
+  });
+  V('centrifuge', {
+    used: {
+      put: [
+        [0, 0, 'tT..........'],
+        [0, 1, 'tT...2.R.2..'],
+        [0, 2, 'tTnnn2nRn2nn'],
+        [7, 5, '8'],
+        [9, 5, 'M'],
+      ],
+    },
+  });
+  V('skeleton-teaching', {
+    side: [
+      '...ttttt',
+      '...t.bbb',
+      '...t.bbn',
+      '...t.bbb',
+      '...t..bb',
+      '...t..b',
+      '...t.bbb',
+      '...t.bbb',
+      '...t.b.b',
+      '...t.bbb',
+      '...t..b',
+      '...t.bbb',
+      '...t..bb',
+      ...rep(7, '...t..b'),
+      '...t..bb',
+      '...t',
+      '.ttttt',
+    ],
+    used: {
+      put: [
+        [10, 7, '.'],
+        [10, 8, '.'],
+        [10, 9, '.'],
+        [10, 10, '.'],
+        [10, 11, '.'],
+        [10, 5, 'b'],
+        [11, 4, 'b'],
+        [11, 3, 'b'],
+        [11, 2, 'b'],
+        [11, 1, 'b'],
+        [10, 1, 'b'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [8, 5, 'b'],
+        [9, 4, 'b'],
+        [9, 3, 'b'],
+        [9, 2, 'b'],
+        [9, 1, 'b'],
+      ],
+    },
+  });
+  /* ---------- small things of the laboratory ---------- */
+  for (const slug of ['jar-brain-wired', 'jar-head', 'jar-heart', 'jar-snake', 'jar-foetus-twin', 'jar-teeth', 'jar-eyes-many', 'leech-jar']) {
+    /* opened: the lid lies beside it and the fluid stands lower */
+    const rows = R[slug].map((r, y) => (y === 0 ? '........' : y === 2 || y === 3 ? r[0] + r.slice(1, 7).replace(/[L3]/g, '1') + r[7] : r));
+    V(slug, {
+      used: pat(rows, {
+        put: [
+          [9, 9, '.IIII.'],
+          [9, 10, 'IIIIII'],
+        ],
+      }),
+    });
+  }
+  V('scalpel-set', {
+    used: {
+      put: [
+        [3, 1, '.'],
+        [3, 2, '.'],
+        [3, 3, '.'],
+        [3, 4, '.'],
+      ],
+    },
+  });
+  V('electrode-helmet', {
+    used: {
+      put: [
+        [0, 6, 'FF'],
+        [8, 6, 'FF'],
+        [2, 0, '2'],
+        [3, 1, '2'],
+        [7, 0, '2'],
+        [6, 1, ' '],
+        [0, 0, '2'],
+        [9, 0, '2'],
+      ],
+    },
+  });
+  V('straitjacket-hook', {
+    side: ['.tt', '.t', '.cc', 'cccc', 'cOcc', 'cccc', 'cccc', 'cOcc', 'cccc', 'cccc', 'cccc', '.cc', '.cO'],
+    used: R['straitjacket-hook'].map((r, y) => (y < 2 ? r : '')),
+    sideUsed: ['.tt', '.t', '', '', '', '', '', '', '', '', '', '', ''],
+  });
+  V('patient-file', {
+    used: [
+      'yyyyyyyyyyyyyyyy',
+      'yYYYYYYycccccccy',
+      'yYwwwYYycnnnnccy',
+      'yYwxwYYycccccccy',
+      'yYwwwYYycnnncRcy',
+      'yYYYYYYycnnnnccy',
+      'yyyyyyyyyyyyyyyy',
+    ],
+  });
+  V('microscope-brass', {
+    base: 'side',
+    side: ['..GGG', '..GGG', '..GGG', '..GGG', '..GGG', '.GGGGG', '..GGG', '.ttttt', '...G', '..GGG', '.GGGGG', 'GGGGGGG'],
+    used: { put: [[2, 7, '2tRt2']] },
+    sideUsed: { put: [[0, 7, '2ttRtt2']] },
+  });
+  V('retort-still', {
+    used: {
+      put: [
+        [2, 7, '...'],
+        [2, 2, '111'],
+        [1, 3, '11111'],
+        [10, 5, '8'],
+      ],
+    },
+  });
+  V('joystick', {
+    used: {
+      put: [
+        [2, 0, '..RR'],
+        [2, 1, '..RR'],
+        [2, 2, '.II'],
+        [1, 6, 'r'],
+      ],
+    },
+  });
+  V('projector-slide', {
+    base: 'side',
+    side: ['IIIIIIII', 'IitTTtiI', 'IitFFtiI', 'IIIIIIII', '.I....I'],
+    used: {
+      put: [
+        [12, 1, 't'],
+        [3, 2, 'nnnn'],
+      ],
+    },
+    sideUsed: { put: [[3, 2, 'nn']] },
+  });
+  V('camera-bellows', {
+    base: 'side',
+    side: ['.nnnnnn', 'nOOOOOOn', 'nOOttOOn', 'nOt22tOn', 'nOOttOOn', 'nOOOOOOn', '.nnnnnn', '..I..I', '.I....I', '.I....I', 'I......I', 'I......I'],
+    used: {
+      put: [
+        [0, 0, 'nnnn'],
+        [0, 1, 'nn'],
+        [0, 5, 'nn'],
+        [0, 6, 'nnn'],
+        [0, 7, 'nnn'],
+        [0, 8, 'nn'],
+        [0, 9, 'nn'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, 'nnnnnnnn'],
+        [0, 1, 'nn    nn'],
+        [0, 6, 'nn    nn'],
+        [0, 7, 'nn    nn'],
+        [0, 8, 'n      n'],
+      ],
+    },
+  });
+  V('camera-flash', {
+    used: {
+      swap: { F: 'a' },
+      put: [
+        [6, 0, 'A'],
+        [7, 0, ' '],
+      ],
+    },
+  });
+  V('telegraph-key', {
+    used: {
+      put: [
+        [4, 0, '..'],
+        [4, 1, 'nn'],
+      ],
+    },
+  });
+  V('adding-machine', {
+    used: {
+      put: [
+        [2, 0, 'cccc'],
+        [1, 1, 'cncnc'],
+        [0, 1, 'c'],
+      ],
+    },
+  });
+  V('xray-skull', { used: { swap: { h: 'N' } } });
+  V('phonograph-cylinder', { base: 'side', side: ['.GGGG', 'GGnnGG', 'GnnnnG', 'GnnnnG', 'GGnnGG', '.GGGG', '.nnnn', 'oooooo', 'oOOOOo', 'oooooo'] });
   //VIEWS
 };
