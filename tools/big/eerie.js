@@ -4680,5 +4680,415 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     }),
   });
 
+  /* --- trophies and stuffed animals --- */
+  /** Any picture hanging askew (see askew): d is a view, not a slug. */
+  const askewOf = (d, deg) =>
+    pic(d.w + 4, d.h + 2, (c) => {
+      const t = canvas(d.w, d.h);
+      d.draw(t);
+      c.stamp(rotated(t, deg, d.w + 4, d.h + 2), 0, 0);
+    });
+  const deerFur = hex('#7a5638'),
+    boarFur = hex('#4a3a30');
+  const deerSide = (c) => {
+    c.rect(17, 11, 18, 23, C.wood); // the plaque on the wall, edge on
+    c.col(17, 11, 23, C.woodDark);
+    c.line(11, 8, 13, 4, dark(C.bone)); // the far antler
+    c.line(13, 4, 12, 1, dark(C.bone));
+    c.poly([[17, 13], [17, 21], [12, 17], [9, 14], [9, 10], [12, 9]], deerFur);
+    c.rect(4, 10, 10, 13, deerFur);
+    c.rect(3, 11, 4, 13, deerFur);
+    c.row(10, 5, 11, lite(deerFur));
+    c.rect(3, 12, 3, 13, K);
+    c.set(8, 11, K);
+    pat(c, 11, 7, ['.x', 'xx'], { x: dark(deerFur) });
+    c.line(10, 8, 8, 3, C.bone);
+    c.line(8, 3, 9, 1, C.bone);
+    c.line(9, 5, 6, 3, C.bone);
+    c.line(6, 3, 5, 1, C.bone);
+    c.line(14, 15, 16, 19, dark(deerFur));
+  };
+  V('taxidermy-deer', { side: pic(20, 25, deerSide), used: askewOf(S['taxidermy-deer'], 13), sideUsed: askewOf(pic(20, 25, deerSide), -12) });
+  const boarSide = (c) => {
+    c.rect(13, 2, 14, 14, C.wood);
+    c.col(13, 2, 14, C.woodDark);
+    c.oval(5, 4, 13, 12, boarFur);
+    c.rect(2, 8, 6, 11, boarFur);
+    c.rect(1, 8, 2, 11, hex('#8a6a5e')); // the snout
+    c.set(1, 10, K);
+    c.col(4, 6, 8, C.white); // a tusk
+    c.set(5, 8, C.white);
+    c.set(8, 6, C.gold);
+    pat(c, 10, 2, ['.k', 'kk', 'kk']);
+    c.row(4, 6, 11, lite(boarFur));
+  };
+  V('taxidermy-boar', { side: pic(16, 16, boarSide), used: askewOf(S['taxidermy-boar'], -13), sideUsed: askewOf(pic(16, 16, boarSide), -12) });
+  const perchStand = (c, x) => {
+    c.rect(x + 2, 8, x + 3, 8, C.woodLight);
+    c.rect(x + 2, 9, x + 3, 16, C.wood);
+    block(c, x - 1, 17, x + 6, 18, C.woodDark);
+  };
+  const FEATHER = ['k..', '.kS', '..k'];
+  V('taxidermy-crow', {
+    base: 'side',
+    side: pic(10, 20, (c) => {
+      pat(c, 2, 1, CROW_F);
+      c.set(3, 2, C.gold);
+      c.set(6, 2, C.gold);
+      perchStand(c, 2);
+    }),
+    used: pic(12, 20, (c) => {
+      c.rect(3, 8, 8, 8, C.woodLight); // it has flown: the bare perch, a feather
+      c.rect(5, 9, 6, 16, C.wood);
+      block(c, 2, 17, 9, 18, C.woodDark);
+      finish(c);
+      pat(c, 3, 13, FEATHER);
+      return false;
+    }),
+    sideUsed: pic(10, 20, (c) => {
+      perchStand(c, 2);
+      finish(c);
+      pat(c, 6, 13, FEATHER);
+      return false;
+    }),
+  });
+  const crackDome = (c) => {
+    c.line(3, 3, 5, 7, C.white);
+    c.line(5, 7, 4, 12, C.white);
+    c.line(5, 7, 8, 9, C.white);
+    c.line(8, 9, 8, 12, C.white);
+    c.rect(6, 4, 7, 5, C.night); // a piece of the glass is out
+  };
+  V('stuffed-owl', {
+    side: pic(12, 18, (c) => {
+      dome(c, 1, 1, 10, 14);
+      pat(c, 3, 4, ['.ooo..', 'ooooo.', 'ygKoo.', 'oooopo', '.opopo', '.oopop', '.opopo', '..ooo.', '..G...']); // in profile
+      c.row(13, 3, 8, C.woodLight);
+      block(c, 1, 15, 10, 16, C.woodDark);
+    }),
+    used: on('base', (c) => {
+      crackDome(c);
+      shards(c, 12, 15);
+    }, { w: 18, outline: true }),
+    sideUsed: on('side', (c) => {
+      crackDome(c);
+      shards(c, 12, 15);
+    }, { w: 18, outline: true }),
+  });
+  const foxMap = { ...P, u: hex('#8a4a26'), U: hex('#5e3018') };
+  const foxFront = (c) => {
+    pat(c, 3, 1, ['u...u', 'uu.uu', 'uuuuu', 'uKuKu', 'wuuuw', '.wKw.', 'uuuuu', 'uUuUu', 'uU.Uu', 'kk.kk'], foxMap);
+    c.set(8, 7, P.w); // the tip of the brush, behind
+    c.set(8, 8, foxMap.u);
+    block(c, 1, 11, 9, 12, C.woodDark);
+  };
+  V('stuffed-fox', {
+    base: 'side',
+    side: pic(11, 14, foxFront),
+    used: pic(24, 14, (c) => {
+      // knocked over: it lies on its side before its board
+      c.rect(2, 2, 20, 11, C.woodDark);
+      c.row(2, 2, 20, C.wood);
+      c.col(2, 2, 11, C.wood);
+      pat(c, 1, 5, ['.u.u..................', '.uuu..................', 'uuKuu.................', 'wuuuuuuuuuuuuuu.......', '.wKwuuuuuuuuuuuu......', '..wwuuuuuuuuuuuUuuu...', '...uuuuuuuuuuuuUuuuuw.', '...kUUk.....kUUk..uuww'], foxMap);
+    }),
+    sideUsed: fallen(pic(11, 14, foxFront)),
+  });
+  const catSide = (c) => {
+    pat(c, 1, 1, ['..k.k.....', '.kkkk.....', '.gkkk.....', 'kkkkk.....', '.kkkkk....', '..kkkkk...', '..kkkkkk..', '..kkkkkk..', '..kkkkkk.k', '.kkkkkkk.k', '.kkkkkkkkk']);
+    c.col(4, 6, 10, C.slate);
+    block(c, 1, 12, 10, 12, C.woodDark);
+  };
+  V('stuffed-cat', { side: pic(12, 14, catSide), used: fallen('stuffed-cat'), sideUsed: fallen(pic(12, 14, catSide), false) });
+  V('key-rack', {
+    side: pic(5, 12, (c) => {
+      c.rect(2, 1, 3, 4, C.wood); // the board on the wall, edge on
+      c.col(2, 1, 4, C.woodLight);
+      c.set(1, 3, C.iron);
+      pat(c, 1, 4, ['t', 'G', 't', 'G', 't', 'G', 't']);
+    }),
+    used: on('base', (c) => {
+      for (const x of [6, 16]) {
+        c.clearRect(x - 1, 5, x + 1, 11); // two more keys are gone
+        c.row(4, x - 1, x + 1, dark(C.wood));
+      }
+    }, { outline: true }),
+    sideUsed: pic(5, 12, (c) => {
+      c.rect(2, 1, 3, 4, C.wood);
+      c.col(2, 1, 4, C.woodLight);
+      c.set(1, 3, C.iron);
+    }),
+  });
+
+  /* --- books, papers and small things on a table --- */
+  const bookOpen = (c, col, ink) => {
+    c.poly([[1, 7], [1, 3], [6, 2], [7, 3], [8, 2], [13, 3], [13, 7], [8, 7], [7, 7]], C.paper);
+    c.row(7, 1, 14, col);
+    c.col(7, 3, 7, dark(C.paper));
+    c.col(14, 4, 7, col);
+    for (const y of [4, 5]) {
+      c.row(y, 2, 5 - (y % 2), ink);
+      c.row(y, 9, 12 - (y % 2), ink);
+    }
+    c.set(7, 2, C.paper);
+  };
+  const bookShut = (c, col, clasp) => {
+    c.box(1, 2, 12, 7, col);
+    c.col(1, 2, 7, dark(col));
+    c.col(12, 3, 6, C.paper);
+    c.row(1, 2, 11, lite(col));
+    if (clasp) {
+      c.row(4, 8, 12, C.brass);
+      c.set(10, 4, K);
+    }
+    pat(c, 4, 3, ['.v.', 'vvv', '.v.', 'v.v']);
+    c.set(2, 3, C.gold);
+    c.set(2, 6, C.gold);
+  };
+  const bookSpine = (c, col) => {
+    c.rect(1, 1, 3, 7, col);
+    c.col(1, 1, 7, lite(col));
+    c.row(3, 1, 3, C.brass);
+    c.row(6, 1, 3, C.brass);
+  };
+  const bookOpenEnd = (c, col) => {
+    c.line(1, 2, 4, 6, col); // the two boards lying open, seen from the foot
+    c.line(8, 2, 5, 6, col);
+    c.line(2, 2, 4, 5, C.paper);
+    c.line(7, 2, 5, 5, C.paper);
+    c.row(2, 3, 6, C.paper);
+    c.row(3, 4, 5, dark(C.paper));
+    c.row(6, 3, 6, dark(col));
+  };
+  V('spell-book', {
+    side: pic(10, 8, (c) => bookOpenEnd(c, leather)),
+    used: pic(14, 9, (c) => bookShut(c, leather, false)), // shut
+    sideUsed: pic(5, 9, (c) => bookSpine(c, leather)),
+  });
+  V('diary-old', {
+    side: pic(5, 9, (c) => bookSpine(c, leather)),
+    used: pic(16, 9, (c) => {
+      bookOpen(c, leather, C.slate); // unlocked, and open at a page
+      c.set(14, 5, C.brass);
+      c.set(10, 6, C.blood);
+    }),
+    sideUsed: pic(10, 8, (c) => bookOpenEnd(c, leather)),
+  });
+  const envelope = (c, x, y) => {
+    c.rect(x, y, x + 7, y + 4, C.paper);
+    c.line(x, y, x + 3, y + 2, C.parchment);
+    c.line(x + 7, y, x + 4, y + 2, C.parchment);
+    c.row(y + 4, x, x + 7, dark(C.parchment));
+  };
+  V('letters-bundle', {
+    side: pic(8, 8, (c) => {
+      c.rect(1, 2, 6, 6, C.paper); // the narrow end of the bundle
+      c.row(3, 1, 6, C.parchment);
+      c.row(5, 1, 6, C.parchment);
+      c.row(6, 1, 6, dark(C.parchment));
+      c.col(3, 1, 6, C.wine);
+      pat(c, 2, 1, ['v.v']);
+    }),
+    used: pic(22, 10, (c) => {
+      envelope(c, 1, 4); // the ribbon undone, the letters spread out
+      envelope(c, 12, 3);
+      envelope(c, 6, 1);
+      c.set(9, 4, C.blood);
+      c.line(3, 8, 8, 7, C.wine);
+      c.line(8, 7, 12, 8, C.wine);
+      c.line(12, 8, 18, 8, C.wine);
+    }),
+    sideUsed: pic(12, 8, (c) => {
+      c.rect(1, 5, 6, 6, C.paper);
+      c.row(6, 1, 6, dark(C.parchment));
+      c.rect(4, 3, 10, 4, C.paper);
+      c.row(4, 4, 10, C.parchment);
+      c.line(1, 6, 10, 6, C.wine);
+    }),
+  });
+  V('letter-unsealed', {
+    used: pic(19, 11, (c) => {
+      c.rect(1, 5, 8, 9, C.parchment); // the note taken out and unfolded
+      c.line(1, 5, 4, 7, dark(C.parchment));
+      c.line(8, 5, 5, 7, dark(C.parchment));
+      c.poly([[9, 1], [17, 2], [16, 9], [9, 8]], C.paper);
+      for (const y of [3, 5, 7]) c.line(11, y, 15 - (y % 3), y, C.slate);
+      c.row(5, 10, 15, dark(C.paper));
+      c.set(14, 8, C.blood);
+    }),
+  });
+  V('newspaper-old', {
+    used: pic(25, 9, (c) => {
+      const pp = hex('#b3a57c');
+      c.rect(1, 1, 23, 7, pp); // opened out
+      c.col(12, 1, 7, dark(pp));
+      c.rect(2, 2, 9, 3, C.slate);
+      c.rect(10, 2, 11, 4, sepiaDark);
+      for (const y of [5, 6]) c.row(y, 2, 11 - (y % 2) * 2, dark(pp));
+      c.rect(14, 2, 18, 5, sepiaDark);
+      c.set(16, 3, sepia);
+      for (const y of [2, 4, 6]) c.row(y, 20, 22, dark(pp));
+      c.row(6, 14, 18, dark(pp));
+      c.row(7, 1, 23, dark(pp));
+    }),
+  });
+  V('photo-pile', {
+    used: pic(24, 10, (c) => {
+      const ph = (x, y, back) => {
+        c.rect(x, y, x + 5, y + 4, C.paper);
+        if (!back) {
+          c.rect(x + 1, y + 1, x + 4, y + 3, sepia);
+          c.set(x + 2, y + 2, sepiaDark);
+          c.set(x + 3, y + 2, sepiaDark);
+        } else c.row(y + 2, x + 1, x + 3, C.slate); // a name written on the back
+      };
+      ph(1, 4); // spread out, one of them turned over
+      ph(8, 1);
+      ph(15, 4, true);
+      c.set(7, 7, K);
+    }),
+  });
+  V('pill-box', {
+    used: pic(17, 7, (c) => {
+      c.box(1, 2, 6, 5, C.steel); // emptied out
+      c.rect(2, 2, 5, 3, C.night);
+      c.row(1, 2, 7, lite(C.steel));
+      for (const [x, y] of [[8, 5], [10, 4], [11, 5], [9, 3], [13, 5], [14, 4], [12, 3], [15, 5]]) c.set(x, y, C.white);
+      c.set(13, 5, C.red);
+    }),
+  });
+  const kidneyEnd = (c) => {
+    c.rect(1, 3, 6, 5, C.steel);
+    c.row(3, 1, 6, lite(C.steel));
+    c.row(5, 2, 5, dark(C.steel));
+    c.clear(1, 5);
+    c.clear(6, 5);
+  };
+  V('syringe-tray', {
+    side: pic(8, 7, (c) => {
+      kidneyEnd(c);
+      c.set(3, 2, C.glassLight);
+      c.set(4, 2, poison);
+      c.set(5, 1, C.iron);
+    }),
+    used: pic(16, 7, (c) => {
+      c.rect(1, 3, 14, 5, C.steel); // the syringe has been used and thrown back
+      c.row(3, 1, 14, lite(C.steel));
+      c.row(5, 2, 13, dark(C.steel));
+      c.clear(1, 5);
+      c.clear(14, 5);
+      c.line(4, 2, 10, 1, C.glassLight);
+      c.set(3, 2, C.iron);
+      c.set(11, 1, C.white);
+      c.set(12, 1, C.white);
+      c.set(5, 3, C.blood);
+      c.set(2, 3, C.blood);
+    }),
+    sideUsed: pic(8, 7, (c) => {
+      kidneyEnd(c);
+      c.set(3, 2, C.glassLight);
+      c.set(4, 1, C.glassLight);
+      c.set(2, 3, C.blood);
+    }),
+  });
+  V('surgical-tools', {
+    side: pic(8, 7, (c) => {
+      kidneyEnd(c);
+      c.set(2, 2, C.white);
+      c.set(4, 2, C.iron);
+      c.set(5, 2, C.blood);
+    }),
+    used: pic(18, 8, (c) => {
+      c.rect(1, 4, 16, 6, C.steel); // the scalpel is gone; more blood
+      c.row(4, 1, 16, lite(C.steel));
+      c.row(6, 2, 15, dark(C.steel));
+      c.clear(1, 6);
+      c.clear(16, 6);
+      c.line(8, 1, 8, 3, C.iron);
+      c.line(10, 1, 9, 3, C.iron);
+      c.rect(11, 2, 15, 3, C.white);
+      c.row(3, 11, 15, C.blood);
+      c.row(2, 12, 14, C.blood);
+      c.set(16, 2, C.wood);
+      c.row(4, 2, 6, C.blood);
+      c.row(5, 3, 5, bloodDark);
+    }),
+    sideUsed: pic(8, 7, (c) => {
+      kidneyEnd(c);
+      c.set(4, 2, C.iron);
+      c.row(3, 1, 3, C.blood);
+      c.set(5, 2, C.blood);
+    }),
+  });
+  V('bone-saw', {
+    used: on('base', (c) => {
+      c.rect(2, 3, 11, 5, C.blood); // fresh from work
+      c.row(3, 4, 9, C.red);
+      for (let x = 1; x <= 11; x += 2) c.set(x, 6, x % 4 === 1 ? C.blood : bloodDark);
+    }),
+  });
+  V('knife-bloody', {
+    used: (() => {
+      const t = turned(done('knife-bloody'), false); // driven into the boards
+      return pic(t.w, t.h - 3, (c) => {
+        c.stamp(t, 0, 0);
+        for (let x = 0; x < c.w; x++) if (c.get(x, c.h - 1)) c.set(x, c.h - 1, K);
+        return false;
+      });
+    })(),
+  });
+  V('rat-trap', {
+    side: pic(7, 6, (c) => {
+      c.rect(1, 3, 5, 4, C.woodPale);
+      c.row(4, 1, 5, C.wood);
+      c.set(3, 2, C.mustard);
+      c.set(1, 2, C.steel);
+      c.set(5, 2, C.steel);
+    }),
+    used: pic(15, 8, (c) => {
+      const fur = hex('#5e5650');
+      c.rect(1, 5, 10, 6, C.woodPale); // sprung, with a rat in it
+      c.row(6, 1, 10, C.wood);
+      c.rect(3, 3, 9, 4, fur);
+      c.row(3, 4, 8, hex('#7a7068'));
+      c.set(2, 4, fur);
+      c.set(3, 4, K);
+      pat(c, 10, 4, ['x..', '.xx'], { x: hex('#a88a7c') });
+      c.col(5, 2, 4, C.steel);
+      c.row(2, 4, 6, C.steel);
+      c.set(8, 5, C.blood);
+    }),
+    sideUsed: pic(7, 7, (c) => {
+      const fur = hex('#5e5650');
+      c.rect(1, 4, 5, 5, C.woodPale);
+      c.row(5, 1, 5, C.wood);
+      c.oval(1, 1, 5, 4, fur);
+      c.row(2, 1, 5, C.steel);
+      c.set(1, 4, hex('#a88a7c'));
+      c.set(5, 4, hex('#a88a7c'));
+    }),
+  });
+  V('rat-dead', {
+    side: pic(8, 8, (c) => {
+      const fur = hex('#5e5650'),
+        skin = hex('#a88a7c');
+      c.oval(1, 3, 6, 6, fur); // from the head end, its feet in the air
+      c.row(3, 3, 4, hex('#7a7068'));
+      c.set(2, 2, skin);
+      c.set(5, 2, skin);
+      c.set(2, 1, skin);
+      c.set(5, 1, skin);
+      c.set(3, 5, K);
+      c.set(4, 6, skin);
+    }),
+    used: pic(14, 12, (c) => {
+      const t = done('rat-dead'); // the flies have found it
+      c.stamp(t, 0, 4);
+      flies(c, [[3, 2], [7, 1], [10, 3], [5, 4], [12, 5]]);
+      return false;
+    }),
+    sideUsed: on('side', (c) => flies(c, [[2, 1], [5, 2], [6, 4]]), { h: 12 }),
+  });
+
   return S;
 };

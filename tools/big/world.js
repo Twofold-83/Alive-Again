@@ -3063,11 +3063,14 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     }, noShade),
   });
   views('shell', {
-    // opened: a pearl
-    used: pic(12, 11, (c) => {
-      c.poly([[2, 6], [4, 1], [7, 1], [9, 6]], C.bone); for (const x of [3, 5, 7]) c.line(5.5, 6, x + 0.5, 2, D(C.bone)); c.row(1, 4, 7, C.white);
-      c.poly([[1, 7], [3, 6], [8, 6], [10, 7], [8, 9], [3, 9]], C.bone); c.rect(3, 7, 8, 7, BLOSSOM); c.row(9, 3, 8, D(C.bone));
-      c.rect(5, 6, 6, 7, C.white); c.set(6, 7, C.ghost);
+    // prised open: a pearl
+    used: pic(13, 12, (c) => {
+      const inner = blend(C.bone, BLOSSOM, 0.6);
+      c.poly([[2, 6], [3, 2], [5, 1], [7, 1], [9, 2], [10, 6]], C.bone); c.poly([[3, 6], [4, 3], [6, 2], [8, 3], [9, 6]], inner);
+      for (const x of [4, 6, 8]) c.line(6, 6, x, 3, D(inner));
+      c.row(1, 5, 7, C.white);
+      c.rect(1, 7, 11, 8, C.bone); c.rect(2, 9, 10, 9, D(C.bone)); c.row(10, 4, 8, D(C.bone)); c.row(7, 2, 10, D(inner));
+      c.rect(5, 6, 7, 8, C.white); c.set(5, 6, inner); c.set(7, 8, C.ghost); c.set(6, 8, C.ghost);
     }),
   });
 

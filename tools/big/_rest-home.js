@@ -1507,7 +1507,11 @@ function views(V, ROWS) {
     const w = Math.max(...rows.map((r) => r.length)),
       h = rows.length,
       at = (x, y) => rows[y][x] || '.';
-    return rep(w, 0).map((_, y) => rep(h, 0).map((_, x) => at(y, h - 1 - x)).join(''));
+    return rep(w, 0).map((_, y) =>
+      rep(h, 0)
+        .map((_, x) => at(y, h - 1 - x))
+        .join(''),
+    );
   };
   const same = { of: 'base' }, // a round thing looks the same from the side
     sameUsed = { of: 'used' };
@@ -1626,15 +1630,7 @@ function views(V, ROWS) {
         ],
       },
       sideUsed: {
-        put: [
-          [9, 5, 'ww.'],
-          ...box(9, 6, 2, 6, 'n'),
-          [9, 11, 'fF'],
-          [9, 12, 'nn'],
-          [9, 13, 'WWWWWWWWW'],
-          [9, 14, 'wwwwwwwww'],
-          [17, 15, 't'],
-        ],
+        put: [[9, 5, 'ww.'], ...box(9, 6, 2, 6, 'n'), [9, 11, 'fF'], [9, 12, 'nn'], [9, 13, 'WWWWWWWWW'], [9, 14, 'wwwwwwwww'], [17, 15, 't']],
       },
     },
     { cooker: {}, 'oven-old': { w: 'P', 1: 'n', t: 'u', W: 'a' } },
@@ -1661,8 +1657,9 @@ function views(V, ROWS) {
     /* a pot put on to boil, the fire stoked */
     used: {
       put: [
-        [8, 1, '.2.2.'],
-        [8, 2, '2.2..'],
+        [10, 0, '2'],
+        [9, 1, '2'],
+        [10, 2, '2'],
         [7, 3, 'ItttttI'],
         [8, 4, 'tTttt'],
         [6, 8, 'FfFF'],
@@ -1671,8 +1668,9 @@ function views(V, ROWS) {
     },
     sideUsed: {
       put: [
-        [5, 1, '.2.2.'],
-        [5, 2, '2.2..'],
+        [7, 0, '2'],
+        [6, 1, '2'],
+        [7, 2, '2'],
         [4, 3, 'ItttttI'],
         [5, 4, 'tTttt'],
         [10, 8, 'F'],
@@ -1775,20 +1773,23 @@ function views(V, ROWS) {
     {
       'kitchen-sink': {},
       'sink-stone': { P: 'l', w: 's', W: 'd', A: 'd', G: 'i' },
-      'sink-dirty': [{ w: 'P', W: 'a', P: 'a' }, { side: [[3, 9, 'u'], [4, 3, 'L']], sideUsed: [[3, 9, 'u'], [4, 3, 'L']] }],
+      'sink-dirty': [
+        { w: 'P', W: 'a', P: 'a' },
+        {
+          side: [
+            [3, 9, 'u'],
+            [4, 3, 'L'],
+          ],
+          sideUsed: [
+            [3, 9, 'u'],
+            [4, 3, 'L'],
+          ],
+        },
+      ],
     },
   );
   {
-    const side = [
-      'qqqqqqqqqqq',
-      'ppppppppppp',
-      'oooooooooo',
-      'oOOOOOOOoo',
-      ...rep(5, 'oOooooooOo'),
-      'oOOOOOOOoo',
-      'oooooooooo',
-      'OOOOOOOOOO',
-    ];
+    const side = ['qqqqqqqqqqq', 'ppppppppppp', 'oooooooooo', 'oOOOOOOOoo', ...rep(5, 'oOooooooOo'), 'oOOOOOOOoo', 'oooooooooo', 'OOOOOOOOOO'];
     /* the right-hand cupboard open: pans and plates, the door swung out */
     const open = [
       [11, 3, 'OOOOOOOO'],
@@ -1804,28 +1805,13 @@ function views(V, ROWS) {
       ...rep(6, 0).map((_, i) => [20, 4 + i, 'OppO']),
       [20, 10, 'OOOO'],
     ];
-    const openSide = [
-      [9, 3, 'nOOOOOOOO'],
-      ...rep(5, 0).map((_, i) => [9, 4 + i, 'nOoooooOO'.replace(/O$/, 'o')]),
-      [16, 6, 'G'],
-      [9, 9, 'nOOOOOOOO'],
-    ];
+    const openSide = [[9, 3, 'nOOOOOOOO'], ...rep(5, 0).map((_, i) => [9, 4 + i, 'nOoooooOO'.replace(/O$/, 'o')]), [16, 6, 'G'], [9, 9, 'nOOOOOOOO']];
     V('kitchen-counter', { side, used: { put: open }, sideUsed: { put: openSide } });
     /* and the top drawer pulled out */
     V('kitchen-counter-drawers', {
       side,
-      used: {
-        put: [
-          ...open,
-          [1, 3, 'ntItntItn'],
-          [0, 4, 'OOOOOOOOOOO'],
-          [0, 5, 'OooooGGooooO'.slice(0, 11)],
-          [0, 6, 'OOOOOOOOOOO'],
-        ],
-      },
-      sideUsed: {
-        put: [...openSide, [10, 2, 'nnnn'], [10, 3, 'ooooO'], [10, 4, 'ooooOG'], [10, 5, 'OOOOO']],
-      },
+      used: { put: [...open, [1, 3, 'ntItntItn'], [0, 4, 'OOOOOOOOOOO'], [0, 5, 'OooooGGooooO'.slice(0, 11)], [0, 6, 'OOOOOOOOOOO']] },
+      sideUsed: { put: [...openSide, [10, 2, 'nnnn'], [10, 3, 'ooooO'], [10, 4, 'ooooOG'], [10, 5, 'OOOOO']] },
     });
   }
   V('dresser-kitchen', {
@@ -1861,15 +1847,7 @@ function views(V, ROWS) {
         [18, 15, 'OOOO'],
       ],
     },
-    sideUsed: {
-      put: [
-        [5, 2, 'o'],
-        [8, 9, 'nOOOOOOO'],
-        ...rep(4, 0).map((_, i) => [8, 10 + i, 'nOooooo']),
-        [14, 11, 'G'],
-        [8, 13, 'nOOOOOOO'],
-      ],
-    },
+    sideUsed: { put: [[5, 2, 'o'], [8, 9, 'nOOOOOOO'], ...rep(4, 0).map((_, i) => [8, 10 + i, 'nOooooo']), [14, 11, 'G'], [8, 13, 'nOOOOOOO']] },
   });
   V('bin', {
     side: same,
@@ -1919,7 +1897,14 @@ function views(V, ROWS) {
       [4, 15, '22'],
       [9, 17, '2'],
     ];
-    const fill = { put: [[1, 4, '3'.repeat(28)], [4, 3, '3'.repeat(20)], [10, 2, '2..2....2'], [2, 3, '2']] };
+    const fill = {
+      put: [
+        [1, 4, '3'.repeat(28)],
+        [4, 3, '3'.repeat(20)],
+        [10, 2, '2..2....2'],
+        [2, 3, '2'],
+      ],
+    };
     fam(
       { base: 'side', side: front, used: fill, sideUsed: { put: water } },
       {
@@ -1929,7 +1914,12 @@ function views(V, ROWS) {
           { w: 'P', P: 'a' },
           {
             side: [...col(4, 6, 'uuu'), [5, 6, 'u'], ...col(9, 10, 'rrrr'), [8, 10, 'rr'], [6, 22, 'r'], [6, 23, 'r'], [10, 3, 'L']],
-            sideUsed: [[6, 22, 'r'], [6, 23, 'r'], [9, 12, 'r'], [8, 13, 'rr']],
+            sideUsed: [
+              [6, 22, 'r'],
+              [6, 23, 'r'],
+              [9, 12, 'r'],
+              [8, 13, 'rr'],
+            ],
           },
         ],
       },
@@ -1938,8 +1928,22 @@ function views(V, ROWS) {
     V('bathtub-filled', {
       base: 'side',
       side: patch(front, water),
-      used: { swap: { 3: 'P' }, put: [[10, 2, '.........'], [4, 3, 'w'.repeat(20)], [8, 12, '3333333'], [18, 12, '33']] },
-      sideUsed: { swap: { 3: 'P', 2: 'P' }, put: [[3, 27, '333333'], [4, 28, '33333']] },
+      used: {
+        swap: { 3: 'P' },
+        put: [
+          [10, 2, '.........'],
+          [4, 3, 'w'.repeat(20)],
+          [8, 12, '3333333'],
+          [18, 12, '33'],
+        ],
+      },
+      sideUsed: {
+        swap: { 3: 'P', 2: 'P' },
+        put: [
+          [3, 27, '333333'],
+          [4, 28, '33333'],
+        ],
+      },
     });
     /* the canvas cover unlaced and thrown back */
     V('water-therapy-tub', {
@@ -1955,7 +1959,14 @@ function views(V, ROWS) {
         ...col(3, 8, 'YcYcYcYcYcYc'),
         ...col(10, 8, 'YcYcYcYcYcYc'),
       ]),
-      used: { put: [[5, 2, '.'], [1, 3, 'tttt33333333333333ccccccccct'], [22, 2, 'ccccc'], [1, 4, '3'.repeat(20)]] },
+      used: {
+        put: [
+          [5, 2, '.'],
+          [1, 3, 'tttt33333333333333ccccccccct'],
+          [22, 2, 'ccccc'],
+          [1, 4, '3'.repeat(20)],
+        ],
+      },
       sideUsed: {
         put: [
           [2, 2, 'tttt..tttt'],
@@ -1983,18 +1994,46 @@ function views(V, ROWS) {
       'WWWWWWWWWWWW',
     ],
     /* turned off: a last drip, water standing in the tray */
-    used: {
-      put: [...box(7, 3, 4, 14, '.'), [9, 4, '2'], [9, 9, '2'], [3, 17, '3333333']],
-    },
+    used: { put: [...box(7, 3, 4, 14, '.'), [9, 4, '2'], [9, 9, '2'], [3, 17, '3333333']] },
     sideUsed: {
-      put: [...rep(13, 0).map((_, i) => [3, 4 + i, '..tt.....'.replace(/^\.\./, '..')]), ...box(3, 4, 2, 13, '.'), ...box(7, 4, 3, 13, '.'), [7, 5, '2'], [4, 10, '2'], [2, 17, '33333333']],
+      put: [
+        ...rep(13, 0).map((_, i) => [3, 4 + i, '..tt.....'.replace(/^\.\./, '..')]),
+        ...box(3, 4, 2, 13, '.'),
+        ...box(7, 4, 3, 13, '.'),
+        [7, 5, '2'],
+        [4, 10, '2'],
+        [2, 17, '33333333'],
+      ],
     },
   });
   {
     const lidUp = (water) => ({ put: [...col(6, 2, 'wwww'), [2, 7, water]] });
-    const front = ['wwwwwwww', 'wwwwwwww', 'wwwwwwtw', 'wwwwwwww', 'wwwwwwww', '.WWWWWW.', 'WwwwwwwW', 'WwwwwwwW', '.WWWWWW.', '.wwwwww.', '..wwww..', '..wwww..', '.wwwwww.'];
+    const front = [
+      'wwwwwwww',
+      'wwwwwwww',
+      'wwwwwwtw',
+      'wwwwwwww',
+      'wwwwwwww',
+      '.WWWWWW.',
+      'WwwwwwwW',
+      'WwwwwwwW',
+      '.WWWWWW.',
+      '.wwwwww.',
+      '..wwww..',
+      '..wwww..',
+      '.wwwwww.',
+    ];
     const frontUp = (water) => ({
-      put: [[1, 1, 'WWWWWW'], [1, 2, 'Wwwww'], [1, 3, 'WwwwwW'], [1, 4, 'WwwwwW'], [0, 5, '.wwwwww.'], [0, 6, 'ww' + water.slice(0, 4) + 'ww'], [0, 7, 'w' + water + 'w'], [0, 8, 'ww' + water.slice(2) + 'ww']],
+      put: [
+        [1, 1, 'WWWWWW'],
+        [1, 2, 'Wwwww'],
+        [1, 3, 'WwwwwW'],
+        [1, 4, 'WwwwwW'],
+        [0, 5, '.wwwwww.'],
+        [0, 6, 'ww' + water.slice(0, 4) + 'ww'],
+        [0, 7, 'w' + water + 'w'],
+        [0, 8, 'ww' + water.slice(2) + 'ww'],
+      ],
     });
     const water = (slug) => (slug === 'toilet-dirty' ? 'LzLL3L' : '333333');
     fam(
@@ -2002,37 +2041,92 @@ function views(V, ROWS) {
       {
         toilet: {},
         'toilet-old': { w: 'P', W: 'a', t: 'G' },
-        'toilet-dirty': [{ w: 'P', W: 'L' }, { side: [[3, 10, 'u'], [3, 11, 'u'], [1, 3, 'L']], sideUsed: [[3, 10, 'u'], [3, 11, 'u'], [1, 3, 'L']] }],
+        'toilet-dirty': [
+          { w: 'P', W: 'L' },
+          {
+            side: [
+              [3, 10, 'u'],
+              [3, 11, 'u'],
+              [1, 3, 'L'],
+            ],
+            sideUsed: [
+              [3, 10, 'u'],
+              [3, 11, 'u'],
+              [1, 3, 'L'],
+            ],
+          },
+        ],
       },
     );
     /* the broken one: flushed, it floods the floor */
     V('toilet-broken', {
       base: 'side',
-      side: patch(recol(front, { w: 'P', W: 'n' }), [[0, 0, '..'], [0, 1, '.'], [6, 0, '..'], [3, 2, 'n'], [4, 3, 'nn'], [4, 4, 'n'], [6, 12, '3333']]),
-      used: { put: [[2, 7, '333333'], [8, 9, '3'], [8, 10, '3'], [5, 12, '33333333'], [0, 12, '333']] },
-      sideUsed: { put: [[1, 6, '333333'], [1, 7, '333333'], [7, 9, '3'], [7, 10, '3'], [7, 11, '3'], [0, 12, '33'], [6, 12, '33333']] },
+      side: patch(recol(front, { w: 'P', W: 'n' }), [
+        [0, 0, '..'],
+        [0, 1, '.'],
+        [6, 0, '..'],
+        [3, 2, 'n'],
+        [4, 3, 'nn'],
+        [4, 4, 'n'],
+        [6, 12, '3333'],
+      ]),
+      used: {
+        put: [
+          [2, 7, '333333'],
+          [8, 9, '3'],
+          [8, 10, '3'],
+          [5, 12, '33333333'],
+          [0, 12, '333'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [1, 6, '333333'],
+          [1, 7, '333333'],
+          [7, 9, '3'],
+          [7, 10, '3'],
+          [7, 11, '3'],
+          [0, 12, '33'],
+          [6, 12, '33333'],
+        ],
+      },
     });
   }
   fam(
     {
-      side: [
-        '.ttt....',
-        '.t.t....',
-        'wwwwwwww',
-        'wWWWWWWw',
-        'wwwwwww.',
-        '.wwwww..',
-        ...rep(6, '.ww.....'),
-        'wwww....',
-      ],
+      side: ['.ttt....', '.t.t....', 'wwwwwwww', 'wWWWWWWw', 'wwwwwww.', '.wwwww..', ...rep(6, '.ww.....'), 'wwww....'],
       /* the tap runs, the basin fills */
-      used: (slug) => ({ put: [[5, 1, '2'], [1, 3, slug === 'washbasin-bloody' ? 'rr3r2rr3' : '33332333']] }),
-      sideUsed: (slug) => ({ put: [[3, 2, '2'], [1, 3, slug === 'washbasin-bloody' ? 'r32rr3' : '332333']] }),
+      used: (slug) => ({
+        put: [
+          [5, 1, '2'],
+          [1, 3, slug === 'washbasin-bloody' ? 'rr3r2rr3' : '33332333'],
+        ],
+      }),
+      sideUsed: (slug) => ({
+        put: [
+          [3, 2, '2'],
+          [1, 3, slug === 'washbasin-bloody' ? 'r32rr3' : '332333'],
+        ],
+      }),
     },
     {
       'bathroom-sink': {},
       washbasin: { w: 'P', W: 'a', t: 'G' },
-      'washbasin-bloody': [{ w: 'P', W: 'r', t: 'G' }, { side: [[6, 4, 'r'], [5, 5, 'r'], [2, 12, 'rr']], sideUsed: [[6, 4, 'r'], [5, 5, 'r'], [2, 12, 'rr']] }],
+      'washbasin-bloody': [
+        { w: 'P', W: 'r', t: 'G' },
+        {
+          side: [
+            [6, 4, 'r'],
+            [5, 5, 'r'],
+            [2, 12, 'rr'],
+          ],
+          sideUsed: [
+            [6, 4, 'r'],
+            [5, 5, 'r'],
+            [2, 12, 'rr'],
+          ],
+        },
+      ],
     },
   );
   V('mirror-cabinet', {
@@ -2126,27 +2220,32 @@ function views(V, ROWS) {
       't........t',
     ],
     /* the hood folded down, the bedding turned back */
-    used: {
-      put: [
-        ...box(4, 0, 12, 3, '.'),
-        [4, 3, '.wwwww.nNn'],
-        [5, 2, 'wccw...nNn'],
-        [12, 1, 'nn'],
-      ],
-    },
-    sideUsed: {
-      put: [
-        ...box(0, 0, 10, 2, '.'),
-        [0, 2, '..wwccww..'],
-        [0, 3, 'IIIIIIIIII'],
-        [0, 4, 'nNwwwwwwNn'],
-      ],
-    },
+    used: { put: [...box(4, 0, 12, 3, '.'), [4, 3, '.wwwww.nNn'], [5, 2, 'wccw...nNn'], [12, 1, 'nn']] },
+    sideUsed: { put: [...box(0, 0, 10, 2, '.'), [0, 2, '..wwccww..'], [0, 3, 'IIIIIIIIII'], [0, 4, 'nNwwwwwwNn']] },
   });
   {
-    const side = ['.OOOOOOOO.', 'OjjjjjjjjO', 'OjjjjjjjjOG', 'OOOOOOOOOOG', 'OjjjjjjjjO', 'OjjjjFjjjO', 'OjjjFFFjjO', 'OjjjjFjjjO', 'OjjjjjjjjO', 'OOOOOOOOOO'];
+    const side = [
+      '.OOOOOOOO.',
+      'OjjjjjjjjO',
+      'OjjjjjjjjOG',
+      'OOOOOOOOOOG',
+      'OjjjjjjjjO',
+      'OjjjjFjjjO',
+      'OjjjFFFjjO',
+      'OjjjjFjjjO',
+      'OjjjjjjjjO',
+      'OOOOOOOOOO',
+    ];
     const lid = ['.OOOOOOOOOOOOOOOO.', 'OJJJJJJJJJJJJJJJJO', 'OJJJJJJJJJJJJJJJJO', 'OJJJJJJJJJJJJJJJJO'];
-    const body = ['OOOOOOOOGGOOOOOOOO', 'OjjjjjjjjjjjjjjjjO', 'OjjjjFjjjjjjFjjjjO', 'OjjjFFFjjjjFFFjjjO', 'OjjjjFjjjjjjFjjjjO', 'OjjjjjjjjjjjjjjjjO', 'OOOOOOOOOOOOOOOOOO'];
+    const body = [
+      'OOOOOOOOGGOOOOOOOO',
+      'OjjjjjjjjjjjjjjjjO',
+      'OjjjjFjjjjjjFjjjjO',
+      'OjjjFFFjjjjFFFjjjO',
+      'OjjjjFjjjjjjFjjjjO',
+      'OjjjjjjjjjjjjjjjjO',
+      'OOOOOOOOOOOOOOOOOO',
+    ];
     const toys = ['OOOOOOOOOOOOOOOOOO', 'OnnRnnbbnnnn8nnnnO', 'OnRRRnbxbnn888nnnO'],
       rags = ['OOOOOOOOOOOOOOOOOO', 'OnnnvvnnnnccnnnnnO', 'OnvvvvvnncccbnnynO'];
     const sideOpen = (a, b) => ['OO', ...rep(3, 'OJ'), 'OOOOOOOOOO', 'O' + a + 'O', 'O' + b + 'O', ...side.slice(3)];
@@ -2154,14 +2253,35 @@ function views(V, ROWS) {
     /* the open one: the toys put away, the lid shut, one block left out */
     V('toy-chest-open', {
       side: sideOpen('nRnnb8nn', 'RRRbx88n').slice(1),
-      used: { put: [[0, 0, '.OOOOOOOOOOOOOOOO.'], [0, 1, 'OjjjjjjjjjjjjjjjjO'], [0, 2, 'OjjjjjjjGGjjjjjjjO'], [19, 7, '8888'], [19, 8, '8w88'], [19, 9, '8888']] },
+      used: {
+        put: [
+          [0, 0, '.OOOOOOOOOOOOOOOO.'],
+          [0, 1, 'OjjjjjjjjjjjjjjjjO'],
+          [0, 2, 'OjjjjjjjGGjjjjjjjO'],
+          [19, 7, '8888'],
+          [19, 8, '8w88'],
+          [19, 9, '8888'],
+        ],
+      },
       sideUsed: [...side, ...[]].map((r, i) => r + (i > 6 ? '.'.repeat(11 - r.length) + ['8888', '8w88', '8888'][i - 7] : '')),
     });
     const web = { o: 'o' };
     V('chest-cobwebbed', {
-      side: patch(recol(side, { j: 'o', F: 'o' }), [[1, 1, 'W.W'], [1, 2, 'WW'], [1, 3, 'W'], [7, 1, 'WW'], [8, 2, 'W'], [2, 4, 'W']]),
+      side: patch(recol(side, { j: 'o', F: 'o' }), [
+        [1, 1, 'W.W'],
+        [1, 2, 'WW'],
+        [1, 3, 'W'],
+        [7, 1, 'WW'],
+        [8, 2, 'W'],
+        [2, 4, 'W'],
+      ]),
       used: recol([...lid, ...rags, ...body], { j: 'o', F: 'o', J: 'p', ...web }),
-      sideUsed: patch(recol(sideOpen('nvvnncbn', 'vvvvccby'), { j: 'o', F: 'o', J: 'p' }), [[2, 0, 'W'], [2, 1, 'WW'], [2, 2, 'W.W'], [2, 3, 'W']]),
+      sideUsed: patch(recol(sideOpen('nvvnncbn', 'vvvvccby'), { j: 'o', F: 'o', J: 'p' }), [
+        [2, 0, 'W'],
+        [2, 1, 'WW'],
+        [2, 2, 'W.W'],
+        [2, 3, 'W'],
+      ]),
     });
   }
   V('dolls-house', {
@@ -2216,7 +2336,20 @@ function views(V, ROWS) {
     },
   });
   V('suitcases-old', {
-    side: ['..ooooo..', '..oOoOo..', '..ooooo..', '.eeeeeee.', '.eEeeeEe.', '.eEeeeEe.', '.eeeeeee.', '000000000', '0u00000u0', '0u00000u0', '0u00000u0', '000000000'],
+    side: [
+      '..ooooo..',
+      '..oOoOo..',
+      '..ooooo..',
+      '.eeeeeee.',
+      '.eEeeeEe.',
+      '.eEeeeEe.',
+      '.eeeeeee.',
+      '000000000',
+      '0u00000u0',
+      '0u00000u0',
+      '0u00000u0',
+      '000000000',
+    ],
     /* the top case opened where it lies */
     used: [
       '...oooooooooo...',
@@ -2235,7 +2368,23 @@ function views(V, ROWS) {
       '0u000000000000u0',
       '0000000000000000',
     ],
-    sideUsed: ['..oo.....', '..oq.....', '..oq.....', '..ooooo..', '..owjvo..', '..ooooo..', '.eeeeeee.', '.eEeeeEe.', '.eEeeeEe.', '.eeeeeee.', '000000000', '0u00000u0', '0u00000u0', '0u00000u0', '000000000'],
+    sideUsed: [
+      '..oo.....',
+      '..oq.....',
+      '..oq.....',
+      '..ooooo..',
+      '..owjvo..',
+      '..ooooo..',
+      '.eeeeeee.',
+      '.eEeeeEe.',
+      '.eEeeeEe.',
+      '.eeeeeee.',
+      '000000000',
+      '0u00000u0',
+      '0u00000u0',
+      '0u00000u0',
+      '000000000',
+    ],
   });
   V('suitcase-open', {
     side: ['oo.....', 'oq.....', 'oq.....', 'oq.....', 'ooooooo', 'oOwjvOo', 'oOwjvOo', 'ooooooo'],
@@ -2335,8 +2484,40 @@ function views(V, ROWS) {
   {
     /* mannequins in profile, looking right */
     const pole = [...rep(15, '..tt..'), 'tttttt'];
-    const man = ['.cccc.', '.ccccc', '.cccc.', '..cc..', '.cccc.', '.ccccc', '.ccccc', '.ccccc', '.cccc.', '.cccc.', '.cccc.', '.ccccc', '.cccc.', '..cc..', ...pole];
-    const form = ['.cccc.', '.ccccc', '.cccc.', '..OO..', '.cccc.', '.ccccc', '.ccccc', '.ccccc', '.cccc.', '.cccc.', '.cccc.', '.ccccc', '.cccc.', '..cc..', ...pole];
+    const man = [
+      '.cccc.',
+      '.ccccc',
+      '.cccc.',
+      '..cc..',
+      '.cccc.',
+      '.ccccc',
+      '.ccccc',
+      '.ccccc',
+      '.cccc.',
+      '.cccc.',
+      '.cccc.',
+      '.ccccc',
+      '.cccc.',
+      '..cc..',
+      ...pole,
+    ];
+    const form = [
+      '.cccc.',
+      '.ccccc',
+      '.cccc.',
+      '..OO..',
+      '.cccc.',
+      '.ccccc',
+      '.ccccc',
+      '.ccccc',
+      '.cccc.',
+      '.cccc.',
+      '.cccc.',
+      '.ccccc',
+      '.cccc.',
+      '..cc..',
+      ...pole,
+    ];
     /* dressed: a hat and a coat hung on it */
     const coat = [
       [3, 0, 'nnnnnn'],
@@ -2356,7 +2537,11 @@ function views(V, ROWS) {
     ];
     V('mannequin', { side: man, used: { put: coat }, sideUsed: { put: coatSide } });
     V('mannequin-broken', {
-      side: patch(recol(man, { c: 'P' }), [[2, 1, 'n'], [3, 2, 'nn'], [0, 28, 'PP']]),
+      side: patch(recol(man, { c: 'P' }), [
+        [2, 1, 'n'],
+        [3, 2, 'nn'],
+        [0, 28, 'PP'],
+      ]),
       /* knocked about once more: the head off and on the floor */
       used: { put: [...box(4, 0, 4, 3, '.'), [5, 3, 'nP'], [9, 27, 'PPP'], [8, 28, 'PPnPP'], [8, 29, 'PPPPP']] },
       sideUsed: { put: [...box(0, 0, 6, 3, '.'), [2, 3, 'nP'], [7, 27, 'PPP'], [6, 28, 'PnPPP'], [6, 29, 'PPPPP']] },
@@ -2374,51 +2559,93 @@ function views(V, ROWS) {
     const pinnedSide = [[1, 4, 'jjjj'], ...rep(8, 0).map((_, i) => [1, 5 + i, 'jjjjj']), [2, 3, 'y'], [2, 4, 'y'], [3, 5, 'y'], [3, 6, 'y']];
     V('dress-form', { side: recol(form, { c: 'y' }), used: { put: pinned }, sideUsed: { put: pinnedSide } });
     /* the gown in profile, a short train behind */
-    const gownSide = patch(recol(form, { c: 'w' }), [
-      [1, 14, 'wwww'],
-      [1, 15, 'wWww'],
-      [0, 16, 'wwWwww'],
-      [0, 17, 'wwWwww'],
-      [0, 18, 'wwwWww'],
-      [0, 19, 'wwwWwww'].map ? [0, 19, 'wwwWwww'] : 0,
-    ].filter(Boolean));
+    const gownSide = patch(
+      recol(form, { c: 'w' }),
+      [
+        [1, 14, 'wwww'],
+        [1, 15, 'wWww'],
+        [0, 16, 'wwWwww'],
+        [0, 17, 'wwWwww'],
+        [0, 18, 'wwwWww'],
+        [0, 19, 'wwwWwww'].map ? [0, 19, 'wwwWwww'] : 0,
+      ].filter(Boolean),
+    );
     const gs = [...gownSide];
     const train = ['wwwWwww', 'wwwWwww', 'wwWwwww', 'wwWwwWw', '.wwWwwWw', '.wwWwwWw', 'wwwWwwww', 'wwWwwwww', 'wwWwwwww', 'wwwwwwww', 'WWWWWWWW'];
-    const gown = patch(gs.map((r) => '..' + r), train.map((t, i) => [t[0] === '.' ? 0 : 1, 19 + i, t.replace(/^\./, 'w')]));
+    const gown = patch(
+      gs.map((r) => '..' + r),
+      train.map((t, i) => [t[0] === '.' ? 0 : 1, 19 + i, t.replace(/^\./, 'w')]),
+    );
     V('dress-form-gown', {
       side: gown,
       /* the gown lifted off and left in a heap at its foot */
       used: {
         swap: { w: 'y', W: 'y' },
-        put: [...box(0, 14, 12, 12, '.'), ...rep(12, 0).map((_, i) => [5, 14 + i, 'tt']), [0, 26, '..wwwwwwww..'], [0, 27, '.wwWwwwwWww.'], [0, 28, 'wwWwwwWwwwww'], [0, 29, 'WWWWWWWWWWWW'], [3, 13, ' yyyy ']],
+        put: [
+          ...box(0, 14, 12, 12, '.'),
+          ...rep(12, 0).map((_, i) => [5, 14 + i, 'tt']),
+          [0, 26, '..wwwwwwww..'],
+          [0, 27, '.wwWwwwwWww.'],
+          [0, 28, 'wwWwwwWwwwww'],
+          [0, 29, 'WWWWWWWWWWWW'],
+          [3, 13, ' yyyy '],
+        ],
       },
-      sideUsed: [...recol(form, { c: 'y' }).slice(0, 26).map((r) => '..' + r), '..wwwwww', '.wwWwwww', 'wwwWwwWw', 'WWWWWWWW'],
+      sideUsed: [
+        ...recol(form, { c: 'y' })
+          .slice(0, 26)
+          .map((r) => '..' + r),
+        '..wwwwww',
+        '.wwWwwww',
+        'wwwWwwWw',
+        'WWWWWWWW',
+      ],
     });
   }
   {
     /* round cages: the same from every side */
-    const door = [
-      [6, 5, '...'],
-      [6, 6, '...'],
-      [6, 7, '...'],
-      [10, 5, 'GGG'],
-      [10, 6, 'G.G'],
-      [10, 7, 'G.G'],
-      [10, 8, 'GGG'],
-    ];
     /* the empty cage: a bird put in */
-    V('birdcage-empty', { side: same, used: { put: [[4, 6, '66'], [3, 7, '9666']] }, sideUsed: sameUsed });
+    V('birdcage-empty', {
+      side: same,
+      used: {
+        put: [
+          [4, 6, '66'],
+          [3, 7, '9666'],
+        ],
+      },
+      sideUsed: sameUsed,
+    });
     /* let out: the bird sits on top of its cage */
     V('birdcage-bird', {
       side: same,
-      used: ['....66....', '...9666...', '....GG....', '...GGGG...', '..G.G.GG..', '.G.G.G.GG.', ...rep(4, 'G.G.G.G.GG'), 'G.GOOOG.GG', ...rep(2, 'G.G.G.G.GG'), 'GGGGGGGGGG'],
+      used: [
+        '....66....',
+        '...9666...',
+        '....GG....',
+        '...GGGG...',
+        '..G.G.GG..',
+        '.G.G.G.GG.',
+        ...rep(4, 'G.G.G.G.GG'),
+        'G.GOOOG.GG',
+        ...rep(2, 'G.G.G.G.GG'),
+        'GGGGGGGGGG',
+      ],
       sideUsed: sameUsed,
     });
     /* a cloth thrown over the cage */
     V('birdcage-dead', {
       side: same,
       used: {
-        put: [[3, 1, 'VVVV'], [2, 2, 'VVvVVV'], [1, 3, 'VVvVVVVV'], [0, 4, 'VVvVVVVvVV'], [0, 5, 'VVvVVVVvVV'], [0, 6, 'VvVVVvVVvV'], [0, 7, 'VvVVVvVVvV'], [0, 8, 'V.VVv.VV.V']],
+        put: [
+          [3, 1, 'VVVV'],
+          [2, 2, 'VVvVVV'],
+          [1, 3, 'VVvVVVVV'],
+          [0, 4, 'VVvVVVVvVV'],
+          [0, 5, 'VVvVVVVvVV'],
+          [0, 6, 'VvVVVvVVvV'],
+          [0, 7, 'VvVVVvVVvV'],
+          [0, 8, 'V.VVv.VV.V'],
+        ],
       },
       sideUsed: sameUsed,
     });
@@ -2446,10 +2673,47 @@ function views(V, ROWS) {
   });
   V('rocking-chair-doll', {
     base: 'side',
-    side: ['.OOOOOOO.', '.OoOoOoO.', '.Oobbbo..'.slice(0, 8) + 'O', '.ObxxxbO.', '.Oonxno..'.slice(0, 7) + 'O.', '.O77777O.', '.O77777O.', 'OOOOOOOOO', '.ooooooo.', '.O.....O.', '.O.....O.', '.O.....O.', 'OO.....OO'],
+    side: [
+      '.OOOOOOO.',
+      '.OoOoOoO.',
+      '.Oobbbo..'.slice(0, 8) + 'O',
+      '.ObxxxbO.',
+      '.Oonxno..'.slice(0, 7) + 'O.',
+      '.O77777O.',
+      '.O77777O.',
+      'OOOOOOOOO',
+      '.ooooooo.',
+      '.O.....O.',
+      '.O.....O.',
+      '.O.....O.',
+      'OO.....OO',
+    ],
     /* the doll is gone from the chair, and lies on the floor */
-    used: { put: [[6, 2, '..'], [5, 3, '....'], [6, 4, '..'], [5, 5, '....'], [5, 6, '....'], [5, 2, 'o'], [5, 3, 'o'], [5, 4, 'o'], [14, 11, 'bb'], [13, 12, 'bxx7777']] },
-    sideUsed: { put: [[2, 2, 'oOoOo'], [2, 3, 'oOoOo'], [2, 4, 'oOoOo'], [2, 5, 'oOoOo'], [2, 6, 'oOoOo'], [10, 11, 'bb'], [10, 12, 'bxx7777']] },
+    used: {
+      put: [
+        [6, 2, '..'],
+        [5, 3, '....'],
+        [6, 4, '..'],
+        [5, 5, '....'],
+        [5, 6, '....'],
+        [5, 2, 'o'],
+        [5, 3, 'o'],
+        [5, 4, 'o'],
+        [14, 11, 'bb'],
+        [13, 12, 'bxx7777'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 2, 'oOoOo'],
+        [2, 3, 'oOoOo'],
+        [2, 4, 'oOoOo'],
+        [2, 5, 'oOoOo'],
+        [2, 6, 'oOoOo'],
+        [10, 11, 'bb'],
+        [10, 12, 'bxx7777'],
+      ],
+    },
   });
   V('furniture-covered', {
     side: [
@@ -2532,7 +2796,22 @@ function views(V, ROWS) {
     sideUsed: { put: [[7, 2, '3'], ...col(7, 3, '3232323'), [2, 11, '333333'], [3, 2, '3'], [3, 3, '3']] },
   });
   V('chairs-stacked', {
-    side: ['.O......', '.O......', '.O......', '.OOOOOO.', 'oO....O.', 'oO....O.', 'oOOOOOO.', 'oooooooo', 'o......o', 'oooooooo', 'o......o', 'o......o', 'o......o', 'o......o'],
+    side: [
+      '.O......',
+      '.O......',
+      '.O......',
+      '.OOOOOO.',
+      'oO....O.',
+      'oO....O.',
+      'oOOOOOO.',
+      'oooooooo',
+      'o......o',
+      'oooooooo',
+      'o......o',
+      'o......o',
+      'o......o',
+      'o......o',
+    ],
     /* one chair lifted down and set beside the others */
     used: [
       '.............O......O',
@@ -2630,11 +2909,25 @@ function views(V, ROWS) {
       'IIIIIIIIIII',
       'II.......II',
     ];
-    const fire = [[4, 8, 'nnnnnn'], [3, 9, 'nfFffFfn'], [3, 10, 'nFfFFfFn'], [3, 11, 'nfFfFFfn'], [4, 12, 'nnnnnn']];
+    const fire = [
+      [4, 8, 'nnnnnn'],
+      [3, 9, 'nfFffFfn'],
+      [3, 10, 'nFfFFfFn'],
+      [3, 11, 'nfFfFFfn'],
+      [4, 12, 'nnnnnn'],
+    ];
     /* burnt down: embers in the ash */
     V('furnace', {
       side,
-      used: { put: [[4, 9, 'nnnnnn'], [4, 10, 'nnnnnn'], [4, 11, 'arafra'], [5, 10, 'r'], [8, 10, 'a']] },
+      used: {
+        put: [
+          [4, 9, 'nnnnnn'],
+          [4, 10, 'nnnnnn'],
+          [4, 11, 'arafra'],
+          [5, 10, 'r'],
+          [8, 10, 'a'],
+        ],
+      },
       sideUsed: { put: [...col(10, 9, 'nnr')] },
     });
     /* lit */
@@ -2644,8 +2937,24 @@ function views(V, ROWS) {
     {
       side: ['...II....', '...II.tt.', '.IIIIIttI', 'IiiiiiiiI', 'IiIIIIIiI', 'IiIiiiIiI', 'IiIiiiIiI', 'IiiiiiiiI', 'IIIIIIIII', '.nn...nn.'],
       /* started: the lamp green, smoke from the exhaust, the whole thing shaking */
-      used: { put: [[3, 5, '8'], [6, 0, 'a.A'], [7, 1, 'a'], [13, 0, 'aaa'], [9, 5, 'FfFf'], [9, 6, 'fFfF']] },
-      sideUsed: { put: [[5, 0, 'a.A'], [6, 1, 'a'], [3, 5, 'FfF'], [3, 6, 'fFf']] },
+      used: {
+        put: [
+          [3, 5, '8'],
+          [6, 0, 'a.A'],
+          [7, 1, 'a'],
+          [13, 0, 'aaa'],
+          [9, 5, 'FfFf'],
+          [9, 6, 'fFfF'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [5, 0, 'a.A'],
+          [6, 1, 'a'],
+          [3, 5, 'FfF'],
+          [3, 6, 'fFf'],
+        ],
+      },
     },
     { 'generator-old': {}, 'generator-diesel': { i: 'L', u: 'n' } },
   );
@@ -2696,9 +3005,23 @@ function views(V, ROWS) {
       sideUsed: { put: [...col(17, 7, 'vvvvv'), [14, 12, 'Ovvvvvv']] },
     });
     /* drunk dry: only a dark stain left */
-    V('barrel-open', { side: same, used: { put: [[3, 1, 'nnnnnn'], ...col(4, 3, 'vvvvvv'), [5, 3, 'v'], [5, 4, 'v'], ...col(8, 3, 'vvv'), [3, 12, 'vvvvvvv']] }, sideUsed: sameUsed });
+    V('barrel-open', {
+      side: same,
+      used: { put: [[3, 1, 'nnnnnn'], ...col(4, 3, 'vvvvvv'), [5, 3, 'v'], [5, 4, 'v'], ...col(8, 3, 'vvv'), [3, 12, 'vvvvvvv']] },
+      sideUsed: sameUsed,
+    });
     /* what was left in it has run out over the floor */
-    V('barrel-smashed', { side: same, used: { put: [[0, 12, 'vvvvvvvvvvvvvv'], [1, 11, 'v'], [12, 11, 'vv']] }, sideUsed: sameUsed });
+    V('barrel-smashed', {
+      side: same,
+      used: {
+        put: [
+          [0, 12, 'vvvvvvvvvvvvvv'],
+          [1, 11, 'v'],
+          [12, 11, 'vv'],
+        ],
+      },
+      sideUsed: sameUsed,
+    });
     /* water drawn: ripples, and what slopped over the rim */
     V('rain-barrel-moss', {
       side: same,
@@ -2726,7 +3049,15 @@ function views(V, ROWS) {
         [15, 12, '2rr2'],
       ],
     };
-    const sideUsed = { put: [[3, 6, '..'], [3, 7, '..'], [6, 10, '.OO.'], [6, 11, '2222'], [6, 12, '2rr2']] };
+    const sideUsed = {
+      put: [
+        [3, 6, '..'],
+        [3, 7, '..'],
+        [6, 10, '.OO.'],
+        [6, 11, '2222'],
+        [6, 12, '2rr2'],
+      ],
+    };
     fam(
       { side, used, sideUsed },
       {
@@ -2741,14 +3072,46 @@ function views(V, ROWS) {
   V('wine-rack', {
     side: ['OOOOOO', 'OooooOn', 'OOOOOO', 'OooooO', 'OOOOOO', 'OooooOn', 'OOOOOO', 'OooooOn', 'OOOOOO', 'OooooO', 'OOOOOO'],
     /* bottles drawn: empty holes, one bottle stood on the floor */
-    used: { put: [[1, 1, '..'], [7, 3, '..'], [10, 5, '...'], [4, 9, '..'], [7, 7, '..'], [15, 6, 'n'], [15, 7, 'n'], [15, 8, 'HH'], [15, 9, 'HH'], [15, 10, 'HH'], [18, 9, 'HHHHnn'], [18, 10, 'HHHH']] },
-    sideUsed: { put: [[6, 1, '.'], [6, 7, '.'], [8, 6, 'n'], [8, 7, 'n'], [8, 8, 'H'], [8, 9, 'H'], [8, 10, 'H']] },
+    used: {
+      put: [
+        [1, 1, '..'],
+        [7, 3, '..'],
+        [10, 5, '...'],
+        [4, 9, '..'],
+        [7, 7, '..'],
+        [15, 6, 'n'],
+        [15, 7, 'n'],
+        [15, 8, 'HH'],
+        [15, 9, 'HH'],
+        [15, 10, 'HH'],
+        [18, 9, 'HHHHnn'],
+        [18, 10, 'HHHH'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [6, 1, '.'],
+        [6, 7, '.'],
+        [8, 6, 'n'],
+        [8, 7, 'n'],
+        [8, 8, 'H'],
+        [8, 9, 'H'],
+        [8, 10, 'H'],
+      ],
+    },
   });
   V('cage-large', {
     side: ['IIIIIIIIII', ...rep(5, 'I.I.I.I.II'), 'IIIIIIIIII', ...rep(10, 'I.I.I.I.II'), 'IIIIIIIIII'],
     /* the door stands open */
     used: {
-      put: [...box(9, 7, 5, 10, '.'), [9, 16, '.....'], [16, 6, 'IIIII'], ...rep(10, 0).map((_, i) => [16, 7 + i, 'I.I.I']), [16, 17, 'IIIII'], [16, 12, 'IItII']],
+      put: [
+        ...box(9, 7, 5, 10, '.'),
+        [9, 16, '.....'],
+        [16, 6, 'IIIII'],
+        ...rep(10, 0).map((_, i) => [16, 7 + i, 'I.I.I']),
+        [16, 17, 'IIIII'],
+        [16, 12, 'IItII'],
+      ],
     },
     sideUsed: {
       put: [[10, 6, 'IIIIIII'], ...rep(10, 0).map((_, i) => [10, 7 + i, '.I.I.II']), [10, 17, 'IIIIIII'], [14, 12, 't'], ...col(9, 7, 'nnnnnnnnnn')],
@@ -2757,13 +3120,49 @@ function views(V, ROWS) {
   V('laundry-mangle', {
     side: ['..III..', '..I.I..', '.OqqqO.', '.OqqqOI', '.OpppOI', '.OpppO.', '..I.I..', '..I.I..', '.I...I.', '.I...I.', 'II...II', 'I.....I'],
     /* a sheet going through the rollers */
-    used: { put: [[4, 3, 'wwwwww'], [4, 4, 'wwWwww'], [4, 5, 'wWwwWw'], [4, 6, 'wWwwWw'], [4, 7, 'wwWwww'], [4, 8, 'wwWwWw'], [5, 9, 'wwww'], [6, 10, '3'], [8, 11, '3']] },
-    sideUsed: { put: [[5, 3, 'www'], [6, 4, 'ww'], [7, 5, 'ww'], [7, 6, 'wW'], [7, 7, 'ww'], [7, 8, 'Ww'], [7, 9, 'w'], [8, 11, '3'], [0, 3, 'ww'], [0, 4, 'w']] },
+    used: {
+      put: [
+        [4, 3, 'wwwwww'],
+        [4, 4, 'wwWwww'],
+        [4, 5, 'wWwwWw'],
+        [4, 6, 'wWwwWw'],
+        [4, 7, 'wwWwww'],
+        [4, 8, 'wwWwWw'],
+        [5, 9, 'wwww'],
+        [6, 10, '3'],
+        [8, 11, '3'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [5, 3, 'www'],
+        [6, 4, 'ww'],
+        [7, 5, 'ww'],
+        [7, 6, 'wW'],
+        [7, 7, 'ww'],
+        [7, 8, 'Ww'],
+        [7, 9, 'w'],
+        [8, 11, '3'],
+        [0, 3, 'ww'],
+        [0, 4, 'w'],
+      ],
+    },
   });
   V('water-pump', {
     base: 'side',
     /* from in front: the spout towards the viewer, the handle behind */
-    side: ['...IIII...', '...IiII...', '...IiII...', '...IiII...', '...tttt...', '...tnnt...', '...tttt...', ...rep(4, '...IiII...'), '..IIIIII..', 'ssssssssss'],
+    side: [
+      '...IIII...',
+      '...IiII...',
+      '...IiII...',
+      '...IiII...',
+      '...tttt...',
+      '...tnnt...',
+      '...tttt...',
+      ...rep(4, '...IiII...'),
+      '..IIIIII..',
+      'ssssssssss',
+    ],
     /* the handle up, water gushing from the spout */
     used: { put: [[6, 2, 'I...'], [9, 3, '.'], [7, 1, 'II'], [9, 0, 'I'], ...col(7, 6, '232322'), [6, 12, '323'], [6, 11, ' 2 2']] },
     sideUsed: { put: [[4, 5, '22'], ...col(4, 6, '23232'), ...col(5, 6, '32323'), [3, 12, '3233'], [3, 11, '2  2']] },
@@ -2771,7 +3170,14 @@ function views(V, ROWS) {
   V('milk-churn', {
     side: same,
     /* the lid off beside it, milk to the brim */
-    used: { put: [[0, 0, '........'], [1, 1, '.twwt.'], [10, 9, 'tttt'], [9, 10, 'tTtttt']] },
+    used: {
+      put: [
+        [0, 0, '........'],
+        [1, 1, '.twwt.'],
+        [10, 9, 'tttt'],
+        [9, 10, 'tTtttt'],
+      ],
+    },
     sideUsed: sameUsed,
   });
   V('oil-drum', {
@@ -2783,33 +3189,93 @@ function views(V, ROWS) {
   V('washing-tub', {
     side: same,
     /* washing in the suds */
-    used: { put: [[3, 0, 'jj'], [2, 1, 'jjjj'], [8, 0, 'RR'], [8, 1, 'RRR'], [6, 1, 'w']] },
+    used: {
+      put: [
+        [3, 0, 'jj'],
+        [2, 1, 'jjjj'],
+        [8, 0, 'RR'],
+        [8, 1, 'RRR'],
+        [6, 1, 'w'],
+      ],
+    },
     sideUsed: sameUsed,
   });
   V('butchers-block', {
     side: ['...TTO..', 'qqqqqqqq', 'pprppppp', 'pppppppp', 'oooooooo', ...rep(6, '.O....O.')],
     /* at work: a joint on the block, blood down the front */
-    used: { put: [[9, 0, 'rRRx'], [3, 0, 'r'], [9, 1, 'rrrr'], ...col(10, 2, 'rrrr'), [11, 2, 'r'], [4, 2, 'r'], [4, 3, 'r'], [9, 10, 'rr'], [8, 11, 'rrrr']] },
+    used: {
+      put: [
+        [9, 0, 'rRRx'],
+        [3, 0, 'r'],
+        [9, 1, 'rrrr'],
+        ...col(10, 2, 'rrrr'),
+        [11, 2, 'r'],
+        [4, 2, 'r'],
+        [4, 3, 'r'],
+        [9, 10, 'rr'],
+        [8, 11, 'rrrr'],
+      ],
+    },
     sideUsed: { put: [[1, 0, 'rR'], [0, 1, 'rrr'], ...col(5, 2, 'rrr'), [6, 2, 'r'], [3, 11, 'rrr']] },
   });
   V('clothes-horse', {
     side: ['..q..', '..q..', '.qPq.', '.qPq.', '.qPq.', '.q.q.', '.q.q.', 'q...q', 'q...q', 'q...q'],
     /* hung full */
-    used: { put: [[4, 2, 'RR'], [4, 3, 'RR'], [4, 4, 'RR'], [4, 5, 'R'], [9, 2, 'www'], ...rep(4, 0).map((_, i) => [9, 3 + i, 'wWw']), [0, 2, 'w'], [0, 3, 'w'], [0, 4, 'w']] },
-    sideUsed: { put: [[2, 2, 'w'], [2, 3, 'W'], [2, 4, 'w'], [2, 5, 'w'], [2, 6, 'R']] },
+    used: {
+      put: [
+        [4, 2, 'RR'],
+        [4, 3, 'RR'],
+        [4, 4, 'RR'],
+        [4, 5, 'R'],
+        [9, 2, 'www'],
+        ...rep(4, 0).map((_, i) => [9, 3 + i, 'wWw']),
+        [0, 2, 'w'],
+        [0, 3, 'w'],
+        [0, 4, 'w'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 2, 'w'],
+        [2, 3, 'W'],
+        [2, 4, 'w'],
+        [2, 5, 'w'],
+        [2, 6, 'R'],
+      ],
+    },
   });
   V('bottle-crate', {
     side: ['H.H.H.', 'H.H.H.', 'pppppp', 'pOpOpO', 'pppppp', 'pOpOpO', 'pppppp'],
     /* three bottles taken */
-    used: { put: [[2, 0, '.'], [2, 1, '.'], [4, 0, '.'], [4, 1, '.'], [8, 0, '.'], [8, 1, '.']] },
-    sideUsed: { put: [[2, 0, '.'], [2, 1, '.']] },
+    used: {
+      put: [
+        [2, 0, '.'],
+        [2, 1, '.'],
+        [4, 0, '.'],
+        [4, 1, '.'],
+        [8, 0, '.'],
+        [8, 1, '.'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 0, '.'],
+        [2, 1, '.'],
+      ],
+    },
   });
 
   /* ---------- garden and yard ---------- */
   V('barbecue', {
     side: same,
     /* supper on the grill, smoke rising */
-    used: tall('barbecue', 3, [[5, 0, 'aa'], [4, 1, 'aAa'], [2, 2, '000.uuu0'], [2, 5, 'FfFfFfFf'], [2, 3, 'tttttttt']]),
+    used: tall('barbecue', 3, [
+      [5, 0, 'aa'],
+      [4, 1, 'aAa'],
+      [2, 2, '000.uuu0'],
+      [2, 5, 'FfFfFfFf'],
+      [2, 3, 'tttttttt'],
+    ]),
     sideUsed: sameUsed,
   });
   V('lawnmower', {
@@ -2817,42 +3283,99 @@ function views(V, ROWS) {
     /* from in front: the handle a bow behind the deck */
     side: ['.IIIIII.', ...rep(4, '.I....I.'), 'RRRRRRRR', 'RRRRRRRR', 'RvvvvvvR', 'nn....nn', 'nn....nn'],
     /* running: smoke from the engine, cut grass flying out behind */
-    used: tall('lawnmower', 0, [[5, 2, 'aa'], [4, 3, 'aAa'], [5, 4, 'a'], [0, 9, 'MHM'], [0, 8, 'HM'], [1, 7, 'M']], 3),
-    sideUsed: { put: [[3, 2, 'aa'], [2, 3, 'aAa'], [3, 4, 'a'], [2, 9, 'MHMH'], [3, 8, 'MH']] },
+    used: tall(
+      'lawnmower',
+      0,
+      [
+        [5, 2, 'aa'],
+        [4, 3, 'aAa'],
+        [5, 4, 'a'],
+        [0, 9, 'MHM'],
+        [0, 8, 'HM'],
+        [1, 7, 'M'],
+      ],
+      3,
+    ),
+    sideUsed: {
+      put: [
+        [3, 2, 'aa'],
+        [2, 3, 'aAa'],
+        [3, 4, 'a'],
+        [2, 9, 'MHMH'],
+        [3, 8, 'MH'],
+      ],
+    },
   });
   {
     /* from the wheel end */
     const front = ['tttttttttt', '.tTtttttt.', '..tttttt..', '..tttttt..', '.O..nn..O.', '.O..nn..O.', '.O..nn..O.'];
-    const heap = [[4, 0, 'eeMe'], [2, 1, 'eeEeeeeeE'], [1, 2, 'eEeeeMeeeee']];
-    const heapF = [[3, 0, 'eeMe'], [1, 1, 'eEeeeeEe'], [0, 2, 'eeeEeeMeee']];
+    const heap = [
+      [4, 0, 'eeMe'],
+      [2, 1, 'eeEeeeeeE'],
+      [1, 2, 'eEeeeMeeeee'],
+    ];
+    const heapF = [
+      [3, 0, 'eeMe'],
+      [1, 1, 'eEeeeeEe'],
+      [0, 2, 'eeeEeeMeee'],
+    ];
     /* loaded with earth */
     V('wheelbarrow', { base: 'side', side: front, used: tall('wheelbarrow', 2, heap), sideUsed: patch(['', '', ...front], heapF) });
     V('wheelbarrow-old', {
       base: 'side',
-      side: patch(recol(front, { t: 'u', T: '0', n: 'I' }), [[3, 0, 'M'], [6, 1, 'U']]),
+      side: patch(recol(front, { t: 'u', T: '0', n: 'I' }), [
+        [3, 0, 'M'],
+        [6, 1, 'U'],
+      ]),
       used: tall('wheelbarrow-old', 2, heap),
       sideUsed: patch(['', '', ...recol(front, { t: 'u', T: '0', n: 'I' })], heapF),
     });
   }
   {
-    const side = [
-      '.RRRRRRRRRRRRR.',
-      'RRRRRRRRRRRRRRR',
-      'RRRRRRRRRRRRRRR',
-      'RRRRRRRRRRRRRRR',
-      ...rep(7, '.ppppppppppppp.'),
-    ];
+    const side = ['.RRRRRRRRRRRRR.', 'RRRRRRRRRRRRRRR', 'RRRRRRRRRRRRRRR', 'RRRRRRRRRRRRRRR', ...rep(7, '.ppppppppppppp.')];
     /* the dog is at home, and looks out */
     V('dog-house', {
       side,
-      used: { put: [[5, 6, '0nnnn0'], [5, 7, '000000'], [5, 8, '0n00n0'], [5, 9, '00ww00'], [6, 10, 'wnnw']] },
-      sideUsed: { put: [[14, 6, '0'], [14, 7, '000'], [14, 8, '0n0ww'], [14, 9, '000wn'], [14, 10, '0ww']] },
+      used: {
+        put: [
+          [5, 6, '0nnnn0'],
+          [5, 7, '000000'],
+          [5, 8, '0n00n0'],
+          [5, 9, '00ww00'],
+          [6, 10, 'wnnw'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [14, 6, '0'],
+          [14, 7, '000'],
+          [14, 8, '0n0ww'],
+          [14, 9, '000wn'],
+          [14, 10, '0ww'],
+        ],
+      },
     });
     /* something in the dark of the old kennel opens its eyes; the chain has been dragged out */
     V('kennel-old', {
-      side: patch(recol(side, { R: 'O', p: 'a' }), [[2, 3, 'M'], [9, 1, 'm'], [5, 8, 'A'], [10, 6, 'A']]),
-      used: { put: [[6, 7, 'F..F'], [9, 10, 'tItItItI'], [17, 10, 't']] },
-      sideUsed: { put: [[14, 7, 'F'], [14, 10, 'tItIt']] },
+      side: patch(recol(side, { R: 'O', p: 'a' }), [
+        [2, 3, 'M'],
+        [9, 1, 'm'],
+        [5, 8, 'A'],
+        [10, 6, 'A'],
+      ]),
+      used: {
+        put: [
+          [6, 7, 'F..F'],
+          [9, 10, 'tItItItI'],
+          [17, 10, 't'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [14, 7, 'F'],
+          [14, 10, 'tItIt'],
+        ],
+      },
     });
   }
   {
@@ -2877,61 +3400,222 @@ function views(V, ROWS) {
     V('swing-set', {
       side: a,
       /* set swinging: the seat high, towards the viewer */
-      used: { put: [...box(5, 12, 10, 7, '.'), [4, 12, 'OOOOOOOOOOOO'], [4, 13, 'OOOOOOOOOOOO'], [4, 11, 'I'], [15, 11, 'I'], [4, 10, 'I'], [15, 10, 'I'], ...col(5, 9, '.'), ...col(14, 9, '.'), [4, 9, 'I'], [15, 9, 'I']] },
+      used: {
+        put: [
+          ...box(5, 12, 10, 7, '.'),
+          [4, 12, 'OOOOOOOOOOOO'],
+          [4, 13, 'OOOOOOOOOOOO'],
+          [4, 11, 'I'],
+          [15, 11, 'I'],
+          [4, 10, 'I'],
+          [15, 10, 'I'],
+          ...col(5, 9, '.'),
+          ...col(14, 9, '.'),
+          [4, 9, 'I'],
+          [15, 9, 'I'],
+        ],
+      },
       sideUsed: swung,
     });
   }
   V('slide', {
     /* a teddy bear left sitting at the foot of it */
-    used: { put: [[15, 10, 'o..o'], [15, 11, 'oooo'], [15, 12, 'oqqo'], [15, 13, 'oooo']] },
-    sideUsed: { put: [[2, 9, 'o..o'], [2, 10, 'oooo'], [2, 11, 'oqqo'], [2, 12, 'oooo']] },
+    used: {
+      put: [
+        [15, 10, 'o..o'],
+        [15, 11, 'oooo'],
+        [15, 12, 'oqqo'],
+        [15, 13, 'oooo'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 9, 'o..o'],
+        [2, 10, 'oooo'],
+        [2, 11, 'oqqo'],
+        [2, 12, 'oooo'],
+      ],
+    },
     base: 'side',
     /* from the foot of the chute, looking up it */
-    side: ['t......t', 'tttttttt', 't.rRRr.t', 'ttrRRrtt', 't.rRRr.t', 't.rRRr.t', 'ttrRRrtt', 't.rRRr.t', 't.rRRr.t', 'trRRRRrt', 'trRRRRrt', 'rRRRRRRr', 'rRRRRRRr', 'rrrrrrrr'],
+    side: [
+      't......t',
+      'tttttttt',
+      't.rRRr.t',
+      'ttrRRrtt',
+      't.rRRr.t',
+      't.rRRr.t',
+      'ttrRRrtt',
+      't.rRRr.t',
+      't.rRRr.t',
+      'trRRRRrt',
+      'trRRRRrt',
+      'rRRRRRRr',
+      'rRRRRRRr',
+      'rrrrrrrr',
+    ],
   });
   V('parasol', {
     side: same,
     /* folded down and tied */
-    used: ['......RR......', '......Rw......', '.....RwRw.....', '.....RwRw.....', '.....RwRw.....', '.....RwRw.....', '.....tttt.....', '.....RwRw.....', '.....Rw.w.....', ...rep(8, '......tt......'), '....tttttt....'],
+    used: [
+      '......RR......',
+      '......Rw......',
+      '.....RwRw.....',
+      '.....RwRw.....',
+      '.....RwRw.....',
+      '.....RwRw.....',
+      '.....tttt.....',
+      '.....RwRw.....',
+      '.....Rw.w.....',
+      ...rep(8, '......tt......'),
+      '....tttttt....',
+    ],
     sideUsed: sameUsed,
   });
   V('deck-chair', {
     base: 'side',
     side: ['qqqqqqqqq', ...rep(6, 'qRwRwRwRq'), 'qqqqqqqqq', ...rep(3, 'q.......q')],
     /* a towel left over the back, a sun hat on the ground */
-    used: { put: [[0, 0, 'jj'], [0, 1, 'jJj'], [0, 2, 'j.jJ'], [3, 3, 'jJ'], [4, 4, 'jj'], [0, 3, 'j'], [13, 9, 'yy'], [12, 10, 'yRRy'], [11, 11, 'yyyyyy']] },
-    sideUsed: { put: [[1, 0, 'jjjjjjj'], [1, 1, 'jJjjjJj'], [1, 2, 'jjjjjjj'], [1, 3, 'jj.j.jj'], [11, 9, 'yy'], [10, 10, 'yRRy'], [9, 11, 'yyyyyy']] },
+    used: {
+      put: [
+        [0, 0, 'jj'],
+        [0, 1, 'jJj'],
+        [0, 2, 'j.jJ'],
+        [3, 3, 'jJ'],
+        [4, 4, 'jj'],
+        [0, 3, 'j'],
+        [13, 9, 'yy'],
+        [12, 10, 'yRRy'],
+        [11, 11, 'yyyyyy'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 0, 'jjjjjjj'],
+        [1, 1, 'jJjjjJj'],
+        [1, 2, 'jjjjjjj'],
+        [1, 3, 'jj.j.jj'],
+        [11, 9, 'yy'],
+        [10, 10, 'yRRy'],
+        [9, 11, 'yyyyyy'],
+      ],
+    },
   });
   {
     /* along the line: one post, the washing edge-on */
     const side = ['.O.', 'tOt', 'wOw', 'wOR', 'wOR', 'wO.', 'wO.', ...rep(13, '.O.')];
     /* the washing taken in: the bare line, a peg or two, the full basket */
-    const basket = (a, b) => [[16, 13, '.' + a + '.' + b + '..'], [15, 14, a + a + b + b + a + a + b], [14, 15, 'yyyyyyyyyy'], [14, 16, 'yYyYyYyYyY'], [14, 17, 'YyYyYyYyYy'], [14, 18, 'yYyYyYyYyY'], [15, 19, 'yyyyyyyy']];
+    const basket = (a, b) => [
+      [16, 13, '.' + a + '.' + b + '..'],
+      [15, 14, a + a + b + b + a + a + b],
+      [14, 15, 'yyyyyyyyyy'],
+      [14, 16, 'yYyYyYyYyY'],
+      [14, 17, 'YyYyYyYyYy'],
+      [14, 18, 'yYyYyYyYyY'],
+      [15, 19, 'yyyyyyyy'],
+    ];
     const bare = [...box(1, 2, 24, 10, '.'), [4, 2, 'q'], [13, 2, 'q'], [17, 2, 'q']];
-    V('washing-line', { side, used: { put: [...bare, ...basket('w', 'j')] }, sideUsed: { put: [[0, 2, '. .'], [2, 3, '.'], [2, 4, '.'], ...col(0, 3, '....'), [2, 2, 'q'], [4, 15, 'wjwy'].slice(0, 3), [4, 14, 'wjw'], [4, 15, 'yyyyy'], [4, 16, 'yYyYy'], [4, 17, 'YyYyY'], [4, 18, 'yYyYy'], [4, 19, 'yyyyy']] } });
+    V('washing-line', {
+      side,
+      used: { put: [...bare, ...basket('w', 'j')] },
+      sideUsed: {
+        put: [
+          [0, 2, '. .'],
+          [2, 3, '.'],
+          [2, 4, '.'],
+          ...col(0, 3, '....'),
+          [2, 2, 'q'],
+          [4, 15, 'wjwy'].slice(0, 3),
+          [4, 14, 'wjw'],
+          [4, 15, 'yyyyy'],
+          [4, 16, 'yYyYy'],
+          [4, 17, 'YyYyY'],
+          [4, 18, 'yYyYy'],
+          [4, 19, 'yyyyy'],
+        ],
+      },
+    });
     V('washing-line-sheets', {
       side: patch(recol(side, { w: 'P', R: 'P', O: 'E' }), [...col(0, 7, 'PPPP'), ...col(2, 5, 'PPrr')]),
       used: { put: [...bare, ...basket('P', 'r')] },
-      sideUsed: { put: [...box(0, 2, 1, 9, '.'), ...box(2, 2, 1, 7, '.'), [2, 2, 'q'], [4, 14, 'PrP'], [4, 15, 'yyyyy'], [4, 16, 'yYyYy'], [4, 17, 'YyYyY'], [4, 18, 'yYyYy'], [4, 19, 'yyyyy']] },
+      sideUsed: {
+        put: [
+          ...box(0, 2, 1, 9, '.'),
+          ...box(2, 2, 1, 7, '.'),
+          [2, 2, 'q'],
+          [4, 14, 'PrP'],
+          [4, 15, 'yyyyy'],
+          [4, 16, 'yYyYy'],
+          [4, 17, 'YyYyY'],
+          [4, 18, 'yYyYy'],
+          [4, 19, 'yyyyy'],
+        ],
+      },
     });
   }
   V('hammock', {
     side: ['..O..', '.cOc.', '.cOc.', '.cOc.', '.cOc.', '..O..', ...rep(6, '..O..')],
     /* somebody has been lying in it: it hangs lower, a pillow and a blanket left behind */
-    used: { put: [[1, 1, '.'], [2, 2, '..'], [4, 3, '....'], [8, 4, '........'], [16, 3, '....'], [20, 2, '..'], [22, 1, '.'], [1, 2, 'c'], [2, 3, 'c'], [3, 4, 'cc'], [5, 5, 'wwwjjjjjjjjjcc'], [5, 6, 'cccccccccccccc'], [19, 4, 'cc'], [21, 3, 'c'], [22, 2, 'c']] },
-    sideUsed: { put: [[1, 5, 'cOc'], [1, 6, 'jOj'], [2, 5, 'O']] },
+    used: {
+      put: [
+        [1, 1, '.'],
+        [2, 2, '..'],
+        [4, 3, '....'],
+        [8, 4, '........'],
+        [16, 3, '....'],
+        [20, 2, '..'],
+        [22, 1, '.'],
+        [1, 2, 'c'],
+        [2, 3, 'c'],
+        [3, 4, 'cc'],
+        [5, 5, 'wwwjjjjjjjjjcc'],
+        [5, 6, 'cccccccccccccc'],
+        [19, 4, 'cc'],
+        [21, 3, 'c'],
+        [22, 2, 'c'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 5, 'cOc'],
+        [1, 6, 'jOj'],
+        [2, 5, 'O'],
+      ],
+    },
   });
   V('paddling-pool', {
     side: same,
     /* a duck set afloat, water slopped over the side */
-    used: { put: [[10, 0, '66'], [9, 1, '96666'], [3, 3, '3'], [3, 4, '33'], [17, 3, '3'], [4, 5, '333'], [16, 4, '3'], [15, 5, '3333']] },
+    used: {
+      put: [
+        [10, 0, '66'],
+        [9, 1, '96666'],
+        [3, 3, '3'],
+        [3, 4, '33'],
+        [17, 3, '3'],
+        [4, 5, '333'],
+        [16, 4, '3'],
+        [15, 5, '3333'],
+      ],
+    },
     sideUsed: sameUsed,
   });
   V('bird-house', {
     side: ['OOOOOO.', 'OOOOOOO', '.OOOOOO', '..OOOOO', '.ppppp.', '.ppppp.', '.pppppO', '.ppppp.', ...rep(8, '...O...')],
     /* a bird has moved in */
-    used: tall('bird-house', 2, [[2, 0, '66'], [1, 1, '9666'], [3, 7, '6']]),
-    sideUsed: { put: [[5, 4, '66'], [5, 5, '669'], [6, 6, '6']] },
+    used: tall('bird-house', 2, [
+      [2, 0, '66'],
+      [1, 1, '9666'],
+      [3, 7, '6'],
+    ]),
+    sideUsed: {
+      put: [
+        [5, 4, '66'],
+        [5, 5, '669'],
+        [6, 6, '6'],
+      ],
+    },
   });
   {
     const side = ['..R.', '.RR.', '.RRR', '.xxx', '.wxxx', '.www', 'jjww', 'jjjj', '.jjj', '.OO.'];
@@ -2939,86 +3623,285 @@ function views(V, ROWS) {
     /* knocked over */
     V('garden-gnome', { side, used: rot(ROWS['garden-gnome']), sideUsed: rot(side) });
     /* kicked about: the pieces lie further apart */
-    const chipped = patch(recol(side, old), [[5, 9, 'uu'], [6, 8, 'u']]);
+    const chipped = patch(recol(side, old), [
+      [5, 9, 'uu'],
+      [6, 8, 'u'],
+    ]);
     V('gnome-broken', {
       side: chipped,
-      used: { put: [[5, 8, '...'], [5, 9, '...'], [8, 9, 'uu'], [9, 8, 'u'], [6, 9, 'a'], [11, 9, 'P']] },
-      sideUsed: patch(chipped, [[5, 8, '...'], [5, 9, '...'], [7, 9, 'uu'], [8, 8, 'u'], [10, 9, 'a']]),
+      used: {
+        put: [
+          [5, 8, '...'],
+          [5, 9, '...'],
+          [8, 9, 'uu'],
+          [9, 8, 'u'],
+          [6, 9, 'a'],
+          [11, 9, 'P'],
+        ],
+      },
+      sideUsed: patch(chipped, [
+        [5, 8, '...'],
+        [5, 9, '...'],
+        [7, 9, 'uu'],
+        [8, 8, 'u'],
+        [10, 9, 'a'],
+      ]),
     });
-    V('gnome-old', { side: patch(recol(side, old), [[0, 7, 'M']]), used: rot(ROWS['gnome-old']), sideUsed: rot(patch(recol(side, old), [[0, 7, 'M']])) });
+    V('gnome-old', {
+      side: patch(recol(side, old), [[0, 7, 'M']]),
+      used: rot(ROWS['gnome-old']),
+      sideUsed: rot(patch(recol(side, old), [[0, 7, 'M']])),
+    });
   }
   V('watering-can', {
     base: 'side',
     side: ['..ttt..', '.t...t.', '.ttttt.', 'ttTtttt', 'ttTtttt', 'tttIttt', 'ttttttt'],
     /* watering: a spray from the rose */
-    used: tall('watering-can', 0, [[2, 2, '2'], [1, 3, '22'], [1, 4, '232'], [0, 5, '2322'], [0, 6, '23232']], 3),
-    sideUsed: { put: [[3, 5, '2'], [2, 6, '232'], [1, 7, '23232']] },
+    used: tall(
+      'watering-can',
+      0,
+      [
+        [2, 2, '2'],
+        [1, 3, '22'],
+        [1, 4, '232'],
+        [0, 5, '2322'],
+        [0, 6, '23232'],
+      ],
+      3,
+    ),
+    sideUsed: {
+      put: [
+        [3, 5, '2'],
+        [2, 6, '232'],
+        [1, 7, '23232'],
+      ],
+    },
   });
   V('garden-hose', {
     side: ['.H.', 'HMH', 'HHH', 'HMH', 'HHH', 'HMH', '.Ht'],
     /* turned on: water running from the nozzle */
-    used: { put: [[9, 6, '22'], [11, 5, '2'], [11, 6, '2'], [10, 7, '3333'], [9, 7, '3']] },
-    sideUsed: { put: [[3, 6, '2'], [3, 7, '333'], [2, 7, '3']] },
+    used: {
+      put: [
+        [9, 6, '22'],
+        [11, 5, '2'],
+        [11, 6, '2'],
+        [10, 7, '3333'],
+        [9, 7, '3'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [3, 6, '2'],
+        [3, 7, '333'],
+        [2, 7, '3'],
+      ],
+    },
   });
 
   /* ---------- small things about the house: mostly only what they look like after use ---------- */
   V('rug', {
-    side: ['.vvvvvvvvvv.', 'vVgVVVVVVgVv', 'vVVVVggVVVVv', 'vVVgVVVVgVVv', 'vVVgVVVVgVVv', 'vVVVVggVVVVv', 'vVVgVVVVgVVv', 'vVVgVVVVgVVv', 'vVVVVggVVVVv', 'vVgVVVVVVgVv', '.vvvvvvvvvv.'],
+    side: [
+      '.vvvvvvvvvv.',
+      'vVgVVVVVVgVv',
+      'vVVVVggVVVVv',
+      'vVVgVVVVgVVv',
+      'vVVgVVVVgVVv',
+      'vVVVVggVVVVv',
+      'vVVgVVVVgVVv',
+      'vVVgVVVVgVVv',
+      'vVVVVggVVVVv',
+      'vVgVVVVVVgVv',
+      '.vvvvvvvvvv.',
+    ],
     /* a corner turned back */
-    used: { put: [[24, 2, 'cc.'], [22, 3, 'ccc..'], [21, 4, 'cc....']] },
-    sideUsed: { put: [[10, 8, 'c.'], [8, 9, 'ccc.'], [7, 10, 'cc...']] },
+    used: {
+      put: [
+        [24, 2, 'cc.'],
+        [22, 3, 'ccc..'],
+        [21, 4, 'cc....'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [10, 8, 'c.'],
+        [8, 9, 'ccc.'],
+        [7, 10, 'cc...'],
+      ],
+    },
   });
   V('doormat', {
     side: ['yYyYy', 'YyyyY', 'yyyyy', 'YyyyY', 'yyyyy', 'YyyyY', 'yYyYy'],
     /* the corner lifted: the key under it */
-    used: { put: [[10, 1, 'YYY.'], [11, 2, 'gGg']] },
-    sideUsed: { put: [[2, 5, 'YYY'], [3, 6, 'gG']] },
+    used: {
+      put: [
+        [10, 1, 'YYY.'],
+        [11, 2, 'gGg'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 5, 'YYY'],
+        [3, 6, 'gG'],
+      ],
+    },
   });
   V('photo-frame', {
     side: ['OO', 'Oc', 'Oc', 'Oc', 'Oc', 'OO'],
     /* the glass cracked */
-    used: { put: [[2, 1, 'n'], [3, 2, 'nn'], [3, 3, 'n'], [4, 4, 'n'], [5, 2, 'n']] },
-    sideUsed: { put: [[1, 2, 'n'], [1, 3, 'n'], [2, 5, '.2']] },
+    used: {
+      put: [
+        [2, 1, 'n'],
+        [3, 2, 'nn'],
+        [3, 3, 'n'],
+        [4, 4, 'n'],
+        [5, 2, 'n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 2, 'n'],
+        [1, 3, 'n'],
+        [2, 5, '.2'],
+      ],
+    },
   });
-  V('houseplant', { side: same, /* knocked over, earth on the floor */ used: patch(rot(ROWS.houseplant), [[1, 7, 'e'], [0, 8, 'eEee']]), sideUsed: sameUsed });
+  V('houseplant', {
+    side: same,
+    /* knocked over, earth on the floor */ used: patch(rot(ROWS.houseplant), [
+      [1, 7, 'e'],
+      [0, 8, 'eEee'],
+    ]),
+    sideUsed: sameUsed,
+  });
   V('flower-pot', { side: same, used: patch(rot(ROWS['flower-pot']), [[0, 3, 'eEe']]), sideUsed: sameUsed });
   V('vase-flowers', {
     side: same,
     /* cracked: the water runs out, petals fall */
-    used: { put: [[2, 4, 'n'], [3, 5, 'n'], [3, 6, 'n'], [0, 0, '.u'], [4, 0, '.u'], [0, 7, 'R.33333'], [5, 6, '13']] },
+    used: {
+      put: [
+        [2, 4, 'n'],
+        [3, 5, 'n'],
+        [3, 6, 'n'],
+        [0, 0, '.u'],
+        [4, 0, '.u'],
+        [0, 7, 'R.33333'],
+        [5, 6, '13'],
+      ],
+    },
     sideUsed: sameUsed,
   });
-  V('cushion', { side: ['.vv.', 'vVvv', 'vvgv', 'vVvv', '.vv.'], /* sat on */ used: { put: [[2, 0, '....'], [2, 1, 'VVVV'], [3, 2, 'VV']] }, sideUsed: { put: [[1, 0, '..'], [1, 1, 'VV']] } });
-  V('pillow', { side: ['.www.', 'wwwwW', '.WWW.'], /* slept on */ used: { put: [[3, 0, '...'], [3, 1, 'WWW']] }, sideUsed: { put: [[2, 0, '.'], [2, 1, 'W']] } });
+  V('cushion', {
+    side: ['.vv.', 'vVvv', 'vvgv', 'vVvv', '.vv.'],
+    /* sat on */ used: {
+      put: [
+        [2, 0, '....'],
+        [2, 1, 'VVVV'],
+        [3, 2, 'VV'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 0, '..'],
+        [1, 1, 'VV'],
+      ],
+    },
+  });
+  V('pillow', {
+    side: ['.www.', 'wwwwW', '.WWW.'],
+    /* slept on */ used: {
+      put: [
+        [3, 0, '...'],
+        [3, 1, 'WWW'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 0, '.'],
+        [2, 1, 'W'],
+      ],
+    },
+  });
   V('fan', {
     side: ['..tt.', '.ItTt', 'IIItT', '.ItTt', '..tt.', '..i..', '..i..', '..i..', '..i..', '..i..', '.iii.'],
     /* switched on */
-    used: { put: [[1, 1, 'tTTTTTt'], [0, 2, 'tTTTiTTTt'], [1, 3, 'tTTTTTt'], [10, 1, 'ww'], [10, 3, 'ww'], [11, 2, 'ww']] },
-    sideUsed: { put: [[6, 1, 'ww'], [6, 3, 'ww'], [7, 2, 'ww']] },
+    used: {
+      put: [
+        [1, 1, 'tTTTTTt'],
+        [0, 2, 'tTTTiTTTt'],
+        [1, 3, 'tTTTTTt'],
+        [10, 1, 'ww'],
+        [10, 3, 'ww'],
+        [11, 2, 'ww'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [6, 1, 'ww'],
+        [6, 3, 'ww'],
+        [7, 2, 'ww'],
+      ],
+    },
   });
   V('laundry-basket', {
     side: ['.w.j.v.', '.wwjjv.', 'yyyyyyy', 'yYyYyYy', 'YyYyYyY', 'yYyYyYy', '.YyYyY.', '.yyyyy.'],
     /* emptied */
-    used: { put: [[0, 0, '..........'], [0, 1, '..........']] },
-    sideUsed: { put: [[0, 0, '.......'], [0, 1, '.......']] },
+    used: {
+      put: [
+        [0, 0, '..........'],
+        [0, 1, '..........'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, '.......'],
+        [0, 1, '.......'],
+      ],
+    },
   });
   V('toaster', {
     side: ['..O..', '.ttt.', 'tTtttI', 'tTttt', 'ttttt', 'I...I'],
     /* the toast taken, crumbs left */
-    used: { put: [[2, 0, '..'], [5, 0, '..'], [2, 5, 'yy.y']] },
-    sideUsed: { put: [[2, 0, '.'], [1, 5, 'yy']] },
+    used: {
+      put: [
+        [2, 0, '..'],
+        [5, 0, '..'],
+        [2, 5, 'yy.y'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 0, '.'],
+        [1, 5, 'yy'],
+      ],
+    },
   });
   fam(
     {
       base: 'side',
       side: ['..II..', '.tttt.', 'tTtttt', 'tTtItt', 'tTtItt', 'tttttt', '.IIII.'],
       /* on the boil */
-      used: (slug) => tall(slug, 3, [[7, 3, 'w'], [6, 2, 'w'], [7, 1, 'w'], [6, 0, 'w']]),
+      used: (slug) =>
+        tall(slug, 3, [
+          [7, 3, 'w'],
+          [6, 2, 'w'],
+          [7, 1, 'w'],
+          [6, 0, 'w'],
+        ]),
       sideUsed: ['..w...', '...w..', '..w...', '..II..', '.tttt.', 'tTtttt', 'tTtItt', 'tTtItt', 'tttttt', '.IIII.'],
     },
     { kettle: {}, 'kettle-copper': { t: '0', T: '9', I: 'u' } },
   );
-  V('blender', { side: same, /* poured out, the lid off */ used: { put: [[1, 0, '....'], [2, 2, '22'], [2, 3, '27']] }, sideUsed: sameUsed });
+  V('blender', {
+    side: same,
+    /* poured out, the lid off */ used: {
+      put: [
+        [1, 0, '....'],
+        [2, 2, '22'],
+        [2, 3, '27'],
+      ],
+    },
+    sideUsed: sameUsed,
+  });
   V('frying-pan', {
     base: 'side',
     side: ['.IIIII.', 'IiiOiiI', '.IIIII.'],
@@ -3026,42 +3909,306 @@ function views(V, ROWS) {
     used: tall('frying-pan', 1, [[2, 0, 'wFFw']]),
     sideUsed: ['..wFFw.', '.IIIII.', 'IiiOiiI', '.IIIII.'],
   });
-  V('cooking-pot', { side: same, /* boiling over */ used: tall('cooking-pot', 2, [[4, 0, 'ww'], [3, 1, 'www'], [2, 2, 'wwwwww'], [7, 3, 'w'], [7, 4, 'w']]), sideUsed: sameUsed });
+  V('cooking-pot', {
+    side: same,
+    /* boiling over */ used: tall('cooking-pot', 2, [
+      [4, 0, 'ww'],
+      [3, 1, 'www'],
+      [2, 2, 'wwwwww'],
+      [7, 3, 'w'],
+      [7, 4, 'w'],
+    ]),
+    sideUsed: sameUsed,
+  });
   /* cutlery and the like from the other side: lying pointing away, or edge-on */
-  V('kitchen-knife', { base: 'side', side: ['.T', 'Tt', 'Tt', 'Tt', '.O', '.O', '.O'], /* used: blood on the blade */ used: { put: [[0, 0, 'rrrTTT'], [1, 1, 'rr']] }, sideUsed: { put: [[1, 0, 'r'], [0, 1, 'rr'], [0, 2, 'r']] } });
-  V('fork', { side: ['.t', '.t', 't.', 't.', 't.', 't.', 't.'], /* a bite on it */ used: { put: [[0, 0, '000'], [0, 1, '0u0']] }, sideUsed: { put: [[0, 0, '00'], [0, 1, '0u']] } });
-  V('spoon', { side: ['.t', 'tt', '.t', 't.', 't.', 't.', 't.'], used: { put: [[1, 0, '999'], [1, 1, '999']] }, sideUsed: { put: [[0, 0, '99'], [0, 1, '99']] } });
+  V('kitchen-knife', {
+    base: 'side',
+    side: ['.T', 'Tt', 'Tt', 'Tt', '.O', '.O', '.O'],
+    /* used: blood on the blade */ used: {
+      put: [
+        [0, 0, 'rrrTTT'],
+        [1, 1, 'rr'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 0, 'r'],
+        [0, 1, 'rr'],
+        [0, 2, 'r'],
+      ],
+    },
+  });
+  V('fork', {
+    side: ['.t', '.t', 't.', 't.', 't.', 't.', 't.'],
+    /* a bite on it */ used: {
+      put: [
+        [0, 0, '000'],
+        [0, 1, '0u0'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, '00'],
+        [0, 1, '0u'],
+      ],
+    },
+  });
+  V('spoon', {
+    side: ['.t', 'tt', '.t', 't.', 't.', 't.', 't.'],
+    used: {
+      put: [
+        [1, 0, '999'],
+        [1, 1, '999'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, '99'],
+        [0, 1, '99'],
+      ],
+    },
+  });
   V('plate', { side: same, /* eaten off: a bone and crumbs */ used: tall('plate', 1, [[2, 0, 'bbby']]), sideUsed: sameUsed });
-  V('bowl', { side: same, /* filled */ used: tall('bowl', 1, [[2, 0, '9999'], [1, 1, '999999']]), sideUsed: sameUsed });
-  V('glass', { side: same, /* drunk */ used: { put: [[1, 1, '..'], [1, 2, '..']] }, sideUsed: sameUsed });
-  V('teacup', { side: ['wwwww', 'w000w', 'wwwww', '.www.', 'WWWWW'], /* drunk: a stain down the side */ used: { put: [[1, 1, 'www'], [3, 2, '0'], [3, 1, '0']] }, sideUsed: { put: [[1, 1, 'www'], [2, 2, '0'], [2, 1, '0']] } });
-  V('teapot', { base: 'side', side: ['..ww..', 'wwwwww', 'wWwwww', 'wWwwww', 'wWwwww', 'wwwwww', '.WWWW.'], /* hot tea */ used: tall('teapot', 2, [[8, 4, '2'], [7, 3, '2'], [8, 2, '2'], [7, 1, '2']]), sideUsed: ['..2...', '...2..', '..ww..', 'wwwwww', 'wWwwww', 'wWwwww', 'wWwwww', 'wwwwww', '.WWWW.'] });
-  V('chopping-board', { side: ['..tt..', 'qqqqqq', 'pppppO'], /* something chopped */ used: { put: [[0, 0, 'RRR']] }, sideUsed: { put: [[0, 0, 'RR']] } });
-  V('rolling-pin', { base: 'side', side: ['.q.', 'qOq', '.q.'], /* floury */ used: { put: [[3, 0, 'w'], [6, 0, 'w']] }, sideUsed: { put: [[1, 0, 'w'], [0, 1, 'w']] } });
-  V('whisk', { side: same, sideUsed: sameUsed, used: { put: [[1, 0, 'ccc'], [0, 1, 'ccccc'], [1, 2, 'c']] } });
-  V('spatula', { side: ['.I', '.I', '.I', 'I.', 'O.', 'O.', 'O.'], used: { put: [[0, 0, '9999'], [1, 1, '99']] }, sideUsed: { put: [[0, 0, '99'], [1, 1, '9']] } });
+  V('bowl', {
+    side: same,
+    /* filled */ used: tall('bowl', 1, [
+      [2, 0, '9999'],
+      [1, 1, '999999'],
+    ]),
+    sideUsed: sameUsed,
+  });
+  V('glass', {
+    side: same,
+    /* drunk */ used: {
+      put: [
+        [1, 1, '..'],
+        [1, 2, '..'],
+      ],
+    },
+    sideUsed: sameUsed,
+  });
+  V('teacup', {
+    side: ['wwwww', 'w000w', 'wwwww', '.www.', 'WWWWW'],
+    /* drunk: a stain down the side */ used: {
+      put: [
+        [1, 1, 'www'],
+        [3, 2, '0'],
+        [3, 1, '0'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 1, 'www'],
+        [2, 2, '0'],
+        [2, 1, '0'],
+      ],
+    },
+  });
+  V('teapot', {
+    base: 'side',
+    side: ['..ww..', 'wwwwww', 'wWwwww', 'wWwwww', 'wWwwww', 'wwwwww', '.WWWW.'],
+    /* hot tea */ used: tall('teapot', 2, [
+      [8, 4, '2'],
+      [7, 3, '2'],
+      [8, 2, '2'],
+      [7, 1, '2'],
+    ]),
+    sideUsed: ['..2...', '...2..', '..ww..', 'wwwwww', 'wWwwww', 'wWwwww', 'wWwwww', 'wwwwww', '.WWWW.'],
+  });
+  V('chopping-board', {
+    side: ['..tt..', 'qqqqqq', 'pppppO'],
+    /* something chopped */ used: { put: [[0, 0, 'RRR']] },
+    sideUsed: { put: [[0, 0, 'RR']] },
+  });
+  V('rolling-pin', {
+    base: 'side',
+    side: ['.q.', 'qOq', '.q.'],
+    /* floury */ used: {
+      put: [
+        [3, 0, 'w'],
+        [6, 0, 'w'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 0, 'w'],
+        [0, 1, 'w'],
+      ],
+    },
+  });
+  V('whisk', {
+    side: same,
+    sideUsed: sameUsed,
+    used: {
+      put: [
+        [1, 0, 'ccc'],
+        [0, 1, 'ccccc'],
+        [1, 2, 'c'],
+      ],
+    },
+  });
+  V('spatula', {
+    side: ['.I', '.I', '.I', 'I.', 'O.', 'O.', 'O.'],
+    used: {
+      put: [
+        [0, 0, '9999'],
+        [1, 1, '99'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, '99'],
+        [1, 1, '9'],
+      ],
+    },
+  });
   V('jar', {
     side: same,
     /* opened: a spoon in the jam, the lid beside it */
-    used: tall('jar', 2, [[3, 0, 't'], [3, 1, 't'], [0, 2, '...t.'], [1, 4, '2t2'], [6, 7, 'OOO']]),
+    used: tall('jar', 2, [
+      [3, 0, 't'],
+      [3, 1, 't'],
+      [0, 2, '...t.'],
+      [1, 4, '2t2'],
+      [6, 7, 'OOO'],
+    ]),
     sideUsed: sameUsed,
   });
-  V('salt-pepper', { side: ['.n', 'nn', 'nn', 'nn', 'II'], sideUsed: ['.n..', 'nn..', 'nn..', 'nnww', 'IIwW'], /* the salt knocked over */ used: tall('salt-pepper', 0, [...box(3, 0, 2, 5, '.'), [1, 3, 'twwW'], [1, 4, 'twwW'], [0, 4, 'w']], 3) });
-  V('toilet-paper', { side: ['wwww', 'wWww', 'wwww', 'wwww'], sideUsed: { put: [[4, 1, 'w'], [4, 2, 'w'], [4, 3, 'w'], [4, 4, 'ww']] }, /* a length pulled off */ used: { put: [[5, 1, 'w'], [5, 2, 'w'], [5, 3, 'w'], [5, 4, 'ww'], [6, 5, 'ww']] } });
-  V('toothpaste', { base: 'side', side: ['www', 'wRw', 'www'], sideUsed: ['.w.', 'wJw', '.w.'], /* the cap off, squeezed */ used: { put: [[0, 0, '.'], [0, 2, '.'], [0, 1, 'J'], [6, 0, '..'], [7, 2, '.']] } });
-  V('soap', { side: ['.777.', '77777', '.777.'], /* lathered */ used: tall('soap', 2, [[1, 0, '2'], [1, 1, '22'], [4, 1, '22'], [5, 0, '22']]), sideUsed: ['.2...', '.22.2', '.777.', '77777', '.777.'] });
-  V('towel', { side: ['jjjjj', 'jJJJj', 'jjjjj', 'wwwww', 'jjjjj', 'jjjjj'], /* used and dropped */ used: ['...jj....', '.jjjJjj..', 'jjJjjjwjj', 'jjjjJjwwj', 'jJjjjjjjj'], sideUsed: ['..jj..', '.jjJj.', 'jJjwjj', 'jjjjjj'] });
-  V('shampoo', { side: same, /* knocked over, and running out */ used: patch(rot(ROWS.shampoo), [[7, 2, '4'], [7, 3, '444']]), sideUsed: sameUsed });
-  V('hairdryer', { base: 'side', side: ['.III.', 'InnnI', '.III.', '..I..', '..I..', '..I..'], /* switched on */ used: tall('hairdryer', 0, [[0, 0, 'ww'], [1, 1, 'ww'], [0, 2, 'ww'], [4, 1, 'f']], 3), sideUsed: { put: [[1, 1, 'fFf']] } });
-  V('oven-glove', { side: ['.R', 'RR', 'RR', 'RR', '.v', '.v'], /* scorched */ used: { put: [[1, 1, 'nn'], [2, 2, 'nu'], [1, 2, 'u']] }, sideUsed: { put: [[1, 1, 'n'], [1, 2, 'u']] } });
-  V('toothbrush', { base: 'side', side: ['ww', 'ww', 'JJ', '.J', '.J', '.J', '.J'], /* paste on it */ used: tall('toothbrush', 1, [[0, 0, '44']]), sideUsed: ['44', 'ww', 'JJ', '.J', '.J', '.J', '.J'] });
-  V('comb', { base: 'side', side: ['OO', 'O.', 'O.'], /* hairs caught in it */ used: { put: [[1, 1, 'n'], [3, 2, 'n'], [5, 1, 'n'], [5, 2, 'n'], [7, 1, 'n']] }, sideUsed: { put: [[1, 1, 'n'], [1, 2, 'n']] } });
+  V('salt-pepper', {
+    side: ['.n', 'nn', 'nn', 'nn', 'II'],
+    sideUsed: ['.n..', 'nn..', 'nn..', 'nnww', 'IIwW'],
+    /* the salt knocked over */ used: tall('salt-pepper', 0, [...box(3, 0, 2, 5, '.'), [1, 3, 'twwW'], [1, 4, 'twwW'], [0, 4, 'w']], 3),
+  });
+  V('toilet-paper', {
+    side: ['wwww', 'wWww', 'wwww', 'wwww'],
+    sideUsed: {
+      put: [
+        [4, 1, 'w'],
+        [4, 2, 'w'],
+        [4, 3, 'w'],
+        [4, 4, 'ww'],
+      ],
+    },
+    /* a length pulled off */ used: {
+      put: [
+        [5, 1, 'w'],
+        [5, 2, 'w'],
+        [5, 3, 'w'],
+        [5, 4, 'ww'],
+        [6, 5, 'ww'],
+      ],
+    },
+  });
+  V('toothpaste', {
+    base: 'side',
+    side: ['www', 'wRw', 'www'],
+    sideUsed: ['.w.', 'wJw', '.w.'],
+    /* the cap off, squeezed */ used: {
+      put: [
+        [0, 0, '.'],
+        [0, 2, '.'],
+        [0, 1, 'J'],
+        [6, 0, '..'],
+        [7, 2, '.'],
+      ],
+    },
+  });
+  V('soap', {
+    side: ['.777.', '77777', '.777.'],
+    /* lathered */ used: tall('soap', 2, [
+      [1, 0, '2'],
+      [1, 1, '22'],
+      [4, 1, '22'],
+      [5, 0, '22'],
+    ]),
+    sideUsed: ['.2...', '.22.2', '.777.', '77777', '.777.'],
+  });
+  V('towel', {
+    side: ['jjjjj', 'jJJJj', 'jjjjj', 'wwwww', 'jjjjj', 'jjjjj'],
+    /* used and dropped */ used: ['...jj....', '.jjjJjj..', 'jjJjjjwjj', 'jjjjJjwwj', 'jJjjjjjjj'],
+    sideUsed: ['..jj..', '.jjJj.', 'jJjwjj', 'jjjjjj'],
+  });
+  V('shampoo', {
+    side: same,
+    /* knocked over, and running out */ used: patch(rot(ROWS.shampoo), [
+      [7, 2, '4'],
+      [7, 3, '444'],
+    ]),
+    sideUsed: sameUsed,
+  });
+  V('hairdryer', {
+    base: 'side',
+    side: ['.III.', 'InnnI', '.III.', '..I..', '..I..', '..I..'],
+    /* switched on */ used: tall(
+      'hairdryer',
+      0,
+      [
+        [0, 0, 'ww'],
+        [1, 1, 'ww'],
+        [0, 2, 'ww'],
+        [4, 1, 'f'],
+      ],
+      3,
+    ),
+    sideUsed: { put: [[1, 1, 'fFf']] },
+  });
+  V('oven-glove', {
+    side: ['.R', 'RR', 'RR', 'RR', '.v', '.v'],
+    /* scorched */ used: {
+      put: [
+        [1, 1, 'nn'],
+        [2, 2, 'nu'],
+        [1, 2, 'u'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 1, 'n'],
+        [1, 2, 'u'],
+      ],
+    },
+  });
+  V('toothbrush', {
+    base: 'side',
+    side: ['ww', 'ww', 'JJ', '.J', '.J', '.J', '.J'],
+    /* paste on it */ used: tall('toothbrush', 1, [[0, 0, '44']]),
+    sideUsed: ['44', 'ww', 'JJ', '.J', '.J', '.J', '.J'],
+  });
+  V('comb', {
+    base: 'side',
+    side: ['OO', 'O.', 'O.'],
+    /* hairs caught in it */ used: {
+      put: [
+        [1, 1, 'n'],
+        [3, 2, 'n'],
+        [5, 1, 'n'],
+        [5, 2, 'n'],
+        [7, 1, 'n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 1, 'n'],
+        [1, 2, 'n'],
+      ],
+    },
+  });
   V('rubber-duck', {
     base: 'side',
     side: ['.666.', '6n6n6', '66966', '.666.', '66666', '.666.'],
     /* set afloat */
-    used: { put: [[0, 5, '3666663'], [0, 6, '.3323233']] },
-    sideUsed: { put: [[0, 5, '36663'], [0, 6, '33233']] },
+    used: {
+      put: [
+        [0, 5, '3666663'],
+        [0, 6, '.3323233'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 5, '36663'],
+        [0, 6, '33233'],
+      ],
+    },
   });
   V('towel-rail', {
     side: ['.t.', '.t.', 'PtP', 'PtP', 'PtP', 'PtP', 'P..'],
@@ -3069,45 +4216,207 @@ function views(V, ROWS) {
     used: { put: box(7, 2, 4, 4, '.') },
     sideUsed: { put: box(2, 2, 1, 4, '.') },
   });
-  V('bucket-and-mop', { side: ['.....O.', '.....O.', '.....O.', '.....O.', '.....O.', '.....O.', 't...tO.', 'ttttt.O', 'tTtttwO', 'tTtttww', '.tTtwww', '.ttt.ww'], sideUsed: { put: [[1, 7, '333'], [0, 12, '.3333333']] }, /* the floor mopped: a wet patch */ used: { put: [[1, 7, '33333'], [0, 12, '.33333333333'], [9, 11, '333']] } });
-  V('paint-can', { side: same, /* opened: paint down the side, the lid beside it */ used: { put: [[1, 0, 'RRRRR'], [2, 1, 'R'], [2, 2, 'R'], [5, 1, 'R'], [8, 4, 'ttttt']] }, sideUsed: sameUsed });
-  V('tyre', { side: ['.nn.', 'nnIn', 'nInn', 'nnIn', 'nInn', 'nnIn', 'nInn', '.nn.'], /* rolled away and fallen flat */ used: ['.nnnnnnnn.', 'nnIIIIIInn', 'nnnnnnnnnn', '.nnnnnnnn.'], sideUsed: sameUsed });
+  V('bucket-and-mop', {
+    side: ['.....O.', '.....O.', '.....O.', '.....O.', '.....O.', '.....O.', 't...tO.', 'ttttt.O', 'tTtttwO', 'tTtttww', '.tTtwww', '.ttt.ww'],
+    sideUsed: {
+      put: [
+        [1, 7, '333'],
+        [0, 12, '.3333333'],
+      ],
+    },
+    /* the floor mopped: a wet patch */ used: {
+      put: [
+        [1, 7, '33333'],
+        [0, 12, '.33333333333'],
+        [9, 11, '333'],
+      ],
+    },
+  });
+  V('paint-can', {
+    side: same,
+    /* opened: paint down the side, the lid beside it */ used: {
+      put: [
+        [1, 0, 'RRRRR'],
+        [2, 1, 'R'],
+        [2, 2, 'R'],
+        [5, 1, 'R'],
+        [8, 4, 'ttttt'],
+      ],
+    },
+    sideUsed: sameUsed,
+  });
+  V('tyre', {
+    side: ['.nn.', 'nnIn', 'nInn', 'nnIn', 'nInn', 'nnIn', 'nInn', '.nn.'],
+    /* rolled away and fallen flat */ used: ['.nnnnnnnn.', 'nnIIIIIInn', 'nnnnnnnnnn', '.nnnnnnnn.'],
+    sideUsed: sameUsed,
+  });
   V('fuel-can', {
     side: ['.In.', 'RRRR', ...rep(5, 'RvvR'), 'RRRR'],
     /* the cap off, fuel spilt */
-    used: { put: [[5, 0, '..'], [7, 1, '9'], [7, 2, '9'], [7, 6, '9'], [6, 7, ' 999'], [7, 3, '9'], [7, 4, '9'], [7, 5, '9']] },
-    sideUsed: { put: [[2, 0, '.'], [4, 6, '9'], [4, 7, '999']] },
+    used: {
+      put: [
+        [5, 0, '..'],
+        [7, 1, '9'],
+        [7, 2, '9'],
+        [7, 6, '9'],
+        [6, 7, ' 999'],
+        [7, 3, '9'],
+        [7, 4, '9'],
+        [7, 5, '9'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [2, 0, '.'],
+        [4, 6, '9'],
+        [4, 7, '999'],
+      ],
+    },
   });
   {
     const side = ['.qqqqqq.', 'qqpqqpqq', 'pppppppp', 'pppOOppp', ...rep(4, 'pppppppp')];
     /* opened: the flaps up */
-    V('cardboard-box', { side, used: tall('cardboard-box', 2, [[0, 0, 'q..........q'], [0, 1, 'qq........qq'], [1, 2, 'qnnnnnnnnq'], [2, 3, 'nwwnjjnR']]), sideUsed: patch(['', '', ...side], [[0, 0, 'q......q'], [0, 1, 'qq....qq'], [1, 2, 'qnnnnq'], [2, 3, 'nwjn']]) });
+    V('cardboard-box', {
+      side,
+      used: tall('cardboard-box', 2, [
+        [0, 0, 'q..........q'],
+        [0, 1, 'qq........qq'],
+        [1, 2, 'qnnnnnnnnq'],
+        [2, 3, 'nwwnjjnR'],
+      ]),
+      sideUsed: patch(
+        ['', '', ...side],
+        [
+          [0, 0, 'q......q'],
+          [0, 1, 'qq....qq'],
+          [1, 2, 'qnnnnq'],
+          [2, 3, 'nwjn'],
+        ],
+      ),
+    });
     /* rummaged through: half of it on the floor */
-    V('box-junk', { side: patch(side, [[0, 0, '..t..OR.'], [0, 1, '.tw.OOR.'], [0, 2, 'pppppppp']]), used: { put: [[0, 0, '............'], [0, 1, '.....O......'], [13, 5, 't'], [13, 6, 'tw.RR'], [13, 7, 'ttORRR']] }, sideUsed: { put: [[0, 0, '........'], [0, 1, '....O...'], [9, 6, 'tw'], [9, 7, 'ttR']] } });
-    V('christmas-box', { side: patch(side.slice(1), [[0, 0, '.gR.8...'], [0, 1, 'ggR.88..'], [0, 2, 'pppppppp'], [0, 3, 'pRRRRRRp']]), used: { put: [[0, 0, '............'], [0, 1, '........8...'], [13, 4, 'g'], [13, 5, 'ggg.R'], [13, 6, '.g.RRR']] }, sideUsed: { put: [[0, 0, '........'], [0, 1, '.....8..'], [9, 5, 'g'], [9, 6, 'gRR']] } });
+    V('box-junk', {
+      side: patch(side, [
+        [0, 0, '..t..OR.'],
+        [0, 1, '.tw.OOR.'],
+        [0, 2, 'pppppppp'],
+      ]),
+      used: {
+        put: [
+          [0, 0, '............'],
+          [0, 1, '.....O......'],
+          [13, 5, 't'],
+          [13, 6, 'tw.RR'],
+          [13, 7, 'ttORRR'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [0, 0, '........'],
+          [0, 1, '....O...'],
+          [9, 6, 'tw'],
+          [9, 7, 'ttR'],
+        ],
+      },
+    });
+    V('christmas-box', {
+      side: patch(side.slice(1), [
+        [0, 0, '.gR.8...'],
+        [0, 1, 'ggR.88..'],
+        [0, 2, 'pppppppp'],
+        [0, 3, 'pRRRRRRp'],
+      ]),
+      used: {
+        put: [
+          [0, 0, '............'],
+          [0, 1, '........8...'],
+          [13, 4, 'g'],
+          [13, 5, 'ggg.R'],
+          [13, 6, '.g.RRR'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [0, 0, '........'],
+          [0, 1, '.....8..'],
+          [9, 5, 'g'],
+          [9, 6, 'gRR'],
+        ],
+      },
+    });
   }
   V('vacuum-cleaner', {
     base: 'side',
     side: [...rep(6, '..II..'), '.RRRR.', 'RRRRRR', 'RRvvRR', 'nnRRnn'],
     /* plugged in and running: the lamp on, the flex across the floor */
-    used: tall('vacuum-cleaner', 0, [[5, 8, 'F'], [0, 9, 'nnn'], [0, 8, 'n']], 3),
-    sideUsed: { put: [[2, 8, 'FF'], [6, 9, 'nnn'], [8, 8, 'n']] },
+    used: tall(
+      'vacuum-cleaner',
+      0,
+      [
+        [5, 8, 'F'],
+        [0, 9, 'nnn'],
+        [0, 8, 'n'],
+      ],
+      3,
+    ),
+    sideUsed: {
+      put: [
+        [2, 8, 'FF'],
+        [6, 9, 'nnn'],
+        [8, 8, 'n'],
+      ],
+    },
   });
-  V('iron', { base: 'side', side: ['.II.', 'tttt', 'tTtt', 'tttt'], /* hot: steam */ used: tall('iron', 2, [[0, 2, 'ww'], [0, 1, 'w'], [0, 3, 'w'], [5, 5, 'R']]), sideUsed: ['w...', 'ww..', 'wII.', 'tttt', 'tTtt', 'tttt'] });
+  V('iron', {
+    base: 'side',
+    side: ['.II.', 'tttt', 'tTtt', 'tttt'],
+    /* hot: steam */ used: tall('iron', 2, [
+      [0, 2, 'ww'],
+      [0, 1, 'w'],
+      [0, 3, 'w'],
+      [5, 5, 'R'],
+    ]),
+    sideUsed: ['w...', 'ww..', 'wII.', 'tttt', 'tTtt', 'tttt'],
+  });
   V('light-bulb', { side: same, /* out */ used: { swap: { F: 'h', w: 'I' } }, sideUsed: sameUsed });
   {
     /* toys: played with, and left lying */
     const doll = ['OOO.', 'OOww', 'OOwn', '.ww.', '.77.', '.77w', '.77w', '.77.', '7777', '.ww.', '.nn.'];
     const rag = { w: 'y', 7: '4', O: 'R', n: 'O' };
     V('doll-porcelain', { side: doll, used: rot(ROWS['doll-porcelain']), sideUsed: rot(doll) });
-    V('doll-rag', { side: patch(recol(doll, rag), [[3, 2, 'k']]), used: rot(ROWS['doll-rag']), sideUsed: rot(patch(recol(doll, rag), [[3, 2, 'k']])) });
-    const broken = patch(recol(doll, { 7: 'a' }), [[2, 1, 'n'], [3, 2, 'n'], [3, 5, '.'], [3, 6, '.']]);
+    V('doll-rag', {
+      side: patch(recol(doll, rag), [[3, 2, 'k']]),
+      used: rot(ROWS['doll-rag']),
+      sideUsed: rot(patch(recol(doll, rag), [[3, 2, 'k']])),
+    });
+    const broken = patch(recol(doll, { 7: 'a' }), [
+      [2, 1, 'n'],
+      [3, 2, 'n'],
+      [3, 5, '.'],
+      [3, 6, '.'],
+    ]);
     V('doll-broken', { side: broken, used: rot(ROWS['doll-broken']), sideUsed: rot(broken) });
-    const second = patch(recol(doll, { 7: 'P' }), [[0, 3, '.rr.'], [6, 9, 'OO'], [5, 10, 'wwnw']]);
+    const second = patch(recol(doll, { 7: 'P' }), [
+      [0, 3, '.rr.'],
+      [6, 9, 'OO'],
+      [5, 10, 'wwnw'],
+    ]);
     V('doll-headless', { side: second, used: rot(ROWS['doll-headless']), sideUsed: rot(second) });
     const teddy = ['.oo..', 'oooo.', 'oonoq', 'ooooq', '.ooo.', 'ooooo', 'oooqo', 'oooqo', '.ooo.', '.oooo'];
     V('teddy-old', { side: teddy, used: rot(ROWS['teddy-old']), sideUsed: rot(teddy) });
-    V('teddy-one-eyed', { side: patch(recol(teddy, { o: 'e', q: 'o' }), [[2, 2, 'e'], [3, 6, 'w']]), used: rot(ROWS['teddy-one-eyed']), sideUsed: rot(patch(recol(teddy, { o: 'e', q: 'o' }), [[2, 2, 'e'], [3, 6, 'w']])) });
+    V('teddy-one-eyed', {
+      side: patch(recol(teddy, { o: 'e', q: 'o' }), [
+        [2, 2, 'e'],
+        [3, 6, 'w'],
+      ]),
+      used: rot(ROWS['teddy-one-eyed']),
+      sideUsed: rot(
+        patch(recol(teddy, { o: 'e', q: 'o' }), [
+          [2, 2, 'e'],
+          [3, 6, 'w'],
+        ]),
+      ),
+    });
     const soldier = ['nn.', 'nn.', 'xx.', 'RRt', 'RRt', 'jj.', 'jj.', 'nn.'];
     V('toy-soldier', { side: soldier, used: rot(ROWS['toy-soldier']), sideUsed: rot(soldier) });
     V('spinning-top-tin', { side: same, /* run down, and fallen over */ used: rot(ROWS['spinning-top-tin']), sideUsed: sameUsed });
@@ -3121,82 +4430,349 @@ function views(V, ROWS) {
       base: 'side',
       side: ['..nn..', '.IIII.', 'IItTII', 'IIIIII', 'tIRRIt', '.I..I.'],
       /* wound up and running */
-      used: tall('toy-train-old', 3, [[1, 2, 'w'], [1, 1, 'ww'], [2, 0, 'ww']]),
+      used: tall('toy-train-old', 3, [
+        [1, 2, 'w'],
+        [1, 1, 'ww'],
+        [2, 0, 'ww'],
+      ]),
       sideUsed: ['...ww.', '..ww..', '..w...', '..nn..', '.IIII.', 'IItTII', 'IIIIII', 'tIRRIt', '.I..I.'],
     });
     V('marionette', {
       side: ['.OOO.', '..t..', '..t..', '..t..', '.xxx.', '.xxn.', '.xxx.', '.jj..', 'xjjj.', '.jj..', '.jj..', '.xx..', '.OO..'],
       /* made to dance: an arm up, a leg kicked out */
-      used: { put: [[0, 8, '.'], [0, 6, 'x'], [0, 7, 'j'], [4, 10, '.'], [4, 11, '.'], [4, 12, '.'], [5, 9, 'j'], [5, 10, 'x'], [6, 10, 'O']] },
-      sideUsed: { put: [[0, 8, '.'], [4, 7, 'j'], [4, 6, 'x'], [3, 10, 'jx'], [3, 11, '.'], [3, 12, '.']] },
+      used: {
+        put: [
+          [0, 8, '.'],
+          [0, 6, 'x'],
+          [0, 7, 'j'],
+          [4, 10, '.'],
+          [4, 11, '.'],
+          [4, 12, '.'],
+          [5, 9, 'j'],
+          [5, 10, 'x'],
+          [6, 10, 'O'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [0, 8, '.'],
+          [4, 7, 'j'],
+          [4, 6, 'x'],
+          [3, 10, 'jx'],
+          [3, 11, '.'],
+          [3, 12, '.'],
+        ],
+      },
     });
     V('jack-in-box-old', {
-      side: ['..RR...', '.RRRR..', '.wwnw..', '.wwwwR.', '..ww...', '..tT...', '..Tt...', '..tT...', 'jjjjjjj', 'jRjjjRj', 'jjjjjjj', 'jRjjjRj', 'jjjjjjj'],
+      side: [
+        '..RR...',
+        '.RRRR..',
+        '.wwnw..',
+        '.wwwwR.',
+        '..ww...',
+        '..tT...',
+        '..Tt...',
+        '..tT...',
+        'jjjjjjj',
+        'jRjjjRj',
+        'jjjjjjj',
+        'jRjjjRj',
+        'jjjjjjj',
+      ],
       /* pushed back in and shut */
       used: ['jjjjjjj', 'OOOOOOO', 'jjjjjjj', 'jRjjjRjt', 'jjjFjjjtt', 'jRjjjRj', 'jjjjjjj'],
       sideUsed: ['jjjjjjj', 'OOOOOOO', 'jjjjjjj', 'jRjjjRj', 'jjjtjjj', 'jRjjjRj', 'jjjjjjj'],
     });
-    V('crib-mobile', { side: same, /* turning */ used: { swap: { F: 'j', j: 'F' }, put: [[1, 2, '.'], [2, 3, 't'], [9, 2, '.'], [8, 3, 't']] }, sideUsed: sameUsed });
+    V('crib-mobile', {
+      side: same,
+      /* turning */ used: {
+        swap: { F: 'j', j: 'F' },
+        put: [
+          [1, 2, '.'],
+          [2, 3, 't'],
+          [9, 2, '.'],
+          [8, 3, 't'],
+        ],
+      },
+      sideUsed: sameUsed,
+    });
   }
   {
     /* the lid up: a mirror in it, and the dancer turning */
     const open = (slug, sw, d) =>
-      tall(slug, 5, recol({ put: [[0, 0, 'OOOOOOOO'], [0, 1, 'O222222O'], [0, 2, 'O22' + d[0] + '222O'], [0, 3, 'O2' + d[1] + '22O'], [0, 4, 'OO' + d[2] + 'OOOOO'], [1, 5, 'nn' + d[3] + 'nnn']] }, sw).put);
+      tall(
+        slug,
+        5,
+        recol(
+          {
+            put: [
+              [0, 0, 'OOOOOOOO'],
+              [0, 1, 'O222222O'],
+              [0, 2, 'O22' + d[0] + '222O'],
+              [0, 3, 'O2' + d[1] + '22O'],
+              [0, 4, 'OO' + d[2] + 'OOOOO'],
+              [1, 5, 'nn' + d[3] + 'nnn'],
+            ],
+          },
+          sw,
+        ).put,
+      );
     const side = ['OOOOO', 'OoooO', 'OoooOt', 'OoooO', 'OOOOO'];
-    const sideOpen = (sw, d) => patch(['', '', '', '', '', ...recol(side, sw)], recol({ put: [[0, 0, 'OO'], [0, 1, 'O2'], [0, 2, 'O2' + d[0]], [0, 3, 'O2' + d[1].slice(0, 2)], [0, 4, 'OO' + d[2].slice(0, 1)], [1, 5, 'n' + d[3] + 'n']] }, sw).put);
+    const sideOpen = (sw, d) =>
+      patch(
+        ['', '', '', '', '', ...recol(side, sw)],
+        recol(
+          {
+            put: [
+              [0, 0, 'OO'],
+              [0, 1, 'O2'],
+              [0, 2, 'O2' + d[0]],
+              [0, 3, 'O2' + d[1].slice(0, 2)],
+              [0, 4, 'OO' + d[2].slice(0, 1)],
+              [1, 5, 'n' + d[3] + 'n'],
+            ],
+          },
+          sw,
+        ).put,
+      );
     const girl = ['w', '777', '7', 'w'],
       bones = ['b', 'bbb', 'b', 'b'];
     V('music-box', { side, used: open('music-box', {}, girl), sideUsed: sideOpen({}, girl) });
     V('music-box-open', { side, used: open('music-box-open', {}, girl), sideUsed: sideOpen({}, girl) });
-    V('cursed-music-box', { side: recol(side, { o: '5', g: 'r', O: 'n' }), used: open('cursed-music-box', { O: 'n' }, bones), sideUsed: sideOpen({ o: '5', g: 'r', O: 'n' }, bones) });
+    V('cursed-music-box', {
+      side: recol(side, { o: '5', g: 'r', O: 'n' }),
+      used: open('cursed-music-box', { O: 'n' }, bones),
+      sideUsed: sideOpen({ o: '5', g: 'r', O: 'n' }, bones),
+    });
   }
   V('hat-boxes', {
     side: same,
     /* the top box opened: the hat, the lid on the floor */
-    used: tall('hat-boxes', 3, [[5, 0, 'nnn'], [4, 1, 'nRRRn'], [3, 2, 'nnnnnnn'], [3, 3, '7nnnnn7'], [14, 11, '7777777'], [14, 12, '7W77777']]),
+    used: tall('hat-boxes', 3, [
+      [5, 0, 'nnn'],
+      [4, 1, 'nRRRn'],
+      [3, 2, 'nnnnnnn'],
+      [3, 3, '7nnnnn7'],
+      [14, 11, '7777777'],
+      [14, 12, '7W77777'],
+    ]),
     sideUsed: sameUsed,
   });
   V('carpet-rolled', {
     base: 'side',
     side: ['.VV.', 'VccV', 'VccV', '.VV.'],
     /* untied and half unrolled across the floor */
-    used: { put: [[0, 4, 'vVgVVVgVVVgVVVgVVVgVVv'], [0, 5, 'vVVVVVVVVVVVVVVVVVVVVv'], [0, 6, '.vvvvvvvvvvvvvvvvvvvv.']] },
+    used: {
+      put: [
+        [0, 4, 'vVgVVVgVVVgVVVgVVVgVVv'],
+        [0, 5, 'vVVVVVVVVVVVVVVVVVVVVv'],
+        [0, 6, '.vvvvvvvvvvvvvvvvvvvv.'],
+      ],
+    },
     sideUsed: ['.VV........', 'VccV.......', 'VccV.......', '.VVvVVgVVVv'],
   });
   V('picture-frames-stack', {
     side: ['G...', 'GO..', ...rep(8, 'GOG.')],
     /* the front one turned round: a portrait */
-    used: { put: [[1, 1, 'eeeeeeee'], [1, 2, 'eeOOOOee'], [1, 3, 'eeOxxOee'], [1, 4, 'eeexxeee'], [1, 5, 'eevvvvee'], [1, 6, 'evvvvvve'], [1, 7, 'evvvvvve'], [1, 8, 'evvvvvve']] },
-    sideUsed: { put: [[0, 3, 'e'], [0, 5, 'e']] },
+    used: {
+      put: [
+        [1, 1, 'eeeeeeee'],
+        [1, 2, 'eeOOOOee'],
+        [1, 3, 'eeOxxOee'],
+        [1, 4, 'eeexxeee'],
+        [1, 5, 'eevvvvee'],
+        [1, 6, 'evvvvvve'],
+        [1, 7, 'evvvvvve'],
+        [1, 8, 'evvvvvve'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 3, 'e'],
+        [0, 5, 'e'],
+      ],
+    },
   });
   V('moth-coat', {
     side: ['.t.', '.t.', '.e.', 'eee', ...rep(8, 'eEe'), '.ee', '.ee'],
     /* the coat is gone: the bare hanger, a moth or two */
-    used: ['....tt....', '...t..t...', '......t...', '.....t....', '....tt....', '..tt..tt..', 'tt......tt', 'tttttttttt', '..........', '...yy.....', '....y..y..', '......yy..', '..........', '....ee....'],
+    used: [
+      '....tt....',
+      '...t..t...',
+      '......t...',
+      '.....t....',
+      '....tt....',
+      '..tt..tt..',
+      'tt......tt',
+      'tttttttttt',
+      '..........',
+      '...yy.....',
+      '....y..y..',
+      '......yy..',
+      '..........',
+      '....ee....',
+    ],
     sideUsed: ['.t.', '.t.', '.t.', '.t.', '.t.', '.t.', '...', '...', '.y.', '.yy', '...', '...', '...', '.e.'],
   });
   V('bat-roost', {
     side: ['OOO', '.I.', '.n.', 'nnn', 'nRn', '.n.'],
     /* disturbed: all but one have flown */
-    used: { put: [...box(3, 1, 13, 5, '.'), [5, 2, 'n.n'], [5, 3, 'nnn'], [11, 3, 'n.n'], [11, 4, 'nnn'], [8, 5, 'nnn'], [8, 4, 'n.n'], [14, 1, 'n.'], [13, 2, 'nnn']] },
+    used: {
+      put: [
+        ...box(3, 1, 13, 5, '.'),
+        [5, 2, 'n.n'],
+        [5, 3, 'nnn'],
+        [11, 3, 'n.n'],
+        [11, 4, 'nnn'],
+        [8, 5, 'nnn'],
+        [8, 4, 'n.n'],
+        [14, 1, 'n.'],
+        [13, 2, 'nnn'],
+      ],
+    },
     sideUsed: { put: [...box(0, 1, 3, 5, '.'), [0, 3, 'n.n'], [0, 4, 'nnn']] },
   });
   /* ---------- kitchen and cellar, the smaller things ---------- */
-  V('hanging-pots', { side: ['III', '.I.', '.I.', '000', '000', '.0.'], /* a pan taken down */ used: { put: [...box(5, 3, 3, 3, '.'), [6, 3, 't']] }, sideUsed: { put: [...box(0, 3, 3, 3, '.'), [1, 3, 't']] } });
-  V('meat-hook', { side: same, /* the meat taken down */ used: ['.I.', '.I.', '.I.', '.t.', 't..', 'tt.', '...', '.r.', '.r.', '...', '.r.'], sideUsed: sameUsed });
-  V('meat-hooks-empty', { side: ['.I', '.I', '.I', '.t', 't.', 'tt'], /* a carcass hung up */ used: { put: [[4, 4, 'rrr'], [4, 5, 'rRr'], [4, 6, 'rRr'], [4, 7, 'rxr'], [4, 8, 'rRr'], [4, 9, 'rrr'], [5, 10, 'r']] }, sideUsed: { put: [[0, 4, 'rr'], [0, 5, 'rR'], [0, 6, 'rR'], [0, 7, 'rx'], [0, 8, 'rR'], [0, 9, 'rr']] } });
-  V('knife-block', { side: ['.O..', '.O..', 'oooo', 'oooo', 'oooo', 'OOOO'], /* a knife drawn, and left lying */ used: { put: [[2, 0, '.'], [2, 1, '.'], [7, 5, 'TTTTOO']] }, sideUsed: { put: [[5, 5, 'TTO']] } });
-  V('bread-bin', { side: ['.PPPP.', 'PPPPPP', 'PPPPPP', 'PPPPPP', 'AAAAAA'], /* open: the loaf */ used: { put: [[2, 1, 'nnnnnn'], [2, 2, 'n9yy9n'], [2, 3, 'n9999n']] }, sideUsed: { put: [[4, 1, 'nn'], [4, 2, 'y9'], [4, 3, '99']] } });
-  V('flour-sack', { side: same, /* opened: flour everywhere */ used: { put: [[1, 0, 'wwww'], [2, 1, 'ww'], [6, 5, 'w'], [6, 6, 'www'], [3, 3, 'w']] }, sideUsed: sameUsed });
-  V('coal-pile', { side: ['...n...', '..nIn..', '.InnnI.', '.nnInn.', 'InnnnIn'], /* half of it shovelled away */ used: ['............', '............', '....nIn.....', '..InnnInn...', '.nnInnnnInn.'], sideUsed: ['.......', '.......', '...n...', '..nIn..', '.InnnI.'] });
-  V('kitchen-scales', { side: same, /* something weighed: flour in the pan, the needle round */ used: tall('kitchen-scales', 2, [[4, 0, 'ww'], [2, 1, 'wwwwww'], [4, 5, 'Rw'], [4, 6, 'ww']]), sideUsed: sameUsed });
-  V('mincer', { base: 'side', side: ['tttt', 'tTTt', '.tt.', 'tttt', 'tOOt', '.tt.', '.tt.', 'tttt'], /* turned: mince coming out */ used: { put: [[6, 3, 'rR'], [6, 4, 'Rr'], [6, 5, 'rR'], [7, 6, 'r']] }, sideUsed: { put: [[1, 4, 'rR'], [1, 5, 'Rr'], [1, 6, 'rR']] } });
-  V('coal-scuttle', { side: same, /* tipped out on the floor */ used: { put: [[0, 2, '.I...II'], [8, 4, 'n'], [8, 5, 'nI'], [7, 6, 'nnIn']] }, sideUsed: sameUsed });
+  V('hanging-pots', {
+    side: ['III', '.I.', '.I.', '000', '000', '.0.'],
+    /* a pan taken down */ used: { put: [...box(5, 3, 3, 3, '.'), [6, 3, 't']] },
+    sideUsed: { put: [...box(0, 3, 3, 3, '.'), [1, 3, 't']] },
+  });
+  V('meat-hook', {
+    side: same,
+    /* the meat taken down */ used: ['.I.', '.I.', '.I.', '.t.', 't..', 'tt.', '...', '.r.', '.r.', '...', '.r.'],
+    sideUsed: sameUsed,
+  });
+  V('meat-hooks-empty', {
+    side: ['.I', '.I', '.I', '.t', 't.', 'tt'],
+    /* a carcass hung up */ used: {
+      put: [
+        [4, 4, 'rrr'],
+        [4, 5, 'rRr'],
+        [4, 6, 'rRr'],
+        [4, 7, 'rxr'],
+        [4, 8, 'rRr'],
+        [4, 9, 'rrr'],
+        [5, 10, 'r'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 4, 'rr'],
+        [0, 5, 'rR'],
+        [0, 6, 'rR'],
+        [0, 7, 'rx'],
+        [0, 8, 'rR'],
+        [0, 9, 'rr'],
+      ],
+    },
+  });
+  V('knife-block', {
+    side: ['.O..', '.O..', 'oooo', 'oooo', 'oooo', 'OOOO'],
+    /* a knife drawn, and left lying */ used: {
+      put: [
+        [2, 0, '.'],
+        [2, 1, '.'],
+        [7, 5, 'TTTTOO'],
+      ],
+    },
+    sideUsed: { put: [[5, 5, 'TTO']] },
+  });
+  V('bread-bin', {
+    side: ['.PPPP.', 'PPPPPP', 'PPPPPP', 'PPPPPP', 'AAAAAA'],
+    /* open: the loaf */ used: {
+      put: [
+        [2, 1, 'nnnnnn'],
+        [2, 2, 'n9yy9n'],
+        [2, 3, 'n9999n'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [4, 1, 'nn'],
+        [4, 2, 'y9'],
+        [4, 3, '99'],
+      ],
+    },
+  });
+  V('flour-sack', {
+    side: same,
+    /* opened: flour everywhere */ used: {
+      put: [
+        [1, 0, 'wwww'],
+        [2, 1, 'ww'],
+        [6, 5, 'w'],
+        [6, 6, 'www'],
+        [3, 3, 'w'],
+      ],
+    },
+    sideUsed: sameUsed,
+  });
+  V('coal-pile', {
+    side: ['...n...', '..nIn..', '.InnnI.', '.nnInn.', 'InnnnIn'],
+    /* half of it shovelled away */ used: ['............', '............', '....nIn.....', '..InnnInn...', '.nnInnnnInn.'],
+    sideUsed: ['.......', '.......', '...n...', '..nIn..', '.InnnI.'],
+  });
+  V('kitchen-scales', {
+    side: same,
+    /* something weighed: flour in the pan, the needle round */ used: tall('kitchen-scales', 2, [
+      [4, 0, 'ww'],
+      [2, 1, 'wwwwww'],
+      [4, 5, 'Rw'],
+      [4, 6, 'ww'],
+    ]),
+    sideUsed: sameUsed,
+  });
+  V('mincer', {
+    base: 'side',
+    side: ['tttt', 'tTTt', '.tt.', 'tttt', 'tOOt', '.tt.', '.tt.', 'tttt'],
+    /* turned: mince coming out */ used: {
+      put: [
+        [6, 3, 'rR'],
+        [6, 4, 'Rr'],
+        [6, 5, 'rR'],
+        [7, 6, 'r'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 4, 'rR'],
+        [1, 5, 'Rr'],
+        [1, 6, 'rR'],
+      ],
+    },
+  });
+  V('coal-scuttle', {
+    side: same,
+    /* tipped out on the floor */ used: {
+      put: [
+        [0, 2, '.I...II'],
+        [8, 4, 'n'],
+        [8, 5, 'nI'],
+        [7, 6, 'nnIn'],
+      ],
+    },
+    sideUsed: sameUsed,
+  });
   V('gramophone-records', {
     side: ['n...', 'n...', 'n...', 'nnnn', 'nInI', 'nnnn'],
     /* the record on top taken */
-    used: { put: [[0, 0, '........'], [0, 1, '........'], [0, 2, '........'], [0, 3, 'nnnnnnnnnn']] },
-    sideUsed: { put: [[0, 0, '.'], [0, 1, '.'], [0, 2, '.']] },
+    used: {
+      put: [
+        [0, 0, '........'],
+        [0, 1, '........'],
+        [0, 2, '........'],
+        [0, 3, 'nnnnnnnnnn'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [0, 0, '.'],
+        [0, 1, '.'],
+        [0, 2, '.'],
+      ],
+    },
   });
   {
     /* set swinging */
@@ -3204,26 +4780,130 @@ function views(V, ROWS) {
     const side = ROWS['chains-hanging'].map((r) => (r[0] || '.') + '.' + (r[3] || '.') + (r[8] || '.'));
     V('chains-hanging', { side, used: sway(ROWS['chains-hanging']), sideUsed: sway(side) });
   }
-  V('tool-rack', { side: ['OO', 'Ot', 'Ot', '.O', '.O', '.O', '.O'], /* tools taken off their hooks */ used: { put: [...box(3, 1, 4, 5, '.'), ...box(10, 1, 3, 5, '.'), [4, 1, 'q'], [11, 1, 'q']] }, sideUsed: { put: [[1, 1, 'q'], [1, 2, '.']] } });
-  V('pipes-valve', { side: ['00.', '0..', '0RR', '00R', '0RR', '0..', '00.', '0..'], /* the valve opened: it leaks */ used: { put: [[5, 5, '232'], [6, 6, '23'], [6, 7, '2'], [6, 8, '3']] }, sideUsed: { put: [[1, 5, '23'], [1, 6, '2'], [1, 7, '3']] } });
-  V('pipes-steam', { side: ['tt.', 't..', 'tRR', 'ttR', 'tRR', 't.w', 'ttw', 't..'], /* blowing off hard */ used: { put: [[8, 4, 'wwwww'], [8, 5, 'wwwwww'], [9, 6, 'wwww'], [10, 7, 'ww']] }, sideUsed: { put: [[1, 5, 'ww'], [1, 6, 'www'], [2, 7, 'ww']] } });
+  V('tool-rack', {
+    side: ['OO', 'Ot', 'Ot', '.O', '.O', '.O', '.O'],
+    /* tools taken off their hooks */ used: { put: [...box(3, 1, 4, 5, '.'), ...box(10, 1, 3, 5, '.'), [4, 1, 'q'], [11, 1, 'q']] },
+    sideUsed: {
+      put: [
+        [1, 1, 'q'],
+        [1, 2, '.'],
+      ],
+    },
+  });
+  V('pipes-valve', {
+    side: ['00.', '0..', '0RR', '00R', '0RR', '0..', '00.', '0..'],
+    /* the valve opened: it leaks */ used: {
+      put: [
+        [5, 5, '232'],
+        [6, 6, '23'],
+        [6, 7, '2'],
+        [6, 8, '3'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 5, '23'],
+        [1, 6, '2'],
+        [1, 7, '3'],
+      ],
+    },
+  });
+  V('pipes-steam', {
+    side: ['tt.', 't..', 'tRR', 'ttR', 'tRR', 't.w', 'ttw', 't..'],
+    /* blowing off hard */ used: {
+      put: [
+        [8, 4, 'wwwww'],
+        [8, 5, 'wwwwww'],
+        [9, 6, 'wwww'],
+        [10, 7, 'ww'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [1, 5, 'ww'],
+        [1, 6, 'www'],
+        [2, 7, 'ww'],
+      ],
+    },
+  });
   {
     /* the switch thrown: sparks */
-    const sparks = { put: [[5, 4, 'F'], [4, 5, 'FFF'], [5, 6, 'F'], [2, 5, '8'], [7, 2, 'F'], [7, 3, 'F']] };
+    const sparks = {
+      put: [
+        [5, 4, 'F'],
+        [4, 5, 'FFF'],
+        [5, 6, 'F'],
+        [2, 5, '8'],
+        [7, 2, 'F'],
+        [7, 3, 'F'],
+      ],
+    };
     const side = ['IIIi', ...rep(6, 'ItIi'), 'IIIi'];
-    V('fuse-box-open', { side, used: sparks, sideUsed: { put: [[3, 4, 'F'], [3, 5, 'FF'], [3, 6, 'F']] } });
-    V('fuse-board', { side: recol(side, { i: 'I' }), used: sparks, sideUsed: { put: [[3, 4, 'F'], [3, 5, 'FF'], [3, 6, 'F']] } });
+    V('fuse-box-open', {
+      side,
+      used: sparks,
+      sideUsed: {
+        put: [
+          [3, 4, 'F'],
+          [3, 5, 'FF'],
+          [3, 6, 'F'],
+        ],
+      },
+    });
+    V('fuse-board', {
+      side: recol(side, { i: 'I' }),
+      used: sparks,
+      sideUsed: {
+        put: [
+          [3, 4, 'F'],
+          [3, 5, 'FF'],
+          [3, 6, 'F'],
+        ],
+      },
+    });
   }
   V('drain-cover', {
     side: same,
     /* the grating lifted and pushed aside: the black hole under it */
-    used: patch(['.IIIIIIII.', 'InnnnnnnnI', 'InnnnnnnnI', 'InnnnnnnnI', '.IIIIIIII.'], [[7, 1, ' IIIIIIII '], [7, 2, 'InInInInII'], [7, 3, 'IInInInInI'], [7, 4, 'InInInInII'], [7, 5, ' IIIIIIII ']]),
+    used: patch(
+      ['.IIIIIIII.', 'InnnnnnnnI', 'InnnnnnnnI', 'InnnnnnnnI', '.IIIIIIII.'],
+      [
+        [7, 1, ' IIIIIIII '],
+        [7, 2, 'InInInInII'],
+        [7, 3, 'IInInInInI'],
+        [7, 4, 'InInInInII'],
+        [7, 5, ' IIIIIIII '],
+      ],
+    ),
     sideUsed: sameUsed,
   });
   {
     /* loaded: a crate set down on it */
-    const crate = (x) => [[x, 0, 'pppppppp'], [x, 1, 'pOppppOp'], [x, 2, 'ppOOOOpp'], [x, 3, 'pOppppOp'], [x, 4, 'pppppppp']];
-    V('pallet', { side: ['qqqqqqqq', 'O..OO..O', 'pppppppp'], used: tall('pallet', 5, crate(5)), sideUsed: patch(['', '', '', '', '', 'qqqqqqqq', 'O..OO..O', 'pppppppp'], crate(0)) });
+    const crate = (x) => [
+      [x, 0, 'pppppppp'],
+      [x, 1, 'pOppppOp'],
+      [x, 2, 'ppOOOOpp'],
+      [x, 3, 'pOppppOp'],
+      [x, 4, 'pppppppp'],
+    ];
+    V('pallet', {
+      side: ['qqqqqqqq', 'O..OO..O', 'pppppppp'],
+      used: tall('pallet', 5, crate(5)),
+      sideUsed: patch(['', '', '', '', '', 'qqqqqqqq', 'O..OO..O', 'pppppppp'], crate(0)),
+    });
   }
-  V('sump-pit', { side: same, /* the water has risen */ used: { put: [[1, 1, 'd3333333333d'], [1, 2, '332233332233'], [1, 3, 'd3333223333d'], [14, 2, '3'], [14, 3, '33'], [13, 4, '333']] }, sideUsed: sameUsed });
+  V('sump-pit', {
+    side: same,
+    /* the water has risen */ used: {
+      put: [
+        [1, 1, 'd3333333333d'],
+        [1, 2, '332233332233'],
+        [1, 3, 'd3333223333d'],
+        [14, 2, '3'],
+        [14, 3, '33'],
+        [13, 4, '333'],
+      ],
+    },
+    sideUsed: sameUsed,
+  });
 }
