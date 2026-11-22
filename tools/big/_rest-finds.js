@@ -1,5 +1,21 @@
 /* Small finds and clues, as text pictures (see rest.js for the letters). Small, but a touch bigger than life. */
-module.exports = ({ T, vary }) => {
+module.exports = ({ T: T0, vary: vary0, V }) => {
+  /* the rows of every picture drawn here are kept, so that the other views can be made from them */
+  const R = {};
+  const pat = (rows, { swap = {}, put = [] } = {}) => {
+    const out = rows.map((r) => [...r].map((ch) => swap[ch] || ch));
+    for (const [x, y, text] of put) {
+      while (out.length <= y) out.push([]);
+      for (let i = 0; i < text.length; i++) {
+        while (out[y].length <= x + i) out[y].push('.');
+        if (text[i] !== ' ') out[y][x + i] = text[i];
+      }
+    }
+    return out.map((r) => r.join(''));
+  };
+  const T = (slug, rows, o) => ((R[slug] = rows), T0(slug, rows, o));
+  const vary = (slug, from, o) => ((R[slug] = pat(R[from], o)), vary0(slug, from, o));
+  const sw = (rows, swap) => pat(rows, { swap });
   T('key-skeleton', ['.tt......', 't..tttttt', 't..t..t.t', '.tt......']);
   vary('key-brass-ornate', 'key-skeleton', { swap: { t: 'G' }, put: [[1, 1, 'g']] });
   vary('key-rusty', 'key-skeleton', { swap: { t: 'u' }, put: [[5, 1, '0']] });
@@ -129,4 +145,6 @@ module.exports = ({ T, vary }) => {
   T('bell-small', ['..G..', '.GGG.', '.GgG.', 'GGGGG', '..n..']);
   T('hourglass-sand', ['OOOOO', '.2y2.', '..y..', '.2.2.', '.2y2.', 'OOOOO']);
   T('compass-broken', ['.GGGG.', 'GwwnwG', 'GwRwwG', 'GnwwwG', '.GGGG.']);
+  /* ================= the other pictures of each thing: turned a quarter, used, and both ================= */
+  //VIEWS
 };

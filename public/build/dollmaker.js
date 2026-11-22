@@ -199,7 +199,7 @@ function draw() {
               title: 'Open this figure in the sprite editor: it becomes a fixed picture you can draw on',
               onclick: async () => {
                 const src = await dollDataUrl(dollAsset(M.parts));
-                openSpriteEditor({ src, name: 'My character' }); // the drawing lands under My drawings
+                openSpriteEditor({ from: { name: 'My character', urls: { '': src } } }); // the drawing lands under My objects
               },
             },
             'Draw on it',

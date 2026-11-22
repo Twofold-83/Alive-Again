@@ -2138,5 +2138,422 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     c.speckle(2, 9, 12, 41, C.rust, 9, 3);
   }, solid);
 
+  /* ================= THE OTHER PICTURES OF EACH THING: side, used, side + used (see make-big.js) ================= */
+  const V = (slug, v) => {
+    if (!S[slug]) throw new Error('views for ' + slug + ', which is not drawn here');
+    S[slug].views = v;
+  };
+  const pic = (w, h, draw, o) => ({ w, h, draw, ...o });
+  const on = (from, draw, o) => ({ from, draw, ...o });
+  /** The picture of another sprite of this file, as a view. */
+  const same = (slug) => ({ w: S[slug].w, h: S[slug].h, draw: S[slug].draw, shade: S[slug].shade, outline: S[slug].outline });
+  /** The finished picture of a sprite of this file (shaded and outlined), to stamp or to turn. */
+  const done = (d) => {
+    if (typeof d === 'string') d = S[d];
+    const c = canvas(d.w, d.h);
+    if (d.draw(c) !== false) {
+      if (d.shade !== false) c.shade();
+      if (d.outline !== false) c.outline();
+    }
+    return c;
+  };
+  /** A picture turned a quarter: fallen over to the right (cw) or to the left. */
+  const turned = (src, cw = true) => {
+    const o = canvas(src.h, src.w);
+    for (let y = 0; y < src.h; y++) for (let x = 0; x < src.w; x++) if (src.get(x, y)) o.px[(cw ? x : src.w - 1 - x) * o.w + (cw ? src.h - 1 - y : y)] = src.get(x, y);
+    return o;
+  };
+  const fallen = (slug, cw = true) => {
+    const t = turned(done(slug), cw);
+    return { w: t.w, h: t.h, shade: false, outline: false, draw: (c) => c.stamp(t, 0, 0) };
+  };
+  /** Move everything in the box by dx, dy (on a copy: to push a lid aside). */
+  const shove = (c, x0, y0, x1, y1, dx, dy = 0) => {
+    const t = [];
+    for (let y = y0; y <= y1; y++)
+      for (let x = x0; x <= x1; x++)
+        if (c.get(x, y)) {
+          t.push([x + dx, y + dy, c.get(x, y)]);
+          c.clear(x, y);
+        }
+    for (const [x, y, p] of t) c.set(x, y, p);
+  };
+  /** Splinters of glass on the floor. */
+  const shards = (c, x, y) => pat(c, x, y, ['.w..J', 'J.Jw.']);
+  const smoke = (c, x, y) => {
+    c.set(x, y, C.ash);
+    c.set(x + 1, y - 1, C.ash);
+    c.set(x, y - 2, dark(C.ash));
+  };
+
+  /* --- coffins: lying ones are drawn from their long side; their front view runs away from the viewer --- */
+  const hexa = (c, cx, y0, d, hw, col, skew = 0) => {
+    const sh = Math.round(d * 0.28),
+      nh = Math.max(2, hw - 3),
+      s = (y) => Math.round((skew * y) / d);
+    c.poly([[cx - nh, y0], [cx + nh, y0], [cx + hw + s(sh), y0 + sh], [cx + nh + skew, y0 + d - 1], [cx - nh + skew, y0 + d - 1], [cx - hw + s(sh), y0 + sh]], col);
+  };
+  const pale = hex('#b9b8a4');
+  /** A coffin seen from its foot end and a little from above; the head is at the top. */
+  const coffinFront = (c, cx, y0, d, hw, o = {}) => {
+    const col = o.col || C.wood,
+      nh = Math.max(2, hw - 3),
+      sh = y0 + Math.round(d * 0.28);
+    if (o.lid) {
+      const lx = cx + hw * 2 + 2; // the lid, taken off and leaning against the far side
+      hexa(c, lx, y0 + 2, d, hw - 1, dark(col), -2);
+      hexa(c, lx, y0, d, hw - 1, o.lidCol || C.woodDark, -2);
+      c.line(lx - hw + 1, sh, lx - nh + 1, y0, col);
+      c.line(lx - hw + 1, sh, lx - nh - 1, y0 + d - 1, col);
+      c.col(lx - 1, y0 + 3, y0 + Math.round(d * 0.6), o.cross || C.brass);
+      c.row(sh, lx - 3, lx + 1, o.cross || C.brass);
+    }
+    hexa(c, cx, y0 + 3, d, hw, dark(col)); // the sides
+    c.rect(cx - nh, y0 + d, cx + nh, y0 + d + 2, col); // the foot end
+    c.row(y0 + d + 2, cx - nh, cx + nh, dark(col));
+    c.set(cx, y0 + d + 1, C.brass);
+    hexa(c, cx, y0, d, hw, o.open ? col : lite(col));
+    if (o.open) {
+      const lin = o.lining || C.wine;
+      hexa(c, cx, y0 + 1, d - 2, hw - 1, lin);
+      c.row(y0 + 1, cx - nh + 1, cx + nh - 1, dark(lin));
+      c.line(cx + hw - 1, sh, cx + nh - 1, y0 + d - 2, dark(lin));
+      c.rect(cx - 2, y0 + 2, cx + 2, y0 + 4, C.white);
+      c.row(y0 + 4, cx - 2, cx + 2, dark(C.white));
+    } else {
+      c.col(cx, y0 + 2, y0 + Math.round(d * 0.62), o.cross || C.brass);
+      c.row(sh, cx - 3, cx + 3, o.cross || C.brass);
+      c.line(cx - hw, sh, cx - nh, y0 + d - 1, col);
+    }
+  };
+  /** The dead lying in the open coffin, seen from the foot end. */
+  const deadFront = (c, cx, y0, d) => {
+    c.rect(cx - 3, y0 + 6, cx + 3, y0 + d - 5, C.black);
+    c.rect(cx - 2, y0 + d - 4, cx + 2, y0 + d - 3, C.black);
+    c.rect(cx - 2, y0 + 2, cx + 2, y0 + 5, pale); // the face
+    c.row(y0 + 2, cx - 2, cx + 2, C.ash);
+    c.set(cx - 1, y0 + 4, K);
+    c.set(cx + 1, y0 + 4, K);
+    c.rect(cx - 1, y0 + 9, cx + 1, y0 + 10, pale); // hands crossed
+    c.set(cx, y0 + 7, C.white);
+  };
+  /** An open coffin from its long side with the lid leaning behind it (as coffin-open). */
+  const coffinOpenSide = (c, len, o = {}) => {
+    const col = o.lidCol || C.woodDark;
+    c.poly([[6, 9], [10, 1], [len, 2], [len + 2, 5], [len - 2, 9]], col);
+    c.line(6, 9, 10, 1, lite(col));
+    c.line(10, 1, len, 2, lite(col));
+    c.row(5, 16, len - 8, o.cross || C.brass);
+    c.col(19, 3, 7, o.cross || C.brass);
+    coffin(c, 1, 8, len, { ...o, open: true });
+  };
+  V('coffin-shut', {
+    base: 'side',
+    side: pic(15, 31, (c) => coffinFront(c, 7, 1, 26, 6)),
+    used: same('coffin-open'),
+    sideUsed: pic(27, 31, (c) => coffinFront(c, 7, 1, 26, 6, { open: true, lid: true })),
+  });
+  V('coffin-open', {
+    base: 'side',
+    side: pic(27, 31, (c) => coffinFront(c, 7, 1, 26, 6, { open: true, lid: true })),
+    used: same('coffin-shut'),
+    sideUsed: pic(15, 31, (c) => coffinFront(c, 7, 1, 26, 6)),
+  });
+  V('coffin-body', {
+    base: 'side',
+    side: pic(15, 31, (c) => {
+      coffinFront(c, 7, 1, 26, 6, { open: true });
+      deadFront(c, 7, 1, 26);
+    }),
+    used: pic(40, 20, (c) => {
+      // the dead has sat up
+      coffin(c, 1, 10, 38, { open: true });
+      c.rect(16, 10, 34, 12, C.black); // legs
+      c.rect(33, 9, 35, 12, C.black);
+      c.rect(11, 5, 15, 12, C.black); // the back, upright
+      c.rect(16, 7, 21, 8, C.black); // an arm, reaching
+      c.rect(22, 7, 23, 8, pale);
+      c.oval(10, 1, 15, 5, pale);
+      c.row(1, 11, 14, C.ash);
+      c.set(14, 3, K);
+      c.set(15, 6, C.white);
+      c.row(13, 3, 37, C.wood);
+    }),
+    sideUsed: pic(15, 34, (c) => {
+      coffinFront(c, 7, 4, 26, 6, { open: true });
+      c.rect(4, 13, 10, 25, C.black); // legs
+      c.rect(5, 26, 9, 27, C.black);
+      c.rect(3, 6, 11, 14, C.black); // sitting up, facing us
+      c.rect(5, 1, 9, 5, pale);
+      c.row(1, 5, 9, C.ash);
+      c.set(6, 3, K);
+      c.set(8, 3, K);
+      c.row(5, 6, 8, dark(pale));
+      c.set(7, 6, C.white);
+      c.rect(3, 15, 4, 16, pale); // hands on the rim
+      c.rect(10, 15, 11, 16, pale);
+    }),
+  });
+  const childCol = hex('#b4b0a0');
+  V('coffin-child', {
+    base: 'side',
+    side: pic(11, 21, (c) => coffinFront(c, 5, 1, 16, 4, { col: childCol, cross: C.gold })),
+    used: pic(26, 18, (c) => coffinOpenSide(c, 22, { col: childCol, lidCol: dark(childCol), cross: C.gold })),
+    sideUsed: pic(20, 21, (c) => coffinFront(c, 5, 1, 16, 4, { col: childCol, cross: C.gold, open: true, lid: true, lidCol: dark(childCol) })),
+  });
+  /** The standing coffin from the side: its box against the wall, the lid in front (to the left). */
+  const coffinUpSide = (c, x) => {
+    c.rect(x, 2, x + 5, 39, C.woodDark); // the box
+    c.col(x, 2, 39, C.night);
+    c.col(x + 1, 2, 39, C.wood);
+    c.row(2, x + 1, x + 5, C.wood);
+    c.row(10, x + 2, x + 5, mix(C.woodDark, 0.8));
+    c.row(40, x - 2, x + 5, C.woodDark);
+  };
+  V('coffin-upright', {
+    side: pic(10, 42, (c) => {
+      coffinUpSide(c, 4);
+      c.rect(1, 1, 2, 39, C.wood); // the lid, ajar
+      c.col(1, 1, 39, C.woodLight);
+      c.set(1, 26, C.woodDark);
+      c.set(1, 32, C.woodDark);
+      pat(c, 2, 18, ['zz', 'zz', 'ZZ']); // the fingers
+    }),
+    used: pic(22, 42, (c) => {
+      const shape = (dx, col) => c.poly([[5 + dx, 1], [11 + dx, 1], [14 + dx, 10], [11 + dx, 39], [5 + dx, 39], [2 + dx, 10]], col);
+      shape(0, C.woodDark);
+      c.poly([[5, 2], [11, 2], [13, 10], [10, 38], [6, 38], [3, 10]], C.night);
+      c.line(5, 1, 2, 10, C.wood);
+      c.line(2, 10, 5, 39, C.wood);
+      c.rect(6, 4, 10, 8, pale); // the one inside
+      c.row(4, 6, 10, C.ash);
+      c.set(7, 6, K);
+      c.set(9, 6, K);
+      c.row(8, 7, 9, dark(pale));
+      c.rect(5, 10, 11, 30, cloth);
+      c.rect(6, 31, 10, 37, cloth);
+      c.col(5, 10, 30, lite(cloth));
+      pat(c, 6, 14, ['z...z', '.zzz.', '.z.z.']);
+      c.poly([[16, 2], [19, 1], [20, 10], [19, 39], [16, 38], [15, 10]], C.wood); // the lid, swung wide
+      c.line(16, 2, 15, 10, C.woodLight);
+      c.line(15, 10, 16, 38, C.woodLight);
+      c.col(18, 6, 22, C.brass);
+      c.row(40, 4, 19, C.woodDark);
+    }),
+    sideUsed: pic(22, 42, (c) => {
+      coffinUpSide(c, 16);
+      c.poly([[2, 10], [5, 1], [11, 1], [14, 10], [11, 39], [5, 39]], C.woodDark); // the inside of the lid, swung out
+      c.poly([[4, 10], [6, 3], [10, 3], [12, 10], [10, 37], [6, 37]], dark(C.wine));
+      c.line(5, 1, 2, 10, C.wood);
+      c.line(2, 10, 5, 39, C.wood);
+      c.col(14, 2, 39, C.wood);
+      c.set(15, 8, C.brass);
+      c.set(15, 30, C.brass);
+      pat(c, 14, 17, ['zz.', '.zz', 'ZZ.']);
+      c.row(40, 4, 21, C.woodDark);
+    }),
+  });
+
+  /* --- tombs, crypt lids, the mausoleum --- */
+  /** A chest tomb seen from its end and a little from above: x0..x1 wide, the slab dep deep. */
+  const tombFront = (c, x0, y0, x1, dep, o = {}) => {
+    const yf = y0 + dep;
+    if (o.open) {
+      c.rect(x0 + 1, y0, x1 - 1, yf - 1, C.stone); // the walls
+      c.rect(x0 + 2, y0 + 1, x1 - 2, yf - 1, C.night);
+      c.col(x0 + 1, y0, yf - 1, C.stoneLight);
+      block(c, x0 + 1, yf, x1 - 1, yf + 9);
+    } else {
+      block(c, x0, y0, x1, yf - 1);
+      c.row(yf, x0, x1, C.stoneDark);
+      c.speckle(x0 + 1, y0 + 1, x1 - 1, yf - 1, C.stoneDark, 12, 4);
+      block(c, x0, yf, x1, yf + 2, C.stoneLight);
+      c.row(yf + 2, x0, x1, C.stone);
+      block(c, x0 + 1, yf + 3, x1 - 1, yf + 9);
+    }
+    c.frame(x0 + 3, yf + 5, x1 - 3, yf + 8, C.stoneDark);
+    block(c, x0, yf + 10, x1, yf + 11);
+    moss(c, x0, yf + 8, x1, yf + 11, 4);
+  };
+  /** The slab of a tomb, pushed askew over the open box. */
+  const slabAskew = (c, x0, y0, x1, y1) => {
+    c.poly([[x0, y0], [x1, y0 + 2], [x1 - 1, y1], [x0 - 1, y1 - 2]], C.stone);
+    c.line(x0, y0, x1, y0 + 2, C.stoneLight);
+    c.line(x0, y0, x0 - 1, y1 - 2, C.stoneLight);
+    c.line(x0 - 1, y1 - 1, x1 - 1, y1 + 1, C.stoneLight);
+    c.line(x0 - 1, y1, x1 - 1, y1 + 2, C.stone);
+  };
+  const bonesIn = (c, x, y) => {
+    skull(c, x, y, true);
+    pat(c, x, y + 6, ['bbbbb', '.bBb.', 'bbbbb', '.bBb.', 'bbbbb', '..b..', '.b.b.', '.b.b.']);
+  };
+  V('tomb-chest', {
+    base: 'side',
+    side: pic(18, 33, (c) => {
+      tombFront(c, 1, 1, 16, 19);
+      c.line(9, 1, 11, 6, C.stoneDark);
+    }),
+    used: same('tomb-cracked'),
+    sideUsed: pic(22, 34, (c) => {
+      tombFront(c, 1, 2, 16, 19, { open: true });
+      slabAskew(c, 6, 1, 20, 17);
+      c.line(13, 2, 14, 7, C.stoneDark);
+    }),
+  });
+  V('tomb-cracked', {
+    base: 'side',
+    side: pic(22, 34, (c) => {
+      tombFront(c, 1, 2, 16, 19, { open: true });
+      slabAskew(c, 6, 1, 20, 17);
+      c.line(13, 2, 14, 7, C.stoneDark);
+      pat(c, 5, 25, ['K..', '.K.', '.KK', '..K'], { K: C.night });
+    }),
+    used: on('base', (c) => {
+      // the lid heaved right off: it leans against the far end, and the bones lie bare
+      shove(c, 9, 0, 39, 6, 8, 3);
+      c.rect(2, 4, 31, 5, C.night);
+      c.rect(1, 3, 32, 3, K);
+      c.clearRect(0, 0, 33, 2);
+      c.set(1, 4, K);
+      c.set(1, 5, K);
+      skull(c, 4, 1, true, { ...P, K: C.night });
+      c.row(5, 10, 24, C.bone);
+      for (let x = 11; x <= 19; x += 2) c.set(x, 4, C.bone);
+      c.rect(26, 4, 27, 5, C.bone);
+    }, { w: 44, h: 20, outline: true }),
+    sideUsed: pic(24, 34, (c) => {
+      tombFront(c, 1, 2, 16, 19, { open: true });
+      bonesIn(c, 6, 4);
+      c.poly([[18, 6], [22, 4], [22, 30], [18, 32]], C.stone); // the slab, leaning against the side
+      c.col(18, 6, 32, C.stoneLight);
+      c.line(18, 6, 22, 4, C.stoneLight);
+    }),
+  });
+  /** The knight on his slab, seen from above; the head at the top. */
+  const effigyTop = (c, x, y) =>
+    pat(c, x, y, [
+      '..llll..',
+      '.llssll.',
+      '.lsllsl.',
+      '..llll..',
+      '.lsssss.',
+      'lssllssd',
+      'lssllssd',
+      'lsssdssd',
+      '.lssdsd.',
+      '.lssdsd.',
+      '.lssdsd.',
+      '.lssdsd.',
+      '.lssdsd.',
+      '.ls.dsd.',
+      '.ll.lld.',
+      '.ll.lld.',
+    ]);
+  V('tomb-effigy', {
+    base: 'side',
+    side: pic(18, 33, (c) => {
+      tombFront(c, 1, 1, 16, 19);
+      c.rect(2, 2, 15, 18, C.stoneDark);
+      c.rect(2, 2, 14, 17, C.stone);
+      effigyTop(c, 5, 2);
+    }),
+    used: on('base', (c) => {
+      shove(c, 0, 0, 33, 9, 6);
+      c.rect(2, 9, 5, 9, C.night);
+      c.rect(2, 8, 5, 8, K);
+      c.set(1, 9, K);
+    }, { w: 40, h: 21 }),
+    sideUsed: pic(22, 34, (c) => {
+      tombFront(c, 1, 2, 16, 19, { open: true });
+      slabAskew(c, 6, 1, 20, 17);
+      effigyTop(c, 9, 2);
+    }),
+  });
+  const cryptSlab = (c, x0, y0, x1, top, o = {}) => {
+    // a slab in the ground from its narrow end: the top runs away from the viewer
+    c.row(y0, x0 + 2, x1 - 2, C.stoneLight);
+    c.rect(x0 + 1, y0 + 1, x1 - 1, y0 + top - 2, C.stoneLight);
+    c.row(y0 + top - 1, x0, x1, C.stoneLight);
+    c.rect(x0, y0 + top, x1, y0 + top + 2, C.stone);
+    c.row(y0 + top + 2, x0, x1, C.stoneDark);
+    const mx = (x0 + x1) >> 1;
+    if (!o.noRing) pat(c, mx - 1, y0 + 1, ['.II.', 'I..I', 'I..I', '.II.']);
+    c.line(x0 + 2, y0 + top - 3, x0 + 4, y0 + top - 2, C.stone);
+    moss(c, x0, y0 + top, x1, y0 + top + 2, 4);
+  };
+  const cryptAjar = (c, hand) => {
+    c.rect(1, 6, 28, 9, C.stone); // the rim
+    c.row(6, 1, 28, C.stoneLight);
+    c.rect(3, 6, 13, 8, C.night); // the dark below
+    c.poly([[11, 5], [27, 2], [28, 4], [12, 7]], C.stoneLight); // the slab, pushed aside
+    c.line(12, 7, 28, 4, C.stone);
+    c.line(12, 8, 28, 5, C.stoneDark);
+    pat(c, 19, 3, ['.II.', 'I..I'], P);
+    if (hand) pat(c, 3, 3, ['.z.z...', 'z.z.z..', 'z.z.z..', 'zzzzz.z', '.zzzzz.', '..ZZ...']);
+    moss(c, 14, 8, 28, 9, 3);
+  };
+  const cryptAjarFront = (c, hand) => {
+    c.rect(1, 5, 16, 15, C.stone); // the rim
+    c.row(5, 1, 16, C.stoneLight);
+    c.rect(3, 9, 14, 13, C.night);
+    c.row(15, 1, 16, C.stoneDark);
+    c.poly([[2, 2], [15, 1], [16, 7], [3, 9]], C.stoneLight); // the slab, pushed back
+    c.line(3, 9, 16, 7, C.stone);
+    c.line(3, 10, 16, 8, C.stoneDark);
+    pat(c, 8, 3, ['.II.', 'I..I', '.II.']);
+    if (hand) pat(c, 5, 9, ['.z.z.', 'z.z.z', 'z.z.z', 'zzzzz', '.zzz.', '.ZZ..']);
+    moss(c, 1, 14, 16, 15, 3);
+  };
+  V('crypt-lid', {
+    side: pic(18, 14, (c) => cryptSlab(c, 1, 1, 16, 9)),
+    used: pic(30, 11, (c) => cryptAjar(c, false)),
+    sideUsed: pic(18, 17, (c) => cryptAjarFront(c, false)),
+  });
+  V('crypt-lid-ajar', {
+    side: pic(18, 17, (c) => cryptAjarFront(c, true)),
+    used: same('crypt-lid'),
+    sideUsed: pic(18, 14, (c) => cryptSlab(c, 1, 1, 16, 9)),
+  });
+  /** The mausoleum from the side: its front, with the columns and the door, is to the left. */
+  const mausoleumSide = (c, open) => {
+    c.rect(4, 3, 19, 11, C.stone); // the roof, running back
+    c.row(3, 4, 19, C.stoneLight);
+    for (let y = 5; y <= 11; y += 2) c.row(y, 5, 19, C.stoneDark);
+    c.poly([[2, 12], [4, 3], [5, 3], [5, 12]], C.stoneLight); // the pediment, edge on
+    block(c, 2, 12, 20, 14, C.stoneLight);
+    c.rect(9, 15, 19, 38, C.stone); // the side wall
+    for (let y = 18; y <= 38; y += 5) c.row(y, 9, 19, C.stoneDark);
+    for (let y = 15; y <= 38; y++) for (let x = 10; x <= 19; x++) if (y % 5 !== 3 && (x + ((y / 5) | 0) * 3) % 6 === 0) c.set(x, y, C.stoneDark);
+    c.rect(7, 15, 8, 38, C.stoneDark); // the porch, in shadow
+    c.rect(4, 15, 6, 38, C.stone); // the near column
+    c.col(4, 15, 38, C.stoneLight);
+    c.col(6, 16, 37, C.stoneDark);
+    c.row(15, 4, 6, C.stoneLight);
+    c.row(38, 4, 6, C.stoneLight);
+    if (open) {
+      c.rect(1, 20, 3, 38, C.ironDark); // the door, standing open
+      c.col(1, 20, 38, C.iron);
+      c.row(20, 1, 3, C.iron);
+      c.set(2, 30, C.brass);
+      c.rect(7, 20, 8, 38, C.night);
+    } else {
+      c.rect(7, 20, 8, 38, C.ironDark);
+      c.col(7, 20, 38, C.iron);
+    }
+    block(c, 3, 39, 19, 40);
+    block(c, 1, 41, 20, 42, C.stoneLight);
+    moss(c, 1, 34, 20, 42, 5);
+  };
+  V('mausoleum-door', {
+    side: pic(22, 44, (c) => mausoleumSide(c, false)),
+    used: same('mausoleum-door-open'),
+    sideUsed: pic(22, 44, (c) => mausoleumSide(c, true)),
+  });
+  V('mausoleum-door-open', {
+    side: pic(22, 44, (c) => mausoleumSide(c, true)),
+    used: same('mausoleum-door'),
+    sideUsed: pic(22, 44, (c) => mausoleumSide(c, false)),
+  });
+
   return S;
 };

@@ -232,9 +232,8 @@ export async function loadPixel() {
           group: c.group,
           w: i.w || 16,
           h: i.h || 16,
-          side: i.side,
-          used: i.used,
-          long: !!i.long,
+          v: i.v || null, // its other pictures: { side, used, sideUsed } -> [w, h]
+          base: i.base || 'front', // which way the main picture looks
         };
         PX.set(i.slug, it);
         SPRITE_WIDTH.set(it.asset, it.w);
@@ -248,7 +247,57 @@ export async function loadPixel() {
 }
 /** Every searchable built-in sprite, pixel art first. */
 export function allItems() {
-  return PIXEL.flatMap((c) => c.items); // the emoji library is still understood (old stories use it) but no longer offered
+  return [...catsWithOwn().flatMap((c) => c.items)]; // the emoji library is still understood (old stories use it) but no longer offered
+}
+
+/* ---------- my own objects: drawn in the sprite editor, kept on this device (localStorage tf.objects) ----------
+ * { id, name, cat, slug, base, pics: { '': dataUrl, side, used, sideUsed }, in: { storyCode: assetId } }
+ *   cat    'campaign' (an edited copy of a library thing), 'own' (My objects) or a library category id (px-furniture)
+ *   slug   set when this drawing permanently stands in for that library thing on this device
+ * In lists an object is the asset 'own:<id>'; put on a stage it is sent to the story and becomes c:<assetId>. */
+export const OWN = new Map();
+export function loadOwn() {
+  OWN.clear();
+  try {
+    for (const o of JSON.parse(localStorage.getItem('tf.objects') || '[]')) if (o && o.id && o.pics && o.pics['']) OWN.set(o.id, o);
+    /* drawings from the first sprite editor */
+    for (const d of JSON.parse(localStorage.getItem('tf.own') || '[]'))
+      if (d && d.id && d.dataUrl && !OWN.has(d.id))
+        OWN.set(d.id, { id: d.id, name: d.name, cat: 'own', base: 'front', pics: { '': d.dataUrl }, in: d.in || {} });
+  } catch {
+    /* nothing kept, or not readable: start empty */
+  }
+}
+export function keepOwn() {
+  try {
+    localStorage.setItem('tf.objects', JSON.stringify([...OWN.values()].slice(0, 400)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+const ownItem = (o) => ({ name: (o.name || 'my object').toLowerCase(), asset: 'own:' + o.id, group: 'thing', own: true });
+/** The library's categories with my own objects in them: altered things stand in for the originals, new ones are
+ * added to the category they were saved to, and "Campaign sprites" and "My objects" come last. */
+export function catsWithOwn(group) {
+  const mine = [...OWN.values()],
+    alt = new Map(mine.filter((o) => o.slug).map((o) => [o.slug, o]));
+  const cats = PIXEL.filter((c) => !group || c.group === group).map((c) => ({
+    ...c,
+    items: [
+      ...c.items.map((i) => (alt.has(i.asset.slice(2)) ? ownItem(alt.get(i.asset.slice(2))) : i)),
+      ...mine.filter((o) => !o.slug && o.cat === c.id).map(ownItem),
+    ],
+  }));
+  if (!group || group === 'thing') {
+    const extra = (id, label) => {
+      const items = mine.filter((o) => !o.slug && o.cat === id).map(ownItem);
+      if (items.length) cats.push({ id: 'px-' + id, label, group: 'thing', items });
+    };
+    extra('campaign', 'Campaign sprites');
+    extra('own', 'My objects');
+  }
+  return cats;
 }
 
 /* ---------- art packs (higher quality replacements for the placeholders) ---------- */
@@ -267,6 +316,19 @@ export async function loadPack() {
   }
 }
 
+/** The other pictures of the story's own things: asset id -> { v: { side, used, sideUsed } (asset ids), base }. */
+export const CUSTOM = new Map();
+export function setCustomAssets(assets) {
+  CUSTOM.clear();
+  for (const a of assets || []) if (a.views || a.base) CUSTOM.set(a.id, { v: a.views || {}, base: a.base || 'front' });
+}
+/** Which of a thing's pictures to show: '' | 'side' | 'used' | 'sideUsed', falling back to what exists. */
+export function viewKey(has, view, used) {
+  const want = view === 'side' ? (used ? 'sideUsed' : 'side') : used ? 'used' : '';
+  if (!want || (has && has[want])) return want;
+  if (want === 'sideUsed' && has && has.side) return 'side';
+  return '';
+}
 export function assetUrl(code, id) {
   return `/api/rooms/${code}/assets/${id.slice(2)}`;
 }
@@ -274,6 +336,7 @@ export function assetUrl(code, id) {
 /** How to draw a sprite asset: { img: url } or { glyph: text }. */
 export function spriteView(code, asset) {
   if (asset.startsWith('c:')) return { img: assetUrl(code, asset) };
+  if (asset.startsWith('own:')) return { img: (OWN.get(asset.slice(4)) || { pics: {} }).pics[''] || '' };
   if (asset.startsWith('p:')) return { img: PACK.pixel[asset.slice(2)] ? 'packs/' + PACK.pixel[asset.slice(2)] : `px/${asset.slice(2)}.png` }; // an art pack can replace any pixel sprite
   if (asset.startsWith('s:')) {
     const slug = asset.slice(2),

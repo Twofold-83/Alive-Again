@@ -103,12 +103,50 @@ module.exports = ({ C, K, hex, dark, lite }) => {
     def(slug, solid, rows, o);
     out[slug].rows = rows;
   }
+  const patched = (rows, { swap = {}, put = [] }) => {
+    const out = rows.map((r) => [...r].map((ch) => swap[ch] || ch));
+    for (const [x, y, text] of put) {
+      while (out.length <= y) out.push([]);
+      for (let i = 0; i < text.length; i++) {
+        while (out[y].length <= x + i) out[y].push('.');
+        if (text[i] !== ' ') out[y][x + i] = text[i];
+      }
+    }
+    return out.map((r) => r.join(''));
+  };
+  const asDef = (rows, o) => {
+    def('\u0000', false, rows, o);
+    const d = out['\u0000'];
+    delete out['\u0000'];
+    delete d.solid;
+    return d;
+  };
+  /**
+   * The other pictures of a thing: V('fridge', { base: 'front', side: rows, used: rows, sideUsed: rows }).
+   * Each is a text picture of its own, or a change to another one: { swap, put } changes the main picture
+   * (for `used`) or the side picture (for `sideUsed`); { of: 'used', swap, put } changes that one instead.
+   */
+  function V(slug, v) {
+    const src = out[slug];
+    if (!src) throw new Error('views for ' + slug + ', which is not drawn here');
+    const o = { shade: src.shade, outline: src.outline },
+      rows = { base: src.rows },
+      views = {};
+    if (v.base) views.base = v.base;
+    for (const key of ['side', 'used', 'sideUsed']) {
+      const x = v[key];
+      if (!x) continue;
+      rows[key] = Array.isArray(x) ? x : patched(rows[x.of || (key === 'sideUsed' ? 'side' : 'base')], x);
+      views[key] = asDef(rows[key], o);
+    }
+    src.views = views;
+  }
   const D = (slug, rows, o) => keep(slug, true, rows, o); // blocks the way
   const T = (slug, rows, o) => keep(slug, false, rows, o); // can be walked past
-  require('./_rest-home.js')({ D, T, vary });
-  require('./_rest-eerie.js')({ D, T, vary });
-  require('./_rest-tech.js')({ D, T, vary });
-  require('./_rest-finds.js')({ D, T, vary });
+  require('./_rest-home.js')({ D, T, vary, V });
+  require('./_rest-eerie.js')({ D, T, vary, V });
+  require('./_rest-tech.js')({ D, T, vary, V });
+  require('./_rest-finds.js')({ D, T, vary, V });
   for (const k of Object.keys(out)) delete out[k].rows;
   return out;
 };

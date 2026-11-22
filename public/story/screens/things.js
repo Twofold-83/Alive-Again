@@ -1,18 +1,17 @@
 /* Director screens about one character or thing: its tools, speaking, moving, adding, tying, active objects, exits. */
 import { isDoll, poseEditor } from '../../core/dolls.js';
-import { PIXEL, pixelInfo } from '../../core/catalog.js';
+import { PIXEL, pixelInfo, CUSTOM, catsWithOwn, OWN } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES } from '../../shared/options.js';
 import { G, buildGuided, short } from '../guided.js';
 import { glyphNode } from '../../stage/render.js';
-import { openSpriteEditor, ownDrawings, useOwn, forgetOwn } from '../../build/spriteed.js';
-import { spriteView } from '../../core/catalog.js';
+import { openSpriteEditor, forgetOwn } from '../../build/spriteed.js';
+import { spriteView, assetUrl } from '../../core/catalog.js';
 import { dollDataUrl } from '../../core/dolls.js';
-import { toast } from '../../core/dom.js';
 
 /** Categories of the pixel-art library for one "Add something" branch. */
 function groupCats(g) {
-  return PIXEL.filter((c) => c.group === g);
+  return catsWithOwn(g);
 }
 
 /* ================= a selected character or thing: all its tools in one place ================= */
@@ -27,32 +26,32 @@ export function screenThing(kit) {
   const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, label);
   /* a library thing has three pictures: as drawn, turned a quarter, and after someone used it */
   const viewRow = () => {
-    const info = pixelInfo(sel.asset);
-    if (!info.side) return null;
-    const names = info.long ? ['Side', 'Front'] : ['Front', 'Side'];
+    const mine = sel.asset.startsWith('c:') ? CUSTOM.get(sel.asset.slice(2)) : null,
+      info = mine || pixelInfo(sel.asset),
+      has = info.v;
+    if (!has || !(has.side || has.used)) return null;
+    const names = info.base === 'side' ? ['Side', 'Front'] : ['Front', 'Side'];
+    const btn = (attr, label, on, fn) =>
+      h(
+        'button',
+        {
+          'data-view': attr,
+          class: 'grow' + (on ? ' on' : ''),
+          onclick: () => {
+            fn();
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        label,
+      );
     return h(
       'div',
       { class: 'row', id: 'viewRow' },
       h('span', { class: 'dim small' }, 'View'),
-      [
-        ['', names[0]],
-        ['side', names[1]],
-        ['used', 'Used'],
-      ].map(([v, label]) =>
-        h(
-          'button',
-          {
-            'data-view': v || 'drawn',
-            class: 'grow' + ((sel.view || '') === v ? ' on' : ''),
-            onclick: () => {
-              sel.view = v;
-              c.changedQuiet();
-              c.rebuild();
-            },
-          },
-          label,
-        ),
-      ),
+      has.side && btn('drawn', names[0], !sel.view, () => (sel.view = '')),
+      has.side && btn('side', names[1], sel.view === 'side', () => (sel.view = 'side')),
+      (has.used || has.sideUsed) && btn('used', sel.used ? 'Used ✓' : 'Used', !!sel.used, () => (sel.used = !sel.used)),
     );
   };
   const lay = (v, label) =>
@@ -83,20 +82,29 @@ export function screenThing(kit) {
       isDoll(sel.asset) && b('', 'Change look', () => c.dollMaker(sel)),
       !ws && b('', 'Move / animate', () => enter('move')),
       b('', 'Edit drawing', async () => {
-        /* open the picture in the sprite editor; the changed drawing replaces this thing (a paper doll becomes a fixed picture) */
-        const src = isDoll(sel.asset) ? await dollDataUrl(sel.asset, sel.feel) : spriteView(kit.code, sel.asset).img;
-        const info = pixelInfo(sel.asset);
-        openSpriteEditor({
-          src: src && sel.view && info[sel.view] ? src.replace(/\.png$/, `.${sel.view}.png`) : src,
-          name: lab(sel),
-          onSave: (id) => {
-            sel.asset = 'c:' + id;
-            sel.view = '';
-            sel.pose = null;
-            c.changedQuiet();
-            c.rebuild();
-          },
-        });
+        /* open all the pictures of this thing in the sprite editor. A library thing is saved as a campaign sprite (or
+           alters the asset for good); one of my own objects is changed; a paper doll becomes a fixed picture. */
+        const swap = (id) => {
+          sel.asset = 'c:' + id;
+          sel.pose = null;
+          c.changedQuiet();
+          c.rebuild();
+        };
+        const mine = sel.asset.startsWith('c:') && [...OWN.values()].find((o) => o.in && o.in[kit.code] === sel.asset.slice(2));
+        if (mine) return openSpriteEditor({ edit: mine, onSave: swap });
+        if (isDoll(sel.asset))
+          return openSpriteEditor({ from: { name: lab(sel), urls: { '': await dollDataUrl(sel.asset, sel.feel) } }, onSave: swap });
+        const main = spriteView(kit.code, sel.asset).img,
+          info = sel.asset.startsWith('c:') ? CUSTOM.get(sel.asset.slice(2)) || {} : pixelInfo(sel.asset),
+          urls = { '': main };
+        for (const k of ['side', 'used', 'sideUsed'])
+          if (info.v && info.v[k])
+            urls[k] = sel.asset.startsWith('c:')
+              ? assetUrl(kit.code, 'c:' + info.v[k])
+              : main.replace(/\.png$/, { side: '.side', used: '.used', sideUsed: '.side.used' }[k] + '.png');
+        const slug = sel.asset.startsWith('p:') ? sel.asset.slice(2) : '',
+          cat = slug && PIXEL.find((x) => x.items.some((i) => i.asset === sel.asset));
+        openSpriteEditor({ from: { name: lab(sel), slug, cat: cat ? cat.id : 'own', base: info.base || 'front', urls }, onSave: swap });
       }),
       b('', 'Turn into…', () => {
         G.q = '';
@@ -402,7 +410,7 @@ export function screenAddSearch(kit) {
 export function screenAddOwn(kit) {
   const { p, c, S, code, head, place } = kit;
   head('Something of your own');
-  const mine = S.assets.filter((a) => a.kind === 'sprite');
+  const mine = S.assets.filter((a) => a.kind === 'sprite' && !a.part);
   const any = h('input', { placeholder: 'A word or two, shown as a sign', maxlength: 24 });
   if (mine.length)
     add(
@@ -413,38 +421,51 @@ export function screenAddOwn(kit) {
         mine.map((a) => h('button', { title: a.name, onclick: () => place('c:' + a.id) }, glyphNode(code, 'c:' + a.id))),
       ),
     );
-  /* my drawings: made in the sprite editor, kept on this device for every story */
-  const own = ownDrawings();
+  /* my own objects: drawn in the sprite editor, kept on this device for every story */
+  const own = [...OWN.values()],
+    kindOf = (o) =>
+      o.slug
+        ? 'stands in for ' + o.slug.replace(/-/g, ' ')
+        : o.cat === 'campaign'
+          ? 'campaign sprite'
+          : o.cat === 'own'
+            ? 'my object'
+            : 'in ' + ((PIXEL.find((x) => x.id === o.cat) || {}).label || 'the library');
   add(
     p,
-    h('button', { id: 'drawNew', class: 'primary', onclick: () => openSpriteEditor({ onSave: (id) => place('c:' + id) }) }, 'Draw a new thing'),
-    h('b', { class: 'actlab' }, 'My drawings'),
+    h('button', { id: 'drawNew', class: 'primary', onclick: () => openSpriteEditor({ onSave: (id) => place('c:' + id) }) }, 'Draw a new object'),
+    h('b', { class: 'actlab' }, 'My objects and campaign sprites'),
     own.length
       ? h(
           'div',
-          { class: 'grid owngrid' },
-          own.map((d) =>
+          { class: 'ownlist' },
+          own.map((o) =>
             h(
-              'button',
-              {
-                title: d.name + ' (right-click to forget)',
-                onclick: () =>
-                  useOwn(d)
-                    .then((id) => place('c:' + id))
-                    .catch((e) => toast(e.message)),
-                oncontextmenu: (ev) => {
-                  ev.preventDefault();
-                  if (confirm(`Forget “${d.name}”?`)) {
-                    forgetOwn(d.id);
+              'div',
+              { class: 'row ownrow' },
+              h(
+                'button',
+                { class: 'ownpick', title: 'Put it on the stage', onclick: () => place('own:' + o.id) },
+                h('img', { src: o.pics[''], alt: o.name, class: 'ownimg' }),
+              ),
+              h('span', { class: 'grow' }, h('b', {}, o.name), h('small', { class: 'dim' }, ' ' + kindOf(o))),
+              h('button', { title: 'Edit', onclick: () => openSpriteEditor({ edit: o, onSave: () => c.rebuild() }) }, '✎'),
+              h(
+                'button',
+                {
+                  title: o.slug ? 'Give the original back' : 'Forget this object',
+                  onclick: () => {
+                    if (!confirm(o.slug ? `Give back the original “${o.slug.replace(/-/g, ' ')}”?` : `Forget “${o.name}”?`)) return;
+                    forgetOwn(o.id);
                     c.rebuild();
-                  }
+                  },
                 },
-              },
-              h('img', { src: d.dataUrl, alt: d.name, class: 'ownimg' }),
+                '✕',
+              ),
             ),
           ),
         )
-      : h('small', { class: 'dim' }, 'Nothing yet. Draw a thing, or press “Edit drawing” on anything on the stage.'),
+      : h('small', { class: 'dim' }, 'Nothing yet. Draw an object, or press “Edit drawing” on anything on the stage.'),
   );
   add(
     p,

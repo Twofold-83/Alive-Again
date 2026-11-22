@@ -308,21 +308,23 @@ export function screenRules(kit) {
           },
           'None',
         ),
-        S.assets.map((a) =>
-          h(
-            'button',
-            {
-              class: info.image === 'c:' + a.id ? 'on' : '',
-              title: a.name,
-              onclick: () => {
-                info.image = 'c:' + a.id;
-                saveInfo();
-                c.rebuild();
+        S.assets
+          .filter((a) => !a.part)
+          .map((a) =>
+            h(
+              'button',
+              {
+                class: info.image === 'c:' + a.id ? 'on' : '',
+                title: a.name,
+                onclick: () => {
+                  info.image = 'c:' + a.id;
+                  saveInfo();
+                  c.rebuild();
+                },
               },
-            },
-            h('img', { src: assetUrl(code, 'c:' + a.id), alt: a.name, class: 'ownimg' }),
+              h('img', { src: assetUrl(code, 'c:' + a.id), alt: a.name, class: 'ownimg' }),
+            ),
           ),
-        ),
       ),
       c.maker('backdrop', (id) => {
         info.image = 'c:' + id;

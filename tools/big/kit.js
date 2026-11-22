@@ -325,4 +325,26 @@ function fromPng(buf) {
   return c;
 }
 
-module.exports = { png, readPng, fromPng, canvas, scale2x, hex, mix, blend, dark, lite, rnd, C, K };
+/**
+ * A sprite written as text: one letter is one pixel. `pal` says which colour each letter is ('#rrggbb' or a kit
+ * colour); '#' is always the outline colour, '.' and ' ' are empty. This is the form `make-big.js --dump=<slug>`
+ * prints, so a picture can be dumped, changed by hand and put back with exactly the same colours.
+ * The text holds the whole canvas including the outline, so nothing is shaded or outlined afterwards.
+ */
+function rows(lines, pal = {}) {
+  const cols = { '#': K };
+  for (const [k, v] of Object.entries(pal)) cols[k] = typeof v === 'string' ? hex(v) : v;
+  return {
+    w: Math.max(...lines.map((l) => l.length)),
+    h: lines.length,
+    shade: false,
+    outline: false,
+    draw(c) {
+      lines.forEach((line, y) => {
+        for (let x = 0; x < line.length; x++) if (cols[line[x]]) c.set(x, y, cols[line[x]]);
+      });
+    },
+  };
+}
+
+module.exports = { rows, png, readPng, fromPng, canvas, scale2x, hex, mix, blend, dark, lite, rnd, C, K };

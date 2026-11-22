@@ -47,13 +47,26 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await p.mouse.down();
     await p.mouse.move(cvb.x + cvb.width * 0.7, cvb.y + cvb.height * 0.5, { steps: 5 });
     await p.mouse.up();
+    // its used picture: a second line, on the "used" tab
+    await p.click('[data-pic=used]');
+    await p.mouse.move(cvb.x + cvb.width * 0.3, cvb.y + cvb.height * 0.2);
+    await p.mouse.down();
+    await p.mouse.move(cvb.x + cvb.width * 0.7, cvb.y + cvb.height * 0.2, { steps: 5 });
+    await p.mouse.up();
+    assert.equal((await p.locator('#spriteCat option').count()) > 5, true, 'a new object can be saved into any category');
     await p.fill('#spriteName', 'My line');
     await p.click('#spriteSave');
     await p.waitForSelector('#spriteed', { state: 'hidden' });
     await p.waitForSelector('#stage .ent img[src*="/assets/"]');
-    assert.match(await p.evaluate(() => localStorage.getItem('tf.own')), /My line/);
-    assert.equal(await p.locator('.owngrid button').count(), 1, 'the drawing is listed under My drawings');
-    await p.click('.gback');
+    assert.match(await p.evaluate(() => localStorage.getItem('tf.objects')), /My line.*"used"/s);
+    assert.equal(await p.locator('.ownlist .ownrow').count(), 1, 'the object is listed under my objects');
+    // on the stage it has a Used state, like a library thing
+    const mineId = await p.evaluate(() => window.__lastAdded);
+    const before = await p.getAttribute(`#stage .ent[data-id="${mineId}"] img`, 'src');
+    await p.locator(`#stage .ent[data-id="${mineId}"]`).click({ force: true });
+    await p.click('#viewRow [data-view=used]');
+    assert.notEqual(await p.getAttribute(`#stage .ent[data-id="${mineId}"] img`, 'src'), before, 'the used picture is shown');
+    await x.done();
 
     /* the character maker */
     await x.opt('Character maker');

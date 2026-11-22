@@ -1,5 +1,6 @@
 /* A turn in a story: the draft being edited, undo, the Director's steps, and sending the turn.
  * onState() is where every message from the server arrives. */
+import { setCustomAssets } from '../core/catalog.js';
 import { audio } from '../core/audio.js';
 import { rpgState } from '../dungeon/screen.js';
 import { renderStage } from '../stage/render.js';
@@ -29,6 +30,7 @@ export function onState(s) {
   normScene(s.scene);
   normScene(s.before);
   app.S = s;
+  setCustomAssets(s.assets);
   app.localDeadline = s.remainingMs != null ? performance.now() + s.remainingMs : 0;
   const newTurn = !prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended;
   if (newTurn) {

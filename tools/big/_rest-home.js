@@ -1,5 +1,5 @@
 /* The modern home, the attic and the household, as text pictures (see rest.js for the letters). */
-module.exports = ({ D, T, vary }) => {
+module.exports = ({ D, T, vary, V }) => {
   /* ---------- living room and bedroom ---------- */
   T(
     'rug',
@@ -1424,4 +1424,598 @@ module.exports = ({ D, T, vary }) => {
   ]);
   T('pallet', ['qqqqqqqqqqqqqqqqqq', 'O..O...OO...O..O..', 'pppppppppppppppppp'], { shade: false });
   T('sump-pit', ['.ssssssssssss.', 'sdnnnnnnnnnnds', 'sn33n3333n33ns', 'sdnnnnnnnnnnds', '.ssssssssssss.'], { shade: false });
+  views(V);
 };
+
+/*
+ * The other pictures of these things: turned a quarter (`side`), after somebody used them (`used`), and both
+ * (`sideUsed`). Side views look to the right: the front of the thing is on the right-hand side of the picture.
+ * Things that lie along the floor and are drawn from their long side (base: 'side') get a front view seen a
+ * little from above, running away from the viewer.
+ */
+function views(V) {
+  const rep = (n, row) => Array(n).fill(row);
+  const re = (text, swap) => [...text].map((ch) => swap[ch] || ch).join('');
+  /** Rows with texts put on them: [[x, y, 'text'], ...]; a space leaves the pixel as it is, a dot empties it. */
+  const patch = (rows, puts) => {
+    const out = rows.map((r) => [...r]);
+    for (const [x, y, text] of puts) {
+      while (out.length <= y) out.push([]);
+      for (let i = 0; i < text.length; i++) {
+        while (out[y].length <= x + i) out[y].push('.');
+        if (text[i] !== ' ') out[y][x + i] = text[i];
+      }
+    }
+    return out.map((r) => r.join(''));
+  };
+  /** A filled box as puts. */
+  const box = (x, y, w, h, ch) => rep(h, 0).map((_, i) => [x, y + i, ch.repeat(w)]);
+  /** A column of single letters as puts. */
+  const col = (x, y, text) => [...text].map((ch, i) => [x, y + i, ch]);
+  const recol = (x, swap) =>
+    Array.isArray(x)
+      ? x.map((r) => re(r, swap))
+      : {
+          ...x,
+          put: (x.put || []).map(([a, b, t]) => [a, b, re(t, swap)]),
+          swap: Object.fromEntries(Object.entries(x.swap || {}).map(([k, v]) => [swap[k] || k, swap[v] || v])),
+        };
+  /**
+   * The same views for a thing and its recoloured variants: fam(views, { slug: swap, slug: [swap, more] }).
+   * A view may be a function of the slug; `more` = { side: puts, used: puts, sideUsed: puts } is added on top.
+   */
+  function fam(v, who) {
+    for (const [slug, w] of Object.entries(who)) {
+      const [swap, more] = Array.isArray(w) ? w : [w, {}],
+        o = {};
+      for (const [k, x0] of Object.entries(v)) {
+        const x = typeof x0 === 'function' ? x0(slug) : x0;
+        if (!x) continue;
+        if (typeof x === 'string') o[k] = x;
+        else {
+          o[k] = recol(x, swap);
+          if (more[k]) o[k] = Array.isArray(o[k]) ? patch(o[k], more[k]) : { ...o[k], put: [...o[k].put, ...more[k]] };
+        }
+      }
+      V(slug, o);
+    }
+  }
+  const same = { of: 'base' }, // a round thing looks the same from the side
+    sameUsed = { of: 'used' };
+
+  /* ---------- kitchen ---------- */
+  fam(
+    {
+      side: [
+        'PPPPPPPPPP',
+        ...rep(2, 'PwwwwwwwAw'),
+        ...rep(3, 'PwwwwwwwAwt'),
+        ...rep(2, 'PwwwwwwwAw'),
+        'PwwwwwwwAA',
+        'PwwwwwwwAw',
+        ...rep(4, 'PwwwwwwwAwt'),
+        ...rep(11, 'PwwwwwwwAw'),
+        'PPPPPPPPPP',
+        'I........I',
+      ],
+      /* the lower door stands open: shelves, food, and the door with its racks swung out to the left */
+      used: [
+        '....PPPPPPPPPPPP',
+        ...rep(2, '....PwwwwwwwwwwP'),
+        ...rep(3, '....PwwwwwwwwtwP'),
+        ...rep(2, '....PwwwwwwwwwwP'),
+        '....PAAAAAAAAAAP',
+        '....PccccccccccP',
+        'PPPPPcb3cc8ccRcP',
+        'PwwwPcb3c88cRRcP',
+        'PAAwPAAAAAAAAAAP',
+        'P3RwPcccccc6cccP',
+        'P3RwPc00cc66cbbP',
+        'PAAwPAAAAAAAAAAP',
+        'PwwwPc8cccc3c3cP',
+        'Pb6wPc88c9c3c3cP',
+        'Pb6wPAAAAAAAAAAP',
+        'PAAwPccccccccccP',
+        'PwwwPcLLcc99cccP',
+        'PwwwPcLLLc99c0cP',
+        'PwwwPAAAAAAAAAAP',
+        'PwwwPwwwwwwwwwwP',
+        'PwwwPwwwwwwwwwwP',
+        'PwwwPPPPPPPPPPPP',
+        'PPPPI..........I',
+      ],
+      sideUsed: [
+        'PPPPPPPPPP',
+        ...rep(2, 'PwwwwwwwAw'),
+        ...rep(3, 'PwwwwwwwAwt'),
+        ...rep(2, 'PwwwwwwwAw'),
+        'PwwwwwwwAA',
+        'PwwwwwwwPcPPPPPPPP',
+        'PwwwwwwwPcPwwwwwwP',
+        ...rep(2, 'PwwwwwwwPcPw3wRbwP'),
+        'PwwwwwwwPcPAAAAAAP',
+        'PwwwwwwwPcPwwwwwwP',
+        ...rep(2, 'PwwwwwwwPcPwb6w8wP'),
+        'PwwwwwwwPcPAAAAAAP',
+        ...rep(6, 'PwwwwwwwPcPwwwwwwP'),
+        'PwwwwwwwPcPPPPPPPP',
+        'PPPPPPPPPP',
+        'I........I',
+      ],
+    },
+    {
+      fridge: {},
+      'fridge-old': [
+        { w: 'P', P: 'a', t: 'u' },
+        {
+          side: [
+            [2, 20, 'uu'],
+            [5, 13, 'A'],
+            [3, 4, 'u'],
+          ],
+          sideUsed: [
+            [2, 20, 'uu'],
+            [5, 13, 'A'],
+            [3, 4, 'u'],
+          ],
+          used: [
+            [11, 4, 'u'],
+            [7, 6, 'A'],
+          ],
+        },
+      ],
+      icebox: { w: 'o', P: 'O', t: 'G', A: 'O' },
+    },
+  );
+  fam(
+    {
+      side: [
+        'IIIIIIIIIII',
+        'InnIIIInnII',
+        'wwwwwwwwwww',
+        'wwwwwwwwwPwI',
+        'wwwwwwwwwPw',
+        'wwwwwwwwwPwt',
+        ...rep(8, 'wwwwwwwwwPw'),
+        'wwwwwwwwwww',
+        'I.........I',
+      ],
+      /* the oven door folded down towards the viewer: the racks, a roast, the glow of the element */
+      used: {
+        put: [
+          [0, 5, 'wwwwwwwwwwwwww'],
+          [0, 7, 'wwnnnnnnnnnnww'],
+          [0, 8, 'wwnIIIIIIIInww'],
+          [0, 9, 'wwnnn0000nnnww'],
+          [0, 10, 'wwnIIIIIIIInww'],
+          [0, 11, 'wwnnfFffFfnnww'],
+          [0, 12, 'wwnnnnnnnnnnww'],
+          [0, 13, 'WWWWWWWWWWWWWW'],
+          [0, 14, 'WWn11111111nWW'],
+          [0, 15, 'WWWWWWWWWWWWWW'],
+          [0, 16, 'wttttttttttttw'],
+        ],
+      },
+      sideUsed: {
+        put: [
+          [9, 5, 'ww.'],
+          ...box(9, 6, 2, 6, 'n'),
+          [9, 11, 'fF'],
+          [9, 12, 'nn'],
+          [9, 13, 'WWWWWWWWW'],
+          [9, 14, 'wwwwwwwww'],
+          [17, 15, 't'],
+        ],
+      },
+    },
+    { cooker: {}, 'oven-old': { w: 'P', 1: 'n', t: 'u', W: 'a' } },
+  );
+  V('stove-iron', {
+    side: [
+      '.II........',
+      '.II........',
+      '.II........',
+      '.II........',
+      '.II........',
+      'IIIIIIIIIII',
+      'iiiiiiiiii',
+      'iIIIIIIiIi',
+      'iIiiiiIiIif',
+      'iIiiiiIiIif',
+      'iIIIIIIiIi',
+      'iiiiiiiiii',
+      'iIIIIIIIIi',
+      'iiiiiiiiii',
+      'II......II',
+      'II......II',
+    ],
+    /* a pot put on to boil, the fire stoked */
+    used: {
+      put: [
+        [8, 1, '.2.2.'],
+        [8, 2, '2.2..'],
+        [7, 3, 'ItttttI'],
+        [8, 4, 'tTttt'],
+        [6, 8, 'FfFF'],
+        [6, 9, 'fFFf'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [5, 1, '.2.2.'],
+        [5, 2, '2.2..'],
+        [4, 3, 'ItttttI'],
+        [5, 4, 'tTttt'],
+        [10, 8, 'F'],
+        [10, 9, 'F'],
+        [11, 9, 'f'],
+      ],
+    },
+  });
+  V('microwave', {
+    side: ['PPPPPPPPP', 'PaaaaPPPn', 'PPPPPPPPn', 'PaaaaPPPn', 'PPPPPPPPn', 'PPPPPPPPP'],
+    /* switched on: the light inside, a plate turning */
+    used: {
+      put: [
+        [2, 2, 'FFFFFF'],
+        [2, 3, 'FwwwwF'],
+        [10, 1, '8'],
+      ],
+    },
+    sideUsed: { swap: { n: 'F' } },
+  });
+  V('washing-machine', {
+    side: [
+      'PPPPPPPPPPP',
+      'PwwwwwwwwPwI',
+      'PwwwwwwwwPw',
+      'PwwwwwwwwPwt',
+      ...rep(4, 'PwwwwwwwwPwtt'),
+      'PwwwwwwwwPwt',
+      'PwwwwwwwwPw',
+      'PwwwwwwwwPw',
+      'PPPPPPPPPPP',
+      'I.........I',
+    ],
+    /* the door open, the washing half out */
+    used: [
+      '...PPPPPPPPPPPP',
+      '...PwIwIwwRwwwP',
+      '...PwwwwwwwwwwP',
+      '.t.PwwwttttwwwP',
+      't1tPwwtnnnntwwP',
+      't1tPwtnnnnnntwP',
+      't2tPwtnnjjnntwP',
+      't1tPwtnjjRRntwP',
+      't1tPwwtjjRRtwwP',
+      '.t.PwwwtjRRwwwP',
+      '...PwwwwjwRwwwP',
+      '...PPPPPPjPPPPP',
+      '...I..........I',
+    ],
+    sideUsed: [
+      'PPPPPPPPPPP',
+      'PwwwwwwwwPwI',
+      'PwwwwwwwwPw....',
+      'PwwwwwwwwPw.tttt.',
+      'PwwwwwwwwPnt1111t',
+      'PwwwwwwwwPnt1211t',
+      'PwwwwwwwwPjj1111t',
+      'PwwwwwwwwPjRt11t.',
+      'PwwwwwwwwPwjRtt..',
+      'PwwwwwwwwPwjR',
+      'PwwwwwwwwPw.j',
+      'PPPPPPPPPPP',
+      'I.........I',
+    ],
+  });
+  fam(
+    {
+      side: [
+        '..ttttt...',
+        '..t...t...',
+        '..t.......',
+        'PPPPPPPPPP',
+        'PnnnnnnnnP',
+        'P.P....P.P',
+        'wwwwwwwwww',
+        'wwwwwwwwWw',
+        'wwwwwwwwWwG',
+        ...rep(4, 'wwwwwwwwWw'),
+        'wwwwwwwwww',
+        'AAAAAAAAAA',
+      ],
+      /* the tap runs, the basin fills */
+      used: (slug) => ({
+        put: [
+          [9, 3, '2'],
+          [1, 4, slug === 'sink-dirty' ? '323 L L 2323' : '332332233233'],
+        ],
+      }),
+      sideUsed: {
+        put: [
+          [6, 2, '2'],
+          [6, 3, '2'],
+          [1, 4, '33233233'],
+        ],
+      },
+    },
+    {
+      'kitchen-sink': {},
+      'sink-stone': { P: 'l', w: 's', W: 'd', A: 'd', G: 'i' },
+      'sink-dirty': [{ w: 'P', W: 'a', P: 'a' }, { side: [[3, 9, 'u'], [4, 3, 'L']], sideUsed: [[3, 9, 'u'], [4, 3, 'L']] }],
+    },
+  );
+  {
+    const side = [
+      'qqqqqqqqqqq',
+      'ppppppppppp',
+      'oooooooooo',
+      'oOOOOOOOoo',
+      ...rep(5, 'oOooooooOo'),
+      'oOOOOOOOoo',
+      'oooooooooo',
+      'OOOOOOOOOO',
+    ];
+    /* the right-hand cupboard open: pans and plates, the door swung out */
+    const open = [
+      [11, 3, 'OOOOOOOO'],
+      [11, 4, 'Onntttnn'],
+      [11, 5, 'OnnttnwwO'],
+      [11, 6, 'OOOOOOOO'],
+      [11, 7, 'Onnnnn0n'],
+      [11, 8, 'On66nn00'],
+      [11, 9, 'OOOOOOOO'],
+      [19, 3, 'oOOOO'],
+      ...box(19, 4, 1, 6, 'o'),
+      ...box(20, 4, 4, 6, 'OppO'.slice(0, 1)),
+      ...rep(6, 0).map((_, i) => [20, 4 + i, 'OppO']),
+      [20, 10, 'OOOO'],
+    ];
+    const openSide = [
+      [9, 3, 'nOOOOOOOO'],
+      ...rep(5, 0).map((_, i) => [9, 4 + i, 'nOoooooOO'.replace(/O$/, 'o')]),
+      [16, 6, 'G'],
+      [9, 9, 'nOOOOOOOO'],
+    ];
+    V('kitchen-counter', { side, used: { put: open }, sideUsed: { put: openSide } });
+    /* and the top drawer pulled out */
+    V('kitchen-counter-drawers', {
+      side,
+      used: {
+        put: [
+          ...open,
+          [1, 3, 'ntItntItn'],
+          [0, 4, 'OOOOOOOOOOO'],
+          [0, 5, 'OooooGGooooO'.slice(0, 11)],
+          [0, 6, 'OOOOOOOOOOO'],
+        ],
+      },
+      sideUsed: {
+        put: [...openSide, [10, 2, 'nnnn'], [10, 3, 'ooooO'], [10, 4, 'ooooOG'], [10, 5, 'OOOOO']],
+      },
+    });
+  }
+  V('dresser-kitchen', {
+    side: [
+      'OOOOOO',
+      'Oooooo',
+      'Ooooow',
+      'OOOOOO',
+      'Oooooo',
+      'OooooP',
+      'OOOOOO',
+      'qqqqqqqqqq',
+      'Ooooooooo',
+      'OoOOOOOoo',
+      ...rep(3, 'OoOoooOoo'),
+      'OoOOOOOoo',
+      'OOOOOOOOO',
+    ],
+    /* a cupboard open, a plate and a cup taken down */
+    used: {
+      put: [
+        [5, 2, 'oo'],
+        [8, 4, 'o'],
+        [8, 5, 'o'],
+        [10, 9, 'OOOOOOO'],
+        [10, 10, 'OnwwwnO'],
+        [10, 11, 'OOOOOOO'],
+        [10, 12, 'On0n6nO'],
+        [10, 13, 'OOOOOOO'],
+        [17, 8, 'oOOOO'],
+        ...rep(5, 0).map((_, i) => [18, 9 + i, 'OppO']),
+        [18, 14, 'OOOO'],
+        [18, 15, 'OOOO'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [5, 2, 'o'],
+        [8, 9, 'nOOOOOOO'],
+        ...rep(4, 0).map((_, i) => [8, 10 + i, 'nOooooo']),
+        [14, 11, 'G'],
+        [8, 13, 'nOOOOOOO'],
+      ],
+    },
+  });
+  V('bin', {
+    side: same,
+    /* the lid off and leaning against it, rubbish to the brim */
+    used: [
+      '...w.6.......',
+      '..wP0w6w.....',
+      'ttttttttt....',
+      '.tItItIt.....',
+      '.tItItIt.....',
+      '.tItItIt...I.',
+      '.tItItIt..It.',
+      '.tItItIt..It.',
+      '.ttttttt.It..',
+    ],
+    sideUsed: sameUsed,
+  });
+
+  /* ---------- bathroom ---------- */
+  {
+    /* the tub seen from its foot end, running away from the viewer: the tap at the far end */
+    const front = [
+      '......tt......',
+      '.....tttt.....',
+      '..wwwwttwwww..',
+      '.wwPPPPPPPPww.',
+      ...rep(16, 'wPPPPPPPPPPPPw'),
+      'wwPPPPPPPPPPww',
+      'wwwwwwwwwwwwww',
+      ...rep(3, '.wwwwwwwwwwww.'),
+      '..wwwwwwwwww..',
+      '..PPPPPPPPPP..',
+      '..G........G..',
+      '.GG........GG.',
+    ];
+    const water = [
+      [3, 3, '33333333'],
+      ...box(1, 4, 12, 16, '3'),
+      [2, 20, '3333333333'],
+      [5, 4, '22'],
+      [6, 5, '2'],
+      [3, 8, '22'],
+      [8, 11, '222'],
+      [4, 15, '22'],
+      [9, 17, '2'],
+    ];
+    const fill = { put: [[1, 4, '3'.repeat(28)], [4, 3, '3'.repeat(20)], [10, 2, '2..2....2'], [2, 3, '2']] };
+    fam(
+      { base: 'side', side: front, used: fill, sideUsed: { put: water } },
+      {
+        bathtub: {},
+        'bathtub-clawfoot': { w: 'P', P: 'a' },
+        'bathtub-stained': [
+          { w: 'P', P: 'a' },
+          {
+            side: [...col(4, 6, 'uuu'), [5, 6, 'u'], ...col(9, 10, 'rrrr'), [8, 10, 'rr'], [6, 22, 'r'], [6, 23, 'r'], [10, 3, 'L']],
+            sideUsed: [[6, 22, 'r'], [6, 23, 'r'], [9, 12, 'r'], [8, 13, 'rr']],
+          },
+        ],
+      },
+    );
+    /* the full bath, let out again: a wet floor */
+    V('bathtub-filled', {
+      base: 'side',
+      side: patch(front, water),
+      used: { swap: { 3: 'P' }, put: [[10, 2, '.........'], [4, 3, 'w'.repeat(20)], [8, 12, '3333333'], [18, 12, '33']] },
+      sideUsed: { swap: { 3: 'P', 2: 'P' }, put: [[3, 27, '333333'], [4, 28, '33333']] },
+    });
+    /* the canvas cover unlaced and thrown back */
+    V('water-therapy-tub', {
+      base: 'side',
+      side: patch(recol(front, { w: 't', P: 'i', G: 'I' }), [
+        [2, 2, 'cccccccccc'],
+        [1, 3, 'cccccccccccc'],
+        ...box(0, 4, 14, 17, 'c'),
+        [1, 21, 'cccccccccccc'],
+        [5, 3, 'nxxn'],
+        [5, 4, 'nxxn'],
+        [5, 5, 'nnnn'],
+        ...col(3, 8, 'YcYcYcYcYcYc'),
+        ...col(10, 8, 'YcYcYcYcYcYc'),
+      ]),
+      used: { put: [[5, 2, '.'], [1, 3, 'tttt33333333333333ccccccccct'], [22, 2, 'ccccc'], [1, 4, '3'.repeat(20)]] },
+      sideUsed: {
+        put: [
+          [2, 2, 'tttt..tttt'],
+          [1, 3, 'ttiiiiiiiitt'],
+          ...box(0, 4, 14, 9, 't333333333333t'.slice(0, 1)),
+          ...rep(9, 0).map((_, i) => [0, 4 + i, 't333333333333t']),
+          [5, 6, '22'],
+          [8, 9, '2'],
+          [0, 13, 'cccccccccccccc'],
+          [0, 14, 'cYccccccccccYc'],
+        ],
+      },
+    });
+  }
+  V('shower', {
+    base: 'side',
+    side: [
+      '.....tt.....',
+      '.....tt.....',
+      '....TTTT....',
+      '...TTTTTT...',
+      ...rep(6, 0).flatMap(() => ['...2.tt2.2..', '....2tt.2...']),
+      '...2.tt2.2..',
+      'wwwwwwwwwwww',
+      'WWWWWWWWWWWW',
+    ],
+    /* turned off: a last drip, water standing in the tray */
+    used: {
+      put: [...box(7, 3, 4, 14, '.'), [9, 4, '2'], [9, 9, '2'], [3, 17, '3333333']],
+    },
+    sideUsed: {
+      put: [...rep(13, 0).map((_, i) => [3, 4 + i, '..tt.....'.replace(/^\.\./, '..')]), ...box(3, 4, 2, 13, '.'), ...box(7, 4, 3, 13, '.'), [7, 5, '2'], [4, 10, '2'], [2, 17, '33333333']],
+    },
+  });
+  {
+    const lidUp = (water) => ({ put: [...col(6, 2, 'wwww'), [2, 7, water]] });
+    const front = ['wwwwwwww', 'wwwwwwww', 'wwwwwwtw', 'wwwwwwww', 'wwwwwwww', '.WWWWWW.', 'WwwwwwwW', 'WwwwwwwW', '.WWWWWW.', '.wwwwww.', '..wwww..', '..wwww..', '.wwwwww.'];
+    const frontUp = (water) => ({
+      put: [[1, 1, 'WWWWWW'], [1, 2, 'Wwwww'], [1, 3, 'WwwwwW'], [1, 4, 'WwwwwW'], [0, 5, '.wwwwww.'], [0, 6, 'ww' + water.slice(0, 4) + 'ww'], [0, 7, 'w' + water + 'w'], [0, 8, 'ww' + water.slice(2) + 'ww']],
+    });
+    const water = (slug) => (slug === 'toilet-dirty' ? 'LzLL3L' : '333333');
+    fam(
+      { base: 'side', side: front, used: (slug) => lidUp(water(slug)), sideUsed: (slug) => frontUp(water(slug)) },
+      {
+        toilet: {},
+        'toilet-old': { w: 'P', W: 'a', t: 'G' },
+        'toilet-dirty': [{ w: 'P', W: 'L' }, { side: [[3, 10, 'u'], [3, 11, 'u'], [1, 3, 'L']], sideUsed: [[3, 10, 'u'], [3, 11, 'u'], [1, 3, 'L']] }],
+      },
+    );
+    /* the broken one: flushed, it floods the floor */
+    V('toilet-broken', {
+      base: 'side',
+      side: patch(recol(front, { w: 'P', W: 'n' }), [[0, 0, '..'], [0, 1, '.'], [6, 0, '..'], [3, 2, 'n'], [4, 3, 'nn'], [4, 4, 'n'], [6, 12, '3333']]),
+      used: { put: [[2, 7, '333333'], [8, 9, '3'], [8, 10, '3'], [5, 12, '33333333'], [0, 12, '333']] },
+      sideUsed: { put: [[1, 6, '333333'], [1, 7, '333333'], [7, 9, '3'], [7, 10, '3'], [7, 11, '3'], [0, 12, '33'], [6, 12, '33333']] },
+    });
+  }
+  fam(
+    {
+      side: [
+        '.ttt....',
+        '.t.t....',
+        'wwwwwwww',
+        'wWWWWWWw',
+        'wwwwwww.',
+        '.wwwww..',
+        ...rep(6, '.ww.....'),
+        'wwww....',
+      ],
+      /* the tap runs, the basin fills */
+      used: (slug) => ({ put: [[5, 1, '2'], [1, 3, slug === 'washbasin-bloody' ? 'rr3r2rr3' : '33332333']] }),
+      sideUsed: (slug) => ({ put: [[3, 2, '2'], [1, 3, slug === 'washbasin-bloody' ? 'r32rr3' : '332333']] }),
+    },
+    {
+      'bathroom-sink': {},
+      washbasin: { w: 'P', W: 'a', t: 'G' },
+      'washbasin-bloody': [{ w: 'P', W: 'r', t: 'G' }, { side: [[6, 4, 'r'], [5, 5, 'r'], [2, 12, 'rr']], sideUsed: [[6, 4, 'r'], [5, 5, 'r'], [2, 12, 'rr']] }],
+    },
+  );
+  V('mirror-cabinet', {
+    side: ['PPPP', ...rep(6, 'PwP1'), 'PPPP'],
+    /* a door open: the shelves, pills and bottles */
+    used: {
+      put: [
+        [6, 1, 'wRw4w'],
+        [6, 2, 'wRw4w'],
+        [6, 3, 'PPPPP'],
+        [6, 4, 'ww6ww'],
+        [6, 5, 'w36wR'],
+        [6, 6, 'w36wR'],
+        [11, 0, 'PPPP'],
+        ...rep(6, 0).map((_, i) => [12, 1 + i, i < 2 ? '22P' : '11P']),
+        [12, 7, 'PPP'],
+      ],
+    },
+    sideUsed: { put: [[3, 0, 'PPPPPP'], ...rep(6, 0).map((_, i) => [3, 1 + i, i < 2 ? 'P221P' : 'P111P']), [3, 7, 'PPPPPP']] },
+  });
+}

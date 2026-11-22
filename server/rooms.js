@@ -116,7 +116,7 @@ function view(room, role) {
     remainingMs: room.deadline != null ? Math.max(0, room.deadline - Date.now()) : room.remaining,
     paused: timed && room.deadline == null,
     scene: room.scene,
-    assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name })),
+    assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name, part: a.part || undefined, views: a.views, base: a.base })),
     before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
     rules: room.rules,
     info: room.info || { title: '', text: '' },

@@ -26,7 +26,7 @@ const index = JSON.parse(fs.readFileSync(path.join(PX, 'index.json'), 'utf8'));
 /* the freshly drawn sprites */
 const drawn = new Map();
 for (const f of fs.readdirSync(path.join(__dirname, 'big')).sort()) {
-  if (!f.endsWith('.js') || f === 'kit.js' || f.startsWith('_')) continue;
+  if (!f.endsWith('.js') || f === 'kit.js' || f.startsWith('_') || f.startsWith('views-')) continue;
   const defs = require('./big/' + f)(kit);
   for (const [slug, def] of Object.entries(defs)) {
     if (drawn.has(slug)) throw new Error(`${slug} is drawn twice (${f} and ${drawn.get(slug).file})`);
@@ -36,7 +36,19 @@ for (const f of fs.readdirSync(path.join(__dirname, 'big')).sort()) {
 
 const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7),
   outDir = (process.argv.find((a) => a.startsWith('--out=')) || '').slice(6);
-function render(slug, d) {
+/* views of a thing drawn elsewhere than with the thing itself: tools/big/views-*.js, { slug: { base?, side, used, sideUsed } } */
+for (const f of fs.readdirSync(path.join(__dirname, 'big')).sort()) {
+  if (!/^views-.*\.js$/.test(f)) continue;
+  for (const [slug, v] of Object.entries(require('./big/' + f)(kit))) {
+    const d = drawn.get(slug);
+    if (!d) throw new Error(`${f}: ${slug} is not a freshly drawn sprite`);
+    if (d.views) throw new Error(`${f}: ${slug} already has views (in ${d.file})`);
+    d.views = v;
+    d.viewsFile = f;
+  }
+}
+/** Draw a sprite; returns its canvas. */
+function paint(slug, d) {
   const c = kit.canvas(d.w, d.h);
   const r = d.draw(c);
   if (r !== false) {
@@ -44,7 +56,68 @@ function render(slug, d) {
     if (d.outline !== false) c.outline();
   }
   if (!c.px.some(Boolean)) throw new Error(`${slug} (${d.file}) is empty`);
-  return kit.png(d.w, d.h, c.px);
+  return c;
+}
+const render = (slug, d) => kit.png(d.w, d.h, paint(slug, d).px);
+/**
+ * The other pictures of a thing, drawn by hand next to it: d.views = { base, side, used, sideUsed }.
+ *   base       'front' (default) or 'side': which way the main picture looks; `side` is then the other way
+ *   a view is  { w, h, draw(c) }                       a fresh canvas, shaded and outlined like any sprite, or
+ *              { from: 'base' | 'side' | 'used', w, h, dx, dy, draw(c), outline }
+ *                                                       a copy of that picture (on a canvas of w x h if given, the
+ *                                                       copy put at dx, dy — by default left, standing on the bottom
+ *                                                       row) to draw the change on; outline: true outlines it again
+ * Returns { side, used, sideUsed } as canvases, whichever exist.
+ */
+function paintViews(slug, d, base) {
+  const out = {},
+    src = { base };
+  for (const key of ['side', 'used', 'sideUsed']) {
+    const v = d.views && d.views[key];
+    if (!v) continue;
+    let c;
+    if (v.from) {
+      const from = src[v.from];
+      if (!from) throw new Error(`${slug}: view ${key} copies ${v.from}, which is not drawn (yet)`);
+      c = kit.canvas(v.w || from.w, v.h || from.h);
+      c.stamp(from, v.dx || 0, v.dy == null ? c.h - from.h : v.dy);
+      if (v.draw) v.draw(c);
+      if (v.outline) c.outline();
+    } else {
+      c = paint(`${slug} (${key})`, { ...v, file: d.viewsFile || d.file });
+    }
+    if (c.w > 64 || c.h > 64) throw new Error(`${slug}: view ${key} is larger than 64 x 64`);
+    out[key] = src[key] = c;
+  }
+  return out;
+}
+const VIEW_FILE = { side: '.side', used: '.used', sideUsed: '.side.used' };
+const dumpArg = (process.argv.find((a) => a.startsWith('--dump=')) || '').slice(7);
+if (dumpArg) {
+  /* look at a sprite as text: node tools/make-big.js --dump=bed-single-old   (or bed-single-old.side, .used, .sideUsed) */
+  const [slug, key] = dumpArg.split('.'),
+    d = drawn.get(slug);
+  if (!d) throw new Error(slug + ' is not a freshly drawn sprite');
+  const base = paint(slug, d),
+    c = key ? paintViews(slug, d, base)[key] : base;
+  if (!c) throw new Error(`${slug} has no view ${key}`);
+  const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+    seen = new Map();
+  let text = '';
+  for (let y = 0; y < c.h; y++) {
+    for (let x = 0; x < c.w; x++) {
+      const p = c.get(x, y);
+      if (!p) text += '.';
+      else {
+        const k = '#' + p.slice(0, 3).map((n) => n.toString(16).padStart(2, '0')).join('');
+        if (!seen.has(k)) seen.set(k, k === '#0b0a10' ? '#' : letters[seen.size % letters.length]);
+        text += seen.get(k);
+      }
+    }
+    text += '\n';
+  }
+  console.log(`${dumpArg}  ${c.w} x ${c.h}\n${text}${[...seen].map(([k, l]) => `${l} ${k}`).join('   ')}`);
+  process.exit(0);
 }
 if (only) {
   if (!outDir) throw new Error('--only needs --out=<folder>');
@@ -52,10 +125,15 @@ if (only) {
   const known = new Set(index.categories.flatMap((c) => c.items.map((i) => i.slug))),
     sizes = {};
   for (const [slug, d] of drawn) {
-    if (d.file !== only + '.js') continue;
+    if (d.file !== only + '.js' && d.viewsFile !== only + '.js') continue;
     if (!known.has(slug)) throw new Error(`${slug} is not a sprite of the library`);
-    fs.writeFileSync(path.join(outDir, slug + '.png'), render(slug, d));
+    const base = paint(slug, d);
+    fs.writeFileSync(path.join(outDir, slug + '.png'), kit.png(base.w, base.h, base.px));
     sizes[slug] = { w: d.w, h: d.h };
+    for (const [key, c] of Object.entries(paintViews(slug, d, base))) {
+      fs.writeFileSync(path.join(outDir, slug + VIEW_FILE[key] + '.png'), kit.png(c.w, c.h, c.px));
+      sizes[slug + VIEW_FILE[key]] = { w: c.w, h: c.h };
+    }
   }
   fs.writeFileSync(path.join(outDir, 'sizes.json'), JSON.stringify(sizes));
   console.log(`${Object.keys(sizes).length} sprites of ${only} → ${outDir}`);
@@ -90,7 +168,9 @@ for (const cat of index.categories) {
   if (LEGACY.has(cat.id)) cat.legacy = true;
   else delete cat.legacy;
 }
-let nDrawn = 0,
+for (const f of fs.readdirSync(PX)) if (/\.(side|used)\.png$/.test(f)) fs.unlinkSync(path.join(PX, f)); // the views are drawn again below
+let nViews = 0,
+  nDrawn = 0,
   nDoubled = 0,
   nSmall = 0;
 const seen = new Set();
@@ -100,10 +180,23 @@ for (const cat of index.categories)
     const file = path.join(PX, it.slug + '.png');
     const d = drawn.get(it.slug);
     if (d) {
-      fs.writeFileSync(file, render(it.slug, d));
+      const base = paint(it.slug, d);
+      fs.writeFileSync(file, kit.png(base.w, base.h, base.px));
       it.w = d.w;
       it.h = d.h;
       it.art = 'big';
+      /* its other pictures: turned a quarter, used, and used seen from the side */
+      delete it.v;
+      delete it.base;
+      delete it.side;
+      delete it.used;
+      delete it.long;
+      for (const [key, c] of Object.entries(paintViews(it.slug, d, base))) {
+        fs.writeFileSync(path.join(PX, it.slug + VIEW_FILE[key] + '.png'), kit.png(c.w, c.h, c.px));
+        (it.v ||= {})[key] = [c.w, c.h];
+        nViews++;
+      }
+      if (it.v && d.views.base === 'side') it.base = 'side';
       if (d.solid != null) it.solid = d.solid;
       nDrawn++;
       continue;
@@ -130,8 +223,7 @@ for (const cat of index.categories)
       it.h = im.h;
     }
   }
-require('./big/_views.js')(kit, index, PX);
 for (const [slug, d] of drawn)
   if (!seen.has(slug)) throw new Error(`${slug} (${d.file}) is not a sprite of the library: only existing slugs can be redrawn`);
 fs.writeFileSync(path.join(PX, 'index.json'), JSON.stringify(index));
-console.log(`large-scale art: ${nDrawn} drawn afresh, ${nDoubled} doubled, ${nSmall} shown small`);
+console.log(`large-scale art: ${nDrawn} drawn afresh (${nViews} more pictures of them: side, used), ${nDoubled} doubled, ${nSmall} shown small`);

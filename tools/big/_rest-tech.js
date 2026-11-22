@@ -1,5 +1,22 @@
 /* Mad science and old machines, as text pictures (see rest.js for the letters). */
-module.exports = ({ D, T, vary }) => {
+module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
+  /* the rows of every picture drawn here are kept, so that the other views can be made from them */
+  const R = {};
+  const pat = (rows, { swap = {}, put = [] } = {}) => {
+    const out = rows.map((r) => [...r].map((ch) => swap[ch] || ch));
+    for (const [x, y, text] of put) {
+      while (out.length <= y) out.push([]);
+      for (let i = 0; i < text.length; i++) {
+        while (out[y].length <= x + i) out[y].push('.');
+        if (text[i] !== ' ') out[y][x + i] = text[i];
+      }
+    }
+    return out.map((r) => r.join(''));
+  };
+  const D = (slug, rows, o) => ((R[slug] = rows), D0(slug, rows, o));
+  const T = (slug, rows, o) => ((R[slug] = rows), T0(slug, rows, o));
+  const vary = (slug, from, o) => ((R[slug] = pat(R[from], o)), vary0(slug, from, o));
+  const sw = (rows, swap) => pat(rows, { swap });
   /* ---------- things in jars ---------- */
   const jar = (slug, inside) =>
     T(slug, ['.IIIIII.', '22222222', '2LLLLLL2', ...inside.map((r) => '2' + r + '2'), '2LLLLLL2', '22222222', 'IIIIIIII']);
@@ -897,4 +914,6 @@ module.exports = ({ D, T, vary }) => {
     '....I....................I....',
     '...nnn..................nnn...',
   ]);
+  /* ================= the other pictures of each thing: turned a quarter, used, and both ================= */
+  //VIEWS
 };

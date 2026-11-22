@@ -14,7 +14,8 @@
  * in screens/; buildGuided() draws the step bar, makes the shared kit of helpers
  * and hands it to the screen that is open.
  */
-import { allItems, assetLabel } from '../core/catalog.js';
+import { allItems, assetLabel, OWN } from '../core/catalog.js';
+import { useOwn } from '../build/spriteed.js';
 import { h, clamp, add } from '../core/dom.js';
 import { glyphNode } from '../stage/render.js';
 import { SCREENS } from './screens/index.js';
@@ -304,6 +305,15 @@ export function buildGuided(p, c) {
     return true;
   };
   const place = (asset) => {
+    if (asset.startsWith('own:')) {
+      /* one of my own objects: it is sent into this story first (once), so the other player sees it too */
+      const o = OWN.get(asset.slice(4));
+      if (o)
+        useOwn(o)
+          .then((id) => place('c:' + id))
+          .catch((e) => c.toast(e.message));
+      return;
+    }
     const e = c.addEntity(asset);
     if (e) {
       /* stay in the list: put out as many things as you like, drag them into place; pressing one on the stage opens its settings */

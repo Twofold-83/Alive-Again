@@ -9,7 +9,7 @@ import { directorOnly } from './turns.js';
 import { randomPlace } from './bots.js';
 import { generateAsset } from './providers.js';
 
-function storeAsset(room, kind, name, mime, data) {
+function storeAsset(room, kind, name, mime, data, link) {
   if (!ASSET_MIME.test(mime)) throw fail(400, 'Unsupported image type');
   if (!Buffer.isBuffer(data) || !data.length || data.length > MAX_ASSET_BYTES) throw fail(413, 'Image is too large');
   if (room.assets.length >= MAX_ASSETS) throw fail(409, 'This story already has the maximum number of custom assets');
@@ -20,6 +20,15 @@ function storeAsset(room, kind, name, mime, data) {
     mime,
     data: data.toString('base64'),
   };
+  /* another picture of a thing already here: its side view, its used state, or both (see the sprite editor) */
+  const base = link && room.assets.find((a) => a.id === link.of && a.kind === 'sprite' && !a.part);
+  if (base && ['side', 'used', 'sideUsed'].includes(link.view)) {
+    asset.part = true;
+    const old = base.views && base.views[link.view];
+    if (old) room.assets = room.assets.filter((a) => a.id !== old); // drawn again: the earlier picture goes
+    base.views = { ...(base.views || {}), [link.view]: asset.id };
+  }
+  if (link && link.base === 'side') asset.base = 'side'; // the main picture is the side view
   room.assets.push(asset);
   touch(room);
   broadcast(room);
@@ -76,7 +85,10 @@ export async function actAddAsset(room, body, who) {
   directorOnly(who);
   const m = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(typeof body.dataUrl === 'string' ? body.dataUrl : '');
   if (!m) throw fail(400, 'Please pick a PNG, JPEG or WebP image');
-  return { ok: true, asset: storeAsset(room, body.kind, body.name, m[1], Buffer.from(m[2], 'base64')) };
+  return {
+    ok: true,
+    asset: storeAsset(room, body.kind, body.name, m[1], Buffer.from(m[2], 'base64'), { of: body.of, view: body.view, base: body.base }),
+  };
 }
 export async function actGenerate(room, body, who) {
   directorOnly(who);

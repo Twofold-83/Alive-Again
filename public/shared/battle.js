@@ -69,6 +69,21 @@ export function resolveBattle(scene, ans, names, label, rnd = Math.random) {
     lines = [],
     floats = new Map();
   const float = (id, n, heal) => floats.set(id, (floats.get(id) || 0) + (heal ? n : -n));
+  const showFloats = () => {
+    scene.floats = [...floats]
+      .filter(([, n]) => n)
+      .map(([id, n]) => ({ id, text: (n > 0 ? '+' : '') + n, c: n > 0 ? '#a7d68c' : id === scene.heroId ? '#e0766a' : '#ffffff' }));
+    floats.clear();
+  };
+  /** What happened so far becomes a step of its own, so the blows are shown one after the other. */
+  const nextStep = () => {
+    showFloats();
+    const { steps, ...now } = scene;
+    scene.steps = [...(steps || []), JSON.parse(JSON.stringify({ ...now, steps: [] }))];
+    scene.floats = [];
+    scene.sfx = '';
+    for (const e of scene.entities) e.once = '';
+  };
   const foes = livingFoes(scene),
     target = foes.find((e) => e.id === ans.id) || foes[0],
     weapon = weaponOf(scene);
@@ -90,6 +105,7 @@ export function resolveBattle(scene, ans, names, label, rnd = Math.random) {
       dmg = Math.max(1, b.atk + (weapon ? WEAPON : 0) + Math.floor(rnd() * 3)) * (r > 0.9 ? 2 : 1);
     if (hero) hero.once = 'lunge';
     if (weapon) weapon.once = 'swing';
+    scene.sfx = scene.sfx || 'hit';
     if (r < 0.1) lines.push(`${names.player} misses ${nameOf(target, label)}`);
     else hurtFoe(target, dmg, r > 0.9 ? 'lands a terrible blow on' : weapon ? `strikes with the ${nameOf(weapon, label).toLowerCase()} at` : 'hits');
   } else if (ans.move === 'defend') {
@@ -119,24 +135,26 @@ export function resolveBattle(scene, ans, names, label, rnd = Math.random) {
   if (!b.over && b.auto) {
     /* the enemies answer, one after the other */
     for (const foe of left) {
+      if (hp.get() <= 0) break;
+      nextStep(); // the hero's move first, then each enemy in turn
+      foe.once = 'lunge';
       if (rnd() < 0.15) {
         lines.push(`${nameOf(foe, label)} misses`);
         continue;
       }
       let dmg = b.foeAtk + Math.floor(rnd() * 3);
       if (b.guard) dmg = Math.floor(dmg / 2);
-      foe.once = foe.once || 'lunge';
       if (dmg > 0) {
         hp.set(hp.get() - dmg);
         float(scene.heroId, dmg);
+        if (hero) hero.once = 'hit';
+        scene.sfx = 'hit';
       }
       lines.push(`${nameOf(foe, label)} hits ${names.player}: ${dmg}${b.guard ? ' (defended)' : ''}`);
     }
     if (hp.get() <= 0) b.over = 'lost';
   }
-  scene.floats = [...floats]
-    .filter(([, n]) => n)
-    .map(([id, n]) => ({ id, text: (n > 0 ? '+' : '') + n, c: n > 0 ? '#a7d68c' : id === scene.heroId ? '#e0766a' : '#ffffff' }));
+  showFloats();
   b.log = [...(b.log || []), ...lines].slice(-8);
   b.round++;
   return lines;

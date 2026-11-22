@@ -63,7 +63,15 @@ for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.l
   const lines = resolveBattle(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
   assert.equal(sc.entities.find((e) => e.id === 'g').hp, 6 - (2 + 2 + 1), 'strength, the tied weapon and the roll');
   assert.equal(heroHealth(sc).get(), 8 - 3, 'the ghoul struck back');
-  assert(lines.length === 2 && sc.floats.length === 2 && sc.battle.round === 2);
+  assert(lines.length === 2 && sc.battle.round === 2);
+  assert.equal(sc.steps.length, 1, 'the hero’s blow is a picture of its own, before the enemy answers');
+  assert.equal(sc.steps[0].floats[0].id, 'g');
+  assert.deepEqual(
+    sc.floats.map((f) => f.id),
+    ['hero'],
+    'then the enemy’s blow lands on the hero',
+  );
+  sc.steps = [];
   resolveBattle(sc, { move: 'item', item: 'i1' }, names, label, () => 0.5);
   assert.equal(sc.sheet.inv.length, 0, 'the potion is used up');
   resolveBattle(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);

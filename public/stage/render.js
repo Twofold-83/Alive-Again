@@ -1,7 +1,7 @@
 /* Drawing a scene on a stage element: backdrop, level, things, bubbles, strips and overlays.
  * renderStage() can be called as often as you like; it only touches what changed. */
 import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
-import { spriteView, assetLabel, backdropCss, pixelInfo } from '../core/catalog.js';
+import { spriteView, assetLabel, backdropCss, pixelInfo, CUSTOM, viewKey, assetUrl } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 
 /** Fill in fields that older saved scenes do not have. */
@@ -14,23 +14,27 @@ function tallOf(asset) {
   const h = pixelInfo(asset).h;
   return h ? h * 0.0422 + 0.12 : 1.22;
 }
-export function glyphNode(code, asset, cls = '', view = '') {
+const VIEW_FILE = { side: '.side', used: '.used', sideUsed: '.side.used' };
+export function glyphNode(code, asset, cls = '', view = '', used = false) {
   if (isDoll(asset)) return dollNode(asset, cls);
   const v = spriteView(code, asset);
   const info = pixelInfo(asset),
-    alt = view && info[view] && !v.img.startsWith('packs/'), // a thing seen from the side, or after it was used
-    size = cls === 'glyph' && (alt ? info[view][0] : info.w); // on the stage a library sprite is drawn at its true size
+    key = v.img ? viewKey(info.v, view, used) : '',
+    alt = key && !v.img.startsWith('packs/'), // a thing seen from the other side, or after it was used
+    size = cls === 'glyph' && (alt ? info.v[key][0] : info.w); // on the stage a library sprite is drawn at its true size
   if (v.img && size)
     return h('img', {
       class: 'glyph sized',
-      src: alt ? v.img.replace(/\.png$/, `.${view}.png`) : v.img,
+      src: alt ? v.img.replace(/\.png$/, VIEW_FILE[key] + '.png') : v.img,
       alt: '',
       draggable: 'false',
       style: `--w:${size}`,
     });
   if (v.img && cls === 'glyph' && asset.startsWith('c:')) {
     /* a drawing of your own is pixel art too: once loaded, a small one is shown at its true size */
-    const im = h('img', { class: cls, src: v.img, alt: '', draggable: 'false' });
+    const mine = CUSTOM.get(asset.slice(2)),
+      k = mine && viewKey(mine.v, view, used);
+    const im = h('img', { class: cls, src: k ? assetUrl(code, 'c:' + mine.v[k]) : v.img, alt: '', draggable: 'false' });
     im.addEventListener('load', () => {
       if (im.naturalWidth > 64 || im.naturalHeight > 64) return;
       im.classList.add('sized');
@@ -253,9 +257,10 @@ export function renderStage(root, scene, o = {}) {
     }
     const [fxw, emote, hp, fl] = el.children,
       at = spot(e);
-    if (el._asset !== e.asset + '|' + (e.view || '')) {
-      el._asset = e.asset + '|' + (e.view || '');
-      fxw.replaceChildren(glyphNode(code, e.asset, 'glyph', e.view));
+    const pic = e.asset + '|' + (e.view || '') + (e.used ? '|used' : '');
+    if (el._asset !== pic) {
+      el._asset = pic;
+      fxw.replaceChildren(glyphNode(code, e.asset, 'glyph', e.view, e.used));
     }
     if (isDoll(e.asset)) {
       poseDoll(fxw.firstChild, e.pose);

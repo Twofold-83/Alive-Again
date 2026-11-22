@@ -28,6 +28,7 @@ const { setup } = require('./lib');
     await x.opt('Battle');
     await p.click('#panel > .grid button >> nth=0');
     assert.equal(await p.locator('#battleRules [data-cmd]').count(), 5, 'five commands to allow');
+    await p.click('.row button:has-text("20") >> nth=0'); // a tough enemy: it survives the first blow
     await p.click('#battleRules [data-foeatk="2"]');
     await p.click('#battleRules [data-flee="100"]');
     await p.click('#battleStart');
@@ -40,7 +41,8 @@ const { setup } = require('./lib');
     assert.equal(sc.answer.move, 'attack');
     assert(sc.answer.lines.length >= 1, 'the round was settled: ' + sc.answer.lines.join(' | '));
     assert.equal(sc.battle.round, 2);
-    assert(sc.floats.length >= 1, 'damage numbers float over who was hit');
+    assert.equal(sc.steps.length, 1, 'the hero’s move is shown first, then the enemy’s answer');
+    assert(sc.steps[0].floats.length + sc.floats.length >= 1, 'damage numbers float over who was hit');
     assert.equal(sc.ask.kind, 'battle', 'the next round is asked for without the Director doing anything');
     await p.waitForSelector('#battleLog');
     await toPlayer();

@@ -1,7 +1,7 @@
 /* The house at paper-doll scale: furniture, doors and stairs, the modern home, and the attic.
  * One pixel is one doll pixel (a person is 16 x 33). Everything stands on its bottom row and is seen from the
  * front or the side, like a stage set. Helpers at the top keep the variants of one thing alike. */
-module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }) => {
+module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
   const D = dark,
     L = lite;
   const W = C.wood,
@@ -2319,6 +2319,57 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }) => {
     ['table-lamp', 'reading-lamp'],
   ])
     A[to] = A[from];
+
+  /* ====================== THE OTHER PICTURES ======================
+   * Every thing has four pictures: the main one above, the other perspective (`side`), and both after someone
+   * used the thing (`used`, `sideUsed`). In a side view the front of the thing faces right. Things drawn from
+   * their long side above (beds, chairs, the grand piano) say base: 'side'; their `side` is then the front view. */
+  const V = (slug, views) => {
+    if (!A[slug]) throw new Error('views for ' + slug + ', which is not drawn here');
+    A[slug].views = views;
+  };
+  const view = (w, h, draw, o = {}) => ({ w, h, draw, ...o });
+  /** The main picture of a thing as its draw() leaves it (not yet shaded or outlined), to stamp into a view. */
+  const raw = (slug) => {
+    const t = canvas(A[slug].w, A[slug].h);
+    A[slug].draw(t);
+    return t;
+  };
+  /** A view that is the main picture with something drawn over it; w, h, dx, dy if the canvas has to grow. */
+  const over = (slug, draw, o = {}) => ({
+    w: o.w || A[slug].w,
+    h: o.h || A[slug].h,
+    draw(c) {
+      c.stamp(raw(slug), o.dx || 0, o.dy == null ? c.h - A[slug].h : o.dy);
+      if (draw) draw(c);
+    },
+  });
+  /** A picture w x h fallen over: its top goes to the left (or to the right). */
+  const turned = (w, h, draw, right = false) => ({
+    w: h,
+    h: w,
+    draw(c) {
+      const t = canvas(w, h);
+      draw(t);
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          const p = t.get(x, y);
+          if (p) right ? c.set(h - 1 - y, x, p) : c.set(y, w - 1 - x, p);
+        }
+    },
+  });
+  /** The same picture seen from the other side: left and right swapped. */
+  const flipped = (w, h, draw) => ({
+    w,
+    h,
+    draw(c) {
+      const t = canvas(w, h);
+      draw(t);
+      c.stamp(t, 0, 0, true);
+    },
+  });
+
+  /*VIEWS*/
 
   return A;
 };

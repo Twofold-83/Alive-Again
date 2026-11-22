@@ -1,12 +1,21 @@
-/* The sprite editor: draw a thing pixel by pixel, from nothing or from any picture of the library.
+/* The sprite editor: draw a thing pixel by pixel — all four of its pictures: as it stands, from the other side,
+ * and each of the two after someone used it.
  *
- *   openSpriteEditor({ src, name, onSave(assetId) })     src: an image url to start from (optional)
+ *   openSpriteEditor({ from, edit, onSave(assetId) })
+ *     from   { name, slug, cat, base, urls: { '': url, side, used, sideUsed } }   a thing to start from (a library
+ *            sprite, or the story's own); nothing: a new object
+ *     edit   one of my own objects (see catalog.js OWN), to change it
  *
- * A finished drawing goes two places: into this story (a custom asset, c:<id>), and into "My drawings" on this
- * device (localStorage tf.own), from where it can be put into any other story. */
+ * What is drawn is kept on this device (catalog.js: OWN, localStorage tf.objects) and sent into the story when it
+ * is put on a stage, so the other player sees it too. Three ways to keep a drawing:
+ *   a campaign sprite     an edited copy of a library thing; the original stays as it is
+ *   permanently altered   from now on this drawing stands in for the library thing wherever it is offered here
+ *   a new object          saved into "My objects" or into any category of the library
+ */
 import { h, toast } from '../core/dom.js';
 import { act } from '../core/net.js';
 import { app } from '../core/state.js';
+import { OWN, keepOwn, PIXEL } from '../core/catalog.js';
 
 const PALETTE = [
   '#0b0a10',
@@ -58,53 +67,50 @@ const PALETTE = [
   '#6d4c36',
   '#aebfc4',
 ];
-const SIZES = [8, 12, 16, 20, 24, 32, 40, 48, 64];
-const E = { o: null, w: 16, h: 16, px: [], col: PALETTE[0], tool: 'pen', undo: [], name: '' };
+const VIEWS = ['', 'side', 'used', 'sideUsed'];
+const NEW_MAX = 32; // a new object is at most two tiles by two
+const E = {
+  o: null,
+  pics: {},
+  tab: '',
+  base: 'front',
+  col: PALETTE[0],
+  tool: 'pen',
+  undo: [],
+  name: '',
+  cat: 'own',
+  from: null,
+  edit: null,
+  max: NEW_MAX,
+};
 const root = () => {
   let el = document.querySelector('#spriteed');
   if (!el) document.body.append((el = h('div', { id: 'spriteed', class: 'overlay', hidden: true })));
   return el;
 };
+const blank = (w = 16, hh = 16) => ({ w, h: hh, px: new Array(w * hh).fill(null) });
+const cur = () => E.pics[E.tab];
+const tabName = (k) => {
+  const [a, b] = E.base === 'side' ? ['Side', 'Front'] : ['Front', 'Side'];
+  return { '': a, side: b, used: `${a}, used`, sideUsed: `${b}, used` }[k];
+};
 
-/** Drawings kept on this device: [{ id, name, w, h, dataUrl, in: { storyCode: assetId } }] */
-export function ownDrawings() {
-  try {
-    const l = JSON.parse(localStorage.getItem('tf.own') || '[]');
-    return Array.isArray(l) ? l : [];
-  } catch {
-    return [];
-  }
-}
-function keepOwn(list) {
-  try {
-    localStorage.setItem('tf.own', JSON.stringify(list.slice(0, 200)));
-  } catch {
-    toast('This device has no room left for more drawings');
-  }
+/** Send one of my objects into this story (once): the main picture, then its other pictures. Returns the asset id. */
+export async function useOwn(o) {
+  const have = o.in && o.in[app.code];
+  if (have && app.S.assets.some((a) => a.id === have)) return have;
+  const main = await act('addAsset', { kind: 'sprite', name: o.name, dataUrl: o.pics[''], base: o.base });
+  for (const k of VIEWS.slice(1))
+    if (o.pics[k]) await act('addAsset', { kind: 'sprite', name: o.name, dataUrl: o.pics[k], of: main.asset.id, view: k });
+  o.in = { ...(o.in || {}), [app.code]: main.asset.id };
+  keepOwn();
+  return main.asset.id;
 }
 export function forgetOwn(id) {
-  keepOwn(ownDrawings().filter((d) => d.id !== id));
-}
-/** The asset id of one of my drawings in this story: it is sent to the story the first time it is used there. */
-export async function useOwn(d) {
-  if (d.in && d.in[app.code] && app.S.assets.some((a) => a.id === d.in[app.code])) return d.in[app.code];
-  const r = await act('addAsset', { kind: 'sprite', name: d.name, dataUrl: d.dataUrl });
-  keepOwn(ownDrawings().map((x) => (x.id === d.id ? { ...x, in: { ...(x.in || {}), [app.code]: r.asset.id } } : x)));
-  return r.asset.id;
+  OWN.delete(id);
+  keepOwn();
 }
 
-function resize(w, h) {
-  const px = new Array(w * h).fill(null),
-    ox = Math.floor((w - E.w) / 2),
-    oy = h - E.h; // a thing stands on its bottom row: keep the feet where they are
-  for (let y = 0; y < E.h; y++)
-    for (let x = 0; x < E.w; x++) {
-      const nx = x + ox,
-        ny = y + oy;
-      if (nx >= 0 && ny >= 0 && nx < w && ny < h) px[ny * w + nx] = E.px[y * E.w + x];
-    }
-  Object.assign(E, { w, h, px });
-}
 function loadImage(src) {
   return new Promise((ok) => {
     const im = new Image();
@@ -119,119 +125,216 @@ function loadImage(src) {
         px = [];
       for (let i = 0; i < w * hh; i++)
         px.push(d[i * 4 + 3] < 128 ? null : '#' + [0, 1, 2].map((k) => d[i * 4 + k].toString(16).padStart(2, '0')).join(''));
-      Object.assign(E, { w, h: hh, px });
-      ok();
+      ok({ w, h: hh, px });
     };
-    im.onerror = () => ok();
+    im.onerror = () => ok(null);
     im.src = src;
   });
 }
-function toDataUrl() {
-  const cv = Object.assign(document.createElement('canvas'), { width: E.w, height: E.h }),
+function toDataUrl(p) {
+  const cv = Object.assign(document.createElement('canvas'), { width: p.w, height: p.h }),
     g = cv.getContext('2d');
-  E.px.forEach((c, i) => {
+  p.px.forEach((c, i) => {
     if (!c) return;
     g.fillStyle = c;
-    g.fillRect(i % E.w, Math.floor(i / E.w), 1, 1);
+    g.fillRect(i % p.w, Math.floor(i / p.w), 1, 1);
   });
   return cv.toDataURL('image/png');
+}
+function resize(p, w, hh) {
+  const px = new Array(w * hh).fill(null),
+    ox = Math.floor((w - p.w) / 2),
+    oy = hh - p.h; // a thing stands on its bottom row: keep the feet where they are
+  for (let y = 0; y < p.h; y++)
+    for (let x = 0; x < p.w; x++) {
+      const nx = x + ox,
+        ny = y + oy;
+      if (nx >= 0 && ny >= 0 && nx < w && ny < hh) px[ny * w + nx] = p.px[y * p.w + x];
+    }
+  Object.assign(p, { w, h: hh, px });
+}
+const snap = () => {
+  E.undo.push({ tab: E.tab, ...cur(), px: [...cur().px] });
+  if (E.undo.length > 40) E.undo.shift();
+};
+
+/** Keep what is drawn: on this device, and in this story. kind: 'campaign' | 'alter' | 'new' | 'same' */
+async function save(kind) {
+  if (!E.pics[''].px.some(Boolean)) return toast('Draw the main picture first');
+  const pics = {};
+  for (const k of VIEWS) if (E.pics[k] && E.pics[k].px.some(Boolean)) pics[k] = toDataUrl(E.pics[k]);
+  const name = E.name.trim() || (E.from && E.from.name) || 'My object';
+  let o;
+  if (kind === 'same') o = { ...E.edit, name, base: E.base, pics, in: {} };
+  else if (kind === 'alter') {
+    /* asked twice: this replaces the thing wherever it is offered on this device */
+    if (
+      !confirm(`Permanently alter “${E.from.name}”?\n\nFrom now on your drawing is what you get wherever “${E.from.name}” is offered on this device.`)
+    )
+      return;
+    if (!confirm('Are you sure? The original picture will no longer be offered here (you can undo this under “Something of your own”).')) return;
+    for (const x of [...OWN.values()]) if (x.slug === E.from.slug) OWN.delete(x.id);
+    o = { id: 'o' + Date.now().toString(36), name, cat: E.from.cat || 'own', slug: E.from.slug, base: E.base, pics, in: {} };
+  } else o = { id: 'o' + Date.now().toString(36), name, cat: kind === 'campaign' ? 'campaign' : E.cat, base: E.base, pics, in: {} };
+  OWN.set(o.id, o);
+  if (!keepOwn()) toast('This device has no room left: the drawing is in this story only');
+  try {
+    const id = await useOwn(o);
+    const done = E.o.onSave;
+    close();
+    toast(
+      kind === 'alter'
+        ? `“${name}” now stands in for the original`
+        : kind === 'campaign'
+          ? `“${name}” is kept under Campaign sprites`
+          : `“${name}” is saved`,
+    );
+    if (done) done(id, o);
+  } catch (e) {
+    toast(e.message);
+  }
 }
 
 function draw() {
   const el = root(),
-    cell = Math.max(6, Math.floor(Math.min(520, innerWidth - 40) / Math.max(E.w, E.h))),
-    cv = Object.assign(document.createElement('canvas'), { width: E.w * cell, height: E.h * cell, id: 'spriteCanvas' }),
+    p = cur(),
+    cell = Math.max(5, Math.floor(Math.min(500, innerWidth - 40) / Math.max(p.w, p.h))),
+    cv = Object.assign(document.createElement('canvas'), { width: p.w * cell, height: p.h * cell, id: 'spriteCanvas' }),
     g = cv.getContext('2d');
+  const bg = (x, y) => ((x + y) % 2 ? '#2a2631' : '#221f29');
   const paint = () => {
-    for (let y = 0; y < E.h; y++)
-      for (let x = 0; x < E.w; x++) {
-        g.fillStyle = E.px[y * E.w + x] || ((x + y) % 2 ? '#2a2631' : '#221f29');
+    for (let y = 0; y < p.h; y++)
+      for (let x = 0; x < p.w; x++) {
+        g.fillStyle = p.px[y * p.w + x] || bg(x, y);
         g.fillRect(x * cell, y * cell, cell, cell);
       }
+    /* tile lines: a tile is 16 pixels */
+    g.fillStyle = 'rgba(255,255,255,.12)';
+    for (let x = 16; x < p.w; x += 16) g.fillRect(x * cell, 0, 1, p.h * cell);
+    for (let y = p.h - 16; y > 0; y -= 16) g.fillRect(0, y * cell, p.w * cell, 1);
   };
   paint();
   const at = (ev) => {
     const r = cv.getBoundingClientRect();
-    return [Math.floor(((ev.clientX - r.left) / r.width) * E.w), Math.floor(((ev.clientY - r.top) / r.height) * E.h)];
+    return [Math.floor(((ev.clientX - r.left) / r.width) * p.w), Math.floor(((ev.clientY - r.top) / r.height) * p.h)];
   };
   const apply = (x, y) => {
-    if (x < 0 || y < 0 || x >= E.w || y >= E.h) return;
-    const i = y * E.w + x;
+    if (x < 0 || y < 0 || x >= p.w || y >= p.h) return;
+    const i = y * p.w + x;
     if (E.tool === 'pick') {
-      if (E.px[i]) E.col = E.px[i];
+      if (p.px[i]) E.col = p.px[i];
       E.tool = 'pen';
       return draw();
     }
     if (E.tool === 'fill') {
-      const from = E.px[i],
-        to = E.col,
+      const from = p.px[i],
         todo = [i];
-      if (from === to) return;
+      if (from === E.col) return;
       while (todo.length) {
         const k = todo.pop();
-        if (E.px[k] !== from) continue;
-        E.px[k] = to;
-        const kx = k % E.w;
+        if (p.px[k] !== from) continue;
+        p.px[k] = E.col;
+        const kx = k % p.w;
         if (kx > 0) todo.push(k - 1);
-        if (kx < E.w - 1) todo.push(k + 1);
-        if (k >= E.w) todo.push(k - E.w);
-        if (k < E.w * (E.h - 1)) todo.push(k + E.w);
+        if (kx < p.w - 1) todo.push(k + 1);
+        if (k >= p.w) todo.push(k - p.w);
+        if (k < p.w * (p.h - 1)) todo.push(k + p.w);
       }
       return paint();
     }
-    E.px[i] = E.tool === 'erase' ? null : E.col;
-    g.fillStyle = E.px[i] || ((x + y) % 2 ? '#2a2631' : '#221f29');
+    p.px[i] = E.tool === 'erase' ? null : E.col;
+    g.fillStyle = p.px[i] || bg(x, y);
     g.fillRect(x * cell, y * cell, cell, cell);
   };
   let down = false;
   cv.addEventListener('pointerdown', (ev) => {
     ev.preventDefault();
-    E.undo.push({ w: E.w, h: E.h, px: [...E.px] });
-    if (E.undo.length > 40) E.undo.shift();
+    snap();
     down = E.tool === 'pen' || E.tool === 'erase';
     cv.setPointerCapture(ev.pointerId);
     apply(...at(ev));
   });
   cv.addEventListener('pointermove', (ev) => down && apply(...at(ev)));
   cv.addEventListener('pointerup', () => (down = false));
-  const tool = (id, label) =>
+  const btn = (label, fn, o = {}) =>
     h(
       'button',
       {
-        'data-tool': id,
-        class: E.tool === id ? 'on' : '',
+        ...o,
         onclick: () => {
-          E.tool = id;
+          fn();
           draw();
         },
       },
       label,
     );
-  const name = h('input', { id: 'spriteName', placeholder: 'What is it?', maxlength: 30, value: E.name, oninput: () => (E.name = name.value) });
-  const save = async () => {
-    if (!E.px.some(Boolean)) return toast('Draw something first');
-    const d = { id: 'o' + Date.now().toString(36), name: E.name.trim() || 'My drawing', w: E.w, h: E.h, dataUrl: toDataUrl(), in: {} };
-    try {
-      const r = await act('addAsset', { kind: 'sprite', name: d.name, dataUrl: d.dataUrl });
-      d.in[app.code] = r.asset.id;
-      keepOwn([d, ...ownDrawings()]);
-      const done = E.o.onSave;
-      close();
-      toast(`“${d.name}” is kept under My drawings`);
-      if (done) done(r.asset.id);
-    } catch (e) {
-      toast(e.message);
-    }
+  const tool = (id, label) => btn(label, () => (E.tool = id), { 'data-tool': id, class: E.tool === id ? 'on' : '' });
+  const name = h('input', {
+    id: 'spriteName',
+    class: 'grow',
+    placeholder: 'What is it?',
+    maxlength: 30,
+    value: E.name,
+    oninput: () => (E.name = name.value),
+  });
+  const sizes = (k) => {
+    const all = [8, 12, 16, 20, 24, 28, 32, 40, 48, 64].filter((n) => n <= E.max);
+    const s = h(
+      'select',
+      {
+        'data-size': k,
+        onchange: () => {
+          snap();
+          resize(p, k === 'w' ? +s.value : p.w, k === 'h' ? +s.value : p.h);
+          draw();
+        },
+      },
+      [...new Set([...all, p[k]])].sort((a, b) => a - b).map((n) => h('option', { value: n, selected: n === p[k] }, String(n))),
+    );
+    return s;
   };
+  const others = VIEWS.filter((k) => k !== E.tab && E.pics[k] && E.pics[k].px.some(Boolean));
+  const cats = [['own', 'My objects'], ...PIXEL.filter((c) => c.group === 'thing').map((c) => [c.id, c.label])];
+  const catSel = h(
+    'select',
+    { id: 'spriteCat', onchange: () => (E.cat = catSel.value) },
+    cats.map(([id, label]) => h('option', { value: id, selected: id === E.cat }, label)),
+  );
   el.replaceChildren(
     h(
       'div',
       { class: 'sheet spritesheet' },
-      h('header', {}, h('b', {}, 'Sprite editor'), h('span', { class: 'grow' }), h('button', { id: 'spriteClose', onclick: close }, 'Close')),
+      h(
+        'header',
+        {},
+        h('b', {}, 'Sprite editor'),
+        h(
+          'span',
+          { class: 'dim small' },
+          E.from ? `Editing “${E.from.name}”` : E.edit ? `Editing “${E.edit.name}”` : 'A new object — at most 2 × 2 tiles',
+        ),
+        h('span', { class: 'grow' }),
+        h('button', { id: 'spriteClose', onclick: close }, 'Close'),
+      ),
       h(
         'div',
         { class: 'spritebody' },
-        h('div', { class: 'spritecanvas' }, cv),
+        h(
+          'div',
+          { class: 'spritecanvas' },
+          h(
+            'div',
+            { class: 'tabs spritetabs' },
+            VIEWS.map((k) =>
+              btn(
+                [tabName(k), E.pics[k].px.some(Boolean) ? h('img', { src: toDataUrl(E.pics[k]), alt: '' }) : h('small', { class: 'dim' }, ' empty')],
+                () => (E.tab = k),
+                { 'data-pic': k || 'main', class: E.tab === k ? 'on' : '' },
+              ),
+            ),
+          ),
+          cv,
+        ),
         h(
           'div',
           { class: 'spritetools' },
@@ -240,95 +343,115 @@ function draw() {
             'div',
             { class: 'swatches' },
             PALETTE.map((c) =>
-              h('button', {
-                class: 'sw' + (c === E.col ? ' on' : ''),
-                style: `background:${c}`,
-                'data-col': c,
-                title: c,
-                onclick: () => {
+              btn(
+                '',
+                () => {
                   E.col = c;
                   if (E.tool !== 'fill') E.tool = 'pen';
-                  draw();
                 },
-              }),
+                { class: 'sw' + (c === E.col ? ' on' : ''), style: `background:${c}`, 'data-col': c, title: c },
+              ),
             ),
           ),
           h(
             'div',
             { class: 'row' },
             h('span', { class: 'dim small' }, 'Wide'),
-            sizeSel('w'),
+            sizes('w'),
             h('span', { class: 'dim small' }, 'Tall'),
-            sizeSel('h'),
-            h('span', { class: 'dim small' }, '(a person is 16 × 33)'),
+            sizes('h'),
+            h('span', { class: 'dim small' }, '(a tile is 16, a person 16 × 33)'),
           ),
           h(
             'div',
             { class: 'row' },
-            h(
-              'button',
-              {
-                disabled: !E.undo.length,
-                onclick: () => {
-                  Object.assign(E, E.undo.pop());
-                  draw();
-                },
-              },
+            btn(
               '↶ Undo',
-            ),
-            h(
-              'button',
-              {
-                onclick: () => {
-                  E.undo.push({ w: E.w, h: E.h, px: [...E.px] });
-                  const px = [];
-                  for (let y = 0; y < E.h; y++) for (let x = 0; x < E.w; x++) px.push(E.px[y * E.w + (E.w - 1 - x)]);
-                  E.px = px;
-                  draw();
-                },
+              () => {
+                const u = E.undo.pop();
+                E.tab = u.tab;
+                E.pics[u.tab] = { w: u.w, h: u.h, px: u.px };
               },
-              'Mirror',
+              { disabled: !E.undo.length },
             ),
-            h(
-              'button',
-              {
-                onclick: () => {
-                  E.undo.push({ w: E.w, h: E.h, px: [...E.px] });
-                  E.px = new Array(E.w * E.h).fill(null);
-                  draw();
-                },
-              },
-              'Clear',
-            ),
+            btn('Mirror', () => {
+              snap();
+              const px = [];
+              for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) px.push(p.px[y * p.w + (p.w - 1 - x)]);
+              p.px = px;
+            }),
+            btn('Clear', () => {
+              snap();
+              p.px = new Array(p.w * p.h).fill(null);
+            }),
           ),
-          h('div', { class: 'row' }, name, h('button', { class: 'primary', id: 'spriteSave', onclick: save }, 'Save')),
-          h('small', { class: 'dim' }, 'Saved drawings go into this story and into “My drawings” on this device, for every story.'),
+          others.length > 0 &&
+            h(
+              'div',
+              { class: 'row' },
+              h('span', { class: 'dim small' }, 'Start this picture from'),
+              others.map((k) =>
+                btn(tabName(k), () => {
+                  snap();
+                  E.pics[E.tab] = { w: E.pics[k].w, h: E.pics[k].h, px: [...E.pics[k].px] };
+                }),
+              ),
+            ),
+          h(
+            'label',
+            { class: 'row' },
+            h('input', {
+              type: 'checkbox',
+              checked: E.base === 'side',
+              onchange: (ev) => {
+                E.base = ev.target.checked ? 'side' : 'front';
+                draw();
+              },
+            }),
+            h('span', {}, 'The first picture shows the thing from the side'),
+          ),
+          h('div', { class: 'row' }, name),
+          /* how to keep it */
+          E.from && E.from.slug
+            ? h(
+                'div',
+                { class: 'card' },
+                h('button', { class: 'primary', id: 'spriteSave', onclick: () => save('campaign') }, 'Save to campaign sprites'),
+                h('small', { class: 'dim' }, 'An edited copy with all its pictures. The original stays as it is.'),
+                h('button', { id: 'spriteAlter', class: 'danger', onclick: () => save('alter') }, 'Permanently alter asset'),
+                h('small', { class: 'dim' }, 'Your drawing stands in for the original wherever it is offered on this device.'),
+              )
+            : E.edit
+              ? h('div', { class: 'card' }, h('button', { class: 'primary', id: 'spriteSave', onclick: () => save('same') }, 'Save changes'))
+              : h(
+                  'div',
+                  { class: 'card' },
+                  h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Save into'), catSel),
+                  h('button', { class: 'primary', id: 'spriteSave', onclick: () => save('new') }, 'Save object'),
+                ),
+          h(
+            'small',
+            { class: 'dim' },
+            'Drawings are kept on this device. Put on a stage they are sent into the story, so the other player sees them too.',
+          ),
         ),
       ),
     ),
   );
-}
-function sizeSel(k) {
-  const s = h(
-    'select',
-    {
-      onchange: () => {
-        E.undo.push({ w: E.w, h: E.h, px: [...E.px] });
-        resize(k === 'w' ? +s.value : E.w, k === 'h' ? +s.value : E.h);
-        draw();
-      },
-    },
-    [...new Set([...SIZES, E[k]])].sort((a, b) => a - b).map((n) => h('option', { value: n, selected: n === E[k] }, String(n))),
-  );
-  return s;
 }
 function close() {
   root().hidden = true;
   root().replaceChildren();
 }
 export async function openSpriteEditor(o = {}) {
-  Object.assign(E, { o, w: 16, h: 16, px: new Array(256).fill(null), undo: [], tool: 'pen', name: o.name || '' });
-  if (o.src) await loadImage(o.src);
+  Object.assign(E, { o, tab: '', undo: [], tool: 'pen', from: o.from || null, edit: o.edit || null, cat: 'own', pics: {} });
+  const urls = o.edit ? o.edit.pics : o.from ? o.from.urls : {};
+  E.base = (o.edit ? o.edit.base : o.from && o.from.base) || 'front';
+  E.name = o.edit ? o.edit.name : o.from ? o.from.name : '';
+  for (const k of VIEWS) E.pics[k] = (urls[k] && (await loadImage(urls[k]))) || blank();
+  /* an empty picture starts at the size of the main one */
+  for (const k of VIEWS.slice(1)) if (!E.pics[k].px.some(Boolean)) E.pics[k] = blank(E.pics[''].w, E.pics[''].h);
+  E.max = o.from || o.edit ? 64 : NEW_MAX;
   root().hidden = false;
   draw();
 }

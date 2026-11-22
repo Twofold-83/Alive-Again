@@ -82,3 +82,12 @@
 .owngrid .ownimg { image-rendering: pixelated; max-width: 40px; max-height: 40px; min-width: 16px; }
 .mutcard { width: min(100%, 460px); } .mutrow { gap: 4px; align-items: center; } .mutrow img { image-rendering: pixelated; height: 26px; }
 .mutrow button { min-height: 28px; padding: 2px 8px; } .doll.live .dpart.x { cursor: move; }
+.spritetabs { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
+.spritetabs button { display: flex; align-items: center; gap: 6px; padding: 3px 8px; min-height: 34px; }
+.spritetabs img { image-rendering: pixelated; height: 24px; }
+.spritetools .card { display: flex; flex-direction: column; gap: 6px; }
+.spritetools .danger { border-color: #9a3b33; color: #e0766a; }
+.ownlist { display: flex; flex-direction: column; gap: 3px; } .ownrow { gap: 6px; align-items: center; }
+.ownrow .ownpick { width: 52px; height: 52px; padding: 2px; display: flex; align-items: center; justify-content: center; background: #1a171f; }
+.ownrow .ownimg { image-rendering: pixelated; max-width: 44px; max-height: 44px; min-width: 16px; }
+.ownrow > button:not(.ownpick) { min-height: 28px; padding: 2px 8px; }

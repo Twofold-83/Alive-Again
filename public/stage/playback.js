@@ -27,7 +27,18 @@ export function playCut(root, before, after, o, done) {
     e.once = '';
     if (p) {
       if (p.x !== e.x || p.y !== e.y || p.scale !== e.scale || p.rot !== e.rot) moved = true;
-      Object.assign(e, { x: p.x, y: p.y, scale: p.scale, rot: p.rot, flip: p.flip, fx: p.fx, pose: p.pose, feel: p.feel, view: p.view });
+      Object.assign(e, {
+        x: p.x,
+        y: p.y,
+        scale: p.scale,
+        rot: p.rot,
+        flip: p.flip,
+        fx: p.fx,
+        pose: p.pose,
+        feel: p.feel,
+        view: p.view,
+        used: p.used,
+      });
     } else if (before) {
       e.fresh = true;
       moved = true;
@@ -139,6 +150,8 @@ export function playCut(root, before, after, o, done) {
           tie: f.tie,
           pose: f.pose,
           feel: f.feel,
+          view: f.view,
+          used: f.used,
         }); // a paper doll swings into its new pose
         if (!f.say) e.emote = f.emote;
         if (!e.tracked) {
@@ -209,7 +222,8 @@ export function playCut(root, before, after, o, done) {
       });
   };
   const actDo = () => {
-    if (o.by === 'player' && (after.action || after.target || after.point || after.use || after.exit || after.answer)) {
+    /* what the Player did is told once, in the first picture of their turn (a battle adds one picture per enemy's blow) */
+    if (o.by === 'player' && !(o.frameNo > 1) && (after.action || after.target || after.point || after.use || after.exit || after.answer)) {
       at(t, () => {
         view.pop = null;
         frame.action = after.action;
@@ -341,6 +355,7 @@ export function playTurn(root, before, after, o, done) {
     const prev = i ? frames[i - 1] : before,
       frame = frames[i++];
     root.dataset.step = i;
+    o.frameNo = i;
     cur = playCut(root, prev, frame, o, () => {
       cur = null;
       wait = setTimeout(next, 220 / (o.speed || 1));

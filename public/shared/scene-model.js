@@ -52,7 +52,8 @@ export function newEntity(asset, props = {}) {
     once: '',
     temp: false,
     layer: 0,
-    view: '', // which picture of a library thing: '' as drawn, 'side' turned a quarter, 'used' after someone used it
+    view: '', // which way a thing is seen: '' as drawn, 'side' from the other side
+    used: false, // shown as it looks after someone used it (an open door, a lit lamp)
     feel: '', // what a paper-doll character feels (see FEELS): it shows on the face
     pose: null, // a paper-doll character's joints: [head, left arm, right arm, left leg, right leg] in degrees
     ...props,
