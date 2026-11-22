@@ -2144,7 +2144,14 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     S[slug].views = v;
   };
   const pic = (w, h, draw, o) => ({ w, h, draw, ...o });
-  const on = (from, draw, o) => ({ from, draw, ...o });
+  /** The dark line around what has been added to a copy (kit's outline() would thicken the line that is there). */
+  const rim = (c) => {
+    const add = [],
+      solidAt = (x, y) => c.get(x, y) && c.get(x, y) !== K;
+    for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) if (!c.get(x, y) && (solidAt(x - 1, y) || solidAt(x + 1, y) || solidAt(x, y - 1) || solidAt(x, y + 1))) add.push([x, y]);
+    for (const [x, y] of add) c.set(x, y, K);
+  };
+  const on = (from, draw, o = {}) => ({ from, ...o, draw: o.rim ? (c) => (draw(c), rim(c)) : draw });
   /** The picture of another sprite of this file, as a view. */
   const same = (slug) => ({ w: S[slug].w, h: S[slug].h, draw: S[slug].draw, shade: S[slug].shade, outline: S[slug].outline });
   /** The finished picture of a sprite of this file (shaded and outlined), to stamp or to turn. */
@@ -2855,7 +2862,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     used: on('base', (c) => {
       c.clearRect(9, 2, 15, 8); // two jars are gone
       c.clearRect(15, 10, 21, 18);
-    }, { outline: true }),
+    }, { rim: true }),
     sideUsed: pic(9, 30, (c) => shelfSide(c, true)),
   });
   function shelfSide(c, gone) {
@@ -4355,6 +4362,17 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       pat(c, 13, 8, ['cc', '.C']);
       moss(c, 3, 2, 15, 11, 6);
     }),
+    used: on('base', (c) => {
+      c.set(8, 9, C.glow); // something lives in the hollow
+      c.set(10, 9, C.glow);
+      c.set(9, 11, C.rot);
+    }),
+    sideUsed: on('side', (c) => {
+      c.set(16, 10, C.glow); // ... and looks round the side of it
+      c.set(17, 9, C.rot);
+      c.set(17, 10, C.rot);
+      c.set(17, 11, C.rot);
+    }, { rim: true }),
   });
   const chopBlock = (c) => {
     c.rect(4, 12, 16, 20, C.wood);
@@ -4769,11 +4787,11 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     used: on('base', (c) => {
       crackDome(c);
       shards(c, 12, 15);
-    }, { w: 18, outline: true }),
+    }, { w: 18, rim: true }),
     sideUsed: on('side', (c) => {
       crackDome(c);
       shards(c, 12, 15);
-    }, { w: 18, outline: true }),
+    }, { w: 18, rim: true }),
   });
   const foxMap = { ...P, u: hex('#8a4a26'), U: hex('#5e3018') };
   const foxFront = (c) => {
@@ -4812,7 +4830,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       c.clearRect(14, 5, 18, 11);
       c.row(4, 5, 7, dark(C.wood));
       c.row(4, 15, 17, dark(C.wood));
-    }, { outline: true }),
+    }, { rim: true }),
     sideUsed: pic(5, 12, (c) => {
       c.rect(2, 1, 3, 4, C.wood);
       c.col(2, 1, 4, C.woodLight);
@@ -5129,8 +5147,8 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
   const bowlFire = (c) => pat(c, 2, 0, ['....F...', '..f.f.F.', '.fFfFff.', '.fFFFFf.', 'ffFFFFff']);
   V('ritual-bowl', {
     side: same('ritual-bowl'),
-    used: on('base', bowlFire, { h: 12, outline: true }), // the offering burns
-    sideUsed: on('side', bowlFire, { h: 12, outline: true }),
+    used: on('base', bowlFire, { h: 12, rim: true }), // the offering burns
+    sideUsed: on('side', bowlFire, { h: 12, rim: true }),
   });
   const pin = (c, x0, y0, x1, y1) => {
     c.line(x0, y0, x1, y1, C.steel);

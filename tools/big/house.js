@@ -2964,10 +2964,10 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     V('bookcase-full', {
       side: view(11, 38, (c) => bookcaseSide(c, W)),
       used: over('bookcase-full', (c) => {
-        gap(c, 9, 12, 9, 14, W); // two books taken, their neighbours leaning into the gap
-        c.line(13, 10, 11, 14, C.navy);
-        gap(c, 16, 18, 22, 27, W);
-        c.line(15, 23, 16, 27, C.mustard);
+        gap(c, 8, 13, 9, 14, W); // books taken, a neighbour leaning into the gap
+        c.line(12, 10, 10, 14, C.navy);
+        gap(c, 15, 20, 22, 27, W);
+        c.line(15, 23, 17, 27, C.mustard);
         bookOnFloor(c, 14, 35, C.wine);
       }),
       sideUsed: view(17, 38, (c) => {
@@ -5980,8 +5980,6 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       sideUsed: view(14, 18, trolleyEnd(true)),
     });
   }
-
-  /*VIEWS*/
 
   return A;
 };
