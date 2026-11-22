@@ -3717,6 +3717,18 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       used: view(11, 21, (c) => A['chair-dining'].draw(c)),
       sideUsed: view(11, 21, plainFront),
     });
+    const sticks = (c, cut) => {
+      const x1 = 16 - cut;
+      c.rect(2, 9, x1, 10, W); // the seat flat on the floor, the rest stacked on it
+      c.row(9, 2, x1, WL);
+      c.rect(3, 7, x1 - 2, 8, WD);
+      c.row(7, 3, x1 - 2, W);
+      c.rect(2, 5, x1 - 3, 6, W);
+      c.row(5, 2, x1 - 3, WL);
+      c.rect(4, 3, x1 - 1, 4, WD);
+      c.row(3, 4, x1 - 1, W);
+      dots(c, C.woodPale, [2, 5, x1, 9, x1 - 1, 3, 3, 7, x1 - 2, 7]);
+    };
     V('chair-broken', {
       base: 'side',
       side: view(14, 12, (c) => {
@@ -3730,6 +3742,8 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
         c.rect(1, 10, 3, 10, WD);
         c.set(1, 9, C.woodPale);
       }),
+      used: view(18, 12, (c) => sticks(c, 0)), // gathered up for the fire
+      sideUsed: view(12, 12, (c) => sticks(c, 6)),
     });
     const shawl = C.plum;
     const rockFront = (used) => (c) => {
@@ -4702,11 +4716,13 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     V('staircase-down', {
       side: view(8, 38, downSide(false)),
       used: over('staircase-down', (c) => {
-        c.rect(9, 10, 16, 16, hex('#6a4a22')); // lamplight on the wall at the bottom
-        c.rect(10, 11, 15, 15, hex('#a8742c'));
-        c.rect(12, 12, 13, 14, C.flameLight);
-        c.row(17, 9, 16, hex('#8a6a3a'));
-        c.row(20, 8, 17, hex('#7a6a4a'));
+        c.oval(8, 7, 17, 16, hex('#3a2a20')); // somebody down there with a lamp
+        c.oval(10, 9, 15, 15, hex('#6a4a22'));
+        c.rect(12, 11, 13, 13, hex('#a8742c'));
+        c.set(12, 12, C.flameLight);
+        c.rect(9, 15, 16, 16, mix(C.stone, 0.26));
+        c.row(16, 9, 16, hex('#6a5a3a')); // its light on the lowest steps
+        c.row(19, 8, 17, hex('#5a5040'));
       }),
       sideUsed: view(8, 38, downSide(true)),
     });
@@ -4769,6 +4785,17 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       }),
     });
     V('ladder-broken', {
+      used: turned(14, 44, (c) => A['ladder-broken'].draw(c)), // and now it has come down altogether
+      sideUsed: view(14, 18, (c) => {
+        const col = hex('#7a5c40');
+        c.col(2, 2, 15, col);
+        c.col(9, 9, 15, D(col));
+        c.col(3, 2, 15, D(col));
+        for (const y of [4, 10, 13]) c.row(y, 4, 8, L(col));
+        c.line(4, 7, 7, 8, L(col));
+        dots(c, WP, [9, 8, 10, 7]);
+        c.rect(10, 14, 12, 15, col);
+      }),
       side: view(15, 44, (c) => {
         const col = hex('#7a5c40');
         lean(c, col);

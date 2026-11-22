@@ -4808,10 +4808,10 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       pat(c, 1, 4, ['t', 'G', 't', 'G', 't', 'G', 't']);
     }),
     used: on('base', (c) => {
-      for (const x of [6, 16]) {
-        c.clearRect(x - 1, 5, x + 1, 11); // two more keys are gone
-        c.row(4, x - 1, x + 1, dark(C.wood));
-      }
+      c.clearRect(5, 5, 7, 11); // two more keys are gone
+      c.clearRect(14, 5, 18, 11);
+      c.row(4, 5, 7, dark(C.wood));
+      c.row(4, 15, 17, dark(C.wood));
     }, { outline: true }),
     sideUsed: pic(5, 12, (c) => {
       c.rect(2, 1, 3, 4, C.wood);
@@ -5088,6 +5088,470 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       return false;
     }),
     sideUsed: on('side', (c) => flies(c, [[2, 1], [5, 2], [6, 4]]), { h: 12 }),
+  });
+
+  /* --- the occult --- */
+  const PLANCHETTE = ['.pp.', 'pKpp', '.pp.'];
+  V('ouija-board', {
+    side: pic(18, 5, (c) => {
+      c.rect(1, 2, 16, 3, C.woodPale); // lying flat, seen along the table
+      c.row(3, 1, 16, dark(C.woodPale));
+      c.rect(7, 1, 10, 1, C.wood);
+    }),
+    used: on('base', (c) => {
+      c.rect(7, 5, 10, 7, C.woodPale); // the planchette has moved
+      c.set(8, 6, C.woodDark);
+      c.set(10, 6, C.woodDark);
+      pat(c, 11, 2, PLANCHETTE, { p: C.wood, K: C.glow });
+      c.set(9, 5, C.wood);
+      c.set(10, 4, C.wood);
+    }),
+    sideUsed: pic(18, 5, (c) => {
+      c.rect(1, 2, 16, 3, C.woodPale);
+      c.row(3, 1, 16, dark(C.woodPale));
+      c.rect(11, 1, 14, 1, C.wood);
+      c.set(12, 1, C.glow);
+    }),
+  });
+  V('tarot-cards', {
+    side: pic(23, 4, (c) => {
+      for (const [x, back] of [[1, 1], [7, 0], [12, 0], [17, 1]]) c.rect(x, 1 + (x % 2 ? 1 : 0), x + 4, 2, back ? C.wine : C.paper); // flat on the table
+    }),
+    used: on('base', (c) => {
+      c.rect(1, 2, 5, 8, C.paper); // the last card turned: the hanged man
+      pat(c, 2, 2, ['rrr', '.r.', '.K.', 'KKK', '.K.', '.K.', 'K..']);
+    }),
+    sideUsed: pic(23, 4, (c) => {
+      for (const [x, back] of [[1, 0], [7, 0], [12, 0], [17, 1]]) c.rect(x, 1 + (x % 2 ? 1 : 0), x + 4, 2, back ? C.wine : C.paper);
+      c.set(3, 1, C.blood);
+    }),
+  });
+  const bowlFire = (c) => pat(c, 2, 0, ['....F...', '..f.f.F.', '.fFfFff.', '.fFFFFf.', 'ffFFFFff']);
+  V('ritual-bowl', {
+    side: same('ritual-bowl'),
+    used: on('base', bowlFire, { h: 12, outline: true }), // the offering burns
+    sideUsed: on('side', bowlFire, { h: 12, outline: true }),
+  });
+  const pin = (c, x0, y0, x1, y1) => {
+    c.line(x0, y0, x1, y1, C.steel);
+    c.set(x0, y0, C.red);
+  };
+  V('voodoo-doll', {
+    side: pic(8, 13, (c) => {
+      const m = { ...P, y: hex('#9a8358'), Y: hex('#6e5c3c') };
+      pat(c, 3, 1, ['.yy', 'Kyy', '.yy', '.yY', 'yyy', 'yRy', '.yy', '.yY', '.yy', '.yy', 'yyy'], m);
+      pin(c, 1, 2, 3, 3);
+      pin(c, 1, 8, 3, 7);
+    }),
+    used: pic(13, 13, (c) => {
+      S['voodoo-doll'].draw(c); // more pins
+      pin(c, 1, 8, 4, 6);
+      pin(c, 11, 4, 7, 6);
+      pin(c, 3, 11, 5, 9);
+      pin(c, 10, 11, 7, 9);
+    }),
+    sideUsed: pic(8, 13, (c) => {
+      const m = { ...P, y: hex('#9a8358'), Y: hex('#6e5c3c') };
+      pat(c, 3, 1, ['.yy', 'Kyy', '.yy', '.yY', 'yyy', 'yRy', '.yy', '.yY', '.yy', '.yy', 'yyy'], m);
+      pin(c, 1, 2, 3, 3);
+      pin(c, 1, 8, 3, 7);
+      pin(c, 1, 5, 4, 6);
+      pin(c, 1, 11, 3, 10);
+      pin(c, 6, 1, 5, 3);
+    }),
+  });
+  V('flowers-wilted', {
+    side: pic(8, 8, (c) => pat(c, 1, 1, ['.vV...', 'vVvH..', 'HvVMc.', '.HMHcc', '..Dc..', '.D....'])), // from the flower end
+    used: pic(17, 9, (c) => {
+      S['flowers-wilted'].draw(c); // the heads have dropped their petals
+      c.rect(8, 1, 11, 4, null);
+      for (const [x, y] of [[9, 1], [10, 1], [8, 2], [10, 2], [9, 3], [10, 3], [9, 4], [10, 4], [8, 3]]) if (c.get(x, y)) c.set(x, y, C.leaf);
+      finish(c);
+      for (const [x, y, k] of [[12, 3, 0], [14, 5, 1], [13, 7, 0], [15, 2, 1], [11, 7, 1], [15, 7, 0]]) c.set(x, y, k ? dark(C.wine) : C.wine);
+      return false;
+    }),
+    sideUsed: pic(12, 8, (c) => {
+      pat(c, 1, 1, ['.HH...', 'HHHH..', 'HHHMc.', '.HMHcc', '..Dc..', '.D....']);
+      finish(c);
+      for (const [x, y, k] of [[8, 4, 0], [9, 6, 1], [7, 6, 0], [10, 5, 1]]) c.set(x, y, k ? dark(C.wine) : C.wine);
+      return false;
+    }),
+  });
+  V('pentagram-circle', {
+    used: on('base', (c) => {
+      for (let i = 0; i < c.px.length; i++) if (c.px[i]) c.px[i] = c.px[i][0] > 200 ? C.flameLight : C.flame; // the lines burn
+    }),
+  });
+
+  /* --- the asylum and the cells --- */
+  const jacket = hex('#a39c84');
+  V('straitjacket', {
+    side: pic(10, 18, (c) => {
+      c.poly([[3, 1], [6, 1], [8, 4], [8, 16], [2, 16], [2, 4]], jacket);
+      c.rect(1, 7, 8, 10, jacket); // the sleeves, crossed in front
+      c.row(10, 1, 8, dark(jacket));
+      c.row(7, 1, 8, lite(jacket));
+      for (const y of [4, 12, 14]) {
+        c.row(y, 2, 8, leather);
+        c.set(8, y, C.brass); // buckled at the back
+      }
+      c.col(2, 4, 16, lite(jacket));
+      c.line(1, 9, 1, 14, leather);
+    }),
+    used: pic(22, 22, (c) => {
+      c.poly([[7, 1], [13, 1], [16, 4], [16, 16], [5, 16], [4, 4]], jacket); // unbuckled: the long sleeves hang
+      c.rect(9, 1, 11, 2, C.night);
+      c.col(5, 4, 16, lite(jacket));
+      for (const x of [1, 17]) {
+        c.rect(x, 5, x + 2, 19, jacket);
+        c.col(x, 5, 19, lite(jacket));
+        c.col(x + 2, 6, 19, dark(jacket));
+        c.col(x + 1, 20, 20, leather);
+        c.set(x + 1, 20, C.brass);
+      }
+      for (const y of [4, 12, 14]) {
+        c.row(y, 6, 8, leather);
+        c.row(y, 12, 15, leather);
+        c.set(9, y + 1, C.brass);
+        c.set(12, y, C.brass);
+      }
+      c.col(10, 3, 16, dark(jacket));
+    }),
+    sideUsed: pic(10, 22, (c) => {
+      c.poly([[3, 1], [6, 1], [8, 4], [8, 16], [2, 16], [2, 4]], jacket);
+      c.col(2, 4, 16, lite(jacket));
+      c.rect(4, 5, 6, 19, jacket);
+      c.col(4, 5, 19, lite(jacket));
+      c.col(6, 6, 19, dark(jacket));
+      c.set(5, 20, C.brass);
+      for (const y of [4, 12, 14]) {
+        c.set(8, y, leather);
+        c.set(8, y + 1, C.brass);
+        c.set(7, y, leather);
+      }
+    }),
+  });
+  const slops = hex('#4a3c22');
+  const bucket = (c) => {
+    c.poly([[2, 6], [9, 6], [8, 13], [3, 13]], C.iron);
+    c.row(6, 2, 9, C.steel);
+    c.row(7, 3, 8, slops);
+    c.row(10, 3, 8, C.ironDark);
+    c.col(3, 7, 13, C.steel);
+    c.speckle(2, 6, 9, 13, C.rust, 5, 2);
+    c.set(1, 7, C.ironDark);
+    c.set(10, 7, C.ironDark);
+  };
+  V('slop-bucket', {
+    side: same('slop-bucket'),
+    used: pic(26, 13, (c) => {
+      const t = canvas(12, 15); // kicked over
+      bucket(t);
+      t.rect(3, 7, 8, 7, C.night);
+      finish(t);
+      c.oval(8, 8, 23, 11, slops);
+      c.row(9, 13, 18, lite(slops));
+      c.set(24, 11, slops);
+      c.stamp(turned(t), -1, 1);
+      flies(c, [[14, 5], [19, 3], [22, 7], [11, 2]]);
+      return false;
+    }),
+    sideUsed: pic(14, 16, (c) => {
+      const t = canvas(14, 16);
+      t.oval(2, 3, 11, 12, C.iron); // on its side, the mouth towards the viewer
+      t.oval(3, 4, 10, 11, C.steel);
+      t.oval(4, 5, 9, 10, C.night);
+      t.speckle(2, 3, 11, 12, C.rust, 6, 2);
+      finish(t);
+      c.oval(1, 10, 12, 14, slops);
+      c.row(12, 4, 8, lite(slops));
+      c.stamp(t, 0, 0);
+      c.rect(5, 9, 8, 10, slops);
+      flies(c, [[2, 2], [9, 1], [12, 5]]);
+      return false;
+    }),
+  });
+  const whipPost = (c, both) => {
+    c.rect(5, 2, 8, 35, C.wood);
+    c.col(5, 2, 35, C.woodLight);
+    c.col(8, 2, 35, C.woodDark);
+    c.col(7, 8, 30, C.woodDark);
+    c.row(1, 6, 7, C.wood);
+    c.rect(4, 5, 9, 6, C.iron);
+    chain(c, 3, 7, 13);
+    pat(c, 2, 14, ['I.I', 'I.I']);
+    if (both) {
+      chain(c, 10, 7, 12);
+      pat(c, 9, 13, ['I.I', 'I.I']);
+    }
+    c.rect(5, 16, 6, 18, bloodDark);
+    c.set(6, 21, bloodDark);
+    c.set(5, 24, bloodDark);
+    block(c, 3, 34, 10, 36, C.stoneDark);
+  };
+  V('whipping-post', {
+    side: pic(14, 38, (c) => whipPost(c, false)),
+    used: on('base', (c) => bleed(c, [[5, 14], [6, 15], [7, 16], [5, 19], [6, 20], [5, 21], [7, 22], [6, 23], [5, 26], [6, 27], [5, 28], [6, 30], [7, 31], [5, 32], [6, 33], [4, 35], [8, 35], [6, 34]])),
+    sideUsed: on('side', (c) => bleed(c, [[5, 14], [6, 15], [7, 16], [5, 19], [6, 20], [5, 21], [7, 22], [6, 23], [5, 26], [6, 27], [5, 28], [6, 30], [7, 31], [5, 32], [6, 33], [4, 35], [8, 35], [6, 34]])),
+  });
+  const RIBS = ['..bbb..', 'bbbbbbb', 'b.bBb.b', 'bbbbbbb', 'b.bBb.b', 'bbbbbbb', 'b..B..b', 'b.bBb.b', 'B.bbb.b', '..bbbbbb'];
+  const skeleton = (c, loose) => {
+    c.rect(2, 1, 3, 2, C.iron);
+    if (loose) {
+      chain(c, 3, 3, 13); // the arm has dropped, and the skull lies in its lap
+      pat(c, 2, 14, ['I.I', '.I.']);
+      skull(c, 13, 16);
+      c.set(8, 12, C.bone);
+    } else {
+      chain(c, 3, 3, 8);
+      skull(c, 5, 6);
+      pat(c, 3, 8, ['b', 'b', '.b', '.b']);
+    }
+    pat(c, 5, 13, RIBS);
+    c.row(23, 7, 22, C.bone);
+    c.row(25, 8, 16, C.bone);
+    c.line(16, 25, 19, 21, C.bone);
+    c.line(19, 21, 22, 25, C.bone);
+    pat(c, 22, 21, ['b.', 'bb', 'b.']);
+    c.set(23, 25, C.bone);
+    c.set(24, 25, C.bone);
+    c.rect(14, 22, 15, 24, C.iron);
+    chain(c, 12, 22, 22);
+    c.row(26, 4, 12, dark(C.bone));
+    pat(c, 4, 22, ['B', 'b', 'b']);
+  };
+  /** The same seen along the wall: the back against it (to the right), the legs stretched out to the left. */
+  const skeletonSide = (c, loose) => {
+    c.rect(22, 1, 23, 2, C.iron);
+    if (loose) {
+      chain(c, 22, 3, 13);
+      pat(c, 21, 14, ['I.I', '.I.']);
+      pat(c, 6, 16, SKULL_P);
+      c.set(18, 12, C.bone);
+    } else {
+      chain(c, 22, 3, 8);
+      pat(c, 14, 6, SKULL_P);
+      pat(c, 21, 8, ['.b', '.b', 'b.', 'b.']);
+    }
+    c.col(20, 13, 22, C.bone); // the spine
+    for (const y of [14, 16, 18, 20]) c.row(y, 16, 19, y % 4 ? C.bone : dark(C.bone));
+    c.rect(18, 22, 21, 23, C.bone);
+    c.row(23, 4, 18, C.bone);
+    c.row(25, 5, 17, C.bone);
+    c.line(10, 25, 7, 21, C.bone);
+    c.line(7, 21, 4, 25, C.bone);
+    pat(c, 2, 21, ['.b', 'bb', '.b']);
+    c.rect(11, 22, 12, 24, C.iron);
+    chain(c, 13, 22, 22);
+    c.row(26, 14, 22, dark(C.bone));
+  };
+  V('skeleton-chained', {
+    side: pic(26, 28, (c) => skeletonSide(c, false)),
+    used: pic(26, 28, (c) => skeleton(c, true)),
+    sideUsed: pic(26, 28, (c) => skeletonSide(c, true)),
+  });
+  V('bones-small', {
+    side: pic(9, 8, (c) => pat(c, 1, 1, ['.bbb...', 'bKbKb..', 'bbbbb.b', '.bBb.b.', '..b.b..', '.b...b.'])), // from the head end
+    used: pic(21, 9, (c) => pat(c, 1, 1, ['...........b...b...', '.bb.........b.b....', 'bKbb..b.b....b...b.', 'bbbb.bbbbb..b.b.b..', '.BB...b.b..b...b...', '.........b.........', '......b.b..........'])), // kicked apart
+    sideUsed: pic(13, 8, (c) => pat(c, 1, 1, ['.bbb.......', 'bKbKb...b..', 'bbbbb..b...', '.bBb..b..b.', '.........b.', '....b.b....'])),
+  });
+
+  /* --- holes, boards and webs --- */
+  V('loose-floorboard', {
+    side: pic(10, 10, (c) => {
+      c.rect(2, 6, 7, 8, C.night); // from its end: the gap, and the board held up
+      c.rect(2, 2, 7, 3, C.woodLight);
+      c.row(2, 2, 7, C.woodPale);
+      c.row(4, 2, 7, C.wood);
+      c.rect(4, 7, 5, 8, C.parchment);
+      c.set(4, 7, C.paper);
+      c.row(8, 2, 7, mix(C.woodDark, 0.6));
+      c.set(6, 8, C.gold);
+    }, soft),
+    used: pic(26, 5, (c) => {
+      c.rect(1, 1, 23, 3, C.woodLight); // pressed back into place
+      c.row(1, 1, 23, C.woodPale);
+      c.row(3, 1, 23, C.wood);
+      c.set(3, 2, C.iron);
+      c.set(21, 2, C.iron);
+      c.line(9, 2, 14, 2, C.wood);
+    }, soft),
+    sideUsed: pic(10, 5, (c) => {
+      c.rect(2, 1, 7, 3, C.woodLight);
+      c.row(1, 2, 7, C.woodPale);
+      c.row(3, 2, 7, C.wood);
+      c.set(4, 2, C.iron);
+    }, soft),
+  });
+  V('floor-hole-boards', {
+    used: pic(32, 12, (c) => {
+      S['floor-hole-boards'].draw(c); // boarded over
+      c.poly([[1, 3], [30, 2], [30, 4], [1, 5]], C.woodLight);
+      c.line(1, 5, 30, 4, C.wood);
+      c.poly([[2, 7], [29, 8], [29, 10], [2, 9]], C.woodPale);
+      c.line(2, 9, 29, 10, C.wood);
+      for (const [x, y] of [[3, 4], [28, 3], [4, 8], [27, 9]]) c.set(x, y, C.iron);
+    }, soft),
+  });
+  V('wall-hole', {
+    used: on('base', (c) => {
+      c.set(11, 8, C.glow); // something in there is looking out
+      c.set(14, 8, C.glow);
+      pat(c, 8, 11, ['z.z.z', 'zzzzz', '.ZZZ.']);
+    }),
+  });
+  V('peephole', {
+    used: on('base', (c) => {
+      c.rect(3, 3, 7, 5, K); // nobody at it now: only the hole
+      c.rect(4, 3, 6, 5, C.night);
+      c.set(5, 4, C.slate);
+    }),
+  });
+  V('rat-hole', {
+    used: on('base', (c) => {
+      const fur = hex('#5e5650');
+      c.rect(4, 4, 7, 7, fur); // it comes out
+      c.set(3, 4, hex('#7a7068'));
+      c.set(8, 4, hex('#7a7068'));
+      c.set(4, 5, C.glow);
+      c.set(7, 5, C.glow);
+      c.rect(5, 7, 6, 7, hex('#a88a7c'));
+      c.set(3, 7, C.ash);
+      c.set(8, 7, C.ash);
+      c.set(2, 6, C.ash);
+      c.set(9, 6, C.ash);
+    }),
+  });
+  V('cobweb-large', {
+    used: pic(28, 28, (c) => {
+      S['cobweb-large'].draw(c); // torn through
+      for (let y = 0; y < 28; y++)
+        for (let x = 0; x < 28; x++) {
+          const a = Math.atan2(y, x),
+            r = Math.hypot(x, y);
+          if (a > 0.36 && a < 1.2 && r > 9 && r < 24) c.clear(x, y);
+        }
+      c.line(12, 4, 13, 12, web);
+      c.line(5, 11, 7, 17, web);
+      c.line(18, 7, 18, 11, web);
+    }, flat),
+  });
+  V('cobweb-doorway', {
+    used: pic(20, 38, (c) => {
+      S['cobweb-doorway'].draw(c); // someone has walked through it
+      for (let y = 6; y <= 37; y++) for (let x = 3; x <= 16; x++) if (((x - 9.5) / 6.5) ** 2 + ((y - 23) / 17) ** 2 < 1) c.clear(x, y);
+      c.line(5, 8, 6, 15, web);
+      c.line(14, 9, 13, 18, web);
+      c.line(9, 4, 10, 9, web);
+      c.set(3, 30, web);
+    }, flat),
+  });
+  V('cobweb-hanging', {
+    used: pic(30, 18, (c) => {
+      S['cobweb-hanging'].draw(c); // brushed aside
+      c.clearRect(8, 2, 20, 17);
+      c.line(9, 1, 8, 9, web);
+      c.line(20, 1, 21, 7, web);
+      c.set(14, 1, web);
+    }, flat),
+  });
+  const spiderDown = pic(7, 30, (c) => {
+    c.col(3, 0, 24, web); // let itself down
+    pat(c, 0, 24, ['K.KKK.K', '.KKKKK.', 'K.KKK.K', 'K..K..K']);
+    c.set(2, 26, C.red);
+    c.set(4, 26, C.red);
+  }, flat);
+  V('spider-thread', { side: same('spider-thread'), used: spiderDown, sideUsed: spiderDown });
+
+  /* --- marks on floors and walls: no side view, only what they look like afterwards --- */
+  V('bloodstain', {
+    used: pic(22, 9, (c) => {
+      stain(c, 22, hex('#4e1a16'), 3, false); // scrubbed at, not quite gone
+      for (let y = 0; y < 9; y++) for (let x = 0; x < 22; x++) if ((x * 3 + y * 5) % 4 || (x > 6 && x < 15 && y > 2 && y < 6)) c.clear(x, y);
+    }, flat),
+  });
+  const layPrint = (c, rows, m, x, y) => rows.forEach((r, j) => [...r].forEach((ch, i) => m[ch] && c.set(x + (6 - j), y + i, m[ch])));
+  V('blood-pool', {
+    used: pic(38, 10, (c) => {
+      stain(c, 22, C.blood, 5, true); // someone has stepped in it
+      layPrint(c, FOOT, { r: C.blood }, 22, 1);
+      layPrint(c, FOOT, { r: bloodDark }, 30, 5);
+      c.set(20, 4, C.blood);
+    }, flat),
+  });
+  V('blood-drips', {
+    used: pic(13, 24, (c) => {
+      c.rect(1, 1, 11, 2, C.blood); // it has gone on running
+      c.oval(2, 1, 9, 4, C.blood);
+      for (const [x, l] of [[2, 11], [4, 19], [6, 9], [8, 15], [10, 7]]) {
+        c.col(x, 2, 2 + l, C.blood);
+        c.set(x, 3 + l, bloodDark);
+      }
+      c.row(22, 2, 8, C.blood);
+      c.row(23, 3, 6, bloodDark);
+      c.row(1, 3, 7, C.red);
+    }, flat),
+  });
+  V('handprint-bloody', {
+    used: on('base', (c) => {
+      for (const [x, l] of [[2, 7], [3, 5], [4, 8], [5, 6], [6, 9], [7, 4]]) for (let y = 10; y < 12 + l; y++) if ((x + y) % 3) c.set(x, y, y > 9 + l ? bloodDark : C.blood); // dragged down the wall
+    }, { h: 22, dy: 0 }),
+  });
+  V('message-blood', {
+    used: on('base', (c) => {
+      for (const [x, l] of [[1, 7], [5, 4], [10, 6], [13, 3], [17, 8], [22, 5], [26, 7], [29, 4]]) {
+        c.col(x, 6, 6 + l, bloodDark); // still wet: it runs
+        c.set(x, 7 + l, C.blood);
+      }
+    }, { h: 17, dy: 0 }),
+  });
+  V('chalk-outline', {
+    used: on('base', (c) => {
+      c.oval(17, 6, 26, 9, C.blood); // the blood has come back
+      c.oval(14, 7, 20, 9, bloodDark);
+      c.row(7, 19, 23, C.red);
+      c.set(28, 9, bloodDark);
+    }),
+  });
+  V('bullet-holes', {
+    used: on('base', (c) => {
+      for (const [x, y] of [[7, 5], [13, 2], [9, 9]]) {
+        c.rect(x, y, x + 1, y + 1, K); // three more
+        c.set(x - 1, y - 1, C.slate);
+        c.set(x + 2, y + 2, C.slate);
+        c.set(x - 1, y + 2, C.paper);
+      }
+      c.line(3, 6, 6, 6, C.slate);
+    }),
+  });
+  V('scratch-marks', {
+    used: pic(25, 15, (c) => {
+      S['scratch-marks'].draw(c); // and again
+      const t = canvas(12, 15);
+      S['scratch-marks'].draw(t);
+      c.stamp(t, 12, 0);
+    }, flat),
+  });
+  const trail = (rows, m, speck) =>
+    pic(46, 10, (c) => {
+      [1, 8, 16, 23, 31, 38].forEach((x, i) => layPrint(c, rows, m, x, i % 2 ? 5 : 1)); // they go on
+      c.speckle(0, 0, 45, 9, speck, 3, 2);
+    }, flat);
+  V('footprints-muddy', { used: trail(BOOT, { m: mud }, dark(mud)) });
+  V('footprints-bloody', { used: trail(FOOT, { r: C.blood }, bloodDark) });
+  V('mist-patch', {
+    used: on('base', (c) => {
+      for (const x of [20, 24]) {
+        c.set(x, 6, C.glow); // eyes in it
+        c.set(x, 5, [...C.night, 90]);
+      }
+    }),
+  });
+  V('flies-swarm', {
+    used: pic(16, 14, (c) => {
+      flies(c, [[2, 5], [5, 2], [7, 7], [10, 3], [12, 8], [4, 10], [9, 11], [13, 4], [6, 5], [11, 12], [2, 8]]); // thicker
+      flies(c, [[4, 4], [8, 2], [9, 6], [12, 5], [14, 10], [6, 12], [3, 12], [14, 2], [8, 9], [1, 2], [11, 9], [6, 9]]);
+    }, raw),
   });
 
   return S;
