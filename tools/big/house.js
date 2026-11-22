@@ -4947,6 +4947,1013 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     });
   }
 
+  /* ---------- lamps, stands and small things ---------- */
+  const same = (p, q) => p && p[0] === q[0] && p[1] === q[1] && p[2] === q[2];
+  /** Swap one colour of what is drawn for another. */
+  function recolour(c, from, to) {
+    for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) if (same(c.get(x, y), from)) c.set(x, y, to);
+  }
+  /** A fringed shade lit from inside: the shade glows, light shows under it. */
+  function lightShade(c, col, y, x0, x1, stem) {
+    const lit = blend(col, C.flameLight, 0.65);
+    recolour(c, L(col), L(lit));
+    recolour(c, col, lit);
+    recolour(c, C.mustard, C.flameLight);
+    c.row(y, x0, x1, C.glow);
+    c.set(stem, y, C.brass);
+  }
+  {
+    const lampOn = (slug, col, y, x0, x1) => over(slug, (c) => lightShade(c, col, y, x0, x1, 5));
+    const asIs = (slug) => view(A[slug].w, A[slug].h, (c) => A[slug].draw(c));
+    V('side-table-lamp', {
+      side: asIs('side-table-lamp'),
+      used: lampOn('side-table-lamp', hex('#8a6a4c'), 7, 3, 7),
+      sideUsed: lampOn('side-table-lamp', hex('#8a6a4c'), 7, 3, 7),
+    });
+    V('standing-lamp-old', {
+      side: asIs('standing-lamp-old'),
+      used: lampOn('standing-lamp-old', hex('#7d5a50'), 8, 3, 7),
+      sideUsed: lampOn('standing-lamp-old', hex('#7d5a50'), 8, 3, 7),
+    });
+    // the desk lamp
+    const green = hex('#3d6a4e'),
+      greenL = hex('#5d8a66'),
+      beam = blend(C.glow, C.white, 0.25);
+    const lampEnd = (on) => (c) => {
+      const x = on ? 2 : 1;
+      if (on) {
+        c.poly([[x, 4], [x + 3, 4], [x + 5, 7], [x - 2, 7]], beam);
+        c.rect(x, 1, x + 3, 2, greenL);
+        c.row(1, x, x + 3, L(greenL));
+      } else {
+        c.rect(x, 1, x + 3, 2, green);
+        c.row(1, x, x + 3, greenL);
+      }
+      c.row(3, x + 1, x + 2, C.glow);
+      c.col(x + 1, 4, 6, C.brass);
+      c.row(7, x, x + 3, C.brass);
+    };
+    V('reading-lamp', {
+      side: view(6, 9, lampEnd(false)),
+      used: view(11, 9, (c) => {
+        c.poly([[3, 4], [7, 4], [9, 7], [1, 7]], beam); // switched on: the light falls on the desk
+        c.rect(2, 1, 8, 2, greenL);
+        c.row(1, 3, 7, L(greenL));
+        c.row(3, 3, 7, C.flameLight);
+        c.col(5, 4, 6, C.brass);
+        c.row(7, 3, 7, C.brass);
+      }),
+      sideUsed: view(8, 9, lampEnd(true)),
+    });
+    // plants: knocked off the stand
+    const plantFallen = (dead) => (c) => {
+      c.rect(4, 15, 9, 15, WL);
+      c.rect(6, 16, 7, 24, W);
+      c.line(6, 22, 3, 26, WD);
+      c.line(7, 22, 10, 26, WD);
+      c.col(6, 22, 26, WD);
+      const pot = hex('#7a4a34');
+      c.rect(13, 23, 16, 26, pot); // the pot on its side, broken
+      c.col(13, 23, 26, L(pot));
+      c.rect(17, 24, 17, 25, pot);
+      dots(c, pot, [11, 26, 19, 26, 20, 25]);
+      c.rect(17, 26, 21, 26, C.earth); // earth spilled
+      c.rect(18, 25, 19, 25, C.earth);
+      if (dead) {
+        const tw = hex('#5c4a34');
+        c.line(17, 24, 22, 21, tw);
+        c.line(18, 24, 23, 24, tw);
+        dots(c, C.straw, [23, 20, 24, 24, 21, 23, 9, 26]);
+      } else {
+        for (const [x1, y1] of [[22, 19], [24, 21], [25, 24], [21, 22]]) c.line(17, 24, x1, y1, C.leaf);
+        for (const [x1, y1] of [[23, 20], [24, 23], [22, 25]]) c.line(18, 24, x1, y1, C.leafLight);
+      }
+    };
+    for (const [slug, dead] of [['plant-stand', false], ['plant-stand-dead', true]])
+      V(slug, {
+        side: flipped(14, 28, (c) => plantStand(c, dead)),
+        used: view(27, 28, plantFallen(dead)),
+        sideUsed: flipped(27, 28, plantFallen(dead)),
+      });
+    V('coat-stand', {
+      side: flipped(14, 37, (c) => A['coat-stand'].draw(c)),
+      used: view(14, 37, (c) => coatStand(c, 6)), // somebody has taken the hat and coat
+      sideUsed: flipped(14, 37, (c) => coatStand(c, 6)),
+    });
+    const brolliesGone = (c) => {
+      c.col(7, 1, 9, WL); // only the walking stick left
+      c.set(8, 1, WL);
+      c.rect(2, 9, 7, 17, C.brass);
+      c.col(2, 9, 17, L(C.brass));
+      c.row(9, 2, 7, D(C.brass));
+      c.row(13, 2, 7, D(C.brass));
+      c.row(17, 2, 7, D(C.brass));
+    };
+    V('umbrella-stand', {
+      side: flipped(10, 19, (c) => A['umbrella-stand'].draw(c)),
+      used: view(10, 19, brolliesGone),
+      sideUsed: flipped(10, 19, brolliesGone),
+    });
+    const toolsSide = (poker) => (c) => {
+      c.col(3, 1, 15, C.iron);
+      c.set(3, 1, C.brass);
+      c.row(4, 2, 4, C.iron);
+      c.rect(4, 12, 5, 14, C.iron); // the shovel, behind
+      c.col(5, 5, 11, C.ironDark);
+      if (poker) {
+        c.col(1, 5, 13, C.ironDark);
+        c.set(2, 13, C.ironDark);
+      }
+      c.row(16, 1, 5, C.ironDark);
+      c.row(15, 2, 4, C.iron);
+    };
+    V('fire-tools', {
+      side: view(7, 18, toolsSide(true)),
+      used: over('fire-tools', (c) => c.clearRect(2, 5, 2, 13)), // the poker is gone
+      sideUsed: view(7, 18, toolsSide(false)),
+    });
+    // candles
+    const candSide = (lit) => (c) => {
+      const b = c.h - 2;
+      c.col(3, 7, b - 1, C.brass);
+      c.row(b, 1, 5, C.brass);
+      c.row(b - 1, 2, 4, D(C.brass));
+      c.set(3, 10, C.gold);
+      c.row(8, 2, 4, C.brass);
+      candle(c, 3, 3, 6, lit);
+      if (!lit) c.set(4, 5, C.bone);
+    };
+    V('candelabra', {
+      side: view(7, 16, candSide(false)),
+      used: view(13, 16, (c) => candelabra(c, true)),
+      sideUsed: view(7, 16, candSide(true)),
+    });
+    V('candelabra-lit', {
+      side: view(7, 16, candSide(true)),
+      used: view(13, 16, (c) => candelabra(c, false)),
+      sideUsed: view(7, 16, candSide(false)),
+    });
+    const standSide = (lit) => (c) => {
+      candle(c, 5, 4, 7, lit);
+      c.row(8, 3, 7, C.brass);
+      c.rect(1, 9, 10, 10, WL);
+      c.row(9, 1, 10, L(WL));
+      c.rect(2, 11, 9, 18, W);
+      c.col(2, 11, 18, L(W));
+      panel(c, 3, 12, 8, 17, W);
+      c.set(10, 13, C.brass);
+      legs(c, [2, 8], 19, 20, WD);
+    };
+    V('nightstand', {
+      side: view(12, 22, standSide(false)),
+      used: over('nightstand', (c) => {
+        candle(c, 5, 4, 7, true); // the candle lit
+        c.set(5, 1, C.flameLight);
+        c.set(5, 2, C.flame);
+        c.set(5, 3, C.flame);
+        c.set(4, 3, C.flame);
+        c.set(6, 3, C.flame);
+      }),
+      sideUsed: view(12, 22, (c) => {
+        standSide(true)(c);
+        c.set(5, 1, C.flameLight);
+        c.set(5, 2, C.flame);
+        c.set(5, 3, C.flame);
+        c.set(4, 3, C.flame);
+        c.set(6, 3, C.flame);
+      }),
+    });
+  }
+
+  /* ---------- music, wireless, fire ---------- */
+  /** A quaver, for something that is playing. */
+  function note(c, x, y) {
+    c.col(x + 2, y, y + 3, C.bone);
+    c.rect(x, y + 3, x + 1, y + 4, C.bone);
+    c.set(x + 3, y + 1, C.bone);
+  }
+  {
+    const pc = hex('#3b2a26');
+    const uprightSide = (shut) => (c) => {
+      c.rect(1, 1, 9, 2, L(pc));
+      c.rect(2, 3, 8, 23, pc);
+      c.col(2, 3, 23, L(pc));
+      panel(c, 3, 5, 7, 11, pc);
+      panel(c, 3, 18, 7, 22, pc);
+      c.rect(9, 13, 13, 16, pc); // the key bed
+      c.row(13, 9, 13, shut ? L(pc) : C.white);
+      if (!shut) {
+        c.line(9, 12, 10, 8, C.paper); // the music on its desk
+        c.row(14, 9, 13, L(pc));
+      }
+      c.rect(11, 17, 13, 23, D(pc));
+      c.rect(1, 24, 13, 24, D(pc));
+      c.set(11, 23, C.brass);
+    };
+    V('piano-upright', {
+      side: view(15, 26, uprightSide(false)),
+      used: over('piano-upright', (c) => {
+        c.rect(2, 14, 29, 15, pc); // the lid shut over the keys, the music put away
+        c.row(14, 2, 29, L(pc));
+        c.row(15, 2, 29, D(pc));
+        c.rect(12, 6, 19, 9, pc);
+      }),
+      sideUsed: view(15, 26, uprightSide(true)),
+    });
+    // the grand, from the keyboard
+    const gc = C.black,
+      hl = hex('#3a3644');
+    const grandFront = (shut) => (c) => {
+      if (shut) {
+        c.rect(2, 12, 29, 13, gc);
+        c.row(12, 2, 29, hl);
+      } else {
+        c.line(3, 13, 28, 3, hl); // the lid, propped open on the far side
+        c.line(3, 14, 28, 4, gc);
+        c.line(4, 14, 28, 5, gc);
+        c.line(24, 13, 25, 6, hex('#5a5560'));
+      }
+      c.rect(10, 8, 21, 13, hl); // music desk
+      c.rect(12, 9, 19, 12, C.paper);
+      dots(c, D(C.paper), [13, 10, 15, 10, 17, 10, 14, 11, 16, 11, 18, 11]);
+      c.rect(2, 14, 29, 19, gc); // the case
+      c.row(14, 2, 29, hl);
+      c.col(2, 14, 19, hl);
+      c.rect(4, 15, 27, 16, C.white);
+      for (let x = 5; x < 27; x += 2) c.set(x, 15, x % 8 === 7 ? C.white : K);
+      c.row(16, 4, 27, C.bone);
+      c.rect(15, 20, 16, 25, hl); // the third leg, behind
+      legs(c, [3, 27], 20, 26, gc);
+      for (const x of [3, 27]) {
+        c.set(x, 20, hl);
+        c.row(27, x, x + 1, C.brass);
+      }
+      c.col(13, 20, 25, hl); // pedal lyre
+      c.col(18, 20, 25, hl);
+      c.row(26, 12, 19, C.brass);
+    };
+    V('piano-grand', {
+      base: 'side',
+      side: view(32, 30, grandFront(false)),
+      used: view(46, 30, (c) => {
+        c.rect(4, 12, 42, 13, gc); // the lid let down
+        c.row(12, 4, 42, hl);
+        c.rect(4, 14, 42, 19, gc);
+        c.row(14, 4, 42, hl);
+        c.col(4, 14, 19, hl);
+        c.rect(43, 15, 43, 18, gc);
+        c.rect(1, 16, 5, 17, C.white);
+        c.row(17, 1, 5, C.bone);
+        c.rect(1, 18, 4, 19, gc);
+        legs(c, [5, 23, 40], 20, 26, gc);
+        for (const x of [5, 23, 40]) {
+          c.set(x, 20, hl);
+          c.row(27, x, x + 1, C.brass);
+        }
+        c.col(13, 20, 25, hl);
+        c.col(15, 20, 25, hl);
+        c.row(26, 12, 16, C.brass);
+      }),
+      sideUsed: view(32, 30, grandFront(true)),
+    });
+    // the gramophone: its horn towards us
+    const gramFront = (c, dy = 0) => {
+      c.oval(3, 1 + dy, 12, 10 + dy, C.brass);
+      c.oval(4, 2 + dy, 11, 9 + dy, mix(C.brass, 0.45));
+      c.oval(6, 4 + dy, 9, 7 + dy, mix(C.brass, 0.25));
+      c.line(4, 3 + dy, 6, 1 + dy, L(C.brass));
+      c.rect(3, 11 + dy, 11, 11 + dy, C.black);
+      c.rect(2, 12 + dy, 13, 17 + dy, W);
+      c.row(12 + dy, 2, 13, WL);
+      c.row(17 + dy, 2, 13, WD);
+      panel(c, 4, 14 + dy, 11, 16 + dy, W);
+      c.line(14, 13 + dy, 15, 14 + dy, C.iron);
+      c.set(15, 15 + dy, C.iron);
+    };
+    V('gramophone', {
+      side: view(17, 19, (c) => gramFront(c)),
+      used: over(
+        'gramophone',
+        (c) => {
+          note(c, 18, 1); // playing
+          note(c, 21, 8);
+        },
+        { w: 26, h: 23 },
+      ),
+      sideUsed: view(23, 23, (c) => {
+        gramFront(c, 4);
+        note(c, 14, 1);
+        note(c, 18, 7);
+      }),
+    });
+    const radioSide = (on) => (c, dy = 0) => {
+      c.rect(2, 2 + dy, 7, 10 + dy, WL);
+      c.rect(3, 1 + dy, 6, 1 + dy, WL);
+      c.col(2, 2 + dy, 10 + dy, L(WL));
+      c.row(10 + dy, 1, 8, WD);
+      c.frame(3, 3 + dy, 6, 8 + dy, D(WL));
+      c.set(8, 8 + dy, on ? C.flameLight : C.glow);
+      c.set(8, 9 + dy, C.black);
+    };
+    V('radio-old', {
+      side: view(10, 12, (c) => radioSide(false)(c)),
+      used: over(
+        'radio-old',
+        (c) => {
+          c.rect(4, 14, 8, 14, C.flameLight); // switched on
+          note(c, 13, 1);
+          note(c, 16, 7);
+        },
+        { w: 21, h: 18 },
+      ),
+      sideUsed: view(18, 18, (c) => {
+        radioSide(true)(c, 6);
+        note(c, 10, 1);
+        note(c, 13, 7);
+      }),
+    });
+    // television
+    const tvSide = (on) => (c) => {
+      c.rect(4, 1, 12, 14, W);
+      c.row(1, 4, 12, WL);
+      c.row(14, 4, 12, WD);
+      c.rect(2, 4, 3, 11, D(W)); // the tube, out at the back
+      c.rect(1, 6, 1, 9, D(W));
+      for (const y of [4, 6, 8]) c.row(y, 6, 10, WD);
+      c.col(13, 3, 12, on ? C.white : hex('#2c3833')); // the glass of the screen
+      if (on) {
+        c.col(14, 4, 11, C.ghost);
+        dots(c, C.ash, [13, 5, 13, 8, 13, 10]);
+      }
+      c.set(13, 13, C.bone);
+      c.line(6, 15, 5, 20, WD);
+      c.line(11, 15, 12, 20, WD);
+    };
+    const tvFront = (on) =>
+      view(19, 22, (c) => {
+        tv(c, on);
+        c.clear(6, 0);
+      });
+    V('tv-old-off', { side: view(16, 22, tvSide(false)), used: tvFront(true), sideUsed: view(16, 22, tvSide(true)) });
+    V('tv-old-static', { side: view(16, 22, tvSide(true)), used: tvFront(false), sideUsed: view(16, 22, tvSide(false)) });
+    // fireplaces; used, a fire burns in them
+    const tongue = (c, x, yb, h, w, col) => c.poly([[x, yb], [x + (w >> 1), yb - h], [x + w, yb]], col);
+    const blaze = (c, x0, yb, h) => {
+      tongue(c, x0, yb, h - 3, 4, C.red);
+      tongue(c, x0 + 3, yb, h, 5, C.red);
+      tongue(c, x0 + 7, yb, h - 2, 4, C.red);
+      tongue(c, x0 + 1, yb, h - 5, 3, C.flame);
+      tongue(c, x0 + 4, yb, h - 3, 4, C.flame);
+      tongue(c, x0 + 8, yb, h - 5, 2, C.flame);
+      tongue(c, x0 + 5, yb, h - 6, 2, C.flameLight);
+    };
+    const fireSide = (state) => (c) => {
+      const st = C.stone,
+        b = 28;
+      c.rect(1, 6, 7, b, st); // the chimney breast
+      c.col(1, 6, b, L(st));
+      for (let y = 9; y < b - 2; y += 4) {
+        c.row(y, 2, 4, D(st));
+        c.row(y + 2, 5, 7, D(st));
+      }
+      c.rect(1, 3, 10, 5, L(st)); // the mantel, standing out
+      c.row(3, 1, 10, L(L(st)));
+      c.row(5, 2, 9, D(st));
+      c.rect(1, b - 1, 12, b, D(st)); // hearth
+      c.row(b - 1, 1, 12, st);
+      c.col(9, b - 6, b - 2, C.ironDark); // the end of the grate
+      c.row(b - 4, 8, 10, C.ironDark);
+      if (state === 'cold') {
+        c.rect(5, 1, 6, 2, C.brass);
+        dots(c, C.ash, [10, b - 2, 11, b - 2]);
+      } else if (state === 'embers') {
+        dots(c, C.red, [8, b - 2, 10, b - 3]);
+        c.set(10, b - 2, C.flame);
+      } else {
+        if (state === 'lit') c.rect(5, 1, 6, 2, C.brass);
+        c.col(8, state === 'lit' ? 18 : 12, b - 2, hex('#6a4a22')); // firelight on the edge of the opening
+        tongue(c, 9, b - 2, state === 'lit' ? 6 : 9, 3, C.red);
+        tongue(c, 10, b - 2, state === 'lit' ? 4 : 6, 2, C.flame);
+        c.set(11, b - 2, C.flameLight);
+      }
+    };
+    const glowBack = (c) => {
+      c.rect(10, 12, 25, 24, hex('#5a2a1c'));
+      for (let y = 13; y < 25; y += 3) c.row(y, 10, 25, hex('#3a1c18'));
+    };
+    V('fireplace-cold', {
+      side: view(14, 30, fireSide('cold')),
+      used: over('fireplace-cold', (c) => {
+        glowBack(c);
+        c.rect(13, 25, 22, 26, hex('#3a2420')); // a log, and the fire catching
+        c.row(25, 13, 22, hex('#5a4030'));
+        blaze(c, 12, 25, 9);
+        for (let x = 12; x <= 23; x += 3) c.col(x, 22, 26, C.ironDark);
+        c.row(24, 12, 23, C.ironDark);
+      }),
+      sideUsed: view(14, 30, fireSide('lit')),
+    });
+    V('fireplace-embers', {
+      side: view(14, 30, fireSide('embers')),
+      used: over('fireplace-embers', (c) => {
+        glowBack(c);
+        c.rect(12, 24, 23, 26, hex('#3a2420')); // logs thrown on: a roaring fire
+        c.row(24, 12, 23, hex('#5a4030'));
+        blaze(c, 11, 24, 13);
+        blaze(c, 15, 25, 10);
+        for (let x = 12; x <= 23; x += 3) c.col(x, 23, 26, C.ironDark);
+        c.row(24, 12, 23, C.ironDark);
+        c.row(27, 9, 26, hex('#6a3a22'));
+      }),
+      sideUsed: view(14, 30, fireSide('roaring')),
+    });
+  }
+
+  /* ---------- the study ---------- */
+  {
+    V('typewriter', {
+      side: view(12, 10, (c) => {
+        c.rect(2, 1, 2, 3, C.paper); // the sheet, standing in the carriage
+        c.rect(1, 4, 4, 5, C.black);
+        c.row(4, 1, 4, C.steel);
+        c.rect(2, 6, 6, 8, C.black);
+        c.rect(7, 7, 9, 8, C.black);
+        c.row(5, 3, 5, hex('#3a3644'));
+        dots(c, C.bone, [5, 5, 7, 6, 9, 6, 6, 5, 8, 6]);
+      }),
+      used: over(
+        'typewriter',
+        (c) => {
+          c.rect(4, 1, 9, 6, C.paper); // a page typed
+          c.row(1, 4, 9, C.white);
+          for (const y of [2, 4]) c.row(y, 5, 8, D(D(C.paper)));
+          c.set(8, 4, C.paper);
+        },
+        { h: 13 },
+      ),
+      sideUsed: view(12, 13, (c) => {
+        c.rect(2, 1, 2, 6, C.paper);
+        c.set(3, 1, C.paper);
+        dots(c, D(D(C.paper)), [2, 2, 2, 4]);
+        c.rect(1, 7, 4, 8, C.black);
+        c.row(7, 1, 4, C.steel);
+        c.rect(2, 9, 6, 11, C.black);
+        c.rect(7, 10, 9, 11, C.black);
+        c.row(8, 3, 5, hex('#3a3644'));
+        dots(c, C.bone, [5, 8, 7, 9, 9, 9, 6, 8, 8, 9]);
+      }),
+    });
+    // the globe: turned, it shows another side of the world
+    const globe = (v) => (c) => {
+      const land = hex('#9a8a58');
+      c.oval(2, 1, 11, 10, hex('#5c7a78'));
+      if (v === 0) {
+        c.poly([[4, 3], [7, 2], [8, 5], [6, 7], [4, 6]], land);
+        c.rect(9, 6, 10, 8, land);
+        c.set(3, 8, land);
+      } else if (v === 1) {
+        c.poly([[6, 2], [9, 3], [10, 6], [8, 7]], land);
+        c.rect(3, 5, 4, 8, land);
+        c.set(6, 9, land);
+      } else if (v === 2) {
+        c.rect(3, 3, 5, 4, land);
+        c.poly([[7, 5], [10, 4], [10, 7], [8, 9], [6, 7]], land);
+        c.set(4, 7, land);
+      } else {
+        c.poly([[3, 4], [5, 3], [6, 6], [4, 8]], land);
+        c.rect(8, 3, 9, 4, land);
+        c.rect(8, 7, 9, 8, land);
+      }
+      c.line(1, 2, 12, 9, C.brass);
+      c.set(1, 2, C.gold);
+      c.col(6, 11, 21, WD);
+      c.col(7, 11, 21, W);
+      c.row(11, 4, 9, C.brass);
+      c.line(6, 20, 3, 24, WD);
+      c.line(7, 20, 10, 24, WD);
+      c.col(6, 21, 24, WD);
+    };
+    V('globe-old', { side: view(14, 26, globe(1)), used: view(14, 26, globe(2)), sideUsed: view(14, 26, globe(3)) });
+    // the telescope: from the other side it looks at us; used, it has been swung round
+    const tripod = (c, m) => {
+      c.rect(m, 10, m + 1, 12, C.iron);
+      c.line(m, 12, m - 4, 28, WD);
+      c.line(m + 1, 12, m + 5, 28, WD);
+      c.line(m + 1, 12, m + 1, 27, W);
+      c.row(20, m - 2, m + 3, D(C.brass));
+    };
+    V('telescope-brass', {
+      side: view(16, 30, (c) => {
+        c.rect(6, 9, 9, 11, D(C.brass)); // the tube, running away behind its great lens
+        tripod(c, 7);
+        c.oval(4, 2, 11, 9, C.brass);
+        c.oval(5, 3, 10, 8, C.glass);
+        c.line(6, 6, 8, 4, C.glassLight);
+        c.set(5, 2, C.gold);
+        c.set(6, 2, C.gold);
+      }),
+      used: view(24, 30, (c) => {
+        const X = (x) => 23 - x;
+        c.line(X(3), 13, X(20), 3, C.brass);
+        c.line(X(3), 14, X(20), 4, C.brass);
+        c.line(X(4), 15, X(21), 5, D(C.brass));
+        c.line(X(14), 6, X(21), 2, C.gold);
+        c.rect(X(22), 2, X(20), 5, C.brass);
+        c.set(X(2), 14, C.black);
+        c.set(X(1), 15, C.black);
+        c.rect(11, 10, 12, 12, C.iron);
+        c.line(11, 12, 5, 28, WD);
+        c.line(12, 12, 18, 28, WD);
+        c.line(12, 12, 12, 27, W);
+        c.row(20, 9, 15, D(C.brass));
+      }),
+      sideUsed: view(16, 30, (c) => {
+        c.rect(6, 4, 9, 6, C.brass); // now its eyepiece is towards us
+        tripod(c, 7);
+        c.oval(5, 6, 10, 11, C.brass);
+        c.oval(6, 7, 9, 10, D(C.brass));
+        c.rect(7, 8, 8, 9, C.black);
+        c.row(4, 6, 9, C.gold);
+      }),
+    });
+    const scattered = (c) => {
+      c.rect(1, 5, 8, 7, C.paper); // what is left of the stack, the rest blown about
+      c.row(6, 1, 8, D(C.paper));
+      c.row(4, 2, 8, C.white);
+      c.poly([[10, 2], [14, 1], [15, 3], [11, 4]], C.white);
+      c.line(11, 3, 14, 2, D(C.paper));
+      c.rect(10, 7, 15, 7, C.paper);
+      c.rect(12, 6, 16, 6, C.white);
+      dots(c, D(C.parchment), [3, 4, 5, 4]);
+    };
+    V('paper-stack', {
+      side: view(10, 8, (c) => A['paper-stack'].draw(c)),
+      used: view(18, 9, scattered),
+      sideUsed: flipped(18, 9, scattered),
+    });
+    const spilt = (c) => {
+      c.rect(6, 9, 11, 9, C.black); // ink spilt
+      c.rect(7, 8, 9, 8, C.black);
+      c.set(8, 8, hex('#3a3644'));
+      c.set(12, 9, C.black);
+    };
+    V('inkwell', {
+      side: flipped(9, 11, (c) => A['inkwell'].draw(c)),
+      used: over('inkwell', spilt, { w: 14 }),
+      sideUsed: flipped(14, 11, (c) => {
+        c.stamp(raw('inkwell'), 0, 0);
+        spilt(c);
+      }),
+    });
+    const phone = (off) => (c) => {
+      const hi = hex('#3a3644');
+      c.rect(3, 2, 4, 2, C.black);
+      c.rect(2, 1, 5, 1, C.black);
+      c.col(3, 3, 9, C.black);
+      c.col(4, 3, 9, hi);
+      c.rect(1, 10, 6, 11, C.black);
+      c.row(10, 2, 5, hi);
+      if (off) {
+        c.set(5, 4, C.brass); // off the hook: the earpiece lies beside it
+        c.set(6, 3, C.brass);
+        c.rect(9, 10, 13, 11, C.black);
+        c.row(10, 9, 12, hi);
+        c.set(13, 9, C.black);
+        dots(c, C.black, [7, 9, 8, 10]);
+      } else {
+        c.row(5, 5, 6, C.brass);
+        c.rect(6, 4, 7, 8, C.black);
+        c.set(7, 9, C.black);
+      }
+    };
+    V('telephone-old', {
+      side: flipped(9, 13, phone(false)),
+      used: view(15, 13, phone(true)),
+      sideUsed: flipped(15, 13, phone(true)),
+    });
+    // the lectern: drawn from the side above
+    const lectSide = (shut) => (c) => {
+      if (shut) {
+        c.poly([[3, 4], [11, 1], [11, 4], [3, 7]], C.wine);
+        c.line(3, 4, 11, 1, L(C.wine));
+      } else {
+        c.poly([[1, 6], [12, 2], [12, 4], [1, 8]], C.paper);
+        c.line(1, 6, 12, 2, C.white);
+        c.line(6, 4, 6, 6, D(C.paper));
+      }
+      c.poly([[1, 9], [12, 5], [12, 7], [1, 11]], WL);
+      c.rect(5, 9, 8, 22, W);
+      c.col(5, 9, 22, L(W));
+      panel(c, 6, 12, 7, 19, W);
+      c.rect(3, 23, 10, 24, W);
+      c.rect(2, 25, 11, 26, WD);
+      c.row(25, 2, 11, W);
+    };
+    const lectFront = (shut) => (c) => {
+      c.rect(1, 3, 12, 9, WL); // the slope, towards the reader
+      c.row(3, 1, 12, L(WL));
+      c.rect(1, 10, 12, 10, WD);
+      if (shut) {
+        c.rect(4, 4, 9, 9, C.wine);
+        c.col(4, 4, 9, L(C.wine));
+        c.col(9, 4, 9, C.paper);
+        dots(c, C.gold, [6, 6, 7, 6, 6, 7, 7, 7]);
+      } else {
+        c.rect(2, 4, 11, 9, C.paper);
+        c.row(4, 2, 11, C.white);
+        c.col(6, 4, 9, D(C.paper));
+        c.col(7, 5, 9, C.white);
+        for (const y of [6, 8]) {
+          c.row(y, 3, 5, D(D(C.paper)));
+          c.row(y, 8, 10, D(D(C.paper)));
+        }
+      }
+      c.rect(5, 11, 8, 22, W);
+      c.col(5, 11, 22, L(W));
+      panel(c, 6, 13, 7, 20, W);
+      c.rect(3, 23, 10, 24, W);
+      c.rect(2, 25, 11, 26, WD);
+      c.row(25, 2, 11, W);
+    };
+    V('lectern', {
+      base: 'side',
+      side: view(14, 28, lectFront(false)),
+      used: view(14, 28, lectSide(true)),
+      sideUsed: view(14, 28, lectFront(true)),
+    });
+    // the map table; used, the chart is rolled up
+    const mapEnd = (rolled) => (c) => {
+      c.rect(1, 4, 14, 5, WL);
+      c.row(4, 1, 14, L(WL));
+      if (rolled) {
+        c.rect(5, 2, 6, 3, C.parchment);
+        c.set(5, 2, C.paper);
+      } else {
+        c.rect(3, 3, 12, 3, C.parchment);
+        c.row(2, 4, 11, C.paper);
+      }
+      c.rect(10, 2, 11, 3, C.brass);
+      c.rect(2, 6, 13, 7, W);
+      c.row(7, 2, 13, WD);
+      legs(c, [2, 12], 8, 16, WD);
+      c.row(13, 4, 11, WD);
+      c.rect(5, 11, 6, 12, C.parchment);
+      c.rect(8, 11, 9, 12, C.paper);
+    };
+    V('map-table', {
+      side: view(16, 18, mapEnd(false)),
+      used: over('map-table', (c) => {
+        c.clearRect(1, 1, 21, 3);
+        c.rect(5, 2, 17, 3, C.parchment); // rolled, tied
+        c.row(2, 5, 17, C.paper);
+        c.col(11, 2, 3, C.rust);
+        c.set(5, 3, D(C.parchment));
+        c.set(17, 3, D(C.parchment));
+      }),
+      sideUsed: view(16, 18, mapEnd(true)),
+    });
+    V('book-pile', {
+      side: view(9, 12, (c) => {
+        const bk = (x0, x1, y, col) => {
+          c.rect(x0, y, x1, y + 1, C.paper); // their fore-edges
+          c.row(y, x0, x1, col);
+          c.set(x0, y + 1, col);
+        };
+        bk(1, 7, 9, C.wine);
+        bk(2, 6, 7, C.navy);
+        bk(1, 6, 5, C.forest);
+        bk(2, 7, 3, C.mustard);
+        bk(2, 5, 1, C.slate);
+      }),
+      used: over(
+        'book-pile',
+        (c) => {
+          c.clearRect(3, 3, 7, 4);
+          c.rect(1, 2, 9, 3, C.paper); // the top one left lying open
+          c.row(1, 2, 8, C.white);
+          c.set(5, 1, C.paper);
+          c.col(5, 2, 3, D(C.paper));
+          dots(c, D(D(C.paper)), [2, 2, 3, 2, 7, 2, 8, 2]);
+          c.row(4, 2, 8, C.slate);
+        },
+        { h: 14 },
+      ),
+      sideUsed: view(9, 14, (c) => {
+        const bk = (x0, x1, y, col) => {
+          c.rect(x0, y, x1, y + 1, C.paper);
+          c.row(y, x0, x1, col);
+          c.set(x0, y + 1, col);
+        };
+        bk(1, 7, 11, C.wine);
+        bk(2, 6, 9, C.navy);
+        bk(1, 6, 7, C.forest);
+        bk(2, 7, 5, C.mustard);
+        c.rect(1, 2, 7, 3, C.paper);
+        c.row(1, 2, 6, C.white);
+        c.row(4, 2, 6, C.slate);
+      }),
+    });
+    // the library steps, drawn from the side above
+    const stepsFront = (used) => (c) => {
+      const dy = c.h - 18;
+      for (let i = 0; i < 4; i++) {
+        c.rect(2, 13 - i * 4 + dy, 11, 16 - i * 4 + dy, mix(W, 1 - i * 0.07));
+        c.row(13 - i * 4 + dy, 1, 12, L(WL));
+      }
+      c.col(1, 2 + dy, 16 + dy, WD);
+      c.col(12, 2 + dy, 16 + dy, WD);
+      if (used) {
+        c.rect(4, dy - 1, 9, dy, C.wine); // a book left on the top step
+        c.row(dy - 1, 4, 9, L(C.wine));
+        c.set(9, dy, C.paper);
+      }
+    };
+    V('library-steps', {
+      base: 'side',
+      side: view(14, 18, stepsFront(false)),
+      used: over(
+        'library-steps',
+        (c) => {
+          c.rect(10, 1, 14, 2, C.wine);
+          c.row(1, 10, 14, L(C.wine));
+          c.set(14, 2, C.paper);
+        },
+        { h: 20 },
+      ),
+      sideUsed: view(14, 20, stepsFront(true)),
+    });
+    V('magnifier', {
+      side: view(11, 5, (c) => {
+        c.rect(1, 2, 6, 2, C.brass); // lying flat: the rim, edge on
+        c.row(1, 2, 5, C.glassLight);
+        c.rect(7, 2, 9, 2, WD);
+      }),
+      used: view(13, 11, (c) => {
+        c.rect(1, 1, 10, 9, C.paper); // on a letter, the words swimming up large
+        c.row(1, 1, 10, C.white);
+        for (const y of [3, 5, 7]) c.row(y, 2, 9, D(C.paper));
+        c.stamp(raw('magnifier'), 2, 2);
+        dots(c, K, [5, 5, 6, 5, 5, 6, 6, 7]);
+      }),
+      sideUsed: view(12, 5, (c) => {
+        c.rect(1, 3, 10, 3, C.paper);
+        c.rect(2, 2, 7, 2, C.brass);
+        c.row(1, 3, 6, C.glassLight);
+        c.rect(8, 2, 10, 2, WD);
+      }),
+    });
+    // the folding screen; used, it is folded up
+    const sc = [hex('#5d6a5a'), hex('#4c5a4e'), hex('#5d6a5a')];
+    V('folding-screen', {
+      side: view(11, 36, (c) => {
+        [[5, 3], [3, 1], [1, 3]].forEach(([x, t], i) => {
+          c.rect(x, t, x + 3, 33 - (i === 1 ? 1 : 0), WD); // its three leaves, seen along the zigzag
+          c.rect(x + 1, t + 1, x + 2, 31 - (i === 1 ? 1 : 0), sc[i]);
+          c.col(x, t, 33, i === 1 ? WD : W);
+        });
+        c.rect(1, 34, 2, 34, WD);
+        c.rect(7, 34, 8, 34, WD);
+        dots(c, hex('#2e3430'), [2, 20, 3, 18, 2, 14]);
+        dots(c, hex('#9a5a4a'), [3, 15, 2, 22]);
+      }),
+      used: view(15, 36, (c) => {
+        c.rect(1, 3, 10, 33, WD);
+        c.rect(2, 4, 9, 31, sc[0]);
+        c.col(1, 3, 33, W);
+        for (const x of [11, 12, 13]) c.col(x, 3 - (x === 12 ? 1 : 0), 33, x === 12 ? W : WD); // the other leaves, behind
+        const br = hex('#2e3430');
+        c.line(3, 26, 9, 19, br);
+        c.line(9, 20, 5, 15, br);
+        dots(c, hex('#9a5a4a'), [5, 14, 7, 22]);
+        dots(c, C.bone, [4, 8, 5, 7, 6, 8]);
+        c.dither(2, 27, 8, 31, hex('#4f5a4c'));
+        c.rect(1, 34, 2, 34, WD);
+        c.rect(12, 34, 13, 34, WD);
+      }),
+      sideUsed: view(8, 36, (c) => {
+        for (const x of [1, 3, 5]) {
+          c.rect(x, 3, x + 1, 33, WD);
+          c.col(x, 3, 33, W);
+        }
+        c.rect(1, 34, 6, 34, WD);
+      }),
+    });
+  }
+
+  /* ---------- the bedroom ---------- */
+  {
+    const tc = hex('#7a5a44');
+    const dressSide = (open) => (c) => {
+      c.rect(4, 2, 5, 17, tc); // the mirror, edge on
+      c.col(6, 3, 16, C.glass);
+      c.rect(3, 13, 5, 17, tc);
+      c.rect(1, 18, 11, 19, L(tc));
+      c.row(18, 1, 11, L(L(tc)));
+      c.rect(2, 20, 10, 27, tc);
+      c.col(2, 20, 27, L(tc));
+      panel(c, 3, 21, 9, 26, tc);
+      legs(c, [2, 9], 28, 32, D(tc));
+      c.rect(8, 15, 9, 17, C.glassLight);
+      c.set(8, 14, C.gold);
+      c.set(11, 26, C.brass);
+      if (open) {
+        c.rect(11, 22, 15, 25, L(tc));
+        c.row(22, 11, 15, L(L(tc)));
+        c.set(16, 24, C.brass);
+        dots(c, C.gold, [13, 21, 14, 26, 14, 27, 13, 28]);
+      } else c.set(11, 22, C.brass);
+    };
+    V('dressing-table', {
+      side: view(13, 34, dressSide(false)),
+      used: over('dressing-table', (c) => {
+        c.rect(3, 21, 8, 22, mix(tc, 0.3)); // a drawer left open, a necklace over its edge
+        c.rect(2, 22, 9, 25, L(tc));
+        c.row(22, 2, 9, L(L(tc)));
+        c.row(25, 2, 9, tc);
+        c.set(5, 24, C.brass);
+        dots(c, C.gold, [4, 21, 5, 21, 6, 22, 7, 23, 7, 24, 7, 26, 6, 27]);
+      }),
+      sideUsed: view(18, 34, dressSide(true)),
+    });
+    // the washstand: seen from the towel rail
+    const en = hex('#c2c4bc');
+    const washSide = (used) => (c) => {
+      c.rect(6, 3, 9, 9, en); // jug
+      c.rect(7, 2, 8, 2, en);
+      c.col(6, 3, 9, C.white);
+      c.row(6, 6, 9, hex('#5a6a88'));
+      c.poly([[2, 7], [8, 7], [7, 10], [3, 10]], en); // basin, in front of it
+      c.row(7, 2, 8, used ? hex('#5a6a88') : C.white);
+      c.rect(1, 11, 11, 12, hex('#9a9aa0'));
+      c.row(11, 1, 11, hex('#b5b5b8'));
+      c.rect(2, 13, 10, 16, W);
+      c.col(2, 13, 16, L(W));
+      legs(c, [2, 9], 17, 25, WD);
+      c.row(22, 4, 8, W);
+      c.row(23, 4, 8, WD);
+      c.row(14, 2, 10, C.brass); // the rail
+      if (used) dots(c, hex('#5a6a88'), [9, 10, 5, 6, 12, 26, 13, 26, 11, 25]);
+      else {
+        c.rect(3, 15, 9, 21, C.cream); // and the towel on it
+        c.row(15, 3, 9, L(C.cream));
+        c.col(6, 16, 21, D(C.cream));
+        c.row(20, 3, 9, hex('#5a6a88'));
+      }
+    };
+    V('washstand', {
+      side: view(15, 28, washSide(false)),
+      used: over('washstand', (c) => {
+        c.row(7, 3, 8, hex('#5a6a88')); // water in the basin, the towel taken
+        c.row(8, 4, 7, hex('#5a6a88'));
+        c.clearRect(1, 14, 1, 19);
+        c.col(1, 13, 20, C.brass);
+        dots(c, hex('#5a6a88'), [10, 10, 9, 26, 10, 26, 8, 25]);
+      }),
+      sideUsed: view(15, 28, washSide(true)),
+    });
+    const potFull = (c) => {
+      c.row(2, 2, 7, hex('#8a7a3a')); // used
+      c.set(1, 2, hex('#3a4a70'));
+      c.set(8, 2, hex('#3a4a70'));
+    };
+    V('bedpan', {
+      side: view(10, 8, (c) => {
+        A['bedpan'].draw(c);
+        c.clear(8, 4);
+        c.rect(4, 4, 5, 5, C.white); // the handle, towards us
+        c.set(5, 5, C.rust);
+      }),
+      used: over('bedpan', potFull),
+      sideUsed: view(10, 8, (c) => {
+        A['bedpan'].draw(c);
+        c.clear(8, 4);
+        c.rect(4, 4, 5, 5, C.white);
+        potFull(c);
+      }),
+    });
+    // trunk and blanket box: opened
+    const kc = hex('#5e4a36'),
+      strap = hex('#3a2a20'),
+      lining = mix(C.parchment, 0.75);
+    const trunkEnd = (open) => (c) => {
+      const b = c.h - 2;
+      if (open) {
+        c.rect(1, b - 18, 3, b - 7, kc); // the lid stood open
+        c.col(1, b - 18, b - 7, L(kc));
+        c.col(3, b - 17, b - 7, lining);
+        c.rect(4, b - 8, 10, b - 7, C.cream); // what is in it
+        c.rect(7, b - 9, 11, b - 8, C.wine);
+        c.rect(1, b - 6, 12, b, kc);
+        c.row(b - 6, 1, 12, mix(kc, 0.4));
+      } else {
+        c.rect(1, b - 10, 12, b, kc);
+        c.row(b - 11, 2, 11, L(kc));
+        c.row(b - 7, 1, 12, D(kc));
+      }
+      c.col(1, b - 6, b, L(kc));
+      c.rect(5, b - 4, 8, b - 4, strap); // handle
+      c.set(5, b - 3, strap);
+      c.set(8, b - 3, strap);
+      dots(c, C.brass, [1, b, 12, b]);
+    };
+    V('trunk-old', {
+      side: view(14, 14, trunkEnd(false)),
+      used: view(22, 22, (c) => {
+        const b = 20;
+        c.rect(1, 3, 20, 12, kc); // the lid thrown back: its paper lining
+        c.rect(2, 2, 19, 2, L(kc));
+        c.rect(3, 4, 18, 12, lining);
+        for (const x of [4, 16]) c.rect(x, 3, x + 1, 12, strap);
+        dots(c, D(lining), [7, 6, 9, 8, 12, 5, 13, 9, 8, 10]);
+        c.rect(3, 11, 9, 13, C.cream); // clothes
+        c.row(11, 3, 9, C.white);
+        c.rect(10, 12, 14, 13, C.wine);
+        c.rect(14, 11, 18, 13, C.navy);
+        c.row(11, 14, 18, L(C.navy));
+        c.rect(1, 14, 20, b, kc);
+        c.col(1, 14, b, L(kc));
+        c.row(14, 1, 20, mix(kc, 0.4));
+        for (const x of [4, 16]) {
+          c.rect(x, 14, x + 1, b, strap);
+          c.set(x, 15, C.brass);
+        }
+        c.rect(10, 15, 11, 16, C.brass);
+        dots(c, C.brass, [1, 14, 20, 14, 1, b, 20, b]);
+      }),
+      sideUsed: view(14, 22, trunkEnd(true)),
+    });
+    const boxEnd = (open) => (c) => {
+      const b = c.h - 2;
+      if (open) {
+        c.rect(1, b - 17, 2, b - 8, WL);
+        c.col(1, b - 17, b - 8, L(WL));
+        c.rect(3, b - 10, 9, b - 8, C.cream);
+        c.row(b - 10, 3, 9, C.white);
+        c.rect(5, b - 11, 10, b - 11, ROSE);
+      } else {
+        c.rect(1, b - 9, 12, b - 8, WL);
+        c.row(b - 9, 1, 12, L(WL));
+      }
+      c.rect(2, b - 7, 11, b, W);
+      c.col(2, b - 7, b, L(W));
+      panel(c, 4, b - 6, 9, b - 1, W);
+      c.row(b, 2, 11, WD);
+    };
+    V('blanket-box', {
+      side: view(14, 13, boxEnd(false)),
+      used: view(24, 21, (c) => {
+        c.rect(1, 1, 22, 9, WL); // the lid up
+        c.row(1, 1, 22, L(WL));
+        panel(c, 3, 3, 20, 8, WL);
+        c.rect(4, 8, 19, 10, C.cream); // blankets, folded
+        c.row(8, 4, 19, C.white);
+        c.row(9, 4, 19, D(C.cream));
+        c.rect(6, 7, 17, 7, ROSE);
+        c.rect(2, 11, 21, 18, W);
+        c.col(2, 11, 18, L(W));
+        c.row(11, 2, 21, mix(W, 0.4));
+        panel(c, 4, 12, 10, 17, W);
+        panel(c, 13, 12, 19, 17, W);
+        c.row(19, 2, 3, WD);
+        c.row(19, 20, 21, WD);
+      }),
+      sideUsed: view(14, 21, boxEnd(true)),
+    });
+    // the tea trolley, from its handle end; used, tea has been taken
+    const trolleyEnd = (used) => (c) => {
+      c.col(2, 3, 14, C.brass);
+      c.col(11, 3, 14, D(C.brass));
+      c.row(3, 2, 11, C.brass); // the handle across
+      c.rect(2, 6, 11, 6, C.brass);
+      c.rect(2, 11, 11, 11, C.brass);
+      if (!used) {
+        c.rect(5, 3, 8, 5, C.white); // teapot
+        c.set(6, 2, C.white);
+        c.row(5, 5, 8, D(C.white));
+        c.rect(4, 9, 9, 10, C.glassLight);
+      } else {
+        c.rect(4, 10, 9, 10, C.glassLight);
+        c.set(7, 5, C.white);
+        dots(c, C.bone, [5, 5, 9, 5]);
+      }
+      c.rect(2, 13, 3, 16, C.ironDark); // wheels, edge on
+      c.rect(10, 13, 11, 16, C.ironDark);
+      c.set(2, 14, C.steel);
+      c.set(10, 14, C.steel);
+    };
+    V('serving-trolley', {
+      side: view(14, 18, trolleyEnd(false)),
+      used: over('serving-trolley', (c) => {
+        c.clearRect(4, 1, 17, 4);
+        c.rect(14, 4, 16, 4, C.white); // one cup left, on its side, and the crumbs
+        c.set(17, 3, C.white);
+        dots(c, C.bone, [6, 4, 9, 4, 11, 4]);
+        c.clearRect(6, 9, 12, 9);
+      }),
+      sideUsed: view(14, 18, trolleyEnd(true)),
+    });
+  }
+
   /*VIEWS*/
 
   return A;

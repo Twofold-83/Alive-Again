@@ -438,17 +438,8 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
       [3, 2, 'm'],
     ],
   });
-  vary('gnome-broken', 'garden-gnome', {
-    swap: { R: 'u', j: 'N', x: 'a', w: 'P' },
-    put: [
-      [0, 0, '     '],
-      [0, 1, '     '],
-      [0, 2, '     '],
-      [0, 3, '.  a.'],
-      [5, 9, '.uu'],
-      [6, 8, 'u'],
-    ],
-  });
+  /* broken off at the shoulders: the head, still in its hat, lies beside it */
+  T('gnome-broken', ['.P.P........', 'NNPNN.......', 'NNNNN.PPauu.', '.NNN..Paauuu', '.O.O..PPauu.']);
   T('bird-house', [
     '...O...',
     '..OOO..',
@@ -744,17 +735,8 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
       [1, 10, '.'],
     ],
   });
-  vary('doll-headless', 'doll-porcelain', {
-    swap: { 7: 'P' },
-    put: [
-      [0, 0, '      '],
-      [0, 1, '      '],
-      [0, 2, '      '],
-      [0, 3, '..rr..'],
-      [8, 9, 'OO'],
-      [7, 10, 'wwww'],
-    ],
-  });
+  /* the body without its head; the head stands on the floor next to it */
+  T('doll-headless', ['..rr..', '.PPPP.', 'wPPPPw', 'wPPPPw', '.PPPP.', 'PPPPPP..OOOO.', '.w..w..OwwwwO', '.n..n..OnwwnO']);
   T('teddy-old', ['oo..oo', 'oooooo', 'onoono', 'ooqqoo', '.oooo.', 'oooooo', 'ooqqoo', 'ooqqoo', '.oooo.', 'oo..oo']);
   vary('teddy-one-eyed', 'teddy-old', {
     swap: { o: 'e', q: 'o' },
@@ -766,7 +748,8 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
     ],
   });
   T('music-box', ['OOOOOOOO', 'OGooooGO', 'OooggooO', 'OGooooGO', 'OOOOOOOO']);
-  vary('music-box-open', 'music-box', { put: [[0, -0, '']], solid: false });
+  /* the lid up: a mirror in it, the little dancer turning */
+  T('music-box-open', ['OOOOOOOO', 'O222222O', 'O22w222O', 'O277722O', 'OO7OOOOO', 'OnnwnnnO', 'OGooooGO', 'OooggooO', 'OGooooGO', 'OOOOOOOO']);
   vary('cursed-music-box', 'music-box', { swap: { o: '5', g: 'r', O: 'n' } });
   T('spinning-top-tin', ['...t...', '...t...', '.RRRRR.', 'RgRgRgR', '.jjjjj.', '..jjj..', '...j...']);
   D('pram-old', [
@@ -1170,18 +1153,22 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
       [3, 1, 'vvvvvv'],
     ],
   });
-  vary('barrel-smashed', 'barrel-wine', {
-    swap: { G: 'o' },
-    put: [
-      [0, 0, '            '],
-      [0, 1, '            '],
-      [0, 2, '  o     o   '],
-      [0, 3, '  o   o o   '],
-      [0, 4, ' oO o o oO  '],
-      [3, 12, 'vvvvvvv'],
-      [10, 11, 'vv'],
-    ],
-  });
+  /* the top hoop gone, the staves splayed open, the wine run out */
+  D('barrel-smashed', [
+    'o....o...o...o',
+    'oo...o...oo.oo',
+    '.oo.ooO.oOo.o.',
+    '.oOonoOnoOnoo.',
+    '.ooOnoonooOoo.',
+    '.ooOoonvoooOo.',
+    '.ooOoovvooOoo.',
+    '.ooOooovooOoo.',
+    '.ooOooovooOoo.',
+    '.IIIIIIIIIIII.',
+    '..oOoovoooOo..',
+    '...ooovvooo...',
+    'vvOOvvvvvvOOvvv',
+  ]);
   vary('rain-barrel-moss', 'barrel-wine', {
     swap: { G: 'o', o: 'e', O: 'E' },
     put: [
@@ -3010,14 +2997,15 @@ function views(V, ROWS) {
       used: { put: [[3, 1, 'nnnnnn'], ...col(4, 3, 'vvvvvv'), [5, 3, 'v'], [5, 4, 'v'], ...col(8, 3, 'vvv'), [3, 12, 'vvvvvvv']] },
       sideUsed: sameUsed,
     });
-    /* what was left in it has run out over the floor */
+    /* the last of the wine has run out: the pool spreads across the floor */
     V('barrel-smashed', {
       side: same,
       used: {
         put: [
-          [0, 12, 'vvvvvvvvvvvvvv'],
-          [1, 11, 'v'],
-          [12, 11, 'vv'],
+          [15, 12, 'vvv'],
+          [1, 13, 'vvvvvvvvvvvvvvvvvv'],
+          [6, 5, 'o'],
+          [6, 6, 'oo'],
         ],
       },
       sideUsed: sameUsed,
@@ -3622,30 +3610,11 @@ function views(V, ROWS) {
     const old = { R: 'u', j: 'N', x: 'a', w: 'P' };
     /* knocked over */
     V('garden-gnome', { side, used: rot(ROWS['garden-gnome']), sideUsed: rot(side) });
-    /* kicked about: the pieces lie further apart */
-    const chipped = patch(recol(side, old), [
-      [5, 9, 'uu'],
-      [6, 8, 'u'],
-    ]);
+    /* kicked about: the head has rolled away and out of its hat */
     V('gnome-broken', {
-      side: chipped,
-      used: {
-        put: [
-          [5, 8, '...'],
-          [5, 9, '...'],
-          [8, 9, 'uu'],
-          [9, 8, 'u'],
-          [6, 9, 'a'],
-          [11, 9, 'P'],
-        ],
-      },
-      sideUsed: patch(chipped, [
-        [5, 8, '...'],
-        [5, 9, '...'],
-        [7, 9, 'uu'],
-        [8, 8, 'u'],
-        [10, 9, 'a'],
-      ]),
+      side: ['..P.', 'NNPP', 'NNNN.PPauu.', '.NNN.Paauuu', '.OO..PPauu.'],
+      used: ['.P.P...........', 'NNPNN..........', 'NNNNN..PPa.....', '.NNN...Paa..uu.', '.O.O...PPa.uuuu'],
+      sideUsed: ['..P............', 'NNPP...........', 'NNNN..PPa......', '.NNN..Paa..uu..', '.OO...PPa.uuuu.'],
     });
     V('gnome-old', {
       side: patch(recol(side, old), [[0, 7, 'M']]),
@@ -4396,12 +4365,12 @@ function views(V, ROWS) {
       [3, 6, '.'],
     ]);
     V('doll-broken', { side: broken, used: rot(ROWS['doll-broken']), sideUsed: rot(broken) });
-    const second = patch(recol(doll, { 7: 'P' }), [
-      [0, 3, '.rr.'],
-      [6, 9, 'OO'],
-      [5, 10, 'wwnw'],
-    ]);
-    V('doll-headless', { side: second, used: rot(ROWS['doll-headless']), sideUsed: rot(second) });
+    /* the head set back on the neck, a little askew */
+    V('doll-headless', {
+      side: ['.rr.', '.PP.', '.PPw', '.PPw', '.PP.', 'PPPP.OOO.', '.ww..OOww', '.nn..OOwn'],
+      used: ['..OOOO.', '.OwwwwO', '.OnwwnO', '..rr..', '.PPPP.', 'wPPPPw', 'wPPPPw', '.PPPP.', 'PPPPPP', '.w..w.', '.n..n.'],
+      sideUsed: ['.OOO.', '.OOww', '.OOwn', '.rr.', '.PP.', '.PPw', '.PPw', '.PP.', 'PPPP', '.ww.', '.nn.'],
+    });
     const teddy = ['.oo..', 'oooo.', 'oonoq', 'ooooq', '.ooo.', 'ooooo', 'oooqo', 'oooqo', '.ooo.', '.oooo'];
     V('teddy-old', { side: teddy, used: rot(ROWS['teddy-old']), sideUsed: rot(teddy) });
     V('teddy-one-eyed', {
@@ -4539,7 +4508,8 @@ function views(V, ROWS) {
     const girl = ['w', '777', '7', 'w'],
       bones = ['b', 'bbb', 'b', 'b'];
     V('music-box', { side, used: open('music-box', {}, girl), sideUsed: sideOpen({}, girl) });
-    V('music-box-open', { side, used: open('music-box-open', {}, girl), sideUsed: sideOpen({}, girl) });
+    /* the open one: shut again */
+    V('music-box-open', { side: sideOpen({}, girl), used: ROWS['music-box'], sideUsed: side });
     V('cursed-music-box', {
       side: recol(side, { o: '5', g: 'r', O: 'n' }),
       used: open('cursed-music-box', { O: 'n' }, bones),
