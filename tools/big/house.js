@@ -4541,6 +4541,412 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     });
   }
 
+  /* ---------- windows: flat on the wall, so from the side only the frame and its sill ---------- */
+  {
+    const fr = hex('#8a8474'),
+      lit = hex('#c9a04a'),
+      gone = hex('#0e0d14');
+    /** The frame edge on at x0, the glass a sliver in it, the sill standing out to the right. */
+    const winSide = (c, glass, x0 = 1) => {
+      c.rect(x0, 1, x0 + 2, 19, fr);
+      c.col(x0, 1, 19, L(fr));
+      c.row(1, x0, x0 + 2, L(fr));
+      c.col(x0 + 1, 3, 17, glass);
+      c.set(x0 + 1, 10, fr);
+      c.rect(x0, 19, x0 + 4, 20, L(fr));
+      c.row(20, x0, x0 + 4, D(fr));
+    };
+    const side = (glass, extra) =>
+      view(7, 22, (c) => {
+        winSide(c, glass);
+        if (extra) extra(c);
+      });
+    const front = (slug) => view(A[slug].w, A[slug].h, (c) => A[slug].draw(c));
+    V('window-frame-lit', { side: side(lit), used: front('window-frame-dark'), sideUsed: side(NIGHTGLASS) });
+    V('window-frame-dark', { side: side(NIGHTGLASS), used: front('window-frame-lit'), sideUsed: side(lit) });
+    V('window-frame-broken', {
+      side: side(NIGHTGLASS, (c) => {
+        c.set(2, 6, gone);
+        c.set(2, 7, gone);
+        c.set(2, 13, gone);
+        dots(c, C.glassLight, [4, 6, 4, 13, 0, 9, 4, 18, 5, 18]);
+      }),
+      used: view(20, 22, (c) => {
+        win(c, gone); // the last of the glass knocked out, the bars with it
+        c.rect(9, 3, 10, 17, gone);
+        c.rect(3, 9, 16, 10, gone);
+        c.rect(9, 3, 10, 4, fr);
+        c.rect(9, 16, 10, 17, fr);
+        c.rect(3, 9, 4, 10, fr);
+        c.set(15, 10, fr);
+        c.set(16, 10, fr);
+        dots(c, C.glass, [3, 3, 4, 3, 3, 4, 16, 3, 16, 4, 16, 17, 15, 17, 3, 17, 3, 16, 5, 17]);
+        dots(c, C.glassLight, [5, 19, 8, 20, 11, 19, 14, 20, 15, 19, 4, 20]);
+      }),
+      sideUsed: side(gone, (c) => dots(c, C.glassLight, [4, 18, 5, 18, 3, 18])),
+    });
+    const g = hex('#9eaaa4');
+    V('window-frame-face', {
+      side: view(9, 22, (c) => {
+        winSide(c, NIGHTGLASS, 3);
+        c.rect(1, 6, 2, 13, g); // a pale head against the far side of the glass
+        c.set(1, 5, g);
+        c.clear(1, 13);
+        dots(c, K, [2, 8, 2, 11]);
+        c.set(2, 16, g);
+      }),
+      used: view(20, 22, (c) => {
+        win(c, NIGHTGLASS, { cb: nightPane(c) });
+        c.rect(7, 6, 12, 9, hex('#3a4660')); // nobody there: breath on the glass, and the marks of fingers
+        c.rect(8, 5, 11, 5, hex('#3a4660'));
+        c.col(9, 3, 17, fr);
+        c.col(10, 3, 17, fr);
+        c.row(10, 3, 16, fr);
+        dots(c, mix(g, 0.6), [4, 16, 5, 15, 6, 16, 5, 17, 13, 16, 14, 15, 15, 16]);
+      }),
+      sideUsed: view(9, 22, (c) => winSide(c, NIGHTGLASS, 3)),
+    });
+    const sg = hex('#48604c');
+    const louvre = (c, x0, x1) => {
+      c.rect(x0, 2, x1, 18, sg);
+      for (let y = 3; y < 18; y += 2) c.row(y, x0 + 1, x1 - 1, D(sg));
+      c.col(x0, 2, 18, L(sg));
+      c.row(10, x0, x1, sg);
+    };
+    V('window-frame-shutters', {
+      side: side(sg, (c) => {
+        c.col(4, 2, 18, sg);
+        c.col(3, 2, 18, D(sg));
+      }),
+      used: view(38, 22, (c) => {
+        const t = canvas(20, 22);
+        win(t, NIGHTGLASS, { cb: nightPane(t) });
+        c.stamp(t, 9, 0);
+        louvre(c, 1, 8); // folded back against the wall
+        louvre(c, 29, 36);
+        dots(c, C.ironDark, [9, 5, 9, 15, 28, 5, 28, 15]);
+      }),
+      sideUsed: view(14, 22, (c) => {
+        winSide(c, NIGHTGLASS);
+        louvre(c, 4, 12); // a shutter standing out from the wall
+      }),
+    });
+    const dr = hex('#5c4a5a');
+    V('window-frame-curtains', {
+      side: side(dr),
+      used: view(20, 22, (c) => {
+        win(c, lit, {
+          cb(x, y) {
+            c.rect(x, y, x + 5, y + 1, hex('#d9bc66'));
+          },
+        });
+        for (const [x0, x1] of [[3, 5], [14, 16]]) {
+          c.rect(x0, 3, x1, 17, dr); // the curtains drawn back
+          c.col(x0 + 1, 3, 17, D(dr));
+          c.col(x0, 3, 17, x0 < 9 ? L(dr) : dr);
+        }
+      }),
+      sideUsed: side(lit),
+    });
+  }
+
+  /* ---------- stairs and ladders ---------- */
+  {
+    // the wooden staircase, drawn from the side above: from the front it runs up and away
+    const front = (broken) => (c) => {
+      const b = 42,
+        w = 30;
+      for (let i = 0; i < 8; i++) {
+        const y = b - i * 4,
+          x0 = 5 + (i >> 1),
+          x1 = w - 6 - (i >> 1);
+        c.rect(x0, y - 2, x1, y, mix(W, 1 - i * 0.05));
+        c.row(y - 3, x0 - 1, x1 + 1, L(WL));
+      }
+      for (const m of [0, 1]) {
+        const X = (x) => (m ? w - 1 - x : x);
+        c.rect(X(m ? 3 : 2), b - 16, X(m ? 2 : 3), b, WD); // newel
+        c.col(X(m ? 3 : 2), b - 16, b, W);
+        c.row(b - 17, X(m ? 3 : 2), X(m ? 2 : 3), W);
+        c.line(X(3), b - 14, X(8), 3, WL); // handrail, running up and in
+        c.line(X(3), b - 13, X(8), 4, W);
+        for (let i = 1; i < 8; i++) c.col(X(3 + Math.round((i * 5) / 8)), b - 12 - Math.round((i * 25) / 8), b - i * 4 - 4, WD);
+        c.rect(X(m ? 9 : 8), 1, X(m ? 8 : 9), 11, WD);
+      }
+      if (broken) {
+        c.rect(11, 27, 18, 29, NIGHT); // a tread gone through
+        dots(c, WP, [10, 27, 19, 27, 12, 30, 17, 26, 13, 26, 16, 30]);
+        c.line(18, 27, 20, 30, WP);
+      }
+    };
+    V('staircase-up', {
+      base: 'side',
+      side: view(30, 44, front(false)),
+      used: over('staircase-up', (c) => {
+        c.clearRect(13, 27, 14, 27);
+        c.rect(14, 27, 17, 29, NIGHT);
+        dots(c, WP, [13, 26, 18, 26, 15, 30]);
+        c.line(17, 28, 19, 31, WP);
+      }),
+      sideUsed: view(30, 44, front(true)),
+    });
+    // the way down to the cellar; used, there is a light below
+    const downSide = (lit) => (c) => {
+      jambSide(c, C.stoneDark);
+      for (let y = 6; y < 36; y += 6) dots(c, D(C.stoneDark), [1, y, 2, y + 3]);
+      c.col(4, 3, 36, lit ? hex('#6a4a22') : NIGHT);
+      if (lit) c.col(4, 3, 14, NIGHT);
+      c.col(5, 22, 34, mix(WD, 0.8)); // the end of the handrail
+      c.set(6, 21, mix(WD, 0.8));
+    };
+    V('staircase-down', {
+      side: view(8, 38, downSide(false)),
+      used: over('staircase-down', (c) => {
+        c.rect(9, 10, 16, 16, hex('#6a4a22')); // lamplight on the wall at the bottom
+        c.rect(10, 11, 15, 15, hex('#a8742c'));
+        c.rect(12, 12, 13, 14, C.flameLight);
+        c.row(17, 9, 16, hex('#8a6a3a'));
+        c.row(20, 8, 17, hex('#7a6a4a'));
+      }),
+      sideUsed: view(8, 38, downSide(true)),
+    });
+    // the grand staircase
+    const red = hex('#7a2228'),
+      mud = mix(C.earth, 0.55);
+    const carpetSide = (used) => (c) => {
+      const b = 44,
+        n = 10,
+        xe = 3 + n * 4 - 1,
+        X = (i) => 3 + i * 4,
+        Y = (i) => b - 3 * (i + 1) + 1;
+      for (let i = 0; i < n; i++) c.rect(X(i), Y(i), xe, b, W);
+      for (let i = 0; i < n; i++) {
+        c.row(Y(i), X(i) - 1, X(i) + 3, L(red)); // the runner over each tread
+        c.col(X(i), Y(i) + 1, Y(i) + 2, red);
+        c.set(X(i) + 1, Y(i) + 1, C.gold);
+        if (used && i % 2 === 0) c.rect(X(i) + 1, Y(i), X(i) + 2, Y(i), mud);
+      }
+      c.line(5, b - 1, xe - 2, b - 3 * n + 5, D(W));
+      for (let i = 2; i < n; i += 2) c.col(X(i) + 1, b - 3 * i + 4, b, D(W));
+      c.row(b, 3, xe, D(W));
+      c.rect(1, b - 18, 3, b, WD); // newel with its ball
+      c.col(1, b - 18, b, W);
+      c.oval(0, b - 22, 4, b - 18, W);
+      c.set(2, b - 21, WL);
+      c.rect(xe - 2, 3, xe, Y(n - 1) - 1, WD);
+      c.line(4, b - 16, xe - 3, 5, W);
+      c.line(4, b - 15, xe - 3, 6, WD);
+      for (let i = 1; i < n; i++) c.col(X(i) + 1, Math.round(b - 15 + ((6 - (b - 15)) * (X(i) - 3)) / (xe - 7)) + 1, Y(i) - 1, WD);
+    };
+    V('staircase-carpet', {
+      side: view(44, 46, carpetSide(false)),
+      used: over('staircase-carpet', (c) => {
+        for (let i = 0; i < 9; i++) {
+          const x = i % 2 ? 21 : 25,
+            y = 44 - i * 3;
+          c.rect(x, y - 2, x + 1, y - 2, mud); // muddy feet, all the way up
+          if (i < 6) c.set(x, y - 1, mud);
+        }
+        dots(c, mud, [19, 44, 27, 44, 23, 43]);
+      }),
+      sideUsed: view(44, 46, carpetSide(true)),
+    });
+    // ladders
+    const lc = hex('#8a6a48');
+    const lean = (c, col, x0 = 9) => {
+      c.line(x0, 42, x0 - 7, 1, col);
+      c.line(x0 + 1, 42, x0 - 6, 1, D(col));
+      for (let y = 39; y > 2; y -= 5) c.set(x0 - 1 - Math.round(((42 - y) * 7) / 41), y, L(col));
+    };
+    V('ladder-wood', {
+      side: view(13, 44, (c) => lean(c, lc)),
+      used: turned(12, 44, (c) => A['ladder-wood'].draw(c)),
+      sideUsed: view(12, 18, (c) => {
+        c.col(2, 2, 15, lc); // flat on the floor, its foot towards us
+        c.col(9, 2, 15, D(lc));
+        for (let y = 4; y < 15; y += 3) c.row(y, 3, 8, L(lc));
+        c.col(3, 2, 15, D(lc));
+      }),
+    });
+    V('ladder-broken', {
+      side: view(15, 44, (c) => {
+        const col = hex('#7a5c40');
+        lean(c, col);
+        c.clearRect(3, 1, 7, 17);
+        c.line(5, 18, 3, 6, col); // only one rail goes on up
+        dots(c, WP, [6, 18, 7, 17, 5, 5]);
+        c.line(7, 12, 10, 16, D(col));
+        c.rect(11, 41, 13, 42, col);
+        c.set(13, 40, WP);
+      }),
+    });
+    const aFrame = (col, skip) => (c) => {
+      c.line(2, 28, 6, 2, col); // the side you climb
+      c.line(3, 28, 7, 2, D(col));
+      c.line(12, 28, 8, 3, D(col)); // the prop
+      c.rect(5, 1, 9, 1, L(col));
+      c.row(16, 6, 10, D(col));
+      for (let y = 25, i = 0; y > 3; y -= 5, i++) if (i !== skip) c.row(y, 3 + Math.round(((28 - y) * 4) / 26), 5 + Math.round(((28 - y) * 4) / 26), L(col));
+    };
+    for (const [slug, col, skip] of [['step-ladder', lc, -1], ['stepladder-old', hex('#6a5038'), 3]])
+      V(slug, {
+        side: view(14, 30, aFrame(col, skip)),
+        used: turned(12, 30, (c) => A[slug].draw(c)),
+        sideUsed: turned(14, 30, aFrame(col, skip)),
+      });
+    // the spiral stair looks the same from every side but for where its steps stand
+    V('spiral-stairs', {
+      side: view(30, 54, (c) => {
+        const b = 52,
+          ir = C.iron,
+          pts = [];
+        for (let i = 0; i < 13; i++) {
+          const a = (i * Math.PI) / 4 + Math.PI / 2;
+          pts.push([14 + Math.round(Math.sin(a) * 12), b - 1 - i * 4, Math.cos(a) >= -0.01]);
+        }
+        for (const [ex, y, f] of pts) if (!f) c.rect(Math.min(14, ex), y, Math.max(15, ex), y + 1, C.ironDark);
+        c.rect(14, 1, 15, b, ir);
+        c.col(14, 1, b, C.steel);
+        for (const [ex, y, f] of pts)
+          if (f) {
+            c.rect(Math.min(14, ex), y, Math.max(15, ex), y + 1, ir);
+            c.row(y, Math.min(14, ex), Math.max(15, ex), C.steel);
+            if (Math.abs(ex - 14) > 6) c.col(ex, y - 10, y, C.ironDark);
+          }
+        for (let i = 0; i < pts.length - 1; i++) {
+          const [x0, y0, f0] = pts[i],
+            [x1, y1, f1] = pts[i + 1];
+          if (f0 || f1) c.line(x0, y0 - 10, x1, y1 - 10, f0 ? C.steel : C.ironDark);
+        }
+        c.rect(11, b, 18, b, C.ironDark);
+        c.speckle(1, 1, 28, 52, C.rust, 14, 4);
+      }),
+    });
+    // banisters
+    const banSide = (broken) => (c) => {
+      c.rect(1, 14, 4, 15, WD);
+      c.row(14, 1, 4, W);
+      if (broken) {
+        c.rect(2, 10, 3, 13, W); // a stump, and the rail hanging
+        c.set(2, 9, WP);
+        c.line(1, 3, 4, 8, WL);
+        c.line(1, 2, 3, 2, WL);
+        c.set(4, 9, WP);
+      } else {
+        c.rect(2, 4, 3, 13, W);
+        c.col(2, 4, 13, WL);
+        c.row(8, 2, 3, WD);
+        c.rect(1, 2, 4, 3, WL);
+        c.row(2, 1, 4, L(WL));
+      }
+    };
+    V('banister', {
+      side: view(6, 18, banSide(false)),
+      used: view(34, 18, (c) => A['banister-broken'].draw(c)),
+      sideUsed: view(6, 18, banSide(true)),
+    });
+    V('banister-broken', {
+      side: view(6, 18, banSide(true)),
+      used: view(34, 18, (c) => A['banister'].draw(c)),
+      sideUsed: view(6, 18, banSide(false)),
+    });
+    {
+      const loose = (c) => {
+        c.rect(3, 6, 5, 6, WD); // the ball has come off in your hand
+        c.set(4, 5, WP);
+        c.rect(2, 7, 6, 8, W);
+        c.rect(3, 9, 5, 17, W);
+        c.col(3, 9, 17, WL);
+        panel(c, 4, 10, 4, 15, W);
+        c.rect(2, 18, 6, 20, W);
+        c.row(18, 2, 6, WL);
+        c.row(20, 2, 6, WD);
+        c.oval(9, 16, 13, 20, WL);
+        c.set(10, 17, L(WL));
+        c.set(12, 20, WD);
+      };
+      V('banister-post', {
+        side: view(9, 22, (c) => A['banister-post'].draw(c)),
+        used: view(15, 22, loose),
+        sideUsed: view(15, 22, loose),
+      });
+    }
+    // the attic ladder; used, it is folded away and the hatch shut
+    const ac = hex('#8a6a48');
+    const atticSide = (away) => (c) => {
+      c.rect(1, 1, 18, 3, WD); // the hatch frame, edge on
+      c.row(1, 1, 18, W);
+      if (away) {
+        c.rect(3, 4, 16, 4, W);
+        c.col(17, 4, 13, C.ash);
+        c.set(17, 14, C.brass);
+      } else {
+        c.line(4, 4, 14, 42, ac); // steep, its foot out into the room
+        c.line(5, 4, 15, 42, D(ac));
+        for (let y = 9; y < 42; y += 4) c.row(y, 5 + Math.round(((y - 4) * 10) / 38), 7 + Math.round(((y - 4) * 10) / 38), L(ac));
+        c.col(2, 4, 13, C.ash);
+        c.set(2, 14, C.brass);
+      }
+    };
+    V('stairs-attic', {
+      side: view(20, 44, atticSide(false)),
+      used: view(20, 44, (c) => {
+        c.rect(1, 1, 18, 7, WD);
+        c.row(1, 1, 18, W);
+        c.rect(3, 2, 16, 6, W);
+        panel(c, 4, 3, 15, 5, W);
+        c.rect(9, 4, 10, 4, C.iron);
+        c.col(17, 7, 16, C.ash);
+        c.set(17, 17, C.brass);
+      }),
+      sideUsed: view(20, 44, atticSide(true)),
+    });
+    const dumbSide = (c) => {
+      c.rect(1, 1, 3, 20, W);
+      c.col(1, 1, 20, WL);
+      c.row(1, 1, 3, WL);
+      c.col(3, 3, 18, WD);
+      c.rect(1, 19, 5, 20, WL);
+      c.row(20, 1, 5, WD);
+      c.set(4, 10, C.brass);
+    };
+    V('dumbwaiter', {
+      side: view(7, 22, dumbSide),
+      used: over('dumbwaiter', (c) => {
+        c.rect(3, 7, 14, 18, NIGHT); // the car has gone: only the ropes, running
+        c.col(7, 7, 18, C.ash);
+        c.col(10, 7, 18, D(C.ash));
+        c.row(18, 3, 14, hex('#2c2834'));
+      }),
+      sideUsed: view(7, 22, dumbSide),
+    });
+    // the fire escape; used, its drop ladder is pulled up
+    const escSide = (up) => (c) => {
+      const ir = C.iron,
+        lt = C.steel;
+      c.col(1, 2, 46, C.ironDark);
+      for (const y of [11, 29]) {
+        c.col(4, y, y + 15, C.ironDark); // the flights between the landings, end on
+        c.col(10, y, y + 15, C.ironDark);
+        for (let yy = y + 1; yy < y + 15; yy += 3) c.row(yy, 5, 9, lt);
+      }
+      for (const y of [9, 27, 45]) {
+        c.rect(1, y, 13, y + 1, ir);
+        c.row(y, 1, 13, lt);
+        c.row(y - 7, 1, 13, ir);
+        for (const x of [1, 7, 13]) c.col(x, y - 7, y, C.ironDark);
+        c.line(2, y + 5, 5, y + 2, C.ironDark);
+      }
+      ladder(c, 5, 9, 47, up ? 52 : 60, ir);
+      c.speckle(1, 1, 14, 60, C.rust, 7, 9);
+    };
+    V('fire-escape', {
+      side: view(16, 62, escSide(false)),
+      used: over('fire-escape', (c) => c.clearRect(11, 53, 19, 60)),
+      sideUsed: view(16, 62, escSide(true)),
+    });
+  }
+
   /*VIEWS*/
 
   return A;

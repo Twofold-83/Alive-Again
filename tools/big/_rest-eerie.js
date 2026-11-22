@@ -1225,5 +1225,136 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
     sideUsed: { put: [[4, 4, 'F']] },
   });
   V('headstone-leaning', { side: ['.ss', '.sld', '.sld', '.sld', '.sld', '.sld', '.sld', '.sld', '.smd', 'ssdd', 'eeee'] });
+  /* ---------- the rest of the yard ---------- */
+  V('dead-tree-small', {
+    used: {
+      put: [
+        [9, 7, 'y'],
+        [9, 8, 'y'],
+        [9, 9, 'y'],
+        [8, 10, 'y.y'],
+        [8, 11, 'y.y'],
+        [9, 12, 'y'],
+      ],
+    },
+  });
+  V('tyre-swing', {
+    side: [...rep(10, '.y'), 'nnn', 'nIn', 'nIn', 'nIn', 'nIn', 'nnn'],
+    used: { put: [4, 5, 6, 7, 8].map((y) => [3, y, '.']) },
+    sideUsed: { put: [4, 5, 6, 7, 8].map((y) => [1, y, '.']) },
+  });
+  V('pumpkin-rotten', {
+    used: {
+      swap: { n: 'f' },
+      put: [
+        [3, 3, 'F'],
+        [7, 3, 'F'],
+        [3, 5, 'FfFfF'],
+      ],
+    },
+  });
+  V('garden-roller', {
+    base: 'side',
+    side: ['....II', '....II', '....II', '....II', '....II', '.ssssssss', 'slllllllld', 'sssssssssd', 'sssmsssssd', 'sssssssssd', '.ssssssss'],
+    used: {
+      put: [
+        [9, 0, '..'],
+        [8, 1, '.'],
+        [7, 2, '.'],
+        [6, 3, '.'],
+        [5, 4, '.'],
+        [9, 8, 'IIII'],
+        [13, 9, 'I'],
+        [13, 10, 'I'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [4, 0, '..'],
+        [4, 1, '..'],
+        [4, 2, '..'],
+        [4, 3, '..'],
+        [4, 4, '..'],
+        [4, 9, 'II'],
+        [4, 10, 'II'],
+        [4, 11, 'II'],
+        [3, 12, 'IIII'],
+      ],
+    },
+  });
+  /* ---------- the rest of the occult ---------- */
+  V('effigy-wax', { used: ['', '', '', '', '..cc', '.cccc', '.cnnc', 'cccccc', 'ccctcc', 'ccccccc'] });
+  V('doll-nails', {
+    used: {
+      put: [
+        [0, 1, '.'],
+        [5, 6, '.'],
+        [3, 0, 'a'],
+        [0, 7, '.'],
+        [1, 1, 'r'],
+        [4, 6, 'r'],
+        [7, 8, 't'],
+        [6, 9, 'tt'],
+      ],
+    },
+  });
+  V('bones-crossed', { used: ['bb', '.bbb..b', '...b..b', '.....bb', 'b', 'bb...bb', '.b....bb', '.......b'] });
+  V('bones-circle', {
+    used: {
+      put: [
+        [4, 2, '....'],
+        [4, 3, '....'],
+        [4, 4, '....'],
+        [9, 5, '..'],
+        [11, 4, '.'],
+        [10, 6, 'b.b'],
+        [12, 5, 'b'],
+      ],
+    },
+  });
+  V('relic-hand', { used: ['.F.F.F', '.f.f.f.F', ...pat(R['relic-hand'], { put: [[7, 0, 'f']] })] });
+  V('charm-bones', {
+    used: {
+      put: [
+        [5, 1, '.'],
+        [5, 2, '.'],
+        [5, 3, '.'],
+        [5, 4, '.'],
+        [5, 6, 'bb'],
+      ],
+    },
+  });
+  V('charm-witch-ball', { used: { swap: { 4: '5', h: 'R' } } });
+  V('dreamcatcher', {
+    used: {
+      put: [
+        [2, 2, '....'],
+        [3, 3, '...'],
+        [3, 4, '...'],
+        [2, 8, '.'],
+        [1, 9, 'b'],
+        [6, 8, '.'],
+      ],
+    },
+  });
+  V('ash-bowl', {
+    used: {
+      put: [
+        [2, 1, 'uf'],
+        [5, 1, 'fu'],
+      ],
+    },
+  });
+  V('hex-bag', { used: ['.e..e', '.ennE', 'eeeeee', 'eEeeEe', 'eeeeee.b', '.eeee.Rmb'] });
+  V('pendulum-crystal', { used: ['...t', '...t', '....t', '....t', '.....t', '....h5h', '....555', '....555', '.....5'] });
+  V('goat-skull', {
+    used: {
+      put: [
+        [3, 4, 'R'],
+        [6, 4, 'R'],
+      ],
+    },
+  });
+  V('witch-broom', { side: [...rep(18, '..O'), '..u', '.yyy', '.yyy', 'yyyyy', 'yyyyy', 'yy.yy'] });
   //VIEWS
 };

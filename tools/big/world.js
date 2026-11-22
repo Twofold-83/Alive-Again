@@ -2710,10 +2710,14 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     pts(c, [[14, 2], [15, 1], [16, 2]], C.woodLight); c.set(15, 2, C.woodPale);
     c.line(7, 4, 15, 4, C.woodLight);
     if (o.snow) { c.rect(7, 3, 12, 3, X.snow); c.set(6, 4, X.snow); }
-    pts(c, [[1, 12], [21, 12], [22, 11]], C.woodPale);
-    if (leaf) pts(c, [[2, 11], [1, 10], [20, 10], [22, 12], [19, 12], [3, 12]], leaf);
+    c.set(21, 11, C.woodPale);
+    if (leaf) { c.rect(1, 12, 2, 12, leaf); c.rect(20, 12, 22, 12, leaf); c.set(22, 11, leaf); }
+    if (o.bark) recolour(c, [[C.wood, o.bark], [C.woodLight, L(o.bark)], [C.woodDark, D(o.bark)]]);
   }, solid);
+  /** Swap colours of what is drawn: pairs [from, to]. */
+  const recolour = (c, pairs) => { const m = new Map(pairs.map(([a, b]) => [a.join(), b])); c.px.forEach((p, i) => { if (p && m.has(p.join())) c.px[i] = m.get(p.join()); }); };
   views('tree', { used: felled(C.leafLight) });
+  views('dead-tree', { used: felled(null, { bark: BARK }) });
   views('tree-autumn', { used: felled(AUTUMN) });
   views('tree-cherry', { used: felled(BLOSSOM) });
   views('tree-apple', {
@@ -2843,6 +2847,228 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
   views('cloud', {
     // it rains
     used: pic(42, 26, (c) => { again(c, 'cloud'); for (let x = 6; x <= 36; x += 3) { const y = 16 + ((x * 7) % 5); c.line(x, y, x - 1, y + 3, (x % 2) ? C.glass : C.glassLight); } }, flat),
+  });
+
+  /* ---------- the rest: piles, marks on the floor, rocks, and the other side of a few more things ---------- */
+  const cageSide = (c, x, open) => {
+    ring(c, x + 8, 1, x + 11, 4, C.iron, 1);
+    c.poly([[x + 3, 7], [x + 9, 4], [x + 10, 4], [x + 16, 7]], C.iron);
+    c.rect(x + 2, 7, x + 17, 8, C.iron); c.row(7, x + 2, x + 17, C.steel);
+    c.rect(x + 3, 9, x + 16, 27, C.night);
+    for (let i = 3; i <= 16; i += 3) c.col(x + i, 9, 27, C.iron);
+    c.row(18, x + 3, x + 16, C.ironDark);
+    c.rect(x + 2, 28, x + 17, 30, C.iron); c.row(28, x + 2, x + 17, C.steel);
+    if (open) { c.frame(1, 10, x + 2, 26, C.iron); c.col(4, 10, 26, C.iron); c.row(18, 1, x + 2, C.ironDark); c.col(1, 10, 26, C.steel); c.rect(2, 16, 3, 20, C.steel); c.set(2, 18, K); }
+    else c.rect(x + 3, 16, x + 3, 20, C.steel);
+  };
+  Object.assign(S.cage.views, { side: pic(20, 32, (c) => cageSide(c, 0, false), solid), sideUsed: pic(27, 32, (c) => cageSide(c, 7, true), solid) });
+  const cageEmptySide = (c, x, open) => {
+    c.rect(x + 1, 1, x + 16, 2, C.iron); c.row(1, x + 1, x + 16, C.steel);
+    c.rect(x + 2, 3, x + 15, 17, C.night);
+    for (let i = 2; i <= 15; i += 3) c.col(x + i, 3, 17, C.iron);
+    c.col(x + 15, 3, 17, C.iron);
+    c.rect(x + 1, 18, x + 16, 20, C.iron); c.row(18, x + 1, x + 16, C.steel);
+    if (open) { c.frame(1, 4, x + 1, 17, C.iron); c.col(4, 4, 17, C.iron); c.col(1, 4, 17, C.steel); c.row(10, 1, x + 1, C.ironDark); }
+    else { c.row(10, x + 2, x + 15, C.ironDark); c.rect(x + 2, 8, x + 2, 12, C.steel); }
+  };
+  Object.assign(S['cage-empty'].views, { side: pic(25, 22, (c) => cageEmptySide(c, 7, true), solid), sideUsed: pic(18, 22, (c) => cageEmptySide(c, 0, false), solid) });
+  const logCut = (c, x, y, col = C.woodPale) => { c.oval(x, y, x + 8, y + 7, C.wood); c.oval(x + 1, y + 1, x + 7, y + 6, col); ring(c, x + 2, y + 2, x + 6, y + 5, C.woodLight, 1); c.set(x + 4, y + 3, C.wood); c.row(y, x + 3, x + 5, C.woodLight); };
+  Object.assign(S.log.views, {
+    base: 'side',
+    side: pic(11, 10, (c) => { logCut(c, 1, 1); c.rect(6, 1, 7, 1, C.moss); }, solid),
+    sideUsed: pic(17, 11, (c) => { logCut(c, 7, 1, D(C.woodPale)); c.rect(12, 1, 13, 1, C.moss); logCut(c, 1, 2); }, solid),
+  });
+
+  views('statue-broken', {
+    side: pic(20, 26, (c) => {
+      pedestal(c, 3, 14, 18, 24, C.stone);
+      c.poly([[8, 6], [10, 4], [12, 7], [13, 13], [6, 13]], C.stoneLight); c.line(9, 8, 8, 13, C.stoneDark); c.line(7, 9, 6, 13, L(C.stoneLight));
+      c.line(8, 16, 11, 20, C.stoneDark); c.line(11, 20, 10, 23, C.stoneDark);
+      c.oval(1, 18, 7, 24, C.stoneLight); c.col(2, 20, 22, L(C.stoneLight)); c.rect(4, 19, 6, 20, D(C.stoneLight)); c.row(24, 2, 6, C.stoneDark);
+    }, solid),
+    // somebody has set the head back on the stump
+    used: changed('statue-broken', (c, dx, dy) => {
+      c.clearRect(18, dy + 16, 25, dy + 25);
+      c.oval(6, 2, 12, 8, C.stoneLight); pts(c, [[8, 5], [11, 5]], DD(C.stoneLight)); c.row(7, 8, 10, C.stoneDark); c.col(6, 4, 6, L(C.stoneLight));
+      c.line(5, 9, 13, 10, C.stoneDark);
+    }, [0, 5, 0]),
+    sideUsed: pic(20, 31, (c) => {
+      pedestal(c, 3, 19, 18, 29, C.stone);
+      c.poly([[8, 11], [10, 9], [12, 12], [13, 18], [6, 18]], C.stoneLight); c.line(9, 13, 8, 18, C.stoneDark);
+      c.line(8, 21, 11, 25, C.stoneDark); c.line(11, 25, 10, 28, C.stoneDark);
+      c.oval(6, 2, 12, 8, C.stoneLight); c.set(5, 5, C.stoneLight); c.set(7, 4, DD(C.stoneLight)); c.col(6, 4, 6, L(C.stoneLight)); c.row(7, 6, 8, C.stoneDark);
+      c.line(6, 9, 12, 10, C.stoneDark);
+    }, solid),
+  });
+  views('well-dry', {
+    // a rope is tied to a stake and let down
+    used: changed('well-dry', (c) => { c.rect(27, 5, 28, 11, C.iron); c.col(27, 5, 11, C.steel); c.line(27, 6, 21, 2, C.straw); c.line(21, 2, 14, 4, C.straw); c.line(27, 7, 22, 3, D(C.straw)); }, [0, 0, 6]),
+  });
+  /** A stalagmite with its point snapped off: everything above row `cut` between x0 and x1 goes, the piece lies beside it. */
+  const snapped = (slug, x0, x1, cut, frag) => changed(slug, (c) => {
+    const w = S[slug].w, yb = S[slug].h - 2;
+    c.clearRect(x0, 0, x1, cut - 1);
+    for (let x = x0; x <= x1; x++) if ((x * 7) % 3 === 0) c.clear(x, cut); else if (c.get(x, cut)) c.set(x, cut, C.stoneLight);
+    c.poly([[w, yb], [w + 1, yb - 3], [w + frag, yb - 1], [w + frag, yb]], C.stone);
+    c.line(w, yb, w + 1, yb - 3, C.stoneLight); c.row(yb, w, w + frag, C.stoneDark);
+  }, [0, 0, frag + 2]);
+  views('stalagmite-tall', { used: snapped('stalagmite-tall', 1, 12, 13, 7) });
+  views('stalagmites', { used: snapped('stalagmites', 6, 13, 6, 5) });
+  views('stalagmite', { used: snapped('stalagmite', 1, 10, 9, 6) });
+  views('rubble', {
+    // cleared away: the last few stones
+    used: pic(26, 7, (c) => { boulder(c, 10, 1, 16, 5, C.stone, 2, { plain: true, grain: 2 }); chips(c, [[2, 4, 3], [19, 4, 4], [6, 4, 2]], C.stoneLight); }),
+  });
+  views('rubble-wood', {
+    used: pic(28, 7, (c) => { c.rect(2, 4, 15, 5, C.wood); c.row(4, 2, 15, C.woodLight); c.rect(12, 2, 25, 3, C.woodLight); c.row(2, 12, 25, L(C.woodLight)); c.row(3, 12, 25, C.wood); pts(c, [[4, 5], [23, 3]], C.iron); c.rect(18, 5, 21, 5, C.woodDark); }),
+  });
+  views('bones-pile', {
+    // the skull is gone
+    used: pic(24, 12, (c) => {
+      bone(c, 2, 8, 12, 4); bone(c, 6, 4, 19, 9); bone(c, 10, 9, 21, 5, D(C.bone)); bone(c, 2, 5, 9, 9, D(C.bone));
+      c.rect(4, 9, 19, 10, D(C.bone)); c.row(9, 5, 18, C.bone);
+      for (let x = 5; x < 11; x += 2) c.col(x, 6, 8, C.bone);
+    }),
+  });
+  views('skull-pile', {
+    // one has rolled off the top
+    used: pic(32, 17, (c) => {
+      c.rect(2, 12, 21, 15, DD(C.bone));
+      skull(c, 1, 9, D(C.bone)); skull(c, 16, 9, D(C.bone)); skull(c, 8, 9);
+      skull(c, 5, 4); skull(c, 12, 5, D(C.bone));
+      skull(c, 24, 9);
+    }, solid),
+  });
+  const tornWeb = (flip) => pic(20, 20, (c) => {
+    cobweb(c, flip);
+    const X_ = (x) => (flip ? 19 - x : x), col = hex('#b9b9b4');
+    for (let y = 3; y <= 13; y++) for (let x = 3; x <= 13; x++) if ((x - 8) ** 2 + (y - 8) ** 2 <= 20) c.clear(X_(x), y);
+    c.col(X_(5), 4, 10, col); c.col(X_(11), 3, 6, D(col)); c.set(X_(5), 11, D(col)); c.col(X_(3), 12, 15, D(col));
+  }, flat);
+  views('cobweb-corner', { used: tornWeb(false) });
+  views('cobweb-corner-right', { used: tornWeb(true) });
+  views('floor-cracks', {
+    // the floor has given way
+    used: changed('floor-cracks', (c) => { c.oval(7, 1, 17, 7, hex('#3a2a22')); c.oval(8, 2, 16, 7, K); c.set(12, 1, null); }),
+  });
+  views('puddle', {
+    // somebody walked through it
+    used: pic(40, 8, (c) => {
+      again(c, 'puddle');
+      ring(c, 5, 2, 14, 5, C.glassLight, 1); c.rect(8, 3, 11, 4, C.water);
+      for (const [x, y] of [[27, 5], [31, 3], [35, 5]]) { c.rect(x, y, x + 2, y, C.water); c.set(x + 3, y, C.glass); }
+    }, flat),
+  });
+  views('scorch-mark', {
+    // raked over: it still glows underneath
+    used: changed('scorch-mark', (c, dx, dy) => { c.rect(9, dy + 4, 16, dy + 4, C.rust); pts(c, [[10, dy + 4], [13, dy + 4], [15, dy + 4], [12, dy + 3]], C.flame); c.set(12, dy + 4, C.flameLight); wisp(c, 12, dy + 1, 6); }, [0, 6, 0]),
+  });
+  views('floor-hole', {
+    // boarded over
+    used: changed('floor-hole', (c) => {
+      for (const [x0, y, x1] of [[1, 2, 22], [2, 5, 21]]) { c.rect(x0, y, x1, y + 1, C.wood); c.row(y, x0, x1, C.woodLight); pts(c, [[x0 + 1, y + 1], [x1 - 1, y + 1]], C.iron); c.set(x0 + 9, y + 1, C.woodDark); }
+    }),
+  });
+  const mown = (w, col) => pic(w, 8, (c) => {
+    for (let x = 1; x < w - 1; x++) { const h = 1 + ((x * 7) % 5 > 2 ? 1 : 0); c.col(x, 6 - h + 1, 6, x % 2 ? col : D(col)); }
+    c.rect(2, 4, 4, 4, L(col)); c.rect(w - 6, 4, w - 4, 4, col);
+  });
+  views('grass', { used: mown(11, C.leafLight) });
+  views('grass-tuft', { used: mown(14, C.moss) });
+  const hatch = pic(24, 10, (c) => {
+    vplanks(c, 2, 2, 21, 7, C.wood, 5); c.frame(2, 2, 21, 7, C.woodDark); c.row(2, 2, 21, C.woodLight);
+    c.rect(10, 4, 13, 5, C.iron); c.rect(11, 5, 12, 5, C.wood); pts(c, [[4, 2], [19, 2]], C.iron);
+  });
+  views('ladder-hole', {
+    side: pic(24, 20, (c) => {
+      c.oval(1, 11, 22, 18, hex('#3a2a22')); c.oval(2, 12, 21, 18, K);
+      c.rect(11, 1, 12, 15, C.woodLight); c.col(12, 1, 15, C.wood);
+      for (const y of [3, 7, 11, 14]) c.set(13, y, C.woodLight);
+      c.row(15, 11, 12, C.woodDark);
+    }, flat),
+    // the ladder is pulled up and the hatch shut
+    used: hatch,
+    sideUsed: hatch,
+  });
+  /** A rock split in two from top to bottom. */
+  const split = (slug) => changed(slug, (c) => {
+    const d = S[slug], m = d.w >> 1;
+    for (let y = 0; y < d.h - 1; y++) {
+      const x = m + Math.round(Math.sin(y * 0.8) * 1.4), wd = 1 + Math.round((d.h - y) / 9);
+      c.clearRect(x, y, x + wd, y);
+    }
+    c.clearRect(0, d.h - 1, d.w, d.h);
+  });
+  for (const slug of ['boulder-round', 'boulder-mossy', 'boulder-snowy', 'boulder-sandstone', 'rock', 'rock-mossy']) views(slug, { used: split(slug) });
+
+  views('fence-post', { used: pic(12, 14, (c) => { wpost(c, 2, 12); leanX(c, 0.35, 12); }) });
+  /** The gap in a broken fence seen from its end: the far post snapped, a rail on the ground. */
+  const brokenEnd = pic(12, 20, (c) => {
+    c.rect(2, 8, 4, FAR, C.wood); c.set(2, 7, C.wood); c.set(4, 6, C.wood); c.set(4, 7, C.wood); c.col(2, 8, FAR, C.woodLight);
+    wpost(c, 2, NEAR);
+    c.line(5, 13, 10, 17, C.woodLight); c.line(5, 14, 9, 18, C.wood); c.rect(7, 18, 10, 18, C.wood);
+  });
+  views('fence-broken', { side: brokenEnd, used: same('fence-h'), sideUsed: same('fence-v') });
+  Object.assign(S['fence-h'].views, { used: same('fence-broken'), sideUsed: brokenEnd });
+  Object.assign(S.fence.views, { used: same('fence-broken'), sideUsed: brokenEnd });
+  /** A way forced through a hedge. */
+  const breach = (slug, y0, yb) => changed(slug, (c) => {
+    arch(c, 6, y0, 11, yb, C.night);
+    pts(c, [[5, y0 + 2], [12, y0 + 3], [8, y0 - 1]], DD(C.leaf));
+    c.line(6, yb, 7, yb - 3, C.woodDark); c.line(11, yb, 10, yb - 4, C.woodDark); c.set(9, yb, C.leafLight); c.set(8, yb, C.leaf);
+  });
+  Object.assign(S['hedge-h'].views, { used: breach('hedge-h', 7, 16) });
+  views('hedge-block', { used: breach('hedge-block', 11, 20) });
+  views('hedge-round', { used: turned(18, 26, S['hedge-round'].draw, solid) });
+  Object.assign(S['iron-fence-h'].views, {
+    // two bars bent apart
+    used: changed('iron-fence-h', (c) => {
+      c.clearRect(8, 6, 8, 18); c.clearRect(11, 6, 11, 18);
+      pts(c, [[8, 6], [7, 7], [7, 8], [7, 16], [7, 17], [8, 18]], C.iron); c.col(6, 9, 15, C.iron);
+      pts(c, [[11, 6], [12, 7], [12, 8], [12, 16], [12, 17], [11, 18]], C.iron); c.col(13, 9, 15, C.iron);
+      pts(c, [[6, 12], [13, 12]], C.steel);
+    }),
+  });
+  Object.assign(S['stone-wall-h'].views, {
+    // a breach knocked into it
+    used: changed('stone-wall-h', (c) => {
+      c.clearRect(7, 0, 11, 6); c.clearRect(6, 0, 6, 4); c.clearRect(12, 0, 12, 3); c.clear(8, 7); c.clear(9, 7);
+      chips(c, [[18, 11, 3], [20, 9, 2], [22, 11, 2]], C.stone);
+    }, [0, 0, 7]),
+  });
+  Object.assign(S['bridge-rail-h'].views, {
+    // the ropes are cut
+    used: pic(18, 17, (c) => {
+      rpost(c, 1, 15); rpost(c, 15, 15);
+      c.row(5, 1, 2, C.straw); c.row(5, 15, 16, C.straw);
+      c.col(3, 5, 11, C.straw); c.col(4, 9, 14, D(C.straw)); c.col(14, 5, 12, C.straw); c.col(13, 9, 13, D(C.straw));
+    }, solid),
+  });
+
+  views('cactus', {
+    // an arm cut off
+    used: changed('cactus', (c) => {
+      const g = hex('#4f6e44');
+      c.clearRect(1, 6, 4, 15);
+      c.col(5, 13, 15, C.bone); c.set(5, 13, L(g));
+      c.rect(1, 22, 4, 24, g); c.row(22, 1, 4, L(g)); c.set(4, 23, C.bone); c.set(2, 23, C.bone);
+    }),
+  });
+  views('lily-pad', {
+    // the flower is picked
+    used: pic(16, 8, (c) => {
+      c.oval(1, 3, 14, 7, C.leafLight); c.oval(2, 3, 13, 5, L(C.leafLight));
+      c.clearRect(11, 4, 14, 4);
+      c.row(7, 3, 12, C.leaf); c.set(5, 4, C.leaf); c.set(6, 3, C.leaf);
+    }, noShade),
+  });
+  views('shell', {
+    // opened: a pearl
+    used: pic(12, 11, (c) => {
+      c.poly([[2, 6], [4, 1], [7, 1], [9, 6]], C.bone); for (const x of [3, 5, 7]) c.line(5.5, 6, x + 0.5, 2, D(C.bone)); c.row(1, 4, 7, C.white);
+      c.poly([[1, 7], [3, 6], [8, 6], [10, 7], [8, 9], [3, 9]], C.bone); c.rect(3, 7, 8, 7, BLOSSOM); c.row(9, 3, 8, D(C.bone));
+      c.rect(5, 6, 6, 7, C.white); c.set(6, 7, C.ghost);
+    }),
   });
 
   return S;

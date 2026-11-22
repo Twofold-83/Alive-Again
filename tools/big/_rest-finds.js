@@ -260,5 +260,236 @@ module.exports = ({ T: T0, vary: vary0, V }) => {
       ],
     },
   });
+  /* torn in two: the right half slips down a row */
+  const torn = (rows, at) =>
+    [...rows, ''].map((r, y) => (r.slice(0, at).padEnd(at, '.') + '.' + (y ? rows[y - 1].slice(at) : '')).replace(/\.+$/, ''));
+  /* keys: used once too often, the bit is bent */
+  for (const [slug, m] of [
+    ['key-skeleton', 't'],
+    ['key-brass-ornate', 'G'],
+    ['key-bone', 'b'],
+  ])
+    V(slug, {
+      used: {
+        put: [
+          [7, 1, '..'],
+          [6, 2, m + m + m],
+          [6, 3, m + '.' + m],
+        ],
+      },
+    });
+  V('key-tiny', { used: ['GG', 'G.G', 'GG.GG', '....G'] });
+  V('key-ring', {
+    used: {
+      put: [
+        [2, 4, '.'],
+        [2, 5, '.'],
+        [2, 6, '..'],
+      ],
+    },
+  });
+  V('torn-page', { used: ['cccccc', 'cnnncc', 'cc.ccc', 'c..c', '', ''] });
+  V('burnt-letter', { used: ['ccccc', 'cnnnnu', 'ccnnu', 'cnnu', 'nnu', 'n'] });
+  V('telegram', { used: torn(R['telegram'], 4) });
+  V('photo-torn', { used: torn(R['photo-torn'], 3) });
+  V('photo-scratched', { used: ['wwwwwww', 'wwwwwww', 'wnnnwww', 'wwwwwww', 'wnnwwww', 'wwwwwww'] });
+  V('photo-negative', { used: torn(R['photo-negative'], 4) });
+  V('map-fragment', { used: ['yyyy', 'yeyY', 'yyeY', 'yyyY', 'y.yY'] });
+  V('blueprint', { used: ['', '', 'jjjjjjjjj', 'JjjJjjJjw', 'jjjjjjjjj'] });
+  V('coin-old', { used: ['.GG', 'GGgG', 'GgGG', '.GG'] });
+  V('coins-eyes', { used: R['coins-eyes'].map((r) => r.slice(0, 4)) });
+  V('ring-signet', {
+    used: {
+      put: [
+        [5, 3, 'RRR'],
+        [5, 4, 'RrR'],
+      ],
+    },
+  });
+  V('ring-finger', { used: ['.GG', 'G..G.xxxxx', 'G..G.xxxxr', '.GG'] });
+  V('pocket-watch', {
+    used: {
+      put: [
+        [1, 3, 'nn'],
+        [2, 4, 'ww'],
+        [5, 2, 'G'],
+        [5, 3, 'GG'],
+        [5, 4, 'GG'],
+        [5, 5, 'G'],
+      ],
+    },
+  });
+  V('pills-spilled', {
+    used: {
+      put: [
+        [5, 1, '.'],
+        [4, 2, '...'],
+        [2, 4, '...'],
+      ],
+    },
+  });
+  V('syringe-used', {
+    used: {
+      put: [
+        [0, 0, '.t'],
+        [6, 0, '2'],
+      ],
+    },
+  });
+  V('rope-coil', { used: ['..y', '..y', '..y', '.yYy', 'y...y', 'y...y', '.yyy'] });
+  V('shovel-dirty', {
+    used: {
+      put: [
+        [10, 0, 'tee'],
+        [10, 1, 'eee'],
+        [10, 2, 'ter'],
+      ],
+    },
+  });
+  V('film-reel', {
+    used: {
+      put: [
+        [6, 4, 'n'],
+        [7, 5, 'nn'],
+        [9, 4, 'n'],
+        [10, 5, 'nn'],
+      ],
+    },
+  });
+  V('music-box-key', { used: ['.G', '.G', '.G', '.G', '.G'] });
+  V('toy-soldier-broken', { used: ['.nn', '.xx', 'RRRR', 'RRR', '.jj', '.jj', '.n'] });
+  V('dolls-head', {
+    used: {
+      put: [
+        [1, 2, 'R'],
+        [4, 2, 'R'],
+      ],
+    },
+  });
+  V('dolls-eye', { used: ['.ww', 'w11w', 'wn1w', '.ww'] });
+  V('teeth-pulled', {
+    used: {
+      put: [
+        [0, 2, 'rr'],
+        [3, 2, 'rr'],
+        [5, 2, 'r'],
+      ],
+    },
+  });
+  V('tooth-gold', {
+    used: {
+      put: [
+        [0, 2, 'r'],
+        [2, 2, 'r'],
+      ],
+    },
+  });
+  V('cloth-bloody', {
+    used: {
+      put: [
+        [1, 1, 'rrrrr'],
+        [0, 2, 'rrrrrr'],
+        [1, 3, 'rrrrr'],
+        [1, 4, 'r'],
+        [5, 4, 'r'],
+      ],
+    },
+  });
+  V('bone-finger', { used: ['b', 'bbb...b', 'b..bbbb', '......b'] });
+  V('bone-jaw', {
+    used: {
+      put: [
+        [1, 1, '.'],
+        [5, 1, '.'],
+        [8, 3, 'w'],
+      ],
+    },
+  });
+  V('feather-black', {
+    used: {
+      put: [
+        [0, 6, 'nn'],
+        [3, 6, 'n'],
+      ],
+    },
+  });
+  V('feathers-white', {
+    used: {
+      put: [
+        [4, 1, 'r'],
+        [3, 2, 'r'],
+        [5, 4, 'r'],
+        [1, 4, 'r'],
+      ],
+    },
+  });
+  V('jar-buttons', {
+    used: {
+      put: [
+        [0, 0, '.....'],
+        [6, 5, 'R'],
+        [7, 4, 'j'],
+        [8, 5, 'G'],
+      ],
+    },
+  });
+  V('hair-lock', {
+    used: {
+      put: [
+        [2, 0, '.'],
+        [0, 3, 'o'],
+        [4, 4, 'o'],
+        [5, 4, 'R'],
+        [4, 5, 'RR'],
+      ],
+    },
+  });
+  V('thimble-needle', {
+    used: {
+      put: [
+        [4, 3, 'n'],
+        [5, 4, 'nn'],
+        [7, 3, 'n'],
+      ],
+    },
+  });
+  V('spectacles-broken', {
+    used: {
+      put: [
+        [1, 1, '..'],
+        [1, 2, '..'],
+        [7, 2, '.'],
+      ],
+    },
+  });
+  V('glove-single', {
+    used: {
+      put: [
+        [0, 0, 'r'],
+        [2, 0, 'r'],
+        [4, 0, 'r'],
+      ],
+    },
+  });
+  V('shoe-child', {
+    used: {
+      put: [
+        [2, 2, 'eEee'],
+        [6, 3, 'e'],
+      ],
+    },
+  });
+  V('ribbon-hair', { used: ['77', '..77..77', '....77'] });
+  V('nail-coffin', { used: ['ttt', '.t', '.t', '.ttI'] });
+  V('compass-broken', {
+    used: {
+      put: [
+        [3, 1, 'w'],
+        [1, 3, 'w'],
+        [1, 1, 'n'],
+        [3, 3, 'n'],
+      ],
+    },
+  });
   //VIEWS
 };

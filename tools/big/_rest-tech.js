@@ -2225,5 +2225,97 @@ module.exports = ({ D: D0, T: T0, vary: vary0, V }) => {
   });
   V('xray-skull', { used: { swap: { h: 'N' } } });
   V('phonograph-cylinder', { base: 'side', side: ['.GGGG', 'GGnnGG', 'GnnnnG', 'GnnnnG', 'GGnnGG', '.GGGG', '.nnnn', 'oooooo', 'oOOOOo', 'oooooo'] });
+  /* ---------- the last of the instruments and parts ---------- */
+  V('forceps', { used: ['..r.r', '..t.t', '..t.t', '...t', '..t.t', '.t...t', '.t...t', 'tt...tt'] });
+  V('trepan-drill', {
+    used: {
+      put: [
+        [0, 2, '.'],
+        [7, 2, 't'],
+        [7, 4, '.'],
+        [0, 4, 't'],
+        [3, 6, 'rr'],
+        [3, 7, 'rr'],
+        [4, 8, 'r'],
+      ],
+    },
+  });
+  V('lobotomy-pick', {
+    used: {
+      put: [
+        [10, 0, 'rrrr'],
+        [12, 1, 'r'],
+      ],
+    },
+  });
+  V('floppy-disk', {
+    used: {
+      put: [
+        [1, 1, 'nnnt'],
+        [1, 2, 'nnnt'],
+        [2, 5, 'nRRn'],
+      ],
+    },
+  });
+  V('floppy-black', {
+    used: {
+      put: [
+        [1, 1, 'IIIt'],
+        [1, 2, 'IIIt'],
+        [2, 5, 'wwww'],
+      ],
+    },
+  });
+  V('radio-broken', {
+    side: ['.....t', 'ooooooo', 'oOOOOOon', 'oOoooOo', 'oOoooOot', 'oOOOOOo.t', 'ooooooo.tt'],
+    used: {
+      put: [
+        [2, 2, 'fF'],
+        [3, 3, 'F'],
+        [7, 1, 'Ff'],
+        [14, 3, 'F'],
+      ],
+    },
+    sideUsed: {
+      put: [
+        [7, 2, 'F'],
+        [7, 3, 'f'],
+      ],
+    },
+  });
+  V('clockwork', {
+    used: {
+      put: [
+        [12, 4, 't'],
+        [13, 3, 't'],
+        [12, 2, 't'],
+        [13, 1, 't'],
+        [12, 0, 't'],
+        [2, 2, 'GG'],
+        [8, 2, 'G'],
+      ],
+    },
+  });
+  V('gear-big', { side: ['.I', 'III', 'IiI', 'III', 'IiI', 'IiI', 'III', 'IiI', 'III', '.I'] });
+  V('anatomy-chart', {
+    side: ['OO', ...rep(12, 'c'), 'OO'],
+    used: [...R['anatomy-chart'].slice(0, 3), 'OOOOOOOOOO', ...rep(10, '')],
+    sideUsed: ['OO', 'c', 'c', 'OO', ...rep(10, '')],
+  });
+  V('gas-mask', {
+    side: ['.nnnn', 'nIIIIn', 'nIII1n', 'nIII1n', 'nIIIIn', '.nIIIn', '.nIIItt', '..nItIIt', '...ntIIt', '....ttt'],
+    used: { swap: { 1: 'h' } },
+    sideUsed: { swap: { 1: 'h' } },
+  });
+  V('bell-nurse', {
+    used: {
+      put: [
+        [2, 0, '.'],
+        [0, 0, 'w'],
+        [4, 0, 'w'],
+        [6, 1, 'w'],
+      ],
+    },
+  });
   //VIEWS
 };
