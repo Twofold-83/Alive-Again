@@ -9,7 +9,7 @@ const { setup } = require('./lib');
   try {
     const x = await t.open(),
       p = x.p;
-    const side = (who) => p.waitForFunction((w) => new RegExp(w).test(document.querySelector('#banner').textContent), who);
+    const { side } = x;
     const round = async (n) => {
       for (let i = 0; i < 60; i++) {
         const s = await x.state();

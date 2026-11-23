@@ -7,17 +7,7 @@ const { setup } = require('./lib');
   try {
     const x = await t.open(),
       p = x.p;
-    const side = (who) => p.waitForFunction((w) => new RegExp(w).test(document.querySelector('#banner').textContent), who);
-    const toPlayer = async () => {
-      await x.end();
-      await side('Player');
-      await x.cutDone();
-    };
-    const toDirector = async () => {
-      await x.end();
-      await side('Director');
-      await x.cutDone();
-    };
+    const { side, toPlayer, toDirector } = x;
     const settings = async (...clicks) => {
       await x.opt('Story settings');
       for (const c of clicks) await p.click(c);

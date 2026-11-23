@@ -7,7 +7,7 @@ const { setup } = require('./lib');
   try {
     const x = await t.open(),
       p = x.p;
-    const side = (who) => p.waitForFunction((w) => new RegExp(w).test(document.querySelector('#banner').textContent), who);
+    const { side } = x;
     await p.goto(t.base);
     await p.click('#typeAdventure');
     await p.click('#hotseat');

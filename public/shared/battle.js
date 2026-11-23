@@ -12,6 +12,7 @@
  *     hit      the hero's chance to hit, in percent        foeAtk, foeHit   the same for an enemy
  *     flee     the chance that Escape works
  *     guard    the hero defended last round                 paused           the Director has stepped in
+ * One blow never takes more than half of the hero's full health — except when the fight is meant to be impossible.
  */
 export const BATTLE_LEVELS = [
   // id, label, how much of the hero's health the fight should cost, hero's hit %, escape %, rounds an enemy lasts
@@ -202,6 +203,7 @@ export function fightRound(scene, move, names, label, rnd = Math.random) {
       }
       let dmg = (b.foeAtk + Math.floor(rnd() * 3)) * (heavy ? 2 : 1);
       if (b.guard) dmg = Math.floor(dmg / 2);
+      if (b.level !== 'impossible') dmg = Math.min(dmg, Math.max(1, Math.ceil(hp.max / 2))); // no single blow ends a fair fight
       if (dmg > 0) {
         hp.set(hp.get() - dmg);
         float(scene.heroId, dmg);

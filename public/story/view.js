@@ -227,6 +227,16 @@ export function typeCard() {
   );
 }
 
+/** One line for the Player about what a turn offers, in this kind of story. */
+function playerTip() {
+  const { rules, names, scene } = app.S;
+  if (scene.battle) return 'You are in a battle. Attack, defend, use an item — or try to escape. It lasts until one side is beaten.';
+  if (rules.player === 'tell') return `Write what you want to do. ${names.director} will make it happen on the stage, and you will see it play out.`;
+  if (rules.player === 'limited') return `Choose one of ${names.director}’s options. You can also walk once and add a line of speech.`;
+  if (rules.type === 'adventure')
+    return 'Click anywhere on the stage to walk there, look at something or use it — or pick an action under “Actions” and click what it is about. You can speak, write a free action and strike a pose too. Then end your turn.';
+  return `Press “Walk” and click where your hero should go (once per turn).${mods().inventory ? ' Click a thing to reach for it, or an item to use it.' : ''} Clickable things show what you can do with them. Then say something, do something — or both — and end your turn.`;
+}
 function buildPanel() {
   const p = $('#panel');
   p.replaceChildren();
@@ -241,14 +251,7 @@ function buildPanel() {
       app.S.you === 'spectator'
         ? null
         : myTurn()
-          ? [
-              'Your turn',
-              app.S.rules.player === 'tell'
-                ? `Write what you want to do. ${app.S.names.director} will make it happen on the stage, and you will see it play out.`
-                : app.S.rules.player === 'limited'
-                  ? `Choose one of ${app.S.names.director}’s options. You can also walk once and add a line of speech.`
-                  : `Press “Walk” and click where your hero should go (once per turn).${mods().inventory ? ' Click a thing to reach for it, or an item to use it.' : ''} Then say something, do something — or both — and end your turn.`,
-            ]
+          ? ['Your turn', playerTip()]
           : app.S.you === 'player'
             ? [
                 app.S.turn === 0 ? `${app.S.names.director} is setting the stage…` : `${app.S.names.director} is deciding what happens…`,

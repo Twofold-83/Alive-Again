@@ -15,6 +15,11 @@ small.grp { display: block; margin-top: 6px; text-transform: uppercase; letter-s
 #main { flex: 1; min-height: 0; display: flex; }
 #left { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #000000; }
 #right { flex: none; width: 420px; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); }
+/* side by side: the stage takes whatever height is left between the bars above and below it (banner, shelf, sheet) */
+@media (min-width: 821px) {
+  body:not(.phone) #stageWrap { container-type: size; }
+  body:not(.phone) #game .stage { width: min(100cqw, 100cqh * 4 / 3); }
+}
 
 
 /* narrow windows: the two columns stack */

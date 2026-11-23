@@ -29,6 +29,19 @@ exports.setup = async (port, env = {}) => {
       opt: (label) => p.click(`.gopt:has-text("${label}")`),
       done: () => p.click('.gdone'),
       end: () => p.click('#foot button.go'),
+      /** One person playing both sides: wait until the banner says whose turn it is. */
+      side: (who) => p.waitForFunction((w) => new RegExp(w).test(document.querySelector('#banner').textContent), who),
+      /** End the turn and wait until the other side has watched it play. */
+      toPlayer: async () => {
+        await x.end();
+        await x.side('Player');
+        await x.cutDone();
+      },
+      toDirector: async () => {
+        await x.end();
+        await x.side('Director');
+        await x.cutDone();
+      },
       cutDone: () => p.waitForFunction(() => !/\b(cut|cine)\b/.test(document.querySelector('#stage').className), null, { timeout: 90000 }),
       shot: async (n) => {
         if (t.shots) await p.screenshot({ path: path.join(t.shots, n + '.png') });

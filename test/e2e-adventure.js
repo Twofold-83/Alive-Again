@@ -7,17 +7,7 @@ const { setup } = require('./lib');
   try {
     const x = await t.open(),
       p = x.p;
-    const side = (who) => p.waitForFunction((w) => new RegExp(w).test(document.querySelector('#banner').textContent), who);
-    const toPlayer = async () => {
-      await x.end();
-      await side('Player');
-      await x.cutDone();
-    };
-    const toDirector = async () => {
-      await x.end();
-      await side('Director');
-      await x.cutDone();
-    };
+    const { side, toPlayer, toDirector } = x;
     const ent = (slug) => `#stage .ent:has(img[src*="${slug}"])`;
     const thing = (label) => p.click(`.thingbtns button:has-text("${label}")`);
     const pos = (sel) =>
