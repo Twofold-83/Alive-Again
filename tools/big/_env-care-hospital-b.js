@@ -700,16 +700,21 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       }
     };
     const side = (c, u) => {
-      const b = c.h - 2;
-      c.rect(1, 1, 4, b, hex('#c9c6b4'));
-      c.col(1, 1, b, L(hex('#c9c6b4')));
-      c.col(4, 1, b, D(hex('#c9c6b4')));
+      const b = c.h - 2,
+        ox = c.w - 6;
       if (u) {
-        c.rect(1, 3, 1, b, col); // the leaf standing into the ward, to the left
-        doorOpenS(c, 5, 3, 5, b, col);
+        doorOpenS(c, 1, 3, ox, b, col); // the leaf standing into the ward
+        c.oval(3, 8, 9, 14, GLASSD);
+        c.set(5, 9, C.glassLight);
+        c.rect(2, b - 6, ox - 1, b, STEEL);
+        c.row(b - 6, 2, ox - 1, STL);
       }
+      c.rect(ox + 1, 1, ox + 4, b, hex('#c9c6b4'));
+      c.col(ox + 1, 1, b, L(hex('#c9c6b4')));
+      c.col(ox + 4, 1, b, D(hex('#c9c6b4')));
+      c.col(ox + 3, 3, b, col);
     };
-    add('hospital-swing-doors', 'ward double doors swing doors portholes pale green kick plates', true, { m: [34, 40, front], s: [6, 40, (c, u) => side(c, false)], su: [18, 40], });
+    add('hospital-swing-doors', 'ward double doors swing doors portholes pale green kick plates', true, { m: [34, 40, front], s: [6, 40, side], su: [18, 40] });
   }
   {
     const col = hex('#6f7f78');
@@ -891,8 +896,9 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       if (u) {
         c.rect(ox + 2, 7, ox + 13, 7, hex('#b8b47a'));
         doorOpenF(c, ox + 1, 7, b - 6, 5, hex('#8fa9ad'));
-        c.rect(ox + 6, b, ox + 9, b, hex('#6a1a1e')); // one dropped and burst
-        c.rect(ox + 4, b + 1, ox + 11, b + 1, BLOOD);
+        c.rect(ox + 3, b, ox + 12, b, BLOOD); // one dropped and burst
+        c.rect(ox + 6, b - 1, ox + 9, b, hex('#6a1a1e'));
+        c.set(ox + 1, b, BLOOD);
       } else {
         c.frame(ox + 2, 7, ox + 13, b - 5, D(ENAMEL));
         dots(c, C.glassLight, [ox + 4, 9, ox + 5, 10, ox + 11, 21, ox + 12, 22]);
@@ -910,7 +916,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(11, b, 14, b, BLOOD);
       } else c.col(11, 14, 18, STL);
     };
-    add('hospital-blood-fridge', 'blood bank fridge refrigerator glass door bags transfusion white', true, { m: [16, 30, front], mu: [21, 31], s: [13, 30, side], su: [19, 30], });
+    add('hospital-blood-fridge', 'blood bank fridge refrigerator glass door bags transfusion white', true, { m: [16, 30, front], mu: [21, 30], s: [13, 30, side], su: [19, 30] });
   }
   {
     const front = (c, u) => {

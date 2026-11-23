@@ -55,7 +55,7 @@ const { setup } = require('./lib');
     assert.match(await p.textContent('.card.told'), /way to the castle/);
 
     /* ---- steps: several things per step, any number of steps, played in order ---- */
-    await x.opt('Change the scene');
+    await x.opt('Mood');
     await x.opt('The weather');
     await p.click('[data-mark="weather=rain"]');
     await x.done(); // step 1: rain + narration together
@@ -94,7 +94,7 @@ const { setup } = require('./lib');
     assert.match(await p.textContent('.gtitle'), /Step 1/);
     // now build nine steps
     const lines = ['One.', 'Two.', 'Three.', 'Four.', 'Five.', 'Six.', 'Seven.', 'Eight.'];
-    await x.opt('Change the scene');
+    await x.opt('Mood');
     await x.opt('The weather');
     await p.click('[data-mark="weather=rain"]');
     await x.done();
@@ -208,9 +208,9 @@ const { setup } = require('./lib');
     await dragWs('#wsStage .ent.hero', 6, 5.4);
     await x.done();
     await p.fill('#wsName', 'The river crossing');
-    await x.opt('Change the scene');
-    await x.opt('The place');
-    await p.click('[data-mark="backdrop=b:hall"]');
+    await x.opt('Mood');
+    await x.opt('The weather');
+    await p.click('[data-mark="weather=fog"]');
     await x.done();
     await p.click('#wsUndo');
     await p.click('button[title^="Redo"]'); // undo and redo work on everything here
@@ -250,7 +250,7 @@ const { setup } = require('./lib');
     assert.equal(saved.length, 2);
     assert.equal(saved[0].name, 'The river crossing');
     assert(saved[0].scene.level && saved[0].scene.entities.some((e) => e.solid));
-    await x.opt('Change the scene');
+    await x.opt('Mood');
     assert.match(await p.textContent('.gopt:has-text("Go to a scene from the map")'), /2 on the map/);
     await p.click('.gback');
     await toPlayer();

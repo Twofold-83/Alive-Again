@@ -2,7 +2,7 @@
 import { isDoll, poseEditor } from '../../core/dolls.js';
 import { PIXEL, pixelInfo, CUSTOM, catsWithOwn, OWN } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
-import { FX, EMOTES } from '../../shared/options.js';
+import { FX, EMOTES, LIGHTS } from '../../shared/options.js';
 import { G, buildGuided, short } from '../guided.js';
 import { glyphNode } from '../../stage/render.js';
 import { openSpriteEditor, forgetOwn } from '../../build/spriteed.js';
@@ -73,6 +73,7 @@ export function screenThing(kit) {
     lookRow(),
     !sel.tie &&
       h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, 'Behind all'), lay(0, 'By position'), lay(1, 'In front')),
+    h('div', { class: 'row' }, pickSel([['', 'No light'], ...LIGHTS.map((l) => [l[0], l[1]])], 'glow', 'Light')),
     h('div', { class: 'row' }, pickSel(FX, 'fx', 'Effect'), pickSel([['', 'No emote'], ...EMOTES.map((e) => [e, e])], 'emote', 'Emote')),
     viewRow(),
     h(

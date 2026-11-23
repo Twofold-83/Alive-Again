@@ -9,7 +9,7 @@ const path = require('path');
 module.exports = (kit) => {
   const out = {};
   const X = require('./_env-city-kit.js')(kit, out);
-  for (const part of ['street', 'urban', 'basement']) {
+  for (const part of ['street', 'street2', 'urban', 'urban2', 'basement', 'basement2']) {
     const f = path.join(__dirname, `_env-city-${part}.js`);
     if (fs.existsSync(f)) require(f)(X);
   }

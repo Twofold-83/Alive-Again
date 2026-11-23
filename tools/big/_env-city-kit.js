@@ -137,12 +137,18 @@ module.exports = (kit, out) => {
   };
   /** Write s at x, y (top left) in the 3 x 5 font; returns the x after the last letter. `only` = which letters to draw. */
   function txt(c, x, y, s, col, o = {}) {
-    const sp = o.sp == null ? 1 : o.sp;
+    const sp = o.sp == null ? 1 : o.sp,
+      k = o.k || 1;
     [...s].forEach((ch, i) => {
       const g = FONT[ch];
       if (g && (!o.only || o.only(i, ch)))
-        for (let j = 0; j < 15; j++) if (g[j] === '1') c.set(x + (j % 3), y + ((j / 3) | 0), typeof col === 'function' ? col(i, ch) : col);
-      x += ch === ' ' ? 2 : 3 + sp;
+        for (let j = 0; j < 15; j++)
+          if (g[j] === '1') {
+            const px = x + (j % 3) * k,
+              py = y + ((j / 3) | 0) * k;
+            c.rect(px, py, px + k - 1, py + k - 1, typeof col === 'function' ? col(i, ch) : col);
+          }
+      x += ch === ' ' ? 2 * k : (3 + sp) * k;
     });
     return x;
   }
@@ -374,7 +380,7 @@ module.exports = (kit, out) => {
 
   return {
     ...kit, D, L, T, setCat, dots, pat, flip, mir, panel, legs, sideBox, txt, scribble, wheel, ring, bricks, planks, hazard, cobweb, tins, bottles,
-    litter, flame, smoke, pool, carSide, carFront, TINS, BOTTLES,
+    litter, flame, smoke, pool, carSide, carFront, TINS, BOTTLES, POLE: C.iron, DARK: hex('#17151c'),
     TYRE, CONC, CONCD, TARMAC, GLASSD, LAMP, AMBER, REDL, GREENL, BLUEL, CARD, CARDD, BAG, DIRTW, WATER, WATERL, SMOKE,
   };
 };

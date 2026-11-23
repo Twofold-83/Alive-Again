@@ -191,7 +191,36 @@ module.exports = (kit) => {
   function folds(c, x0, y0, x1, y1, col, step = 3, off = 0) {
     for (let x = x0 + off; x <= x1; x += step) c.col(x, y0, y1, col);
   }
-  const T = { ...P, D, L, dots, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds };
+  const BOOKS = [C.wine, C.navy, C.forest, C.mustard, C.slate, C.plum, C.teal, C.parchment, C.rust, C.black];
+  /** A row of book spines standing on yb, at most mh tall; fill < 1 leaves gaps. */
+  function books(c, x0, x1, yb, mh, seed, fill = 1) {
+    const r = rnd(seed);
+    let x = x0;
+    while (x <= x1) {
+      if (r() > fill) {
+        x += 1 + ((r() * 3) | 0);
+        continue;
+      }
+      const w = r() < 0.35 ? 2 : 1,
+        h = mh - ((r() * 3) | 0),
+        col = BOOKS[(r() * BOOKS.length) | 0],
+        xe = Math.min(x1, x + w - 1);
+      c.rect(x, yb - h + 1, xe, yb, col);
+      if (h > 3) c.row(yb - h + 2, x, xe, L(col));
+      x = xe + 1;
+    }
+  }
+  /** A lying picture stood on end, or the other way: draws fn on a w x h canvas and turns it a quarter onto c. */
+  function turned(c, w, h, fn, right = false, ox = 0, oy = 0) {
+    const t = canvas(w, h);
+    fn(t);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const p = t.get(x, y);
+        if (p) right ? c.set(ox + h - 1 - y, oy + x, p) : c.set(ox + y, oy + w - 1 - x, p);
+      }
+  }
+  const T = { ...P, D, L, dots, books, turned, canvas, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds };
 
   const parts = [
     ['env-hospital', 'Hospital', ['hospital-a', 'hospital-b']],

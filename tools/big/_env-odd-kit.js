@@ -146,7 +146,8 @@ module.exports = (kit) => {
     }
   }
   /** A cobweb in a corner at x, y spreading sx, sy. */
-  function cobweb(c, x, y, sx, sy, n, col = C.ash) {
+  function cobweb(c, x, y, sx, sy, n, col = C.ash, free = false) {
+    if (free) for (let i = 0; i < n; i++) for (let j = 0; i + j < n; j++) c.set(x + sx * i, y + sy * j, hex('#4f4d50'));
     for (let i = 0; i < n; i++) {
       c.set(x + sx * i, y + sy * i, col);
       if (i % 2 === 0 || i < 3) c.set(x + sx * i, y, col);

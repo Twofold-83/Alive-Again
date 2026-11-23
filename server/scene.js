@@ -1,6 +1,6 @@
 /* What the server accepts as a scene: every field a client sends is checked and cut to size here.
  * The shape of a scene itself is defined once, for browser and server, in public/shared/scene-model.js. */
-import { FEELS } from '../public/shared/options.js';
+import { FEELS, LIGHTS } from '../public/shared/options.js';
 import { cleanBattle } from '../public/shared/battle.js';
 import { MAX_ENTITIES, playerFields } from '../public/shared/scene-model.js';
 import crypto from 'node:crypto';
@@ -141,6 +141,7 @@ export function cleanScene(s, prev, inner) {
       view: e.view === 'side' ? 'side' : '', // seen from the other side
       used: !!e.used || e.view === 'used', // after someone used it
       near: !!e.near,
+      glow: LIGHTS.some((l) => l[0] === e.glow) ? e.glow : '',
     });
   }
   const drawing = [];
@@ -164,6 +165,7 @@ export function cleanScene(s, prev, inner) {
     entities,
     drawing,
     weather: str(s.weather, 12),
+    dark: Math.round(num(s.dark, 0, 3, 0)),
     tracks,
     burst: str(s.burst, 12),
     sfx: str(s.sfx, 12),

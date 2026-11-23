@@ -1,7 +1,8 @@
 /* Director screens about the scene as a whole: moments and sounds, place, weather, music, title cards, narration, drawing, camera. */
 import { SFX, SFX_GROUPS, MOODS } from '../../core/audio.js';
 import { h, clamp, add } from '../../core/dom.js';
-import { BURSTS, WEATHER } from '../../shared/options.js';
+import { BURSTS, WEATHER, LIGHTS, DARKNESS } from '../../shared/options.js';
+import { newEntity, freeSpot } from '../../shared/scene-model.js';
 import { G, short } from '../guided.js';
 import { BACKDROPS, backdropCss } from '../../core/catalog.js';
 import { glyphNode } from '../../stage/render.js';
@@ -38,14 +39,19 @@ export function screenMoment(kit) {
 /* ================= scene ================= */
 export function screenScene(kit) {
   const { p, c, d, S, ws, enter, done, head, opt } = kit;
-  head('Change what about the scene?');
+  head('Mood', 'Light and dark, weather, music: how the place feels.');
   add(
     p,
     h(
       'div',
       { class: 'gopts' },
       !ws && opt('map', 'Go to a scene from the map', `${(S.scenes || []).length} on the map`, () => enter('scene:prepared')),
-      opt('painting', 'The place', 'A new backdrop', () => enter('scene:place')),
+      opt(
+        'light-bulb',
+        'Light and dark',
+        d.dark ? DARKNESS[d.dark][1] + ', ' + d.entities.filter((e) => e.glow).length + ' lights' : 'A dark room, lamps, fire, neon',
+        () => enter('scene:light'),
+      ),
       ws &&
         S.rules.type === 'adventure' &&
         opt('door', 'Add an exit', 'A way out to another prepared scene', () => {
@@ -495,4 +501,91 @@ export function screenRoom(kit) {
         : h('small', { class: 'dim' }, 'Nothing yet. A saved room stays on this device and can be brought on stage in any story.'),
     ),
   );
+}
+
+/* ================= light and dark: how dark the place is, and what shines in it ================= */
+export function screenSceneLight(kit) {
+  const { p, c, d, head, lab, doneBtn } = kit;
+  head('Light and dark', 'Darken the place, then put light sources into it. Any thing can shine: press it on the stage and choose its light.');
+  const lit = d.entities.filter((e) => e.glow);
+  add(
+    p,
+    h('small', { class: 'dim' }, 'How dark is it?'),
+    h(
+      'div',
+      { class: 'row', id: 'darkRow' },
+      DARKNESS.map(([n, label]) =>
+        h(
+          'button',
+          {
+            'data-dark': n,
+            class: 'grow' + ((d.dark || 0) === n ? ' on' : ''),
+            onclick: () => {
+              d.dark = n;
+              c.changedQuiet();
+              c.rebuild();
+            },
+          },
+          label,
+        ),
+      ),
+    ),
+    h('small', { class: 'dim' }, 'Add a light source'),
+    h(
+      'div',
+      { class: 'lightgrid', id: 'lightGrid' },
+      LIGHTS.map(([id, label, col]) =>
+        h(
+          'button',
+          {
+            'data-light': id,
+            onclick: () => {
+              const e = c.addEntity(
+                'p:' +
+                  (id === 'candle'
+                    ? 'candle-stub'
+                    : id === 'fire'
+                      ? 'campfire'
+                      : id === 'screen'
+                        ? 'monitor-text'
+                        : id === 'moon'
+                          ? 'window-frame-dark'
+                          : 'lamp-bare-bulb'),
+              );
+              if (e) {
+                e.glow = id;
+                Object.assign(e, freeSpot(d));
+              }
+              c.changedQuiet();
+              c.rebuild();
+            },
+          },
+          h('i', { style: `background:${col};box-shadow:0 0 10px 3px ${col}` }),
+          h('span', {}, label),
+        ),
+      ),
+    ),
+    lit.length > 0 && h('small', { class: 'dim' }, 'Shining now (drag them on the stage)'),
+    lit.map((e) =>
+      h(
+        'div',
+        { class: 'row' },
+        h('span', { class: 'grow' }, lab(e), h('small', { class: 'dim' }, ' — ' + (LIGHTS.find((l) => l[0] === e.glow) || [0, ''])[1])),
+        h(
+          'button',
+          {
+            title: 'Put this light out',
+            onclick: () => {
+              e.glow = '';
+              c.changedQuiet();
+              c.rebuild();
+            },
+          },
+          'Put out',
+        ),
+      ),
+    ),
+    doneBtn(() => (d.dark ? `It is ${DARKNESS[d.dark][1].toLowerCase()} now` : 'The light changes')),
+  );
+  void newEntity;
 }

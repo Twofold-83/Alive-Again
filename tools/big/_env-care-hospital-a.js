@@ -338,35 +338,40 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
     // a drip stand with a bag of saline
     const stand = (side) => (c, u) => {
       const b = c.h - 2,
-        m = c.w >> 1;
+        m = side ? 4 : 7;
       c.col(m, 3, b - 2, STEEL);
       c.row(b - 2, m - 3, m + 3, STD);
       caster(c, m - 4, b);
       caster(c, m + 3, b);
-      if (side) c.rect(m - 1, 2, m + 1, 2, STEEL);
+      if (side) c.rect(m - 1, 2, m + 2, 2, STEEL);
       else {
-        c.row(2, m - 3, m + 3, STEEL);
-        dots(c, STEEL, [m - 3, 3, m + 3, 3]);
+        c.row(2, m - 4, m + 4, STEEL);
+        dots(c, STEEL, [m - 4, 3, m + 4, 3]);
       }
-      const x = side ? m : m - 3;
-      c.rect(x - 1, 4, x + 1, 10, u ? hex('#8a9a98') : C.glassLight); // the bag
+      const x = side ? m + 1 : m - 5; // the bag, four wide from x
       if (u) {
-        c.col(x, 5, 9, hex('#6f7f7d')); // run dry, collapsed
-        c.col(x + (side ? 1 : -1), 11, b - 9, C.glass);
-        c.line(x + (side ? 1 : -1), b - 9, x + (side ? 3 : -1), b - 4, C.glass); // the line hanging loose
-        c.set(x + (side ? 3 : -1), b - 3, hex('#b0b4b8'));
-        puddle(c, x - 1 + (side ? 3 : -1), x + 2 + (side ? 3 : 1), b, WATD);
+        c.rect(x, 4, x + 2, 11, hex('#b9c4bc')); // run dry and gone flat
+        c.col(x + 1, 5, 11, hex('#7f8d88'));
+        c.set(x, 11, hex('#7f8d88'));
+        c.col(x + 2, 12, b - 10, C.glassLight);
+        c.line(x + 2, b - 10, x + 4, b - 3, C.glassLight); // the line pulled out, hanging loose
+        c.set(x + 4, b - 2, STL);
+        puddle(c, x + 3, x + 8, b, WATD);
+        dots(c, BLOOD, [x + 5, b - 1]);
       } else {
-        c.rect(x - 1, 7, x + 1, 10, WAT);
-        c.set(x, 5, L(C.glassLight));
-        c.col(x, 11, 14, C.glass);
-        c.rect(x, 15, x, 16, C.glassLight); // drip chamber
-        c.col(x, 17, 22, C.glass);
-        c.line(x, 22, m, 25, C.glass); // coiled round the pole
-        c.set(m - 1, 26, C.glass);
+        c.rect(x, 4, x + 3, 12, hex('#c4d2cc'));
+        c.rect(x, 7, x + 3, 12, WAT);
+        c.row(7, x, x + 3, L(WAT));
+        c.col(x, 4, 12, L(hex('#c4d2cc')));
+        c.rect(x + 1, 9, x + 2, 10, SHEET); // label
+        c.col(x + 2, 13, 15, C.glassLight);
+        c.rect(x + 2, 16, x + 2, 17, SHEET); // drip chamber
+        c.col(x + 2, 18, 23, C.glassLight);
+        c.line(x + 2, 23, m, 26, C.glassLight); // wound round the pole
+        c.set(m - 1, 27, C.glassLight);
       }
     };
-    add('hospital-drip-stand-saline', 'drip stand saline bag iv pole infusion on wheels clear', false, { m: [13, 38, stand(false)], s: [11, 38, stand(true)] });
+    add('hospital-drip-stand-saline', 'drip stand saline bag iv pole infusion on wheels clear', false, { m: [15, 38, stand(false)], s: [14, 38, stand(true)] });
   }
   {
     // a folding wheelchair, seen from the side and from the front
@@ -716,9 +721,9 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
   {
     const front = (c, u) => {
       const b = c.h - 2;
-      c.col(2, b - 26, b - 3, STEEL); // trolley frame
-      c.col(9, b - 26, b - 3, STEEL);
-      c.row(b - 27, 2, 9, STEEL);
+      c.col(3, b - 27, b - 18, STEEL); // the trolley's handle behind it
+      c.col(8, b - 27, b - 18, STEEL);
+      c.row(b - 27, 3, 8, STL);
       c.row(b - 2, 2, 9, STD);
       cylinder(c, 4, b - 3, 22);
       c.row(b - 12, 3, 8, STD); // strap

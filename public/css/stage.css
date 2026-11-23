@@ -208,3 +208,7 @@
 .actlab { align-self: flex-start; font-weight: normal; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
 .poser .feels button.on { background: var(--accent); color: #000; }
 #titleScreen.pic { background-size: cover; background-position: center; image-rendering: auto; } #titleScreen.pic h2, #titleScreen.pic p { text-shadow: 0 2px 0 #000, 0 0 12px #000; }
+.stage .darkov, .stage .glowov { position: absolute; inset: 0; pointer-events: none; z-index: 6000; }
+.stage .glowov { mix-blend-mode: screen; z-index: 6001; }
+.stage .glowov.flicker { animation: glowflick 1.7s steps(6) infinite; }
+@keyframes glowflick { 0%, 100% { opacity: 1; } 20% { opacity: .82; } 45% { opacity: .95; } 60% { opacity: .78; } 80% { opacity: .9; } }

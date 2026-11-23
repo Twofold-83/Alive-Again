@@ -265,12 +265,11 @@ module.exports = (X) => {
         col = BENCHG;
       c.rect(2, 9, 29, b, col);
       c.col(2, 9, b, L(col));
-      c.rect(1, 2, 30, 8, D(col));
-      c.row(2, 1, 30, col);
-      c.row(8, 1, 30, DARK);
-      c.rect(7, 3, 24, 7, C.bone);
+      c.rect(1, 1, 30, 9, D(col));
+      c.row(1, 1, 30, col);
+      c.row(9, 1, 30, DARK);
+      c.rect(6, 2, 25, 8, C.bone);
       txt(c, 9, 3, 'NEWS', C.wine);
-      c.set(8, 5, C.wine);
       c.rect(4, 11, 27, 27, DARK);
       panel(c, 4, 29, 27, b - 2, col);
       c.rect(8, 31, 14, b - 4, C.paper);
@@ -305,9 +304,9 @@ module.exports = (X) => {
       const b = c.h - 2,
         col = BENCHG;
       sideBox(c, 2, 9, 14, b, col);
-      c.rect(1, 2, 16, 8, D(col));
-      c.row(2, 1, 16, col);
-      c.row(8, 1, 16, DARK);
+      c.rect(1, 1, 16, 9, D(col));
+      c.row(1, 1, 16, col);
+      c.row(9, 1, 16, DARK);
       panel(c, 4, 13, 10, b - 3, col);
       c.set(9, 25, C.brass);
       c.rect(15, 27, 16, 28, C.woodLight);
@@ -316,8 +315,8 @@ module.exports = (X) => {
         c.col(16, 12, 14, LAMP);
         c.row(10, 15, 16, C.steel);
       }
-      c.rect(5, 4, 12, 7, C.bone);
-      scribble(c, 6, 5, 11, 6, C.wine, 1);
+      c.rect(4, 2, 12, 8, C.bone);
+      scribble(c, 5, 4, 11, 6, C.wine, 1);
     },
   });
   T('headline-board-papers', 'newspaper stand headline board bundle of papers evening news', {
@@ -635,9 +634,9 @@ module.exports = (X) => {
     w: 26, h: 24, solid: true, base: 'side',
     sw: 48,
     s(c, u) {
-      const g = carSide(c, { col: DIRTW, lit: u });
-      c.rect(g.c0 + 4, g.wy + 3, g.c1 - 3, g.wy + 7, NAVY);
-      txt(c, g.c0 + 5, g.wy + 3, 'POLICE', C.bone, { sp: 0 });
+      const g = carSide(c, { col: DIRTW, lit: u, wheels: [8, 39] });
+      c.rect(11, g.wy + 1, 36, g.wy + 5, NAVY);
+      txt(c, 12, g.wy + 1, 'POLICE', C.bone);
       c.rect(g.mid - 4, g.ry - 2, g.mid + 4, g.ry - 1, C.ironDark);
       c.rect(g.mid - 4, g.ry - 2, g.mid - 1, g.ry - 1, u ? hex('#7fa8e8') : hex('#2c3c66'));
       c.rect(g.mid + 1, g.ry - 2, g.mid + 4, g.ry - 1, u ? hex('#e8605a') : hex('#662c2c'));

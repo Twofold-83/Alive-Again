@@ -54,7 +54,8 @@ export function newEntity(asset, props = {}) {
     layer: 0,
     view: '', // which way a thing is seen: '' as drawn, 'side' from the other side
     used: false,
-    near: false, // a trap: if the hero walks close, "something happened" and the turn goes to the Director // shown as it looks after someone used it (an open door, a lit lamp)
+    near: false,
+    glow: '', // a light source (see LIGHTS in options.js): it shines where the thing stands // a trap: if the hero walks close, "something happened" and the turn goes to the Director // shown as it looks after someone used it (an open door, a lit lamp)
     feel: '', // what a paper-doll character feels (see FEELS): it shows on the face
     pose: null, // a paper-doll character's joints: [head, left arm, right arm, left leg, right leg] in degrees
     ...props,
@@ -65,6 +66,7 @@ export function newScene() {
     backdrop: 'b:room',
     mood: 'm:none',
     weather: '',
+    dark: 0, // how dark the place is, 0 (lit) to 3 (pitch black): light sources cut through it
     drawing: [],
     level: null,
     exits: [],

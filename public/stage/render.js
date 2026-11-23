@@ -3,6 +3,7 @@
 import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
 import { spriteView, assetLabel, backdropCss, pixelInfo, CUSTOM, viewKey, assetUrl } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
+import { LIGHTS } from '../shared/options.js';
 
 /** Fill in fields that older saved scenes do not have. */
 /** How big a thing of scale 1 is drawn, in units of --u (an eighth of the stage width): a person is a tile and a half tall. */
@@ -122,6 +123,8 @@ export function renderStage(root, scene, o = {}) {
         draw,
         h('div', { class: 'marks' }),
         h('div', { class: 'ents' }),
+        h('div', { class: 'darkov' }),
+        h('div', { class: 'glowov' }),
         h('div', { class: 'weather' }),
         h('div', { class: 'dest' }),
         h('div', { class: 'camframe' }),
@@ -140,7 +143,7 @@ export function renderStage(root, scene, o = {}) {
     fit();
   }
   const [world, actEl, narrEl, cardEl, diceEl, awardEl, , , bubbles] = root.children;
-  const [bg, level, draw, marks, ents, weather, destEl, camEl] = world.children;
+  const [bg, level, draw, marks, ents, darkEl, glowEl, weather, destEl, camEl] = world.children;
   const code = o.code || '';
   const css = backdropCss(code, scene.backdrop);
   if (bg._css !== css) {
@@ -148,6 +151,31 @@ export function renderStage(root, scene, o = {}) {
     bg.style.background = css;
   }
   weather.className = 'weather' + (scene.weather ? ' w-' + scene.weather : '');
+  /* light and dark: the dark lies over the room, every light source cuts a soft hole in it and adds its colour */
+  const lights = scene.entities
+    .filter((e) => e.glow && !e.gone)
+    .map((e) => {
+      const L = LIGHTS.find((l) => l[0] === e.glow),
+        at = e; // where it stands (a held light shines from its own last place)
+      return L && { x: at.x * 100, y: (at.y - 0.07 * e.scale) * 100, col: L[2], r: L[3] * Math.max(0.6, e.scale), flick: L[4] };
+    })
+    .filter(Boolean);
+  const sig = (scene.dark || 0) + '|' + lights.map((l) => `${l.x.toFixed(1)},${l.y.toFixed(1)},${l.col},${l.r}`).join(';');
+  if (root._light !== sig) {
+    root._light = sig;
+    const dark = [0, 0.45, 0.72, 0.93][scene.dark || 0];
+    darkEl.style.background = dark ? `rgba(4, 4, 12, ${dark})` : '';
+    const holes = lights
+      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r}) at ${l.x}% ${l.y}%, transparent 0, transparent 30%, #000 100%)`)
+      .join(',');
+    darkEl.style.maskImage = darkEl.style.webkitMaskImage = dark && holes ? holes : '';
+    darkEl.style.maskComposite = 'intersect';
+    darkEl.style.webkitMaskComposite = 'source-in';
+    glowEl.style.background = lights
+      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r * 0.9}) at ${l.x}% ${l.y}%, ${l.col}66 0, ${l.col}22 45%, transparent 100%)`)
+      .join(',');
+    glowEl.className = 'glowov' + (lights.some((l) => l.flick) ? ' flicker' : '');
+  }
 
   // camera: zoom the world onto a point (shown as a frame instead while the Director edits)
   const cam = scene.cam && scene.cam.z > 1 ? scene.cam : null;

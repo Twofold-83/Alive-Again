@@ -744,14 +744,14 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
       p: '#221c1c',
       m: '#22252b', // marker pen
     });
-    const tl = hex('#7c897f'),
-      tlL = hex('#8a978c'),
-      grout = hex('#5c6862'),
-      band = hex('#34504e'),
-      bandG = hex('#263b3a'),
-      ca = hex('#5b4742'),
-      cb = hex('#655a4f'),
-      cg = hex('#463b3a'),
+    const tl = hex('#5f6c66'),
+      tlL = hex('#6b7871'),
+      grout = hex('#4a5651'),
+      band = hex('#2c4543'),
+      bandG = hex('#213634'),
+      ca = hex('#5d4944'),
+      cb = hex('#685b50'),
+      cg = hex('#483d3b'),
       cement = hex('#3a3837');
     const wall = (c) => {
       each(c, (x, y) => {
@@ -764,8 +764,6 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
     };
     const floor = (c) => {
       each(c, (x, y) => (x % 4 === 3 || y % 4 === 3 ? cg : ((x >> 2) + (y >> 2)) % 2 ? ca : cb));
-      dots(c, hex('#6c6155'), [[4, 0], [12, 8]]);
-      dots(c, hex('#54413c'), [[1, 1], [9, 9]]);
     };
     set('toilet', 'public toilet lavatory', {
       top: (c) => {
@@ -1165,12 +1163,12 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
           'hearthstone',
           'hearth stone flagstone slab',
           (c) => {
-            fill(c, p.s);
-            c.frame(0, 0, 15, 15, p.t);
-            c.row(1, 1, 14, p.S);
-            c.col(1, 1, 14, p.S);
-            speck(c, p.t, 7, 8, 2, 2, 13, 13);
-            speck(c, p.S, 5, 12, 2, 2, 13, 13);
+            fill(c, hex('#514e4d'));
+            c.frame(0, 0, 15, 15, hex('#3d3a3a'));
+            c.row(1, 1, 14, hex('#5e5b59'));
+            c.col(1, 1, 14, hex('#5e5b59'));
+            speck(c, hex('#444140'), 7, 8, 2, 2, 13, 13);
+            speck(c, hex('#5e5b59'), 5, 12, 2, 2, 13, 13);
             dots(c, p.d, [[10, 12], [11, 12], [11, 13]]);
           },
           true,
@@ -1579,7 +1577,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
   {
     const p = pal({
       a: '#5a5739', // the wallpaper
-      A: '#737048',
+      A: '#7a774c',
       z: '#434129',
       L: '#817e58', // where it bulges
       D: '#39372a',
@@ -2011,9 +2009,9 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
   {
     const p = pal({
       k: '#101014',
-      a: '#6f6d5c', // woodchip paper, painted
-      A: '#7a7866',
-      z: '#646252',
+      a: '#676554', // woodchip paper, painted
+      A: '#72705e',
+      z: '#5c5a4b',
       w: '#b0ad9c', // white plastic, gloss paint
       W: '#c4c1b0',
       v: '#8d8a7a',
@@ -2041,7 +2039,11 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
       speck(c, p.A, 18, 5);
       speck(c, p.z, 12, 10);
     };
-    const floor = (c) => each(c, (x, y) => ((x * 3 + y * 5) % 7 === 0 ? cpL : (x * 5 + y * 3) % 11 === 0 ? cpD : cp));
+    const floor = (c) => {
+      fill(c, cp);
+      speck(c, cpL, 26, 6);
+      speck(c, cpD, 18, 12);
+    };
     set('modern', 'modern home eighties nineties', {
       top: (c) => {
         fill(c, hex('#17161a'));
@@ -2104,7 +2106,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
               '..fgggggfggggf..',
               '..fggGggfggggf..',
               '..fgGGggfggggf..',
-              '..fgGggggggggf'.slice(0, 14) + '..',
+              '..fgGgggfggggf..',
               '..fgggggfggggf..',
               '..ffffffffffff..',
               '.vwwwwwwwwwwwwv.',
@@ -2439,6 +2441,489 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
                 d = u + w;
               return d < 2.5 ? hex('#7a3a2a') : d < 4.5 ? hex('#8a7848') : d < 6.5 ? hex('#3a3330') : Math.max(u, w) > 5 && d > 9.5 ? hex('#7a3a2a') : hex('#8a7848');
             });
+          },
+        ],
+      ],
+    });
+  }
+
+  /* ================= 12. childroom: a child's room where something happened ================= */
+  {
+    const p = pal({
+      k: '#0e0d12',
+      a: '#56627a', // wallpaper
+      A: '#66728a',
+      s: '#96906c', // its stars
+      n: '#171b2a', // night
+      N: '#262c40',
+      f: '#a5a394', // white gloss
+      F: '#bfbcab',
+      v: '#7f7d70',
+      c: '#86666e', // curtains
+      C: '#9c7a80',
+      w: '#b8b4a0', // paper
+      W: '#cecab6',
+      r: '#a03a34', // crayons
+      b: '#3a5a8a',
+      y: '#b89a3a',
+      g: '#4a7a4a',
+      d: '#5f4634', // wood
+      D: '#735842',
+      e: '#3f2e24',
+      o: '#c8b46a', // a night-light
+      O: '#e0d090',
+      p: '#353130', // bare plaster
+      P: '#454140',
+      m: '#b4b4a4',
+      q: '#343440', // pencil
+    });
+    const cp = hex('#786560'),
+      cpL = hex('#857169'),
+      cpD = hex('#6b5954');
+    const star = (c, x, y) => {
+      dots(c, p.s, [[x, y]]);
+      dots(c, hex('#767a78'), [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]);
+    };
+    const wall = (c) => {
+      fill(c, p.a);
+      star(c, 3, 3);
+      star(c, 11, 11);
+      art(c, 8, 1, ['.A.A.', '.A.A.', '.AAA.', 'AAAAA', '.AAA.'], p);
+      art(c, 0, 9, ['.A.A.', '.A.A.', '.AAA.', 'AAAAA', '.AAA.'], p);
+      dots(c, hex('#4c586e'), [[9, 4], [11, 4], [1, 12], [3, 12]]);
+      dots(c, p.A, [[6, 8], [14, 6], [7, 14]]);
+      dots(c, hex('#4c586e'), [[13, 3], [5, 12]]);
+    };
+    const floor = (c) => {
+      each(c, (x, y) => {
+        const u = (x + 4) % 8,
+          w = (y + 4) % 8,
+          d = Math.abs(u - 3.5) + Math.abs(w - 3.5);
+        return d === 3 ? cpL : d < 1.5 ? cpD : cp;
+      });
+      dots(c, cp, [[4, 1], [11, 4], [2, 12], [12, 10], [9, 9]]);
+    };
+    const glow = (c, x0, y0, x1, y1, col, t) => {
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (c.get(x, y)) c.set(x, y, blend(c.get(x, y), col, t));
+    };
+    set('childroom', 'child room children bedroom kid', {
+      top: (c) => {
+        fill(c, hex('#15131a'));
+        speck(c, hex('#1b1921'), 7, 8);
+        dots(c, hex('#100f14'), [[5, 4], [12, 11]]);
+      },
+      wallWords: 'wallpaper small stars rabbits',
+      wall,
+      details: [
+        [
+          'window',
+          'window night outside curtain moon',
+          (c) =>
+            art(c, 0, 1, [
+              '.vvvvvvvvvvvvvv.',
+              '.CcFFFFFFFFFFcC.',
+              '.CcFnnnnFnnmFcC.',
+              '.CcFnnnnFnmmFc..',
+              '.CcFnnnnFnnnF...',
+              '.cCFFFFFFFFFF...',
+              '.cCFnnnnFnnnF...',
+              '.CcFnNnnFnnnF...',
+              '.CcFNNNnFnnnFc..',
+              '.CcFFFFFFFFFFcC.',
+              '.cvvvvvvvvvvvv..',
+              '.c..............',
+            ], p),
+        ],
+        [
+          'wardrobe',
+          'wardrobe door ajar dark eyes',
+          (c) =>
+            art(c, 0, 0, [
+              '.eeeeeeeeeeeeee.',
+              '.eDDDDDDekkDDDe.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDemkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDdddyDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDddddDekkDdde.',
+              '.eDDDDDDekkDDDe.',
+              '.eeeeeeeekkeeee.',
+            ], p),
+        ],
+        [
+          'drawings',
+          'drawings pinned up crayon pictures',
+          (c) => {
+            art(c, 1, 1, ['WWWWWWW', 'WyWWWWW', 'WWWrrWW', 'WWrrrrW', 'WWbWWbW', 'WWbbbbW', 'gggggggg'.slice(0, 7)], p);
+            art(c, 9, 4, ['wwwwww', 'wqqwqw', 'wwqqww', 'wqqqqw', 'wwqqww', 'wqwwqw', 'wqwwqw', 'wwwwww'], p);
+            art(c, 3, 10, ['WWWWW', 'WbWbW', 'WWrWW', 'WWWWW'], p);
+            dots(c, p.r, [[4, 1], [12, 4], [5, 10]]);
+          },
+        ],
+        [
+          'nightlight',
+          'night light shelf glow toy',
+          (c) => {
+            glow(c, 1, 2, 9, 9, p.o, 0.14);
+            glow(c, 2, 3, 8, 8, p.o, 0.16);
+            art(c, 0, 4, [
+              '....oo..........',
+              '...oOOo.........',
+              '...oOOo...d.d...',
+              '...oOOo...ddd...',
+              '....vv....dkd...',
+              '....vv...ddddd..',
+              '.DDDDDDDDDDDDDD.',
+              '.dddddddddddddd.',
+              '..e..........e..',
+            ], p);
+          },
+        ],
+        [
+          'height',
+          'height marks pencil growing',
+          (c) => {
+            for (const [y, n] of [[14, 5], [12, 4], [10, 6], [9, 4], [7, 5]]) c.row(y, 7, 6 + n, p.q);
+            c.col(6, 6, 15, hex('#4a566c'));
+            dots(c, p.q, [[13, 13], [13, 11], [14, 9], [13, 7], [14, 7]]);
+            c.row(1, 7, 12, p.r);
+            dots(c, p.r, [[14, 1], [14, 0]]);
+          },
+        ],
+        [
+          'peeling',
+          'peeling wallpaper corner something underneath scratches',
+          (c) => {
+            art(c, 4, 0, [
+              'pppppppppppp',
+              '.ppPpppqppqp',
+              '.pppqppqppqp',
+              '..ppqppqpPqp',
+              '..ppqqqqqqqp',
+              '...pqppqppqp',
+              '...ppppppppp',
+              '....pppmkppp',
+              '....ppppmppp',
+              '.....WWppppp',
+              '.....wWWpppp',
+              '......wWWppp',
+              '.......wWWpp',
+              '........wwWp',
+            ], p);
+          },
+        ],
+      ],
+      floorWords: 'soft carpet faded pattern',
+      floor,
+      variants: [
+        [
+          'playmat',
+          'play mat road piece toy',
+          (c) => {
+            c.rect(0, 1, 15, 14, hex('#4a6a48'));
+            c.rect(0, 4, 15, 11, hex('#4e4e56'));
+            c.row(4, 0, 15, hex('#8a8a80'));
+            c.row(11, 0, 15, hex('#8a8a80'));
+            for (let x = 1; x < 16; x += 5) c.rect(x, 7, x + 2, 8, hex('#b0ac98'));
+            dots(c, hex('#5c8058'), [[3, 2], [11, 13], [7, 2]]);
+            dots(c, p.r, [[13, 2]]);
+          },
+        ],
+        [
+          'crayon',
+          'crayon marks scribble',
+          (c) => {
+            art(c, 2, 2, ['r.....r', '.r...r..', '..r.r...', '...r....', '..r.r...', '.r...r..'], p);
+            art(c, 6, 9, ['b.b.b.b.', '.b.b.b.b', 'b.b.b.b.'], p);
+            art(c, 11, 3, ['.yy.', 'y..y', 'y..y', '.yy.'], p);
+            art(c, 2, 12, ['yyy'], p);
+          },
+        ],
+        [
+          'stain',
+          'stain dark soaked',
+          (c) =>
+            each(c, (x, y) => {
+              const d = ((x - 7) / 5.5) ** 2 + ((y - 8) / 4.5) ** 2 + ((x * 3 + y * 5) % 6) * 0.07;
+              return d < 0.5 ? hex('#3f2428') : d < 1 ? hex('#553238') : null;
+            }),
+        ],
+      ],
+    });
+  }
+
+  /* ================= 13. gardenwall: an outdoor room inside old garden walls ================= */
+  {
+    const p = pal({
+      k: '#0c0e0b',
+      d: '#171c15',
+      l: '#2f4430', // ivy
+      L: '#40583a',
+      i: '#2a2c32', // iron
+      I: '#484b53',
+      s: '#66665f', // stone
+      S: '#7e7e75',
+      t: '#4c4c48',
+      w: '#34525f', // water
+      W: '#6a8a96',
+      b: '#44301f', // a branch
+      f: '#8a3a30', // fruit
+      F: '#a8843a',
+      o: '#4a3a2c', // a door
+      O: '#5c4a38',
+      y: '#a8965a',
+      g: '#33494d', // greenhouse glass
+      G: '#4f686c',
+      h: '#94948a',
+      q: '#2c4630',
+      e: '#463526', // earth
+      E: '#574432',
+      r: '#5a3e34', // brick
+      R: '#6a4a3c',
+      m: '#33282a',
+      v: '#8a84a0', // small flowers
+      c: '#b0aa94',
+    });
+    const brick2 = hex('#523830'),
+      grass = hex('#3f5936'),
+      grassL = hex('#4b6840'),
+      grassD = hex('#354e2e');
+    const wall = (c) => {
+      bricks(c, p.r, brick2, p.m, 11);
+      art(c, 9, 0, ['.lL.', 'lLLl', '.lLl', '..l.'], p);
+      art(c, 0, 9, ['Ll..', 'lLL.', 'LlLl', '.lL.', '..l.'], p);
+      dots(c, p.l, [[12, 4], [12, 5], [4, 14], [13, 12]]);
+      dots(c, p.L, [[13, 5], [5, 15]]);
+    };
+    const floor = (c) => {
+      fill(c, grass);
+      speck(c, grassL, 16, 2);
+      speck(c, grassD, 14, 7);
+      for (const [x, y] of [[2, 4], [9, 2], [13, 9], [5, 11], [10, 13]]) {
+        c.set(x, y, grassL);
+        c.set(x, y + 1, grassL);
+      }
+      for (const [x, y] of [[6, 6], [12, 4], [3, 13], [14, 14]]) {
+        c.set(x, y, grassD);
+        c.set(x, (y + 1) & 15, grassD);
+      }
+    };
+    set('gardenwall', 'walled garden outdoor', {
+      topWords: 'dark hedge night foliage surround',
+      top: (c) => {
+        fill(c, hex('#11160f'));
+        speck(c, hex('#171e14'), 10, 4);
+        dots(c, hex('#1d2619'), [[3, 5], [4, 5], [11, 12], [12, 11]]);
+      },
+      wallWords: 'old brick garden wall ivy',
+      wall,
+      details: [
+        [
+          'gate',
+          'gate wrought iron arch',
+          (c) => {
+            art(c, 0, 0, [
+              '................',
+              '.....ssssss.....',
+              '...ssSkkkkSss...',
+              '..sSkkkIkkkkSs..',
+              '..skkIkIkIkkks..',
+              '..skIkIkIkIkks..',
+              '..skIkIkIkIkks..',
+              '..sIIIIIIIIIIs..',
+              '..skIkIkIkIkks..',
+              '..skIkIkIkIkks..',
+              '..skIkIkIkIyks..',
+              '..skIkIkIkIkks..',
+              '..skIkIkIkIkks..',
+              '..sIIIIIIIIIIs..',
+              '..skIkIkIkIkks..',
+              '..tttttttttttt..',
+            ], p);
+          },
+        ],
+        [
+          'espalier',
+          'espalier fruit tree trained branches',
+          (c) =>
+            art(c, 0, 0, [
+              '.......LL.......',
+              '..l.L.lBBl.L.l..',
+              '.BBBBBBBBBBBBBB.',
+              '..f....BB...F...',
+              '.......BB.......',
+              '.L.l.L.BB.l.L.l.',
+              '.BBBBBBBBBBBBBB.',
+              '....F..BB..f....',
+              '.......BB.......',
+              '.l.L.l.BB.L.l.L.',
+              '.BBBBBBBBBBBBBB.',
+              '..f....BB....f..',
+              '.......BB.......',
+              '.......BB.......',
+              '.......BB.......',
+              '......bBBb......',
+            ], { ...p, B: hex('#75603f') }),
+        ],
+        [
+          'fountain',
+          'wall fountain mask spout basin water',
+          (c) =>
+            art(c, 0, 2, [
+              '.....ssssss.....',
+              '....sSSSSSSs....',
+              '....SkSSSSkS....',
+              '....SSSttSSS....',
+              '....sStkktSs....',
+              '.....sSWWSs.....',
+              '......sWWs......',
+              '.......WW.......',
+              '.......WW.......',
+              '..SSSSSWWSSSSS..',
+              '..swwwWWWWwwws..',
+              '..stwwwwwwwwts..',
+              '...ssssssssss...',
+              '....tttttttt....',
+            ], p),
+        ],
+        [
+          'door',
+          'door to the house lit window step',
+          (c) =>
+            art(c, 0, 0, [
+              '..ssssssssssss..',
+              '..sSSSSSSSSSSs..',
+              '..tooooooooooot'.slice(0, 14) + '..',
+              '..tOoOoOoOoOot..',
+              '..tOoyyyyoOoot..',
+              '..tOoyyyyoOoot..',
+              '..tOoyykyoOoot..',
+              '..tOoOoOoOoOot..',
+              '..tOoOoOoOoOIt..',
+              '..tOoOoOoOoOIt..',
+              '..tOoOoOoOoOot..',
+              '..tOoOoOoOoOot..',
+              '..tOoOoOoOoOot..',
+              '..toooooooooot..',
+              '.SSSSSSSSSSSSSS.',
+              '.ssssssssssssss.',
+            ], p),
+        ],
+        [
+          'greenhouse',
+          'greenhouse glass panes plants broken',
+          (c) =>
+            art(c, 0, 0, [
+              'hhhhhhhhhhhhhhhh',
+              'hgggghgggGhggggh',
+              'hgGgghggGghggggh',
+              'hGggghgGgghqgggh',
+              'hgggqhgggghqqgqh',
+              'hhhhhhhhhhhhhhhh',
+              'hgqgqhkkgghgqqqh',
+              'hqqqqhkkkghqqqqh',
+              'hqqgqhgkkghgqqgh',
+              'hqqqqhggkghqqqqh',
+              'hhhhhhhhhhhhhhhh',
+              'hqqqqhqqgqhqqqqh',
+              'hqLqqhqqqqhqqLqh',
+              'hqqqqhqLqqhqqqqh',
+              'hhhhhhhhhhhhhhhh',
+              'tttttttttttttttt',
+            ], p),
+        ],
+        [
+          'gap',
+          'broken gap hole in the wall rubble',
+          (c) => {
+            art(c, 0, 2, [
+              '......kk........',
+              '.....kkkkk......',
+              '....kkkkkkkk....',
+              '...kkkkkkkkk....',
+              '...kkkkkkkkkk...',
+              '..kkkkkkkkkkk...',
+              '..kkkkkdkkkkkk..',
+              '..kkkkddkkkkkk..',
+              '.kkkkkddkkkkkk..',
+              '.kkkkddddkkkkkk.',
+              '.kkkkddddkkkkkk.',
+              '.kRRkkdddkkrrkk.',
+              'RRrmRRkkkkRRmrr.',
+              'rrmRRrmkRRrmRRr.',
+            ], p);
+            dots(c, p.l, [[2, 6], [13, 5], [12, 4]]);
+            dots(c, hex('#6f6a50'), [[9, 8], [11, 8]]);
+          },
+        ],
+      ],
+      floorWords: 'lawn grass',
+      floor,
+      variants: [
+        [
+          'path',
+          'flagstone path stepping stones',
+          (c) => {
+            art(c, 0, 0, [
+              '................',
+              '.sssssss.SSSSS..',
+              '.sSSSSSs.Ssssst.',
+              '.sSsssst.Sssset'.slice(0, 14) + 't.',
+              '.sssssst.sssstt.',
+              '..tttttt..tttt..',
+              '................',
+              '..SSSS..sssssss.',
+              '.SsssSt.sSSSSst.',
+              '.Sssssst.sSssst.',
+              '.Sssssst.ssssst.',
+              '.ssssstt.sssstt.',
+              '..ttttt...tttt..',
+              '................',
+            ], p);
+          },
+        ],
+        [
+          'flowerbed',
+          'flower bed earth flowers',
+          (c) => {
+            c.rect(0, 1, 15, 14, p.e);
+            speck(c, p.E, 12, 3, 0, 1, 15, 14);
+            speck(c, hex('#38291e'), 8, 6, 0, 1, 15, 14);
+            c.row(1, 0, 15, hex('#38291e'));
+            for (const [x, y, k] of [[2, 4, 'v'], [7, 3, 'c'], [12, 5, 'f'], [4, 9, 'c'], [10, 10, 'v'], [14, 11, 'c'], [1, 12, 'f']]) {
+              c.set(x, y, p[k]);
+              c.set(x, y + 1, p.L);
+              c.set(x + 1, y + 2, p.l);
+              c.set(x, y + 2, p.l);
+            }
+          },
+        ],
+        [
+          'earth',
+          'bare earth patch soil',
+          (c) =>
+            each(c, (x, y) => {
+              const d = ((x - 7.5) / 6.5) ** 2 + ((y - 7.5) / 5.5) ** 2 + ((x * 7 + y * 5) % 6) * 0.08;
+              return d < 1 ? ((x * 3 + y * 7) % 9 === 0 ? p.E : (x * 5 + y * 3) % 11 === 0 ? hex('#38291e') : p.e) : null;
+            }),
+        ],
+        [
+          'leaves',
+          'fallen leaves autumn',
+          (c) => {
+            for (const [x, y, k] of [[2, 3, 0], [8, 2, 1], [12, 6, 2], [5, 8, 1], [10, 11, 0], [3, 13, 2], [14, 13, 1]]) {
+              const col = [hex('#8a5a2a'), hex('#a0803a'), hex('#6e3a26')][k];
+              c.set(x, y, col);
+              c.set(x + 1, y, col);
+              c.set(x + (k % 2), y + 1, [hex('#6e3a26'), hex('#8a5a2a'), hex('#553020')][k]);
+            }
           },
         ],
       ],

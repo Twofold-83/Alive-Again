@@ -200,7 +200,7 @@ export function screenRoot(kit) {
           enter('narrate');
         }),
       !ws && opt('explosion', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
-      opt('painting', 'Change the scene', 'Place, weather, music, title', () => enter('scene')),
+      opt('rain-cloud', 'Mood', 'Light and dark, weather, music, title', () => enter('scene')),
       !ws && opt('pencil', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
       !ws && opt('hammer', 'Build this room', 'Walls and floor in one press, save rooms', () => enter('room')),
       !ws && opt('map', 'Map & campaigns', `${(S.scenes || []).length} scenes — connect, copy, save the lot`, () => c.workshop({ map: true })),

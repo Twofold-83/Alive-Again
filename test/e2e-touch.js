@@ -22,6 +22,19 @@ const { setup } = require('./lib');
     await p.click('.gdone');
     const chestId = await p.evaluate(() => window.__lastAdded);
     await x.done();
+    /* mood: the room goes dark, a fire shines in it */
+    await x.opt('Mood');
+    await x.opt('Light and dark');
+    await p.click('[data-dark="2"]');
+    await p.click('[data-light=fire]');
+    assert.match(
+      await p.evaluate(
+        () => document.querySelector('#stage .darkov').style.maskImage || document.querySelector('#stage .darkov').style.webkitMaskImage,
+      ),
+      /radial-gradient/,
+      'the fire cuts a hole in the dark',
+    );
+    await x.done();
     await x.add('crate');
     await p.click('.thingbtns button:has-text("clickable"), .thingbtns button:has-text("Clickable")');
     await p.click('#nearToggle');
