@@ -14,10 +14,7 @@
 .grid button { padding: 0; height: 44px; font-size: 32px; line-height: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .grid button img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
 .grid button.heroopt { outline: 2px solid var(--accent); }
-.grid.drops { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
-.grid.drops button { height: 64px; font-size: 16px; font-weight: 600; color: #ffffff; text-shadow: 0 1px 3px #000000, 0 0 2px #000000; align-items: flex-end; padding-bottom: 3px; }
-.grid.drops button.on, .list button.on { outline: 3px solid var(--accent); }
-.grid.drops button.on { color: #ffffff; }
+.list button.on { outline: 3px solid var(--accent); }
 .list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .maker { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px; margin-top: 4px; }
 .maker .hint { font-size: 16px; color: var(--dim); margin: 0; }

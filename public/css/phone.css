@@ -72,8 +72,6 @@ body.phone .chips button { min-height: 40px; padding: 4px 13px; font-size: 18px;
 body.phone .grid { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 6px; }
 body.phone .grid button { height: 54px; min-height: 54px; }
 body.phone .grid button img { width: 40px; height: 40px; }
-body.phone .grid.drops { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-body.phone .grid.drops button { height: 70px; }
 body.phone .thingbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 body.phone .card { border-radius: 0; }
 body.phone #verbs { gap: 6px; padding: 8px; max-width: 86vw; }

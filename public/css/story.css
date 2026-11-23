@@ -127,9 +127,7 @@ button.foe.on { outline: 2px solid var(--accent); }
 .lightgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .lightgrid button { display: flex; align-items: center; gap: 10px; text-align: left; padding: 6px 10px; }
 .lightgrid i { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-.airow input { width: 64px; text-align: right; }
 .estimate { margin: 4px 0 0; padding: 6px 8px; background: #000; border-left: 3px solid var(--accent); }
-#btStop .row button, #btStop .row { gap: 4px; } #btStop .row button { min-height: 26px; padding: 1px 8px; }
 .battlebox { display: flex; flex-direction: column; gap: 6px; }
 .battlebox .battlecmds button { min-height: 44px; font-size: 1.15em; }
 .battlebox .battlepick button { text-align: left; }

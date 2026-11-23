@@ -1,116 +1,21 @@
 /*
- * Asset catalog. Every visual in a scene is referenced by an asset id string:
+ * The asset catalog. Everything seen or heard in a scene is referred to by an id string; a scene never holds pixels.
  *
- *   s:<slug>    built-in sprite from the library below (e.g. s:wizard)
- *   b:<slug>    built-in backdrop
- *   c:<id>      custom image stored with one story (uploaded or generated)
- *   e:<text>    raw emoji / short text typed by the Director
- *   m:<name>    music mood (see audio.js)
+ *   p:<slug>     a sprite of the pixel-art library (public/px, drawn by tools/make-big.js); its other pictures
+ *                (side, used, side-used) are files next to it
+ *   d:<parts>    a paper-doll character (see dolls.js)
+ *   c:<id>       a picture stored with one story: uploaded, generated, or drawn in the sprite editor
+ *   own:<id>     a drawing kept on this device; put on a stage it is sent to the story and becomes c:<id>
+ *   b:<slug>     a built-in backdrop (a CSS painting; rooms are built from tiles on a black one)
+ *   m:<name>     a music mood (see shared/sounds.js)
+ *   s:<slug>, e:<text>   the first, emoji library and typed emoji: still drawn for old stories, no longer offered
  *
- * Scenes never embed pixels, only ids. Each built-in sprite has a placeholder
- * look (an emoji) and a stable slug. To raise the art quality later, add image
- * files and list them in public/packs/manifest.json:
- *
- *   { "sprites": { "wizard": "hd/wizard.png" }, "backdrops": { "forest": "hd/forest.jpg" } }
- *
- * Anything listed there replaces the placeholder everywhere, in old stories too.
- * tools/upgrade-sprites.js fills that folder by sending every item below through
- * the asset provider (providers.js), i.e. through whatever paid image service is
- * plugged in. Do not rename an item once stories use it: the slug comes from the name.
+ * public/packs/manifest.json can replace any built-in picture by a file:
+ *   { "pixel": { "old-oak-chest": "hd/chest.png" }, "backdrops": { "forest": "hd/forest.jpg" }, "sprites": { ... } }
  */
 import { SPRITE_WIDTH } from '../shared/scene-model.js';
 import { kept } from './kept.js';
-
-export const SPRITES = new Map(); // slug -> { glyph, name, asset }
-function cat(id, label, items) {
-  return {
-    id,
-    label,
-    items: items.split(',').map((s) => {
-      const i = s.indexOf(' '),
-        glyph = s.slice(0, i),
-        name = s.slice(i + 1);
-      let slug = name.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      while (SPRITES.has(slug)) slug += '-x';
-      const item = { glyph, name, asset: 's:' + slug };
-      SPRITES.set(slug, item);
-      return item;
-    }),
-  };
-}
-
-export const CATEGORIES = [
-  cat(
-    'people',
-    'People',
-    '🧑 person,👩 woman,👨 man,🧒 child,👧 girl,👦 boy,👵 old woman grandma,👴 old man grandpa,👶 baby,🧔 bearded man,👱 blond,🧕 woman headscarf,🤵 groom suit,👰 bride,🤰 pregnant,👮 police officer cop,🕵️ detective spy,💂 guard,👷 builder worker,🧑‍⚕️ doctor nurse,🧑‍🍳 cook chef,🧑‍🚀 astronaut,🧑‍🌾 farmer,🧑‍🏫 teacher,🧑‍🎤 singer,🧑‍🎨 artist,🧑‍✈️ pilot,🧑‍🚒 firefighter,🧑‍⚖️ judge,🤴 prince king,👸 princess queen,🥷 ninja thief,🦸 superhero,🦹 villain,🤡 clown,🎅 santa,🧑‍🔬 scientist,🧑‍💻 hacker programmer,🧑‍🔧 mechanic,🧑‍🎓 student,🧑‍💼 office worker,🏃 runner,🧎 kneeling,🧍 standing,💃 dancer woman,🕺 dancer man,🧗 climber,🏊 swimmer,🤺 fencer,🏇 jockey rider,🧘 meditating,🛌 sleeping in bed,👪 family,👫 couple,👯 twins',
-  ),
-  cat(
-    'fantasy',
-    'Fantasy',
-    '🧙 wizard mage,🧛 vampire,🧟 zombie,🧚 fairy,🧜 mermaid,🧝 elf,🧞 genie,👻 ghost,👽 alien,🤖 robot,👹 ogre demon,👺 goblin,💀 skull skeleton,👿 devil,😇 angel,🐉 dragon,🦄 unicorn,👾 monster,🧌 troll,🦖 dinosaur,🦕 dinosaur long neck,🧿 amulet,🔮 crystal ball,🪄 magic wand,⚗️ potion,🗡️ dagger,⚔️ swords,🛡️ shield,🏹 bow,👑 crown,💍 ring,🏺 urn vase,📜 scroll,🕯️ candle,⚰️ coffin,🪦 grave,🐲 dragon head,🦇 bat,🕷️ spider,🧸 cursed teddy,🪬 hamsa charm,🔱 trident,⚱️ funeral urn,🦴 bone,☠️ skull crossbones,🎃 pumpkin lantern,🌀 portal',
-  ),
-  cat(
-    'faces',
-    'Faces',
-    '😀 happy face,😂 laughing face,😊 smiling face,😍 in love face,😘 kiss face,😎 cool face,🤔 thinking face,😐 neutral face,🙄 eye roll face,😏 smirk face,😴 sleeping face,😢 crying face,😭 sobbing face,😡 angry face,🤬 cursing face,😱 screaming face,😨 scared face,😰 nervous face,😳 embarrassed face,🥺 pleading face,😤 huffing face,🤢 sick face,🤮 vomiting face,🤕 hurt face,🤒 fever face,🥶 freezing face,🥵 hot face,😵 dizzy face,🤯 mind blown face,🤫 shushing face,🤥 liar face,😈 evil grin face,🥳 party face,🤑 greedy face,🥱 yawning face,😬 grimace face,🫣 peeking face,🤐 zipped mouth face,😶 speechless face,🤨 suspicious face',
-  ),
-  cat(
-    'body',
-    'Body',
-    '👁️ eye,👀 eyes,👄 mouth,👅 tongue,👃 nose,👂 ear,🦷 tooth,🧠 brain,🫀 heart organ,🫁 lungs,💪 arm muscle,🦵 leg,🦶 foot,👋 waving hand,✋ raised hand,🖐️ open hand,👆 finger pointing up,👉 finger pointing right,👈 finger pointing left,👇 finger pointing down,👍 thumbs up,👎 thumbs down,✊ fist,👏 clapping hands,🤝 handshake,🙏 praying hands,✌️ peace hand,🤞 crossed fingers,🤙 call me hand,🦾 robot arm,🦿 robot leg,💅 nails,👣 footprints,🩸 blood drop,💋 lips kiss mark,🧔‍♂️ beard,👤 silhouette,👥 two silhouettes,🫂 hug,🦻 hearing aid ear',
-  ),
-  cat(
-    'animals',
-    'Animals',
-    '🐕 dog,🐈 cat,🐎 horse,🐄 cow,🐖 pig,🐑 sheep,🐓 rooster chicken,🦆 duck,🐇 rabbit,🐁 mouse,🐀 rat,🦊 fox,🐺 wolf,🐻 bear,🦁 lion,🐅 tiger,🐘 elephant,🐒 monkey,🦌 deer,🦉 owl,🦅 eagle,🐦 bird,🐍 snake,🐢 turtle,🐸 frog,🐊 crocodile,🐟 fish,🦈 shark,🐙 octopus,🐋 whale,🦀 crab,🐝 bee,🦋 butterfly,🐌 snail,🦍 gorilla,🐼 panda,🐨 koala,🦘 kangaroo,🦒 giraffe,🦓 zebra,🐪 camel,🦏 rhino,🦛 hippo,🐧 penguin,🦜 parrot,🦢 swan,🦩 flamingo,🐬 dolphin,🦭 seal,🐜 ant,🪲 beetle,🦂 scorpion,🐛 caterpillar,🦔 hedgehog,🐿️ squirrel,🦝 raccoon,🐐 goat,🦃 turkey',
-  ),
-  cat(
-    'nature',
-    'Nature',
-    '🌳 tree,🌲 pine tree,🌴 palm tree,🌵 cactus,🌱 sprout,🌿 herb plant,🍄 mushroom,🌷 tulip flower,🌹 rose,🌻 sunflower,💐 bouquet,🍂 leaves,🪨 rock stone,⛰️ mountain,🌋 volcano,🏝️ island,🔥 fire,💧 water drop,🌊 wave,❄️ snowflake,⛄ snowman,☀️ sun,🌙 moon,⭐ star,☁️ cloud,🌧️ rain cloud,⛈️ storm cloud,🌈 rainbow,⚡ lightning,🌪️ tornado,🕳️ hole,🪵 log wood,🪺 nest,🌾 wheat grass,🍀 clover,🌸 blossom,🪷 lotus,🐚 shell,🪸 coral,🌕 full moon,🌑 dark moon,🪐 planet,🌍 earth globe,☄️ comet,🌫️ fog',
-  ),
-  cat(
-    'places',
-    'Places',
-    '🏠 house home,🏡 house garden,🏚️ ruined house,🏰 castle,🏯 fortress,⛪ church,🏛️ temple museum,🏥 hospital,🏫 school,🏪 shop store,🏨 hotel,🏢 office building,🏭 factory,⛺ tent,🛖 hut,🗼 tower,⛲ fountain,🌉 bridge,🚪 door,🪟 window,🧱 wall bricks,🚧 barrier,🪧 sign,🗿 statue,⛩️ gate,🎪 circus,🎡 ferris wheel,🛝 slide playground,🚏 bus stop,⚓ anchor,🗺️ map,🏦 bank,🏟️ stadium arena,🕌 mosque,🛕 shrine temple,🗽 liberty statue,🏗️ construction crane,🛤️ railway track,🛣️ highway road,⛽ gas station,🏕️ campsite,🎢 roller coaster,💒 wedding chapel,🏤 post office',
-  ),
-  cat(
-    'blocks',
-    'Level pieces',
-    '🟫 brown block dirt,🟩 green block grass,🟦 blue block water,🟥 red block lava,🟨 yellow block sand,⬜ white block snow,⬛ black block,🟪 purple block,🟧 orange block,🪜 ladder,🚩 flag,🏁 finish flag,🎯 target,🪤 trap,⛓️ chains,🪝 hook,🧲 magnet,⚙️ gear,🪙 coin,💠 crystal,🔶 orange diamond,🔷 blue diamond,🔺 red spike,🔻 hanging spike,⚪ white ball,🔴 red ball,🟢 green ball,🔵 blue ball,🟡 yellow ball,🟣 purple ball,⚫ black ball,🛢️ barrel,📍 pin marker,🏆 trophy,🔘 button,🎚️ lever,💈 pole,🚥 traffic light,🛗 elevator,🕹️ joystick,🔲 frame,🧨 dynamite,💣 bomb,🗝️ old key,🔑 key,🔒 lock,🔓 open lock,❤️‍🔥 extra life heart',
-  ),
-  cat(
-    'things',
-    'Things',
-    '🪑 chair,🛏️ bed,🛋️ sofa couch,🚽 toilet,🛁 bath,📺 tv television,💻 laptop computer,📱 phone,☎️ telephone,💡 lamp light,🔦 flashlight,📦 box,🧳 suitcase,💼 briefcase,🎒 backpack,📕 book,✉️ letter envelope,📰 newspaper,🖼️ painting picture,🪞 mirror,⏰ clock,💰 money bag,💎 gem diamond,🎁 gift present,🔨 hammer,🪓 axe,🔪 knife,🔫 water pistol,🔭 telescope,🎈 balloon,🧸 teddy bear,⚽ ball,🎸 guitar,🎹 piano,🪣 bucket,🧹 broom,🕰️ grandfather clock,🛒 cart,💊 pill medicine,🩹 bandage,🚬 cigarette,🚿 shower,🧻 toilet paper,🧼 soap,🧺 basket,🛎️ service bell,🗑️ trash can,🧯 fire extinguisher,🪴 potted plant,🖥️ desktop computer,📻 radio,🎙️ microphone,📷 camera,🎥 movie camera,🔋 battery,🧊 ice cube,🍳 frying pan,🫖 teapot,🗄️ cabinet,📚 books,🪆 nesting doll,🎨 palette,🧩 puzzle piece,♟️ chess pawn,🎲 die,🃏 joker card,🎰 slot machine,🥁 drum,🎺 trumpet,🎻 violin,🪕 banjo,📯 horn',
-  ),
-  cat(
-    'tools',
-    'Tools & science',
-    '⛏️ pickaxe,🪚 saw,🔧 wrench,🔩 bolt,🧰 toolbox,🪛 screwdriver,✂️ scissors,📎 paperclip,📏 ruler,🖊️ pen,✏️ pencil,🔬 microscope,🧬 dna,💉 syringe,🩺 stethoscope,🧫 petri dish,🌡️ thermometer,⚖️ scales,🧭 compass,⏳ hourglass,📡 satellite dish,🛰️ satellite,🧪 test tube,🔗 chain link,🪢 rope knot,🧵 thread,🪡 needle,🧶 yarn,🔌 plug,🪫 empty battery,💾 disk,📼 tape,🧮 abacus,🪙 token,🎣 fishing rod,🪃 boomerang,🥊 boxing glove,🏒 hockey stick,🎿 skis,🛹 skateboard',
-  ),
-  cat(
-    'wear',
-    'Clothes',
-    '🎩 top hat,👒 sun hat,🧢 cap,🎓 graduation hat,⛑️ rescue helmet,🪖 army helmet,👓 glasses,🕶️ sunglasses,🥽 goggles,🧣 scarf,🧤 gloves,🧥 coat,👕 shirt,👖 jeans,👗 dress,👘 kimono,🩳 shorts,👙 bikini,👠 high heel,👞 shoe,👢 boot,👟 sneaker,🥾 hiking boot,🧦 socks,👜 handbag,👛 purse,🎭 theatre masks,🎀 ribbon bow,💄 lipstick,🌂 umbrella closed,☂️ umbrella,🦯 cane,📿 beads,🥇 medal,🎖️ military medal,👔 tie,🥼 lab coat,🦺 safety vest,🩱 swimsuit,🪭 fan',
-  ),
-  cat(
-    'food',
-    'Food',
-    '🍎 apple,🍌 banana,🍇 grapes,🍓 strawberry,🥕 carrot,🌽 corn,🍞 bread,🧀 cheese,🍖 meat,🍗 chicken leg,🍔 burger,🍕 pizza,🍜 noodles soup,🍰 cake,🎂 birthday cake,🍪 cookie,🍫 chocolate,🍬 candy,🥚 egg,☕ coffee,🍵 tea,🥛 milk,🍺 beer,🍷 wine,🍾 bottle champagne,🍽️ plate dinner,🥄 spoon,🍉 watermelon,🍋 lemon,🍒 cherries,🥑 avocado,🌶️ chili pepper,🧅 onion,🥔 potato,🥐 croissant,🥞 pancakes,🍟 fries,🌭 hot dog,🍣 sushi,🍦 ice cream,🍩 donut,🍯 honey pot,🧂 salt,🥫 can,🍲 stew pot,🧃 juice box,🥤 soda cup',
-  ),
-  cat(
-    'vehicles',
-    'Vehicles',
-    '🚗 car,🚕 taxi,🚓 police car,🚑 ambulance,🚒 fire truck,🚌 bus,🚚 truck,🚜 tractor,🏍️ motorcycle,🚲 bicycle bike,🛴 scooter,🚂 train,🚇 metro subway,✈️ plane,🚁 helicopter,🚀 rocket,🛸 ufo,⛵ sailboat,🚤 speedboat,🚢 ship,🛶 canoe,🎠 carousel horse,🛷 sled,🪂 parachute,🚙 jeep,🏎️ race car,🚐 van,🛻 pickup truck,🚛 big truck,🛵 moped,🛺 rickshaw,🚠 cable car,🛳️ cruise ship,⛴️ ferry,🚃 train car,🛩️ small plane,🎈 hot air balloon,🛞 wheel,🚨 police light',
-  ),
-  cat(
-    'effects',
-    'Effects',
-    '❗ exclamation,❓ question,💥 explosion bang,💢 anger mark,💤 sleep zzz,❤️ heart love,💔 broken heart,💦 sweat splash,💨 dash wind smoke,✨ sparkles magic,🎵 music note,💬 speech mark,💭 thought cloud,🚫 forbidden,➡️ arrow right,⬅️ arrow left,⬆️ arrow up,⬇️ arrow down,⭕ circle,❌ cross,✅ check,🕸️ web,🎆 fireworks,💫 dizzy stars,🌟 glowing star,💯 hundred,‼️ double exclamation,⁉️ exclamation question,〰️ wavy line,🔆 brightness,🔔 bell,📢 loudspeaker,🗯️ angry speech,♨️ steam,☢️ radioactive,☣️ biohazard,⚠️ warning,⛔ no entry,🆘 sos,💲 dollar sign,🎶 music notes,➕ plus,➖ minus,💕 two hearts,💘 heart arrow,🫧 bubbles,🎇 sparkler,🎉 party popper,🎊 confetti ball,👑 winner crown,🏳️ white flag,🏴‍☠️ pirate flag,🔅 dim light,🧿 evil eye,🪩 disco ball,🕐 clock face,🌠 shooting star,☮️ peace sign',
-  ),
-];
+import { LEGACY_SPRITES } from './legacy-sprites.js';
 
 const stars =
   'radial-gradient(1px 1px at 12% 18%,#fff 99%,transparent),radial-gradient(1.5px 1.5px at 31% 9%,#fff 99%,transparent),radial-gradient(1px 1px at 47% 27%,#fff 99%,transparent),radial-gradient(1.5px 1.5px at 63% 13%,#fff 99%,transparent),radial-gradient(1px 1px at 78% 31%,#fff 99%,transparent),radial-gradient(1px 1px at 90% 8%,#fff 99%,transparent),radial-gradient(1px 1px at 22% 40%,#fff 99%,transparent),radial-gradient(1.5px 1.5px at 70% 45%,#fff 99%,transparent),';
@@ -244,13 +149,11 @@ export async function loadPixel() {
       if (!c.legacy) PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items }); // old icons are still drawn, not offered
     }
   } catch {
-    /* no pixel pack: the emoji library is used */
+    /* the library could not be loaded: pickers stay empty, the stage still draws what it can */
   }
 }
-/** Every searchable built-in sprite, pixel art first. */
-export function allItems() {
-  return [...catsWithOwn().flatMap((c) => c.items)]; // the emoji library is still understood (old stories use it) but no longer offered
-}
+/** Everything a search can find: the library and my own objects. */
+export const allItems = () => catsWithOwn().flatMap((c) => c.items);
 
 /* ---------- my own objects: drawn in the sprite editor, kept on this device (localStorage tf.objects) ----------
  * { id, name, cat, slug, base, pics: { '': dataUrl, side, used, sideUsed }, in: { storyCode: assetId } }
@@ -295,7 +198,7 @@ export function catsWithOwn(group) {
   return cats;
 }
 
-/* ---------- art packs (higher quality replacements for the placeholders) ---------- */
+/* ---------- art packs: files that replace built-in pictures ---------- */
 export const PACK = { sprites: {}, backdrops: {}, pixel: {} };
 export async function loadPack() {
   try {
@@ -312,17 +215,10 @@ export async function loadPack() {
 }
 
 /** The other pictures of the story's own things: asset id -> { v: { side, used, sideUsed } (asset ids), base }. */
-export const CUSTOM = new Map();
+const CUSTOM = new Map();
 export function setCustomAssets(assets) {
   CUSTOM.clear();
   for (const a of assets || []) if (a.views || a.base) CUSTOM.set(a.id, { v: a.views || {}, base: a.base || 'front' });
-}
-/** Which of a thing's pictures to show: '' | 'side' | 'used' | 'sideUsed', falling back to what exists. */
-export function viewKey(has, view, used) {
-  const want = view === 'side' ? (used ? 'sideUsed' : 'side') : used ? 'used' : '';
-  if (!want || (has && has[want])) return want;
-  if (want === 'sideUsed' && has && has.side) return 'side';
-  return '';
 }
 export function assetUrl(code, id) {
   return `/api/rooms/${code}/assets/${id.slice(2)}`;
@@ -335,17 +231,51 @@ export function spriteView(code, asset) {
   if (asset.startsWith('p:')) return { img: PACK.pixel[asset.slice(2)] ? 'packs/' + PACK.pixel[asset.slice(2)] : `px/${asset.slice(2)}.png` }; // an art pack can replace any pixel sprite
   if (asset.startsWith('s:')) {
     const slug = asset.slice(2),
-      it = SPRITES.get(slug);
+      it = LEGACY_SPRITES.get(slug);
     return PACK.sprites[slug] ? { img: 'packs/' + PACK.sprites[slug] } : { glyph: it ? it.glyph : '❓' };
   }
   return { glyph: asset.slice(2) };
+}
+/* ---------- the pictures of a thing: as drawn, from the other side, used, and both ---------- */
+const VIEW_FILE = { side: '.side', used: '.used', sideUsed: '.side.used' };
+/**
+ * Every picture of a thing, whatever kind of asset it is:
+ *   { base, pics: { '': { url, w }, side, used, sideUsed } }
+ * base says which way the main picture looks ('front' or 'side'); w is the width in doll pixels where the catalog
+ * knows it (library sprites). Null for something that is not a picture (an emoji of the first library).
+ */
+export function picturesOf(code, asset) {
+  const main = spriteView(code, asset).img;
+  if (!main) return null;
+  const lib = pixelInfo(asset),
+    pics = { '': { url: main, w: lib.w } };
+  let base = lib.base || 'front';
+  if (asset.startsWith('p:') && !main.startsWith('packs/'))
+    for (const [k, size] of Object.entries(lib.v || {})) pics[k] = { url: main.replace(/\.png$/, VIEW_FILE[k] + '.png'), w: size[0] };
+  else if (asset.startsWith('c:')) {
+    const mine = CUSTOM.get(asset.slice(2)) || { v: {} };
+    for (const [k, id] of Object.entries(mine.v)) if (id) pics[k] = { url: assetUrl(code, 'c:' + id) };
+    base = mine.base || 'front';
+  } else if (asset.startsWith('own:')) {
+    const o = OWN.get(asset.slice(4)) || { pics: {} };
+    for (const [k, url] of Object.entries(o.pics)) if (k && url) pics[k] = { url };
+    base = o.base || 'front';
+  }
+  return { base, pics };
+}
+/** The one picture to show: seen from the other side and/or used if such a picture exists, else the nearest that does. */
+export function pictureOf(code, asset, view, used) {
+  const all = picturesOf(code, asset);
+  if (!all) return null;
+  const want = view === 'side' ? (used ? 'sideUsed' : 'side') : used ? 'used' : '';
+  return all.pics[want] || (want === 'sideUsed' && all.pics.side) || all.pics[''];
 }
 /** Short text for an asset, for sentences like "reaches for 🔑". */
 export function assetLabel(asset, name) {
   if (asset.startsWith('d:')) return name || 'the figure';
   const v = spriteView('', asset);
   if (v.glyph) return v.glyph;
-  const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;
+  const it = asset.startsWith('s:') ? LEGACY_SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;
   return name || (it ? 'the ' + it.name.split(' ').slice(0, 3).join(' ') : 'it');
 }
 /** Catalog facts about a pixel sprite: { kind: 'floor'|'wall' } for tiles, { solid } for props. */
@@ -358,7 +288,7 @@ export function spriteTitle(asset) {
   return words ? words[0].toUpperCase() + words.slice(1) : 'Thing';
 }
 export function assetName(asset) {
-  const it = asset.startsWith('s:') ? SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;
+  const it = asset.startsWith('s:') ? LEGACY_SPRITES.get(asset.slice(2)) : asset.startsWith('p:') ? PX.get(asset.slice(2)) : null;
   return it ? it.name.split(' ').slice(0, 2).join(' ') : '';
 }
 

@@ -4,7 +4,7 @@ import { h, clamp, add } from '../../core/dom.js';
 import { BURSTS, WEATHER, LIGHTS, DARKNESS } from '../../shared/options.js';
 import { newEntity, freeSpot } from '../../shared/scene-model.js';
 import { G, short } from '../guided.js';
-import { BACKDROPS, backdropCss, PIXEL, pixelInfo } from '../../core/catalog.js';
+import { PIXEL, pixelInfo } from '../../core/catalog.js';
 import { setCell } from '../../stage/level.js';
 import { LEVEL_W, LEVEL_H } from '../../shared/scene-model.js';
 import { glyphNode } from '../../stage/render.js';
@@ -102,40 +102,6 @@ export function screenScenePrepared(kit) {
         )
       : h('p', { class: 'dim' }, 'The map is empty. Build a room on the stage and keep it on the map first.'),
     h('button', { onclick: () => c.map() }, 'Open the map'),
-  );
-  return;
-}
-
-export function screenScenePlace(kit) {
-  const { p, c, d, S, code, head, doneBtn } = kit;
-  head('Where are we now?');
-  const drop = (id, name) =>
-    h(
-      'button',
-      {
-        'data-mark': `backdrop=${id}`,
-        class: d.backdrop === id ? 'on' : '',
-        style: `background:${backdropCss(code, id)}`,
-        onclick: () => {
-          d.backdrop = id;
-          c.changed();
-        },
-      },
-      name,
-    );
-  add(
-    p,
-    doneBtn('The place changes'),
-    h(
-      'div',
-      { class: 'grid drops' },
-      BACKDROPS.map((b) => drop(b.id, b.name)),
-      S.assets.filter((a) => a.kind === 'backdrop').map((a) => drop('c:' + a.id, a.name)),
-    ),
-    c.maker('backdrop', (id) => {
-      d.backdrop = 'c:' + id;
-      c.rebuild();
-    }),
   );
   return;
 }

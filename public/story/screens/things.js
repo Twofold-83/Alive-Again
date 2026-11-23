@@ -1,13 +1,12 @@
 /* Director screens about one character or thing: its tools, speaking, moving, adding, tying, active objects, exits. */
 import { isDoll, poseEditor } from '../../core/dolls.js';
-import { PIXEL, pixelInfo, CUSTOM, catsWithOwn, OWN } from '../../core/catalog.js';
+import { PIXEL, picturesOf, catsWithOwn, OWN } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES, LIGHTS } from '../../shared/options.js';
 import { ENVIRONMENTS, OBJECT_CATS, environmentItems } from '../../shared/environments.js';
 import { G, buildGuided, short } from '../guided.js';
 import { glyphNode } from '../../stage/render.js';
 import { openSpriteEditor, forgetOwn } from '../../build/spriteed.js';
-import { spriteView, assetUrl } from '../../core/catalog.js';
 import { dollDataUrl } from '../../core/dolls.js';
 
 /** Categories of the pixel-art library for one "Add something" branch. */
@@ -43,11 +42,10 @@ export function screenThing(kit) {
   const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, label);
   /* a library thing has three pictures: as drawn, turned a quarter, and after someone used it */
   const viewRow = () => {
-    const mine = sel.asset.startsWith('c:') ? CUSTOM.get(sel.asset.slice(2)) : null,
-      info = mine || pixelInfo(sel.asset),
-      has = info.v;
-    if (!has || !(has.side || has.used)) return null;
-    const names = info.base === 'side' ? ['Side', 'Front'] : ['Front', 'Side'];
+    const all = picturesOf(kit.code, sel.asset),
+      has = all ? all.pics : {};
+    if (!(has.side || has.used)) return null;
+    const names = all.base === 'side' ? ['Side', 'Front'] : ['Front', 'Side'];
     const btn = (attr, label, on, fn) =>
       h(
         'button',
@@ -113,24 +111,18 @@ export function screenThing(kit) {
         if (mine) return openSpriteEditor({ edit: mine, onSave: swap });
         if (isDoll(sel.asset))
           return openSpriteEditor({ from: { name: lab(sel), urls: { '': await dollDataUrl(sel.asset, sel.feel) } }, onSave: swap });
-        const main = spriteView(kit.code, sel.asset).img,
-          info = sel.asset.startsWith('c:') ? CUSTOM.get(sel.asset.slice(2)) || {} : pixelInfo(sel.asset),
-          urls = { '': main };
-        for (const k of ['side', 'used', 'sideUsed'])
-          if (info.v && info.v[k])
-            urls[k] = sel.asset.startsWith('c:')
-              ? assetUrl(kit.code, 'c:' + info.v[k])
-              : main.replace(/\.png$/, { side: '.side', used: '.used', sideUsed: '.side.used' }[k] + '.png');
+        const all = picturesOf(kit.code, sel.asset),
+          urls = Object.fromEntries(Object.entries(all.pics).map(([k, pic]) => [k, pic.url]));
         const slug = sel.asset.startsWith('p:') ? sel.asset.slice(2) : '',
           cat = slug && PIXEL.find((x) => x.items.some((i) => i.asset === sel.asset));
-        openSpriteEditor({ from: { name: lab(sel), slug, cat: cat ? cat.id : 'own', base: info.base || 'front', urls }, onSave: swap });
+        openSpriteEditor({ from: { name: lab(sel), slug, cat: cat ? cat.id : 'own', base: all.base, urls }, onSave: swap });
       }),
       b('', 'Turn into…', () => {
         G.q = '';
         enter('swap');
       }),
       b('⧉', 'Copy', () => {
-        const k = { ...clone(sel), id: Math.random().toString(36).slice(2, 10), x: clamp(sel.x + 0.09, 0, 1), say: '' };
+        const k = { ...clone(sel), id: c.rid(), x: clamp(sel.x + 0.09, 0, 1), say: '' };
         d.entities.push(k);
         G.sel = k.id;
         c.select(k.id);

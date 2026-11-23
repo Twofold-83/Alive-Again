@@ -5,6 +5,10 @@ import { clone, h } from '../core/dom.js';
 import { renderStage, burst } from './render.js';
 import { sample } from './level.js';
 
+/** How a thing looks, as far as a step can change it: shown as before until the step plays, then as the step left it. */
+const LOOKS = ['scale', 'rot', 'flip', 'fx', 'pose', 'feel', 'view', 'used', 'glow'];
+const pick = (from, keys) => Object.fromEntries(keys.map((k) => [k, from[k]]));
+
 /**
  * Present the step from scene `before` to scene `after`: things glide, recorded
  * moves play, new drawing draws itself, lines appear one after another.
@@ -27,18 +31,7 @@ export function playCut(root, before, after, o, done) {
     e.once = '';
     if (p) {
       if (p.x !== e.x || p.y !== e.y || p.scale !== e.scale || p.rot !== e.rot) moved = true;
-      Object.assign(e, {
-        x: p.x,
-        y: p.y,
-        scale: p.scale,
-        rot: p.rot,
-        flip: p.flip,
-        fx: p.fx,
-        pose: p.pose,
-        feel: p.feel,
-        view: p.view,
-        used: p.used,
-      });
+      Object.assign(e, { x: p.x, y: p.y }, pick(p, LOOKS)); // it starts as it was, and changes when the step plays
     } else if (before) {
       e.fresh = true;
       moved = true;
@@ -139,20 +132,7 @@ export function playCut(root, before, after, o, done) {
           e.walk = true;
           e.face = Math.sign(f.x - e.x);
         } // on the move: bob along, face the way it goes
-        Object.assign(e, {
-          scale: f.scale,
-          rot: f.rot,
-          flip: f.flip,
-          fx: f.fx,
-          once: f.once,
-          hp: f.hp,
-          maxHp: f.maxHp,
-          tie: f.tie,
-          pose: f.pose,
-          feel: f.feel,
-          view: f.view,
-          used: f.used,
-        }); // a paper doll swings into its new pose
+        Object.assign(e, { once: f.once, hp: f.hp, maxHp: f.maxHp, tie: f.tie }, pick(f, LOOKS)); // a paper doll swings into its new pose
         if (!f.say) e.emote = f.emote;
         if (!e.tracked) {
           e.x = f.x;

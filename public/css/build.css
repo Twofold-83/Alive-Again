@@ -41,7 +41,6 @@
 .grid.tiles { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 3px; }
 .grid.tiles button { height: 40px; }
 .grid.tiles button img { width: 32px; height: 32px; }
-.grid.tiles button.iswall { box-shadow: inset 0 -3px 0 rgba(255, 60, 60, .8); }
 .grid.tiles button.on { outline: 2px solid #ffffff; outline-offset: -2px; }
 
 /* ---- the character maker ---- */

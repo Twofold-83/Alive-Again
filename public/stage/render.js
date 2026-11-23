@@ -1,7 +1,7 @@
 /* Drawing a scene on a stage element: backdrop, level, things, bubbles, strips and overlays.
  * renderStage() can be called as often as you like; it only touches what changed. */
 import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
-import { spriteView, assetLabel, backdropCss, pixelInfo, CUSTOM, viewKey, assetUrl } from '../core/catalog.js';
+import { spriteView, pictureOf, assetLabel, backdropCss, pixelInfo } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 import { LIGHTS } from '../shared/options.js';
 import { baseOf, nameOf, called, pointText } from '../shared/scene-model.js';
@@ -16,36 +16,24 @@ function tallOf(asset) {
   const h = pixelInfo(asset).h;
   return h ? h * 0.0422 + 0.12 : 1.22;
 }
-const VIEW_FILE = { side: '.side', used: '.used', sideUsed: '.side.used' };
-/** What a thing is called: the name the Director gave it. Until then it has none, and is spoken of as "this". */
+/** The picture of a thing, as an element. On the stage (cls 'glyph') pixel art is drawn at its true size: one sprite pixel is one doll pixel. */
 export function glyphNode(code, asset, cls = '', view = '', used = false) {
   if (isDoll(asset)) return dollNode(asset, cls);
-  const v = spriteView(code, asset);
-  const info = pixelInfo(asset),
-    key = v.img ? viewKey(info.v, view, used) : '',
-    alt = key && !v.img.startsWith('packs/'), // a thing seen from the other side, or after it was used
-    size = cls === 'glyph' && (alt ? info.v[key][0] : info.w); // on the stage a library sprite is drawn at its true size
-  if (v.img && size)
-    return h('img', {
-      class: 'glyph sized',
-      src: alt ? v.img.replace(/\.png$/, VIEW_FILE[key] + '.png') : v.img,
-      alt: '',
-      draggable: 'false',
-      style: `--w:${size}`,
-    });
-  if (v.img && cls === 'glyph' && asset.startsWith('c:')) {
-    /* a drawing of your own is pixel art too: once loaded, a small one is shown at its true size */
-    const mine = CUSTOM.get(asset.slice(2)),
-      k = mine && viewKey(mine.v, view, used);
-    const im = h('img', { class: cls, src: k ? assetUrl(code, 'c:' + mine.v[k]) : v.img, alt: '', draggable: 'false' });
-    im.addEventListener('load', () => {
-      if (im.naturalWidth > 64 || im.naturalHeight > 64) return;
+  const pic = pictureOf(code, asset, view, used);
+  if (!pic) return h('span', { class: cls }, spriteView(code, asset).glyph);
+  const im = h('img', { class: cls, src: pic.url, alt: '', draggable: 'false' });
+  if (cls === 'glyph') {
+    const sized = (w) => {
       im.classList.add('sized');
-      im.style.setProperty('--w', im.naturalWidth);
-    });
-    return im;
+      im.style.setProperty('--w', w);
+    };
+    if (pic.w) sized(pic.w);
+    else if (asset.startsWith('c:'))
+      im.addEventListener('load', () => {
+        if (im.naturalWidth <= 64 && im.naturalHeight <= 64) sized(im.naturalWidth); // a drawing of your own is pixel art too
+      });
   }
-  return v.img ? h('img', { class: cls, src: v.img, alt: '', draggable: 'false' }) : h('span', { class: cls }, v.glyph);
+  return im;
 }
 
 /** What the Player did this turn, as rows of [kind, text]: says, does, goes, gives, rolls. */
