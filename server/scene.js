@@ -46,9 +46,11 @@ export function rollDie(sides) {
  *   target   pick one of the listed characters or things (verb: "Attack", "Talk to", ...)
  *   battle   a battle move: attack an enemy, defend, or flee */
 function cleanAsk(a, ids) {
-  if (!a || typeof a !== 'object' || !['roll', 'discard', 'place', 'target', 'battle'].includes(a.kind)) return null;
+  if (!a || typeof a !== 'object' || !['roll', 'discard', 'place', 'target', 'battle', 'image'].includes(a.kind)) return null;
   return {
     kind: a.kind,
+    image: a.kind === 'image' && /^c:[A-Za-z0-9_-]{1,40}$/.test(a.image) ? a.image : '', // a picture shown to the Player: all they can do is click it
+    back: a.kind === 'image' && !!a.back, // ... and then the turn goes straight back to the Director
     text: str(a.text, 120),
     sides: a.sides === 20 ? 20 : 6,
     dc: Math.round(num(a.dc, 0, 20, 0)),

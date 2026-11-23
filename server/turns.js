@@ -125,7 +125,8 @@ function submitPlayer(room, body) {
   if (ask && ask.kind === 'roll' && ask.rolled) {
     answer = { kind: 'roll', dc: ask.dc }; // rolled already, in front of the Player (see actRoll)
   } else if (ask && ans) {
-    if (ask.kind === 'roll' && ans.decline)
+    if (ask.kind === 'image' && ans.seen) answer = { kind: 'image' };
+    else if (ask.kind === 'roll' && ans.decline)
       answer = { kind: 'roll', dc: ask.dc, declined: true }; // looked at the check and backed out
     else if (ask.kind === 'roll' && ans.roll) {
       askRoll = ask.sides;

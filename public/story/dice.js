@@ -64,7 +64,9 @@ export function openCheck(ask, done) {
         verdict.textContent = !ask.dc ? `You rolled ${r.rolled.value}.` : ok ? `${r.rolled.value} — success!` : `${r.rolled.value} — not enough.`;
         verdict.className = 'verdict ' + (!ask.dc ? '' : ok ? 'good' : 'bad');
         if (ask.dc) audio.sfx(ok ? 'levelup' : 'fail');
-        buttons.replaceChildren(h('button', { class: 'primary grow', id: 'checkDone', onclick: () => leave({ rolled: r.rolled }) }, 'Continue'));
+        /* the result stands for three seconds, then the turn goes back to the Director */
+        buttons.replaceChildren(h('small', { class: 'dim grow', id: 'checkDone' }, 'Back to the story…'));
+        setTimeout(() => leave({ rolled: r.rolled }), 3000);
       }
     }, 85);
   };

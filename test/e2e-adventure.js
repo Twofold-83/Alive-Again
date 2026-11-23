@@ -190,17 +190,17 @@ const { setup } = require('./lib');
     await p.click('#checkBack');
     await p.waitForSelector('#check', { state: 'hidden' });
     assert.match(await p.textContent('.askbox'), /You backed out/);
-    await p.click('.askbox button'); // roll after all: a die tumbles and lands
-    await p.click('#checkRoll');
-    await p.waitForSelector('#check .tumble.landed .die');
-    assert.match(await p.textContent('#check .verdict'), /success|not enough/);
-    await p.click('#checkDone');
-    await p.waitForSelector('#rolled'); // the die falls at once, and the Player is told how it went
-    assert.match(await p.textContent('#rolled'), /Success! You needed 4 or more|Failed\. You needed 4 or more/);
+    // first use the key ON the chest (clicks still land right while zoomed in), then roll after all
     await p.click('#sheet .chip.item');
     await p.click(ent('chest'));
     assert.match(await act(), /uses .* on Old chest/s);
-    await toDirector();
+    await p.click('.askbox button'); // a die tumbles and lands
+    await p.click('#checkRoll');
+    await p.waitForSelector('#check .tumble.landed .die');
+    assert.match(await p.textContent('#check .verdict'), /success|not enough/);
+    // the result stands for three seconds, then the turn goes back to the Director by itself
+    await side('Director');
+    await x.cutDone();
     sc = await x.last();
     assert.equal(sc.roll.by, 'player');
     assert.equal(sc.roll.sides, 6);

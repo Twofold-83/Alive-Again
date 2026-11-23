@@ -2,7 +2,7 @@
  * (The Director's side of the same footer is just the button that ends the turn.) */
 import { isDoll, poseEditor } from '../core/dolls.js';
 import { openDollMaker } from '../build/dollmaker.js';
-import { assetLabel } from '../core/catalog.js';
+import { assetLabel, assetUrl } from '../core/catalog.js';
 import { h, add } from '../core/dom.js';
 import { openCheck } from './dice.js';
 import { livingFoes, heroHealth, weaponOf, itemHeals } from '../shared/battle.js';
@@ -17,6 +17,25 @@ import { openStory } from './viewer.js';
 import { leave } from '../shell/home.js';
 
 /* ---------- footer: what I say / narrate, and the End turn button ---------- */
+/** A picture the Director shows: over the whole stage; a click closes it — and, if the Director said so, ends the turn. */
+function showPicture(ask) {
+  let el = document.querySelector('#picture');
+  if (!el) document.body.append((el = h('div', { id: 'picture' })));
+  el.hidden = false;
+  el.replaceChildren(
+    h('img', { src: assetUrl(app.code, ask.image), alt: '' }),
+    ask.text ? h('p', {}, ask.text) : '',
+    h('small', {}, 'Click to go on'),
+  );
+  el.onclick = () => {
+    el.hidden = true;
+    el.replaceChildren();
+    setReply({ seen: true });
+    saveDraft();
+    if (ask.back) return submit();
+    rebuild();
+  };
+}
 /** The card for a roll the Director asked for; what the Player decided goes into the draft. */
 function check(ask) {
   if (document.querySelector('#check:not([hidden])')) return;
@@ -24,7 +43,10 @@ function check(ask) {
     if (r.rolled) {
       if (app.draft.ask) app.draft.ask.rolled = r.rolled;
       setReply({ roll: true });
-    } else setReply({ decline: true });
+      saveDraft();
+      return submit(); // rolled: the Director takes over at once
+    }
+    setReply({ decline: true });
     saveDraft();
     rebuild();
   });
@@ -258,7 +280,15 @@ export function buildFoot() {
         return e ? (e.active ? e.active.name : glyphNode(app.code, e.asset, 'mini')) : '?';
       };
       let body;
-      if (ask.kind === 'roll') {
+      if (ask.kind === 'image') {
+        /* a picture from the Director: it fills the stage until it is clicked */
+        answered = !!rp.seen;
+        body = opt(rp.seen ? 'Look at the picture again' : 'Look at the picture', false, () => showPicture(ask));
+        if (!rp.seen && app.pictureSeen !== app.S.turn) {
+          app.pictureSeen = app.S.turn;
+          setTimeout(() => showPicture(ask), 350);
+        }
+      } else if (ask.kind === 'roll') {
         /* the die falls at once: the Player sees the number, and whether it was enough */
         const got = ask.rolled;
         answered = !!got;
@@ -436,6 +466,7 @@ export function buildFoot() {
       }
       const def = {
         roll: 'Roll the die.',
+        image: 'A picture',
         discard: 'Give up one of your things.',
         place: 'Where do you go?',
         target: `${ask.verb || 'Choose'} — who or what?`,

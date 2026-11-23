@@ -1,4 +1,5 @@
 /* Director screens about the Player: what to ask of them, points, their sheet, giving items, battles. */
+import { assetUrl } from '../../core/catalog.js';
 import { BATTLE_CMDS, WEAPON } from '../../shared/battle.js';
 import { h, clamp, add } from '../../core/dom.js';
 import { glyphNode } from '../../stage/render.js';
@@ -9,7 +10,17 @@ import { G } from '../guided.js';
 export function screenAsk(kit) {
   const { p, c, d, S, code, head, opt, doneBtn } = kit;
   const kind = d.ask ? d.ask.kind : d.choices.filter(Boolean).length ? 'choice' : '';
-  const mk = (k) => ({ kind: k, text: d.ask ? d.ask.text : '', sides: 6, dc: 0, verb: k === 'target' ? 'Attack' : '', places: [], targets: [] });
+  const mk = (k) => ({
+    kind: k,
+    image: '',
+    back: false,
+    text: d.ask ? d.ask.text : '',
+    sides: 6,
+    dc: 0,
+    verb: k === 'target' ? 'Attack' : '',
+    places: [],
+    targets: [],
+  });
   const set = (k) => {
     if (k === 'choice' || !k) {
       d.ask = null;
@@ -34,6 +45,7 @@ export function screenAsk(kit) {
       { class: 'gopts' },
       opt('button', 'Pick one of these', 'Up to three choices', () => set('choice'), cur === 'choice'),
       opt('dice', 'Roll a die', 'd6 or d20, with a number to reach', () => set('roll'), cur === 'roll'),
+      opt('painting', 'Show a picture', 'A cut scene: they click it and go on', () => set('image'), cur === 'image'),
       opt('map-pin', 'Go to a place', 'Mark places on the stage', () => set('place'), cur === 'place'),
       opt('archery-target', 'Pick a target', 'Who to attack, talk to, save…', () => set('target'), cur === 'target'),
       c.mods().inventory && opt('cross-box', 'Give up an item', 'Discard one thing they carry', () => set('discard'), cur === 'discard'),
@@ -46,7 +58,12 @@ export function screenAsk(kit) {
       p,
       h('input', {
         id: 'askText',
-        placeholder: 'Your question or instruction (optional)',
+        placeholder:
+          cur === 'roll'
+            ? 'What is the check for? — “Picking the lock”'
+            : cur === 'image'
+              ? 'A line under the picture (optional)'
+              : 'Your question or instruction (optional)',
         maxlength: 120,
         value: a.text,
         oninput: (ev) => {
@@ -68,6 +85,46 @@ export function screenAsk(kit) {
         },
       });
     add(p, inp(0), inp(1), inp(2));
+  } else if (cur === 'image') {
+    /* a picture of your own: uploaded, generated or drawn */
+    const pics = S.assets.filter((x) => !x.part);
+    add(
+      p,
+      h('small', { class: 'dim' }, 'Which picture?'),
+      h(
+        'div',
+        { class: 'grid', id: 'askPics' },
+        pics.map((x) =>
+          h(
+            'button',
+            {
+              class: a.image === 'c:' + x.id ? 'on' : '',
+              title: x.name,
+              onclick: () => {
+                a.image = 'c:' + x.id;
+                c.rebuild();
+              },
+            },
+            h('img', { src: assetUrl(code, 'c:' + x.id), alt: x.name, class: 'ownimg' }),
+          ),
+        ),
+      ),
+      c.maker('backdrop', (id) => {
+        a.image = 'c:' + id;
+        c.rebuild();
+      }),
+      h('small', { class: 'dim' }, 'After they click it'),
+      h(
+        'div',
+        { class: 'row' },
+        h(
+          'button',
+          { id: 'picPlay', class: 'grow' + (!a.back ? ' on' : ''), onclick: () => ((a.back = false), c.rebuild()) },
+          `${S.names.player} plays on`,
+        ),
+        h('button', { id: 'picBack', class: 'grow' + (a.back ? ' on' : ''), onclick: () => ((a.back = true), c.rebuild()) }, 'Straight back to me'),
+      ),
+    );
   } else if (cur === 'roll') {
     add(
       p,
@@ -189,7 +246,7 @@ export function screenAsk(kit) {
     p,
     doneBtn(() =>
       cur
-        ? `${S.names.player} is asked: ${{ choice: 'pick a choice', roll: 'roll a die', place: 'go to a place', target: 'pick a target', discard: 'give up an item' }[cur]}`
+        ? `${S.names.player} is asked: ${{ choice: 'pick a choice', roll: 'roll a die', image: 'look at a picture', place: 'go to a place', target: 'pick a target', discard: 'give up an item' }[cur]}`
         : '',
     ),
   );
