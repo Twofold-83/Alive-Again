@@ -77,9 +77,8 @@ export function buildGuided(p, c) {
   const sel = d.entities.find((e) => e.id === G.sel);
   const me = d.entities.find((e) => e.id === d.heroId);
   const lab = (e) => assetLabel(e.asset);
-  const ws = c.mode === 'workshop'; // the same tools, used on a prepared scene in the workshop
-  const setup = ws || S.turn === 0,
-    stepNo = ws ? 1 : d.steps.length + 1;
+  const setup = S.turn === 0, // before the story begins the Director only sets the stage: nothing is logged or played
+    stepNo = d.steps.length + 1;
   if (p._gpath !== G.path.join('>') + G.sel) {
     p._gpath = G.path.join('>') + G.sel;
     p.scrollTop = 0;
@@ -370,7 +369,6 @@ export function buildGuided(p, c) {
     sel,
     me,
     lab,
-    ws,
     setup,
     stepNo,
     home,

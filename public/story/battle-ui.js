@@ -7,7 +7,7 @@ import { glyphNode } from '../stage/render.js';
 import { BATTLE_LEVELS, livingFoes, heroHealth, weaponOf, itemHeals } from '../shared/battle.js';
 import { spriteTitle } from '../core/catalog.js';
 
-const nameOf = (e) => e.name || (e.active && e.active.name) || spriteTitle(e.asset.startsWith('p:') ? e.asset : 'p:enemy');
+const nameOf = (e) => e.name || spriteTitle(e.asset.startsWith('p:') ? e.asset : 'p:enemy');
 const bar = (cls, name, hp, max, id) =>
   h(
     'div',

@@ -5,8 +5,7 @@ import { toast, $ } from '../core/dom.js';
 import { hero, heroStart, app, mods } from '../core/state.js';
 import { saveDraft, paint, changed, rebuild, submit } from './turn.js';
 import { audio } from '../core/audio.js';
-import { walkable } from '../shared/scene-model.js';
-import { thingName } from '../stage/render.js';
+import { walkable, called } from '../shared/scene-model.js';
 import { render } from './view.js';
 
 /* ---------- the Player's walk: press Walk, click where to go; once per turn ---------- */
@@ -128,7 +127,7 @@ export function showVerbs(e, ev) {
     h(
       'div',
       { id: 'verbs', style: `left:${Math.min(ev.clientX - r.left, r.width - 220)}px;top:${Math.max(4, ev.clientY - r.top - 70)}px` },
-      h('b', {}, e.active.name),
+      h('b', {}, called(e)),
       e.active.verbs.map((v) =>
         h(
           'button',
@@ -149,7 +148,6 @@ export function showVerbs(e, ev) {
   );
 }
 /* ---------- a click on the stage in an adventure: walk here, look at, use ---------- */
-const nameOf = (e) => thingName(e) || 'this';
 /** Where the hero ends up for a click at x, y: on the spot if one can stand there, else straight below it (a click high on a wall). */
 function standBelow(x, y) {
   for (let yy = clamp(y, 0.08, 0.98); yy <= 0.985; yy += 0.01) if (walkable(app.draft, x, yy)) return yy;
@@ -168,7 +166,7 @@ function react(e, verb) {
     const box = h(
       'div',
       { id: 'reaction', onclick: () => box.remove() },
-      h('b', {}, `${verb}: ${nameOf(e)}`),
+      h('b', {}, `${verb}: ${called(e)}`),
       h('p', {}, re.text),
       h('small', {}, 'click to close'),
     );
@@ -196,7 +194,7 @@ export function showClickMenu(hit, p, ev) {
     r = wrap.getBoundingClientRect(),
     me = hero(app.draft),
     what = hit && hit !== me ? hit : null,
-    name = what ? nameOf(what) : 'this spot';
+    name = what ? called(what) : 'this spot';
   const item = (label, fn, o = {}) =>
     h(
       'button',

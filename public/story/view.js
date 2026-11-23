@@ -6,7 +6,7 @@ import { LAYERS as MODULES, STORY_TYPES as TYPES, PLAYER_MODES } from '../shared
 import { audio } from '../core/audio.js';
 import { h, clamp, add } from '../core/dom.js';
 import { glyphNode } from '../stage/render.js';
-import { workshopOpen } from '../build/workshop.js';
+import { mapOpen } from '../build/map.js';
 import { guidedKey, guidedTool, buildGuided } from './guided.js';
 import { $, rid, toast } from '../core/dom.js';
 import { myTurn, shown, directing, stage, heroTurn, mods, app } from '../core/state.js';
@@ -14,7 +14,7 @@ import { paint, changed, changedQuiet, saveDraft } from './turn.js';
 import { renderChrome, tick } from '../shell/chrome.js';
 import { buildFoot } from './player.js';
 import { act } from '../core/net.js';
-import { guidedCtx, showWorkshop } from './director.js';
+import { guidedCtx, showMap } from './director.js';
 
 /* ---------- main render ---------- */
 export function render() {
@@ -74,7 +74,7 @@ export function render() {
     app.S.scene.battle ? JSON.stringify([app.S.scene.battle.round, app.S.scene.battle.paused, app.S.liveN, app.battleMenu, app.liveBusy]) : '',
     guidedKey(),
   ].join('|');
-  if (workshopOpen()) return; // the workshop has the tools while it is open
+  if (mapOpen()) return; // the map covers the tools while it is open
   if (key !== app.uiKey) {
     app.uiKey = key;
     buildPanel();
@@ -266,15 +266,7 @@ function buildPanel() {
       );
     if (tips) add(p, h('div', { class: 'card' }, h('h3', {}, tips[0]), h('p', { class: 'dim' }, tips[1])));
     if (app.S.you === 'director')
-      add(
-        p,
-        h(
-          'div',
-          { class: 'row' },
-          h('button', { id: 'wsOpen', class: 'grow', onclick: () => showWorkshop() }, 'Build scene — while you wait'),
-          h('button', { class: 'grow', onclick: () => showWorkshop({ map: true }) }, 'Map'),
-        ),
-      );
+      add(p, h('div', { class: 'row' }, h('button', { id: 'mapOpen', class: 'grow', onclick: showMap }, 'Map & campaigns — while you wait')));
     const r = recap(app.S.scene);
     if (r) add(p, r);
     return;

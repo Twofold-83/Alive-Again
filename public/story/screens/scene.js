@@ -9,9 +9,10 @@ import { setCell } from '../../stage/level.js';
 import { LEVEL_W, LEVEL_H } from '../../shared/scene-model.js';
 import { glyphNode } from '../../stage/render.js';
 import { roomPicker, envOfTheme } from './pickers.js';
+import { kept, keepRoom, enterRoom } from '../../core/kept.js';
 import { ROOM_THEMES, ROOM_SHAPES, buildRoom, themeOf, roomArea } from '../../shared/rooms.js';
-import { walkable, normScene } from '../../shared/scene-model.js';
-import { clone, rid, toast } from '../../core/dom.js';
+import { walkable } from '../../shared/scene-model.js';
+import { toast } from '../../core/dom.js';
 
 const PENS = ['#ffffff', '#15131c', '#ff5a5a', '#ffb454', '#ffe14d', '#57d38c', '#4db8ff', '#c77dff'];
 
@@ -41,14 +42,14 @@ export function screenMoment(kit) {
 
 /* ================= scene ================= */
 export function screenScene(kit) {
-  const { p, c, d, S, ws, enter, done, head, opt } = kit;
+  const { p, c, d, S, enter, done, head, opt } = kit;
   head('Mood', 'Light and dark, weather, music: how the place feels.');
   add(
     p,
     h(
       'div',
       { class: 'gopts' },
-      !ws && opt('map', 'Go to a scene from the map', `${(S.scenes || []).length} on the map`, () => enter('scene:prepared')),
+      opt('map', 'Go to a scene from the map', `${(S.scenes || []).length} on the map`, () => enter('scene:prepared')),
       opt(
         'light-bulb',
         'Light and dark',
@@ -64,12 +65,11 @@ export function screenScene(kit) {
         }),
       opt('rain-cloud', 'The weather', 'Rain, fog, darkness…', () => enter('scene:weather')),
       opt('music-note', 'The music', '', () => enter('scene:music')),
-      !ws && opt('book-red', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
-      !ws &&
-        opt('dice', 'A surprise scene', 'A ready-made place and cast', async () => {
-          if (await c.randomScene()) done('A whole new scene');
-        }),
-      !ws && opt('light-bulb', 'Give me an idea', 'A random story twist', () => c.idea()),
+      opt('book-red', 'A title card', '“Chapter 2”, “Later that night”', () => enter('scene:card')),
+      opt('dice', 'A surprise scene', 'A ready-made place and cast', async () => {
+        if (await c.randomScene()) done('A whole new scene');
+      }),
+      opt('light-bulb', 'Give me an idea', 'A random story twist', () => c.idea()),
     ),
   );
   return;
@@ -100,8 +100,8 @@ export function screenScenePrepared(kit) {
             ),
           ),
         )
-      : h('p', { class: 'dim' }, 'The map is empty. Build a scene and add it to the map first.'),
-    h('button', { onclick: () => c.workshop({ map: true }) }, 'Open the map'),
+      : h('p', { class: 'dim' }, 'The map is empty. Build a room on the stage and keep it on the map first.'),
+    h('button', { onclick: () => c.map() }, 'Open the map'),
   );
   return;
 }
@@ -344,14 +344,6 @@ export function screenDraw(kit) {
 }
 
 /* ================= build this room: walls and floor in one press, on the stage itself; rooms kept for every story ================= */
-function savedRooms() {
-  try {
-    const l = JSON.parse(localStorage.getItem('tf.savedRooms') || '[]');
-    return Array.isArray(l) ? l : [];
-  } catch {
-    return [];
-  }
-}
 export function screenRoom(kit) {
   const { p, c, d, head, done } = kit;
   head('Build this room', 'Everything happens on the stage: pick walls and a floor, then add things from “Add something”.');
@@ -380,7 +372,7 @@ export function screenRoom(kit) {
     value: G.roomName || '',
     oninput: () => (G.roomName = name.value),
   });
-  const rooms = savedRooms();
+  const rooms = kept.rooms.all();
   add(
     p,
     h(
@@ -419,29 +411,8 @@ export function screenRoom(kit) {
             id: 'roomSave',
             class: 'primary',
             onclick: () => {
-              const nm = (G.roomName || '').trim() || 'A room',
-                scene = normScene(
-                  clone({
-                    backdrop: d.backdrop,
-                    level: d.level,
-                    weather: d.weather,
-                    mood: d.mood,
-                    drawing: d.drawing,
-                    entities: d.entities,
-                    heroId: d.heroId,
-                    sheet: { inv: [], stats: [], points: 0 },
-                  }),
-                );
-              for (const e of scene.entities) Object.assign(e, { say: '', once: '', emote: '' });
-              try {
-                localStorage.setItem(
-                  'tf.savedRooms',
-                  JSON.stringify([{ id: rid(), name: nm, scene, at: Date.now() }, ...savedRooms().filter((r) => r.name !== nm)].slice(0, 60)),
-                );
-                toast(`“${nm}” is saved for every story`);
-              } catch {
-                toast('This device has no room left to save it');
-              }
+              const nm = (G.roomName || '').trim() || 'A room';
+              toast(keepRoom(nm, d) ? `“${nm}” is saved for every story` : 'This device has no room left to save it');
               c.rebuild();
             },
           },
@@ -460,23 +431,7 @@ export function screenRoom(kit) {
                   class: 'grow',
                   title: 'Bring this room on stage',
                   onclick: () => {
-                    /* the place and its things come on stage; the hero stays who they are and stands where the room's hero stood */
-                    const sc = normScene(clone(r.scene)),
-                      there = sc.entities.find((e) => e.id === sc.heroId);
-                    Object.assign(d, {
-                      backdrop: sc.backdrop,
-                      level: sc.level,
-                      weather: sc.weather,
-                      mood: sc.mood,
-                      drawing: sc.drawing,
-                      exits: [],
-                      sceneId: '',
-                    });
-                    d.entities = [
-                      ...d.entities.filter((e) => e.id === d.heroId || (e.tie && e.tie.to === d.heroId)),
-                      ...sc.entities.filter((e) => e.id !== sc.heroId).map((e) => ({ ...e, id: rid(), tie: null })),
-                    ];
-                    if (hero && there) Object.assign(hero, { x: there.x, y: there.y });
+                    enterRoom(d, r);
                     c.changedQuiet();
                     done(`The scene changes to ${r.name}`);
                   },
@@ -490,7 +445,7 @@ export function screenRoom(kit) {
                   title: 'Forget this room',
                   onclick: () => {
                     if (!confirm(`Forget “${r.name}”?`)) return;
-                    localStorage.setItem('tf.savedRooms', JSON.stringify(savedRooms().filter((x) => x.id !== r.id)));
+                    kept.rooms.remove(r.id);
                     c.rebuild();
                   },
                 },

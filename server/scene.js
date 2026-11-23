@@ -118,9 +118,8 @@ export function cleanScene(s, prev, inner) {
       emote: str(e.emote, 16),
       solid: !!e.solid,
       active:
-        e.active && typeof e.active === 'object' && str(e.active.name, 40)
+        e.active && typeof e.active === 'object'
           ? {
-              name: str(e.active.name, 40),
               verbs: arr(e.active.verbs)
                 .map((v) => str(v, 16))
                 .filter(Boolean)
@@ -142,7 +141,7 @@ export function cleanScene(s, prev, inner) {
       view: e.view === 'side' ? 'side' : '', // seen from the other side
       used: !!e.used || e.view === 'used', // after someone used it
       near: !!e.near,
-      name: str(e.name, 40),
+      name: str(e.name, 40) || str(e.active && e.active.name, 40), // older clients kept a clickable thing's name with its actions
       base: e.base && typeof e.base === 'object' ? { dy: r3(num(e.base.dy, -1, 1, 0)), d: Math.round(num(e.base.d, 0.25, 6, 0.5) * 4) / 4 } : null,
       glow: LIGHTS.some((l) => l[0] === e.glow) ? e.glow : '',
     });

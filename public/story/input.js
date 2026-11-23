@@ -9,7 +9,7 @@ import { rid, r3, toast, $ } from '../core/dom.js';
 import { changed, rebuild, paint, undo, submit } from './turn.js';
 import { walkHero, setReply, hideVerbs, showVerbs, showClickMenu, doVerb } from './walk.js';
 import { render } from './view.js';
-import { workshopOpen } from '../build/workshop.js';
+import { mapOpen } from '../build/map.js';
 import { removeEntity } from './director.js';
 
 let drag = null;
@@ -214,7 +214,7 @@ stage.addEventListener('pointercancel', endDrag);
 
 /* ---------- keyboard (computers) ---------- */
 document.addEventListener('keydown', (ev) => {
-  if (!app.S || !app.code || !$('#story').hidden || workshopOpen()) return;
+  if (!app.S || !app.code || !$('#story').hidden || mapOpen()) return;
   if (ev.key === 'Escape' && (app.walkMode || app.verb)) {
     app.walkMode = false;
     app.verb = '';

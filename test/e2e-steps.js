@@ -203,16 +203,16 @@ const { setup } = require('./lib');
     await p.click('#mapNew');
     await p.fill('#mapName', 'The river crossing');
     await p.click('#mapDup');
-    assert.equal(await p.locator('.wsmap .node').count(), 2);
+    assert.equal(await p.locator('.mapboard .node').count(), 2);
     // the whole map is saved as a campaign, and can be put on a map again
     await p.click('#campSave');
     assert.equal(await p.locator('#campaigns .myroom').count(), 1);
     assert.match(await p.evaluate(() => localStorage.getItem('tf.campaigns')), /The river crossing/);
-    await p.click('.wsmap .node >> nth=0');
+    await p.click('.mapboard .node >> nth=0');
     assert.equal(await p.inputValue('#mapName'), 'The river crossing');
     assert.equal(await p.locator('#wsBuild').count(), 0, 'there is no separate Build scene any more');
-    await p.click('#wsClose');
-    await p.waitForSelector('#workshop', { state: 'hidden' });
+    await p.click('#mapClose');
+    await p.waitForSelector('#storymap', { state: 'hidden' });
     assert.equal(await p.locator('#stage .level i').count(), 192);
     let saved = await p.evaluate(async () => {
       const r = await fetch(`/api/rooms/${location.hash.slice(1)}/events?token=${localStorage.getItem('tf.token')}`);

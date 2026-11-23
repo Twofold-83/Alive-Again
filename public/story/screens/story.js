@@ -6,7 +6,7 @@ import { G, short } from '../guided.js';
 
 /* ================= root ================= */
 export function screenRoot(kit) {
-  const { p, c, d, S, code, lab, ws, setup, stepNo, enter, done, opt } = kit;
+  const { p, c, d, S, code, lab, setup, stepNo, enter, done, opt } = kit;
   if (!setup) {
     /* what the Player just did: read out like the log of an old adventure game */
     const parts = actionParts(d),
@@ -172,19 +172,11 @@ export function screenRoot(kit) {
     h(
       'div',
       { class: 'gtitle' },
-      h('b', {}, ws ? 'Things and scene' : setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
-      h(
-        'small',
-        { class: 'dim' },
-        ws
-          ? 'Add things, make them solid or active, set the place, exits, weather and music.'
-          : setup
-            ? 'Build the opening scene, then begin.'
-            : 'All of it plays at the same time.',
-      ),
+      h('b', {}, setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
+      h('small', { class: 'dim' }, setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.'),
     ),
   );
-  if (!ws && setup)
+  if (setup)
     add(p, h('div', { class: 'row' }, h('button', { class: 'grow', id: 'undoBtn', disabled: !c.canUndo(), onclick: () => c.undo() }, '↶ Undo')));
   const sheet = c.mods().inventory || c.mods().stats || c.mods().dice;
   add(
@@ -193,29 +185,27 @@ export function screenRoot(kit) {
       'div',
       { class: 'gopts' },
       opt('plus', 'Add something', 'A character, a thing, an effect', () => enter('add')),
-      !ws && opt('speech-bubble', 'Someone speaks', 'Give a character a line', () => enter('speak')),
-      !ws && opt('boot', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
-      !ws &&
-        opt('scroll', 'Narrate', 'Tell what happens in words', () => {
-          d.narration = '';
-          enter('narrate');
-        }),
-      !ws && opt('explosion', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
+      opt('speech-bubble', 'Someone speaks', 'Give a character a line', () => enter('speak')),
+      opt('boot', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
+      opt('scroll', 'Narrate', 'Tell what happens in words', () => {
+        d.narration = '';
+        enter('narrate');
+      }),
+      opt('explosion', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
       opt('rain-cloud', 'Mood', 'Light and dark, weather, music, title', () => enter('scene')),
-      !ws && opt('pencil', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
-      !ws && opt('hammer', 'Build this room', 'Walls and floor in one press, save rooms', () => enter('room')),
-      !ws && opt('map', 'Map & campaigns', `${(S.scenes || []).length} scenes — connect, copy, save the lot`, () => c.workshop({ map: true })),
-      !ws && sheet && opt('backpack', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
-      !ws && opt('question', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
-      !ws && opt('camera', 'Camera', 'Zoom in on something', () => enter('camera')),
-      !ws && c.mods().points && opt('star', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
-      !ws &&
-        S.rules.type === 'adventure' &&
+      opt('pencil', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
+      opt('hammer', 'Build this room', 'Walls and floor in one press, save rooms', () => enter('room')),
+      opt('map', 'Map & campaigns', `${(S.scenes || []).length} scenes — connect, copy, save the lot`, () => c.map()),
+      sheet && opt('backpack', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
+      opt('question', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),
+      opt('camera', 'Camera', 'Zoom in on something', () => enter('camera')),
+      c.mods().points && opt('star', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
+      S.rules.type === 'adventure' &&
         opt('sword', 'Battle', d.battle ? `Paused in round ${d.battle.round}` : 'Pick the enemies and how hard it is', () => enter('battle')),
-      !ws && opt('robot', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
+      opt('robot', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
       opt('doll', 'Character maker', 'Build a person: head, body, arms, legs', () => c.dollMaker()),
       opt('paint-can', 'Sprite editor', 'Draw your own things, pixel by pixel', () => enter('add:own')),
-      !ws && opt('cog', 'Story settings', 'Type, rules, time, invite', () => enter('rules')),
+      opt('cog', 'Story settings', 'Type, rules, time, invite', () => enter('rules')),
     ),
   );
   add(p, h('p', { class: 'dim small' }, 'Tip: click anything on the stage to change it, drag it to move it.'));

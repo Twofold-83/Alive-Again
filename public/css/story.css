@@ -62,7 +62,6 @@ button.chip.add { color: var(--dim); }
 
 /* ---- small pieces of the Director's and the Player's tools ---- */
 button.prep { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-#wsOpen { text-align: left; }
 .askbox { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--accent); border-radius: 0; background: var(--bg); }
 button.foe { min-width: 40px; }
 button.foe.on { outline: 2px solid var(--accent); }

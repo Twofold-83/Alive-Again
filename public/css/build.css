@@ -1,58 +1,48 @@
-/* Build scene and the Map: a full-screen editor apart from the turn. */
-.ws { position: fixed; inset: 0; z-index: 60; background: var(--bg); display: flex; flex-direction: column; }
-.ws > header { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--panel); flex: none; }
-.ws > header b { font-size: 20px; }
-.wsbody { flex: 1; min-height: 0; display: flex; }
-.wsdoc { display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px; }
-.wsdoc i { width: 44px; height: 33px; flex: none; border-radius: 0; border: 1px solid var(--line); }
-.wsdoc span { display: flex; flex-direction: column; min-width: 0; }
-.wsdoc b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-.wsdoc small { font-size: 15px; opacity: .75; }
-.wsmid { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000000; gap: 6px; }
-.wsmid .stage { width: min(100%, calc((100vh - 110px) * 4 / 3)); cursor: crosshair; }
-.wsmid .stage .ent { cursor: grab; }
-.wsmid .stage .level i { outline: 1px solid rgba(255, 255, 255, .1); outline-offset: -1px; }
-.wsmid .stage .level::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .13) 1px, transparent 1px); background-size: 6.25% 8.3333%; pointer-events: none; }
-.wstools { width: 400px; flex: none; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid var(--line); }
-.wstools .tabs { position: static; margin: 0; padding: 0 0 4px; }
-.wstools .row button { padding: 4px 4px; white-space: nowrap; }
+/* The map, the character maker and the sprite editor: full-screen places apart from the turn. */
+
+/* ---- a full-screen workbench: a bar on top, the work in the middle, tools at the side ---- */
+.bench { position: fixed; inset: 0; z-index: 60; background: var(--bg); display: flex; flex-direction: column; }
+.bench > header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--panel); flex: none; }
+.bench > header b { font-size: 20px; }
+.bench > header button { padding-left: 9px; padding-right: 9px; }
+.bench > header .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+.benchbody { flex: 1; min-height: 0; display: flex; }
+.benchtools { width: 400px; flex: none; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid var(--line); }
+.benchtools .row button { padding: 4px 4px; white-space: nowrap; }
+.benchtools .tabs { position: static; margin: 0; padding: 0 0 4px; }
+
+/* ---- the map ---- */
+#mapClose { margin-right: 6px; }
+.mapacts { display: contents; }
+.mapmid { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000000; gap: 6px; }
+.mapboard { position: relative; width: min(100%, calc((100vh - 110px) * 4 / 3)); aspect-ratio: 4 / 3; background: radial-gradient(circle at 50% 50%, #24232b, #121215); border: 1px solid var(--line); }
+.mapboard svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.mapboard line { stroke: #87c196; stroke-width: 4px; vector-effect: non-scaling-stroke; }
+.mapboard line.locked { stroke: #c58181; stroke-dasharray: 8 6; }
+.mapboard .node { position: absolute; z-index: 1; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px; width: 120px; cursor: grab; touch-action: none; }
+.mapboard .node b { font-size: 16px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapboard .node small { display: block; font-size: 13px; color: #abd2b9; }
+.mapboard .node.on { outline: 3px solid #ffffff; }
+.mapboard .node.here { box-shadow: 0 0 0 3px #69aa84; }
+.mapboard .node .thumb { width: 100%; cursor: inherit; border: 1px solid #000; }
+.mapboard .node .thumb * { pointer-events: none; }
+.mapboard .node .thumb .exit { display: none; }
+.mapboard .mapempty { position: absolute; inset: 0; margin: auto; width: 360px; max-width: 90%; height: max-content; text-align: center; }
+#mapName { width: 100%; font-weight: 700; font-size: 20px; }
+.mapdoc { display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px; }
+.mapdoc i { width: 44px; height: 33px; flex: none; border-radius: 0; border: 1px solid var(--line); }
+.mapdoc span { display: flex; flex-direction: column; min-width: 0; }
+.mapdoc b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.mapdoc small { font-size: 15px; opacity: .75; }
+.mapact { display: block; width: 100%; text-align: left; padding: 7px 10px; margin-top: 5px; } .mapact small { display: block; font-size: 15px; opacity: .75; font-weight: 400; } .mapact.off { opacity: .6; }
+.myroom { gap: 4px; margin-top: 4px; } .myroom button.grow { text-align: left; }
+
+/* ---- level tiles in a picker ---- */
 .grid.tiles { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 3px; }
 .grid.tiles button { height: 40px; }
 .grid.tiles button img { width: 32px; height: 32px; }
 .grid.tiles button.iswall { box-shadow: inset 0 -3px 0 rgba(255, 60, 60, .8); }
 .grid.tiles button.on { outline: 2px solid #ffffff; outline-offset: -2px; }
-.wsmap { position: relative; width: min(100%, calc((100vh - 110px) * 4 / 3)); aspect-ratio: 4 / 3; background: radial-gradient(circle at 50% 50%, #24232b, #121215); border: 1px solid var(--line); }
-.wsmap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.wsmap line { stroke: #87c196; stroke-width: 1.2; vector-effect: non-scaling-stroke; stroke-width: 4px; }
-.wsmap line.locked { stroke: #c58181; stroke-dasharray: 8 6; }
-.wsmap .node { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px; width: 120px; cursor: grab; touch-action: none; }
-.wsmap .node i { width: 100%; aspect-ratio: 4 / 3; border-radius: 0; border: 1px solid var(--line); }
-.wsmap .node b { font-size: 16px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wsmap .node.on { outline: 3px solid #ffffff; }
-.conn input { flex: 1.2; } .conn select { flex: 1; }
-
-#workshop > header { flex-wrap: wrap; }
-#workshop .wsview { font-weight: 700; padding: 6px 14px; }
-#workshop .wsview.on { background: #322f3c; color: var(--text); border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
-#workshop header .sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
-#workshop header #wsName { width: 170px; font-weight: 600; }
-#workshop > header { gap: 6px; } #workshop > header button { padding-left: 9px; padding-right: 9px; }
-.wsmap .node.here { box-shadow: 0 0 0 3px #69aa84; } .wsmap .node small { display: block; font-size: 13px; color: #abd2b9; }
-.wsmap .mapempty { position: absolute; inset: 0; margin: auto; width: 360px; height: max-content; text-align: center; }
-.mapact { display: block; width: 100%; text-align: left; padding: 7px 10px; margin-top: 5px; } .mapact small { display: block; font-size: 15px; opacity: .75; font-weight: 400; } .mapact.off { opacity: .6; }
-.wstools #mapName { width: 100%; font-weight: 700; font-size: 20px; }
-.wsacts { display: contents; }
-
-/* ---- room in one click ---- */
-.roomgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-height: 318px; overflow-y: auto; padding-right: 2px; }
-.roomgrid button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; min-height: 0; }
-.roomgrid button span { display: flex; flex-direction: column; }
-.roomgrid button img { width: 32px; height: 32px; display: block; }
-.roomgrid button small { font-size: 15px; line-height: 1; text-align: center; }
-.wsmap .node .thumb { width: 100%; cursor: inherit; border: 1px solid #000; }
-.wsmap .node .thumb * { pointer-events: none; }
-.wsmap .node .thumb .exit { display: none; }
-.wsmap svg { pointer-events: none; z-index: 0; } .wsmap .node { z-index: 1; }
 
 /* ---- the character maker ---- */
 #dollmaker { z-index: 70; }
@@ -70,8 +60,8 @@
 .castrow { display: flex; flex-wrap: wrap; gap: 6px; }
 .castitem { display: inline-flex; flex-direction: column; align-items: center; }
 .castitem > button:first-child { font-size: 30px; padding: 4px 6px; min-height: 0; }
-.myroom { gap: 4px; margin-top: 4px; } .myroom button.grow { text-align: left; }
-#workshop > header #wsClose { margin-right: 6px; }
+
+/* ---- the sprite editor ---- */
 #spriteed { z-index: 80; }
 .spritebody { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px 16px; overflow-y: auto; justify-content: center; }
 .spritecanvas canvas { image-rendering: pixelated; border: 2px solid; border-color: #000 var(--hi) var(--hi) #000; touch-action: none; cursor: crosshair; max-width: 100%; }
@@ -79,7 +69,6 @@
 .swatches { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; }
 .swatches .sw { height: 24px; min-height: 0; padding: 0; border: 2px solid #000; }
 .swatches .sw.on { border-color: #fff; }
-.owngrid .ownimg { image-rendering: pixelated; max-width: 40px; max-height: 40px; min-width: 16px; }
 .mutcard { width: min(100%, 460px); } .mutrow { gap: 4px; align-items: center; } .mutrow img { image-rendering: pixelated; height: 26px; }
 .mutrow button { min-height: 28px; padding: 2px 8px; } .doll.live .dpart.x { cursor: move; }
 .spritetabs { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
@@ -91,6 +80,8 @@
 .ownrow .ownpick { width: 52px; height: 52px; padding: 2px; display: flex; align-items: center; justify-content: center; background: #1a171f; }
 .ownrow .ownimg { image-rendering: pixelated; max-width: 44px; max-height: 44px; min-width: 16px; }
 .ownrow > button:not(.ownpick) { min-height: 28px; padding: 2px 8px; }
+
+/* ---- picking a room ---- */
 .roompick { display: flex; flex-direction: column; gap: 6px; }
 .envchips button { padding: 2px 8px; min-height: 26px; font-size: .92em; }
 .roomlist { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; max-height: 232px; overflow-y: auto; }

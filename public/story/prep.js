@@ -1,7 +1,8 @@
 /* The Director's shelf: a strip under the stage, seen only by the Director. It holds the cast (characters kept in
  * the character maker) and whatever the Director has put aside for later — one press puts a thing on the stage.
- * Kept on this device (localStorage tf.prep; the cast is tf.cast). */
-import { h, toast } from '../core/dom.js';
+ * Both are kept on this device (see core/kept.js). */
+import { h, toast, clone } from '../core/dom.js';
+import { kept } from '../core/kept.js';
 import { app } from '../core/state.js';
 import { glyphNode } from '../stage/render.js';
 import { isDoll, dollNode } from '../core/dolls.js';
@@ -10,15 +11,8 @@ import { rebuild } from './turn.js';
 import { spriteTitle, OWN } from '../core/catalog.js';
 import { useOwn } from '../build/spriteed.js';
 
-const read = (key) => {
-  try {
-    const l = JSON.parse(localStorage.getItem(key) || '[]');
-    return Array.isArray(l) ? l : [];
-  } catch {
-    return [];
-  }
-};
-const keep = (list) => localStorage.setItem('tf.prep', JSON.stringify(list.slice(0, 40)));
+/** What the shelf remembers of a thing, so that it comes back the way it was prepared. */
+const PREPARED = ['name', 'pose', 'feel', 'scale', 'flip', 'solid', 'active', 'near', 'view', 'used', 'glow', 'base', 'hp', 'maxHp'];
 
 async function put(item) {
   let asset = item.asset;
@@ -33,8 +27,8 @@ async function put(item) {
   }
   const e = guidedCtx.addEntity(asset);
   if (!e) return;
-  if (item.pose) e.pose = [...item.pose];
-  if (item.name) e.active = { name: item.name, verbs: ['Look at', 'Use', 'Take'], re: {} };
+  for (const k of PREPARED) if (item[k] != null) e[k] = clone(item[k]);
+  if (item.name && item.active === undefined) e.active = { verbs: ['Look at', 'Use', 'Take'], re: {} }; // kept by an older version: a named thing was a clickable one
   window.__lastAdded = e.id;
   rebuild();
 }
@@ -48,8 +42,7 @@ function prepare() {
     if (!o) return toast('Only library things, characters and your own drawings can be kept for later');
     asset = 'own:' + o.id;
   }
-  const list = read('tf.prep').filter((x) => x.asset !== asset);
-  keep([{ asset, pose: e.pose || null, name: e.active ? e.active.name : '' }, ...list]);
+  kept.shelf.add({ asset, ...Object.fromEntries(PREPARED.map((k) => [k, clone(e[k] ?? null)])) }, 'asset');
   toast('Kept on your shelf');
   renderPrep(true);
 }
@@ -58,8 +51,8 @@ export function renderPrep(show) {
   if (!el) return;
   el.hidden = !show;
   if (!show) return;
-  const cast = read('tf.cast'),
-    prep = read('tf.prep');
+  const cast = kept.cast.all(),
+    prep = kept.shelf.all();
   const sig = JSON.stringify([cast, prep]);
   if (el._sig === sig) return;
   el._sig = sig;
@@ -83,7 +76,7 @@ export function renderPrep(show) {
             class: 'x',
             title: 'Take off the shelf',
             onclick: () => {
-              keep(read('tf.prep').filter((x) => x.asset !== item.asset));
+              kept.shelf.remove(item.asset, 'asset');
               renderPrep(true);
             },
           },

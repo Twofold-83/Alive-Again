@@ -45,7 +45,7 @@ export function newEntity(asset, props = {}) {
     fx: '',
     emote: '',
     solid: false,
-    active: null,
+    active: null, // a thing the Player can click: { verbs: [...], re: { verb: { text, used } } } — what it answers to, and how
     tie: null,
     hp: null,
     maxHp: null,
@@ -104,14 +104,18 @@ export function normScene(sc) {
     full.layer ||= 0;
     if (full.hp === undefined) full.hp = null;
     if (full.maxHp === undefined) full.maxHp = null;
+    if (full.active && full.active.name !== undefined) {
+      full.name ||= full.active.name; // older scenes kept a clickable thing's name with its actions
+      delete full.active.name;
+    }
     return full;
   });
   for (const f of sc.steps) normScene(f);
   return sc;
 }
-export function heroOf(scene) {
-  return scene.entities.find((e) => e.id === scene.heroId);
-}
+/** What a thing is called: the name the Director gave it. Until then it has none, and everybody calls it "this". */
+export const nameOf = (e) => (e && e.name) || '';
+export const called = (e) => nameOf(e) || 'this';
 
 /** The level cell under a point of the stage. */
 export function cellAt(x, y) {

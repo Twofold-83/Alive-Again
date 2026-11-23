@@ -83,24 +83,23 @@ body.phone .overlay .stage { width: 100%; }
 body.phone .overlay header { padding-top: calc(8px + env(safe-area-inset-top)); }
 body.phone #story { padding-bottom: env(safe-area-inset-bottom); }
 
-/* build scene and map */
-body.phone #workshop > header { flex-wrap: wrap; padding: calc(6px + env(safe-area-inset-top)) 8px 6px; gap: 6px; }
-body.phone #workshop > header .sep { display: none; }
-body.phone #workshop > header #wsClose { order: -1; }
-body.phone .wsacts { display: flex; order: 9; width: 100%; gap: 6px; overflow-x: auto; align-items: center; padding-bottom: 2px; }
-body.phone .wsacts > * { flex: none; white-space: nowrap; }
-body.phone .wsacts .grow { display: none; }
-body.phone .wsacts #wsName { width: 150px; }
-body.phone .wsbody { flex-direction: column; }
-body.phone .wsmid { flex: none; gap: 0; }
-body.phone .wsmid .stage, body.phone .wsmap { width: 100%; }
-body.phone #wsHint { display: none; }
-body.phone .wstools { width: auto; flex: 1; border-left: 0; padding: 10px 10px calc(14px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
-body.phone .wstools .row button { padding: 4px 6px; }
+/* the map and the makers */
+body.phone .bench > header { padding: calc(6px + env(safe-area-inset-top)) 8px 6px; }
+body.phone .bench > header .sep { display: none; }
+body.phone #mapClose { order: -1; }
+body.phone .mapacts { display: flex; order: 9; width: 100%; gap: 6px; overflow-x: auto; align-items: center; padding-bottom: 2px; }
+body.phone .mapacts > * { flex: none; white-space: nowrap; }
+body.phone .mapacts .grow { display: none; }
+body.phone .benchbody { flex-direction: column; }
+body.phone .mapmid { flex: none; gap: 0; }
+body.phone .mapboard { width: 100%; }
+body.phone #mapHint { display: none; }
+body.phone .benchtools { width: auto; flex: 1; border-left: 0; padding: 10px 10px calc(14px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+body.phone .benchtools .row button { padding: 4px 6px; }
+body.phone .mapboard .node { width: 84px; padding: 4px; min-height: 0; }
+body.phone .mapboard .node b { font-size: 15px; }
 body.phone .grid.tiles { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); }
 body.phone .grid.tiles button { height: 48px; min-height: 48px; }
-body.phone .wsmap .node { width: 84px; padding: 4px; min-height: 0; }
-body.phone .wsmap .node b { font-size: 15px; }
 
 /* dungeon mode: the game on top, a thumb pad under it */
 body.phone #rpg { flex-direction: column; overflow: hidden; }
@@ -145,7 +144,7 @@ body.phone #rpgPad:not([hidden]) { display: flex; align-items: center; justify-c
   body.phone #rpgSide { flex: 1; }
   body.phone #rpgPad:not([hidden]) { padding: 4px 14px; }
   #rpgStick { width: 96px; height: 96px; } #rpgStick i { width: 40px; height: 40px; }
-  body.phone .wsbody { flex-direction: row; } body.phone .wsmid { flex: 1.2; } body.phone .wsmid .stage, body.phone .wsmap { width: min(100%, calc((100dvh - 70px) * 4 / 3)); }
+  body.phone .benchbody { flex-direction: row; } body.phone .mapmid { flex: 1.2; } body.phone .mapboard { width: min(100%, calc((100dvh - 70px) * 4 / 3)); }
 }
 body.phone .gtitle small { display: none; }
 body.phone #undoBtn { min-height: 36px; }
@@ -169,4 +168,4 @@ body.phone .dollleft .doll.big { font-size: 74px; }
 body.phone .dollleft .poser small { display: none; }
 body.phone .dollleft .chips, body.phone .dollacts { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; width: 100%; }
 body.phone .dollleft .chips button, body.phone .dollacts button { flex: none; white-space: nowrap; }
-body.phone #wsClose .wide { display: none; }
+body.phone #mapClose .wide { display: none; }

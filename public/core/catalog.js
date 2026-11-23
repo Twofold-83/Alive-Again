@@ -19,6 +19,7 @@
  * plugged in. Do not rename an item once stories use it: the slug comes from the name.
  */
 import { SPRITE_WIDTH } from '../shared/scene-model.js';
+import { kept } from './kept.js';
 
 export const SPRITES = new Map(); // slug -> { glyph, name, asset }
 function cat(id, label, items) {
@@ -260,7 +261,7 @@ export const OWN = new Map();
 export function loadOwn() {
   OWN.clear();
   try {
-    for (const o of JSON.parse(localStorage.getItem('tf.objects') || '[]')) if (o && o.id && o.pics && o.pics['']) OWN.set(o.id, o);
+    for (const o of kept.objects.all()) if (o && o.id && o.pics && o.pics['']) OWN.set(o.id, o);
     /* drawings from the first sprite editor */
     for (const d of JSON.parse(localStorage.getItem('tf.own') || '[]'))
       if (d && d.id && d.dataUrl && !OWN.has(d.id))
@@ -269,14 +270,7 @@ export function loadOwn() {
     /* nothing kept, or not readable: start empty */
   }
 }
-export function keepOwn() {
-  try {
-    localStorage.setItem('tf.objects', JSON.stringify([...OWN.values()].slice(0, 400)));
-    return true;
-  } catch {
-    return false;
-  }
-}
+export const keepOwn = () => kept.objects.set([...OWN.values()]);
 const ownItem = (o) => ({ name: (o.name || 'my object').toLowerCase(), asset: 'own:' + o.id, group: 'thing', own: true });
 /** The library's categories with my own objects in them: altered things stand in for the originals, new ones are
  * added to the category they were saved to, and "Campaign sprites" and "My objects" come last. */

@@ -6,6 +6,7 @@
  *
  * "My cast" is kept in this browser, so favourite characters are there in every story. */
 import { h, fill, toast } from '../core/dom.js';
+import { kept } from '../core/kept.js';
 import { DOLLS, dollNode, dollParts, dollAsset, randomDoll, poseEditor, REST, MAX_EXTRA, DOLL_W, dollDataUrl } from '../core/dolls.js';
 import { openSpriteEditor } from './spriteed.js';
 import { audio } from '../core/audio.js';
@@ -18,15 +19,6 @@ const TABS = [
 ];
 const M = { o: null, parts: null, pose: REST, tab: 'h', q: '' };
 const root = () => document.querySelector('#dollmaker');
-const cast = () => {
-  try {
-    return JSON.parse(localStorage.getItem('tf.cast') || '[]');
-  } catch {
-    return [];
-  }
-};
-const saveCast = (list) => localStorage.setItem('tf.cast', JSON.stringify(list.slice(0, 60)));
-export const dollMakerOpen = () => !root().hidden;
 
 export function openDollMaker(o) {
   M.o = o;
@@ -118,7 +110,7 @@ function draw() {
     [, , listName] = TABS.find((t) => t[0] === M.tab);
   const q = M.q.trim().toLowerCase(),
     list = DOLLS[listName].filter((p) => !q || p.name.includes(q));
-  const mine = cast();
+  const mine = kept.cast.all();
   const grid = h(
     'div',
     { class: 'dollgrid k-' + M.tab },
@@ -167,7 +159,7 @@ function draw() {
     ),
     h(
       'div',
-      { class: 'wsbody dollbody' },
+      { class: 'benchbody dollbody' },
       h(
         'div',
         { class: 'dollleft' },
@@ -209,7 +201,7 @@ function draw() {
             {
               id: 'dollKeep',
               onclick: () => {
-                saveCast([{ asset: dollAsset(M.parts), pose: [...M.pose] }, ...mine.filter((c) => c.asset !== dollAsset(M.parts))]);
+                kept.cast.add({ asset: dollAsset(M.parts), pose: [...M.pose] }, 'asset');
                 toast('Kept in your cast');
                 draw();
               },
@@ -220,7 +212,7 @@ function draw() {
       ),
       h(
         'aside',
-        { class: 'wstools dolltools' },
+        { class: 'benchtools dolltools' },
         h(
           'div',
           { class: 'tabs' },
@@ -285,7 +277,7 @@ function draw() {
                       class: 'link',
                       title: 'Remove from my cast',
                       onclick: () => {
-                        saveCast(mine.filter((x) => x !== c));
+                        kept.cast.remove(c.asset, 'asset');
                         draw();
                       },
                     },

@@ -6,7 +6,8 @@ import { assetUrl } from '../core/catalog.js';
 import { h, add } from '../core/dom.js';
 import { openCheck } from './dice.js';
 import { battleBox } from './battle-ui.js';
-import { glyphNode, thingName } from '../stage/render.js';
+import { glyphNode } from '../stage/render.js';
+import { nameOf, called } from '../shared/scene-model.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
 import { myTurn, other, hero, mods, app } from '../core/state.js';
@@ -128,7 +129,7 @@ export function buildFoot() {
     const pointed = () => {
       const pt = app.draft.point,
         e = pt && pt.id && app.draft.entities.find((x) => x.id === pt.id);
-      return e ? thingName(e) || 'this' : 'here';
+      return e ? called(e) : 'here';
     };
     /* a paper-doll hero: strike a pose by dragging the limbs, or decide how the hero looks */
     const dollRow = () =>
@@ -307,7 +308,7 @@ export function buildFoot() {
         );
       const lab = (id) => {
         const e = app.draft.entities.find((x) => x.id === id);
-        return e ? (e.active ? e.active.name : glyphNode(app.code, e.asset, 'mini')) : '?';
+        return e ? nameOf(e) || glyphNode(app.code, e.asset, 'mini') : '?';
       };
       let body;
       if (ask.kind === 'image') {

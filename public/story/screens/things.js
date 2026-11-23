@@ -19,7 +19,7 @@ function groupCats(g) {
 
 /* ================= a selected character or thing: all its tools in one place ================= */
 export function screenThing(kit) {
-  const { p, c, d, S, sel, lab, ws, home, enter, done, head, doneBtn, lookRow, sayInput, pickSel } = kit;
+  const { p, c, d, S, sel, lab, home, enter, done, head, doneBtn, lookRow, sayInput, pickSel } = kit;
   if (!sel) {
     home();
     return buildGuided(p, c);
@@ -33,10 +33,9 @@ export function screenThing(kit) {
       id: 'thingName',
       placeholder: 'Name it (the Player sees the name) — unnamed, it is just “this”',
       maxlength: 40,
-      value: sel.name || (sel.active ? sel.active.name : ''),
+      value: sel.name,
       oninput: (ev) => {
         sel.name = ev.target.value;
-        if (sel.active) sel.active.name = sel.name;
         c.changedQuiet();
       },
     }),
@@ -87,7 +86,7 @@ export function screenThing(kit) {
     );
   add(
     p,
-    !ws && sayInput('What does it say? (optional)'),
+    sayInput('What does it say? (optional)'),
     lookRow(),
     !sel.tie &&
       h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, 'Behind all'), lay(0, 'By position'), lay(1, 'In front')),
@@ -99,7 +98,7 @@ export function screenThing(kit) {
       { class: 'thingbtns' },
       isDoll(sel.asset) && b('', 'Act', () => enter('pose'), !!sel.pose || !!sel.feel),
       isDoll(sel.asset) && b('', 'Change look', () => c.dollMaker(sel)),
-      !ws && b('', 'Move / animate', () => enter('move')),
+      b('', 'Move / animate', () => enter('move')),
       !isHero && b('', sel.base ? 'Base point ✓' : 'Base point', () => enter('base'), !!sel.base),
       b('', 'Edit drawing', async () => {
         /* open all the pictures of this thing in the sprite editor. A library thing is saved as a campaign sprite (or
@@ -137,16 +136,15 @@ export function screenThing(kit) {
         c.select(k.id);
         c.rebuild();
       }),
-      !ws &&
-        b(
-          '',
-          'Player’s character',
-          () => {
-            d.heroId = isHero ? null : sel.id;
-            c.rebuild();
-          },
-          isHero,
-        ),
+      b(
+        '',
+        'Player’s character',
+        () => {
+          d.heroId = isHero ? null : sel.id;
+          c.rebuild();
+        },
+        isHero,
+      ),
       !isHero &&
         b(
           '',
@@ -157,7 +155,7 @@ export function screenThing(kit) {
           },
           sel.solid,
         ),
-      !isHero && b('', sel.active ? `Clickable: “${sel.active.name}”` : 'Make it clickable', () => enter('active'), !!sel.active),
+      !isHero && b('', sel.active ? 'Clickable ✓' : 'Make it clickable', () => enter('active'), !!sel.active),
       b(
         '',
         sel.tie ? 'Tied — change' : 'Tie to…',
@@ -167,22 +165,19 @@ export function screenThing(kit) {
         },
         !!sel.tie,
       ),
-      !ws &&
-        c.mods().inventory &&
+      c.mods().inventory &&
         !isHero &&
         b('', `Give to ${S.names.player}`, () => {
           const l = lab(sel);
           c.giveToPlayer(sel);
           done(`${S.names.player} gets ${l}`);
         }),
-      !(ws && isHero) &&
-        b('', 'Remove', () => {
-          const l = lab(sel);
-          c.removeEntity(sel);
-          done(`${l} disappears`);
-        }),
+      b('', 'Remove', () => {
+        const l = lab(sel);
+        c.removeEntity(sel);
+        done(`${l} disappears`);
+      }),
     ),
-    ws && isHero && h('p', { class: 'dim small' }, 'This marks where the Player’s hero starts in this scene.'),
     sel.solid && h('p', { class: 'dim small' }, 'Solid: the Player’s hero cannot walk through it.'),
     doneBtn(''),
   );
@@ -562,7 +557,7 @@ export function screenActive(kit) {
         id: 'activeToggle',
         class: on ? 'on' : '',
         onclick: () => {
-          sel.active = on ? null : { name: '', verbs: ['Look at', 'Use', 'Open'] };
+          sel.active = on ? null : { verbs: ['Look at', 'Use', 'Open'] };
           c.rebuild();
         },
       },
@@ -577,9 +572,8 @@ export function screenActive(kit) {
         id: 'activeName',
         placeholder: 'Its name, e.g. “Old oak chest”',
         maxlength: 40,
-        value: sel.active.name,
+        value: sel.name,
         oninput: (ev) => {
-          sel.active.name = ev.target.value;
           sel.name = ev.target.value;
           c.changedQuiet();
         },
@@ -681,8 +675,7 @@ export function screenActive(kit) {
       {
         class: 'primary gdone',
         onclick: () => {
-          if (sel.active && !sel.active.name.trim()) sel.active.name = lab(sel).replace(/^the /, '');
-          if (!setup && sel.active) G.log.push(`${sel.active.name} can be used`);
+          if (!setup && sel.active) G.log.push(`${sel.name || lab(sel)} can be clicked`);
           back();
         },
       },
@@ -795,7 +788,7 @@ export function screenTie(kit) {
 
 /* ================= an exit to another scene ================= */
 export function screenExit(kit) {
-  const { p, c, d, S, ws, setup, home, done, head, doneBtn } = kit;
+  const { p, c, d, S, setup, home, done, head, doneBtn } = kit;
   const ex = d.exits.find((x) => x.id === G.exit);
   if (!ex) {
     home();
@@ -844,19 +837,18 @@ export function screenExit(kit) {
         },
         ex.locked ? 'Locked — click to unlock' : 'Open — click to lock',
       ),
-      !ws &&
-        h(
-          'button',
-          {
-            class: 'grow',
-            disabled: !ex.to,
-            onclick: () => {
-              const doc = c.travelTo(ex.to);
-              if (doc) done(`Traveling to “${doc.name}”`);
-            },
+      h(
+        'button',
+        {
+          class: 'grow',
+          disabled: !ex.to,
+          onclick: () => {
+            const doc = c.travelTo(ex.to);
+            if (doc) done(`Traveling to “${doc.name}”`);
           },
-          'Travel there now',
-        ),
+        },
+        'Travel there now',
+      ),
       h(
         'button',
         {

@@ -4,7 +4,7 @@ import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
 import { spriteView, assetLabel, backdropCss, pixelInfo, CUSTOM, viewKey, assetUrl } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 import { LIGHTS } from '../shared/options.js';
-import { baseOf } from '../shared/scene-model.js';
+import { baseOf, nameOf, called } from '../shared/scene-model.js';
 
 /** Fill in fields that older saved scenes do not have. */
 /** How big a thing of scale 1 is drawn, in units of --u (an eighth of the stage width): a person is a tile and a half tall. */
@@ -18,7 +18,6 @@ function tallOf(asset) {
 }
 const VIEW_FILE = { side: '.side', used: '.used', sideUsed: '.side.used' };
 /** What a thing is called: the name the Director gave it. Until then it has none, and is spoken of as "this". */
-export const thingName = (e) => (e && (e.name || (e.active && e.active.name))) || '';
 export function glyphNode(code, asset, cls = '', view = '', used = false) {
   if (isDoll(asset)) return dollNode(asset, cls);
   const v = spriteView(code, asset);
@@ -52,7 +51,7 @@ export function glyphNode(code, asset, cls = '', view = '', used = false) {
 /** What the Player did this turn, as rows of [kind, text]: says, does, goes, gives, rolls. */
 export function actionParts(scene, pendingRoll) {
   const parts = [];
-  const name = (e) => thingName(e) || 'this';
+  const name = called;
   if (scene.said) parts.push(['says', `“${scene.said}”`]);
   if (scene.felt) parts.push(['feels', 'feels ' + scene.felt]);
   const item = scene.use && scene.sheet.inv.find((i) => i.id === scene.use);
@@ -282,12 +281,12 @@ export function renderStage(root, scene, o = {}) {
       (at.held && (at.held.gone || at.held.fresh) ? ' gone' : '') +
       (o.showKinds && e.solid ? ' solid' : '') +
       (e.active ? ' active' : '') +
-      (thingName(e) ? ' named' : '') +
+      (nameOf(e) ? ' named' : '') +
       (o.hot && o.hot.has(e.id) ? ' hot' : '') +
       (o.speaker === e.id ? ' speaking' : '') +
       (e.walk && !e.fx ? ' walk' : '') +
       (e.pop ? ' popin' : '');
-    el.dataset.name = thingName(e); // shown when the pointer is over it — only once the Director has named it
+    el.dataset.name = nameOf(e); // shown when the pointer is over it — only once the Director has named it
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '') + (o.playing && e.once ? ' once-' + e.once : '');
     fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${faces(e) !== !!(at.held && faces(at.held)) ? -1 : 1})`;
     if (emote.textContent !== (e.emote || '')) emote.textContent = e.emote || '';

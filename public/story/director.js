@@ -30,7 +30,7 @@ import { openStory } from './viewer.js';
 import { leave } from '../shell/home.js';
 import { clone, clamp, h } from '../core/dom.js';
 
-import { openWorkshop } from '../build/workshop.js';
+import { openMap } from '../build/map.js';
 import { resetGuided, guidedStart, guidedPick } from './guided.js';
 
 const IDEAS = [
@@ -73,8 +73,8 @@ export const guidedCtx = {
     return app.code;
   },
   pen,
-  workshop: (o) => showWorkshop(o),
-  useScene: (doc) => useScene(doc, false),
+  map: () => showMap(),
+  useScene,
   travelTo: (id) => travelTo(id),
   rid,
   select(id) {
@@ -116,39 +116,35 @@ export const guidedCtx = {
   idea: () => toast('' + IDEAS[Math.floor(Math.random() * IDEAS.length)]),
   dollMaker: (e) => showDollMaker(e),
 };
-/* ---------- prepared scenes and the scene workshop ---------- */
+/* ---------- the map: scenes kept for this story ---------- */
 function blankHero() {
   return newEntity((hero(app.S.scene) || { asset: HERO_ASSET }).asset, { id: 'hero', y: 0.8 });
 }
-/** Put a prepared scene (or the workshop's edit of the live one) on the stage, as part of the current step. */
-function useScene(doc, live) {
+/** Bring a scene from the map on the stage, as part of the current step. The hero stays who they are, with what they hold. */
+function useScene(doc) {
   const src = doc.scene,
     me = hero(app.draft),
-    at = src.entities.find((e) => e.id === src.heroId);
-  const carried = me && !live ? app.draft.entities.filter((e) => e.tie && e.tie.to === me.id) : []; // what the hero holds comes along
-  const cameFrom = app.draft.sceneId;
+    at = src.entities.find((e) => e.id === src.heroId),
+    carried = me ? app.draft.entities.filter((e) => e.tie && e.tie.to === me.id) : [],
+    cameFrom = app.draft.sceneId;
   Object.assign(app.draft, {
     backdrop: src.backdrop,
     mood: src.mood,
     weather: src.weather,
+    dark: src.dark || 0,
     level: clone(src.level),
-    tracks: [],
+    drawing: clone(src.drawing || []),
     exits: clone(src.exits || []),
-    sceneId: live ? app.draft.sceneId : doc.id,
+    sceneId: doc.id,
+    tracks: [],
     cam: null,
   });
-  if (!live) app.draft.drawing = [];
-  const ids = new Map(src.entities.map((e) => [e.id, e.id === src.heroId && me ? me.id : live ? e.id : rid()])); // ties keep pointing at the right thing
+  const ids = new Map(src.entities.map((e) => [e.id, e.id === src.heroId && me ? me.id : rid()])); // ties keep pointing at the right thing
   app.draft.entities = src.entities
-    .filter((e) => e.id !== src.heroId && !(me && !live && e.tie && e.tie.to === src.heroId)) // what the hero holds comes from the hero on stage
-    .map((e) => ({
-      ...clone(e),
-      id: ids.get(e.id),
-      say: live ? e.say : '',
-      tie: e.tie && ids.has(e.tie.to) ? { ...e.tie, to: ids.get(e.tie.to) } : null,
-    }));
+    .filter((e) => e.id !== src.heroId && !(me && e.tie && e.tie.to === src.heroId)) // what the hero holds comes from the hero on stage
+    .map((e) => ({ ...clone(e), id: ids.get(e.id), say: '', tie: e.tie && ids.has(e.tie.to) ? { ...e.tie, to: ids.get(e.tie.to) } : null }));
   if (me) {
-    const door = !live && cameFrom && app.draft.exits.find((x) => x.to === cameFrom); // arrive at the way back to where they came from
+    const door = cameFrom && app.draft.exits.find((x) => x.to === cameFrom); // arrive at the way back to where they came from
     if (door) {
       me.x = clamp(door.x + (door.x < 0.5 ? 0.08 : -0.08), 0.04, 0.96);
       me.y = clamp(door.y + (door.y < 0.3 ? 0.14 : 0.05), 0.1, 1);
@@ -165,17 +161,16 @@ function useScene(doc, live) {
 function travelTo(sceneId) {
   const doc = (app.S.scenes || []).find((d) => d.id === sceneId);
   if (!doc) {
-    toast('That exit does not lead to a prepared scene yet — set it in the scene workshop');
+    toast('That exit does not lead to a prepared scene yet — connect it on the map');
     return null;
   }
-  useScene(doc, false);
+  useScene(doc);
   app.draft.travel = doc.name;
   app.draft.exit = null;
   rebuild();
   return doc;
 }
-/** Keep the scene on stage as a prepared scene, to come back to or to connect on the map. */
-/** A copy of what is on stage, ready for the bench in Build scene: the place and its things, without this turn's lines and moments. */
+/** A copy of what is on stage, to keep on the map: the place and its things, without this turn's lines and moments. */
 function stageCopy() {
   const scene = normScene({
     ...clone(app.draft),
@@ -190,35 +185,25 @@ function stageCopy() {
     said: undefined,
     rollWant: undefined,
   });
-  for (const e of scene.entities) {
-    e.say = '';
-    e.once = '';
-  }
+  for (const e of scene.entities) Object.assign(e, { say: '', once: '' });
   return scene;
 }
-export function showWorkshop(o = {}) {
+export function showMap() {
   const can = directing();
   $('#panel').replaceChildren();
-  resetGuided(); // the same tools now work on the scene being built
-  openWorkshop({
+  openMap({
     code: app.code,
     names: app.S.names,
     scenes: clone(app.S.scenes || []),
     blankHero,
     toast,
-    audio,
-    adventure: app.S.rules.type === 'adventure',
-    map: !!o.map,
-    rules: app.S.rules,
-    assets: app.S.assets,
-    maker: (k, f) => maker(k, f),
     stage: can ? stageCopy : null,
     sceneId: () => (can ? app.draft.sceneId : app.S.scene.sceneId),
     save: (scenes) => {
       app.S.scenes = clone(scenes);
       return act('saveScenes', { scenes }, 3).catch((e) => toast(e.message));
     },
-    use: can ? (doc) => useScene(doc, false) : null,
+    use: can ? useScene : null,
     closed: () => {
       resetGuided();
       if (directing()) guidedStart(app.draft);

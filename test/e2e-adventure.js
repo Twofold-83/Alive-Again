@@ -265,22 +265,22 @@ const { setup } = require('./lib');
     await x.opt('Map');
     await p.click('#mapNew'); // the stage is kept as a scene on the map, twice
     await p.click('#mapNew');
-    await p.waitForSelector('.wsmap .node >> nth=1'); // the newest one is selected
+    await p.waitForSelector('.mapboard .node >> nth=1'); // the newest one is selected
     await p.click('#mapDup');
-    assert.equal(await p.locator('.wsmap .node').count(), 3, 'duplicated on the map');
+    assert.equal(await p.locator('.mapboard .node').count(), 3, 'duplicated on the map');
     await p.click('#mapDel');
-    assert.equal(await p.locator('.wsmap .node').count(), 2, 'and deleted again');
-    await p.click('.wsmap .node >> nth=0');
+    assert.equal(await p.locator('.mapboard .node').count(), 2, 'and deleted again');
+    await p.click('.mapboard .node >> nth=0');
     await p.click('#mapLink');
-    await p.click('.wsmap .node >> nth=1');
-    await p.waitForSelector('.wsmap line', { state: 'attached' });
-    assert.match(await p.textContent('.wstools'), /Connections \(1\).*Scene [12] ⇄ Scene [12]/s);
+    await p.click('.mapboard .node >> nth=1');
+    await p.waitForSelector('.mapboard line', { state: 'attached' });
+    assert.match(await p.textContent('.benchtools'), /Connections \(1\).*Scene [12] ⇄ Scene [12]/s);
     await p.click('.conn button:has-text("Open")');
-    await p.waitForSelector('.wsmap line.locked', { state: 'attached' });
+    await p.waitForSelector('.mapboard line.locked', { state: 'attached' });
     await p.click('.conn button:has-text("Locked")');
     await x.shot('a-1-workshop-exit');
     await p.click('#mapEdit'); // "Edit" goes there: scenes are changed on the stage
-    await p.waitForSelector('#workshop', { state: 'hidden' });
+    await p.waitForSelector('#storymap', { state: 'hidden' });
     assert.match(await p.textContent('#stage .exit'), /Scene 2/);
     await toPlayer();
     await p.click('#stage .exit');
