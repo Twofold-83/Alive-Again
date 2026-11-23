@@ -1184,9 +1184,9 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
     const p = pal({
       k: '#0b090b',
       d: '#1a1416',
-      c: '#4b4845', // cement
-      C: '#56524e',
-      e: '#3c3938',
+      c: '#42403e', // cement
+      C: '#4b4845',
+      e: '#353332',
       r: '#6a3d28', // rust
       R: '#84502e',
       u: '#4a2c22',
@@ -1209,8 +1209,8 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
       speck(c, p.e, 9, 6);
       for (let y = 0; y < 16; y++) {
         if (y % 5 !== 2) c.set(5, y, p.e);
-        if (y % 2) c.set(11, y, hex('#5a4132'));
-        if (y % 4 === 1) c.set(12, y, hex('#5a4132'));
+        if (y % 2) c.set(11, y, hex('#513b30'));
+        if (y % 4 === 1) c.set(12, y, hex('#513b30'));
       }
       dots(c, p.e, [[4, 9], [6, 3], [5, 2]]);
       dots(c, p.j, [[2, 12], [14, 4]]);
@@ -1219,7 +1219,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
       each(c, (x, y) => {
         if (x % 4 >= 2 && y % 4 >= 2) return p.k;
         const h = (x >> 2) * 3 + (y >> 2) * 5;
-        return y % 4 === 0 ? (h % 4 === 0 ? p.R : p.r) : x % 4 === 0 && y % 4 < 2 ? p.r : h % 3 === 0 ? hex('#3f2a24') : p.u;
+        return y % 4 === 0 ? (h % 4 === 0 ? hex('#5e3828') : hex('#54342a')) : h % 3 === 0 ? hex('#3f2a24') : p.u;
       });
     const plate = (c) => {
       fill(c, p.u);
@@ -1245,15 +1245,21 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
           'hanging chains shackle',
           (c) => {
             const chain = (x, y1) => {
-              for (let y = 0; y <= y1; y++) c.set(x + (y % 4 === 3 ? 0 : y % 2), y, y % 2 ? p.I : p.i);
-              for (let y = 0; y <= y1; y += 2) c.set(x + 1 - (y % 4 === 2 ? 0 : 1) + 0, y, p.j);
+              for (let y = 0; y <= y1; y++) {
+                if (y % 3 === 2) c.set(x, y, p.j);
+                else {
+                  c.set(x, y, p.S);
+                  c.set(x + 1, y, p.j);
+                  c.set(x - 1, y, p.i);
+                }
+              }
             };
             chain(3, 10);
             chain(8, 13);
             chain(12, 6);
-            art(c, 2, 11, ['iIi', 'i.i', 'iii'], p);
-            art(c, 7, 13, ['.I.', 'i.i', '.ii'], p);
-            dots(c, p.r, [[3, 4], [9, 7], [12, 3]]);
+            art(c, 1, 11, ['jSSSj', 'S.e.S', 'S.e.S', 'jSSSj'], p);
+            art(c, 7, 13, ['jSj', 'S.j', '.Sj'], p);
+            dots(c, p.r, [[3, 4], [8, 7], [12, 3]]);
           },
         ],
         [
@@ -1322,10 +1328,10 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
               '.jSssssssssIIij.',
               '.jSsssssssIjjij.',
               '.jSsssssssIjsij.',
-              '.jSsssrsssssssj.',
-              '.jSssrrsssssrij.',
-              '.jSsrrrssssrrij.',
-              '.jSsxbbsssrrbij.',
+              '.jSsssssssssssj.',
+              '.jSssussssssuij.',
+              '.jSsuussssuuuij.',
+              '.jSsxbbsssuubij.',
               '.jiixbbiiiibbij.',
               '.jjjxbbjjjjbbjj.',
             ], p),
@@ -1335,12 +1341,17 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
           'barbed wire coils',
           (c) => {
             for (let x = 0; x < 16; x++) {
-              c.set(x, 4 + Math.round(Math.sin((x / 16) * Math.PI * 2) * 2), p.S);
-              c.set(x, 6 - Math.round(Math.sin((x / 16) * Math.PI * 2) * 2), p.s);
-              c.set(x, 11 + Math.round(Math.sin((x / 16) * Math.PI * 2 + 1.6) * 2), p.s);
+              const a = Math.round(Math.sin((x / 16) * Math.PI * 2) * 1.5);
+              c.set(x, 4 + a, p.S);
+              c.set(x, 5 + a, p.j);
+              c.set(x, 11 - a, p.S);
+              c.set(x, 12 - a, p.j);
             }
-            for (const [x, y] of [[2, 6], [6, 5], [10, 2], [13, 3], [3, 12], [8, 9], [12, 10]]) art(c, x - 1, y - 1, ['S.S', '.S.', 'S.S'], p);
-            dots(c, p.b, [[6, 7], [6, 8], [8, 11]]);
+            for (const [x, y] of [[1, 4], [5, 5], [9, 3], [13, 3], [3, 10], [7, 11], [11, 12], [15, 11]]) {
+              c.set(x, y - 1, p.S);
+              c.set(x + 1, y + 1, p.S);
+            }
+            dots(c, p.b, [[5, 7], [5, 8], [7, 13], [7, 14]]);
           },
         ],
       ],
@@ -1371,7 +1382,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
                 r = Math.hypot(dx, dy),
                 a = (Math.atan2(dy, dx) + Math.PI * 2 + r * 0.12) % (Math.PI / 2);
               if (r < 1.6) return p.I;
-              return r < 8 && a < 0.62 ? hex('#34363b') : r < 8.6 ? hex('#141215') : null;
+              return r < 8 && a < 0.7 ? hex('#4a4d54') : r < 8.6 ? hex('#1a181c') : null;
             }),
         ],
         [
@@ -1559,6 +1570,876 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
               const r = Math.hypot((x - 7.5) * 1, (y - 7.5) * 1.5);
               return (r > 2.2 && r < 3.2) || (r > 6 && r < 7) ? hex('#8284ac') : r < 1 ? hex('#565880') : null;
             }),
+        ],
+      ],
+    });
+  }
+
+  /* ================= 8. weird ================= */
+  {
+    const p = pal({
+      a: '#5a5739', // the wallpaper
+      A: '#737048',
+      z: '#434129',
+      L: '#817e58', // where it bulges
+      D: '#39372a',
+      w: '#aaa48a', // the white of an eye
+      k: '#0f0d0c',
+      i: '#6b3a2c',
+      d: '#4c2b27', // a door
+      E: '#5e3a32',
+      b: '#8f7636',
+      y: '#b8a468',
+      r: '#2a281c', // roots
+      R: '#403d28',
+      g: '#4a5234',
+      q: '#8c6a6a',
+      f: '#3a2a22',
+      F: '#5a4234',
+      t: '#b5ae96', // teeth
+      T: '#8f886f',
+      v: '#4a4468', // a vein
+      m: '#7a3c40', // lips
+      M: '#8f4c4c',
+    });
+    const fl = hex('#73504d'),
+      fL = hex('#86635d'),
+      fD = hex('#5b3e40'),
+      fK = hex('#402a2e');
+    const lid = (c, x, y) => {
+      art(c, x, y, ['A.....A', '.AAAAA.', '..z.z..'], p);
+    };
+    const eye = (c, x, y, look = 0) => {
+      art(c, x, y - 1, ['.zzzzz.', 'zwwwwwz', '.zzzzz.'], p);
+      c.set(x + 3 + look, y, p.k);
+      c.set(x + 2 + look, y, p.i);
+    };
+    const wall = (c) => {
+      fill(c, p.a);
+      lid(c, 0, 2);
+      lid(c, 8, 10);
+      dots(c, p.z, [[11, 3], [3, 11]]);
+      dots(c, p.A, [[11, 2], [11, 4], [10, 3], [12, 3], [3, 10], [3, 12], [2, 11], [4, 11]]);
+    };
+    const floor = (c) =>
+      each(c, (x, y) => {
+        const v = (y + Math.round(Math.sin((x / 16) * Math.PI * 2) * 1.5) + 16) % 4;
+        return v === 0 ? fL : v === 3 ? fD : fl;
+      });
+    set('weird', 'weird strange wrong uncanny', {
+      top: (c) => {
+        fill(c, hex('#141210'));
+        speck(c, hex('#1b1814'), 7, 9);
+        dots(c, hex('#221d16'), [[5, 12], [13, 5]]);
+      },
+      wallWords: 'wallpaper that watches closed eyes pattern',
+      wall,
+      details: [
+        [
+          'eyes',
+          'eyes open watching wallpaper',
+          (c) => {
+            eye(c, 0, 3, 1);
+            c.rect(8, 10, 14, 12, p.a);
+            c.rect(10, 2, 12, 4, p.a);
+            art(c, 4, 6, ['..zzzzzz..', '.zwwiiwwz.', 'zwwwikkiwwz', '.zwwiiwwz.', '..zzzzzz..'], p);
+            eye(c, 1, 13, 1);
+          },
+        ],
+        [
+          'small-door',
+          'door too small tiny light under',
+          (c) =>
+            art(c, 0, 6, [
+              '......ffff......',
+              '.....fdEEdf.....',
+              '....fdEddEdf....',
+              '....fdEddEdf....',
+              '....fddddddf....',
+              '....fdEddbdf....',
+              '....fdEddEdf....',
+              '....fdEEEEdf....',
+              '....fddddddf....',
+              '....fyyyyyyf....',
+            ], p),
+        ],
+        [
+          'hands',
+          'hands pressing through wall bulge',
+          (c) => {
+            c.rect(0, 1, 15, 14, p.a);
+            art(c, 1, 2, ['.L.L.L..', '.L.L.L.L', '.L.L.L.L', '.LLLLLLL', 'LLLLLLLD', 'L.LLLLLD', '..LLLLD.', '..LDDD..'], p);
+            art(c, 8, 6, ['..L.L.L.', 'L.L.L.L.', 'L.L.L.L.', 'LLLLLLL.', 'LLLLLLLL', 'DLLLLL.D', '.DLLLL..', '..DDDL..'], p);
+            dots(c, p.D, [[3, 3], [5, 3], [3, 4], [5, 4], [7, 4], [11, 7], [13, 7], [11, 8], [13, 8], [9, 8]]);
+          },
+        ],
+        [
+          'clock',
+          'clock without hands face',
+          (c) => {
+            c.rect(2, 2, 13, 13, p.a);
+            c.oval(2, 1, 13, 12, p.f);
+            c.oval(3, 2, 12, 11, p.w);
+            dots(c, p.f, [[7, 3], [8, 3], [11, 6], [11, 7], [7, 10], [8, 10], [4, 6], [4, 7]]);
+            dots(c, p.T, [[10, 4], [5, 4], [10, 9], [5, 9]]);
+            art(c, 7, 6, ['Tk', 'kT'], p);
+            art(c, 6, 13, ['fFFf', '.bb.', '.bb.'], p);
+          },
+        ],
+        [
+          'roots',
+          'growth roots tendrils',
+          (c) => {
+            art(c, 0, 0, [
+              'rRr..r......rR..',
+              '.rRr.r.....rR...',
+              '..rRrr.....r....',
+              '...rRr....rr....',
+              '...rRrr...r.....',
+              '..rr.rRr..r.....',
+              '..r...rRrrr.....',
+              '.rr....rR.......',
+              '.r.....rRr......',
+              'qr......rRr.....',
+              '........r.rr....',
+              '.......rr..r....',
+              '.......r...rq...',
+              '......rr........',
+              '......r.........',
+              '.....gr.........',
+            ], p);
+            dots(c, p.g, [[4, 5], [9, 5], [12, 11], [0, 8]]);
+          },
+        ],
+      ],
+      floorWords: 'flesh ridges organic',
+      floor,
+      variants: [
+        [
+          'eye',
+          'eye open in the floor',
+          (c) => {
+            art(c, 2, 5, ['...KKKKKK...', '.KKwwiiwwKK.', 'KwwwikkiwwwK', '.KKwwiiwwKK.', '...KKKKKK...'], { ...p, K: fK });
+            art(c, 4, 4, ['LLLLLLLL'], { L: fL });
+          },
+        ],
+        [
+          'teeth',
+          'teeth ring maw',
+          (c) => {
+            c.oval(3, 3, 12, 12, fK);
+            c.oval(5, 5, 10, 10, p.k);
+            dots(c, p.t, [[7, 4], [8, 4], [5, 5], [10, 5], [4, 7], [4, 8], [11, 7], [11, 8], [5, 10], [10, 10], [7, 11], [8, 11]]);
+            dots(c, p.T, [[6, 4], [9, 4], [4, 6], [11, 6], [4, 9], [11, 9], [6, 11], [9, 11]]);
+          },
+        ],
+        [
+          'vein',
+          'vein blue branching',
+          (c) => {
+            art(c, 1, 2, [
+              '..vv..........',
+              '....vv........',
+              '......v.......',
+              '......vv......',
+              '.......v...vv.',
+              '.......vv.v...',
+              '........vv....',
+              '.......v......',
+              '......vv......',
+              '....vv........',
+              '...v..........',
+              '..v...........',
+            ], p);
+            dots(c, hex('#5c5478'), [[7, 5], [9, 8], [6, 11]]);
+          },
+        ],
+        [
+          'mouth',
+          'mouth lips',
+          (c) =>
+            art(c, 2, 5, [
+              '..mMMm..mMMm',
+              '.mMMMMmmMMMMm',
+              'mmkkkkkkkkkkm',
+              '.mMMMMMMMMMMm',
+              '..mmMMMMMMmm',
+              '....mmmmmm',
+            ], p),
+        ],
+      ],
+    });
+  }
+
+  /* ================= 9. apartment: the stairwell and corridor of a block of flats ================= */
+  {
+    const p = pal({
+      k: '#0e0e11',
+      u: '#676654', // paint above the dado
+      U: '#727160',
+      l: '#3d4f47', // and below
+      L: '#47584f',
+      n: '#2b3833',
+      d: '#4d3a2c', // a flat's door
+      D: '#5c4635',
+      e: '#3a2b22',
+      s: '#62676d', // steel
+      S: '#7b8086',
+      j: '#3c4046',
+      b: '#93793a',
+      w: '#b3ae98', // paper
+      W: '#c9c5b0',
+      r: '#84302c',
+      c: '#77593a', // cork
+      g: '#232c36', // the yard at night
+      G: '#35434f',
+      y: '#a9965a',
+      t: '#c8cdb8', // a strip light
+      T: '#e0e2cf',
+      i: '#8f8c7a', // a radiator
+      I: '#a8a592',
+      h: '#6d6a5c',
+      m: '#4f3d2b', // a doormat
+      M: '#63503a',
+    });
+    const lino = hex('#596058'),
+      linoL = hex('#687066'),
+      linoD = hex('#4b5149'),
+      linoY = hex('#737160');
+    const wall = (c) => {
+      c.rect(0, 0, 15, 8, p.u);
+      c.row(9, 0, 15, p.n);
+      c.rect(0, 10, 15, 15, p.l);
+      dots(c, p.U, [[3, 2], [4, 2], [11, 6], [8, 4]]);
+      dots(c, hex('#5c5b4a'), [[13, 1], [6, 7], [1, 5]]);
+      dots(c, p.L, [[5, 12], [12, 14], [13, 14]]);
+      dots(c, p.n, [[9, 12], [2, 14]]);
+    };
+    const floor = (c) => {
+      fill(c, lino);
+      speck(c, linoL, 14, 4);
+      speck(c, linoD, 14, 8);
+      speck(c, linoY, 6, 13);
+    };
+    set('apartment', 'apartment block of flats stairwell corridor', {
+      top: (c) => {
+        fill(c, hex('#16161a'));
+        speck(c, hex('#1c1c21'), 7, 6);
+        dots(c, hex('#111114'), [[4, 4], [11, 12]]);
+      },
+      wallWords: 'two tone painted concrete dado',
+      wall,
+      details: [
+        [
+          'door',
+          'flat door number peephole letter slot',
+          (c) =>
+            art(c, 0, 0, [
+              '..eeeeeeeeeeee..',
+              '..eDDDDDDDDDDe..',
+              '..eDddddddddde..',
+              '..eDddwwwdddde..',
+              '..eDddwkwdddde..',
+              '..eDddddddddde..',
+              '..eDdddkddddde..',
+              '..eDddddddddde..',
+              '..eDdddddddbde..',
+              '..eDdddddddbde..',
+              '..eDdbbbbbddde..',
+              '..eDdbkkkbddde..',
+              '..eDddddddddde..',
+              '..eDddddddddde..',
+              '..eDddddddddde..',
+              '..emmmmmmmmmme..',
+            ], p),
+        ],
+        [
+          'letterboxes',
+          'letter boxes mail post',
+          (c) => {
+            c.rect(1, 2, 14, 12, p.j);
+            for (let j = 0; j < 2; j++)
+              for (let i = 0; i < 3; i++) {
+                const x = 2 + i * 4,
+                  y = 3 + j * 5;
+                c.rect(x, y, x + 3, y + 3, p.s);
+                c.row(y, x, x + 3, p.S);
+                c.row(y + 1, x, x + 2, p.k);
+                c.set(x + 3, y + 3, p.j);
+                c.set(x + 1, y + 3, p.w);
+              }
+            c.rect(10, 8, 13, 11, p.k);
+            art(c, 6, 3, ['WW', 'ww'], p);
+            art(c, 11, 10, ['w', 'W'], p);
+            c.set(2, 6, p.r);
+          },
+        ],
+        [
+          'lift',
+          'lift elevator doors button',
+          (c) =>
+            art(c, 0, 0, [
+              '.jjjjjjjjjjjjj..',
+              '.jkkkkrkkkkkkj..',
+              '.jjjjjjjjjjjjj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj.j',
+              '.jSssssjSssssjjy',
+              '.jSssssjSssssj.j',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSssssjSssssj..',
+              '.jSsssjjjssssj..',
+            ], p),
+        ],
+        [
+          'light',
+          'strip light fluorescent tube',
+          (c) => {
+            for (let y = 3; y <= 8; y++) for (let x = 0; x < 16; x++) if (y < 9) c.set(x, y, blend(c.get(x, y), p.t, y === 3 || y === 8 ? 0.1 : 0.22));
+            art(c, 1, 5, ['jssssssssssssj', 'jTTTTTTtTTTTTj'], p);
+            dots(c, p.h, [[5, 6], [6, 6]]);
+          },
+        ],
+        [
+          'noticeboard',
+          'notice board pinned papers',
+          (c) =>
+            art(c, 0, 1, [
+              '.eeeeeeeeeeeeee.',
+              '.ecccccccccccce.',
+              '.ecwwwcWWWcwwce.',
+              '.ecwrwcWWWcwwce.',
+              '.ecwwwcWkWccwce.',
+              '.ecwwwcWWWcccce.',
+              '.ecccccccccrrce.',
+              '.ecWWWWccccrrce.',
+              '.ecWkkWcwwcccce.',
+              '.ecccccccwcccce.',
+              '.eeeeeeeeeeeeee.',
+            ], p),
+        ],
+        [
+          'radiator',
+          'radiator heating pipes',
+          (c) => {
+            for (let x = 2; x <= 13; x++) c.col(x, 8, 13, x % 2 ? p.h : p.i);
+            c.row(7, 2, 13, p.I);
+            c.row(14, 2, 13, p.j);
+            c.row(10, 2, 13, p.I);
+            art(c, 14, 6, ['h', 'h', 'h', 'h', 'h', 'h', 'h', 'h', 'h', 'h'], p);
+            c.set(14, 8, p.r);
+            art(c, 1, 12, ['h', 'h', 'h', 'h'], p);
+            dots(c, hex('#5c4a30'), [[4, 9], [4, 10], [9, 12]]);
+          },
+        ],
+        [
+          'window',
+          'window to the yard night lit window',
+          (c) =>
+            art(c, 0, 1, [
+              '..jjjjjjjjjjjj..',
+              '..jgggggjggggj..',
+              '..jggGggjggggj..',
+              '..jgGGGgjgyggj..',
+              '..jgGGGgjggggj..',
+              '..jgGgGgjggggj..',
+              '..jjjjjjjjjjjj..',
+              '..jGGGGGjgGGgj..',
+              '..jGyGGGjgGGgj..',
+              '..jGGGGGjgGGgj..',
+              '..jjjjjjjjjjjj..',
+              '.hhhhhhhhhhhhhh.',
+            ], p),
+        ],
+      ],
+      floorWords: 'speckled linoleum lino',
+      floor,
+      variants: [
+        [
+          'worn',
+          'worn patch path',
+          (c) => {
+            const w = hex('#646a5f');
+            c.oval(2, 3, 13, 12, w);
+            c.rect(0, 6, 15, 9, w);
+            speck(c, linoL, 8, 5, 2, 4, 13, 11);
+            speck(c, lino, 9, 7, 1, 3, 14, 12);
+            dots(c, linoY, [[6, 7], [10, 6], [4, 9]]);
+          },
+        ],
+        [
+          'stain',
+          'stain dark spill',
+          (c) => {
+            const d = hex('#3f423c');
+            c.oval(3, 4, 11, 11, d);
+            c.rect(6, 3, 9, 12, d);
+            c.oval(9, 8, 13, 12, d);
+            dots(c, hex('#33352f'), [[6, 6], [7, 7], [8, 6], [7, 9], [11, 10]]);
+            dots(c, d, [[13, 5], [2, 12], [14, 13]]);
+          },
+        ],
+        [
+          'doormat',
+          'doormat mat bristle',
+          (c) => {
+            c.rect(1, 4, 14, 12, p.m);
+            c.frame(1, 4, 14, 12, p.e);
+            for (let y = 5; y <= 11; y++) for (let x = 2; x <= 13; x++) if ((x + y * 2) % 3 === 0) c.set(x, y, p.M);
+            c.row(13, 2, 14, linoD);
+          },
+        ],
+        [
+          'cracked',
+          'cracked torn lino lifted corner',
+          (c) => {
+            dots(c, hex('#33362f'), [[2, 3], [3, 4], [4, 4], [5, 5], [6, 6], [6, 7], [7, 8], [8, 8], [9, 9], [10, 9], [11, 10], [6, 8], [5, 9], [5, 10]]);
+            art(c, 11, 10, ['kkkk.', 'kkkkk', 'Lkkkk', 'LLkkk', 'LLLkk'], { k: hex('#2f2c2a'), L: linoL });
+          },
+        ],
+      ],
+    });
+  }
+
+  /* ================= 10. modern: a home of the 1980s and 90s ================= */
+  {
+    const p = pal({
+      k: '#101014',
+      a: '#6f6d5c', // woodchip paper, painted
+      A: '#7a7866',
+      z: '#646252',
+      w: '#b0ad9c', // white plastic, gloss paint
+      W: '#c4c1b0',
+      v: '#8d8a7a',
+      g: '#202834', // night outside
+      G: '#323e4c',
+      s: '#a5a290', // blind slats
+      S: '#87846f',
+      x: '#3a3a3c',
+      f: '#4d4a44',
+      F: '#5f5c55',
+      r: '#7a3430', // book spines
+      n: '#2f4a5a',
+      o: '#8a6a2e',
+      e: '#3f5a3e',
+      t: '#6a4e36', // shelf wood
+      T: '#7e6044',
+      i: '#565a60',
+      y: '#a9965a',
+    });
+    const cp = hex('#74624e'),
+      cpL = hex('#7f6d57'),
+      cpD = hex('#685741');
+    const wall = (c) => {
+      fill(c, p.a);
+      speck(c, p.A, 18, 5);
+      speck(c, p.z, 12, 10);
+    };
+    const floor = (c) => each(c, (x, y) => ((x * 3 + y * 5) % 7 === 0 ? cpL : (x * 5 + y * 3) % 11 === 0 ? cpD : cp));
+    set('modern', 'modern home eighties nineties', {
+      top: (c) => {
+        fill(c, hex('#17161a'));
+        speck(c, hex('#1d1c21'), 7, 3);
+        dots(c, hex('#121115'), [[6, 3], [10, 12]]);
+      },
+      wallWords: 'painted woodchip wallpaper',
+      wall,
+      details: [
+        [
+          'window-blinds',
+          'picture window venetian blinds gap',
+          (c) => {
+            art(c, 0, 1, [
+              'ffffffffffffffff',
+              'fssssssssssssssf',
+              'fxxxxxxxxxxxxxxf',
+              'fssssssssssssssf',
+              'fxxxxxxxxxxxxxxf',
+              'fsssssSggSsssssf',
+              'fxxxxxggggxxxxxf',
+              'fssssssSSssssssf',
+              'fxxxxxxxxxxxxxxf',
+              'fssssssssssssssf',
+              'ffffffffffffffff',
+              'vwwwwwwwwwwwwwwv',
+            ], p);
+            c.col(13, 2, 13, p.v);
+          },
+        ],
+        [
+          'door',
+          'door flush white lever handle',
+          (c) =>
+            art(c, 0, 0, [
+              '..FFFFFFFFFFFF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwiiivF..',
+              '..FWwwwwwwwivF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwwwwwwwvF..',
+              '..FWwwvvwwwwvF..',
+              '..FWwvvvvwwwvF..',
+              '..FvvvvvvvvvvF..',
+            ], p),
+        ],
+        [
+          'radiator',
+          'radiator under window',
+          (c) => {
+            art(c, 0, 0, [
+              '..ffffffffffff..',
+              '..fgggggfggggf..',
+              '..fggGggfggggf..',
+              '..fgGGggfggggf..',
+              '..fgGggggggggf'.slice(0, 14) + '..',
+              '..fgggggfggggf..',
+              '..ffffffffffff..',
+              '.vwwwwwwwwwwwwv.',
+            ], p);
+            c.col(8, 1, 5, p.f);
+            for (let x = 2; x <= 13; x++) c.col(x, 9, 14, x % 3 === 1 ? p.v : p.w);
+            c.row(9, 2, 13, p.W);
+            c.row(14, 2, 13, p.v);
+            art(c, 14, 10, ['i', 'i', 'i', 'i', 'i', 'i'], p);
+            c.set(14, 9, p.k);
+          },
+        ],
+        [
+          'shelf',
+          'shelf books tapes plant',
+          (c) =>
+            art(c, 0, 2, [
+              '..............e.',
+              '.r.....o....e.e.',
+              '.rn.e..or....e..',
+              '.rnoer.orn..eee.',
+              '.rnoer.orn..TTT.',
+              '.rnoernorn..TTT.',
+              'TTTTTTTTTTTTTTTT',
+              'tttttttttttttttt',
+              '..i..........i..',
+              '..i..........i..',
+            ], p),
+        ],
+        [
+          'clock',
+          'wall clock plastic hands',
+          (c) => {
+            c.oval(3, 2, 12, 11, p.f);
+            c.oval(4, 3, 11, 10, p.w);
+            dots(c, p.f, [[7, 4], [10, 7], [7, 9], [5, 6]]);
+            c.line(7, 6, 7, 4, p.k);
+            c.line(8, 7, 10, 8, p.k);
+            c.set(8, 8, p.r);
+            c.set(8, 9, p.r);
+            c.set(5, 4, p.W);
+          },
+        ],
+        [
+          'switch',
+          'light switch socket cable',
+          (c) => {
+            art(c, 6, 3, ['wwww', 'wWvw', 'wWvw', 'wwww'], p);
+            c.row(7, 6, 9, p.v);
+            art(c, 5, 11, ['wwwwww', 'wkwwkw', 'wwwwww'], p);
+            c.row(14, 5, 10, p.v);
+            art(c, 10, 12, ['kk..', '.kk.', '..kk', '...k'], p);
+            dots(c, p.z, [[4, 5], [4, 6], [11, 4]]);
+          },
+        ],
+      ],
+      floorWords: 'wall to wall carpet fitted',
+      floor,
+      variants: [
+        [
+          'parquet',
+          'parquet wood blocks',
+          (c) =>
+            each(c, (x, y) => {
+              const q = ((x >> 3) + (y >> 3)) % 2,
+                a = (q ? x : y) % 8,
+                b = (q ? y : x) % 8;
+              return a % 4 === 3 || b === 7 ? hex('#5a442e') : ((a >> 2) + q + (y >> 3)) % 2 ? hex('#806548') : hex('#775c41');
+            }),
+          true,
+        ],
+        [
+          'lino',
+          'kitchen lino vinyl squares',
+          (c) => {
+            each(c, (x, y) => {
+              const u = x % 8,
+                w = y % 8;
+              if (u === 7 || w === 7) return hex('#5d5a4c');
+              return (u === 3 || u === 4) && (w === 3 || w === 4) ? hex('#6a4a38') : ((x >> 3) + (y >> 3)) % 2 ? hex('#7a7562') : hex('#70705e');
+            });
+            dots(c, hex('#5d5a4c'), [[2, 5], [10, 12]]);
+          },
+          true,
+        ],
+        [
+          'rug',
+          'rug edge fringe',
+          (c) => {
+            c.rect(0, 6, 15, 15, hex('#4f3a48'));
+            c.row(6, 0, 15, hex('#8a7a58'));
+            c.row(8, 0, 15, hex('#6a4e5c'));
+            for (let x = 0; x < 16; x += 2) {
+              c.set(x, 5, hex('#a39a7c'));
+              c.set(x, 4, hex('#8a7a58'));
+            }
+            for (let x = 1; x < 16; x += 4) art(c, x, 11, ['.q.', 'qQq', '.q.'], { q: hex('#6a4e5c'), Q: hex('#8a7a58') });
+          },
+        ],
+      ],
+    });
+  }
+
+  /* ================= 11. victorian ================= */
+  {
+    const p = pal({
+      k: '#0d0a0b',
+      g: '#2d4034', // wallpaper
+      G: '#3a5341',
+      h: '#22322a',
+      w: '#4a2f22', // wainscot
+      W: '#5e3e2a',
+      v: '#35211a',
+      o: '#8f7636', // gilt
+      O: '#b09448',
+      r: '#5a1f28', // drapes
+      R: '#72303a',
+      q: '#3f141c',
+      n: '#1a2130', // night in the glass
+      N: '#2a3446',
+      f: '#9c8a74', // a face
+      F: '#b5a48a',
+      y: '#b8a860', // gaslight
+      Y: '#d8cc8a',
+      m: '#6a676a', // marble
+      M: '#858288',
+      i: '#2a2a30',
+      e: '#a8502a',
+      E: '#d08a3a',
+      c: '#43555b', // old mirror glass
+      C: '#62777c',
+      d: '#3a251e',
+      D: '#4c3226',
+    });
+    const pa = hex('#55392a'),
+      pb = hex('#614231'),
+      pl = hex('#3d291f');
+    const wall = (c) => {
+      c.rect(0, 0, 15, 9, p.g);
+      for (const [x, y] of [[2, 2], [10, 2], [6, 6], [14, 6]]) {
+        dots(c, p.G, [[x, y - 1], [x - 1, y], [x + 1, y], [x, y + 1]]);
+        c.set(x, y, p.h);
+      }
+      dots(c, p.h, [[6, 1], [14, 1], [2, 7], [10, 7]]);
+      c.row(10, 0, 15, p.W);
+      c.row(11, 0, 15, p.v);
+      c.rect(0, 12, 15, 15, p.w);
+      c.col(7, 12, 15, p.v);
+      c.col(15, 12, 15, p.v);
+      c.col(0, 12, 14, p.W);
+      c.col(8, 12, 14, p.W);
+      c.row(15, 0, 15, p.v);
+    };
+    const floor = (c) =>
+      each(c, (x, y) => {
+        const z = y % 8 < 4 ? y % 8 : 7 - (y % 8),
+          s = (x + z) % 4;
+        return s === 0 ? pl : s === 1 ? pb : pa;
+      });
+    const glow = (c, x0, y0, x1, y1, col, t) => {
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (c.get(x, y)) c.set(x, y, blend(c.get(x, y), col, t));
+    };
+    set('victorian', 'victorian house old parlour', {
+      top: (c) => {
+        fill(c, hex('#150f0e'));
+        speck(c, hex('#1c1513'), 7, 7);
+        dots(c, hex('#100b0a'), [[4, 10], [12, 4]]);
+      },
+      wallWords: 'dark green patterned wallpaper wood wainscot',
+      wall,
+      details: [
+        [
+          'window',
+          'sash window drapes curtains night',
+          (c) =>
+            art(c, 0, 0, [
+              '.oOoOoOoOoOoOoO.',
+              '.RrrRrrRrrRrrRr.',
+              '.RrnnnnnnnnnnrR.',
+              '.RrnnnNnnnnnnrR.',
+              '.RrrnnNNnnnnrrR.',
+              '.RrrnnnnnnnnrrR.',
+              '.qRrDDDDDDDDrRq.',
+              '.qRrnnnnnnnnrRq.',
+              '..Rrnnnnnnnnrq..',
+              '..oOrnnnnnnrOo..',
+              '..Rrnnnnnnnnrq..',
+              '.RrrnnnnnnnnrrR.',
+              '.RrrDDDDDDDDrrR.',
+              '.RrR........RrR.',
+              '.RrR........RrR.',
+              '.qrq........qrq.',
+            ], p),
+        ],
+        [
+          'portrait',
+          'portrait oval gilt frame faceless',
+          (c) =>
+            art(c, 0, 0, [
+              '.......ii.......',
+              '....oOOOOOOo....',
+              '...oOkkkkkkOo...',
+              '..oOkkkffkkkOo..',
+              '..OkkkfFFfkkkO..',
+              '..OkkkfFFfkkkO..',
+              '..OkkkkffkkkkO..',
+              '..OkkqqffqqkkO..',
+              '..oOqqqqqqqqOo..',
+              '...oOqqqqqqOo...',
+              '....oOOOOOOo....',
+            ], p),
+        ],
+        [
+          'lamp',
+          'gas lamp glowing wall bracket',
+          (c) => {
+            glow(c, 3, 0, 12, 8, p.y, 0.14);
+            glow(c, 5, 1, 10, 7, p.y, 0.16);
+            art(c, 5, 2, [
+              '..yy..',
+              '.yYYy.',
+              '.yYYy.',
+              '.yYYy.',
+              '..yy..',
+              '.oOOo.',
+              '..oo..',
+              '..o...',
+              '..oo..',
+              '...oo.',
+              '..oOo.',
+              '..oOo.',
+            ], p);
+          },
+        ],
+        [
+          'fireplace',
+          'fireplace marble grate coals',
+          (c) =>
+            art(c, 0, 3, [
+              'MMMMMMMMMMMMMMMM',
+              '.mmmmmmmmmmmmmm.',
+              '..MmmmmmmmmmmM..',
+              '..MmoooooooomM..',
+              '..MmokkkkkkomM..',
+              '..MmokkkkkkomM..',
+              '..MmokkkkkkomM..',
+              '..MmokkkkkkomM..',
+              '..MmokiiiikomM..',
+              '..MmokieEikomM..',
+              '..MmoiEeEeiomM..',
+              '..MmoiiiiiiomM..',
+              '.mmmmmmmmmmmmmm.',
+            ], p),
+        ],
+        [
+          'door',
+          'door fanlight panelled',
+          (c) =>
+            art(c, 0, 0, [
+              '.....vvvvvv.....',
+              '....vyyvvyyv....',
+              '...vyyyvvyyyv...',
+              '...vvvvvvvvvv...',
+              '...vDDDDDDDDv...',
+              '...vDddDDddDv...',
+              '...vDddDDddDv...',
+              '...vDddDDddDv...',
+              '...vDDDDDDDDv...',
+              '...vDDDDDDDov...',
+              '...vDddDDddDv...',
+              '...vDddDDddDv...',
+              '...vDddDDddDv...',
+              '...vDddDDddDv...',
+              '...vDDDDDDDDv...',
+              '...vvvvvvvvvv...',
+            ], p),
+        ],
+        [
+          'mirror',
+          'mirror gilt frame reflection figure',
+          (c) =>
+            art(c, 0, 0, [
+              '.......ii.......',
+              '....oOOOOOOo....',
+              '...oOccccCcOo...',
+              '..oOccccCcccOo..',
+              '..OccckkccCccO..',
+              '..OcckkkkccccO..',
+              '..OcckkkkccccO..',
+              '..OccckkcccccO..',
+              '..oOkkkkkkccOo..',
+              '...oOkkkkkcOo...',
+              '....oOOOOOOo....',
+            ], p),
+        ],
+      ],
+      floorWords: 'dark parquet herringbone',
+      floor,
+      variants: [
+        [
+          'runner',
+          'carpet runner red',
+          (c) => {
+            c.rect(0, 2, 15, 13, p.r);
+            c.row(2, 0, 15, p.q);
+            c.row(13, 0, 15, p.q);
+            c.row(4, 0, 15, p.o);
+            c.row(11, 0, 15, p.o);
+            for (let x = 1; x < 16; x += 4) art(c, x, 6, ['.R.', 'RoR', 'RoR', '.R.'], p);
+            speck(c, p.q, 6, 4, 0, 5, 15, 10);
+          },
+        ],
+        [
+          'worn',
+          'worn scuffed pale',
+          (c) =>
+            each(c, (x, y) => {
+              const d = ((x - 7.5) / 7) ** 2 + ((y - 8) / 5) ** 2 + ((x * 5 + y * 3) % 7) * 0.05;
+              const q = c.get(x, y);
+              return d < 1 ? (q === pl ? hex('#584032') : hex('#6d4e3a')) : null;
+            }),
+        ],
+        [
+          'inlay',
+          'tile inlay encaustic star pattern',
+          (c) => {
+            c.rect(1, 1, 14, 14, hex('#3a3330'));
+            each(c, (x, y) => {
+              if (x < 2 || y < 2 || x > 13 || y > 13) return null;
+              const u = Math.abs(x - 7.5),
+                w = Math.abs(y - 7.5),
+                d = u + w;
+              return d < 2.5 ? hex('#7a3a2a') : d < 4.5 ? hex('#8a7848') : d < 6.5 ? hex('#3a3330') : Math.max(u, w) > 5 && d > 9.5 ? hex('#7a3a2a') : hex('#8a7848');
+            });
+          },
         ],
       ],
     });

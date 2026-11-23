@@ -370,6 +370,7 @@ const { setup } = require('./lib');
     await x.done();
     await toPlayer();
     await p.mouse.click(st.x + st.width * kx, st.y + st.height * ky - 10);
+    await p.click('#cmTake'); // the click menu: walk here, look at, use, reach for
     await p.waitForSelector('.ent.target');
     await toDirector();
     await p.click('.card.ask button.primary');

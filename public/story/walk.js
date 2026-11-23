@@ -2,7 +2,7 @@
 import { clamp, h, add } from '../core/dom.js';
 import { findWalk, sample } from '../stage/level.js';
 import { toast, $ } from '../core/dom.js';
-import { hero, heroStart, app } from '../core/state.js';
+import { hero, heroStart, app, mods } from '../core/state.js';
 import { saveDraft, paint, changed, rebuild, submit } from './turn.js';
 import { audio } from '../core/audio.js';
 import { walkable } from '../shared/scene-model.js';
@@ -229,6 +229,20 @@ export function showClickMenu(hit, p, ev) {
       ),
       item(what ? `Look at ${name}` : 'Look at this spot', plain('Look at'), { id: 'cmLook' }),
       item(what ? `Use ${name}` : 'Use this spot', plain('Use'), { id: 'cmUse' }),
+      what &&
+        !what.active &&
+        mods().inventory &&
+        app.S.rules.player === 'free' &&
+        item(
+          `Reach for ${name}`,
+          () => {
+            app.draft.target = app.draft.target === what.id ? null : what.id;
+            app.draft.act = null;
+            app.draft.verb = '';
+            changed();
+          },
+          { id: 'cmTake' },
+        ),
       /* a clickable thing: the other actions the Director offers on it */
       special.map((v) =>
         item(v, () => {

@@ -83,8 +83,23 @@ module.exports = (kit) => {
   }
   /** Rust eating what is drawn in the box. */
   function rusty(c, x0, y0, x1, y1, seed = 1, every = 5) {
-    c.speckle(x0, y0, x1, y1, C.rust, every * 2, seed);
-    c.speckle(x0, y0, x1, y1, D(C.rust), every * 4, seed + 7);
+    const r = rnd(seed + x0 * 3 + y1),
+      n = Math.max(1, Math.round(((x1 - x0 + 1) * (y1 - y0 + 1)) / (every * 14))),
+      put = (x, y, col) => c.get(x, y) && c.get(x, y) !== K && c.set(x, y, col);
+    for (let i = 0; i < n * 3; i++) {
+      const x = x0 + ((r() * (x1 - x0 + 1)) | 0),
+        y = y0 + ((r() * (y1 - y0 + 1)) | 0);
+      if (i % 3) {
+        put(x, y, i % 2 ? C.rust : D(C.rust)); // a fleck
+        continue;
+      }
+      put(x, y, C.rust); // a patch, running down a little
+      put(x + 1, y, C.rust);
+      put(x, y + 1, C.rust);
+      if (r() < 0.6) put(x + 1, y + 1, D(C.rust));
+      if (r() < 0.5) put(x, y + 2, D(C.rust));
+      if (r() < 0.3) put(x - 1, y + 1, C.rust);
+    }
   }
   /** A drip running down from x, y. */
   function drip(c, x, y, n, col = C.blood) {

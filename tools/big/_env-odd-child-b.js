@@ -204,15 +204,13 @@ module.exports = (H) => {
       for (let x = 3; x < 22; x += 4) c.set(x, 26, RED), c.set(x + 1, 25, RED), c.set(x + 2, 26, RED); // zigzag
       c.row(28, 2, 22, BLUE);
       if (u) {
-        c.poly([[8, 33], [12, 12], [16, 33]], hex('#8a7a3c')); // lit from inside
-        c.poly([[9, 33], [12, 16], [15, 33]], C.glow);
-        figure(c, 12, 33, 9, IN);
-        c.set(10, 27, IN); // its long fingers
-        c.set(15, 27, IN);
-        c.set(9, 28, IN);
-        c.set(16, 28, IN);
-        c.line(8, 33, 6, 22, D(CV));
-        c.line(16, 33, 18, 22, D(CV));
+        c.poly([[5, 33], [12, 10], [13, 10], [19, 33]], hex('#8a7a3c')); // lit from inside
+        c.poly([[7, 33], [12, 15], [13, 15], [17, 33]], C.glow);
+        figure(c, 12, 33, 10, IN);
+        c.line(10, 27, 8, 31, IN); // its long arms
+        c.line(15, 27, 17, 31, IN);
+        c.line(5, 33, 4, 20, D(CV));
+        c.line(19, 33, 20, 20, D(CV));
       } else {
         c.line(12, 12, 12, 33, D(CV));
         c.line(13, 12, 13, 33, mix(CV, 0.5));
@@ -552,7 +550,7 @@ module.exports = (H) => {
     c.row(b - 6, x + 1, x + 3, cap);
     c.set(x + 1, b - 5, on ? C.white : C.bone);
     c.set(x + 3, b - 4, on ? C.white : C.bone);
-    if (on) dots(c, C.glow, [x - 2, b - 5, x + 6, b - 4, x + 2, b - 8, x - 1, b - 7, x + 5, b - 7, x - 2, b - 2, x + 6, b - 1]);
+    if (on) c.row(b - 7, x + 1, x + 3, C.glow), c.col(x - 1, b - 5, b - 3, C.glow), c.col(x + 5, b - 5, b - 3, C.glow);
   }
   kid(
     'bedside-night-light',

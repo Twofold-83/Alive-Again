@@ -9,7 +9,8 @@
  *   f(c, u)   draws the main picture on a w x h canvas; u is true for the used picture
  *   s(c, u)   draws the other perspective on a sw x sh canvas (in a side view the front faces right)
  *   U, SU     { w, h, dx, dy, x(c) } if the used picture needs a larger canvas: the used drawing is put at dx, dy
- *             (by default left, standing on the bottom row), then x(c) draws what sticks out (an open door ...)
+ *             (by default left, standing on the bottom row), then x(c) draws what sticks out (an open door ...);
+ *             { own: true, w, h }: f(c, true) draws on a canvas of that size itself
  *   base      'side' if the main picture is the long side; p: true if one can walk past it
  * All four pictures are drawn afresh with the same colour variables, then shaded and outlined by make-big.js.
  */
@@ -209,13 +210,26 @@ module.exports = (kit) => {
       c.set(x + 2, yb, D(col));
     }
   };
-  const tools = { ...kit, D, L, X, dots, legs, panel, door, hole, scr, led, leds, vents, grille, cable, cord, wisp, puddle, wheel, bottle, cup, cloth, stuff, shoes };
+  /** A drawing w x h fallen over, as a canvas to stamp: its top goes to the left (or to the right). */
+  const turn = (w, h, fn, right = false) => {
+    const t = canvas(w, h),
+      r = canvas(h, w);
+    fn(t);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const p = t.get(x, y);
+        if (p) right ? r.set(h - 1 - y, x, p) : r.set(y, w - 1 - x, p);
+      }
+    return r;
+  };
+  const tools = { ...kit, turn, D, L, X, dots, legs, panel, door, hole, scr, led, leds, vents, grille, cable, cord, wisp, puddle, wheel, bottle, cup, cloth, stuff, shoes };
 
   /* ---------- the four pictures of a thing ---------- */
   const setting = (cat, catLabel) => (slug, name, o) => {
     if (out[slug]) throw new Error('env-modern: ' + slug + ' twice');
     const mk = (w, h, fn, u, U) => {
       if (!U) return { w, h, draw: (c) => fn(c, u) };
+      if (U.own) return { w: U.w || w, h: U.h || h, draw: (c) => fn(c, true) }; // the used drawing lays itself out
       const W = U.w || w,
         Hh = U.h || h,
         dx = U.dx || 0,

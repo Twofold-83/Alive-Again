@@ -432,8 +432,38 @@ module.exports = (kit) => {
     legs(c, [x0 + 1, x1 - 2], top + 2, b, o.leg || D(col));
   }
 
+  /** The picture fn draws, as a plain canvas (not shaded or outlined). */
+  function plain(fn, used = false) {
+    const d = cut(fn, used, 'a part'),
+      t = canvas(d.w - 2, d.h - 2);
+    const o = { set: (x, y, col) => t.set(x - 1, y - 1, col) };
+    d.draw(o);
+    return t;
+  }
+  /** fn's picture fallen over, lying on row b from x: its top to the right (or to the left). */
+  function fallen(c, fn, x, b, right = true, used = false) {
+    const t = plain(fn, used);
+    for (let j = 0; j < t.h; j++)
+      for (let i = 0; i < t.w; i++) {
+        const p = t.get(i, j);
+        if (p) right ? c.set(x + (t.h - 1 - j), b - (t.w - 1 - i), p) : c.set(x + j, b - i, p);
+      }
+  }
+  /** fn's picture upside down, standing on row b from x. */
+  function upturned(c, fn, x, b, used = false) {
+    const t = plain(fn, used);
+    for (let j = 0; j < t.h; j++)
+      for (let i = 0; i < t.w; i++) {
+        const p = t.get(i, j);
+        if (p) c.set(x + i, b - j, p);
+      }
+  }
+
   return {
     ...kit,
+    plain,
+    fallen,
+    upturned,
     D,
     L,
     out,
