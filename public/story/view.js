@@ -1,4 +1,5 @@
 /* Drawing a story screen: the stage, the Player's sheet under it, and the tool column for whoever is looking. */
+import { renderPrep } from './prep.js';
 import { assetUrl } from '../core/catalog.js';
 import { LAYERS as MODULES, STORY_TYPES as TYPES, PLAYER_MODES } from '../shared/rules.js';
 import { audio } from '../core/audio.js';
@@ -32,6 +33,7 @@ export function render() {
         h('small', {}, `${app.S.names.director} is setting the stage…`),
       ].filter(Boolean),
     );
+  renderPrep(directing() && !app.S.ended); // the Director's shelf under the stage
   const tool = directing() ? guidedTool() : ''; // the stage tool always follows the open Director screen
   app.rec = tool === 'rec';
   app.drawOn = tool === 'draw';

@@ -37,7 +37,7 @@ module.exports = (X) => {
       for (const x of [10, 18, 26]) c.col(x, 9, b - 2, D(DUMP));
       c.rect(1, 10, 3, 13, D(DUMP));
       c.rect(32, 10, 34, 13, D(DUMP));
-      c.speckle(3, 8, 32, b - 1, C.rust, 10, 3);
+      c.speckle(3, 8, 32, b - 1, C.rust, 26, 3);
       scribble(c, 12, 12, 16, 14, C.bone, 3);
       for (const [x, y, n] of [[7, 9, 5], [22, 9, 7], [29, 9, 4]]) c.col(x, y, y + n, mix(DUMP, 0.6));
       c.rect(5, b, 7, b, TYRE);
@@ -69,7 +69,7 @@ module.exports = (X) => {
       c.col(2, 7, b - 1, DUMP);
       c.row(7, 2, 17, DUMP);
       c.rect(6, 10, 12, 13, D(DUMP));
-      c.speckle(3, 8, 16, b - 1, C.rust, 10, 3);
+      c.speckle(3, 8, 16, b - 1, C.rust, 26, 3);
       c.rect(3, b, 5, b, TYRE);
       c.rect(12, b, 14, b, TYRE);
       if (u) {
@@ -109,7 +109,7 @@ module.exports = (X) => {
         c.rect(7, 38, 16, 39, I);
         dots(c, C.rust, [8, 40, 15, 40]);
       } else c.rect(7, 15, 16, 16, I);
-      c.speckle(1, 2, 22, b, C.rust, 14, 5);
+      c.speckle(1, 2, 22, b, C.rust, 30, 5);
     },
     sw: 12,
     s(c, u) {
@@ -124,7 +124,7 @@ module.exports = (X) => {
       const end = u ? b : 38;
       c.rect(9, 9, 10, end, C.iron);
       for (let y = 17; y <= end - 1; y += 3) c.set(8, y, I);
-      c.speckle(1, 2, 10, b, C.rust, 14, 5);
+      c.speckle(1, 2, 10, b, C.rust, 30, 5);
     },
   });
   T('shutter-roller-graffiti', 'steel roller shutter shop front closed graffiti padlock half open', {
@@ -161,7 +161,7 @@ module.exports = (X) => {
         c.rect(17, b - 2, 18, b - 1, C.brass);
         c.row(b, 3, 32, C.iron);
       }
-      c.speckle(3, 6, 32, end, C.rust, 22, 2);
+      c.speckle(3, 6, 32, end, C.rust, 60, 2);
     },
     sw: 8,
     s(c, u) {
@@ -867,7 +867,7 @@ module.exports = (X) => {
         c.rect(2, 4, 11, 5, D(DR));
         c.row(4, 2, 11, C.iron);
         for (const y of [10, 15]) c.row(y, 2, 11, D(DR));
-        c.speckle(2, 6, 11, b, C.rust, 4, 3);
+        c.speckle(2, 6, 11, b, C.rust, 9, 3);
         for (const [x, y] of [[4, 8], [7, 12], [9, 8], [5, 17], [8, 17]]) c.set(x, y, u ? AMBER : DARK);
         c.line(4, 4, 3, 1, hex('#2a2018'));
         c.line(8, 4, 10, 2, hex('#2a2018'));
@@ -984,7 +984,7 @@ module.exports = (X) => {
     f(c, u) {
       const b = c.h - 2,
         S = C.steel;
-      for (let y = 4; y <= b - 1; y++) for (let x = 3; x <= 30; x++) if ((x + y) % 4 === 0 || (x - y + 40) % 4 === 0) c.set(x, y, mix(S, 0.8));
+      for (let y = 4; y <= b - 1; y++) for (let x = 3; x <= 30; x++) if ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0) c.set(x, y, mix(S, 0.8));
       c.row(3, 1, 32, S);
       c.row(b - 1, 3, 30, mix(S, 0.7));
       for (const x of [1, 31]) {

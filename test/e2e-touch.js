@@ -22,6 +22,16 @@ const { setup } = require('./lib');
     await p.click('.gdone');
     const chestId = await p.evaluate(() => window.__lastAdded);
     await x.done();
+    /* the Director's shelf under the stage: keep a thing for later, put it out again with one press */
+    await p.locator(`#stage .ent[data-id="${chestId}"]`).click({ force: true });
+    await p.click('#prepAdd');
+    assert.equal(await p.locator('#prep .preptile').count(), 1);
+    const before = await p.locator('#stage .ent').count();
+    await p.click('#prep .preptile .pick');
+    assert.equal(await p.locator('#stage .ent').count(), before + 1, 'one press puts it on the stage');
+    await p.locator(`#stage .ent[data-id="${await p.evaluate(() => window.__lastAdded)}"]`).click({ force: true });
+    await p.click('.thingbtns button:has-text("Remove")');
+    await p.click('.gback').catch(() => {});
     /* everything of a setting in one place: its things and the beings one meets there */
     await x.opt('Add something');
     await x.opt('Environment');
