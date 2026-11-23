@@ -137,7 +137,7 @@ export function screenThing(kit) {
           },
           sel.solid,
         ),
-      ws && !isHero && b('', sel.active ? `Clickable: “${sel.active.name}”` : 'Make it clickable', () => enter('active'), !!sel.active),
+      !isHero && b('', sel.active ? `Clickable: “${sel.active.name}”` : 'Make it clickable', () => enter('active'), !!sel.active),
       b(
         '',
         sel.tie ? 'Tied — change' : 'Tie to…',
@@ -546,6 +546,39 @@ export function screenActive(kit) {
           ),
         ),
       ),
+      /* reactions: what the Player is shown at once, without the turn coming to you */
+      h('small', { class: 'dim' }, `Answer at once — ${S.names.player} sees this without the turn coming to you`),
+      sel.active.verbs.map((v) => {
+        const re = ((sel.active.re ||= {})[v] ||= { text: '', used: false });
+        return h(
+          'div',
+          { class: 'reactrow' },
+          h('b', {}, `If they ${v.toLowerCase()}`),
+          h('input', {
+            'data-re': v,
+            placeholder: 'show this text… (leave empty: you answer yourself)',
+            maxlength: 240,
+            value: re.text,
+            oninput: (ev) => {
+              re.text = ev.target.value;
+              c.changedQuiet();
+            },
+          }),
+          h(
+            'label',
+            { class: 'row' },
+            h('input', {
+              type: 'checkbox',
+              checked: re.used,
+              onchange: (ev) => {
+                re.used = ev.target.checked;
+                c.changedQuiet();
+              },
+            }),
+            h('span', {}, 'and change its look to “used”'),
+          ),
+        );
+      }),
       h(
         'div',
         { class: 'row' },
@@ -566,6 +599,25 @@ export function screenActive(kit) {
       ),
     );
   }
+  /* a trap: works whether or not the thing is clickable */
+  add(
+    p,
+    h(
+      'button',
+      {
+        id: 'nearToggle',
+        class: sel.near ? 'on' : '',
+        onclick: () => {
+          sel.near = !sel.near;
+          c.changedQuiet();
+          c.rebuild();
+        },
+      },
+      sel.near ? 'Trap set — press to disarm' : `Trap: something happens if ${S.names.player} walks close`,
+    ),
+    sel.near &&
+      h('small', { class: 'dim' }, `Their walk stops there, both shake, “Something happened!” — and the turn comes straight to you. It works once.`),
+  );
   add(
     p,
     h(

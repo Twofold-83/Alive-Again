@@ -5,7 +5,7 @@ import { stage, pen, myTurn, hero, mods, directing, app } from '../core/state.js
 import { guidedPick, guidedMark } from './guided.js';
 import { rid, r3, toast, $ } from '../core/dom.js';
 import { changed, rebuild, paint, undo, submit } from './turn.js';
-import { walkHero, setReply, hideVerbs, showVerbs } from './walk.js';
+import { walkHero, setReply, hideVerbs, showVerbs, showClickMenu } from './walk.js';
 import { render } from './view.js';
 import { workshopOpen } from '../build/workshop.js';
 import { removeEntity } from './director.js';
@@ -78,6 +78,7 @@ stage.addEventListener('pointerdown', (ev) => {
         app.draft.verb = '';
         return changed();
       } // use the chosen item ON this
+      if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev); // walk here, look at, use — and what a clickable thing offers
       if (hit.active && hit.active.verbs.length) return showVerbs(hit, ev); // an active object: what to do with it?
       if (mods().inventory && app.S.rules.player === 'free') {
         app.draft.target = app.draft.target === hit.id ? null : hit.id;
@@ -86,6 +87,7 @@ stage.addEventListener('pointerdown', (ev) => {
         return changed();
       } // reach for it
     }
+    if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev);
     return toast(app.draft.walked ? 'You have already walked this turn' : 'Press “Walk”, then click where you want to go');
   } else if (app.drawOn) {
     if (app.draft.drawing.length >= 60) return toast('That is a lot of drawing — clear some first');

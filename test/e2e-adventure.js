@@ -229,7 +229,7 @@ const { setup } = require('./lib');
     await p.waitForTimeout(3500);
     [hx, hy] = await x.heroPos();
     assert(Math.abs(hx - 0.4) < 0.03 && Math.abs(hy - 0.7) < 0.03, `the hero walked to the chosen place (${hx}, ${hy})`);
-    await p.fill('#foot input[placeholder^="Do"]', 'Kick');
+    await p.fill('#foot input[placeholder^="Free"]', 'Kick');
     await p.click('#pointBtn');
     {
       const b = await p.locator(ent('chest')).boundingBox();

@@ -72,6 +72,12 @@ export function actionParts(scene, pendingRoll) {
   if (a && a.kind === 'roll' && a.declined) parts.push(['does', 'backs out of the roll']);
   if (a && a.kind === 'place') parts.push(['goes', 'goes to ' + a.label]);
   if (a && a.kind === 'discard') parts.push(['gives', 'discards ' + assetLabel(a.asset, a.name)]);
+  for (const r of scene.reacted || []) {
+    const e = scene.entities.find((x) => x.id === r.id);
+    if (e) parts.push(['does', `${r.verb}: ${name(e)}`]);
+  }
+  const trap = scene.tripped && scene.entities.find((x) => x.id === scene.tripped);
+  if (trap) parts.push(['does', `came too close to ${name(trap)} — something happened!`]);
   const ex = scene.exit && (scene.exits || []).find((x) => x.id === scene.exit);
   if (ex) parts.push(['goes', 'heads for ' + ex.label]);
   const pt = scene.point,

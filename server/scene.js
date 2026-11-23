@@ -11,6 +11,14 @@ import { arr, num, r3, str, uid, HEX } from './util.js';
  * otherwise a base-36 index into pal (1 = pal[0]). Where a level exists the hero
  * may only stand on floor tiles, and solid things block the way. */
 /** Five joint angles of a paper-doll character, or null. */
+/** Reactions of a clickable thing: { verb: { text, used } } — the text is shown to the Player at once; `used` switches the thing to its used picture. */
+function cleanReactions(re) {
+  const out = {};
+  if (re && typeof re === 'object')
+    for (const [verb, r] of Object.entries(re).slice(0, 8))
+      if (r && typeof r === 'object' && (str(r.text, 240) || r.used)) out[str(verb, 16)] = { text: str(r.text, 240), used: !!r.used };
+  return out;
+}
 export function cleanFeel(f) {
   return FEELS.some((x) => x[0] === f) ? f : '';
 }
@@ -116,6 +124,7 @@ export function cleanScene(s, prev, inner) {
                 .map((v) => str(v, 16))
                 .filter(Boolean)
                 .slice(0, 6),
+              re: cleanReactions(e.active.re), // what the Player is shown at once for an action, without the Director
             }
           : null,
       tie:
@@ -131,6 +140,7 @@ export function cleanScene(s, prev, inner) {
       feel: cleanFeel(e.feel),
       view: e.view === 'side' ? 'side' : '', // seen from the other side
       used: !!e.used || e.view === 'used', // after someone used it
+      near: !!e.near,
     });
   }
   const drawing = [];

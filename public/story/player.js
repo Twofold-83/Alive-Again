@@ -532,7 +532,7 @@ export function buildFoot() {
         f,
         say(),
         h('input', {
-          placeholder: 'Do something… (“open the drawer”)',
+          placeholder: 'Free Action… (“open the drawer”)',
           maxlength: 160,
           value: app.draft.action,
           enterkeyhint: 'done',

@@ -219,6 +219,24 @@ function submitPlayer(room, body) {
   sc.roll = roll ? { by: 'player', ...roll } : null;
   sc.choices = [];
   sc.ask = null;
+  /* reactions the Player already saw on clickable things: note them for the Director, and leave the thing used where the reaction says so */
+  for (const r of Array.isArray(body.reacted) ? body.reacted.slice(0, 8) : []) {
+    const e = r && sc.entities.find((x) => x.id === r.id),
+      re = e && e.active && e.active.re && e.active.re[r.verb];
+    if (!re) continue;
+    if (re.used) e.used = true;
+    sc.reacted.push({ id: e.id, verb: String(r.verb) });
+  }
+  /* a trap sprung: the hero walked too close to something */
+  const trap = typeof body.tripped === 'string' && sc.entities.find((e) => e.id === body.tripped && e.near);
+  if (trap) {
+    trap.near = false; // it happens once
+    trap.once = 'hit';
+    if (hero) hero.once = 'hit';
+    sc.tripped = trap.id;
+    sc.card = 'Something happened!';
+    sc.sfx = 'alarm';
+  }
   if (battleMove) {
     const lines = resolveBattle(sc, battleMove, room.names, (e) => assetName(e.asset));
     sc.answer = { ...answer, lines: lines.slice(0, 8) };

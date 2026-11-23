@@ -290,6 +290,8 @@ export async function submit() {
           emote: me ? me.emote : '',
           pose: me ? me.pose : null,
           feel: me ? me.feel || '' : '',
+          reacted: app.draft.reacted || [],
+          tripped: app.draft.tripped || '',
           look: app.draft.look,
           action: app.draft.action,
           target: app.draft.target,
