@@ -119,7 +119,7 @@ function freshDraft() {
     Object.assign(d, stepFields(), { narration: '', choices: [], steps: [] });
     d.entities = d.entities.filter((e) => !e.temp);
     for (const e of d.entities) e.once = '';
-    d.ask = d.battle ? { kind: 'battle', text: 'Your move!', sides: 6, dc: 0, verb: '', places: [], targets: [] } : null; // a battle keeps asking for a move
+    d.ask = null;
     if (d.roll && d.roll.by === 'director') d.roll = null;
   } else {
     const me = hero(d);

@@ -328,68 +328,7 @@ const { setup } = require('./lib');
       'the tied sword travelled along',
     );
 
-    /* ---- a battle ---- */
-    await toDirector();
-    await x.add('ghoul');
-    await x.done();
-    await x.opt('Battle');
-    await p.click('#panel > .grid button >> nth=0');
-    await p.click('.row button:has-text("3") >> nth=0');
-    await p.click('#btManual'); // this battle is run all by hand
-    await p.click('#battleStart');
-    assert.equal(
-      await p.evaluate(() => getComputedStyle(document.querySelector('#stage .ent:has(img[src*="ghoul"]) .hp')).display),
-      'block',
-      'the enemy shows a health bar',
-    );
-    await toPlayer();
-    assert.match(await p.textContent('.askbox'), /Attack.*Defend.*Flee/s);
-    await p.click('.askbox button:has-text("Attack")');
-    assert.match(await act(), /attacks/);
-    await toDirector();
-    sc = await x.last();
-    assert.deepEqual(sc.answer, { kind: 'battle', move: 'attack' });
-    assert(sc.battle);
-    await p.waitForSelector('#heroHits'); // the battle tools open by themselves
-    await p.click('#heroHits [data-dmg="2"]'); // one click: animation, damage, sound, and its own step
-    assert.equal(await p.locator('.stepchip').count(), 2);
-    assert.match(await p.textContent('.statrow:has(.foe)'), /1\/3/);
-    await p.click('[data-attack=swing]');
-    await p.click('#foeHits [data-dmg="1"]');
-    assert.equal(await p.locator('.stepchip').count(), 3);
-    await x.shot('a-3-battle');
-    await p.evaluate(() => {
-      window.__float = [];
-      setInterval(() => {
-        for (const f of document.querySelectorAll('#stage .float'))
-          if (f.textContent && !window.__float.includes(f.textContent)) window.__float.push(f.textContent);
-      }, 40);
-    });
-    await toPlayer();
-    assert.deepEqual((await p.evaluate(() => window.__float)).sort(), ['-1', '-2'], 'damage numbers floated over the goblin and the hero');
-    sc = await x.last();
-    assert.equal(sc.steps.length, 1);
-    assert.equal(sc.steps[0].entities.find((e) => e.hp === 1).once, 'hit');
-    assert.equal(sc.steps[0].floats[0].text, '-2');
-    assert.equal(sc.sheet.stats[0].value, 4, 'the hero lost one health');
-    assert.equal(sc.battle.round, 2);
-    assert.equal(sc.burst, 'hurt');
-    assert.equal(sc.ask.kind, 'battle');
-    assert.equal(sc.entities.find((e) => e.tie && e.asset.includes('dagger')).once, '', 'the hero’s sword swing belonged to the first step');
-    assert.equal(sc.steps[0].entities.find((e) => e.tie).once, 'swing', 'the tied sword swung with the hero’s attack');
-    // finish it
-    await p.click('.askbox button:has-text("Attack")');
-    await toDirector();
-    await p.click('#heroHits [data-dmg="2"]'); // the last enemy falls: the battle ends by itself
-    assert.match(await p.textContent('.gtitle'), /what happens/);
-    await toPlayer();
-    sc = await x.last();
-    assert.equal(sc.battle, null);
-    assert.equal(sc.ask, null);
-    await x.walk(0.5, 0.8);
-    await toDirector();
-    sc = await x.last();
-    assert(!sc.entities.some((e) => e.asset.includes('ghoul')), 'the defeated goblin is gone');
+    /* (battles have a test of their own: e2e-battle.js) */
     assert.deepEqual(t.errors, []);
     console.log('E2E-ADVENTURE OK');
   } finally {

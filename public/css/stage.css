@@ -74,9 +74,8 @@
 .ent img.glyph.sized { width: calc(.0422em * var(--w)); height: auto; }
 .ent .emote { position: absolute; right: -.25em; top: -.3em; font-size: .45em; line-height: 1; pointer-events: none; }
 .ent .emote:empty { display: none; }
-.ent.hero::before { content: ""; position: absolute; left: -12%; right: -12%; bottom: -.14em; height: .42em; border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 214, 120, .8) 0, rgba(255, 190, 80, .35) 45%, rgba(255, 190, 80, 0) 72%); z-index: -1; }
 .ent.sel { outline: 2px dashed #ffffff; outline-offset: 2px; border-radius: 0; }
-.ent.target { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 50%; }
+.ent.target .glyph { filter: drop-shadow(0 0 .08em #ffffff) drop-shadow(0 0 .2em #ffffff); } /* what is chosen glows a little: no ring */
 .stage.edit .ent { cursor: grab; }
 .stage.cut .ent { transition: left .85s ease-in-out, top .85s ease-in-out, font-size .85s ease-in-out, opacity .45s; }
 .stage.cut .ent .glyph { transition: transform .85s ease-in-out; }

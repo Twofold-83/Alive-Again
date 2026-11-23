@@ -1,4 +1,5 @@
 /* Drawing a story screen: the stage, the Player's sheet under it, and the tool column for whoever is looking. */
+import { watchCard } from './battle-ui.js';
 import { renderPrep } from './prep.js';
 import { assetUrl } from '../core/catalog.js';
 import { LAYERS as MODULES, STORY_TYPES as TYPES, PLAYER_MODES } from '../shared/rules.js';
@@ -69,6 +70,7 @@ export function render() {
     myTurn() && app.draft.use,
     myTurn() && JSON.stringify([app.draft.reply, app.draft.act, app.draft.exit]),
     myTurn() && app.draft.steps.length,
+    app.S.scene.battle ? JSON.stringify([app.S.scene.battle.round, app.S.scene.battle.paused, app.S.liveN, app.battleMenu, app.liveBusy]) : '',
     guidedKey(),
   ].join('|');
   if (workshopOpen()) return; // the workshop has the tools while it is open
@@ -255,28 +257,7 @@ function buildPanel() {
                 `${app.S.names.player} is making a move…`,
                 'When they finish you can change anything: the cast, the place, the music, what everybody says.',
               ];
-    const lb = app.S.scene.battle;
-    if (lb && lb.live && !lb.over && app.S.whose === 'player' && (app.S.you === 'director' || app.S.hotseat))
-      add(
-        p,
-        h(
-          'div',
-          { class: 'card', id: 'liveCard' },
-          h('h3', {}, `Live battle — round ${lb.round}`),
-          h(
-            'p',
-            { class: 'dim small' },
-            'The enemies fight on their own and you both watch every round. Step in whenever you want to stage something special.',
-          ),
-          lb.log.length > 0 &&
-            h(
-              'div',
-              { class: 'battlelog' },
-              lb.log.slice(-5).map((l) => h('p', {}, l)),
-            ),
-          h('button', { class: 'primary', id: 'liveStop', onclick: () => act('battlePause', {}, 2).catch((e) => toast(e.message)) }, 'Step in now'),
-        ),
-      );
+    if (app.S.scene.battle && app.S.whose === 'player' && app.S.you === 'director') add(p, watchCard());
     if (app.S.info.text && app.S.you !== 'director')
       add(
         p,

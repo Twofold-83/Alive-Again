@@ -1,6 +1,6 @@
 /* Director screens about the Player: what to ask of them, points, their sheet, giving items, battles. */
 import { assetUrl } from '../../core/catalog.js';
-import { BATTLE_CMDS, WEAPON, BATTLE_LEVELS, estimateBattle, presetBattle } from '../../shared/battle.js';
+import { BATTLE_LEVELS, planBattle } from '../../shared/battle.js';
 import { h, clamp, add } from '../../core/dom.js';
 import { glyphNode } from '../../stage/render.js';
 import { G } from '../guided.js';
@@ -293,208 +293,22 @@ export function screenAward(kit) {
 
 /* ================= battle ================= */
 export function screenBattle(kit) {
-  const { p, c, d, S, code, me, lab, setup, home, head } = kit;
-  const foes = d.entities.filter((e) => e.hp != null && e.id !== d.heroId);
+  const { p, c, d, S, code, me, lab, setup, home, head, doneBtn } = kit;
   const hpStat = c.mods().stats && d.sheet.stats.find((st) => /health|hp|life/i.test(st.name));
-  const heroHp = () => (hpStat ? hpStat.value : me && me.hp != null ? me.hp : null);
-  const hurtHero = (n) => {
-    if (hpStat) hpStat.value = clamp(hpStat.value - n, 0, hpStat.max ?? 9999);
-    else if (me) {
-      if (me.hp == null) {
-        me.hp = 5;
-        me.maxHp = 5;
-      }
-      me.hp = clamp(me.hp - n, 0, me.maxHp);
-    }
-  };
-  const float = (id, text, col) => {
-    d.floats = d.floats.filter((f) => f.id !== id);
-    d.floats.push({ id, text, c: col });
-  };
-  const held = (who) => d.entities.filter((e) => e.tie && e.tie.to === who.id); // a tied sword swings with its owner
-  const lunge = (a, b) => {
-    if (!a || !b) return;
-    const mx = a.x + (b.x - a.x) * 0.7,
-      my = a.y + (b.y - a.y) * 0.7,
-      ox = a.x,
-      oy = a.y;
-    c.autoTrack(a, [
-      [220, mx, my],
-      [120, mx, my],
-      [260, ox, oy],
-    ]);
-  };
+  const heroHp = () => (hpStat ? hpStat.value : me && me.hp != null ? me.hp : 10);
+  const armed = d.entities.some((e) => e.tie && e.tie.to === d.heroId);
+  const levelName = (id) => (BATTLE_LEVELS.find((l) => l[0] === id) || [0, ''])[1];
   if (!d.battle) {
-    head('Start a battle', 'Pick the enemies. The Player then chooses a move each turn, and you get tools for attacks, damage and checks.');
+    /* before the battle: who the enemies are, and how hard it is — nothing else */
+    head(
+      'Start a battle',
+      `Pick the enemies and how hard it is. Then the whole fight is ${S.names.player}’s: you watch every blow, and can pause it whenever you like.`,
+    );
     G.foes ||= [];
-    G.hp ||= 5;
-    G.bt ||= {
-      auto: true,
-      live: true,
-      atk: 2,
-      foeAtk: 1,
-      hit: 85,
-      foeHit: 80,
-      heroHp: 8,
-      flee: 50,
-      level: '',
-      ai: { attack: 70, heavy: 15, defend: 10, wait: 5 },
-      stop: { speak: true, foe: 0, hero: 25, rounds: 0 },
-      cmds: BATTLE_CMDS.map((x) => x[0]),
-    };
-    const bt = G.bt;
-    const chips = (label, key, values, fmt = String) =>
-      h(
-        'div',
-        {},
-        h('small', { class: 'dim' }, label),
-        h(
-          'div',
-          { class: 'row' },
-          values.map((n) =>
-            h(
-              'button',
-              {
-                [`data-${key.toLowerCase()}`]: n,
-                class: 'grow' + (bt[key] === n ? ' on' : ''),
-                onclick: () => {
-                  bt[key] = n;
-                  c.rebuild();
-                },
-              },
-              fmt(n),
-            ),
-          ),
-        ),
-      );
-    const cand = d.entities.filter((e) => e.id !== d.heroId && !e.tie);
-    /* what an enemy does each round, in percent */
-    const aiCard = () =>
-      h(
-        'div',
-        { id: 'btAi' },
-        h('small', { class: 'dim' }, 'What an enemy does each round (shares, in percent)'),
-        [
-          ['attack', 'Attack'],
-          ['heavy', 'Heavy blow (double damage, misses more)'],
-          ['defend', 'Guard (your next blow on it is halved)'],
-          ['wait', 'Hesitate'],
-        ].map(([k, label]) =>
-          h(
-            'label',
-            { class: 'row airow' },
-            h('span', { class: 'grow' }, label),
-            h('input', {
-              type: 'number',
-              min: 0,
-              max: 100,
-              step: 5,
-              'data-ai': k,
-              value: bt.ai[k],
-              onchange: (ev) => {
-                bt.ai[k] = clamp(Math.round(+ev.target.value || 0), 0, 100);
-                bt.level = '';
-                c.rebuild();
-              },
-            }),
-          ),
-        ),
-      );
-    /* when a live battle hands over to the Director */
-    const stopCard = () =>
-      h(
-        'div',
-        { id: 'btStop' },
-        h('small', { class: 'dim' }, 'Give me the turn when…'),
-        h(
-          'label',
-          { class: 'row' },
-          h('input', { type: 'checkbox', checked: bt.stop.speak, onchange: (ev) => (bt.stop.speak = ev.target.checked) }),
-          h('span', {}, `${S.names.player} speaks`),
-        ),
-        h(
-          'div',
-          { class: 'row' },
-          h('span', { class: 'grow' }, 'an enemy is down to'),
-          [0, 25, 50, 75].map((n) =>
-            h(
-              'button',
-              { 'data-stopfoe': n, class: bt.stop.foe === n ? 'on' : '', onclick: () => ((bt.stop.foe = n), c.rebuild()) },
-              n ? n + '%' : 'never',
-            ),
-          ),
-        ),
-        h(
-          'div',
-          { class: 'row' },
-          h('span', { class: 'grow' }, `${S.names.player} is down to`),
-          [0, 25, 50].map((n) =>
-            h(
-              'button',
-              { 'data-stophero': n, class: bt.stop.hero === n ? 'on' : '', onclick: () => ((bt.stop.hero = n), c.rebuild()) },
-              n ? n + '%' : 'never',
-            ),
-          ),
-        ),
-        h(
-          'div',
-          { class: 'row' },
-          h('span', { class: 'grow' }, 'every'),
-          [0, 1, 2, 3, 5].map((n) =>
-            h(
-              'button',
-              { 'data-stoprounds': n, class: bt.stop.rounds === n ? 'on' : '', onclick: () => ((bt.stop.rounds = n), c.rebuild()) },
-              n ? `${n} round${n > 1 ? 's' : ''}` : 'never',
-            ),
-          ),
-        ),
-      );
-    /* how hard: six ready-made settings worked out from the numbers above, and an estimate of the fight as it stands */
-    const setup_ = () => ({
-      heroHp: hpStat ? hpStat.value : bt.heroHp,
-      atk: bt.atk,
-      weapon: d.entities.some((e) => e.tie && e.tie.to === d.heroId),
-      hit: bt.hit,
-      foes: cand.filter((e) => G.foes.includes(e.id)).map(() => G.hp),
-      foeAtk: bt.foeAtk,
-      foeHit: bt.foeHit,
-      ai: bt.ai,
-    });
-    const levelCard = () => {
-      const o = setup_(),
-        est = o.foes.length ? estimateBattle(o) : null;
-      return h(
-        'div',
-        { id: 'btLevel' },
-        h('small', { class: 'dim' }, 'How hard? (sets the enemies’ strength and aim for the fighters you chose)'),
-        h(
-          'div',
-          { class: 'chips wrap' },
-          BATTLE_LEVELS.map(([id, label]) =>
-            h(
-              'button',
-              {
-                'data-level': id,
-                class: bt.level === id ? 'on' : '',
-                disabled: !o.foes.length,
-                onclick: () => {
-                  Object.assign(bt, presetBattle(id, setup_()), { level: id });
-                  c.rebuild();
-                },
-              },
-              label,
-            ),
-          ),
-        ),
-        h(
-          'p',
-          { class: 'estimate', id: 'btEstimate' },
-          est
-            ? `Estimate: ${est.label.toUpperCase()} — about ${est.rounds} rounds; ${S.names.player} (${o.heroHp} health${o.weapon ? ', armed' : ''}) can expect to lose about ${est.damage} health against ${o.foes.length} ${o.foes.length > 1 ? 'enemies' : 'enemy'} with ${G.hp} health each.`
-            : 'Pick the enemies to see an estimate.',
-        ),
-      );
-    };
+    G.level ||= 'medium';
+    const cand = d.entities.filter((e) => e.id !== d.heroId && !e.tie),
+      chosen = cand.filter((e) => G.foes.includes(e.id)),
+      plan = planBattle(G.level, { heroHp: heroHp(), weapon: armed, foes: chosen.length });
     add(
       p,
       h('small', { class: 'dim' }, 'Enemies'),
@@ -516,145 +330,61 @@ export function screenBattle(kit) {
               ),
             ),
           )
-        : h('p', { class: 'dim' }, 'Add an enemy to the stage first.'),
-      h('small', { class: 'dim' }, 'Health of each enemy'),
+        : h('p', { class: 'dim' }, 'Put an enemy on the stage first.'),
+      h('small', { class: 'dim' }, 'How hard is it?'),
       h(
         'div',
-        { class: 'row' },
-        [2, 3, 5, 8, 12, 20].map((n) =>
+        { class: 'levelgrid', id: 'battleLevels' },
+        BATTLE_LEVELS.map(([id, label]) =>
           h(
             'button',
             {
-              class: 'grow' + (G.hp === n ? ' on' : ''),
+              'data-level': id,
+              class: G.level === id ? 'on' : '',
               onclick: () => {
-                G.hp = n;
+                G.level = id;
                 c.rebuild();
               },
             },
-            String(n),
+            label,
           ),
         ),
       ),
-      /* the rules of this battle, decided before it starts */
       h(
-        'div',
-        { class: 'card', id: 'battleRules' },
-        h('h3', {}, 'Rules of this battle'),
-        h('small', { class: 'dim' }, 'Who moves the enemies?'),
-        h(
-          'div',
-          { class: 'row' },
-          h(
-            'button',
-            {
-              id: 'btLive',
-              class: 'grow' + (bt.auto === true && bt.live ? ' on' : ''),
-              onclick: () => ((bt.auto = true), (bt.live = true), c.rebuild()),
-            },
-            'Live: you both watch',
-          ),
-          h(
-            'button',
-            {
-              id: 'btAuto',
-              class: 'grow' + (bt.auto === true && !bt.live ? ' on' : ''),
-              onclick: () => ((bt.auto = true), (bt.live = false), c.rebuild()),
-            },
-            'Turn by turn',
-          ),
-          h(
-            'button',
-            { id: 'btHand', class: 'grow' + (bt.auto === false ? ' on' : ''), onclick: () => ((bt.auto = false), c.rebuild()) },
-            'I move each one',
-          ),
-          h(
-            'button',
-            { id: 'btManual', class: 'grow' + (bt.auto === null ? ' on' : ''), onclick: () => ((bt.auto = null), c.rebuild()) },
-            'All by hand',
-          ),
-        ),
-        h(
-          'small',
-          { class: 'dim' },
-          bt.auto === null
-            ? 'No rules: the Player picks Attack, Defend or Flee, and you decide every blow yourself.'
-            : bt.auto && bt.live
-              ? 'The enemies fight on their own. Every command is carried out at once and you both watch each blow; the turn only comes to you when the battle ends, when one of the moments below is reached, or when you press “Step in now”.'
-              : bt.auto
-                ? 'Each round is settled when the Player ends the turn: their command, then every enemy strikes back. On your turn you can still step in: hurt, heal, add enemies, end it.'
-                : 'The Player’s command is settled at once; then you make each enemy act with the tools here.',
-        ),
-        hpStat
-          ? h('small', { class: 'dim' }, `${S.names.player}’s health is the “${hpStat.name}” stat: ${hpStat.value}`)
-          : chips(`${S.names.player}’s health`, 'heroHp', [5, 8, 12, 20, 30]),
-        chips(`${S.names.player}’s strength (a tied weapon adds ${WEAPON})`, 'atk', [1, 2, 3, 5]),
-        chips('Enemies’ strength', 'foeAtk', [0, 1, 2, 3, 5]),
-        bt.auto !== null && chips(`${S.names.player}’s chance to hit`, 'hit', [50, 70, 85, 95, 100], (n) => n + '%'),
-        bt.auto !== null && chips('Enemies’ chance to hit', 'foeHit', [20, 40, 60, 80, 95], (n) => n + '%'),
-        chips('Chance to escape', 'flee', [0, 25, 50, 75, 100], (n) => n + '%'),
-        bt.auto === true && aiCard(),
-        bt.auto === true && bt.live && stopCard(),
-        bt.auto !== null && levelCard(),
-        h('small', { class: 'dim' }, `What ${S.names.player} may do`),
-        h(
-          'div',
-          { class: 'chips wrap' },
-          BATTLE_CMDS.map(([id, label]) =>
-            h(
-              'button',
-              {
-                'data-cmd': id,
-                class: bt.cmds.includes(id) ? 'on' : '',
-                disabled: id === 'attack',
-                onclick: () => {
-                  bt.cmds = bt.cmds.includes(id) ? bt.cmds.filter((x) => x !== id) : [...bt.cmds, id];
-                  c.rebuild();
-                },
-              },
-              label,
-            ),
-          ),
-        ),
+        'p',
+        { class: 'estimate', id: 'btEstimate' },
+        chosen.length
+          ? `${levelName(G.level)}: ${S.names.player} (${heroHp()} health${armed ? ', armed' : ''}) against ${chosen.length} ${chosen.length > 1 ? 'enemies' : 'enemy'} with ${plan.foeHp} health each — about ${plan.rounds} rounds, costing about ${Math.min(plan.damage, 99)} health. ${S.names.player} hits ${plan.hit} times in 100, an enemy ${plan.foeHit}; escaping works ${plan.flee} times in 100.`
+          : 'Pick at least one enemy.',
       ),
       h(
         'button',
         {
           class: 'primary gdone',
           id: 'battleStart',
-          disabled: !G.foes.some((id) => cand.some((e) => e.id === id)),
+          disabled: !chosen.length,
           onclick: () => {
-            for (const e of cand)
-              if (G.foes.includes(e.id)) {
-                e.hp = G.hp;
-                e.maxHp = G.hp;
-              }
-            if (!hpStat && me) me.hp = me.maxHp = bt.heroHp; // a story with a Health stat keeps its own count
-            d.battle =
-              bt.auto === null
-                ? { round: 1 }
-                : {
-                    round: 1,
-                    auto: bt.auto,
-                    live: bt.auto === true && bt.live,
-                    cmds: [...bt.cmds],
-                    atk: bt.atk,
-                    foeAtk: bt.foeAtk,
-                    hit: bt.hit,
-                    foeHit: bt.foeHit,
-                    ai: { ...bt.ai },
-                    stop: bt.auto === true && bt.live ? { ...bt.stop } : { speak: false, foe: 0, hero: 0, rounds: 0 },
-                    level: bt.level,
-                    flee: bt.flee,
-                    guard: false,
-                    log: [],
-                    over: '',
-                  };
-            d.ask = { kind: 'battle', text: 'Battle! What do you do?', sides: 6, dc: 0, verb: '', places: [], targets: [] };
+            for (const e of chosen) e.hp = e.maxHp = plan.foeHp;
+            if (!hpStat && me && me.hp == null) me.hp = me.maxHp = 10;
+            d.battle = {
+              level: plan.level,
+              round: 1,
+              atk: plan.atk,
+              hit: plan.hit,
+              foeAtk: plan.foeAtk,
+              foeHit: plan.foeHit,
+              flee: plan.flee,
+              guard: false,
+              paused: false,
+              log: [],
+            };
+            d.ask = null;
             d.choices = [];
             d.sfx ||= 'alarm';
             d.card ||= 'Battle!';
             G.foes = [];
-            if (!setup) G.log.push('A battle begins');
+            if (!setup) G.log.push(`A ${levelName(plan.level).toLowerCase()} battle begins when you end your turn`);
+            home();
             c.rebuild();
           },
         },
@@ -663,384 +393,65 @@ export function screenBattle(kit) {
     );
     return;
   }
-  const ruled = typeof d.battle.auto === 'boolean';
+  /* the battle is paused (or about to begin): it is the Director's turn */
+  const foes = d.entities.filter((e) => e.hp != null && e.hp > 0 && e.id !== d.heroId);
   head(
-    `Battle — round ${d.battle.round}`,
-    !ruled
-      ? 'One click per event. Each becomes its own step, so they play one after the other.'
-      : d.battle.auto
-        ? 'The enemies fight on their own. Step in whenever you like: one click per event.'
-        : 'The Player’s command is settled. Now move each enemy: one click per event.',
+    d.battle.paused ? 'The battle is paused' : 'The battle is about to begin',
+    `Stage whatever you like with the usual tools. When you end your turn the fight is ${S.names.player}’s again.`,
   );
-  if (ruled && !d.ask && !d.battle.over)
-    d.ask = { kind: 'battle', text: `Round ${d.battle.round} — what do you do?`, sides: 6, dc: 0, verb: '', places: [], targets: [] };
-  if (ruled && d.battle.log.length)
-    add(
-      p,
-      h(
-        'div',
-        { class: 'battlelog', id: 'battleLog' },
-        d.battle.log.map((l) => h('p', {}, l)),
-      ),
-    );
-  if (ruled && d.battle.paused)
-    add(
-      p,
-      h(
-        'p',
-        { class: 'warn', id: 'battlePaused' },
-        `${d.battle.paused} — the battle waits for you. Stage what you like; it goes on when you end your turn.`,
-      ),
-    );
-  if (ruled && d.battle.over === 'lost')
-    add(p, h('p', { class: 'warn' }, `${S.names.player} is beaten. Decide what happens: heal them, end the battle, or end the story.`));
-  const foe = foes.find((e) => e.id === G.foe) || foes.find((e) => e.id === d.target) || foes[0];
-  const a = d.answer,
-    mv = a && a.kind === 'battle' ? a.move : '';
-  const endBattle = (sound, card) => {
-    const dd = c.draft;
-    for (const e of dd.entities) {
-      e.hp = null;
-      e.maxHp = null;
-    }
-    dd.battle = null;
-    dd.ask = null;
-    dd.sfx = sound;
-    if (card) dd.card = card;
-    G.path = [];
-  };
-  /** Finish the event just built: it becomes a step of its own, and the tools stay open for the next one. */
-  const stepOn = (label) => {
-    const left = d.entities.some((e) => e.hp != null && e.id !== d.heroId && !e.temp),
-      down = heroHp() === 0;
-    c.nextStep();
-    G.log = [];
-    G.path = ['battle'];
-    if (!left) {
-      endBattle('fanfare', 'Victory!');
-      c.toast('All enemies are down — the battle is over');
-    } else if (down) c.toast(`${S.names.player} is at 0 health — decide what happens`);
-    if (label) G.did = [...(G.did || []), label].slice(-4);
-    c.rebuild();
-  };
   add(
     p,
     h(
       'div',
       { class: 'card' },
-      h('small', { class: 'dim' }, 'Who is fighting'),
-      h(
-        'div',
-        { class: 'row statrow' },
-        h('b', { class: 'grow' }, '', S.names.player, `  ${heroHp() ?? '–'}`),
-        h(
-          'button',
-          {
-            onclick: () => {
-              hurtHero(1);
-              c.rebuild();
-            },
-          },
-          '−',
-        ),
-        h(
-          'button',
-          {
-            onclick: () => {
-              hurtHero(-1);
-              c.rebuild();
-            },
-          },
-          '+',
-        ),
-      ),
-      foes.map((e) =>
+      h('b', {}, `${levelName(d.battle.level)} — round ${d.battle.round}`),
+      h('div', { class: 'row statrow' }, h('span', { class: 'grow' }, S.names.player), h('b', {}, `${heroHp()} health`)),
+      foes.map((e) => h('div', { class: 'row statrow' }, h('span', { class: 'grow' }, lab(e)), h('b', {}, `${e.hp} / ${e.maxHp}`))),
+      d.battle.log.length > 0 &&
         h(
           'div',
-          { class: 'row statrow' },
-          h(
-            'button',
-            {
-              class: 'foe' + (e === foe ? ' on' : ''),
-              title: 'Choose this enemy',
-              onclick: () => {
-                G.foe = e.id;
-                c.rebuild();
-              },
-            },
-            glyphNode(code, e.asset, 'mini'),
-          ),
-          h('b', { class: 'grow' }, ` ${e.hp}/${e.maxHp}`),
-          h(
-            'button',
-            {
-              onclick: () => {
-                e.hp = clamp(e.hp - 1, 0, e.maxHp);
-                c.rebuild();
-              },
-            },
-            '−',
-          ),
-          h(
-            'button',
-            {
-              onclick: () => {
-                e.hp = clamp(e.hp + 1, 0, e.maxHp);
-                c.rebuild();
-              },
-            },
-            '+',
-          ),
+          { class: 'battlelog', id: 'battleLog' },
+          d.battle.log.map((l) => h('p', {}, l)),
         ),
-      ),
     ),
-  );
-  if (foe) {
-    const hit = (n) => {
-      // the Player's blow lands (or misses)
-      lunge(me, foe);
-      for (const w of me ? held(me) : []) w.once = 'swing';
-      if (n) {
-        foe.hp = clamp(foe.hp - n, 0, foe.maxHp);
-        foe.once = 'hit';
-        float(foe.id, `-${n}`, '#ff5a5a');
-        d.sfx = 'boom';
-      } else {
-        float(foe.id, 'miss', '#ffffff');
-        d.sfx = 'fail';
-      }
-      if (foe.hp <= 0) {
-        foe.once = 'die';
-        foe.temp = true;
-        foe.say = '';
-      }
-      stepOn(n ? `${S.names.player} hits ${lab(foe)} for ${n}${foe.hp <= 0 ? ' — it falls' : ''}` : `${S.names.player} misses`);
-    };
-    const strike = (style, n) => {
-      // the enemy's move against the hero
-      const arms = held(foe);
-      if (style === 'strike') {
-        lunge(foe, me);
-        d.sfx = 'boom';
-      }
-      if (style === 'swing') {
-        lunge(foe, me);
-        if (arms.length) for (const w of arms) w.once = 'swing';
-        else foe.once = 'swing';
-        d.sfx = 'boom';
-      }
-      if (style === 'shoot' || style === 'magic') {
-        foe.once = 'cast';
-        d.sfx = style === 'magic' ? 'magic' : 'laser';
-        if (me) {
-          const shot = {
-            id: c.rid(),
-            asset: style === 'magic' ? 'e:' : 'e:',
-            x: me.x,
-            y: me.y - 0.06,
-            scale: 0.6,
-            flip: me.x < foe.x,
-            rot: 0,
-            say: '',
-            fx: '',
-            emote: '',
-            solid: false,
-            active: null,
-            tie: null,
-            hp: null,
-            maxHp: null,
-            once: 'vanish',
-            temp: true,
-            layer: 1,
-          };
-          d.entities.push(shot);
-          d.tracks.push({ id: shot.id, pts: [0, foe.x, foe.y - 0.08 * foe.scale, 420, me.x, me.y - 0.06] });
-        }
-      }
-      if (style === 'roar') {
-        foe.once = 'roar';
-        d.burst = 'shake';
-        d.sfx = 'alarm';
-      }
-      if (n && me) {
-        hurtHero(n);
-        me.once = 'hit';
-        float(me.id, `-${n}`, '#ff5a5a');
-        d.burst = 'hurt';
-      } else if (me && style !== 'roar') float(me.id, 'miss', '#ffffff');
-      d.battle.round += 1;
-      stepOn(
-        `${lab(foe)} ${{ strike: 'strikes', swing: 'swings', shoot: 'shoots', magic: 'casts a spell', roar: 'roars' }[style]}${n ? ` for ${n}` : style === 'roar' ? '' : ' and misses'}`,
-      );
-    };
-    G.style ||= 'strike';
-    const dmgRow = (fn, id) =>
-      h(
-        'div',
-        { class: 'row', id },
-        [
-          [0, 'Miss'],
-          [1, '1'],
-          [2, '2'],
-          [3, '3'],
-          [5, '5'],
-          [8, '8'],
-        ].map(([n, l]) => h('button', { 'data-dmg': n, class: 'grow', onclick: () => fn(n) }, l)),
-      );
-    add(
-      p,
-      h(
-        'div',
-        { class: 'card' },
-        h(
-          'b',
-          {},
-          '1. ',
-          mv === 'attack'
-            ? `${S.names.player} attacks `
-            : mv === 'defend'
-              ? `${S.names.player} defends. `
-              : mv === 'flee'
-                ? `${S.names.player} tries to flee. `
-                : `${S.names.player}’s attack on `,
-          mv === 'defend' || mv === 'flee' ? '' : glyphNode(code, foe.asset, 'mini'),
-        ),
-        mv === 'flee'
-          ? h(
-              'div',
-              { class: 'row' },
-              h(
-                'button',
-                {
-                  class: 'grow',
-                  id: 'fleeYes',
-                  onclick: () => {
-                    endBattle('magic', '');
-                    if (!setup) G.log.push(`${S.names.player} gets away`);
-                    c.rebuild();
-                  },
-                },
-                'They get away',
-              ),
-              h('span', { class: 'dim small grow' }, 'or they fail: go on to 2.'),
-            )
-          : mv === 'defend'
-            ? h('small', { class: 'dim' }, 'Take it into account in the damage below.')
-            : [h('small', { class: 'dim' }, 'How much damage does it do?'), dmgRow(hit, 'heroHits')],
-      ),
-      h(
-        'div',
-        { class: 'card' },
-        h('b', {}, '2. What ', glyphNode(code, foe.asset, 'mini'), ' does back'),
-        h(
-          'div',
-          { class: 'chips wrap' },
-          [
-            ['strike', 'Strike'],
-            ['swing', 'Sword swing'],
-            ['shoot', 'Shoot'],
-            ['magic', 'Magic'],
-          ].map(([id, l]) =>
-            h(
-              'button',
-              {
-                'data-attack': id,
-                class: G.style === id ? 'on' : '',
-                onclick: () => {
-                  G.style = id;
-                  c.rebuild();
-                },
-              },
-              l,
-            ),
-          ),
-          h('button', { 'data-attack': 'roar', onclick: () => strike('roar', 0) }, 'Just roars'),
-        ),
-        h('small', { class: 'dim' }, 'Damage to the hero'),
-        dmgRow((n) => strike(G.style, n), 'foeHits'),
-      ),
-    );
-  }
-  if (G.did && G.did.length)
-    add(
-      p,
-      h(
-        'div',
-        { class: 'card gevents' },
-        h('small', { class: 'dim' }, 'So far this turn'),
-        G.did.map((l) => h('div', {}, '• ' + l)),
-      ),
-    );
-  add(
-    p,
+    h('small', { class: 'dim' }, 'Change how hard it is from here on'),
     h(
       'div',
-      { class: 'card' },
-      h('small', { class: 'dim' }, `What ${S.names.player} does next turn`),
-      h(
-        'div',
-        { class: 'row' },
+      { class: 'levelgrid' },
+      BATTLE_LEVELS.map(([id, label]) =>
         h(
           'button',
           {
-            class: 'grow' + (d.ask && d.ask.kind === 'battle' ? ' on' : ''),
+            'data-level': id,
+            class: d.battle.level === id ? 'on' : '',
             onclick: () => {
-              d.ask = { kind: 'battle', text: 'Your move!', sides: 6, dc: 0, verb: '', places: [], targets: [] };
+              const plan = planBattle(id, { heroHp: heroHp(), weapon: armed, foes: Math.max(1, foes.length) });
+              Object.assign(d.battle, { level: id, hit: plan.hit, foeAtk: plan.foeAtk, foeHit: plan.foeHit, flee: plan.flee });
+              c.changedQuiet();
               c.rebuild();
             },
           },
-          'A battle move',
-        ),
-        [
-          [8, 'Check 8+'],
-          [12, 'Check 12+'],
-          [16, 'Check 16+'],
-        ].map(([dc, l]) =>
-          h(
-            'button',
-            {
-              class: 'grow' + (d.ask && d.ask.kind === 'roll' && d.ask.dc === dc ? ' on' : ''),
-              title: 'A d20 skill check',
-              onclick: () => {
-                d.ask = { kind: 'roll', text: 'Skill check!', sides: 20, dc, verb: '', places: [], targets: [] };
-                c.rebuild();
-              },
-            },
-            l,
-          ),
+          label,
         ),
       ),
     ),
     h(
-      'div',
-      { class: 'row' },
-      h(
-        'button',
-        {
-          class: 'grow danger',
-          id: 'battleEnd',
-          onclick: () => {
-            endBattle('fanfare', '');
-            if (!setup) G.log.push('The battle is over');
-            c.rebuild();
-          },
+      'button',
+      {
+        id: 'battleEnd',
+        onclick: () => {
+          for (const e of d.entities) if (e.id !== d.heroId) e.hp = e.maxHp = null;
+          d.battle = null;
+          d.ask = null;
+          if (!setup) G.log.push('The battle is called off');
+          home();
+          c.rebuild();
         },
-        'End the battle',
-      ),
-      h(
-        'button',
-        {
-          class: 'grow',
-          onclick: () => {
-            home();
-            c.rebuild();
-          },
-        },
-        'Other tools',
-      ),
+      },
+      'Call the battle off',
     ),
+    doneBtn(() => ''),
   );
-  return;
 }
 
 /* ================= the Player's sheet ================= */

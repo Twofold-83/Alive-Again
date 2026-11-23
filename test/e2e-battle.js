@@ -1,5 +1,6 @@
-// A battle with rules, in a real browser: the Director sets it up, the enemies fight on their own, the Player
-// commands (Attack, Defend, Item, Escape, Speak), every round is settled and told to both.
+// The battle, in a real browser: the Director picks the enemies and how hard it is; the whole fight is then the
+// Player's — Attack, Defend, Item, Escape, each carried out at once while both watch — until it is over. The
+// Director can pause it, stage something, and give it back.
 const assert = require('assert');
 const { setup } = require('./lib');
 
@@ -9,15 +10,13 @@ const { setup } = require('./lib');
     const x = await t.open(),
       p = x.p;
     const side = (who) => p.waitForFunction((w) => new RegExp(w).test(document.querySelector('#banner').textContent), who);
-    const toPlayer = async () => {
-      await x.end();
-      await side('Player');
-      await x.cutDone();
-    };
-    const toDirector = async () => {
-      await x.end();
-      await side('Director');
-      await x.cutDone();
+    const round = async (n) => {
+      for (let i = 0; i < 60; i++) {
+        const s = await x.state();
+        if (!s.scene.battle || s.scene.battle.round >= n) return s;
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      return x.state();
     };
     await p.goto(t.base);
     await p.click('#typeAdventure');
@@ -25,66 +24,65 @@ const { setup } = require('./lib');
     await p.waitForSelector('.gopts');
     await x.add('ghoul');
     await x.done();
+    /* the Director: enemies and difficulty, nothing else */
     await x.opt('Battle');
     await p.click('#panel > .grid button >> nth=0');
-    assert.equal(await p.locator('#battleRules [data-cmd]').count(), 5, 'five commands to allow');
-    await p.click('.row button:has-text("20") >> nth=0'); // a tough enemy: it survives the first blow
-    await p.click('#battleRules [data-foeatk="2"]');
-    await p.click('#battleRules [data-flee="100"]');
-    assert.match(await p.textContent('#btEstimate'), /Estimate: [A-Z ]+ — about \d+ rounds/, 'the fight is estimated before it starts');
-    await p.click('[data-level=easy]');
-    assert.match(await p.textContent('#btEstimate'), /EASY/);
-    await p.click('#btAuto'); // turn by turn
-    await p.click('#battleStart');
-    await toPlayer();
-    assert.match(await p.textContent('.askbox'), /Attack.*Defend.*Item.*Escape.*Speak/s);
-    assert.equal(await p.locator('#battleHud .bar').count(), 2, 'health of the hero and of the enemy');
-    await p.click('.battlecmds button:has-text("Attack")');
-    await toDirector();
-    let sc = await x.last();
-    assert.equal(sc.answer.move, 'attack');
-    assert(sc.answer.lines.length >= 1, 'the round was settled: ' + sc.answer.lines.join(' | '));
-    assert.equal(sc.battle.round, 2);
-    assert.equal(sc.steps.length, 1, 'the hero’s move is shown first, then the enemy’s answer');
-    assert(sc.steps[0].floats.length + sc.floats.length >= 1, 'damage numbers float over who was hit');
-    assert.equal(sc.ask.kind, 'battle', 'the next round is asked for without the Director doing anything');
-    await p.waitForSelector('#battleLog');
-    await toPlayer();
-    await p.click('.battlecmds button:has-text("Escape")');
-    await toDirector();
-    sc = await x.last();
-    assert.equal(sc.battle, null, 'escaped: the battle is over');
-    assert.equal(sc.card, 'Got away!');
-    /* a live battle: commands are carried out at once, both watch, the turn stays with the Player */
-    await x.opt('Battle');
-    await p.click('#panel > .grid button >> nth=0');
-    await p.click('.row button:has-text("20") >> nth=0');
-    await p.click('#btLive');
-    await p.click('[data-stophero="0"]');
-    await p.uncheck('#btStop input[type=checkbox]');
+    assert.equal(await p.locator('#battleLevels button').count(), 6, 'six levels, from very easy to basically impossible');
+    await p.click('[data-level=impossible]');
+    const hard = await p.textContent('#btEstimate');
     await p.click('[data-level=veryeasy]');
+    const easy = await p.textContent('#btEstimate');
+    assert.match(easy, /Very easy: Player .* against 1 enemy/);
+    assert.notEqual(easy, hard, 'the level changes the numbers');
+    await p.click('[data-level=hard]'); // tough enough to last a few rounds
     await p.click('#battleStart');
-    await toPlayer();
+    await x.end();
+    await side('Player');
+    await x.cutDone();
+    /* the Player is locked into the fight: only the battle's commands */
+    assert.equal(await p.locator('#foot input').count(), 0, 'no speaking, no free action');
+    assert.equal(await p.locator('#foot button.go').count(), 0, 'no ending the turn');
+    assert.deepEqual(await p.locator('.battlecmds button').allTextContents(), ['Attack', 'Defend', 'Item (0)', 'Escape (40%)']);
+    assert.equal(await p.locator('#battleHud .bar').count(), 2, 'health of the hero and of the enemy');
     const turn = (await x.state()).turn;
-    const round = async (n) => {
-      for (let i = 0; i < 60 && (((await x.state()).scene.battle || {}).round || 0) < n; i++) await new Promise((r) => setTimeout(r, 150));
-    };
-    await p.click('.battlecmds button:has-text("Attack")');
-    await round(2);
-    let live = await x.state();
-    assert.equal(live.turn, turn, 'the turn did not change');
-    assert.equal(live.whose, 'player');
-    assert.equal(live.liveN, 1);
-    assert.equal(live.scene.battle.round, 2);
+    await p.click('[data-cmd=attack]');
+    let s = await round(2);
+    assert.equal(s.turn, turn, 'the turn stays with the Player');
+    assert.equal(s.whose, 'player');
+    assert.equal(s.scene.battle.round, 2);
+    assert(s.scene.answer.lines.length >= 1, 'the round is told: ' + s.scene.answer.lines.join(' | '));
+    assert.equal(s.scene.steps.length, 1, 'the hero’s move is shown first, then the enemy’s answer');
     await x.cutDone();
-    await p.click('.battlecmds button:has-text("Defend")');
-    await round(3);
+    await p.click('[data-cmd=defend]');
+    s = await round(3);
+    assert.equal(s.turn, turn);
     await x.cutDone();
-    /* the Director steps in whenever they like */
+    /* the Director pauses: the turn comes over with all the usual tools; ending it gives the fight back */
     await p.click('#liveStop');
     await side('Director');
-    live = await x.state();
-    assert.equal(live.scene.battle.paused, 'The Director steps in');
+    s = await x.state();
+    assert.equal(s.scene.battle.paused, true);
+    assert.match(await p.textContent('#panel'), /The battle is paused/);
+    await p.click('#battleOpen');
+    await p.click('[data-level=veryeasy]'); // make it easy to get away
+    await x.done();
+    await x.end();
+    await side('Player');
+    await x.cutDone();
+    s = await x.state();
+    assert.equal(s.scene.battle.paused, false);
+    assert.equal(s.scene.battle.flee, 90, 'the level sets the chance to escape');
+    /* escape (or the end of the fight) hands the turn to the Director */
+    for (let i = 0; i < 12 && (await x.state()).scene.battle; i++) {
+      await p.click('[data-cmd=escape]').catch(() => {});
+      await new Promise((r) => setTimeout(r, 600));
+      await x.cutDone().catch(() => {});
+    }
+    await side('Director');
+    s = await x.state();
+    assert.equal(s.scene.battle, null, 'the battle is over');
+    assert.match(s.scene.card, /Got away!|Defeated…|Victory!/);
+    assert.equal(s.scene.entities.find((e) => e.asset === 'p:ghoul') ? s.scene.entities.find((e) => e.asset === 'p:ghoul').hp : null, null, 'the health bars are gone');
     assert.deepEqual(t.errors, []);
     console.log('E2E-BATTLE OK');
   } finally {

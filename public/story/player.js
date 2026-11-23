@@ -5,9 +5,7 @@ import { openDollMaker } from '../build/dollmaker.js';
 import { assetLabel, assetUrl } from '../core/catalog.js';
 import { h, add } from '../core/dom.js';
 import { openCheck } from './dice.js';
-import { act } from '../core/net.js';
-import { toast } from '../core/dom.js';
-import { livingFoes, heroHealth, weaponOf, itemHeals } from '../shared/battle.js';
+import { battleBox } from './battle-ui.js';
 import { glyphNode } from '../stage/render.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
@@ -70,6 +68,11 @@ export function buildFoot() {
   if (!myTurn())
     return void add(f, h('div', { class: 'status' }, `Waiting for ${app.S.joined[other()] ? app.S.names[other()] : 'your partner'}`, tl()));
   if (app.submitting) return void add(f, h('div', { class: 'status' }, 'Sending…'));
+  if (app.S.you === 'player' && app.S.scene.battle) {
+    /* locked in battle: nothing but the battle's commands until it is over */
+    f.classList.add('tight');
+    return void add(f, battleBox(rebuild));
+  }
   if (app.S.you === 'director') {
     const ready = app.S.joined.player;
     add(
@@ -344,153 +347,6 @@ export function buildFoot() {
             setReply({ id });
           }),
         );
-      } else if (app.draft.battle && typeof app.draft.battle.auto === 'boolean') {
-        /* a battle with rules: Attack, Defend, Item, Escape, Speak — whatever the Director allowed */
-        const b = app.draft.battle,
-          foes = livingFoes(app.draft),
-          hp = heroHealth(app.draft),
-          weapon = weaponOf(app.draft),
-          pick = app.battleMenu || '';
-        answered = !!rp.move;
-        const menu = (id) => () => {
-          app.battleMenu = app.battleMenu === id ? '' : id;
-          rebuild();
-        };
-        /* live: a command is carried out the moment it is chosen, and both sides watch the round */
-        if (b.live && rp.move && !app.liveBusy) {
-          const me = hero(app.draft),
-            said = me ? (me.say || '').trim() : '';
-          if (rp.move === 'speak' && !said) {
-            app.draft.reply = null;
-            toast('Type what you say in “Say something…”, then press Speak');
-            setTimeout(() => $('#sayInput') && $('#sayInput').focus(), 50);
-          } else {
-            app.liveBusy = true;
-            const sent = { ...rp };
-            app.draft.reply = null; // sent: it is not chosen again
-            saveDraft();
-            act('battle', { turn: app.S.turn, move: sent.move, id: sent.id, item: sent.item, say: said }, 2).catch((e) => {
-              app.liveBusy = false;
-              toast(e.message);
-            });
-            setTimeout(() => (app.liveBusy = false), 6000);
-          }
-        }
-        const cmd = {
-          attack: () =>
-            opt(
-              weapon ? 'Attack (armed)' : 'Attack',
-              rp.move === 'attack' || pick === 'attack',
-              foes.length === 1 ? () => (setReply({ move: 'attack', id: foes[0].id }), (app.battleMenu = '')) : menu('attack'),
-            ),
-          defend: () =>
-            opt('Defend', rp.move === 'defend', () => {
-              app.battleMenu = '';
-              setReply({ move: 'defend' });
-            }),
-          item: () => opt(`Item (${app.draft.sheet.inv.length})`, rp.move === 'item' || pick === 'item', menu('item')),
-          escape: () =>
-            opt(`Escape (${b.flee}%)`, rp.move === 'escape', () => {
-              app.battleMenu = '';
-              setReply({ move: 'escape' });
-            }),
-          speak: () =>
-            opt(
-              'Speak',
-              rp.move === 'speak' || pick === 'speak',
-              foes.length === 1
-                ? () => (
-                    setReply({ move: 'speak', id: foes[0].id }),
-                    (app.battleMenu = ''),
-                    setTimeout(() => $('#sayInput') && $('#sayInput').focus(), 50)
-                  )
-                : menu('speak'),
-            ),
-        };
-        body = [
-          h(
-            'div',
-            { class: 'battlehud', id: 'battleHud' },
-            h(
-              'div',
-              { class: 'bar hero' },
-              h('b', {}, app.S.names.player),
-              h('span', {}, `${hp.get()} / ${hp.max}`),
-              h('i', { style: `width:${(hp.get() / (hp.max || 1)) * 100}%` }),
-            ),
-            foes.map((e) =>
-              h(
-                'div',
-                { class: 'bar foe' },
-                h('b', {}, lab(e.id)),
-                h('span', {}, `${e.hp} / ${e.maxHp}`),
-                h('i', { style: `width:${(e.hp / (e.maxHp || 1)) * 100}%` }),
-              ),
-            ),
-          ),
-          b.live &&
-            h(
-              'small',
-              { class: 'dim', id: 'liveNote' },
-              app.liveBusy ? 'The round is being fought…' : 'Live battle: your command is carried out at once.',
-            ),
-          h(
-            'div',
-            { class: 'battlecmds' },
-            b.cmds.map((k) => cmd[k]()),
-          ),
-          (pick === 'attack' || pick === 'speak') &&
-            h(
-              'div',
-              { class: 'battlepick' },
-              foes.map((e) =>
-                opt([pick === 'attack' ? 'Attack ' : 'Speak to ', lab(e.id)], rp.id === e.id && rp.move === pick, () => {
-                  setReply({ move: pick, id: e.id });
-                  app.battleMenu = '';
-                }),
-              ),
-            ),
-          pick === 'item' &&
-            h(
-              'div',
-              { class: 'battlepick' },
-              app.draft.sheet.inv.length
-                ? app.draft.sheet.inv.map((it) =>
-                    opt(
-                      [glyphNode(app.code, it.asset, 'mini'), ` ${it.name || ''} — ${itemHeals(it) ? 'heals you' : 'throw it'}`],
-                      rp.item === it.id,
-                      () => {
-                        setReply({ move: 'item', item: it.id, id: foes[0] && foes[0].id });
-                        app.battleMenu = '';
-                      },
-                    ),
-                  )
-                : h('small', { class: 'dim' }, 'You carry nothing.'),
-            ),
-          b.log.length > 0 &&
-            h(
-              'div',
-              { class: 'battlelog' },
-              b.log.slice(-4).map((l) => h('p', {}, l)),
-            ),
-        ].filter(Boolean);
-      } else {
-        answered = !!rp.move;
-        body = [
-          ...app.draft.entities
-            .filter((e) => e.hp != null && e.id !== app.draft.heroId)
-            .map((e) =>
-              opt(['Attack ', lab(e.id)], rp.move === 'attack' && rp.id === e.id, () => {
-                setReply({ move: 'attack', id: e.id });
-              }),
-            ),
-          opt('Defend', rp.move === 'defend', () => {
-            setReply({ move: 'defend' });
-          }),
-          opt('Flee', rp.move === 'flee', () => {
-            setReply({ move: 'flee' });
-          }),
-        ];
       }
       const def = {
         roll: 'Roll the die.',
@@ -498,7 +354,6 @@ export function buildFoot() {
         discard: 'Give up one of your things.',
         place: 'Where do you go?',
         target: `${ask.verb || 'Choose'} — who or what?`,
-        battle: 'Battle! What do you do?',
       }[ask.kind];
       asked = h('div', { class: 'askbox' }, h('b', {}, ask.text || def), h('div', { class: 'chips wrap choices' }, body));
     }

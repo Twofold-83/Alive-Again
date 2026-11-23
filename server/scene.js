@@ -52,7 +52,8 @@ export function rollDie(sides) {
  *   discard  give up one inventory item
  *   place    walk to one of the marked places [{ label, x, y }]
  *   target   pick one of the listed characters or things (verb: "Attack", "Talk to", ...)
- *   battle   a battle move: attack an enemy, defend, or flee */
+ *   battle   the Player is in a battle (see shared/battle.js): their commands are carried out at once
+ *   image    a picture to look at */
 function cleanAsk(a, ids) {
   if (!a || typeof a !== 'object' || !['roll', 'discard', 'place', 'target', 'battle', 'image'].includes(a.kind)) return null;
   return {

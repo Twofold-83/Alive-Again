@@ -103,7 +103,7 @@ export function setReply(r) {
   const ask = app.draft.ask || {};
   app.draft.reply = r;
   app.draft.answer = null;
-  if (ask.kind === 'target' || ask.kind === 'battle') app.draft.target = null;
+  if (ask.kind === 'target') app.draft.target = null;
   if (!r) return;
   if (ask.kind === 'place') app.draft.answer = { kind: 'place', label: ask.places[r.index].label };
   if (ask.kind === 'discard') {
@@ -113,10 +113,6 @@ export function setReply(r) {
   if (ask.kind === 'target') {
     app.draft.answer = { kind: 'target', verb: ask.verb || 'chooses' };
     app.draft.target = r.id;
-  }
-  if (ask.kind === 'battle') {
-    app.draft.answer = { kind: 'battle', move: r.move };
-    app.draft.target = r.move === 'attack' || r.move === 'speak' ? r.id || null : null;
   }
 }
 /* ---------- active objects: hover shows the name, a click offers what the Director allowed ---------- */

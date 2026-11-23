@@ -30,7 +30,7 @@ export function guidedKey() {
 /** At the start of the Director's turn: in a battle, the battle tools are what they need. */
 export function guidedStart(d) {
   G.did = [];
-  if (d && d.battle) G.path = ['battle'];
+  void d; // a paused battle is shown on the first screen: all the usual tools are there
 }
 
 /** Which stage tool the open screen needs: dragging records a path, or draws. */

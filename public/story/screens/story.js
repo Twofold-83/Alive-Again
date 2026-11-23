@@ -113,8 +113,9 @@ export function screenRoot(kit) {
         h(
           'div',
           { class: 'card ask' },
-          h('b', {}, `Battle — round ${d.battle.round}`),
-          h('button', { class: 'primary', id: 'battleOpen', onclick: () => enter('battle') }, 'Open the battle tools'),
+          h('b', {}, d.battle.paused ? `The battle is paused — round ${d.battle.round}` : 'A battle begins when you end your turn'),
+          h('small', { class: 'dim' }, 'Stage what you like; ending your turn gives the fight back.'),
+          h('button', { id: 'battleOpen', onclick: () => enter('battle') }, 'Battle: difficulty, call it off'),
         ),
       );
     const used = d.use && d.sheet.inv.find((i) => i.id === d.use);
@@ -210,7 +211,7 @@ export function screenRoot(kit) {
       !ws && c.mods().points && opt('star', 'Award points', `${d.sheet.points || 0} so far`, () => enter('award')),
       !ws &&
         S.rules.type === 'adventure' &&
-        opt('sword', 'Battle', d.battle ? `Round ${d.battle.round}` : 'Enemies, attacks, damage', () => enter('battle')),
+        opt('sword', 'Battle', d.battle ? `Paused in round ${d.battle.round}` : 'Pick the enemies and how hard it is', () => enter('battle')),
       !ws && opt('robot', 'Tell Claude', 'Describe it, Claude stages it', () => enter('claude')),
       opt('doll', 'Character maker', 'Build a person: head, body, arms, legs', () => c.dollMaker()),
       opt('paint-can', 'Sprite editor', 'Draw your own things, pixel by pixel', () => enter('add:own')),

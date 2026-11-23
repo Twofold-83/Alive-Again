@@ -2,7 +2,7 @@
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
 import { timers, online, broadcast, touch, rooms } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
-import { resolveBattle, livingFoes, stopReason } from '../public/shared/battle.js';
+import { fightRound, livingFoes, heroHealth, BATTLE_CMDS } from '../public/shared/battle.js';
 import { cutEstimate, rollDie, cleanScene, cleanTrackPts, cleanPose, cleanFeel } from './scene.js';
 import { cleanRules } from '../public/shared/rules.js';
 import { walkable, stepFields, playerFields } from '../public/shared/scene-model.js';
@@ -107,11 +107,33 @@ function submitDirector(room, body) {
   room.scene = cleanScene(body.scene || {}, room.scene);
   const roll = rollDie(body.roll);
   if (roll) room.scene.roll = { by: 'director', ...roll };
+  /* a battle belongs to the Player from here on: it starts, or goes on after a pause */
+  const sc = room.scene;
+  if (sc.battle && livingFoes(sc).length && heroHealth(sc).get() > 0) {
+    sc.battle.paused = false;
+    sc.ask = battleAsk(sc);
+    sc.choices = [];
+  } else if (sc.battle) {
+    sc.battle = null; // nobody left to fight
+    if (sc.ask && sc.ask.kind === 'battle') sc.ask = null;
+  }
 }
+const battleAsk = (sc) => ({
+  kind: 'battle',
+  image: '',
+  back: false,
+  text: `Battle — round ${sc.battle.round}`,
+  sides: 6,
+  dc: 0,
+  verb: '',
+  places: [],
+  targets: [],
+});
 /** The Player ends a turn: only what a Player may change — the hero's line and walk, an action, an answer. */
 function submitPlayer(room, body) {
   const sc = room.scene,
     mode = room.rules.player;
+  if (sc.battle) throw fail(400, 'You are in a battle: fight, or try to escape');
   const hero = sc.entities.find((e) => e.id === sc.heroId);
   let action = str(body.action, mode === 'tell' ? 300 : 160);
   if (mode === 'limited' && sc.choices.length && !sc.choices.includes(action)) throw fail(400, 'Pick one of the Director’s options first');
@@ -119,7 +141,6 @@ function submitPlayer(room, body) {
   const ask = sc.ask,
     ans = body.answer && typeof body.answer === 'object' ? body.answer : null;
   let answer = null,
-    battleMove = null,
     askRoll = 0,
     askTarget = null;
   if (ask && ask.kind === 'roll' && ask.rolled) {
@@ -141,18 +162,6 @@ function submitPlayer(room, body) {
     else if (ask.kind === 'target' && ask.targets.includes(ans.id)) {
       askTarget = ans.id;
       answer = { kind: 'target', verb: ask.verb || 'chooses' };
-    } else if (ask.kind === 'battle' && sc.battle && typeof sc.battle.auto === 'boolean' && sc.battle.cmds.includes(ans.move)) {
-      /* a battle with rules: the round is settled below, once the hero has spoken and moved */
-      const foe = livingFoes(sc).find((e) => e.id === ans.id);
-      battleMove = { move: ans.move, id: foe ? foe.id : null, item: typeof ans.item === 'string' ? ans.item : '' };
-      answer = { kind: 'battle', move: ans.move };
-      askTarget = foe && (ans.move === 'attack' || ans.move === 'speak') ? foe.id : null;
-    } else if (ask.kind === 'battle' && ['attack', 'defend', 'flee'].includes(ans.move)) {
-      const foe = sc.entities.find((e) => e.id === ans.id && e.hp != null && e.id !== sc.heroId);
-      if (ans.move !== 'attack' || foe) {
-        answer = { kind: 'battle', move: ans.move };
-        askTarget = foe && ans.move === 'attack' ? foe.id : null;
-      }
     }
   }
   if (mode === 'limited' && ask && ask.kind !== 'battle' && !answer) throw fail(400, 'Do what the Director asked first');
@@ -237,40 +246,17 @@ function submitPlayer(room, body) {
     sc.card = 'Something happened!';
     sc.sfx = 'alarm';
   }
-  if (battleMove) settleBattle(room, sc, battleMove, answer);
-}
-/** One round of a battle with rules: the hero's command, the enemies' answer, and what follows if it is over. */
-function settleBattle(room, sc, move, answer) {
-  const label = (e) => assetName(e.asset);
-  const lines = resolveBattle(sc, move, room.names, label);
-  sc.answer = { ...answer, lines: lines.slice(0, 8) };
-  const b = sc.battle;
-  if (b.over === 'won' || b.over === 'fled') {
-    for (const e of sc.entities) if (e.id !== sc.heroId && !e.temp) e.hp = e.maxHp = null;
-    sc.card = b.over === 'won' ? 'Victory!' : 'Got away!';
-    sc.sfx = b.over === 'won' ? 'fanfare' : 'teleport';
-    sc.battle = null;
-    return 'over';
-  }
-  if (b.over === 'lost') {
-    sc.card = 'Defeated…';
-    sc.sfx = 'fail'; // the Director decides what that means
-    return 'over';
-  }
-  sc.ask = { kind: 'battle', text: `Round ${b.round} — what do you do?`, sides: 6, dc: 0, verb: '', places: [], targets: [] };
-  b.paused = stopReason(sc, move.move, room.names, label);
-  return b.paused ? 'stop' : '';
 }
 /**
- * A live battle: the Player's command is settled the moment it is given and both sides watch the round; the turn
- * stays with the Player until the battle ends or something the Director asked to be told about happens.
+ * The Player's command in a battle: carried out at once, and both sides watch the round. The turn stays with the
+ * Player until the battle is over — then it goes to the Director, with the outcome on a card.
  */
 export function actBattle(room, body, who) {
   const sc = room.scene,
     b = sc.battle;
   if (room.ended || body.turn !== room.turn || who.role !== room.whose || room.whose !== 'player') return { ok: true, stale: true };
-  if (!b || !b.live || b.over) throw fail(400, 'There is no live battle');
-  if (!b.cmds.includes(body.move)) throw fail(400, 'That is not possible in this battle');
+  if (!b) throw fail(400, 'There is no battle');
+  if (!BATTLE_CMDS.some((c) => c[0] === body.move)) throw fail(400, 'That is not possible in a battle');
   room.liveBefore = clone(sc); // the round is shown from here
   room.liveN = (room.liveN || 0) + 1;
   Object.assign(sc, stepFields(), playerFields(), { steps: [] });
@@ -279,31 +265,38 @@ export function actBattle(room, body, who) {
     e.once = '';
     e.say = '';
   }
-  const hero = sc.entities.find((e) => e.id === sc.heroId),
-    foe = livingFoes(sc).find((e) => e.id === body.id);
-  if (hero && body.move === 'speak') hero.say = str(body.say, 160);
-  if (foe && (body.move === 'attack' || body.move === 'speak')) sc.target = foe.id;
-  const end = settleBattle(
-    room,
+  const foe = livingFoes(sc).find((e) => e.id === body.id);
+  if (foe && body.move === 'attack') sc.target = foe.id;
+  const { lines, over } = fightRound(
     sc,
     { move: body.move, id: foe ? foe.id : null, item: typeof body.item === 'string' ? body.item : '' },
-    { kind: 'battle', move: body.move },
+    room.names,
+    (e) => assetName(e.asset),
   );
-  if (end)
-    advance(room, false); // over, or the Director wanted to step in here
-  else {
+  sc.answer = { kind: 'battle', move: body.move, lines: lines.slice(0, 8), over };
+  if (!over) {
+    sc.ask = battleAsk(sc);
     touch(room);
     broadcast(room);
+    return { ok: true };
   }
+  /* over: the enemies' health bars go, the outcome is told, and the Director takes it from here */
+  for (const e of sc.entities) if (e.id !== sc.heroId && !e.temp) e.hp = e.maxHp = null;
+  sc.card = over === 'won' ? 'Victory!' : over === 'fled' ? 'Got away!' : 'Defeated…';
+  sc.sfx = over === 'won' ? 'fanfare' : over === 'fled' ? 'teleport' : 'fail';
+  sc.battle = null;
+  sc.ask = null;
+  advance(room, false);
   return { ok: true };
 }
-/** The Director steps into a live battle: the turn comes over at once. */
+/** The Director pauses the battle: the turn comes over at once, with all the usual tools. Ending that turn gives the fight back. */
 export function actBattlePause(room, body, who) {
   const sc = room.scene;
   if (who.role !== 'director' && !room.hotseat) throw fail(403, 'Only the Director can do that');
-  if (room.ended || room.whose !== 'player' || !sc.battle || !sc.battle.live) return { ok: true, stale: true };
+  if (room.ended || room.whose !== 'player' || !sc.battle) return { ok: true, stale: true };
   Object.assign(sc, stepFields(), playerFields(), { steps: [] }); // the last round was already seen
-  sc.battle.paused = 'The Director steps in';
+  sc.battle.paused = true;
+  sc.ask = null;
   room.liveBefore = null;
   advance(room, false);
   return { ok: true };

@@ -46,41 +46,44 @@ assert.equal(parts.length, 500);
 assert.equal(new Set(parts.map((x) => x.id)).size, 500);
 for (const part of parts) assert(fs.existsSync(`public/doll/${part.id}.png`) && part.name, part.id);
 for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.length % 16 === 0, m.id);
-/* battle rules: a round with enemies that fight on their own */
+/* battle rules: the difficulty decides every number; a round is the hero's move and then each enemy's */
 {
-  const { resolveBattle, cleanBattle, heroHealth } = await import('../public/shared/battle.js');
+  const { fightRound, cleanBattle, planBattle, heroHealth, BATTLE_LEVELS } = await import('../public/shared/battle.js');
   const { newScene, newEntity } = await import('../public/shared/scene-model.js');
-  const sc = newScene();
+  const who = { heroHp: 10, weapon: true, foes: 2 };
+  const plans = BATTLE_LEVELS.map((l) => planBattle(l[0], who));
+  for (let i = 1; i < plans.length; i++) {
+    assert(plans[i].damage >= plans[i - 1].damage, 'each level costs the hero at least as much as the one before');
+    assert(plans[i].flee < plans[i - 1].flee && plans[i].hit <= plans[i - 1].hit, 'and escaping and hitting get harder');
+  }
+  assert(plans[0].damage < 4 && plans[5].damage > 12, `very easy barely hurts, basically impossible kills: ${plans.map((x) => x.damage)}`);
+  const sc = newScene(),
+    plan = planBattle('medium', { heroHp: 10, weapon: true, foes: 1 });
   sc.entities.push(
-    newEntity('p:ghoul', { id: 'g', hp: 6, maxHp: 6 }),
+    newEntity('p:ghoul', { id: 'g', hp: plan.foeHp, maxHp: plan.foeHp }),
     newEntity('p:dagger-ritual', { id: 'w', tie: { to: 'hero', dx: 0, dy: 0, front: true } }),
   );
   sc.sheet.inv.push({ id: 'i1', asset: 'p:potion-poison', name: 'Healing potion' });
-  sc.battle = cleanBattle({ round: 1, auto: true, cmds: ['attack', 'item', 'escape'], atk: 2, foeAtk: 2, flee: 100 });
-  assert.deepEqual(sc.battle.cmds, ['attack', 'item', 'escape']);
+  sc.battle = cleanBattle({ ...plan, round: 1 });
+  assert.equal(cleanBattle({ round: 1 }), null, 'a battle without a level is no battle');
   const names = { player: 'Hero', director: 'D' },
     label = () => 'ghoul';
-  const lines = resolveBattle(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
-  assert.equal(sc.entities.find((e) => e.id === 'g').hp, 6 - (2 + 2 + 1), 'strength, the tied weapon and the roll');
-  assert.equal(heroHealth(sc).get(), 8 - 3, 'the ghoul struck back');
-  assert(lines.length === 2 && sc.battle.round === 2);
+  let r = fightRound(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
+  assert.equal(sc.entities.find((e) => e.id === 'g').hp, plan.foeHp - (2 + 2 + 1), 'strength, the tied weapon and the roll');
   assert.equal(sc.steps.length, 1, 'the hero’s blow is a picture of its own, before the enemy answers');
   assert.equal(sc.steps[0].floats[0].id, 'g');
-  assert.deepEqual(
-    sc.floats.map((f) => f.id),
-    ['hero'],
-    'then the enemy’s blow lands on the hero',
-  );
+  assert.equal(r.over, '');
+  assert(heroHealth(sc).get() < 10 && sc.battle.round === 2, 'the ghoul struck back');
   sc.steps = [];
-  resolveBattle(sc, { move: 'item', item: 'i1' }, names, label, () => 0.5);
+  fightRound(sc, { move: 'item', item: 'i1' }, names, label, () => 0.5);
   assert.equal(sc.sheet.inv.length, 0, 'the potion is used up');
-  resolveBattle(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
-  assert.equal(sc.battle.over, 'won');
+  sc.entities.find((e) => e.id === 'g').hp = 1;
+  r = fightRound(sc, { move: 'attack', id: 'g' }, names, label, () => 0.5);
+  assert.equal(r.over, 'won');
   sc.entities.find((e) => e.id === 'g').hp = 5;
   sc.entities.find((e) => e.id === 'g').temp = false;
-  sc.battle.over = '';
-  resolveBattle(sc, { move: 'escape' }, names, label, () => 0.5);
-  assert.equal(sc.battle.over, 'fled');
+  sc.battle.flee = 100;
+  assert.equal(fightRound(sc, { move: 'escape' }, names, label, () => 0.5).over, 'fled');
 }
 /* every hand-drawn view named in the index is a file */
 {

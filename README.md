@@ -201,10 +201,10 @@ as icons, and what the Player did is read out like the log of an old adventure g
 - **Adventure controls.** A click on the stage offers Walk here / Look at / Use; clickable things can answer by
   themselves and change to their used picture; a thing can be a trap; the Director can show a picture; a roll
   hands straight back to the Director. The Director's shelf under the stage holds the cast and prepared things.
-- **Live battles.** Both watch every round as it happens; enemy actions by percentage, hit chances, triggers
-  that hand over to the Director, six difficulty settings and an estimate (`public/shared/battle.js`).
-- **Battles with rules.** Attack, Defend, Item, Escape, Speak; enemies fight on their own or are moved by the
-  Director; a tied thing is a weapon (`public/shared/battle.js`).
+- **Battles.** The Director picks the enemies and one of six levels (very easy to basically impossible); the
+  level sets every number, the chance to escape included. The whole fight is then the Player's — Attack, Defend,
+  Item, Escape, carried out at once while both watch — until it is over. The Director can pause it, stage
+  something with the usual tools, and give it back (`public/shared/battle.js`, `public/story/battle-ui.js`).
 - **Save room.** In Build scene, "Save room" keeps a room on the device; "My saved rooms" opens it in any story.
 - **Rolls at once.** When the Director asks for a roll (with the number to reach), the Player presses Roll,
   sees the die and is told at once whether it was enough; the Director gets the result in words.

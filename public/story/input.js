@@ -1,5 +1,6 @@
 /* Pointer and keyboard on the stage during a story: selecting, dragging, recording moves, drawing (Director);
  * walking, pointing, choosing (Player). */
+import { battleCmd } from './battle-ui.js';
 import { clamp, clone } from '../core/dom.js';
 import { stage, pen, myTurn, hero, mods, directing, app } from '../core/state.js';
 import { guidedPick, guidedMark } from './guided.js';
@@ -41,6 +42,10 @@ stage.addEventListener('pointerdown', (ev) => {
       if (!app.draft.action.trim()) app.draft.action = 'Look at';
       return rebuild();
     }
+    if (app.S.scene.battle) {
+      if (hit && hit.hp > 0 && hit !== me) battleCmd('attack', { id: hit.id });
+      return;
+    }
     if (app.S.rules.player === 'tell') return toast('In this story you write what you want to do, and the Director makes it happen');
     if (!me) return toast('You have no character on stage right now — speak or act instead');
     hideVerbs();
@@ -66,10 +71,6 @@ stage.addEventListener('pointerdown', (ev) => {
     if (hit && hit !== me) {
       if (ask && ask.kind === 'target' && ask.targets.includes(hit.id)) {
         setReply({ id: hit.id });
-        return rebuild();
-      }
-      if (ask && ask.kind === 'battle' && hit.hp != null) {
-        setReply({ move: 'attack', id: hit.id });
         return rebuild();
       }
       if (app.draft.use) {
