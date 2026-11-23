@@ -188,7 +188,6 @@ function syncOrder() {
         app.draft.point ||
         app.draft.use ||
         app.draft.exit ||
-        app.draft.act ||
         (app.draft.reply && !app.draft.reply.roll)
       ),
     };
@@ -308,7 +307,6 @@ export async function submit() {
       ? { turn, scene: finalScene(), roll }
       : {
           answer: app.draft.reply,
-          act: app.draft.act,
           exit: app.draft.exit,
           turn,
           x: me && me.x,

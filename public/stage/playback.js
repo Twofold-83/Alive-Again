@@ -232,7 +232,6 @@ export function playCut(root, before, after, o, done) {
         frame.use = after.use;
         frame.exit = after.exit;
         frame.answer = after.answer;
-        frame.verb = after.verb;
       });
       t += 1300;
     }

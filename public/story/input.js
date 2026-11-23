@@ -7,7 +7,7 @@ import { stage, pen, myTurn, hero, mods, directing, app } from '../core/state.js
 import { guidedPick, guidedMark, guidedTool } from './guided.js';
 import { rid, r3, toast, $ } from '../core/dom.js';
 import { changed, rebuild, paint, undo, submit } from './turn.js';
-import { walkHero, setReply, hideVerbs, showVerbs, showClickMenu, doVerb } from './walk.js';
+import { walkHero, setReply, hideVerbs, showClickMenu, intend } from './walk.js';
 import { render } from './view.js';
 import { mapOpen } from '../build/map.js';
 import { removeEntity } from './director.js';
@@ -41,7 +41,7 @@ stage.addEventListener('pointerdown', (ev) => {
       const verb = app.verb;
       app.verb = '';
       app.actionsOpen = false;
-      return doVerb(verb, hit && hit !== me ? hit : null, p);
+      return intend(verb, hit && hit !== me ? hit : null, p);
     }
     if (app.S.scene.battle) {
       if (hit && hit.hp > 0 && hit !== me) battleCmd('attack', { id: hit.id });
@@ -74,20 +74,14 @@ stage.addEventListener('pointerdown', (ev) => {
         setReply({ id: hit.id });
         return rebuild();
       }
-      if (app.draft.use) {
+      const reach = () => {
         app.draft.target = app.draft.target === hit.id ? null : hit.id;
-        app.draft.act = null;
-        app.draft.verb = '';
-        return changed();
-      } // use the chosen item ON this
+        changed();
+      };
+      if (app.draft.use) return reach(); // use the chosen item ON this
       if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev); // walk here, look at, use — and what a clickable thing offers
-      if (hit.active && hit.active.verbs.length) return showVerbs(hit, ev); // an active object: what to do with it?
-      if (mods().inventory && app.S.rules.player === 'free') {
-        app.draft.target = app.draft.target === hit.id ? null : hit.id;
-        app.draft.act = null;
-        app.draft.verb = '';
-        return changed();
-      } // reach for it
+      if (hit.active && hit.active.verbs.length) return showClickMenu(hit, p, ev); // a clickable thing: what to do with it?
+      if (mods().inventory && app.S.rules.player === 'free') return reach(); // reach for it
     }
     if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev);
     return toast(app.draft.walked ? 'You have already walked this turn' : 'Press “Walk”, then click where you want to go');

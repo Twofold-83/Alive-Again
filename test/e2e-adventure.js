@@ -101,7 +101,7 @@ const { setup } = require('./lib');
     await p.waitForSelector('#verbs');
     assert.match(await p.textContent('#verbs'), /Old chest.*Look at.*Use.*Open/s);
     await p.click('#verbs button:has-text("Open")');
-    assert.match(await act(), /Open: Old chest/);
+    assert.match(await act(), /Open Old chest/);
     await x.walk(0.5, 0.9);
     [sx, sy] = await pos(ent('dagger'));
     [hx, hy] = await x.heroPos();
@@ -122,10 +122,10 @@ const { setup } = require('./lib');
       const g = await p.evaluate(() => [window.__gap, window.__moved]);
       assert(g[0] < 90, `the sword stayed in the hero’s hand while the walk was replayed (gap ${g[0]}px, hero moved ${g[1]}px)`);
     }
-    assert.match(await p.textContent('.card.told'), /Open: Old chest/);
+    assert.match(await p.textContent('.card.told'), /Open Old chest/);
     let sc = await x.last();
-    assert.equal(sc.verb, 'Open');
-    assert(sc.entities.find((e) => e.id === sc.target).active);
+    assert.equal(sc.point.verb, 'Open');
+    assert(sc.entities.find((e) => e.id === sc.point.id).active);
 
     /* ---- speech bubbles belong to their step and do not survive a turn change ---- */
     await x.opt('Someone speaks');
@@ -235,7 +235,7 @@ const { setup } = require('./lib');
     assert.deepEqual(sc.answer, { kind: 'place', label: 'Place 2' });
     assert.match(await p.textContent('.card.told'), /goes to Place 2/);
     assert(sc.point && sc.point.id, 'the action points at the chest');
-    assert.equal(sc.action, 'Attack');
+    assert.equal(sc.point.verb, 'Attack');
     assert.match(await p.textContent('.card.told'), /Attack Old chest/);
     /* ---- ask: pick a target; then give up an item ---- */
     await x.opt('Ask Player');

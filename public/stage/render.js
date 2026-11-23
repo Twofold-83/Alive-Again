@@ -4,7 +4,7 @@ import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
 import { spriteView, assetLabel, backdropCss, pixelInfo, CUSTOM, viewKey, assetUrl } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 import { LIGHTS } from '../shared/options.js';
-import { baseOf, nameOf, called } from '../shared/scene-model.js';
+import { baseOf, nameOf, called, pointText } from '../shared/scene-model.js';
 
 /** Fill in fields that older saved scenes do not have. */
 /** How big a thing of scale 1 is drawn, in units of --u (an eighth of the stage width): a person is a tile and a half tall. */
@@ -59,8 +59,6 @@ export function actionParts(scene, pendingRoll) {
   const a = scene.answer;
   if (item && t) parts.push(['does', `uses ${assetLabel(item.asset, item.name)} on ${name(t)}`]);
   else if (item) parts.push(['does', 'uses ' + assetLabel(item.asset, item.name)]);
-  else if (t && scene.verb)
-    parts.push(['does', `${scene.verb}: ${name(t)}`]); // a verb on a clickable thing
   else if (t && a && a.kind === 'target') parts.push(['does', `${a.verb}: ${name(t)}`]);
   else if (a && a.kind === 'battle')
     void 0; // told below, line by line
@@ -76,10 +74,8 @@ export function actionParts(scene, pendingRoll) {
   if (trap) parts.push(['does', `came too close to ${name(trap)} — something happened!`]);
   const ex = scene.exit && (scene.exits || []).find((x) => x.id === scene.exit);
   if (ex) parts.push(['goes', 'heads for ' + ex.label]);
-  const pt = scene.point,
-    pe = pt && pt.id && scene.entities.find((e) => e.id === pt.id); // the action points at something on the stage
-  if (pt) parts.push(['does', `${scene.action || 'Look at'} ${pe ? name(pe) : 'here'}`]);
-  else if (scene.action) parts.push(['does', scene.action]);
+  if (scene.point) parts.push(['does', pointText(scene)]);
+  if (scene.action) parts.push(['does', scene.action]);
   if (scene.roll && scene.roll.by === 'player') {
     const need = a && a.kind === 'roll' && a.dc ? (scene.roll.value >= a.dc ? ` — success (needed ${a.dc})` : ` — fails (needed ${a.dc})`) : '';
     parts.push(['rolls', `rolls ${scene.roll.value} (d${scene.roll.sides})${need}`]);

@@ -12,6 +12,7 @@
 import { BACKDROPS as CATALOG_BACKDROPS } from '../public/core/catalog.js';
 import { MOODS as MOOD_LIST, SFX as SFX_LIST } from '../public/shared/sounds.js';
 import { WEATHER as WEATHER_LIST, BURSTS as BURST_LIST, FX as FX_LIST } from '../public/shared/options.js';
+import { pointText } from '../public/shared/scene-model.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -210,7 +211,7 @@ function describe({ text, scene, raw, rules, names }) {
     },
     player_last_turn: {
       said: raw.said || (hero ? hero.say : ''),
-      did: raw.action || '',
+      did: [pointText(raw, (e) => looks(e.asset)), raw.action].filter(Boolean).join(', '),
       reached_for: reached ? looks(reached.asset) : undefined,
       used: used ? looks(used.asset) : undefined,
       rolled: raw.roll && raw.roll.by === 'player' ? raw.roll.value : undefined,

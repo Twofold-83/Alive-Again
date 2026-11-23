@@ -19,6 +19,7 @@
  * (or throwing) falls back to the scripted bot for that turn.
  */
 import path from 'node:path';
+import { pointText } from '../public/shared/scene-model.js';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 
@@ -360,7 +361,7 @@ function directorMove({ scene, memory, turn, rules }) {
   hero.say = ''; // the Player's line has been heard; it does not hang over the next scene
   const tgt = scene.entities.find((e) => e.id === scene.target);
   const item = scene.sheet.inv.find((i) => i.id === scene.use);
-  let did = scene.action || '';
+  let did = [pointText(scene, (e) => e.asset.slice(2).replace(/-/g, ' ')), scene.action].filter(Boolean).join(', '); // an aimed action, and what was written
   if (tgt && !did) did = tgt.id.startsWith('npc-') ? (said ? '' : 'hello') : 'take'; // reaching for something means wanting it
   const text = ` ${said} ${did} `.toLowerCase();
   const has = (re) => re.test(text);

@@ -69,7 +69,7 @@ export function render() {
     app.verb,
     app.actionsOpen,
     myTurn() && app.draft.use,
-    myTurn() && JSON.stringify([app.draft.reply, app.draft.act, app.draft.exit]),
+    myTurn() && JSON.stringify([app.draft.reply, app.draft.exit]),
     myTurn() && app.draft.steps.length,
     app.S.scene.battle ? JSON.stringify([app.S.scene.battle.round, app.S.scene.battle.paused, app.S.liveN, app.battleMenu, app.liveBusy]) : '',
     guidedKey(),

@@ -114,40 +114,11 @@ export function setReply(r) {
     app.draft.target = r.id;
   }
 }
-/* ---------- active objects: hover shows the name, a click offers what the Director allowed ---------- */
+/* ---------- acting on the stage: a verb, aimed at a thing or at a spot ---------- */
 export function hideVerbs() {
   const v = $('#verbs');
   if (v) v.remove();
 }
-export function showVerbs(e, ev) {
-  const wrap = $('#stageWrap'),
-    r = wrap.getBoundingClientRect();
-  add(
-    wrap,
-    h(
-      'div',
-      { id: 'verbs', style: `left:${Math.min(ev.clientX - r.left, r.width - 220)}px;top:${Math.max(4, ev.clientY - r.top - 70)}px` },
-      h('b', {}, called(e)),
-      e.active.verbs.map((v) =>
-        h(
-          'button',
-          {
-            onclick: () => {
-              app.draft.act = { id: e.id, verb: v };
-              app.draft.target = e.id;
-              app.draft.verb = v;
-              hideVerbs();
-              rebuild();
-            },
-          },
-          v,
-        ),
-      ),
-      h('button', { class: 'link', onclick: hideVerbs }, 'never mind'),
-    ),
-  );
-}
-/* ---------- a click on the stage in an adventure: walk here, look at, use ---------- */
 /** Where the hero ends up for a click at x, y: on the spot if one can stand there, else straight below it (a click high on a wall). */
 function standBelow(x, y) {
   for (let yy = clamp(y, 0.08, 0.98); yy <= 0.985; yy += 0.01) if (walkable(app.draft, x, yy)) return yy;
@@ -159,7 +130,6 @@ function react(e, verb) {
   if (!re) return false;
   if (re.used) e.used = true;
   app.draft.reacted = [...(app.draft.reacted || []).filter((r) => !(r.id === e.id && r.verb === verb)), { id: e.id, verb }].slice(-8);
-  const wrap = $('#stageWrap');
   const old = $('#reaction');
   if (old) old.remove();
   if (re.text) {
@@ -170,31 +140,39 @@ function react(e, verb) {
       h('p', {}, re.text),
       h('small', {}, 'click to close'),
     );
-    add(wrap, box);
+    add($('#stageWrap'), box);
   }
   audio.sfx('pop');
   changed();
   return true;
 }
-/** Carry out an action picked from the Actions list on what was clicked: a thing (or nothing: "here"). */
-export function doVerb(verb, what, p) {
+/**
+ * The Player does something on the stage: `verb`, to a thing (`what`) or to the spot `p` ("Push here").
+ * Walking happens at once. If the Director prepared an answer for exactly this action on this thing, it shows at
+ * once too. Anything else is told to the Director with the turn (draft.point).
+ */
+export function intend(verb, what, p) {
   if (verb === 'Walk') {
     const y = standBelow(p.x, p.y);
     if (y == null) return toast('There is nowhere to stand there');
     return walkHero(p.x, y);
   }
-  if (what && react(what, verb)) return rebuild();
-  app.draft.action = verb;
-  app.draft.point = what ? { id: what.id } : { x: Math.round(p.x * 1000) / 1000, y: Math.round(p.y * 1000) / 1000 };
+  if (!(what && react(what, verb))) {
+    app.draft.point = what ? { verb, id: what.id } : { verb, x: Math.round(p.x * 1000) / 1000, y: Math.round(p.y * 1000) / 1000 };
+    app.draft.target = null; // not reaching for something else at the same time
+  }
   rebuild();
 }
+/** The little menu at a click: what can be done here. In an adventure every click gets one; elsewhere only clickable things do. */
 export function showClickMenu(hit, p, ev) {
   hideVerbs();
   const wrap = $('#stageWrap'),
     r = wrap.getBoundingClientRect(),
     me = hero(app.draft),
     what = hit && hit !== me ? hit : null,
-    name = what ? called(what) : 'this spot';
+    adventure = app.S.rules.type === 'adventure',
+    name = what ? called(what) : 'this spot',
+    offered = what && what.active ? what.active.verbs : [];
   const item = (label, fn, o = {}) =>
     h(
       'button',
@@ -207,13 +185,7 @@ export function showClickMenu(hit, p, ev) {
       },
       label,
     );
-  const plain = (verb) => () => {
-    if (what && react(what, verb)) return;
-    app.draft.action = verb;
-    app.draft.point = what ? { id: what.id } : { x: Math.round(p.x * 1000) / 1000, y: Math.round(p.y * 1000) / 1000 };
-    rebuild();
-  };
-  const special = what && what.active ? what.active.verbs.filter((v) => !['Look at', 'Use'].includes(v)) : [];
+  const verb = (v, o) => item(['Look at', 'Use'].includes(v) ? `${v} ${name}` : v, () => intend(v, what, p), o);
   add(
     wrap,
     h(
@@ -224,18 +196,11 @@ export function showClickMenu(hit, p, ev) {
         style: `left:${Math.min(Math.max(4, ev.clientX - r.left), r.width - 190)}px;top:${Math.max(4, Math.min(ev.clientY - r.top - 20, r.height - 190))}px`,
       },
       what && h('b', {}, name),
-      item(
-        'Walk here',
-        () => {
-          const y = standBelow(p.x, p.y);
-          if (y == null) return toast('There is nowhere to stand there');
-          walkHero(p.x, y);
-        },
-        { id: 'cmWalk', disabled: app.draft.walked || app.S.rules.player === 'tell' },
-      ),
-      item(what ? `Look at ${name}` : 'Look at this spot', plain('Look at'), { id: 'cmLook' }),
-      item(what ? `Use ${name}` : 'Use this spot', plain('Use'), { id: 'cmUse' }),
-      what &&
+      adventure && item('Walk here', () => intend('Walk', null, p), { id: 'cmWalk', disabled: app.draft.walked || app.S.rules.player === 'tell' }),
+      adventure && verb('Look at', { id: 'cmLook' }),
+      adventure && verb('Use', { id: 'cmUse' }),
+      adventure &&
+        what &&
         !what.active &&
         mods().inventory &&
         app.S.rules.player === 'free' &&
@@ -243,22 +208,13 @@ export function showClickMenu(hit, p, ev) {
           `Reach for ${name}`,
           () => {
             app.draft.target = app.draft.target === what.id ? null : what.id;
-            app.draft.act = null;
-            app.draft.verb = '';
+            app.draft.point = null;
             changed();
           },
           { id: 'cmTake' },
         ),
-      /* a clickable thing: the other actions the Director offers on it */
-      special.map((v) =>
-        item(v, () => {
-          if (react(what, v)) return;
-          app.draft.act = { id: what.id, verb: v };
-          app.draft.target = what.id;
-          app.draft.verb = v;
-          rebuild();
-        }),
-      ),
+      /* a clickable thing: the actions the Director offers on it */
+      offered.filter((v) => !(adventure && ['Look at', 'Use'].includes(v))).map((v) => verb(v)),
       h('button', { class: 'link', onclick: hideVerbs }, 'never mind'),
     ),
   );

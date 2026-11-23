@@ -11,9 +11,13 @@
  *   one step      STEP fields: tracks, burst, sfx, card, travel, award, floats  belong to the step that made them
  *   the telling   narration, cam, steps (the earlier steps of a Director turn)
  *   for the Player  choices, ask                                               what the Director wants next turn
- *   by the Player   PLAYER fields: action, target, point, order, use, answer, verb, exit, felt, plus roll
- *                                                                              what the Player did; shown to the
- *                                                                              Director, never sent back
+ *   by the Player   PLAYER fields, plus roll: what the Player did; shown to the Director, never sent back
+ *       action    what the Player wrote, or which of the Director's options they chose
+ *       point     an action aimed at the stage: { verb, id } at a thing or { verb, x, y } at a spot ("Open old chest")
+ *       use, target   an item from the inventory, and the thing it is used on (target alone: the hero reaches for it)
+ *       answer    the reply to what the Director asked      exit      the way out the hero heads for
+ *       reacted   what the Player did to clickable things that answered at once ([{ id, verb }])
+ *       tripped   the trap the hero walked into             felt, order   the hero's feeling; the order things were done in
  */
 
 /** A level is a grid of tiles over the backdrop: LEVEL_W x LEVEL_H cells. */
@@ -28,7 +32,7 @@ export function stepFields() {
 }
 /** What the Player did on their turn (the die they rolled is `roll`, kept separately because either side can roll). */
 export function playerFields() {
-  return { action: '', target: null, point: null, order: [], use: null, answer: null, verb: '', exit: null, felt: '', reacted: [], tripped: '' };
+  return { action: '', target: null, point: null, order: [], use: null, answer: null, exit: null, felt: '', reacted: [], tripped: '' };
 }
 
 /** A character or thing on the stage. x and y are fractions of the stage (0..1), y at its feet. */
@@ -92,7 +96,11 @@ export function normScene(sc) {
   if (!sc) return sc;
   const base = newScene();
   for (const k of Object.keys(base)) if (sc[k] === undefined || (sc[k] === null && Array.isArray(base[k]))) sc[k] = k === 'entities' ? [] : base[k];
-  for (const k of ['sceneId', 'travel', 'verb', 'weather', 'burst', 'sfx', 'card', 'narration', 'action']) sc[k] ||= '';
+  for (const k of ['sceneId', 'travel', 'weather', 'burst', 'sfx', 'card', 'narration', 'action']) sc[k] ||= '';
+  /* older stories told an aimed action in two other ways: a verb with a target, and a written action with a bare point */
+  if (sc.verb && sc.target) Object.assign(sc, { point: { verb: sc.verb, id: sc.target }, target: null });
+  else if (sc.point && !sc.point.verb) Object.assign(sc, { point: { ...sc.point, verb: sc.action || 'Look at' }, action: '' });
+  delete sc.verb;
   sc.sheet.inv ||= [];
   sc.sheet.stats ||= [];
   sc.sheet.points ??= 0;
@@ -116,6 +124,12 @@ export function normScene(sc) {
 /** What a thing is called: the name the Director gave it. Until then it has none, and everybody calls it "this". */
 export const nameOf = (e) => (e && e.name) || '';
 export const called = (e) => nameOf(e) || 'this';
+/** The Player's aimed action in words: "Open old chest", "Push here". `label` says what to call a thing nobody has named. */
+export function pointText(scene, label = () => 'this') {
+  const pt = scene.point,
+    e = pt && pt.id && scene.entities.find((x) => x.id === pt.id);
+  return pt ? `${pt.verb} ${e ? nameOf(e) || label(e) : 'here'}` : '';
+}
 
 /** The level cell under a point of the stage. */
 export function cellAt(x, y) {

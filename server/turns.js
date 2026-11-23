@@ -202,25 +202,18 @@ function submitPlayer(room, body) {
     sc.use = sc.sheet.inv.some((i) => i.id === body.use) ? body.use : null;
     const thing = sc.entities.find((e) => e.id === body.target && e.id !== sc.heroId);
     if (thing && (mode === 'free' || sc.use)) sc.target = thing.id; // reach for it, or use an item on it
-    const act =
-      body.act && typeof body.act === 'object'
-        ? sc.entities.find((e) => e.id === body.act.id && e.active && e.active.verbs.includes(body.act.verb))
-        : null;
-    if (act) {
-      sc.target = act.id;
-      sc.verb = body.act.verb;
-    } // a verb on an active object
     const ex = sc.exits.find((x) => x.id === body.exit && !x.locked);
     if (ex) sc.exit = ex.id;
     if (askTarget) sc.target = askTarget;
   }
   sc.order = [...new Set(arr(body.order).filter((k) => ['say', 'walk', 'act'].includes(k)))]; // the order the Player did things in, for the replay
-  sc.point = null; // adventure: the written action may point at a thing or a spot on the stage
-  if (room.rules.type === 'adventure' && body.point && typeof body.point === 'object') {
-    const thing = sc.entities.find((e) => e.id === body.point.id && e.id !== sc.heroId);
-    if (thing) sc.point = { id: thing.id };
+  /* an action aimed at the stage: a verb, and the thing or the spot it is about */
+  if (mode !== 'tell' && body.point && typeof body.point === 'object') {
+    const verb = str(body.point.verb, 16) || 'Look at',
+      thing = sc.entities.find((e) => e.id === body.point.id && e.id !== sc.heroId);
+    if (thing) sc.point = { verb, id: thing.id };
     else if (Number.isFinite(Number(body.point.x)) && Number.isFinite(Number(body.point.y)))
-      sc.point = { x: r3(num(body.point.x, 0, 1, 0.5)), y: r3(num(body.point.y, 0, 1, 0.5)) };
+      sc.point = { verb, x: r3(num(body.point.x, 0, 1, 0.5)), y: r3(num(body.point.y, 0, 1, 0.5)) };
   }
   sc.action = action;
   sc.answer = answer;
