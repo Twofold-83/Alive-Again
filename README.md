@@ -182,9 +182,10 @@ as icons, and what the Player did is read out like the log of an old adventure g
   old machines, small finds, apparitions, and 233 ready-made people in the look of the paper dolls).
   Older 16 x 16 icons that do not belong in a house are no longer offered; their files remain for old
   stories, the menus' own icons and the Dungeon mode.
-- **Build on the stage.** "Build this room" in the Director's menu lays walls and floor on the live stage in
-  one press, saves the room for every story and brings saved rooms back; hand-painting tiles and the map
-  ("Map & campaigns") open the full-screen builder. "Save campaign" keeps a whole map with its connections.
+- **Everything is built on the stage.** There is no separate Build scene: "Build this room" lays walls and floor
+  in one press, paints tiles by hand on the stage, and saves rooms for every story. Any thing can be made solid
+  and has a base point (`baseOf` in `public/shared/scene-model.js`): a strip of floor that decides what it is
+  drawn in front of and where it blocks. The Map is a plain overlay for connecting scenes and saving campaigns.
 - **Four pictures per thing.** Front and side, and each of them after someone used the thing (an open fridge,
   an unmade bed, a lit lamp) — all drawn by hand next to the sprite itself (`views` in `tools/big/*.js`, see
   `tools/make-big.js`; `--dump=<slug>` prints a sprite as text). A View row on each thing switches between them.

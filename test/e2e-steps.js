@@ -159,43 +159,29 @@ const { setup } = require('./lib');
     /* ---- the scene workshop: build a level, prepare scenes, use them ---- */
     await settings('[data-pmode=free]');
     await x.opt('Build this room');
-    await p.click('#roomPaint');
-    await p.waitForSelector('#wsStage');
-    await p.waitForSelector('#wsAdd'); // a scene on the bench is not on the map until you add it
-    const ws = await p.locator('#wsStage').boundingBox(),
+    await p.click('#roomPaint'); // walls and floor are painted on the stage itself
+    const ws = await p.locator('#stage').boundingBox(),
       cw = ws.width / 16,
       ch = ws.height / 12;
     const cell = (cx, cy) => [ws.x + cw * (cx + 0.5), ws.y + ch * (cy + 0.5)];
-    const tileBtn = (kind) => ({
-      click: async () => {
-        await p.click(`.grid.tiles button >> nth=${kind === 'wall' ? 12 : 0}`);
-        await p.click(`[data-kind=${kind === 'wall' ? 'w' : 'f'}]`);
-      },
-    });
-    // a new prepared scene: floor everywhere, a wall across with a gap at the bottom, a solid crate
-    await p.click('#wsNew');
+    const tileBtn = (kind) => ({ click: () => p.click(`.grid.tiles[data-set=${kind}] button >> nth=0`) });
+    const paintCol = async (x0, y0, y1) => {
+      await p.mouse.move(...cell(x0, y0));
+      await p.mouse.down();
+      await p.mouse.move(...cell(x0, y1), { steps: (y1 - y0) * 4 + 2 });
+      await p.mouse.up();
+    };
+    // floor everywhere, a wall across with a gap at the bottom, a solid crate
     await tileBtn('floor').click();
-    await p.click('#wsFillAll');
-    assert.match(await p.textContent('#wsCount'), /192 floor · 0 wall/);
+    await p.click('#paintFill');
+    assert.match(await p.textContent('#paintCount'), /192 floor · 0 wall/);
     await tileBtn('wall').click();
-    await p.click('[data-tool=rect]');
-    await p.mouse.move(...cell(10, 0));
-    await p.mouse.down();
-    await p.mouse.move(...cell(10, 5), { steps: 6 });
-    await p.mouse.move(...cell(10, 9), { steps: 6 });
-    await p.mouse.up();
-    assert.match(await p.textContent('#wsCount'), /182 floor · 10 wall/);
-    await p.keyboard.press('Control+z');
-    assert.match(await p.textContent('#wsCount'), /192 floor · 0 wall/);
-    await p.keyboard.press('Control+y');
-    assert.match(await p.textContent('#wsCount'), /182 floor · 10 wall/);
-    await p.click('[data-tool=pick]');
-    await p.mouse.click(...cell(10, 3));
-    assert(await p.locator('[data-kind=w].on').count(), 'picking a wall tile selects the wall brush');
-    await p.click('[data-wtab=things]');
-    await x.add('crate'); // the same add-and-change tools as during a turn
+    await paintCol(10, 0, 9);
+    assert.match(await p.textContent('#paintCount'), /182 floor · 10 wall/);
+    await x.done();
+    await x.add('crate'); // any thing can be made solid, right where it is added
     await p.click('#viewRow [data-view=used]'); // a thing has hand-drawn pictures of itself used, and from the side
-    assert.match(await p.getAttribute('#wsStage .ent.sel img', 'src'), /crate\.used\.png/);
+    assert.match(await p.getAttribute('#stage .ent.sel img', 'src'), /crate\.used\.png/);
     if (!(await p.locator('.thingbtns button.on:has-text("Solid")').count())) await p.click('.thingbtns button:has-text("Solid")'); // a crate blocks the way from the start
     const dragWs = async (sel, cx, cy) => {
       const b = await p.locator(sel).boundingBox();
@@ -204,22 +190,18 @@ const { setup } = require('./lib');
       await p.mouse.move(...cell(cx, cy), { steps: 10 });
       await p.mouse.up();
     };
-    await dragWs('#wsStage .ent.sel', 3, 5.4);
-    await dragWs('#wsStage .ent.hero', 6, 5.4);
-    await x.done();
-    await p.fill('#wsName', 'The river crossing');
+    await dragWs('#stage .ent.sel', 3, 5.4);
+    await dragWs('#stage .ent.hero', 6, 5.4);
+    await p.click('.gback').catch(() => {});
     await x.opt('Mood');
     await x.opt('The weather');
     await p.click('[data-mark="weather=fog"]');
     await x.done();
-    await p.click('#wsUndo');
-    await p.click('button[title^="Redo"]'); // undo and redo work on everything here
     await x.shot('s-3-workshop');
-    // a second prepared scene, by duplicating; the library is saved with the story
-    await p.click('#wsAdd');
-    await p.waitForSelector('#wsSaved');
-    await p.click('#wsMap');
-    await p.click('.wsmap .node');
+    // the stage is kept as a scene on the map; a second one by duplicating; the map is saved with the story
+    await x.opt('Map');
+    await p.click('#mapNew');
+    await p.fill('#mapName', 'The river crossing');
     await p.click('#mapDup');
     assert.equal(await p.locator('.wsmap .node').count(), 2);
     // the whole map is saved as a campaign, and can be put on a map again
@@ -228,10 +210,10 @@ const { setup } = require('./lib');
     assert.match(await p.evaluate(() => localStorage.getItem('tf.campaigns')), /The river crossing/);
     await p.click('.wsmap .node >> nth=0');
     assert.equal(await p.inputValue('#mapName'), 'The river crossing');
-    await p.click('#mapUse'); // bring the prepared scene on stage, in this step
+    assert.equal(await p.locator('#wsBuild').count(), 0, 'there is no separate Build scene any more');
+    await p.click('#wsClose');
     await p.waitForSelector('#workshop', { state: 'hidden' });
     assert.equal(await p.locator('#stage .level i').count(), 192);
-    assert.equal(await p.locator('#stage .ent').count(), 2);
     let saved = await p.evaluate(async () => {
       const r = await fetch(`/api/rooms/${location.hash.slice(1)}/events?token=${localStorage.getItem('tf.token')}`);
       const rd = r.body.getReader();
@@ -294,20 +276,14 @@ const { setup } = require('./lib');
     assert(low > 10 / 12, `it went through the gap at the bottom (lowest point ${low})`);
     for (let i = 0; i < tr.length; i += 3)
       assert(!(Math.floor(tr[i + 1] * 16) === 10 && tr[i + 2] < 10 / 12), 'no point of the walk is inside the wall');
-    // close the gap in Build scene and use the scene again: the hero starts on the left and cannot cross
+    // close the gap, on the stage, and stand the hero back on the left: now it cannot cross
     await x.opt('Build this room');
     await p.click('#roomPaint');
-    await p.waitForSelector('#wsStage');
-    assert.equal(await p.inputValue('#wsName'), 'The river crossing');
     await tileBtn('wall').click();
-    await p.click('[data-tool=brush]');
-    await p.mouse.move(...cell(10, 10));
-    await p.mouse.down();
-    await p.mouse.move(...cell(10, 11), { steps: 4 });
-    await p.mouse.up();
-    await p.click('#wsUse');
-    await p.waitForSelector('#workshop', { state: 'hidden' });
-    assert.equal(await p.locator('#stage .ent').count(), 2);
+    await paintCol(10, 10, 11);
+    await x.done();
+    await dragWs('#stage .ent.hero', 6, 5.4);
+    await p.click('.gback').catch(() => {});
     await toPlayer();
     await x.walk(13.5 / 16, 5.5 / 12); // towards the far side
     [qx] = await x.heroPos();
@@ -316,13 +292,11 @@ const { setup } = require('./lib');
     await toDirector();
     await x.opt('Build this room');
     await p.click('#roomPaint');
-    await p.waitForSelector('#wsStage');
     await p.click('[data-tool=erase]');
     await p.mouse.click(...cell(10, 10)); // an erased tile is a hole: still not walkable
     await tileBtn('floor').click();
     await p.mouse.click(...cell(10, 11)); // a floor tile reopens the way
-    await p.click('#wsUse');
-    await p.waitForSelector('#workshop', { state: 'hidden' });
+    await x.done();
     await toPlayer();
     await x.walk(3.5 / 16, 5.5 / 12); // straight at the solid crate
     [qx, qy] = await x.heroPos();
@@ -359,9 +333,9 @@ const { setup } = require('./lib');
     await p.fill('#panel textarea', 'A dragon bursts in');
     await x.done();
     await p.waitForSelector('.gevents:has-text("A dragon bursts in")');
-    assert.equal(await p.locator('#stage .ent').count(), 3);
+    assert.equal(await p.locator('#stage .ent').count(), 4);
     await p.click('#resetStep');
-    assert.equal(await p.locator('#stage .ent').count(), 2, 'reset step undoes what Claude staged');
+    assert.equal(await p.locator('#stage .ent').count(), 3, 'reset step undoes what Claude staged');
     await x.add('brass key');
     const [kx, ky] = await p.evaluate(() => {
       const s = document.querySelector('.ent.sel').style;

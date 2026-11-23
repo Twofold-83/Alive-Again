@@ -26,18 +26,21 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await p.click('#roomSave');
     assert.equal(await p.locator('#roomSaves .myroom').count(), 1);
     await p.click('.gback');
-    /* Build scene: a room is saved on this device for other stories, and Esc leaves */
+    /* walls and floor are painted by hand on the stage too: pick a tile, drag */
     await x.opt('Build this room');
     await p.click('#roomPaint');
-    await p.waitForSelector('#wsStage');
-    await p.fill('#wsName', 'My cellar');
-    await p.click('#wsSave');
-    assert.equal(await p.locator('#myRooms .myroom').count(), 2, 'the room is kept, next to the one saved from the stage');
-    assert.match(await p.evaluate(() => localStorage.getItem('tf.savedRooms')), /My cellar/);
-    await p.keyboard.press('Tab');
-    await p.keyboard.press('Escape');
-    await p.waitForSelector('#workshop', { state: 'hidden' });
-    await p.waitForSelector('.gopt');
+    await p.click('.grid.tiles[data-set=wall] button >> nth=0');
+    const tilesBefore = await p.textContent('#paintCount');
+    {
+      const b = await p.locator('#stage').boundingBox();
+      await p.mouse.move(b.x + b.width * 0.3, b.y + b.height * 0.6);
+      await p.mouse.down();
+      await p.mouse.move(b.x + b.width * 0.5, b.y + b.height * 0.6, { steps: 6 });
+      await p.mouse.up();
+    }
+    assert.notEqual(await p.textContent('#paintCount'), tilesBefore, 'the tiles under the drag are painted');
+    await x.done();
+    assert.equal(await p.locator('#wsBuild').count(), 0);
 
     /* the sprite editor: draw a thing, save it, it stands on the stage and is kept under My drawings */
     await x.opt('Sprite editor');

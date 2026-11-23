@@ -1,9 +1,10 @@
 /* Pointer and keyboard on the stage during a story: selecting, dragging, recording moves, drawing (Director);
  * walking, pointing, choosing (Player). */
+import { paintAt } from './screens/scene.js';
 import { battleCmd } from './battle-ui.js';
 import { clamp, clone } from '../core/dom.js';
 import { stage, pen, myTurn, hero, mods, directing, app } from '../core/state.js';
-import { guidedPick, guidedMark } from './guided.js';
+import { guidedPick, guidedMark, guidedTool } from './guided.js';
 import { rid, r3, toast, $ } from '../core/dom.js';
 import { changed, rebuild, paint, undo, submit } from './turn.js';
 import { walkHero, setReply, hideVerbs, showVerbs, showClickMenu, doVerb } from './walk.js';
@@ -90,6 +91,9 @@ stage.addEventListener('pointerdown', (ev) => {
     }
     if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev);
     return toast(app.draft.walked ? 'You have already walked this turn' : 'Press “Walk”, then click where you want to go');
+  } else if (guidedTool() === 'paint') {
+    drag = { paint: true };
+    paintAt(app.draft, p.x, p.y);
   } else if (app.drawOn) {
     if (app.draft.drawing.length >= 60) return toast('That is a lot of drawing — clear some first');
     drag = { stroke: { id: rid(), c: pen.c, w: pen.w, pts: [r3(p.x), r3(p.y)] } };
@@ -125,6 +129,10 @@ stage.addEventListener('pointerdown', (ev) => {
 stage.addEventListener('pointermove', (ev) => {
   if (!drag) return;
   const p = stagePos(ev);
+  if (drag.paint) {
+    if (paintAt(app.draft, p.x, p.y)) paint();
+    return;
+  }
   if (drag.stroke) {
     const s = drag.stroke.pts,
       n = s.length;
@@ -167,6 +175,7 @@ function endDrag() {
     storeTrack(d.e.id, tk.off, tk.pts);
     app.uiKey = '';
   }
+  if (d.paint) app.uiKey = '';
   if (d.stroke) {
     if (d.stroke.pts.length < 4) d.stroke.pts.push(d.stroke.pts[0], d.stroke.pts[1]);
     app.uiKey = '';

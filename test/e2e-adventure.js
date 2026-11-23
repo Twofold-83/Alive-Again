@@ -58,22 +58,14 @@ const { setup } = require('./lib');
       [sx, sy] = await pos(ent('dagger'));
     assert(Math.abs(sx - hx) < 0.3 && Math.abs(sy - hy) < 0.3, 'the tied sword sits with the hero');
     // an active object
-    // an active object is made in Build scene, where places are made; then the scene is used in the story
-    assert.equal(await p.locator('.gopt:has-text("Add an exit")').count(), 0);
-    await x.opt('Build this room');
-    await p.click('#roomPaint');
-    await p.waitForSelector('#wsStage');
-    await p.waitForSelector('#wsAdd');
-    await p.click('[data-wtab=things]');
+    // a clickable thing is made right on the stage: add it, make it clickable, name it, choose what can be done with it
     await x.add('treasure chest');
-    assert.match(await p.textContent('.thingbtns'), /Clickable: “Chest”/, 'a thing added in Build scene can be clicked from the start');
-    await thing('Clickable');
+    assert.equal(await p.getAttribute(ent('chest'), 'data-name'), '', 'a new thing has no name until the Director gives it one');
+    await thing('clickable');
+    await p.click('#activeToggle');
     await p.fill('#activeName', 'Old chest');
-    await p.click('.wstools .chips button:has-text("Open")');
     await x.done();
     await x.done();
-    await p.click('#wsUse');
-    await p.waitForSelector('#workshop', { state: 'hidden' });
     assert.equal(await p.locator('#stage .ent').count(), 4, 'hero, tied sword, mage and chest are on stage');
     {
       const b = await p.locator(ent('chest')).boundingBox(),
@@ -271,15 +263,9 @@ const { setup } = require('./lib');
 
     /* ---- the map: connect two prepared scenes, travel through an exit ---- */
     await x.opt('Map');
-    await p.waitForSelector('.wsmap .node');
-    assert.equal(await p.locator('.wsmap .node').count(), 1, 'the scene used earlier is on the map');
+    await p.click('#mapNew'); // the stage is kept as a scene on the map, twice
     await p.click('#mapNew');
-    await p.waitForSelector('#wsAdd');
-    await p.click('#wsAdd');
-    await p.waitForSelector('#wsSaved');
-    await p.click('#wsMap');
-    await p.waitForSelector('.wsmap .node >> nth=1');
-    await p.click('.wsmap .node >> nth=1');
+    await p.waitForSelector('.wsmap .node >> nth=1'); // the newest one is selected
     await p.click('#mapDup');
     assert.equal(await p.locator('.wsmap .node').count(), 3, 'duplicated on the map');
     await p.click('#mapDel');
@@ -292,10 +278,8 @@ const { setup } = require('./lib');
     await p.click('.conn button:has-text("Open")');
     await p.waitForSelector('.wsmap line.locked', { state: 'attached' });
     await p.click('.conn button:has-text("Locked")');
-    await p.click('#mapEdit');
-    await p.waitForSelector('#wsStage .exit');
     await x.shot('a-1-workshop-exit');
-    await p.click('#wsUse');
+    await p.click('#mapEdit'); // "Edit" goes there: scenes are changed on the stage
     await p.waitForSelector('#workshop', { state: 'hidden' });
     assert.match(await p.textContent('#stage .exit'), /Scene 2/);
     await toPlayer();

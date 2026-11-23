@@ -113,7 +113,7 @@ export function openWorkshop(c) {
   });
   const kept = bench && bench.code === c.code ? W.list.find((d) => d.id === bench.doc.id) || (bench.onMap ? null : bench.doc) : null;
   W.cur = kept || (c.stage ? { id: rid(), name: newName(), scene: c.stage() } : { id: rid(), name: newName(), scene: blankScene() });
-  W.view = c.map ? 'map' : 'build';
+  W.view = 'map'; // the map is all that is left here: rooms are built on the stage
   W.h.reset(W.cur.scene);
   if (!W.a) {
     const t = tileCats()[0];
@@ -309,16 +309,18 @@ function undo(dir) {
   draw();
 }
 /** Put another scene on the bench. An unsaved one with work in it is offered to the map first. */
+/** Build scene is gone: a scene is changed on the stage itself. What used to open the bench now puts the scene on the map. */
 function build(doc) {
-  flush();
-  if (doc !== W.cur && !onMap() && W.h.canUndo && confirm(`“${W.cur.name}” is not on the map yet. Add it to the map before you leave it?`))
-    addToMap(true);
+  if (!W.list.includes(doc)) {
+    Object.assign(doc, spot());
+    doc.scene.sceneId = doc.id;
+    doc.scene.steps = [];
+    W.list.push(doc);
+    saveNow();
+  }
   W.cur = doc;
-  W.sel = null;
-  W.h.reset(doc.scene);
-  W.view = 'build';
-  W.tab = 'tiles';
-  resetGuided();
+  W.node = doc.id;
+  W.view = 'map';
   draw();
 }
 function addToMap(quiet) {
@@ -373,7 +375,7 @@ function keys(ev) {
     } else if (ev.key === 'Delete' || ev.key === 'Backspace') {
       ev.preventDefault();
       remove(node);
-    } else if (ev.key === 'Enter') build(node);
+    } else if (ev.key === 'Enter') useNow(node);
     return;
   }
   if (mod && key === 'z') {
@@ -464,7 +466,8 @@ function drawBar() {
         },
         label,
       );
-  const kids = [tab('wsBuild', 'Build scene', 'build'), tab('wsMap', `Map (${W.list.length})`, 'map'), h('span', { class: 'sep' })];
+  void tab;
+  const kids = [h('b', { id: 'wsMap' }, `Map (${W.list.length})`), h('span', { class: 'sep' })];
   if (W.view === 'build')
     kids.push(
       h('input', {
@@ -527,7 +530,17 @@ function drawBar() {
     kids.push(
       h('span', { class: 'dim small' }, 'Every scene you added. Drag to arrange.'),
       h('span', { class: 'grow' }),
-      h('button', { id: 'mapNew', onclick: () => build({ id: rid(), name: newName(), scene: blankScene() }) }, '＋ New scene'),
+      h(
+        'button',
+        {
+          id: 'mapNew',
+          class: 'primary',
+          disabled: !W.c.stage,
+          title: 'Keep what is on the stage now as a scene on the map',
+          onclick: () => build({ id: rid(), name: newName(), scene: W.c.stage() }),
+        },
+        '＋ Add the stage as a scene',
+      ),
       h(
         'button',
         {
@@ -668,7 +681,7 @@ function drawMap() {
         d.id === here && h('small', {}, 'the story is here'),
       );
       n.dataset.node = d.id;
-      n.addEventListener('dblclick', () => build(d));
+      n.addEventListener('dblclick', () => useNow(d));
       n.addEventListener('pointerdown', (ev) => {
         ev.preventDefault();
         n.setPointerCapture(ev.pointerId);
@@ -759,7 +772,29 @@ function mapTools() {
           { class: 'dim' },
           `${node.scene.entities.length - 1} things${node.scene.level ? ' · has a level' : ''}${node.scene.exits.length ? ` · ${node.scene.exits.length} exits` : ''}`,
         ),
-        big('mapEdit', 'Edit', 'Open it in Build scene', () => build(node)),
+        big(
+          'mapEdit',
+          'Edit',
+          W.c.use ? 'Go there and change it on the stage' : 'Possible during your own turn',
+          () => useNow(node),
+          W.c.use ? '' : 'off',
+        ),
+        big(
+          'mapSave',
+          'Save the stage into it',
+          W.c.stage ? 'This scene becomes what is on the stage now' : 'Possible during your own turn',
+          () => {
+            if (!W.c.stage) return;
+            const exits = node.scene.exits || [];
+            node.scene = W.c.stage();
+            node.scene.exits = exits;
+            node.scene.sceneId = node.id;
+            saveNow();
+            W.c.toast(`“${node.name}” is now what is on the stage`);
+            draw();
+          },
+          W.c.stage ? '' : 'off',
+        ),
         big('mapNext', '+ Room next door', `A new ${themeOf(W.theme).name.toLowerCase()}, already connected to this one`, () => nextDoor(node)),
         h(
           'select',

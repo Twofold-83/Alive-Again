@@ -4,7 +4,9 @@ import { h, clamp, add } from '../../core/dom.js';
 import { BURSTS, WEATHER, LIGHTS, DARKNESS } from '../../shared/options.js';
 import { newEntity, freeSpot } from '../../shared/scene-model.js';
 import { G, short } from '../guided.js';
-import { BACKDROPS, backdropCss } from '../../core/catalog.js';
+import { BACKDROPS, backdropCss, PIXEL, pixelInfo } from '../../core/catalog.js';
+import { setCell } from '../../stage/level.js';
+import { LEVEL_W, LEVEL_H } from '../../shared/scene-model.js';
 import { glyphNode } from '../../stage/render.js';
 import { roomPicker, envOfTheme } from './pickers.js';
 import { ROOM_THEMES, ROOM_SHAPES, buildRoom, themeOf, roomArea } from '../../shared/rooms.js';
@@ -53,8 +55,7 @@ export function screenScene(kit) {
         d.dark ? DARKNESS[d.dark][1] + ', ' + d.entities.filter((e) => e.glow).length + ' lights' : 'A dark room, lamps, fire, neon',
         () => enter('scene:light'),
       ),
-      ws &&
-        S.rules.type === 'adventure' &&
+      S.rules.type === 'adventure' &&
         opt('door', 'Add an exit', 'A way out to another prepared scene', () => {
           const x = { id: c.rid(), to: '', label: 'Exit', x: 0.9, y: 0.6, locked: false };
           d.exits.push(x);
@@ -100,7 +101,7 @@ export function screenScenePrepared(kit) {
           ),
         )
       : h('p', { class: 'dim' }, 'The map is empty. Build a scene and add it to the map first.'),
-    h('button', { onclick: () => c.workshop() }, 'Build scene'),
+    h('button', { onclick: () => c.workshop({ map: true }) }, 'Open the map'),
   );
   return;
 }
@@ -402,7 +403,7 @@ export function screenRoom(kit) {
           h('button', { 'data-shape': s.id, class: G.roomShape === s.id ? 'on' : '', onclick: () => lay(G.roomTheme, s.id) }, s.name),
         ),
       ),
-      h('div', { class: 'row' }, h('button', { class: 'grow', id: 'roomPaint', onclick: () => c.workshop() }, 'Paint walls and floor by hand…')),
+      h('div', { class: 'row' }, h('button', { class: 'grow', id: 'roomPaint', onclick: () => kit.enter('paint') }, 'Paint walls and floor by hand')),
     ),
     h(
       'div',
@@ -587,4 +588,131 @@ export function screenSceneLight(kit) {
     doneBtn(() => (d.dark ? `It is ${DARKNESS[d.dark][1].toLowerCase()} now` : 'The light changes')),
   );
   void newEntity;
+}
+
+/* ================= paint walls and floor by hand, on the stage ================= */
+/** Paint (or rub out) the tiles under a point of the stage with what is chosen on the Paint screen. */
+export function paintAt(scene, x, y) {
+  const P = G.paint;
+  if (!P || (P.tool === 'brush' && !P.asset)) return false;
+  const cx = Math.min(LEVEL_W - 1, Math.floor(x * LEVEL_W)),
+    cy = Math.min(LEVEL_H - 1, Math.floor(y * LEVEL_H)),
+    k = P.tool === 'erase' ? '' : pixelInfo(P.asset).kind === 'wall' ? 'w' : 'f';
+  let any = false;
+  for (let j = 0; j < P.size; j++)
+    for (let i = 0; i < P.size; i++) {
+      const X = cx + i - ((P.size - 1) >> 1),
+        Y = cy + j - ((P.size - 1) >> 1);
+      if (X < 0 || Y < 0 || X >= LEVEL_W || Y >= LEVEL_H) continue;
+      if (setCell(scene, Y * LEVEL_W + X, k ? P.asset : '', k) !== false) any = true;
+    }
+  if (any && scene.backdrop !== 'b:black') scene.backdrop = 'b:black';
+  return any;
+}
+export function screenPaint(kit) {
+  const { p, c, d, head, doneBtn } = kit;
+  const cats = PIXEL.filter((x) => x.group === 'tile');
+  G.paint ||= { tool: 'brush', size: 1, cat: '', asset: '' };
+  const P = G.paint,
+    cat = cats.find((x) => x.id === P.cat) || cats[cats.length - 1];
+  head('Paint walls and floor', 'Pick a tile, then drag on the stage. The hero walks on floor tiles; wall tiles block the way.');
+  const chip = (label, on, fn, attr = {}) =>
+    h(
+      'button',
+      {
+        ...attr,
+        class: 'grow' + (on ? ' on' : ''),
+        onclick: () => {
+          fn();
+          c.rebuild();
+        },
+      },
+      label,
+    );
+  const count = (k) => (d.level ? [...d.level.cells].filter((ch) => (d.level.pal[parseInt(ch, 36) - 1] || {}).k === k).length : 0);
+  const tiles = (kind, title) => {
+    const items = cat.items.filter((i) => (i.kind === 'wall' ? 'wall' : 'floor') === kind);
+    return (
+      items.length > 0 && [
+        h('small', { class: 'dim' }, title),
+        h(
+          'div',
+          { class: 'grid tiles', 'data-set': kind },
+          items.map((i) =>
+            h(
+              'button',
+              {
+                title: i.name,
+                class: P.asset === i.asset ? 'on' : '',
+                onclick: () => {
+                  P.asset = i.asset;
+                  P.tool = 'brush';
+                  c.rebuild();
+                },
+              },
+              h('img', { src: `px/${i.asset.slice(2)}.png`, alt: '' }),
+            ),
+          ),
+        ),
+      ]
+    );
+  };
+  add(
+    p,
+    h(
+      'div',
+      { class: 'row' },
+      chip('Brush', P.tool === 'brush', () => (P.tool = 'brush'), { 'data-tool': 'brush' }),
+      chip('Rub out', P.tool === 'erase', () => (P.tool = 'erase'), { 'data-tool': 'erase' }),
+    ),
+    h(
+      'div',
+      { class: 'row' },
+      h('span', { class: 'dim small' }, 'Size'),
+      [1, 2, 3].map((n) => chip(`${n}×${n}`, P.size === n, () => (P.size = n), { 'data-size': n })),
+    ),
+    h(
+      'div',
+      { class: 'chips wrap envchips' },
+      cats.map((x) => h('button', { 'data-tcat': x.id, class: x === cat ? 'on' : '', onclick: () => ((P.cat = x.id), c.rebuild()) }, x.label)),
+    ),
+    tiles('floor', 'Floor — can be walked on'),
+    tiles('wall', 'Walls — block the way'),
+    h(
+      'div',
+      { class: 'row' },
+      h(
+        'button',
+        {
+          class: 'grow',
+          id: 'paintClear',
+          onclick: () => {
+            d.level = null;
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        'Take all tiles away',
+      ),
+      h(
+        'button',
+        {
+          class: 'grow',
+          id: 'paintFill',
+          disabled: !P.asset,
+          title: 'Cover the whole stage with the chosen tile',
+          onclick: () => {
+            const k = pixelInfo(P.asset).kind === 'wall' ? 'w' : 'f';
+            for (let i = 0; i < LEVEL_W * LEVEL_H; i++) setCell(d, i, P.asset, k);
+            d.backdrop = 'b:black';
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        'Fill the stage',
+      ),
+      h('span', { class: 'dim small grow', id: 'paintCount' }, `${count('f')} floor · ${count('w')} wall tiles`),
+    ),
+    doneBtn(() => 'The room is repainted'),
+  );
 }

@@ -62,20 +62,15 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await shot('ph-1-director');
     await p.tap('.gdone');
     await inView('#foot button.go');
-    /* build scene on a phone: one row of buttons that scrolls, stage above the tools */
+    /* building a room on a phone: on the stage itself, the tools under it */
     await p.tap('.gopt:has-text("Build this room")');
+    await p.tap('[data-env=horror]');
+    await p.tap('[data-room=horror]');
+    await fits('build this room');
     await p.tap('#roomPaint');
-    await p.waitForSelector('#wsStage');
-    await fits('build scene');
-    const bar = await p.locator('#workshop > header').boundingBox();
-    assert(bar.height < 125, `the toolbar is two tidy rows (${bar.height})`);
-    await inView('#wsClose');
-    await inView('#wsAdd');
-    const ws = await p.locator('#wsStage').boundingBox(),
-      tools = await p.locator('.wstools').boundingBox();
-    assert(tools.y >= ws.y + ws.height - 1, 'tools are under the stage');
+    await fits('paint tiles');
     await shot('ph-2-build');
-    await p.tap('#wsClose');
+    await p.tap('.gdone');
     await p.tap('#foot button.go');
     await p.waitForFunction(() => /Player/.test(document.querySelector('#banner').textContent));
     await sleep(1800);
