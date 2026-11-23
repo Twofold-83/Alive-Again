@@ -4,6 +4,7 @@ import { isDoll, dollNode, poseDoll, feelDoll } from '../core/dolls.js';
 import { spriteView, assetLabel, backdropCss, pixelInfo, CUSTOM, viewKey, assetUrl } from '../core/catalog.js';
 import { h, clamp } from '../core/dom.js';
 import { LIGHTS } from '../shared/options.js';
+import { baseOf } from '../shared/scene-model.js';
 
 /** Fill in fields that older saved scenes do not have. */
 /** How big a thing of scale 1 is drawn, in units of --u (an eighth of the stage width): a person is a tile and a half tall. */
@@ -232,7 +233,8 @@ export function renderStage(root, scene, o = {}) {
   const spot = (e) => {
     const p = e.tie && byId.get(e.tie.to);
     const lift = (e.layer || 0) * 3000; // sent to the back / brought to the front by the Director
-    if (!p || p === e || p.tie) return { x: e.x, y: e.y, z: Math.round(e.y * 1000) + 1 + lift };
+    const dy = (e.base && e.base.dy) || 0; // layered by its base line, not by where the picture happens to end
+    if (!p || p === e || p.tie) return { x: e.x, y: e.y, z: Math.round((e.y + dy) * 1000) + 1 + (e.base ? 1 : 0) + lift };
     return {
       x: p.x + e.tie.dx * p.scale * (faces(p) ? -1 : 1),
       y: p.y + e.tie.dy * p.scale,
@@ -328,6 +330,22 @@ export function renderStage(root, scene, o = {}) {
     glowEl.className = 'glowov' + (lights.some((l) => l.flick) ? ' flicker' : '');
   }
 
+  /* the base of the thing whose base is being set (and, with showKinds, of every solid thing) */
+  const based = scene.entities.filter((e) => !e.gone && (e.id === o.showBase || (o.showBases && e.solid && e.id !== scene.heroId)));
+  const bsig = based.map((e) => JSON.stringify([e.id, e.x, e.y, e.scale, e.view, e.base, e.asset, e.id === o.showBase])).join();
+  if (root._bases !== bsig) {
+    root._bases = bsig;
+    for (const old of world.querySelectorAll('.basebar')) old.remove();
+    for (const e of based) {
+      const b = baseOf(e);
+      world.append(
+        h('div', {
+          class: 'basebar' + (e.id === o.showBase ? ' on' : ''),
+          style: `left:${b.x0 * 100}%;top:${b.y0 * 100}%;width:${(b.x1 - b.x0) * 100}%;height:${(b.y1 - b.y0) * 100}%`,
+        }),
+      );
+    }
+  }
   for (const [id, el] of root._els)
     if (!live.has(id)) {
       el.remove();

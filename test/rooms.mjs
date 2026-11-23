@@ -99,4 +99,22 @@ for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.l
       }
   assert(n > 1000, 'the views are built');
 }
+/* the base of a thing: where it blocks, and how wide it is when turned */
+{
+  const { newScene, newEntity, walkable, baseOf, SPRITE_WIDTH } = await import('../public/shared/scene-model.js');
+  SPRITE_WIDTH.set('p:bed-test', 36);
+  SPRITE_WIDTH.set('p:bed-test|side', 18);
+  const sc = newScene(),
+    bed = newEntity('p:bed-test', { id: 'b', x: 0.5, y: 0.5, solid: true });
+  sc.entities.push(bed);
+  assert(!walkable(sc, 0.5, 0.49) && !walkable(sc, 0.57, 0.49), 'the long side blocks over its whole width');
+  assert(walkable(sc, 0.5, 0.42), 'but not far behind it');
+  bed.view = 'side';
+  assert(walkable(sc, 0.57, 0.49), 'turned, it is narrower');
+  assert(walkable(sc, 0.5, 0.4), 'and by default only half a tile deep');
+  bed.base = { dy: 0, d: 2 };
+  assert(!walkable(sc, 0.5, 0.4) && walkable(sc, 0.5, 0.3), 'made two tiles deep it blocks its whole length');
+  bed.base = { dy: 0.1, d: 0.5 };
+  assert.equal(Math.round(baseOf(bed).y * 100), 60, 'a base line of its own');
+}
 console.log(`ROOMS OK (${ROOM_THEMES.length} themes, ${SCENARIOS.length} places, ${MOODS.length - 1} tunes)`);

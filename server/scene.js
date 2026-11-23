@@ -143,6 +143,7 @@ export function cleanScene(s, prev, inner) {
       used: !!e.used || e.view === 'used', // after someone used it
       near: !!e.near,
       name: str(e.name, 40),
+      base: e.base && typeof e.base === 'object' ? { dy: r3(num(e.base.dy, -1, 1, 0)), d: Math.round(num(e.base.d, 0.25, 6, 0.5) * 4) / 4 } : null,
       glow: LIGHTS.some((l) => l[0] === e.glow) ? e.glow : '',
     });
   }

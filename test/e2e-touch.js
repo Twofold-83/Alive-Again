@@ -32,6 +32,18 @@ const { setup } = require('./lib');
     await p.locator(`#stage .ent[data-id="${await p.evaluate(() => window.__lastAdded)}"]`).click({ force: true });
     await p.click('.thingbtns button:has-text("Remove")');
     await p.click('.gback').catch(() => {});
+    /* the base point: a strip on the floor shows where a thing stands; it can be made deeper, and solid */
+    await p.locator(`#stage .ent[data-id="${chestId}"]`).click({ force: true });
+    await p.click('.thingbtns button:has-text("Base point")');
+    assert.equal(await p.locator('#stage .basebar.on').count(), 1, 'the base is shown on the stage');
+    const thin = (await p.locator('#stage .basebar.on').boundingBox()).height;
+    await p.click('[data-depth="2"]');
+    assert((await p.locator('#stage .basebar.on').boundingBox()).height > thin * 3, 'two tiles deep');
+    await p.click('#baseDown');
+    await p.click('.gdone');
+    assert.match(await p.textContent('.thingbtns'), /Base point ✓/);
+    assert.equal(await p.locator('.thingbtns button:has-text("Solid")').count(), 1, 'any thing can be made solid, right here');
+    await p.click('.gback').catch(() => {});
     /* everything of a setting in one place: its things and the beings one meets there */
     await x.opt('Add something');
     await x.opt('Environment');

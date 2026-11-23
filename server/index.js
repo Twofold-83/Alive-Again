@@ -193,7 +193,10 @@ for (const sig of ['SIGINT', 'SIGTERM']) {
 /* how wide each sprite is: the server checks the hero's walk with the same footprints as the browser */
 try {
   for (const c of JSON.parse(fs.readFileSync(path.join(PUBLIC, 'px', 'index.json'), 'utf8')).categories)
-    for (const i of c.items) SPRITE_WIDTH.set('p:' + i.slug, i.w || 16);
+    for (const i of c.items) {
+      SPRITE_WIDTH.set('p:' + i.slug, i.w || 16);
+      if (i.v && i.v.side) SPRITE_WIDTH.set('p:' + i.slug + '|side', i.v.side[0]);
+    }
 } catch {
   /* no sprite library: every thing counts as one tile wide */
 }

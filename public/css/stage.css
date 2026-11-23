@@ -211,3 +211,5 @@
 .stage .glowov { mix-blend-mode: screen; z-index: 6001; }
 .stage .glowov.flicker { animation: glowflick 1.7s steps(6) infinite; }
 @keyframes glowflick { 0%, 100% { opacity: 1; } 20% { opacity: .82; } 45% { opacity: .95; } 60% { opacity: .78; } 80% { opacity: .9; } }
+.stage .basebar { position: absolute; z-index: 5500; pointer-events: none; background: rgba(217, 164, 65, .18); border: 1px dashed rgba(217, 164, 65, .7); box-sizing: border-box; }
+.stage .basebar.on { background: rgba(217, 164, 65, .38); border: 2px solid #d9a441; }

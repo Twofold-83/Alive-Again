@@ -55,6 +55,7 @@ export function newEntity(asset, props = {}) {
     view: '', // which way a thing is seen: '' as drawn, 'side' from the other side
     used: false,
     near: false,
+    base: null, // where it stands, if not at its own feet: { dy, d } — dy moves the base line (stage fraction), d is its depth in tiles
     name: '', // what it is called, once the Director has named it; shown to the Player. Unnamed, it is just "this"
     glow: '', // a light source (see LIGHTS in options.js): it shines where the thing stands // a trap: if the hero walks close, "something happened" and the turn goes to the Director // shown as it looks after someone used it (an open door, a lit lamp)
     feel: '', // what a paper-doll character feels (see FEELS): it shows on the face
@@ -119,7 +120,22 @@ export function cellAt(x, y) {
 /** How wide each library sprite is, in doll pixels (asset id -> width): filled from public/px/index.json by the
  * browser and by the server, so both agree on how much floor a bed takes up. */
 export const SPRITE_WIDTH = new Map();
-/** May the hero stand here? Where a level exists only floor tiles will do; solid things block everywhere. */
+/**
+ * The base of a thing: the strip of floor it stands on. It decides two things — what is drawn in front of what
+ * (a thing whose base line is lower on the stage is nearer, so it is drawn later), and, for a solid thing, where
+ * nobody can walk. It is as wide as the picture (the side view of a thing has its own width) and by default half a
+ * tile deep, right behind the thing's feet. The Director can move the line (a candle on a table stands on the
+ * table's base) and make it deeper (a bed seen from the front lies two tiles deep).
+ * Returns { x0, x1, y0, y1, y } in stage fractions; y is the base line.
+ */
+export function baseOf(e) {
+  const px = SPRITE_WIDTH.get(e.asset + (e.view === 'side' ? '|side' : '')) || SPRITE_WIDTH.get(e.asset) || 16,
+    w = (px / 16 / LEVEL_W) * (e.scale || 1),
+    d = (((e.base && e.base.d) || 0.5) / LEVEL_H) * (e.scale || 1),
+    y = e.y + ((e.base && e.base.dy) || 0);
+  return { x0: e.x - w / 2, x1: e.x + w / 2, y0: y - d, y1: y, y };
+}
+/** May the hero stand here? Where a level exists only floor tiles will do; the base of a solid thing blocks. */
 export function walkable(scene, x, y) {
   if (scene.level) {
     const t = scene.level.pal[parseInt(scene.level.cells[cellAt(x, y)], 36) - 1];
@@ -127,8 +143,8 @@ export function walkable(scene, x, y) {
   }
   for (const e of scene.entities) {
     if (!e.solid || e.id === scene.heroId) continue;
-    const half = ((SPRITE_WIDTH.get(e.asset) || 16) / 16) * 0.031 + 0.012; // half its width (a tile is 1/16 of the stage) and a little room
-    if (Math.hypot((x - e.x) / (half * e.scale), ((y - e.y + 0.02 * e.scale) * 0.75) / (0.04 * e.scale)) < 1) return false;
+    const b = baseOf(e);
+    if (x > b.x0 - 0.014 && x < b.x1 + 0.014 && y > b.y0 - 0.008 && y < b.y1 + 0.012) return false; // a little room for the hero's own width
   }
   return true;
 }

@@ -237,6 +237,7 @@ export async function loadPixel() {
         };
         PX.set(i.slug, it);
         SPRITE_WIDTH.set(it.asset, it.w);
+        if (it.v && it.v.side) SPRITE_WIDTH.set(it.asset + '|side', it.v.side[0]); // turned, it takes up another width of floor
         return it;
       });
       if (!c.legacy) PIXEL.push({ id: 'px-' + c.id, label: c.label, group: c.group, items }); // old icons are still drawn, not offered

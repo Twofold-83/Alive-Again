@@ -100,6 +100,7 @@ export function screenThing(kit) {
       isDoll(sel.asset) && b('', 'Act', () => enter('pose'), !!sel.pose || !!sel.feel),
       isDoll(sel.asset) && b('', 'Change look', () => c.dollMaker(sel)),
       !ws && b('', 'Move / animate', () => enter('move')),
+      !isHero && b('', sel.base ? 'Base point ✓' : 'Base point', () => enter('base'), !!sel.base),
       b('', 'Edit drawing', async () => {
         /* open all the pictures of this thing in the sprite editor. A library thing is saved as a campaign sprite (or
            alters the asset for good); one of my own objects is changed; a paper doll becomes a fixed picture. */
@@ -146,7 +147,7 @@ export function screenThing(kit) {
           },
           isHero,
         ),
-      ws &&
+      !isHero &&
         b(
           '',
           'Solid',
@@ -872,4 +873,86 @@ export function screenExit(kit) {
     doneBtn(''),
   );
   return;
+}
+
+/* ================= base point: where a thing stands — what it is drawn in front of, and what it blocks ================= */
+export function screenBase(kit) {
+  const { p, c, d, sel, lab, back, head } = kit;
+  if (!sel) return back();
+  const TILE = 1 / 12;
+  /* "stand on that": the thing clicked on the stage lends its base line */
+  if (G.pick && G.pick !== sel.id) {
+    const on = d.entities.find((e) => e.id === G.pick);
+    if (on) sel.base = { dy: on.y + ((on.base && on.base.dy) || 0) - sel.y, d: (sel.base && sel.base.d) || 0.5 };
+  }
+  G.pick = null;
+  const own = !!sel.base,
+    b = sel.base || { dy: 0, d: 0.5 };
+  const set = (patch) => {
+    sel.base = { ...b, ...patch };
+    c.changedQuiet();
+    c.rebuild();
+  };
+  head(
+    `Base point of ${sel.name || lab(sel)}`,
+    'The yellow strip is the floor it stands on. Things with a lower strip are drawn in front; a solid thing cannot be walked through where its strip lies.',
+  );
+  add(
+    p,
+    h(
+      'div',
+      { class: 'row' },
+      h(
+        'button',
+        {
+          id: 'baseOwn',
+          class: 'grow' + (own ? ' on' : ''),
+          onclick: () => {
+            sel.base = own ? null : { dy: 0, d: 0.5 };
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        own ? 'Own base point — press to go back to its feet' : 'Give it a base point of its own',
+      ),
+    ),
+    h('small', { class: 'dim' }, 'Move the base line'),
+    h(
+      'div',
+      { class: 'row' },
+      h('button', { id: 'baseUp', class: 'grow', onclick: () => set({ dy: b.dy - TILE / 4 }) }, '▲ Further back'),
+      h('button', { id: 'baseDown', class: 'grow', onclick: () => set({ dy: b.dy + TILE / 4 }) }, '▼ Nearer'),
+    ),
+    h(
+      'small',
+      { class: 'dim', id: 'basePickHint' },
+      'Or click another thing on the stage: this one then stands on that one’s base (a candle on a table).',
+    ),
+    h('small', { class: 'dim' }, 'How deep is it? (how much floor it takes up, front to back)'),
+    h(
+      'div',
+      { class: 'row' },
+      [
+        [0.25, 'Thin'],
+        [0.5, '½ tile'],
+        [1, '1 tile'],
+        [2, '2 tiles'],
+        [3, '3 tiles'],
+      ].map(([n, label]) => h('button', { 'data-depth': n, class: 'grow' + (b.d === n ? ' on' : ''), onclick: () => set({ d: n }) }, label)),
+    ),
+    h(
+      'button',
+      {
+        id: 'baseSolid',
+        class: sel.solid ? 'on' : '',
+        onclick: () => {
+          sel.solid = !sel.solid;
+          c.changedQuiet();
+          c.rebuild();
+        },
+      },
+      sel.solid ? 'Solid: nobody walks through its base — press to let them' : 'Make it solid: nobody walks through its base',
+    ),
+    h('button', { class: 'primary gdone', onclick: back }, '✓ Done'),
+  );
 }

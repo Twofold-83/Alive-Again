@@ -36,14 +36,14 @@ export function guidedStart(d) {
 /** Which stage tool the open screen needs: dragging records a path, or draws. */
 export function guidedTool() {
   const top = G.path[G.path.length - 1];
-  return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : '';
+  return top === 'move:rec' ? 'rec' : top === 'draw' ? 'draw' : top === 'base' ? 'base' : top === 'paint' ? 'paint' : '';
 }
 
 const PICKERS = ['speak', 'move', 'give', 'tie']; // questions that start with "which one?"
 /** A tap on something on the stage: answers an open "which one?", otherwise opens that thing's own tools. */
 export function guidedPick(id) {
   const top = G.path[G.path.length - 1] || '';
-  if (top === 'tie') {
+  if (top === 'tie' || top === 'base') {
     G.pick = id;
     return;
   }

@@ -8,7 +8,7 @@ import { playTurn } from '../stage/playback.js';
 import { clone } from '../core/dom.js';
 import { History } from '../core/history.js';
 import { normScene, stepFields, playerFields } from '../shared/scene-model.js';
-import { resetGuided, guidedStart } from './guided.js';
+import { resetGuided, guidedStart, guidedTool } from './guided.js';
 import { $, toast } from '../core/dom.js';
 import { myTurn, directing, stage, hero, shown, heroTurn, app } from '../core/state.js';
 import { stopWalkAnim, settleWalk } from './walk.js';
@@ -343,6 +343,8 @@ function stageOpts() {
     code: app.code,
     names: app.S.names,
     selId: directing() ? app.selId : null,
+    showBase: directing() && guidedTool() === 'base' ? app.selId : null,
+    showBases: directing() && guidedTool() === 'base',
     pendingRoll: heroTurn()
       ? app.draft.rollWant || (app.draft.reply && app.draft.reply.roll && !(app.draft.ask && app.draft.ask.rolled) ? app.draft.ask.sides : 0)
       : 0,
