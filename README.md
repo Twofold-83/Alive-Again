@@ -27,9 +27,8 @@ mount a persistent disk there if stories should survive redeploys.
 3. Turns alternate, each on a clock (1 minute by default, changeable under ⚙️ More).
    Every finished turn is first played back to the other side as a short cut scene
    (things glide, recorded moves play, lines appear one by one), then they take over.
-   - **Player:** tap/drag to move, say and/or do something, pick an emote, tap an offered
-     choice, reach for a thing, use an inventory item, roll a die.
-   - **Director:** everything else — see the tabs below.
+   - **Player:** walk, speak, act on things, strike a pose, answer what was asked, roll, fight.
+   - **Director:** everything else — see below.
 4. If the clock runs out, the turn is sent as it stands.
 5. 📖 replays the whole story and can download it as a file.
 
@@ -57,110 +56,110 @@ A turn is a list of **steps**. Everything done within one step plays at the same
 (a line of speech, an explosion and its sound, two characters moving); "＋ Next step"
 starts what happens after that. There is no limit on steps. The step bar at the top
 of the tool column shows them and offers **Preview turn**, **Undo** (Ctrl+Z, one
-change at a time), **Reset step** (undo the whole current step), **Clear steps** (start the turn over), and clicking an earlier step
-goes back to it.
+change at a time), **Reset step**, **Clear steps**, and clicking an earlier step goes
+back to it.
 
 Inside a step the Director answers one question at a time: "What happens?" → a broad
 choice → narrower choices.
 
 | Choice | What it does |
 | --- | --- |
-| ➕ Add something | 1,242 things and people at paper-doll scale, 1,100 tiles and effects and 670 emoji in searchable categories, plus your own photos, generated assets, or any emoji. |
-| 💬 Someone speaks | A line and a face for any character. |
-| 🚶 Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, cross the stage, jump, tremble. Different things move together; one thing's moves follow each other. |
-| 📝 Narrate | One narration per step. |
-| 💥 Moment and sound | Shake, flash, confetti; 50 sound effects in five groups (action, magic, places, nature, people & spooks) — click one to hear it. |
-| 🌄 Change the scene | A prepared scene, backdrop, weather, music, a title card, a random scene, story ideas. |
-| ✏️ Draw on the stage | Freehand lines that draw themselves in playback. |
-| 🏗️ Build scene / 🗺️ Map | Make places and keep them on the map, see below. |
-| 🎒 The Player's sheet | Items, stats, a dice roll. |
-| ❓ Offer choices | Up to three options for the Player. |
-| 🤖 Tell Claude | Describe the step in words; Claude stages it (needs `ANTHROPIC_API_KEY` and `npm install`; `CLAUDE_MODEL`, `CLAUDE_MAX_PER_STORY`; see `director-ai.js`). |
-| ⚙️ Story settings | Story type and layers, how the Player plays, turn time, invite link, end the story. |
+| Add something | The library by **Environment** (hospital, school, attic, street …), **Objects** and **Beings**, level pieces, effects, a search by name, your own drawings and uploads. The list stays open while you place things. |
+| Someone speaks | A line for any character. |
+| Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, enter from outside the screen, jump, tremble. Different things move together; one thing's moves follow each other. |
+| Narrate | One narration per step. |
+| Moment and sound | Shake, flash, confetti; sound effects in five groups — click one to hear it. |
+| Mood | Light and dark (four levels of darkness, lamps that cut through it), weather, music (57 tunes), a title card, a surprise scene, story ideas. |
+| Draw on the stage | Freehand lines that draw themselves in playback. |
+| Build this room | Walls and floor in one press (68 themes in four shapes), paint single tiles, **Save room** for any story. |
+| Map & campaigns | The scenes kept for this story and the ways between them, see below. |
+| The Player's sheet | Items, stats, points. |
+| Ask the Player | Choices, a skill check, a picture to show, a place to go, a target to pick, a thing to give up. |
+| Camera | Zoom 1.5×, 2× or 3× onto a thing or a corner; the camera moves there when the step plays. |
+| Battle | Pick the enemies and one of six difficulties; the fight then belongs to the Player (see below). |
+| Tell Claude | Describe the step in words; Claude stages it (needs `ANTHROPIC_API_KEY` and `npm install`; see `server/director-ai.js`). |
+| Character maker, Sprite editor | Build people from parts (with mutations); draw or redraw things, all four pictures of them. |
+| Story settings | Layers, how the Player plays, turn time, title screen and instructions, invite link, end the story. |
 
-Clicking anything on the stage opens its own tools (line, size, rotation, effect,
-emote, move, turn into something else, copy, solid, give to the Player, remove);
-dragging moves it.
+**A thing on the stage.** Clicking anything opens its tools; dragging moves it. Every thing has:
 
-### Adventure tools
+- a **name** — until the Director types one it has none, and everybody calls it "this";
+- a **view**: as drawn, from the other side, and *used* (an open door, a lit lamp, a bed slept in) — four
+  hand-drawn pictures per library sprite;
+- a **base point**: the strip of floor it stands on. It decides what is drawn in front of what, and — if the
+  thing is **solid** — where nobody can walk. It can be moved and made deeper;
+- a **light** it carries (the light follows the thing), an effect, an emote, a layer, a size;
+- **clickable**: the actions the Player is offered on it, and for each a **reaction** the Player sees at once
+  ("If the Player looks at it, show this text", optionally switching the thing to its used picture) — and a
+  **trap**: if the hero walks close, "Something happened!" and the turn goes straight to the Director;
+- **tie** (a sword to a hand, a candle to a table), copy, turn into something else, give to the Player, remove;
+- for paper-doll characters: **Act** — a feeling that shows on the face, and a pose.
 
-| Tool | What it does |
-| --- | --- |
-| ❓ Ask the Player | The Director decides exactly what the Player may do next turn: pick one of up to three choices, roll a d6/d20 (optionally against a number to reach), go to one of several marked places, pick a target ("Attack", "Talk to"…), or give up an item. In limited will the Player must do it; in free will it is offered. |
-| ⭐ Active objects | Any thing can be given a name and a set of actions (Look at, Use, Open, Talk to, your own…). The Player sees the name when pointing at it and picks an action by clicking it. |
-| Use item on | The Player selects an inventory item, then clicks something on stage: "uses the key on Old chest". |
-| 🔗 Tie | A thing can be tied to another (a sword to a character), in front of or behind it. It follows its holder everywhere, including walks, moves and travel. |
-| 🎥 Camera | Zoom 1.5×, 2× or 3× onto a thing or a corner; the camera moves there when the step plays. The Director sees the framing as a yellow frame. |
-| ➡️ Enter | "Move or animate → Enter from the left/right" brings a character in from outside the screen. |
-| ⭐ Points | A layer; the Director awards points with a reason, shown to the Player as the step plays. |
-| 🚪 Exits and the map | Scenes can have exits that lead to other prepared scenes, locked or open. The 🗺️ Map connects scenes. When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story continues in that scene, with the hero arriving at the way back. |
-| ⚔️ Battle | The Director picks enemies and their health. The Player then chooses Attack, Defend or Flee each turn. The battle tools open by themselves on the Director's turn: one click on a damage number resolves the Player's blow, another the enemy's reply (strike, sword swing, shoot, magic, roar), each as its own step with animation, damage number, sound and health change. The battle ends by itself when the last enemy falls. |
+The **shelf** under the stage is the Director's alone: the cast from the character maker and anything put
+aside with "Keep for later" wait there, and come back exactly as they were prepared.
 
-Speech bubbles belong to the step they were said in: a new step starts without them,
-and no line survives into the other side's turn.
+### Rooms, the map and campaigns
 
-### Build scene and the Map
+Everything is built on the stage itself; there is no separate building mode.
 
-Places are made in one spot only, apart from the turn. The Director can open it during
-setup, during their own turn, and while waiting for the Player.
+- **Build this room** lays walls and floor for a theme and shape, and **Paint walls and floor** changes
+  single tiles of the 16 × 12 grid. A tile is either floor (the hero can walk on it) or wall.
+- **Save room** keeps the stage as a room on this device, for any story; "My saved rooms" brings one back.
+- **Map & campaigns** holds the scenes of this story. "Add the stage as a scene" keeps what is on stage;
+  on the map scenes are arranged, renamed, duplicated, deleted and **connected** (an exit in both scenes,
+  lockable). "Edit" or a double-click moves the story there; "Save the stage into it" updates a scene.
+  Ready-made places (several furnished, connected rooms) can be dropped in.
+- A **campaign** is the whole map — every scene, where it lies, the ways between them — kept on this device
+  and usable in any story. The map can also be saved to a file and loaded elsewhere.
 
-**🏗️ Build scene** has one scene on the bench:
-
-- **Level tiles:** a 16 × 12 tile grid over the backdrop, painted with brush (1–3 tiles
-  wide), box, fill, erase and pick tools, from 412 tiles in nine sets. Every tile is
-  either **floor** (the hero can walk on it) or **wall** (it cannot).
-- **Things & scene:** add things, make them solid or **active** (a name and verbs the
-  Player can click), tie them together, set layers; backdrop, weather, music and
-  **exits**. The hero marker sets where the Player starts. These construction tools are
-  not in the turn menu any more — a turn is for telling the story.
-- **💾 Add scene to map** keeps the scene. From then on it saves itself.
-- **▶ Use in story** brings the scene on stage in the step being made (and adds it to
-  the map if it was not there). **🎬 From stage** starts from a copy of what is on stage
-  now; **＋ New** starts empty. Undo/redo with Ctrl+Z / Ctrl+Y, Ctrl+D copies a thing.
-
-**🗺️ Map** shows every scene that was added. Drag to arrange; select one to rename,
-edit (double-click), duplicate (Ctrl+D), delete, connect to another scene (adventure:
-an exit in both, lockable) or to go there in the story. The whole map can be saved to a
-file and loaded into another story.
-
-Where a level exists the hero can only stand on floor tiles, and solid things block
-it; the server enforces the same rule.
+When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story
+continues in that scene. Where a level exists the hero can only stand on floor tiles, and the base of a solid
+thing blocks the way; the server enforces the same rule.
 
 ### How the Player plays
 
-The Director chooses one of three modes (Rules of the story / ⚙️ More), and can
-change it at any time:
+The Director chooses one of three modes under Story settings, and can change it at any time:
 
 | Mode | The Player… |
 | --- | --- |
-| 📝 Narration | only writes what they want to do. Nothing on stage moves until the Director stages it; the Player then watches it as a cut scene. |
-| 🕹️ Free will | walks their hero, speaks, picks an emote, types an action, reaches for things. |
-| 🎯 Limited will | must pick one of the options the Director offered for this turn; may also walk and add a line of speech. |
+| Narration | only writes what they want to do. Nothing on stage moves until the Director stages it. |
+| Free will | walks, speaks, picks an emote, writes a **Free Action**, acts on things, strikes a pose. |
+| Limited will | must pick one of the options the Director offered, or do exactly what was asked; may also walk and speak. |
 
-**Walking** (free and limited will): the Player presses "Walk" and clicks where the
-hero should go. The hero finds its own way around walls and solid things and walks
-there at an easy pace; the same walk is replayed for the Director. One walk per turn
-(it can be taken back before the turn ends).
+- **Point and click (adventures).** A click on the stage opens a small menu — Walk here, Look at, Use, and
+  whatever else a clickable thing offers. Or pick one of ten **Actions** (walk, look at, push, pull, open, use,
+  pick up, give, talk to, attack) and then click what it is about: a thing ("Open old chest") or a spot
+  ("Push here"). If the Director prepared a reaction for that action, the Player sees it at once and plays
+  on; anything else is told to the Director with the turn.
+- **Walking.** The hero finds its own way around walls and solid things; the same walk is replayed for the
+  Director. One walk per turn (it can be taken back).
+- **Items.** Select an inventory item, then click something on stage: "uses the key on Old chest".
+- **A skill check.** The Director writes what the check is for and what number is needed. The Player's turn
+  opens on the card: Roll or Back out. The die tumbles, the result stands for three seconds, and the turn
+  goes back to the Director.
+- **A battle.** The Director sets only the enemies and the difficulty (very easy to basically impossible);
+  the difficulty decides every number, and an estimate says what to expect. From then on the Player is locked
+  into the fight — Attack, Defend, Item, Escape — round after round, each carried out at once while the
+  Director watches, until one side is beaten or the hero gets away. The Director can pause it, stage
+  something, and give it back.
+
+Speech bubbles belong to the step they were said in: a new step starts without them, and no line survives
+into the other side's turn.
 
 ### Story types and layers
 
-A story type is a preset of **layers**; the Director can also switch each layer on or
-off at any time.
+A story type is a preset of **layers**; the Director can also switch each layer on or off at any time.
 
 | Layer | Adds |
 | --- | --- |
-| 🎒 Inventory | The Player can reach for things on stage; the Director decides whether they get them. Items can be used on a later turn, and the Director decides whether they are used up. |
-| ❤️ Stats | Named counters (Health, Gold, anything) that the Director adjusts. |
-| 🎲 Dice | Either side can attach a d6 or d20 roll to a turn; the server rolls it. |
+| Inventory | The Player can reach for things on stage; the Director decides whether they get them. |
+| Stats | Named counters (Health, Gold, anything) that the Director adjusts. |
+| Dice | Either side can attach a d6 or d20 roll to a turn; the server rolls it. |
+| Points | The Director awards points with a reason, shown as the step plays. |
 
-Types so far: **Free play** (no layers) and **Adventure** (all three). To add a type,
-add a line to `TYPES` in `public/story/view.js` and `server/scene.js`; to add a layer, add it to
-`MODULES` and the scene fields it needs (`public/shared/scene-model.js`, checked in `server/scene.js`).
-
-The layout is made for computers for now (a phone design is still to come): the stage
-sits on the left and the tools on the right; Ctrl+Enter ends
-the turn, and with something selected the arrow keys move it, `+`/`-` resize, `r`
-rotates, `f` flips and Delete removes.
+Types: **Free play** and **Adventure** (see `public/shared/rules.js`). On a computer the stage sits on the
+left and the tools on the right; Ctrl+Enter ends the turn, and with something selected the arrow keys move
+it, `+`/`-` resize, `r` rotates, `f` flips and Delete removes. On a phone the stage is on top.
 
 ## The look
 
@@ -171,10 +170,10 @@ are no emoji anywhere: the stage uses the pixel-art library only, menus use spri
 as icons, and what the Player did is read out like the log of an old adventure game
 (`SAYS`, `DOES`, `GOES`, `ROLLS`), with a `> command line` on the stage during the replay.
 
-- **Rooms in one click.** Build scene has 55 themes — old-house rooms (wallpapers, nursery,
-  study, attic, bathroom …), institutions (asylum, morgue, hospital, prison, station, factory)
-  and bleak outdoors (dead wood, marsh, moor, cemetery, catacomb, shipwreck, carnival …) — in four
-  shapes; one press lays walls, floor and a few details. A new story opens in such a room.
+- **Rooms in one press.** "Build this room" has 68 themes — old-house rooms, institutions (asylum, morgue,
+  hospital, school, prison, station, factory), modern homes and streets, and bleak outdoors (dead wood, marsh,
+  moor, cemetery, catacomb, shipwreck, carnival …) — in four shapes; one press lays walls, floor and a few
+  details. A new story opens in such a room.
 - **One scale for everything.** One pixel of any picture is the same size on the stage: a person is
   16 x 33, a floor tile 16 x 16, a bed two tiles wide, a door taller than a person. `tools/make-big.js`
   draws the library at that scale from the modules in `tools/big/`: 1,242 things and people of the house
@@ -206,24 +205,25 @@ as icons, and what the Player did is read out like the log of an old adventure g
   level sets every number, the chance to escape included. The whole fight is then the Player's — Attack, Defend,
   Item, Escape, carried out at once while both watch — until it is over. The Director can pause it, stage
   something with the usual tools, and give it back (`public/shared/battle.js`, `public/story/battle-ui.js`).
-- **Save room.** In Build scene, "Save room" keeps a room on the device; "My saved rooms" opens it in any story.
+- **Save room.** "Build this room → Save room" keeps the stage as a room on the device; "My saved rooms" brings
+  it on stage in any story, or puts a copy on the map.
 - **Rolls at once.** When the Director asks for a roll (with the number to reach), the Player presses Roll,
   sees the die and is told at once whether it was enough; the Director gets the result in words.
 - **Feelings.** A paper-doll character can feel happy, sad, scared, angry, uneasy, curious, doubtful,
   surprised, tired or hurt: a few pixels of brow, eye and mouth, drawn for every head. Director and
   Player choose it in the same Act panel as the ready-made poses; the Director is told what the hero feels.
-- **Things can be clicked from the start.** Anything placed in Build scene gets a name and
-  the verbs Look at / Use / Take; rename it or change the verbs under "Clickable".
+- **Ready-made places come alive.** The things in a ready-made place are named and clickable from the start
+  (Look at / Use / Take); rename them or change the actions under "Clickable".
 - **Places with many rooms.** On the Map, "Room next door" adds a connected room in one
   press, and "Ready-made places" drops a furnished, connected set of rooms (the old house,
   the crypt, the lost mine) to play at once or change.
-- **Thirty tunes**, eight of them made to unsettle: Dread, Crypt, Broken music box,
-  Whispers, Heartbeat, Church organ, Lament, Drone.
+- **57 tunes**, most of them made to unsettle: Dread, Crypt, Broken music box, Whispers, Heartbeat,
+  Church organ, Lament, Drone and their kin.
 
 ## Paper-doll characters
 
-Besides the ready-drawn sprites there is a **Character maker** (in the Director's menu, in
-Build scene, and for the Player as "Make my character"). A person is put together from a
+Besides the ready-drawn sprites there is a **Character maker** (in the Director's menu,
+and for the Player as "Make my character"). A person is put together from a
 head, a torso, arms and legs — 500 parts in a muted old-home-computer palette (190 heads
 from tired faces to plague doctors and drowned girls, 130 torsos, 90 arms, 90 legs), made by
 `tools/make-dolls.js`.
@@ -253,8 +253,8 @@ The 📱/💻 button in the top bar switches at any time.
 the tools scroll under it, and the button that ends your turn stays at the bottom. Touch
 targets are at least 44 px, text fields do not make iOS zoom, the layout respects the
 notch and the home bar, and while you type the stage shrinks to leave room for the
-keyboard. Active objects show their names without hovering. Build scene and the Map
-stack the stage above the tools. Dungeon mode gets a thumb pad and sword, potion and bomb
+keyboard. Named things show their names without hovering. The Map and the makers
+stack their picture above the tools. Dungeon mode gets a thumb pad and sword, potion and bomb
 buttons. Held sideways, the stage sits on the left and the tools on the right.
 
 ## Dungeon mode
@@ -295,62 +295,79 @@ commands to the hero, and remembers the game across reloads. `public/dungeon/scr
 ## How the code is laid out
 
 Plain JavaScript modules, no build step: what is in the repository is what runs.
-The same idea everywhere — small files that each do one thing, named for what they do.
+Small files that each do one thing, named for what they do.
 
 ```
 server.js                 start here: `node server.js`
 server/                   the server (ES modules, no dependencies except the optional Claude SDK)
   index.js                HTTP, static files, event streams
   rooms.js                stories: who is in them, what each side sees, saving to disk
-  turns.js                the clock, ending a turn, handing over, the computer partner
+  turns.js                the clock, ending a turn, handing over, dice, live battle rounds
   scene.js                checks every scene a browser sends
   actions.js              everything a browser may ask for, by name
-  director.js             Director-only requests: Tell Claude, the map's scenes, custom art
+  director.js             Director-only requests: Tell Claude, the map's scenes, a story's own pictures
   dungeon.js              Dungeon mode: relays between the two sides, remembers the game
-  bots.js                 computer partners for solo play (hook: BOT_PROVIDER)
-  director-ai.js          "Tell Claude" (hook: DIRECTOR_AI)
+  bots.js, director-ai.js computer partners for solo play; "Tell Claude"
   providers.js            making images (hook: ASSET_PROVIDER)
-  config.js, util.js      limits and small helpers
 public/                   the browser
   main.js                 start-up
-  shared/                 used by browser AND server, so rules exist once
-    rooms.js              rooms in one click: themes, shapes, the level they make
-    scene-model.js        what a scene is: its fields by lifetime, where the hero may stand
+  shared/                 used by browser AND server, so every rule exists once
+    scene-model.js        what a scene is: its fields by lifetime, names, base points, where the hero may stand
+    battle.js             the battle: difficulty levels, planning a fight, one round
+    rooms.js              rooms in one press: themes, shapes, the level they make
+    environments.js       the library sorted into settings, objects and beings
+    options.js, sounds.js, rules.js   effects, lights, weather, feelings; tunes and sounds; story types and layers
     dungeon-rules.js      all rules of Dungeon mode (no drawing, no network)
-  core/                   state.js (one `app` object), net.js, dom.js, history.js (undo),
-                          audio.js, catalog.js, consts.js
-  stage/                  render.js (draw a scene), playback.js (play a turn), level.js (tiles, walking)
+  core/
+    state.js              one `app` object: the server's last word, my draft, what is selected
+    net.js, dom.js, history.js, audio.js
+    catalog.js            every asset id and how to find its pictures (front, side, used)
+    dolls.js              paper-doll characters: parts, mutations, poses, feelings
+    kept.js               everything kept on this device: cast, shelf, saved rooms, campaigns, own objects
+    legacy-sprites.js     the first, emoji library — still drawn for old stories
+  stage/                  render.js (draw a scene), playback.js (play a turn), level.js (tiles, finding a way)
   story/                  a story on screen
-    turn.js               the draft, steps, undo, sending the turn
-    input.js, walk.js     mouse, touch and keyboard on the stage
-    view.js, player.js    the tool column; the Player's controls
+    turn.js               the draft, steps, undo, sending the turn, receiving the next
+    input.js, walk.js     mouse, touch and keyboard on the stage; walking, the click menu, acting on things
+    view.js               the tool column and the sheet
+    player.js             the footer: the Player's controls, the button that ends a turn
+    dice.js, battle-ui.js the skill check card; the battle for the Player, the watch card for the Director
     director.js           what the Director's menu can do to the turn
-    guided.js, screens/   the Director's menu: one function per screen
+    prep.js               the Director's shelf
+    guided.js, screens/   the Director's menu: one function per screen (things, scene, player, story)
     viewer.js             "the story so far"
-  build/workshop.js       Build scene and the Map
-  build/dollmaker.js      the character maker (paper dolls)
+  build/                  full-screen workbenches
+    map.js                the map: scenes, connections, campaigns, ready-made places (scenarios.js)
+    dollmaker.js          the character maker
+    spriteed.js           the sprite editor: all four pictures of a thing
   dungeon/screen.js       Dungeon mode: editor, game canvas, controls, Overlord panel
-  shell/                  home.js (start screen), chrome.js (top bar, clock), device.js (phone or computer), title.js
-  css/                    nine style sheets by area; phone.css holds everything phone mode changes
-  px/, packs/             the pixel-art library; better art that replaces it
-test/                     `npm test` (protocol + 300 dungeon games), `npm run test:e2e` (five browser suites), `npm run sim`
-tools/                    make-sprites.js (the art library), upgrade-sprites.js (fills packs/ from an image service)
+  shell/                  home.js (start screen), chrome.js (top bar, clock), device.js, display.js (filters), title.js
+  css/                    style sheets by area; phone.css holds everything phone mode changes
+  px/, doll/, packs/      the pixel-art library, the doll parts, art that replaces built-in pictures
+test/                     `npm test` (protocol, dungeon games, rooms and rules), `npm run test:e2e` (eight browser suites), `npm run sim`
+tools/                    make-big.js + big/ (the library, drawn in code), make-dolls.js, make-sprites.js
 ```
 
 How the pieces fit:
 
-- **One scene model.** `shared/scene-model.js` says what a scene contains and how long each
-  part lives (the place, the cast, one step's effects, what the Player did). Server and
-  browser both import it, so a new field is added in one place.
-- **One state object.** The browser keeps what it knows in `app` (`core/state.js`): the
-  server's last word (`app.S`), my draft (`app.draft`), what is selected. Screens read it and
+- **One scene model.** `shared/scene-model.js` says what a scene contains and how long each part lives (the
+  place, the cast, one step's effects, what the Player did). Server and browser both import it, so a new
+  field is added in one place — and `normScene` brings older stories up to date when they are loaded.
+- **One state object.** The browser keeps what it knows in `app` (`core/state.js`). Screens read it and
   redraw; nothing hides state in a corner.
-- **Server decides, browsers draft.** A browser only edits its draft and sends it when the
-  turn ends; `server/scene.js` checks every field. Dungeon mode is the one exception, on
-  purpose: the hero's browser runs the rules so the controls have no lag.
-- **One undo.** `core/history.js` serves the Director's turn, Build scene and the castle editor.
-- **`npm run lint`** finds names that do not exist and code nobody uses; **`npm run format`**
-  keeps the style even.
+- **Server decides, browsers draft.** A browser only edits its draft and sends it when the turn ends;
+  `server/scene.js` checks every field. Two things are live on purpose: a dice roll and a battle round are
+  carried out by the server the moment the Player asks, and shown to both. (Dungeon mode runs its rules in
+  the hero's browser so the controls have no lag.)
+- **One way to act.** Whatever the Player does to the stage is `point: { verb, id | x, y }` — from the click
+  menu, the Actions list or a clickable thing alike. What they write is `action`.
+- **One name, one base.** A thing's `name` is what everybody calls it; its base (`baseOf`) decides both
+  drawing order and where it blocks the way.
+- **One place for pictures.** `catalog.picturesOf` knows the four pictures of a library sprite, of a story's
+  own drawing and of a drawing kept on the device.
+- **One place for what the device keeps.** `core/kept.js`.
+- **One undo.** `core/history.js` serves the Director's turn and the castle editor.
+- **`npm run lint`** finds names that do not exist and code nobody uses; **`npm run format`** keeps the style even.
 
 ## Solo play
 

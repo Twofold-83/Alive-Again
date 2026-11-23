@@ -163,8 +163,6 @@ export const ENVIRONMENTS = [
 ];
 /** Categories of things that belong to no setting in particular. */
 export const OBJECT_CATS = ['clues'];
-/** Categories of people, animals and creatures. */
-export const BEING_CATS = ['heroes', 'townsfolk', 'people', 'cast', 'apparitions'];
 
 const slugOf = (item) => item.asset.replace(/^p:/, '');
 /** The things (or beings) of an environment out of the library's categories ([{ id, items: [{ asset, name }] }]). */
