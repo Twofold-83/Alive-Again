@@ -6,7 +6,7 @@ import { stage, pen, myTurn, hero, mods, directing, app } from '../core/state.js
 import { guidedPick, guidedMark } from './guided.js';
 import { rid, r3, toast, $ } from '../core/dom.js';
 import { changed, rebuild, paint, undo, submit } from './turn.js';
-import { walkHero, setReply, hideVerbs, showVerbs, showClickMenu } from './walk.js';
+import { walkHero, setReply, hideVerbs, showVerbs, showClickMenu, doVerb } from './walk.js';
 import { render } from './view.js';
 import { workshopOpen } from '../build/workshop.js';
 import { removeEntity } from './director.js';
@@ -35,12 +35,12 @@ stage.addEventListener('pointerdown', (ev) => {
   drag = null;
   if (app.S.you === 'player') {
     const me = hero(app.draft);
-    if (app.pointMode) {
-      // what the written action is about: a thing, or a spot
-      app.pointMode = false;
-      app.draft.point = hit && hit !== me ? { id: hit.id } : { x: r3(p.x), y: r3(p.y) };
-      if (!app.draft.action.trim()) app.draft.action = 'Look at';
-      return rebuild();
+    if (app.verb) {
+      // an action was picked: this click says what it is about
+      const verb = app.verb;
+      app.verb = '';
+      app.actionsOpen = false;
+      return doVerb(verb, hit && hit !== me ? hit : null, p);
     }
     if (app.S.scene.battle) {
       if (hit && hit.hp > 0 && hit !== me) battleCmd('attack', { id: hit.id });
@@ -206,8 +206,9 @@ stage.addEventListener('pointercancel', endDrag);
 /* ---------- keyboard (computers) ---------- */
 document.addEventListener('keydown', (ev) => {
   if (!app.S || !app.code || !$('#story').hidden || workshopOpen()) return;
-  if (ev.key === 'Escape' && (app.walkMode || app.pointMode)) {
-    app.walkMode = app.pointMode = false;
+  if (ev.key === 'Escape' && (app.walkMode || app.verb)) {
+    app.walkMode = false;
+    app.verb = '';
     return render();
   }
   const typing = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName);

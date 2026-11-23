@@ -25,7 +25,22 @@ export function screenThing(kit) {
     return buildGuided(p, c);
   }
   const isHero = sel.id === d.heroId;
-  head(lab(sel), 'Drag it on the stage to move it.');
+  head(sel.name || lab(sel), 'Drag it on the stage to move it.');
+  /* its name: until you type one it has none, and the Player sees and says "this" */
+  add(
+    p,
+    h('input', {
+      id: 'thingName',
+      placeholder: 'Name it (the Player sees the name) — unnamed, it is just “this”',
+      maxlength: 40,
+      value: sel.name || (sel.active ? sel.active.name : ''),
+      oninput: (ev) => {
+        sel.name = ev.target.value;
+        if (sel.active) sel.active.name = sel.name;
+        c.changedQuiet();
+      },
+    }),
+  );
   const b = (icon, label, fn, on) => h('button', { class: on ? 'on' : '', onclick: fn }, label);
   /* a library thing has three pictures: as drawn, turned a quarter, and after someone used it */
   const viewRow = () => {
@@ -564,6 +579,7 @@ export function screenActive(kit) {
         value: sel.active.name,
         oninput: (ev) => {
           sel.active.name = ev.target.value;
+          sel.name = ev.target.value;
           c.changedQuiet();
         },
       }),

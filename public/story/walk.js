@@ -6,7 +6,7 @@ import { hero, heroStart, app, mods } from '../core/state.js';
 import { saveDraft, paint, changed, rebuild, submit } from './turn.js';
 import { audio } from '../core/audio.js';
 import { walkable } from '../shared/scene-model.js';
-import { spriteTitle } from '../core/catalog.js';
+import { thingName } from '../stage/render.js';
 import { render } from './view.js';
 
 /* ---------- the Player's walk: press Walk, click where to go; once per turn ---------- */
@@ -149,7 +149,7 @@ export function showVerbs(e, ev) {
   );
 }
 /* ---------- a click on the stage in an adventure: walk here, look at, use ---------- */
-const nameOf = (e) => (e.active && e.active.name) || spriteTitle(e.asset.startsWith('p:') ? e.asset : 'p:thing').toLowerCase();
+const nameOf = (e) => thingName(e) || 'this';
 /** Where the hero ends up for a click at x, y: on the spot if one can stand there, else straight below it (a click high on a wall). */
 function standBelow(x, y) {
   for (let yy = clamp(y, 0.08, 0.98); yy <= 0.985; yy += 0.01) if (walkable(app.draft, x, yy)) return yy;
@@ -177,6 +177,18 @@ function react(e, verb) {
   audio.sfx('pop');
   changed();
   return true;
+}
+/** Carry out an action picked from the Actions list on what was clicked: a thing (or nothing: "here"). */
+export function doVerb(verb, what, p) {
+  if (verb === 'Walk') {
+    const y = standBelow(p.x, p.y);
+    if (y == null) return toast('There is nowhere to stand there');
+    return walkHero(p.x, y);
+  }
+  if (what && react(what, verb)) return rebuild();
+  app.draft.action = verb;
+  app.draft.point = what ? { id: what.id } : { x: Math.round(p.x * 1000) / 1000, y: Math.round(p.y * 1000) / 1000 };
+  rebuild();
 }
 export function showClickMenu(hit, p, ev) {
   hideVerbs();

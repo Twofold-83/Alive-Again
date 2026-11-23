@@ -16,6 +16,8 @@ function tallOf(asset) {
   return h ? h * 0.0422 + 0.12 : 1.22;
 }
 const VIEW_FILE = { side: '.side', used: '.used', sideUsed: '.side.used' };
+/** What a thing is called: the name the Director gave it. Until then it has none, and is spoken of as "this". */
+export const thingName = (e) => (e && (e.name || (e.active && e.active.name))) || '';
 export function glyphNode(code, asset, cls = '', view = '', used = false) {
   if (isDoll(asset)) return dollNode(asset, cls);
   const v = spriteView(code, asset);
@@ -49,7 +51,7 @@ export function glyphNode(code, asset, cls = '', view = '', used = false) {
 /** What the Player did this turn, as rows of [kind, text]: says, does, goes, gives, rolls. */
 export function actionParts(scene, pendingRoll) {
   const parts = [];
-  const name = (e) => (e.active ? e.active.name : assetLabel(e.asset));
+  const name = (e) => thingName(e) || 'this';
   if (scene.said) parts.push(['says', `“${scene.said}”`]);
   if (scene.felt) parts.push(['feels', 'feels ' + scene.felt]);
   const item = scene.use && scene.sheet.inv.find((i) => i.id === scene.use);
@@ -76,7 +78,7 @@ export function actionParts(scene, pendingRoll) {
   if (ex) parts.push(['goes', 'heads for ' + ex.label]);
   const pt = scene.point,
     pe = pt && pt.id && scene.entities.find((e) => e.id === pt.id); // the action points at something on the stage
-  if (pt) parts.push(['does', `${scene.action || 'Look at'} → ${pe ? name(pe) : 'that spot'}`]);
+  if (pt) parts.push(['does', `${scene.action || 'Look at'} ${pe ? name(pe) : 'here'}`]);
   else if (scene.action) parts.push(['does', scene.action]);
   if (scene.roll && scene.roll.by === 'player') {
     const need = a && a.kind === 'roll' && a.dc ? (scene.roll.value >= a.dc ? ` — success (needed ${a.dc})` : ` — fails (needed ${a.dc})`) : '';
@@ -144,32 +146,6 @@ export function renderStage(root, scene, o = {}) {
     bg.style.background = css;
   }
   weather.className = 'weather' + (scene.weather ? ' w-' + scene.weather : '');
-  /* light and dark: the dark lies over the room, every light source cuts a soft hole in it and adds its colour */
-  const lights = scene.entities
-    .filter((e) => e.glow && !e.gone)
-    .map((e) => {
-      const L = LIGHTS.find((l) => l[0] === e.glow),
-        at = e; // where it stands (a held light shines from its own last place)
-      return L && { x: at.x * 100, y: (at.y - 0.07 * e.scale) * 100, col: L[2], r: L[3] * Math.max(0.6, e.scale), flick: L[4] };
-    })
-    .filter(Boolean);
-  const sig = (scene.dark || 0) + '|' + lights.map((l) => `${l.x.toFixed(1)},${l.y.toFixed(1)},${l.col},${l.r}`).join(';');
-  if (root._light !== sig) {
-    root._light = sig;
-    const dark = [0, 0.45, 0.72, 0.93][scene.dark || 0];
-    darkEl.style.background = dark ? `rgba(4, 4, 12, ${dark})` : '';
-    const holes = lights
-      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r}) at ${l.x}% ${l.y}%, transparent 0, transparent 30%, #000 100%)`)
-      .join(',');
-    darkEl.style.maskImage = darkEl.style.webkitMaskImage = dark && holes ? holes : '';
-    darkEl.style.maskComposite = 'intersect';
-    darkEl.style.webkitMaskComposite = 'source-in';
-    glowEl.style.background = lights
-      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r * 0.9}) at ${l.x}% ${l.y}%, ${l.col}66 0, ${l.col}22 45%, transparent 100%)`)
-      .join(',');
-    glowEl.className = 'glowov' + (lights.some((l) => l.flick) ? ' flicker' : '');
-  }
-
   // camera: zoom the world onto a point (shown as a frame instead while the Director edits)
   const cam = scene.cam && scene.cam.z > 1 ? scene.cam : null;
   let zoom = 1,
@@ -304,11 +280,12 @@ export function renderStage(root, scene, o = {}) {
       (at.held && (at.held.gone || at.held.fresh) ? ' gone' : '') +
       (o.showKinds && e.solid ? ' solid' : '') +
       (e.active ? ' active' : '') +
+      (thingName(e) ? ' named' : '') +
       (o.hot && o.hot.has(e.id) ? ' hot' : '') +
       (o.speaker === e.id ? ' speaking' : '') +
       (e.walk && !e.fx ? ' walk' : '') +
       (e.pop ? ' popin' : '');
-    el.dataset.name = e.active ? e.active.name : '';
+    el.dataset.name = thingName(e); // shown when the pointer is over it — only once the Director has named it
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '') + (o.playing && e.once ? ' once-' + e.once : '');
     fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${faces(e) !== !!(at.held && faces(at.held)) ? -1 : 1})`;
     if (emote.textContent !== (e.emote || '')) emote.textContent = e.emote || '';
@@ -325,6 +302,32 @@ export function renderStage(root, scene, o = {}) {
     el.style.fontSize = `calc(var(--u) * ${e.scale * SPRITE})`;
     el.style.zIndex = at.z;
   }
+  /* light and dark: the dark lies over the room, every light source cuts a soft hole in it and adds its colour */
+  const lights = scene.entities
+    .filter((e) => e.glow && !e.gone)
+    .map((e) => {
+      const L = LIGHTS.find((l) => l[0] === e.glow),
+        at = spot(e); // where it is drawn: a light that is carried goes along
+      return L && { x: at.x * 100, y: (at.y - 0.07 * e.scale) * 100, col: L[2], r: L[3] * Math.max(0.6, e.scale), flick: L[4] };
+    })
+    .filter(Boolean);
+  const sig = (scene.dark || 0) + '|' + lights.map((l) => `${l.x.toFixed(1)},${l.y.toFixed(1)},${l.col},${l.r}`).join(';');
+  if (root._light !== sig) {
+    root._light = sig;
+    const dark = [0, 0.45, 0.72, 0.93][scene.dark || 0];
+    darkEl.style.background = dark ? `rgba(4, 4, 12, ${dark})` : '';
+    const holes = lights
+      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r}) at ${l.x}% ${l.y}%, transparent 0, transparent 30%, #000 100%)`)
+      .join(',');
+    darkEl.style.maskImage = darkEl.style.webkitMaskImage = dark && holes ? holes : '';
+    darkEl.style.maskComposite = 'intersect';
+    darkEl.style.webkitMaskComposite = 'source-in';
+    glowEl.style.background = lights
+      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r * 0.9}) at ${l.x}% ${l.y}%, ${l.col}66 0, ${l.col}22 45%, transparent 100%)`)
+      .join(',');
+    glowEl.className = 'glowov' + (lights.some((l) => l.flick) ? ' flicker' : '');
+  }
+
   for (const [id, el] of root._els)
     if (!live.has(id)) {
       el.remove();

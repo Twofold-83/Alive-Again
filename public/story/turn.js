@@ -40,8 +40,13 @@ export function onState(s) {
     app.rec = false;
     app.drawOn = false;
     app.walkMode = false;
-    app.pointMode = false;
+    app.verb = '';
+    app.actionsOpen = false;
     stopWalkAnim();
+    for (const id of ['verbs', 'reaction', 'picture', 'check']) {
+      const box = document.getElementById(id);
+      if (box) box.remove(); // menus and notes of the turn that is over
+    }
     resetGuided();
     initDraft();
     history.reset();

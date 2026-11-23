@@ -36,7 +36,7 @@ const HEALS = /potion|bandage|medicine|food|bread|apple|laudanum|pill|herb|elixi
 export const livingFoes = (scene) => scene.entities.filter((e) => e.hp != null && e.hp > 0 && e.id !== scene.heroId && !e.temp);
 export const weaponOf = (scene) => scene.entities.find((e) => e.tie && e.tie.to === scene.heroId);
 export const itemHeals = (it) => HEALS.test(it.name || '') || HEALS.test(it.asset || '');
-const nameOf = (e, label) => (e.active && e.active.name) || label(e);
+const nameOf = (e, label) => e.name || (e.active && e.active.name) || label(e);
 
 /** The hero's health lives in a "Health" stat if the story has one, else on the hero. */
 export function heroHealth(scene) {

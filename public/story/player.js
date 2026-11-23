@@ -2,11 +2,11 @@
  * (The Director's side of the same footer is just the button that ends the turn.) */
 import { isDoll, poseEditor } from '../core/dolls.js';
 import { openDollMaker } from '../build/dollmaker.js';
-import { assetLabel, assetUrl } from '../core/catalog.js';
+import { assetUrl } from '../core/catalog.js';
 import { h, add } from '../core/dom.js';
 import { openCheck } from './dice.js';
 import { battleBox } from './battle-ui.js';
-import { glyphNode } from '../stage/render.js';
+import { glyphNode, thingName } from '../stage/render.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
 import { myTurn, other, hero, mods, app } from '../core/state.js';
@@ -51,6 +51,9 @@ function check(ask) {
     rebuild();
   });
 }
+
+/** What the hero can do to the things of an adventure. */
+const VERBS = ['Walk', 'Look at', 'Push', 'Pull', 'Open', 'Use', 'Pick up', 'Give', 'Talk to', 'Attack'];
 
 export function buildFoot() {
   const f = $('#foot');
@@ -114,7 +117,7 @@ export function buildFoot() {
               class: 'grow' + (app.walkMode ? ' recording' : ''),
               onclick: () => {
                 app.walkMode = !app.walkMode;
-                app.pointMode = false;
+                app.verb = '';
                 render();
               },
             },
@@ -125,7 +128,7 @@ export function buildFoot() {
     const pointed = () => {
       const pt = app.draft.point,
         e = pt && pt.id && app.draft.entities.find((x) => x.id === pt.id);
-      return e ? (e.active ? e.active.name : assetLabel(e.asset)) : 'that spot';
+      return e ? thingName(e) || 'this' : 'here';
     };
     /* a paper-doll hero: strike a pose by dragging the limbs, or decide how the hero looks */
     const dollRow = () =>
@@ -193,42 +196,64 @@ export function buildFoot() {
           },
         },
       );
+    /* point and click: pick an action, then click what it is about — a thing ("Open old chest") or a spot ("Push here") */
     const pointRow = () =>
       app.S.rules.type === 'adventure' &&
+      mode !== 'tell' &&
       h(
         'div',
-        { class: 'row', id: 'pointRow' },
+        { id: 'actionBar' },
         h(
-          'button',
-          {
-            id: 'pointBtn',
-            class: 'grow' + (app.pointMode ? ' recording' : app.draft.point ? ' on' : ''),
-            title: 'Tie what you wrote to something on the stage',
-            onclick: () => {
-              app.pointMode = !app.pointMode;
-              app.walkMode = false;
-              render();
-            },
-          },
-          app.pointMode
-            ? 'Click a thing or a spot on the stage…'
-            : app.draft.point
-              ? `→ ${pointed()} — click to point at something else`
-              : '→ Point at something on the stage',
-        ),
-        app.draft.point &&
+          'div',
+          { class: 'row' },
           h(
             'button',
             {
-              id: 'pointClear',
-              title: 'Point at nothing',
+              id: 'actionsBtn',
+              class: 'grow' + (app.actionsOpen || app.verb ? ' on' : ''),
               onclick: () => {
-                app.draft.point = null;
-                if (app.draft.action === 'Look at') app.draft.action = '';
+                app.actionsOpen = !app.actionsOpen;
+                app.verb = '';
                 rebuild();
               },
             },
-            '✕',
+            app.verb ? `${app.verb} — now click on the stage…` : app.draft.point ? `${app.draft.action || 'Look at'} ${pointed()}` : 'Actions',
+          ),
+          app.draft.point &&
+            h(
+              'button',
+              {
+                id: 'pointClear',
+                title: 'Do not do this after all',
+                onclick: () => {
+                  app.draft.point = null;
+                  app.draft.action = '';
+                  rebuild();
+                },
+              },
+              '✕',
+            ),
+        ),
+        (app.actionsOpen || app.verb) &&
+          h(
+            'div',
+            { class: 'verbgrid' },
+            VERBS.map((v) =>
+              h(
+                'button',
+                {
+                  'data-verb': v,
+                  class: app.verb === v ? 'on' : '',
+                  disabled: v === 'Walk' && app.draft.walked,
+                  onclick: () => {
+                    app.verb = app.verb === v ? '' : v;
+                    app.walkMode = false;
+                    rebuild();
+                  },
+                },
+                v,
+              ),
+            ),
           ),
       );
     const say = () =>

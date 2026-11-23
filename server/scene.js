@@ -142,6 +142,7 @@ export function cleanScene(s, prev, inner) {
       view: e.view === 'side' ? 'side' : '', // seen from the other side
       used: !!e.used || e.view === 'used', // after someone used it
       near: !!e.near,
+      name: str(e.name, 40),
       glow: LIGHTS.some((l) => l[0] === e.glow) ? e.glow : '',
     });
   }

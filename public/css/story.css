@@ -136,3 +136,6 @@ button.foe.on { outline: 2px solid var(--accent); }
 .battlebox .battlepick button { text-align: left; }
 .levelgrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
 .levelgrid button { min-height: 36px; }
+.verbgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 4px; }
+.verbgrid button { min-height: 32px; padding: 2px 4px; }
+body.phone .verbgrid { grid-template-columns: repeat(3, 1fr); }

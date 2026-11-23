@@ -88,17 +88,20 @@ const { setup } = require('./lib');
 
     /* ---- active object: name on hover, verbs on click ---- */
     assert.equal(await p.getAttribute(ent('chest'), 'data-name'), 'Old chest');
-    // a written action can point at a thing or a spot on the stage
-    await p.click('#pointBtn');
+    // point and click: pick an action, then what it is about — a thing, or a spot ("here")
+    await p.click('#actionsBtn');
+    assert.equal(await p.locator('.verbgrid button').count(), 10);
+    await p.click('[data-verb="Look at"]');
     await p.click(ent('chest'));
-    assert.match(await act(), /Look at → Old chest/);
+    assert.match(await act(), /Look at Old chest/);
     {
       const b = await p.locator('#stage').boundingBox();
-      await p.click('#pointBtn');
+      await p.click('#actionsBtn');
+      await p.click('[data-verb="Push"]');
       await p.mouse.click(b.x + b.width * 0.12, b.y + b.height * 0.25);
     }
     await p.waitForSelector('#stage .pointmark');
-    assert.match(await act(), /Look at → that spot/);
+    assert.match(await act(), /Push here/);
     await p.click('#pointClear');
     assert.equal(await p.locator('#stage .pointmark').count(), 0);
     assert.equal(await p.locator('#pointClear').count(), 0);
@@ -229,8 +232,8 @@ const { setup } = require('./lib');
     await p.waitForTimeout(3500);
     [hx, hy] = await x.heroPos();
     assert(Math.abs(hx - 0.4) < 0.03 && Math.abs(hy - 0.7) < 0.03, `the hero walked to the chosen place (${hx}, ${hy})`);
-    await p.fill('#foot input[placeholder^="Free"]', 'Kick');
-    await p.click('#pointBtn');
+    await p.click('#actionsBtn');
+    await p.click('[data-verb="Attack"]');
     {
       const b = await p.locator(ent('chest')).boundingBox();
       await p.mouse.click(b.x + b.width / 2, b.y + b.height - 4);
@@ -240,8 +243,8 @@ const { setup } = require('./lib');
     assert.deepEqual(sc.answer, { kind: 'place', label: 'Place 2' });
     assert.match(await p.textContent('.card.told'), /goes to Place 2/);
     assert(sc.point && sc.point.id, 'the action points at the chest');
-    assert.equal(sc.action, 'Kick');
-    assert.match(await p.textContent('.card.told'), /Kick → Old chest/);
+    assert.equal(sc.action, 'Attack');
+    assert.match(await p.textContent('.card.told'), /Attack Old chest/);
     /* ---- ask: pick a target; then give up an item ---- */
     await x.opt('Ask Player');
     await x.opt('Pick a target');

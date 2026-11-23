@@ -82,7 +82,11 @@ const { setup } = require('./lib');
     s = await x.state();
     assert.equal(s.scene.battle, null, 'the battle is over');
     assert.match(s.scene.card, /Got away!|Defeated…|Victory!/);
-    assert.equal(s.scene.entities.find((e) => e.asset === 'p:ghoul') ? s.scene.entities.find((e) => e.asset === 'p:ghoul').hp : null, null, 'the health bars are gone');
+    assert.equal(
+      s.scene.entities.find((e) => e.asset === 'p:ghoul') ? s.scene.entities.find((e) => e.asset === 'p:ghoul').hp : null,
+      null,
+      'the health bars are gone',
+    );
     assert.deepEqual(t.errors, []);
     console.log('E2E-BATTLE OK');
   } finally {
