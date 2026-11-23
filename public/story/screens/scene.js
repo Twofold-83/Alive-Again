@@ -6,6 +6,7 @@ import { newEntity, freeSpot } from '../../shared/scene-model.js';
 import { G, short } from '../guided.js';
 import { BACKDROPS, backdropCss } from '../../core/catalog.js';
 import { glyphNode } from '../../stage/render.js';
+import { roomPicker, envOfTheme } from './pickers.js';
 import { ROOM_THEMES, ROOM_SHAPES, buildRoom, themeOf, roomArea } from '../../shared/rooms.js';
 import { walkable, normScene } from '../../shared/scene-model.js';
 import { clone, rid, toast } from '../../core/dom.js';
@@ -385,17 +386,15 @@ export function screenRoom(kit) {
       'div',
       { class: 'card roomcard' },
       h('h3', {}, 'Room in one click'),
-      h(
-        'div',
-        { class: 'roomgrid' },
-        ROOM_THEMES.map((t) =>
-          h(
-            'button',
-            { 'data-room': t.id, title: t.name, class: d.level && G.roomTheme === t.id ? 'on' : '', onclick: () => lay(t.id, G.roomShape) },
-            glyphNode(kit.code, 'p:' + t.wall),
-          ),
-        ),
-      ),
+      roomPicker({
+        env: G.roomEnv || envOfTheme(G.roomTheme),
+        theme: d.level ? G.roomTheme : '',
+        onEnv: (id) => {
+          G.roomEnv = id;
+          c.rebuild();
+        },
+        onPick: (id) => lay(id, G.roomShape),
+      }),
       h(
         'div',
         { class: 'chips wrap' },

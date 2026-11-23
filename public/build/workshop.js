@@ -19,6 +19,7 @@ import { setCell } from '../stage/level.js';
 import { LEVEL_W, LEVEL_H, MAX_ENTITIES, cellAt, walkable, normScene, newScene, newEntity, freeSpot } from '../shared/scene-model.js';
 import { History } from '../core/history.js';
 import { SCENARIOS } from './scenarios.js';
+import { roomPicker, envOfTheme } from '../story/screens/pickers.js';
 import { ROOM_THEMES, ROOM_SHAPES, buildRoom, themeOf, roomScene, roomArea } from '../shared/rooms.js';
 import { resetGuided, guidedPick, guidedMark, buildGuided } from '../story/guided.js';
 
@@ -954,18 +955,15 @@ function drawTools() {
         'div',
         { class: 'card roomcard' },
         h('h3', {}, 'Room in one click'),
-        h(
-          'div',
-          { class: 'roomgrid' },
-          ROOM_THEMES.map((t) =>
-            h(
-              'button',
-              { 'data-room': t.id, class: W.theme === t.id ? 'on' : '', title: `Build: ${t.name}`, onclick: () => makeRoom(t.id, W.shape) },
-              h('span', {}, glyphNode(W.c.code, 'p:' + t.wall), glyphNode(W.c.code, 'p:' + t.floor)),
-              h('small', {}, t.name),
-            ),
-          ),
-        ),
+        roomPicker({
+          env: W.env || envOfTheme(W.theme),
+          theme: W.theme,
+          onEnv: (id) => {
+            W.env = id;
+            drawTools();
+          },
+          onPick: (id) => makeRoom(id, W.shape),
+        }),
         h(
           'div',
           { class: 'chips wrap' },

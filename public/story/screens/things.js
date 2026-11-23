@@ -3,6 +3,7 @@ import { isDoll, poseEditor } from '../../core/dolls.js';
 import { PIXEL, pixelInfo, CUSTOM, catsWithOwn, OWN } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES, LIGHTS } from '../../shared/options.js';
+import { ENVIRONMENTS, OBJECT_CATS, environmentItems } from '../../shared/environments.js';
 import { G, buildGuided, short } from '../guided.js';
 import { glyphNode } from '../../stage/render.js';
 import { openSpriteEditor, forgetOwn } from '../../build/spriteed.js';
@@ -11,6 +12,8 @@ import { dollDataUrl } from '../../core/dolls.js';
 
 /** Categories of the pixel-art library for one "Add something" branch. */
 function groupCats(g) {
+  /* things that belong to a setting are found under Environment; Objects holds what fits no setting, and my own */
+  if (g === 'thing') return catsWithOwn(g).filter((c) => OBJECT_CATS.includes(c.id.replace(/^px-/, '')) || ['px-campaign', 'px-own'].includes(c.id));
   return catsWithOwn(g);
 }
 
@@ -342,13 +345,14 @@ export function screenAdd(kit) {
     h(
       'div',
       { class: 'gopts' },
-      opt('hero', 'A character', 'Heroes, townsfolk, monsters, animals', () => {
-        G.cat = '';
-        enter('add:char');
-      }),
-      opt('crate', 'A thing', 'Items, furniture, nature, buildings…', () => {
+      opt('door-oak', 'Environment', 'Everything by setting: hospital, school, street, horror…', () => enter('add:env')),
+      opt('key-brass-ornate', 'Objects', 'Clues, small finds, your own and campaign sprites', () => {
         G.cat = '';
         enter('add:thing');
+      }),
+      opt('hero', 'Beings', 'People, creatures, apparitions', () => {
+        G.cat = '';
+        enter('add:char');
       }),
       opt('tile-brick', 'A level piece', 'Blocks and props to place freely', () => {
         G.cat = '';
@@ -401,6 +405,40 @@ export function screenAddChar(kit) {
   return;
 }
 
+/** Everything of one setting: its things, and the beings one meets there. */
+export function screenAddEnv(kit) {
+  const { p, c, head, place, itemGrid } = kit;
+  const env = ENVIRONMENTS.find((e) => e.id === G.env) || ENVIRONMENTS[0],
+    cats = catsWithOwn(),
+    things = environmentItems(env, cats, 'things'),
+    beings = environmentItems(env, cats, 'beings');
+  head('Environment', 'Pick a setting, then put its things on the stage.');
+  add(
+    p,
+    h(
+      'div',
+      { class: 'chips wrap envchips' },
+      ENVIRONMENTS.map((e) =>
+        h(
+          'button',
+          {
+            'data-env': e.id,
+            class: e === env ? 'on' : '',
+            onclick: () => {
+              G.env = e.id;
+              c.rebuild();
+            },
+          },
+          e.name,
+        ),
+      ),
+    ),
+    h('b', { class: 'actlab' }, `${env.name}: ${things.length} things`),
+    itemGrid(things, (i) => place(i.asset)),
+    beings.length > 0 && h('b', { class: 'actlab' }, 'Beings you meet here'),
+    beings.length > 0 && itemGrid(beings, (i) => place(i.asset)),
+  );
+}
 export function screenAddSearch(kit) {
   const { p, head, place, searchGrid } = kit;
   head('Search');

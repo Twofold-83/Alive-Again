@@ -19,7 +19,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
     /* build on the stage itself: a room in one press, saved for other stories */
     await x.opt('Build this room');
-    await p.click('[data-room=crypt]');
+    await p.click('[data-env=horror]'); // rooms are listed by setting
+    await p.click('[data-room=horror]');
     assert.equal(await p.locator('#stage .level i').count(), 192, 'walls and floor are laid on the live stage');
     await p.fill('#roomName', 'My crypt');
     await p.click('#roomSave');

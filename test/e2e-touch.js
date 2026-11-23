@@ -22,6 +22,15 @@ const { setup } = require('./lib');
     await p.click('.gdone');
     const chestId = await p.evaluate(() => window.__lastAdded);
     await x.done();
+    /* everything of a setting in one place: its things and the beings one meets there */
+    await x.opt('Add something');
+    await x.opt('Environment');
+    await p.click('[data-env=hospital]');
+    assert((await p.locator('#panel .grid button').count()) > 40, 'the hospital has its things');
+    await p.click('[data-env=horror]');
+    assert.match(await p.textContent('#panel'), /Beings you meet here/);
+    await p.click('.gback');
+    await p.click('.gback');
     /* mood: the room goes dark, a fire shines in it */
     await x.opt('Mood');
     await x.opt('Light and dark');
