@@ -51,7 +51,7 @@ module.exports = (X) => {
         blade(c, 13, text);
         if (u) {
           c.rect(13, 5, 14, 27, D(SIGNG));
-          c.col(13, 5, 27, C.bone);
+          c.col(13, 5, 27, hex('#6f8a72'));
           c.set(13, 6, C.steel);
         } else edge(c, 5);
       }

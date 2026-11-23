@@ -38,6 +38,7 @@ module.exports = (kit) => {
    *   sw, sh, s(c, used)        the other perspective; left out: the thing is round, f is used again
    *   base: 'side'              the main picture is the long side, s is the front
    *   u, su: [left, top, right] extra room the used pictures need
+   *   us, sus: [w, h]           or a canvas of another size altogether for the used pictures (a thing fallen over)
    *   solid, o                  o: options for every picture (shade: false ...)
    * }
    */
@@ -59,8 +60,8 @@ module.exports = (kit) => {
       views: {
         ...(s.base ? { base: 'side' } : {}),
         side: mk(side, sw, sh, null, false, o),
-        used: mk(s.f, s.w, s.h, s.u, true, o),
-        sideUsed: mk(side, sw, sh, s.su || (s.s ? null : s.u), true, o),
+        used: s.us ? mk(s.f, s.us[0], s.us[1], null, true, o) : mk(s.f, s.w, s.h, s.u, true, o),
+        sideUsed: s.sus || (!s.s && s.us) ? mk(side, (s.sus || s.us)[0], (s.sus || s.us)[1], null, true, o) : mk(side, sw, sh, s.su || (s.s ? null : s.u), true, o),
       },
     };
   };

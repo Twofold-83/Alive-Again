@@ -212,15 +212,19 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
     const side = (c, u) => {
       const b = c.h - 2,
         n = u ? 3 : 5;
+      c.line(4, b - 6, 2, b, STEEL); // the legs of the lowest
+      c.line(8, b - 6, 10, b, STEEL);
       for (let i = 0; i < n; i++) {
-        const y = b - 3 * i,
-          x = Math.min(i, 3);
-        c.line(x + 1, y - 15, x + 2, y - 9, cols[i]);
-        c.rect(x + 2, y - 8, x + 8, y - 7, cols[i]);
-        c.row(y - 8, x + 2, x + 8, L(cols[i]));
-        c.line(x + 3, y - 6, x + 1, y, STEEL);
-        c.line(x + 7, y - 6, x + 9, y, STEEL);
+        const y = b - 7 - 3 * i;
+        c.rect(3, y - 1, 9, y, cols[i]);
+        c.row(y - 1, 3, 9, L(cols[i]));
+        c.set(10, y + 1, STD);
+        c.set(2, y - 2, D(cols[i])); // the backs, nested
+        c.set(2, y - 3, cols[i]);
       }
+      const t = b - 7 - 3 * (n - 1);
+      c.line(2, t - 8, 3, t - 2, cols[n - 1]);
+      c.line(3, t - 8, 4, t - 2, D(cols[n - 1]));
       if (u) pchairS(c, 13, b, cols[3]);
     };
     add('school-chairs-plastic-stack', 'stack of plastic school chairs orange stacked hall', true, { m: [12, 32, front], mu: [24, 32], s: [14, 32, side], su: [25, 32] });
@@ -973,8 +977,9 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
             c.set(x + 2, y - 1, D(col));
           }
       }
-      for (let x = 1; x <= x1; x += 3) c.col(x, b - 16, b - 3, STEEL); // the wire
+      for (let x = 1; x <= x1; x += 4) c.col(x, b - 16, b - 3, STD); // the wire
       c.col(x1, b - 16, b - 3, STEEL);
+      c.col(1, b - 16, b - 3, STEEL);
       c.row(b - 16, 1, x1, STL);
       c.row(b - 10, 1, x1, STD);
       c.row(b - 3, 1, x1, STD);
