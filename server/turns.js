@@ -2,7 +2,7 @@
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
 import { timers, online, broadcast, touch, rooms } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
-import { resolveBattle, livingFoes } from '../public/shared/battle.js';
+import { resolveBattle, livingFoes, stopReason } from '../public/shared/battle.js';
 import { cutEstimate, rollDie, cleanScene, cleanTrackPts, cleanPose, cleanFeel } from './scene.js';
 import { cleanRules } from '../public/shared/rules.js';
 import { walkable, stepFields, playerFields } from '../public/shared/scene-model.js';
@@ -237,20 +237,76 @@ function submitPlayer(room, body) {
     sc.card = 'Something happened!';
     sc.sfx = 'alarm';
   }
-  if (battleMove) {
-    const lines = resolveBattle(sc, battleMove, room.names, (e) => assetName(e.asset));
-    sc.answer = { ...answer, lines: lines.slice(0, 8) };
-    const b = sc.battle;
-    if (b.over === 'won' || b.over === 'fled') {
-      for (const e of sc.entities) if (e.id !== sc.heroId && !e.temp) e.hp = e.maxHp = null;
-      sc.card = b.over === 'won' ? 'Victory!' : 'Got away!';
-      sc.sfx = b.over === 'won' ? 'fanfare' : 'teleport';
-      sc.battle = null;
-    } else if (b.over === 'lost') {
-      sc.card = 'Defeated…';
-      sc.sfx = 'fail'; // the Director decides what that means
-    } else sc.ask = { kind: 'battle', text: `Round ${b.round} — what do you do?`, sides: 6, dc: 0, verb: '', places: [], targets: [] };
+  if (battleMove) settleBattle(room, sc, battleMove, answer);
+}
+/** One round of a battle with rules: the hero's command, the enemies' answer, and what follows if it is over. */
+function settleBattle(room, sc, move, answer) {
+  const label = (e) => assetName(e.asset);
+  const lines = resolveBattle(sc, move, room.names, label);
+  sc.answer = { ...answer, lines: lines.slice(0, 8) };
+  const b = sc.battle;
+  if (b.over === 'won' || b.over === 'fled') {
+    for (const e of sc.entities) if (e.id !== sc.heroId && !e.temp) e.hp = e.maxHp = null;
+    sc.card = b.over === 'won' ? 'Victory!' : 'Got away!';
+    sc.sfx = b.over === 'won' ? 'fanfare' : 'teleport';
+    sc.battle = null;
+    return 'over';
   }
+  if (b.over === 'lost') {
+    sc.card = 'Defeated…';
+    sc.sfx = 'fail'; // the Director decides what that means
+    return 'over';
+  }
+  sc.ask = { kind: 'battle', text: `Round ${b.round} — what do you do?`, sides: 6, dc: 0, verb: '', places: [], targets: [] };
+  b.paused = stopReason(sc, move.move, room.names, label);
+  return b.paused ? 'stop' : '';
+}
+/**
+ * A live battle: the Player's command is settled the moment it is given and both sides watch the round; the turn
+ * stays with the Player until the battle ends or something the Director asked to be told about happens.
+ */
+export function actBattle(room, body, who) {
+  const sc = room.scene,
+    b = sc.battle;
+  if (room.ended || body.turn !== room.turn || who.role !== room.whose || room.whose !== 'player') return { ok: true, stale: true };
+  if (!b || !b.live || b.over) throw fail(400, 'There is no live battle');
+  if (!b.cmds.includes(body.move)) throw fail(400, 'That is not possible in this battle');
+  room.liveBefore = clone(sc); // the round is shown from here
+  room.liveN = (room.liveN || 0) + 1;
+  Object.assign(sc, stepFields(), playerFields(), { steps: [] });
+  sc.entities = sc.entities.filter((e) => !e.temp);
+  for (const e of sc.entities) {
+    e.once = '';
+    e.say = '';
+  }
+  const hero = sc.entities.find((e) => e.id === sc.heroId),
+    foe = livingFoes(sc).find((e) => e.id === body.id);
+  if (hero && body.move === 'speak') hero.say = str(body.say, 160);
+  if (foe && (body.move === 'attack' || body.move === 'speak')) sc.target = foe.id;
+  const end = settleBattle(
+    room,
+    sc,
+    { move: body.move, id: foe ? foe.id : null, item: typeof body.item === 'string' ? body.item : '' },
+    { kind: 'battle', move: body.move },
+  );
+  if (end)
+    advance(room, false); // over, or the Director wanted to step in here
+  else {
+    touch(room);
+    broadcast(room);
+  }
+  return { ok: true };
+}
+/** The Director steps into a live battle: the turn comes over at once. */
+export function actBattlePause(room, body, who) {
+  const sc = room.scene;
+  if (who.role !== 'director' && !room.hotseat) throw fail(403, 'Only the Director can do that');
+  if (room.ended || room.whose !== 'player' || !sc.battle || !sc.battle.live) return { ok: true, stale: true };
+  Object.assign(sc, stepFields(), playerFields(), { steps: [] }); // the last round was already seen
+  sc.battle.paused = 'The Director steps in';
+  room.liveBefore = null;
+  advance(room, false);
+  return { ok: true };
 }
 /** A plain name for a library thing, for the battle's lines: 'p:ritual-dagger' -> 'ritual dagger'. */
 function assetName(asset) {
@@ -269,6 +325,7 @@ export function actRoll(room, body, who) {
 }
 export async function actSubmit(room, body, who) {
   if (room.ended || body.turn !== room.turn || who.role !== room.whose) return { ok: true, stale: true };
+  room.liveBefore = null; // a live battle's last round was shown; from here on turns are told as usual
   if (who.role === 'director') submitDirector(room, body);
   else submitPlayer(room, body);
   advance(room, false);

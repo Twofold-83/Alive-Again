@@ -117,7 +117,8 @@ function view(room, role) {
     paused: timed && room.deadline == null,
     scene: room.scene,
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name, part: a.part || undefined, views: a.views, base: a.base })),
-    before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
+    before: room.liveBefore || (room.history.length > 1 ? room.history[room.history.length - 2].scene : null),
+    liveN: room.liveN || 0, // counts the rounds of a live battle: each one is shown to both sides as it happens
     rules: room.rules,
     info: room.info || { title: '', text: '' },
     hotseat: !!room.hotseat,

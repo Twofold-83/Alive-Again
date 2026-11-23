@@ -305,8 +305,8 @@ module.exports = (X) => {
       sw: 48,
       s(c, u) {
         const g = carSide(c, { col: BURNT, noGlass: true, noTyres: true, dead: true, trim: C.ironDark });
-        c.speckle(2, g.ry, 45, g.by, C.rust, 5, 3);
-        c.speckle(2, g.ry, 45, g.by, hex('#1e1a1c'), 6, 8);
+        c.speckle(2, g.ry, 45, g.by, C.rust, 9, 3);
+        c.speckle(2, g.ry, 45, g.by, hex('#1e1a1c'), 8, 8);
         c.line(36, g.wy, 44, g.wy - 4, BURNT);
         c.line(36, g.wy - 1, 43, g.wy - 4, C.rust);
         dots(c, C.ash, [5, g.b, 15, g.b, 22, g.b, 30, g.b]);
@@ -322,8 +322,8 @@ module.exports = (X) => {
       },
       f(c, u) {
         const g = carFront(c, { col: BURNT, noGlass: true, noTyres: true, dead: true, trim: C.ironDark, noPlate: true });
-        c.speckle(2, g.ry, 23, g.by, C.rust, 5, 3);
-        c.speckle(2, g.ry, 23, g.by, hex('#1e1a1c'), 6, 8);
+        c.speckle(2, g.ry, 23, g.by, C.rust, 9, 3);
+        c.speckle(2, g.ry, 23, g.by, hex('#1e1a1c'), 8, 8);
         if (u) {
           flame(c, 9, g.wy - 1, 6);
           flame(c, 14, g.wy - 1, 4);
@@ -481,7 +481,7 @@ module.exports = (X) => {
           c.row(8, 6, 15, C.steel);
           c.set(15, 10, DARK);
         }
-        c.speckle(2, 3, 19, b - 7, C.rust, 30, 2);
+        c.speckle(2, 3, 19, b - 7, C.rust, 70, 2);
       },
       sw: 6,
       s(c, u) {

@@ -83,6 +83,28 @@ export function onState(s) {
       );
     }
   }
+  /* a live battle: the turn has not changed, but a round was fought — both sides watch it */
+  if (!newTurn && prev && (s.liveN || 0) > (prev.liveN || 0) && s.before) {
+    if (app.cut) app.cut.skip();
+    if (myTurn()) {
+      sessionStorage.removeItem('tf.draft'); // the command that was just carried out must not come back with the saved draft
+      initDraft();
+      history.reset();
+      noteChange();
+    }
+    app.liveBusy = false;
+    app.uiKey = '';
+    app.cut = playTurn(
+      stage,
+      s.before,
+      s.scene,
+      { ...stageOpts(), selId: null, pendingRoll: 0, dest: null, camFrame: false, by: 'player', sfx: audio.sfx, who: s.names.player, stinger: '' },
+      () => {
+        app.cut = null;
+        render();
+      },
+    );
+  }
   render();
 }
 

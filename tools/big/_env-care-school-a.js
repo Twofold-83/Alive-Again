@@ -1,7 +1,7 @@
 /* The school, first half: the classroom, the corridor, the hall and the gym. See env-care.js. */
 module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
-  const { D, L, dots, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds, books, turned } = T;
-  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, RUB, YEL, BLOOD, IN, PAPER, CORK, BOARD, CHALK, LOCK, PLASTIC } = T;
+  const { D, L, dots, panel, caster, wleg, screen, cabS, doorOpenF, doorOpenS, books } = T;
+  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, IN, PAPER, BOARD, CHALK, LOCK, PLASTIC } = T;
   const W = C.wood,
     WD = C.woodDark,
     WL = C.woodLight,
@@ -714,7 +714,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         for (let y = b - 25; y < b - 19; y++) if (y % 2) c.set(6, y, hex('#b8b47a'));
       }
     };
-    add('school-overhead-projector', 'overhead projector on trolley transparency lamp classroom', true, { m: [16, 31, front], s: [18, 34, side] });
+    add('school-overhead-projector', 'overhead projector on trolley transparency lamp classroom', true, { m: [16, 32, front], s: [14, 34, side], su: [18, 34] });
   }
   {
     const front = (c, u) => {

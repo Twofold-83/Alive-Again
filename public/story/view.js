@@ -255,6 +255,28 @@ function buildPanel() {
                 `${app.S.names.player} is making a move…`,
                 'When they finish you can change anything: the cast, the place, the music, what everybody says.',
               ];
+    const lb = app.S.scene.battle;
+    if (lb && lb.live && !lb.over && app.S.whose === 'player' && (app.S.you === 'director' || app.S.hotseat))
+      add(
+        p,
+        h(
+          'div',
+          { class: 'card', id: 'liveCard' },
+          h('h3', {}, `Live battle — round ${lb.round}`),
+          h(
+            'p',
+            { class: 'dim small' },
+            'The enemies fight on their own and you both watch every round. Step in whenever you want to stage something special.',
+          ),
+          lb.log.length > 0 &&
+            h(
+              'div',
+              { class: 'battlelog' },
+              lb.log.slice(-5).map((l) => h('p', {}, l)),
+            ),
+          h('button', { class: 'primary', id: 'liveStop', onclick: () => act('battlePause', {}, 2).catch((e) => toast(e.message)) }, 'Step in now'),
+        ),
+      );
     if (app.S.info.text && app.S.you !== 'director')
       add(
         p,

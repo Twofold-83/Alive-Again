@@ -1,7 +1,7 @@
 /* The hospital, first half: beds, what stands round them, trolleys and machines. See env-care.js. */
 module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
-  const { D, L, dots, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds } = T;
-  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, HG, MINT, LAM, VINYL, TEALV, RUB, YEL, SCR, TR, WAT, WATD, BLOOD, IN, BLANK, PORC, PORD, PAPER } = T;
+  const { D, L, dots, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, splat, folds } = T;
+  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, HG, LAM, VINYL, TEALV, RUB, SCR, TR, WAT, WATD, BLOOD, IN, BLANK, PORC, PORD, PAPER } = T;
   const ENAMEL = hex('#cfd0c2'),
     TICK = hex('#bdb49a'),
     STAIN = hex('#8a7a55'),
@@ -283,7 +283,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
   });
   add('hospital-overbed-table', 'hospital overbed table on wheels meal tray plate cover cup', true, {
     m: [
-      22, 22,
+      22, 23,
       (c, u) => {
         const b = c.h - 2;
         c.rect(1, b - 15, 20, b - 14, LAM);
@@ -312,7 +312,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       },
     ],
     s: [
-      13, 22,
+      13, 23,
       (c, u) => {
         const b = c.h - 2;
         c.rect(1, b - 15, 11, b - 14, LAM);
@@ -338,7 +338,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
     // a drip stand with a bag of saline
     const stand = (side) => (c, u) => {
       const b = c.h - 2,
-        m = side ? 4 : 7;
+        m = side ? 5 : 7;
       c.col(m, 3, b - 2, STEEL);
       c.row(b - 2, m - 3, m + 3, STD);
       caster(c, m - 4, b);
@@ -371,7 +371,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.set(m - 1, 27, C.glassLight);
       }
     };
-    add('hospital-drip-stand-saline', 'drip stand saline bag iv pole infusion on wheels clear', false, { m: [15, 38, stand(false)], s: [14, 38, stand(true)] });
+    add('hospital-drip-stand-saline', 'drip stand saline bag iv pole infusion on wheels clear', false, { m: [15, 38, stand(false)], s: [11, 38, stand(true)], su: [16, 38] });
   }
   {
     // a folding wheelchair, seen from the side and from the front
@@ -521,7 +521,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       if (w > 14) c.rect(11, b - 9, 15, b - 6, hex('#8f9a94'));
       if (w > 14) c.row(b - 9, 11, 15, STL);
     };
-    add('hospital-instrument-trolley', 'instrument trolley steel dressing trolley kidney dish scalpels swabs', true, { m: [20, 18, trolley(20)], s: [13, 18, trolley(13)] });
+    add('hospital-instrument-trolley', 'instrument trolley steel dressing trolley kidney dish scalpels swabs', true, { m: [20, 20, trolley(20)], s: [13, 20, trolley(13)] });
   }
   {
     const CANVAS = hex('#b3ad94');
@@ -708,7 +708,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(7, b - 21, 8, b - 19, hex('#55555f'));
       }
     };
-    add('hospital-defibrillator-cart', 'defibrillator crash cart red drawers paddles resuscitation shock', true, { m: [20, 28, front], s: [17, 28, side] });
+    add('hospital-defibrillator-cart', 'defibrillator crash cart red drawers paddles resuscitation shock', true, { m: [18, 28, front], mu: [20, 28], s: [13, 28, side], su: [17, 28] });
   }
   /** An oxygen cylinder standing on yb: black with a white shoulder. */
   function cylinder(c, x, yb, h, body = O2, top = SHEET) {
@@ -762,7 +762,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(11, b - 19, 11, b - 16, hex('#8fb39a'));
       }
     };
-    add('hospital-oxygen-bottle-trolley', 'oxygen bottle cylinder on trolley black white mask gauge gas', true, { m: [15, 30, front], s: [16, 30, side] });
+    add('hospital-oxygen-bottle-trolley', 'oxygen bottle cylinder on trolley black white mask gauge gas', true, { m: [12, 30, front], mu: [15, 30], s: [13, 30, side], su: [16, 30] });
   }
   {
     const BLUE = hex('#3a4a6a');
@@ -851,13 +851,13 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         dots(c, C.glassLight, [12, 6, 13, 7, 15, 12, 16, 13]);
       } else c.set(10, 12, STD);
     };
-    add('hospital-medicine-cabinet-glass', 'medicine cabinet glass doors white enamel bottles dispensary pharmacy', true, { m: [22, 38, front], mu: [27, 38], s: [11, 38, side], su: [20, 38] });
+    add('hospital-medicine-cabinet-glass', 'medicine cabinet glass doors white enamel bottles dispensary pharmacy', true, { m: [22, 38, front], mu: [27, 38], s: [12, 38, side], su: [20, 38] });
   }
   {
     const col = hex('#6f7f78');
     const front = (c, u) => {
       const b = c.h - 2,
-        ox = c.w - 17;
+        ox = u ? 4 : 0;
       c.rect(ox + 1, b - 20, ox + 15, b - 5, col);
       c.row(b - 20, ox + 1, ox + 15, L(col));
       c.col(ox + 1, b - 20, b - 5, L(col));
@@ -945,7 +945,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         puddle(c, 9, 13, b, WATD);
       }
     };
-    add('hospital-scrub-sink', 'scrub sink steel trough elbow taps surgeons wash tiled splashback', true, { m: [29, 24, front], s: [15, 24, side] });
+    add('hospital-scrub-sink', 'scrub sink steel trough elbow taps surgeons wash tiled splashback', true, { m: [28, 24, front], mu: [29, 24], s: [12, 24, side], su: [15, 24] });
   }
   {
     const front = (c, u) => {

@@ -1,7 +1,7 @@
 /* The school, second half: the canteen, the science room, the art room, the yard and the small things. See env-care.js. */
 module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
-  const { D, L, dots, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds, books, turned } = T;
-  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, RUB, YEL, BLOOD, IN, PAPER, CORK, BOARD, CHALK, LOCK, PLASTIC, WAT, WATD, PORC, PORD } = T;
+  const { D, L, dots, panel, caster, wleg, screen, puddle, cabS, doorOpenS } = T;
+  const { SHEET, FOLD, STEEL, STL, STD, BLK, IN, PAPER, CORK, WAT, PORC, PORD } = T;
   const W = C.wood,
     WD = C.woodDark,
     WL = C.woodLight,
@@ -66,7 +66,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
     c.col(ox + 4, 1, b, D(fr));
     if (!u) {
       c.col(ox + 3, 3, b, col);
-      c.set(ox + 5, 21, C.brass);
+      c.set(ox + 4, 21, C.brass);
     }
   }
   T.doorF = doorF;
@@ -185,7 +185,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         dots(c, WAT, [4, b - 21, 6, b - 21, 3, b - 19, 7, b - 19]);
       }
     };
-    add('school-drinking-fountain', 'drinking fountain porcelain pedestal playground corridor water', true, { m: [12, 26, front], s: [11, 26, side] });
+    add('school-drinking-fountain', 'drinking fountain porcelain pedestal playground corridor water', true, { m: [12, 27, front], s: [11, 27, side] });
   }
   {
     const bin = (c, u) => {
@@ -212,7 +212,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.rect(6, b - 11, 7, b - 11, PAPER);
       c.set(4, b - 13, FOLD);
     };
-    add('school-bin-wire', 'wire waste paper bin classroom rubbish screwed up paper', false, { m: [11, 15, bin], mu: [24, 9] });
+    add('school-bin-wire', 'wire waste paper bin classroom rubbish screwed up paper', false, { m: [11, 16, bin], mu: [24, 9] });
   }
   {
     const PINS = [SHEET, hex('#c9b98a'), hex('#b9a0a0'), SHEET, hex('#a9b9a0')];
@@ -301,7 +301,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.set(31, b - 21, hex('#5f8ac0')); // lit
         c.set(31, b - 22, hex('#8fb3d9'));
         dots(c, hex('#8fae5a'), [31, b - 29, 30, b - 30, 32, b - 31, 31, b - 32, 33, b - 25, 33, b - 24, 34, b - 23]); // boiling over
-        dots(c, hex('#a9b0b2'), [29, b - 31, 33, b - 33, 30, b - 34]);
+        dots(c, hex('#a9b0b2'), [29, b - 31, 33, b - 33, 30, b - 33]);
         c.col(34, b - 22, b - 17, hex('#8fae5a'));
       }
     };
@@ -430,7 +430,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.col(11, 7, u ? 9 : 20, hex('#7f9aa0'));
       if (u) dots(c, hex('#c2b85a'), [11, 12, 12, 11, 12, 14, 13, 10, 11, 16, 13, 13, 12, 8, 14, 7, 13, 5, 12, 18]);
     };
-    add('school-fume-cupboard', 'fume cupboard chemistry glass sash flue science room', true, { m: [22, 38, front], s: [16, 38, side] });
+    add('school-fume-cupboard', 'fume cupboard chemistry glass sash flue science room', true, { m: [22, 38, front], s: [13, 38, side], su: [16, 38] });
   }
 
   /* ---------- lessons ---------- */
@@ -647,7 +647,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.set(8, 9, SHEET);
       } else dots(c, SHEET, [8, 5, 8, 13]);
     };
-    add('school-pigeonholes', 'pigeonholes staff room post registers papers wooden cupboard', true, { m: [26, 30, front], s: [9, 30, side], su: [13, 30] });
+    add('school-pigeonholes', 'pigeonholes staff room post registers papers wooden cupboard', true, { m: [26, 30, front], s: [10, 30, side], su: [13, 30] });
   }
   {
     const side = (c, u) => {
@@ -780,7 +780,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(5, b - 15, 7, b - 14, hex('#8a6a4a'));
       }
     };
-    add('school-lost-property-box', 'lost property box tea chest scarf plimsoll teddy bear jumper', true, { m: [18, 18, front], mu: [24, 18], s: [13, 18, side], su: [16, 18] });
+    add('school-lost-property-box', 'lost property box tea chest scarf plimsoll teddy bear jumper', true, { m: [18, 19, front], mu: [24, 19], s: [13, 19, side], su: [16, 19] });
   }
   {
     const front = (c, u) => {
@@ -824,7 +824,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.line(2, b - 19, 6, b - 21, SHEET);
       }
     };
-    add('school-lectern', 'lectern assembly hall reading desk school crest microphone headmaster', true, { m: [14, 30, front], mu: [20, 30], s: [12, 30, side], su: [16, 30] });
+    add('school-lectern', 'lectern assembly hall reading desk school crest microphone headmaster', true, { m: [14, 31, front], mu: [20, 31], s: [12, 31, side], su: [16, 31] });
   }
   {
     const beige = hex('#b9b29a');
@@ -907,7 +907,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(6, b, 8, b, SHEET);
       } else c.set(5, b - 2, C.brass);
     };
-    add('school-satchel', 'school satchel leather bag brown buckles strap books', false, { m: [12, 14, front], mu: [18, 14], s: [7, 14, side], su: [10, 14] });
+    add('school-satchel', 'school satchel leather bag brown buckles strap books', false, { m: [12, 15, front], mu: [18, 15], s: [7, 15, side], su: [10, 15] });
   }
   {
     const TIN = hex('#6a3a3a');
@@ -970,7 +970,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(3, b - 5, 5, b - 5, SHEET); // name label
       }
     };
-    add('school-exercise-books-pile', 'pile of exercise books marking red ink homework', false, { m: [11, 9, pile(11)], mu: [15, 10], s: [9, 9, pile(9)], su: [13, 10] });
+    add('school-exercise-books-pile', 'pile of exercise books marking red ink homework', false, { m: [11, 9, pile(11)], mu: [16, 10], s: [9, 9, pile(9)], su: [14, 10] });
   }
   {
     const col = hex('#b3ad94');
@@ -1039,10 +1039,10 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       if (u) {
         c.rect(x1 + 2, b - 1, x1 + 5, b, C.glassLight); // one knocked over
         c.set(x1 + 6, b, STL);
-        c.rect(x1 + 4, b, x1 + 9, b, hex('#d8d4c4'));
+        c.rect(x1 + 4, b, x1 + 8, b, hex('#d8d4c4'));
         c.line(6, b - 9, 7, b - 12, hex('#a85a5a')); // a straw
       }
     };
-    add('school-milk-crate', 'school milk crate third pint bottles break time straws', false, { m: [15, 13, crate(15)], mu: [23, 13], s: [11, 13, crate(11)], su: [19, 13] });
+    add('school-milk-crate', 'school milk crate third pint bottles break time straws', false, { m: [15, 13, crate(15)], mu: [23, 15], s: [11, 13, crate(11)], su: [19, 15] });
   }
 };

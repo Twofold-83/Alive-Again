@@ -282,12 +282,11 @@ module.exports = (T, obj) => {
         for (let y = 2; y <= 22; y++) {
           const t = (y - 12) / 10.5,
             x = Math.round(10 - 7 * (1 - t * t));
-          c.rect(x, y, x + 1, y, DISH);
+          c.rect(x, y, 10, y, DISH);
+          c.rect(x + 2, y, 10, y, mix(DISH, 0.8));
           c.set(x, y, L(DISH));
         }
-        c.line(11, 3, 17, 11, X.GREY);
         c.line(11, 21, 17, 12, X.GREY);
-        c.line(5, 12, 17, 12, X.GREY);
         c.rect(17, 11, 18, 12, X.BLK);
       },
     });

@@ -1,6 +1,6 @@
 /* Director screens about the Player: what to ask of them, points, their sheet, giving items, battles. */
 import { assetUrl } from '../../core/catalog.js';
-import { BATTLE_CMDS, WEAPON } from '../../shared/battle.js';
+import { BATTLE_CMDS, WEAPON, BATTLE_LEVELS, estimateBattle, presetBattle } from '../../shared/battle.js';
 import { h, clamp, add } from '../../core/dom.js';
 import { glyphNode } from '../../stage/render.js';
 import { G } from '../guided.js';
@@ -328,7 +328,20 @@ export function screenBattle(kit) {
     head('Start a battle', 'Pick the enemies. The Player then chooses a move each turn, and you get tools for attacks, damage and checks.');
     G.foes ||= [];
     G.hp ||= 5;
-    G.bt ||= { auto: true, atk: 2, foeAtk: 1, heroHp: 8, flee: 50, cmds: BATTLE_CMDS.map((x) => x[0]) };
+    G.bt ||= {
+      auto: true,
+      live: true,
+      atk: 2,
+      foeAtk: 1,
+      hit: 85,
+      foeHit: 80,
+      heroHp: 8,
+      flee: 50,
+      level: '',
+      ai: { attack: 70, heavy: 15, defend: 10, wait: 5 },
+      stop: { speak: true, foe: 0, hero: 25, rounds: 0 },
+      cmds: BATTLE_CMDS.map((x) => x[0]),
+    };
     const bt = G.bt;
     const chips = (label, key, values, fmt = String) =>
       h(
@@ -355,6 +368,133 @@ export function screenBattle(kit) {
         ),
       );
     const cand = d.entities.filter((e) => e.id !== d.heroId && !e.tie);
+    /* what an enemy does each round, in percent */
+    const aiCard = () =>
+      h(
+        'div',
+        { id: 'btAi' },
+        h('small', { class: 'dim' }, 'What an enemy does each round (shares, in percent)'),
+        [
+          ['attack', 'Attack'],
+          ['heavy', 'Heavy blow (double damage, misses more)'],
+          ['defend', 'Guard (your next blow on it is halved)'],
+          ['wait', 'Hesitate'],
+        ].map(([k, label]) =>
+          h(
+            'label',
+            { class: 'row airow' },
+            h('span', { class: 'grow' }, label),
+            h('input', {
+              type: 'number',
+              min: 0,
+              max: 100,
+              step: 5,
+              'data-ai': k,
+              value: bt.ai[k],
+              onchange: (ev) => {
+                bt.ai[k] = clamp(Math.round(+ev.target.value || 0), 0, 100);
+                bt.level = '';
+                c.rebuild();
+              },
+            }),
+          ),
+        ),
+      );
+    /* when a live battle hands over to the Director */
+    const stopCard = () =>
+      h(
+        'div',
+        { id: 'btStop' },
+        h('small', { class: 'dim' }, 'Give me the turn when…'),
+        h(
+          'label',
+          { class: 'row' },
+          h('input', { type: 'checkbox', checked: bt.stop.speak, onchange: (ev) => (bt.stop.speak = ev.target.checked) }),
+          h('span', {}, `${S.names.player} speaks`),
+        ),
+        h(
+          'div',
+          { class: 'row' },
+          h('span', { class: 'grow' }, 'an enemy is down to'),
+          [0, 25, 50, 75].map((n) =>
+            h(
+              'button',
+              { 'data-stopfoe': n, class: bt.stop.foe === n ? 'on' : '', onclick: () => ((bt.stop.foe = n), c.rebuild()) },
+              n ? n + '%' : 'never',
+            ),
+          ),
+        ),
+        h(
+          'div',
+          { class: 'row' },
+          h('span', { class: 'grow' }, `${S.names.player} is down to`),
+          [0, 25, 50].map((n) =>
+            h(
+              'button',
+              { 'data-stophero': n, class: bt.stop.hero === n ? 'on' : '', onclick: () => ((bt.stop.hero = n), c.rebuild()) },
+              n ? n + '%' : 'never',
+            ),
+          ),
+        ),
+        h(
+          'div',
+          { class: 'row' },
+          h('span', { class: 'grow' }, 'every'),
+          [0, 1, 2, 3, 5].map((n) =>
+            h(
+              'button',
+              { 'data-stoprounds': n, class: bt.stop.rounds === n ? 'on' : '', onclick: () => ((bt.stop.rounds = n), c.rebuild()) },
+              n ? `${n} round${n > 1 ? 's' : ''}` : 'never',
+            ),
+          ),
+        ),
+      );
+    /* how hard: six ready-made settings worked out from the numbers above, and an estimate of the fight as it stands */
+    const setup_ = () => ({
+      heroHp: hpStat ? hpStat.value : bt.heroHp,
+      atk: bt.atk,
+      weapon: d.entities.some((e) => e.tie && e.tie.to === d.heroId),
+      hit: bt.hit,
+      foes: cand.filter((e) => G.foes.includes(e.id)).map(() => G.hp),
+      foeAtk: bt.foeAtk,
+      foeHit: bt.foeHit,
+      ai: bt.ai,
+    });
+    const levelCard = () => {
+      const o = setup_(),
+        est = o.foes.length ? estimateBattle(o) : null;
+      return h(
+        'div',
+        { id: 'btLevel' },
+        h('small', { class: 'dim' }, 'How hard? (sets the enemies’ strength and aim for the fighters you chose)'),
+        h(
+          'div',
+          { class: 'chips wrap' },
+          BATTLE_LEVELS.map(([id, label]) =>
+            h(
+              'button',
+              {
+                'data-level': id,
+                class: bt.level === id ? 'on' : '',
+                disabled: !o.foes.length,
+                onclick: () => {
+                  Object.assign(bt, presetBattle(id, setup_()), { level: id });
+                  c.rebuild();
+                },
+              },
+              label,
+            ),
+          ),
+        ),
+        h(
+          'p',
+          { class: 'estimate', id: 'btEstimate' },
+          est
+            ? `Estimate: ${est.label.toUpperCase()} — about ${est.rounds} rounds; ${S.names.player} (${o.heroHp} health${o.weapon ? ', armed' : ''}) can expect to lose about ${est.damage} health against ${o.foes.length} ${o.foes.length > 1 ? 'enemies' : 'enemy'} with ${G.hp} health each.`
+            : 'Pick the enemies to see an estimate.',
+        ),
+      );
+    };
     add(
       p,
       h('small', { class: 'dim' }, 'Enemies'),
@@ -406,8 +546,21 @@ export function screenBattle(kit) {
           { class: 'row' },
           h(
             'button',
-            { id: 'btAuto', class: 'grow' + (bt.auto === true ? ' on' : ''), onclick: () => ((bt.auto = true), c.rebuild()) },
-            'They fight on their own',
+            {
+              id: 'btLive',
+              class: 'grow' + (bt.auto === true && bt.live ? ' on' : ''),
+              onclick: () => ((bt.auto = true), (bt.live = true), c.rebuild()),
+            },
+            'Live: you both watch',
+          ),
+          h(
+            'button',
+            {
+              id: 'btAuto',
+              class: 'grow' + (bt.auto === true && !bt.live ? ' on' : ''),
+              onclick: () => ((bt.auto = true), (bt.live = false), c.rebuild()),
+            },
+            'Turn by turn',
           ),
           h(
             'button',
@@ -425,16 +578,23 @@ export function screenBattle(kit) {
           { class: 'dim' },
           bt.auto === null
             ? 'No rules: the Player picks Attack, Defend or Flee, and you decide every blow yourself.'
-            : bt.auto
-              ? 'Each round is settled when the Player ends the turn: their command, then every enemy strikes back. On your turn you can still step in: hurt, heal, add enemies, end it.'
-              : 'The Player’s command is settled at once; then you make each enemy act with the tools here.',
+            : bt.auto && bt.live
+              ? 'The enemies fight on their own. Every command is carried out at once and you both watch each blow; the turn only comes to you when the battle ends, when one of the moments below is reached, or when you press “Step in now”.'
+              : bt.auto
+                ? 'Each round is settled when the Player ends the turn: their command, then every enemy strikes back. On your turn you can still step in: hurt, heal, add enemies, end it.'
+                : 'The Player’s command is settled at once; then you make each enemy act with the tools here.',
         ),
         hpStat
           ? h('small', { class: 'dim' }, `${S.names.player}’s health is the “${hpStat.name}” stat: ${hpStat.value}`)
           : chips(`${S.names.player}’s health`, 'heroHp', [5, 8, 12, 20, 30]),
         chips(`${S.names.player}’s strength (a tied weapon adds ${WEAPON})`, 'atk', [1, 2, 3, 5]),
         chips('Enemies’ strength', 'foeAtk', [0, 1, 2, 3, 5]),
+        bt.auto !== null && chips(`${S.names.player}’s chance to hit`, 'hit', [50, 70, 85, 95, 100], (n) => n + '%'),
+        bt.auto !== null && chips('Enemies’ chance to hit', 'foeHit', [20, 40, 60, 80, 95], (n) => n + '%'),
         chips('Chance to escape', 'flee', [0, 25, 50, 75, 100], (n) => n + '%'),
+        bt.auto === true && aiCard(),
+        bt.auto === true && bt.live && stopCard(),
+        bt.auto !== null && levelCard(),
         h('small', { class: 'dim' }, `What ${S.names.player} may do`),
         h(
           'div',
@@ -472,7 +632,23 @@ export function screenBattle(kit) {
             d.battle =
               bt.auto === null
                 ? { round: 1 }
-                : { round: 1, auto: bt.auto, cmds: [...bt.cmds], atk: bt.atk, foeAtk: bt.foeAtk, flee: bt.flee, guard: false, log: [], over: '' };
+                : {
+                    round: 1,
+                    auto: bt.auto,
+                    live: bt.auto === true && bt.live,
+                    cmds: [...bt.cmds],
+                    atk: bt.atk,
+                    foeAtk: bt.foeAtk,
+                    hit: bt.hit,
+                    foeHit: bt.foeHit,
+                    ai: { ...bt.ai },
+                    stop: bt.auto === true && bt.live ? { ...bt.stop } : { speak: false, foe: 0, hero: 0, rounds: 0 },
+                    level: bt.level,
+                    flee: bt.flee,
+                    guard: false,
+                    log: [],
+                    over: '',
+                  };
             d.ask = { kind: 'battle', text: 'Battle! What do you do?', sides: 6, dc: 0, verb: '', places: [], targets: [] };
             d.choices = [];
             d.sfx ||= 'alarm';
@@ -505,6 +681,15 @@ export function screenBattle(kit) {
         'div',
         { class: 'battlelog', id: 'battleLog' },
         d.battle.log.map((l) => h('p', {}, l)),
+      ),
+    );
+  if (ruled && d.battle.paused)
+    add(
+      p,
+      h(
+        'p',
+        { class: 'warn', id: 'battlePaused' },
+        `${d.battle.paused} — the battle waits for you. Stage what you like; it goes on when you end your turn.`,
       ),
     );
   if (ruled && d.battle.over === 'lost')

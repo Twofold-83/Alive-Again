@@ -229,12 +229,14 @@ module.exports = (H, O) => {
       const b = 20;
       cageBox(c, 1, 3, 28, b, () => {
         if (u) return dots(c, BD, [9, 17, 10, 18, 14, 18, 18, 17]);
-        c.oval(6, 9, 19, 19, D(PALE));
-        c.oval(15, 7, 23, 14, PALE);
-        c.row(19, 5, 22, D(D(PALE)));
-        dots(c, C.glow, [17, 10, 20, 10]);
-        dots(c, NI, [18, 12, 20, 12]);
-        dots(c, D(D(PALE)), [8, 12, 11, 11, 13, 13]);
+        c.oval(5, 10, 20, 19, mix(PALE, 0.5)); // something hunched, and it is awake
+        c.oval(14, 6, 23, 14, mix(PALE, 0.75));
+        c.row(19, 5, 22, mix(PALE, 0.35));
+        c.rect(17, 10, 18, 10, C.glow);
+        c.rect(20, 10, 21, 10, C.glow);
+        c.rect(17, 12, 21, 12, NI);
+        dots(c, mix(PALE, 0.35), [8, 13, 11, 12, 13, 14, 9, 16]);
+        c.rect(23, 16, 24, 18, mix(PALE, 0.75)); // a hand on the floor of the cage
       });
       if (u) {
         c.frame(29, 4, 34, b, IR); // the end door swung out

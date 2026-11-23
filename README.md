@@ -192,6 +192,17 @@ as icons, and what the Player did is read out like the log of an old adventure g
   with its views, or permanently alters the asset on this device; a new object (at most 2 x 2 tiles) goes into
   "My objects" or any category. Own objects are kept in the browser and sent into the story when used, so the
   other player sees them. The character maker has mutations: more heads, arms and legs.
+- **Environments.** Things, beings and rooms are grouped by setting (`public/shared/environments.js`): Victorian,
+  Modern home, Apartment complex, Child's room, Attic, Basement, Toilet, Cottage, Garden, School, Hospital,
+  Electronics, Street, Urban, Horror, Graveyard, Dream world, Weird, Castle and dungeon, Wild places. "Add
+  something" offers Environment, Objects and Beings; every setting has rooms of its own (68 room themes).
+- **Mood.** Light and dark with light sources that glow (lamp, fluorescent, neon, fire, candle, moonlight, screen,
+  alarm), weather and music. Any thing can be a light.
+- **Adventure controls.** A click on the stage offers Walk here / Look at / Use; clickable things can answer by
+  themselves and change to their used picture; a thing can be a trap; the Director can show a picture; a roll
+  hands straight back to the Director. The Director's shelf under the stage holds the cast and prepared things.
+- **Live battles.** Both watch every round as it happens; enemy actions by percentage, hit chances, triggers
+  that hand over to the Director, six difficulty settings and an estimate (`public/shared/battle.js`).
 - **Battles with rules.** Attack, Defend, Item, Escape, Speak; enemies fight on their own or are moved by the
   Director; a tied thing is a weapon (`public/shared/battle.js`).
 - **Save room.** In Build scene, "Save room" keeps a room on the device; "My saved rooms" opens it in any story.

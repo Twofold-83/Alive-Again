@@ -6,7 +6,7 @@
  * m is the main picture, s the other perspective; mu / su the canvas of the used pictures if it has to grow.
  * In a side view the front of the thing faces right. The settings are drawn in the _env-care-*.js files. */
 module.exports = (kit) => {
-  const { C, K, hex, mix, blend, dark, lite, rnd, canvas } = kit;
+  const { C, hex, blend, dark, lite, rnd, canvas } = kit;
   const D = dark,
     L = lite;
   const out = {};

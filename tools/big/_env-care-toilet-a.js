@@ -1,7 +1,7 @@
 /* Toilets and bathrooms, first half: cubicles, pans, urinals, basins, baths, showers and the doors. See env-care.js. */
 module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
-  const { D, L, dots, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds, doorF, doorS } = T;
-  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, RUB, YEL, BLOOD, IN, PAPER, WAT, WATD, PORC, PORD, TILE, GRIME, RUSTW } = T;
+  const { D, L, dots, panel, caster, stream, puddle, cabS, doorOpenF, doorOpenS, folds, doorF, doorS } = T;
+  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, YEL, IN, PAPER, WAT, WATD, PORC, PORD, TILE, GRIME, RUSTW } = T;
   const FORM = hex('#7f8f8a'), // cubicle partitions
     DOORC = hex('#3f6a6a'),
     SHADE = hex('#7f877c'), // tiles in shadow
@@ -106,7 +106,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       }
     }
     if (o.flood && (u || o.flood === 'always')) {
-      c.row(b, 0, 19, WATD);
+      c.row(b, 1, 18, WATD);
       c.row(b, 4, 14, L(WATD));
     }
   }
@@ -128,7 +128,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       doorOpenS(c, 21, 5, 31, b - 5, dc);
       c.rect(22, 19, 23, 21, STL);
     } else c.col(21, 6, b - 6, D(dc));
-    if (o.flood && (u || o.flood === 'always')) c.row(b, 0, c.w - 1, WATD);
+    if (o.flood && (u || o.flood === 'always')) c.row(b, 1, c.w - 2, WATD);
   }
   const cubicle = (slug, name, o) => add(slug, name, true, { m: [20, 40, (c, u) => cubF(c, u, o)], s: [23, 40, (c, u) => cubS(c, u, o)], su: [33, 40] });
   cubicle('wc-cubicle-vacant', 'toilet cubicle stall door vacant public lavatory green door', {
@@ -181,8 +181,8 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       dots(c, C.rust, [3, 7, 10, 5, 8, 8]);
       c.rect(1, 9, 3, 9, ID); // brackets
       c.rect(10, 9, 12, 9, ID);
-      c.col(6, 9, b - 18, COPPER); // the down pipe
-      c.col(7, 9, b - 18, D(COPPER));
+      c.col(6, 9, b - 11, COPPER); // the down pipe
+      c.col(7, 9, b - 11, D(COPPER));
       c.row(1, 9, 13, ID); // the lever
       const cy = u ? 20 : 15;
       c.col(13, 2, cy, hex('#9a9a8a'));
@@ -238,7 +238,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.col(8, b - 8, b - 4, FILTH);
         c.col(4, b - 20, b - 11, WOODP); // the plunger left standing in it
         c.rect(3, b - 11, 5, b - 10, hex('#8c3a34'));
-        puddle(c, 0, 12, b, hex('#5a5a3c'));
+        puddle(c, 1, 12, b, hex('#5a5a3c'));
       }
     };
     const side = (c, u) => {
@@ -253,7 +253,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         puddle(c, 8, 15, b, hex('#5a5a3c'));
       }
     };
-    add('wc-toilet-blocked-filthy', 'filthy toilet no seat blocked overflowing public lavatory stained', true, { m: [14, 23, front], s: [17, 23, side] });
+    add('wc-toilet-blocked-filthy', 'filthy toilet no seat blocked overflowing public lavatory stained', true, { m: [10, 23, front], mu: [14, 23], s: [13, 23, side], su: [17, 23] });
   }
   {
     const BLUE = hex('#4a6a8a');
@@ -271,7 +271,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(7, b - 11, 10, b - 11, IN);
         c.rect(12, b - 18, 13, b - 16, SHEET); // paper
         dots(c, FILTH, [6, b - 5, 9, b - 3, 4, b - 1]);
-        doorOpenF(c, 3, 5, b - 2, 4, hex('#c9c6b4'));
+        doorOpenF(c, 14, 5, b - 2, 4, hex('#c9c6b4'), 1);
         dots(c, BLK, [8, 14, 9, 13, 10, 14, 9, 15]); // flies
       } else {
         c.rect(3, 5, 14, b - 1, hex('#c9c6b4')); // the door
@@ -294,7 +294,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       if (u) doorOpenS(c, 15, 5, 25, b - 1, hex('#c9c6b4'));
       else c.col(15, 5, b - 1, hex('#c9c6b4'));
     };
-    add('wc-portable-chemical', 'portable chemical toilet plastic cabin blue building site festival', true, { m: [18, 40, front], mu: [18, 40], s: [17, 40, side], su: [27, 40] });
+    add('wc-portable-chemical', 'portable chemical toilet plastic cabin blue building site festival', true, { m: [18, 40, front], mu: [20, 40], s: [17, 40, side], su: [27, 40] });
   }
   {
     const PL = hex('#6a5a48');
@@ -377,7 +377,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       for (const x of [11, 22]) c.col(x, b - 24, b - 3, hex('#a9a797'));
       c.rect(26, b - 12, 29, b - 12, hex('#b59a3c')); // tape across the cracked one
       if (u) {
-        puddle(c, 22, 34, b, hex('#8a8a4a')); // out through the crack
+        puddle(c, 22, 33, b, hex('#8a8a4a')); // out through the crack
         c.col(26, b - 6, b - 1, hex('#8a8a4a'));
         c.set(20, 6, WAT);
       }
@@ -397,7 +397,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         puddle(c, 6, 13, b, hex('#8a8a4a'));
       }
     };
-    add('wc-urinals-row', 'row of three urinals porcelain stalls copper pipe gents public', true, { m: [35, 38, front], s: [15, 38, side] });
+    add('wc-urinals-row', 'row of three urinals porcelain stalls copper pipe gents public', true, { m: [35, 38, front], s: [10, 38, side], su: [15, 38] });
   }
   {
     const front = (c, u) => {
@@ -534,7 +534,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         puddle(c, 6, 12, b, WATD);
       }
     };
-    add('wc-basins-row', 'row of three wash basins taps public toilet washroom school', true, { m: [37, 22, front], s: [14, 22, side] });
+    add('wc-basins-row', 'row of three wash basins taps public toilet washroom school', true, { m: [37, 22, front], s: [10, 22, side], su: [14, 22] });
   }
   {
     const front = (c, u) => {
@@ -770,7 +770,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.rect(1, b, 2, b, hex('#5a5a55'));
       if (u) {
         dots(c, hex('#c4ccc4'), [11, 8, 12, 12, 11, 16, 12, 20]);
-        c.row(b, 11, 13, WATD);
+        c.row(b, 11, 12, WATD);
       }
     };
     add('wc-showers-row-tiled', 'communal showers two shower heads tiled wall changing room baths', true, { m: [30, 40, front], s: [14, 40, side] });

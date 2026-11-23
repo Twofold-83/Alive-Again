@@ -33,6 +33,23 @@ exports.setup = async (port, env = {}) => {
       shot: async (n) => {
         if (t.shots) await p.screenshot({ path: path.join(t.shots, n + '.png') });
       },
+      /** The story as the server sees it right now (what a client is sent). */
+      state: () =>
+        p.evaluate(async () => {
+          const r = await fetch(`/api/rooms/${location.hash.slice(1)}/events?token=${localStorage.getItem('tf.token')}`);
+          const rd = r.body.getReader();
+          let b = '';
+          for (;;) {
+            const { value } = await rd.read();
+            b += new TextDecoder().decode(value);
+            const i = b.indexOf('data: '),
+              e = b.indexOf('\n\n', i);
+            if (i >= 0 && e > i) {
+              rd.cancel();
+              return JSON.parse(b.slice(i + 6, e));
+            }
+          }
+        }),
       last: () => p.evaluate(async () => (await (await fetch(`/api/rooms/${location.hash.slice(1)}/history`)).json()).history.at(-1).scene),
       heroPos: () =>
         p.evaluate(() => {

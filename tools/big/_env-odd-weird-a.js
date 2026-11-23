@@ -89,8 +89,8 @@ module.exports = (H) => {
       }
       c.line(0, 39, 4, 2, WD); // the rails closing in
       c.line(15, 39, 11, 2, WD);
-      c.line(0, 27, 4, -4, WL);
-      c.line(15, 27, 11, -4, W);
+      c.line(0, 27, 3, 4, WL);
+      c.line(15, 27, 12, 4, W);
       c.col(0, 27, 39, WD);
       c.col(15, 27, 39, WD);
       if (u) {
@@ -191,7 +191,6 @@ module.exports = (H) => {
         c.rect(11, 11, 11, 16, C.steel);
         c.col(0, 9, 25, hex('#8a8e88')); // the seam, and something wet in it
         drip(c, 0, 20, 5, hex('#7a8a8c'));
-        eye(c, 4, 4, 1); // a magnet? no
         dots(c, D(ENAMEL), [5, 14, 8, 20, 4, 22]);
       }
     },
@@ -207,7 +206,6 @@ module.exports = (H) => {
         miniEye(c, 15, 15, mix(ENAMEL, 0.9));
         c.rect(23, 25, 25, 27, C.white); // one has rolled out
         c.set(24, 26, K);
-        c.set(23, 25, null);
       } else c.rect(12, 11, 12, 16, C.steel);
     },
   );

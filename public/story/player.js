@@ -5,6 +5,8 @@ import { openDollMaker } from '../build/dollmaker.js';
 import { assetLabel, assetUrl } from '../core/catalog.js';
 import { h, add } from '../core/dom.js';
 import { openCheck } from './dice.js';
+import { act } from '../core/net.js';
+import { toast } from '../core/dom.js';
 import { livingFoes, heroHealth, weaponOf, itemHeals } from '../shared/battle.js';
 import { glyphNode } from '../stage/render.js';
 import { EMOTES } from '../shared/options.js';
@@ -354,6 +356,26 @@ export function buildFoot() {
           app.battleMenu = app.battleMenu === id ? '' : id;
           rebuild();
         };
+        /* live: a command is carried out the moment it is chosen, and both sides watch the round */
+        if (b.live && rp.move && !app.liveBusy) {
+          const me = hero(app.draft),
+            said = me ? (me.say || '').trim() : '';
+          if (rp.move === 'speak' && !said) {
+            app.draft.reply = null;
+            toast('Type what you say in “Say something…”, then press Speak');
+            setTimeout(() => $('#sayInput') && $('#sayInput').focus(), 50);
+          } else {
+            app.liveBusy = true;
+            const sent = { ...rp };
+            app.draft.reply = null; // sent: it is not chosen again
+            saveDraft();
+            act('battle', { turn: app.S.turn, move: sent.move, id: sent.id, item: sent.item, say: said }, 2).catch((e) => {
+              app.liveBusy = false;
+              toast(e.message);
+            });
+            setTimeout(() => (app.liveBusy = false), 6000);
+          }
+        }
         const cmd = {
           attack: () =>
             opt(
@@ -406,6 +428,12 @@ export function buildFoot() {
               ),
             ),
           ),
+          b.live &&
+            h(
+              'small',
+              { class: 'dim', id: 'liveNote' },
+              app.liveBusy ? 'The round is being fought…' : 'Live battle: your command is carried out at once.',
+            ),
           h(
             'div',
             { class: 'battlecmds' },

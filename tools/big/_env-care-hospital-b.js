@@ -1,7 +1,7 @@
 /* The hospital, second half: the hall, the offices, the stores and the way down to the mortuary. See env-care.js. */
 module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
-  const { D, L, dots, panel, caster, wleg, screen, bottle, jars, stream, puddle, cabS, doorOpenF, doorOpenS, wheel, sheet, splat, folds } = T;
-  const { SHEET, FOLD, STEEL, STL, STD, IRON, ID, BLK, HG, MINT, LAM, VINYL, TEALV, RUB, YEL, ORANGE, SCR, TR, WAT, WATD, BLOOD, IN, BLANK, PORC, PORD, PAPER } = T;
+  const { D, L, dots, panel, caster, puddle, cabS, doorOpenF, doorOpenS, splat, folds } = T;
+  const { SHEET, FOLD, STEEL, STL, STD, BLK, HG, MINT, LAM, RUB, YEL, ORANGE, WAT, WATD, BLOOD, IN, PAPER } = T;
   const ENAMEL = hex('#cfd0c2'),
     REDC = hex('#8c3a34'),
     GLASSD = hex('#55707a'),
@@ -113,7 +113,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(5, b - 9, 9, b - 9, PAPER);
       }
     };
-    add('hospital-waiting-chairs', 'waiting room chairs row of three plastic seats orange bench hall', true, { m: [32, 18, front], s: [13, 18, side] });
+    add('hospital-waiting-chairs', 'waiting room chairs row of three plastic seats orange bench hall', true, { m: [32, 19, front], s: [13, 19, side] });
   }
   {
     const MAGS = [hex('#8c3a34'), hex('#3a4a6a'), hex('#a07e2c'), hex('#5a6a4a')];
@@ -131,14 +131,14 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(x1 - 7, b - 7, x1 - 2, b - 7, SHEET); // one left open
         c.set(x1 - 4, b - 7, STD);
         dots(c, MAGS[0], [x1 - 6, b - 8, x1 - 3, b - 8]);
-        c.rect(x1 - 1, b, x1 + 3, b, MAGS[0]); // one on the floor
+        c.rect(x1 - 1, b, x1 + 2, b, MAGS[0]); // one on the floor
         c.set(x1 + 1, b - 1, PAPER);
       } else {
         for (let i = 0; i < 4; i++) c.rect(3 + (i % 2), b - 7 - i, 8 + (i % 2), b - 7 - i, MAGS[i]);
         c.rect(x1 - 5, b - 7, x1 - 2, b - 7, MAGS[3]);
       }
     };
-    add('hospital-magazine-table', 'waiting room low table magazines pile old comics coffee table', true, { m: [20, 13, tbl(18)], s: [15, 13, tbl(12)] });
+    add('hospital-magazine-table', 'waiting room low table magazines pile old comics coffee table', true, { m: [18, 13, tbl(18)], mu: [20, 13], s: [12, 13, tbl(12)], su: [14, 13] });
   }
   {
     const front = (c, u) => {
@@ -298,7 +298,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.row(b, 9, 12, STD);
       }
     };
-    add('hospital-bedpan-rack', 'bedpan rack steel pans urine bottles sluice room shelf', true, { m: [18, 30, front], s: [14, 30, side] });
+    add('hospital-bedpan-rack', 'bedpan rack steel pans urine bottles sluice room shelf', true, { m: [18, 30, front], s: [10, 30, side], su: [14, 30] });
   }
   {
     const WOODC = hex('#8c6240');
@@ -345,7 +345,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
   }
   {
     const front = (c, u) => {
-      const b = c.h - 2;
+      const b = u ? c.h - 1 : c.h - 2;
       if (u) {
         c.row(b - 8, 2, 16, STEEL); // lying on its side
         c.row(b - 1, 2, 16, STEEL);
@@ -384,7 +384,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.row(b - 8, 3, 9, STD);
       dots(c, RUB, [2, b, 11, b]);
     };
-    add('hospital-walking-frame', 'walking frame zimmer aluminium frame old patient aid', false, { m: [15, 19, front], mu: [20, 12], s: [14, 19, side], su: [19, 11] });
+    add('hospital-walking-frame', 'walking frame zimmer aluminium frame old patient aid', false, { m: [15, 19, front], mu: [20, 11], s: [14, 19, side], su: [19, 11] });
   }
   {
     const TABS = [REDC, hex('#3a4a6a'), hex('#a07e2c'), hex('#5a6a4a'), hex('#6a4a5a')];
@@ -426,7 +426,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(11, b, 14, b, SHEET);
       }
     };
-    add('hospital-notes-trolley', 'patient notes trolley case files folders records cart ward round', true, { m: [22, 22, front], s: [16, 22, side] });
+    add('hospital-notes-trolley', 'patient notes trolley case files folders records cart ward round', true, { m: [22, 23, front], s: [12, 23, side], su: [16, 23] });
   }
   {
     const front = (c, u) => {
@@ -437,7 +437,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.col(22, 2, b, STEEL);
       c.row(2, 1, 22, STL);
       for (let i = 0; i < 5; i++) {
-        const yb = 8 + i * 7;
+        const yb = 7 + i * 7;
         c.row(yb + 1, 1, 22, STEEL);
         for (let x = 2; x < 22; x++) {
           const k = r();
@@ -464,8 +464,8 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.col(8, 2, b, STEEL);
       c.row(2, 1, 8, STL);
       for (let i = 0; i < 5; i++) {
-        c.row(9 + i * 7, 1, 8, STEEL);
-        if (!(u && i === 2)) c.rect(3, 5 + i * 7, 7, 8 + i * 7, BUFF);
+        c.row(8 + i * 7, 1, 8, STEEL);
+        if (!(u && i === 2)) c.rect(3, 4 + i * 7, 7, 7 + i * 7, BUFF);
       }
       c.line(1, 3, 8, 15, STD); // a brace
       if (u) {
@@ -649,7 +649,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       for (const y of [11, 20, 29]) c.row(y, 2, 7, hex('#5a3a34')); // straps
     };
     const side = (c, u) => {
-      const b = c.h - 2;
+      const b = u ? c.h - 1 : c.h - 2;
       if (u) {
         c.rect(1, b - 3, 2, b - 3, POLE); // from its end
         c.rect(11, b - 3, 12, b - 3, POLE);
@@ -663,7 +663,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       c.line(5, 6, 3, b - 5, CANV);
       c.line(6, 6, 4, b - 5, D(CANV));
     };
-    add('hospital-stretcher-canvas', 'stretcher canvas poles rolled leaning carrying litter ambulance', false, { m: [10, 38, main], mu: [42, 6], s: [8, 38, side], su: [14, 6] });
+    add('hospital-stretcher-canvas', 'stretcher canvas poles rolled leaning carrying litter ambulance', false, { m: [10, 38, main], mu: [42, 6], s: [8, 38, side], su: [14, 5] });
   }
   {
     const col = hex('#8fa594');
@@ -826,7 +826,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect((w >> 1) - 1, b - 10, w >> 1, b - 10, D(REDC));
       }
     };
-    add('hospital-sharps-bin', 'sharps bin yellow needles box red lid syringes disposal', false, { m: [9, 14, bin(9)], mu: [14, 14], s: [8, 14, bin(8)], su: [13, 14] });
+    add('hospital-sharps-bin', 'sharps bin yellow needles box red lid syringes disposal', false, { m: [9, 15, bin(9)], mu: [14, 15], s: [8, 15, bin(8)], su: [13, 15] });
   }
   {
     const front = (c, u) => {
@@ -869,7 +869,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.row(b - 13, 1, 9, L(ENAMEL));
       }
     };
-    add('hospital-waste-bin-pedal', 'pedal bin clinical waste white enamel yellow bag dressings', false, { m: [11, 21, front], s: [13, 21, side] });
+    add('hospital-waste-bin-pedal', 'pedal bin clinical waste white enamel yellow bag dressings', false, { m: [11, 22, front], s: [13, 22, side] });
   }
   {
     const front = (c, u) => {
@@ -966,7 +966,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
         c.rect(20, b - 15, 20, b - 14, STL);
       }
     };
-    add('hospital-autoclave', 'autoclave steriliser steam drum steel pressure instruments', true, { m: [22, 30, front], s: [28, 30, side] });
+    add('hospital-autoclave', 'autoclave steriliser steam drum steel pressure instruments', true, { m: [22, 31, front], s: [22, 31, side], su: [28, 31] });
   }
   {
     const cooler = (side) => (c, u) => {
@@ -996,7 +996,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
       }
       if (u) puddle(c, side ? 8 : 5, side ? 12 : 10, b, WATD);
     };
-    add('hospital-water-cooler', 'water cooler bottle dispenser paper cup waiting room', true, { m: [12, 31, cooler(false)], s: [14, 31, cooler(true)] });
+    add('hospital-water-cooler', 'water cooler bottle dispenser paper cup waiting room', true, { m: [10, 31, cooler(false)], mu: [12, 31], s: [12, 31, cooler(true)], su: [14, 31] });
   }
   {
     const front = (c, u) => {
@@ -1037,7 +1037,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
   {
     const vase = (side) => (c, u) => {
       const b = c.h - 2,
-        m = side ? 3 : 4,
+        m = 4,
         stem = hex('#5a6a3c'),
         dead = hex('#7a5a3c');
       c.rect(m - 1, b - 5, m + 1, b, C.glass);
@@ -1061,9 +1061,9 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, T, add) => {
           c.rect(7, b - 4, 10, b, SHEET); // get well soon
           c.set(8, b - 2, REDC);
           c.set(9, b - 3, REDC);
-        } else c.col(7, b - 4, b, SHEET);
+        } else c.col(8, b - 4, b, SHEET);
       }
     };
-    add('hospital-flowers-wilted', 'flowers in a vase wilted get well card bedside visitors', false, { m: [12, 15, vase(false)], s: [9, 15, vase(true)] });
+    add('hospital-flowers-wilted', 'flowers in a vase wilted get well card bedside visitors', false, { m: [12, 15, vase(false)], s: [10, 15, vase(true)] });
   }
 };
