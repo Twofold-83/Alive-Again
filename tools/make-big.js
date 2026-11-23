@@ -47,6 +47,26 @@ for (const f of fs.readdirSync(path.join(__dirname, 'big')).sort()) {
     d.viewsFile = f;
   }
 }
+/* brand-new sprites: a definition that names its category ({ cat, name, catLabel, group, kind }) is added to the
+ * library if its slug is not there yet. group: 'thing' (default), 'tile' or 'char'; kind: 'floor' | 'wall' for tiles. */
+{
+  const where = new Map();
+  for (const c of index.categories) for (const it of c.items) where.set(it.slug, c.id);
+  for (const [slug, d] of drawn) {
+    if (!d.cat) continue;
+    if (where.has(slug)) {
+      if (where.get(slug) !== d.cat) throw new Error(`${slug} (${d.file}) wants category ${d.cat}, but a sprite of that name is already in ${where.get(slug)}: pick another name`);
+      continue;
+    }
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error(`${slug} (${d.file}): a slug is lower-case words joined by hyphens`);
+    let c = index.categories.find((x) => x.id === d.cat);
+    if (!c) index.categories.push((c = { id: d.cat, label: d.catLabel || d.cat, group: d.group || 'thing', items: [] }));
+    const it = { slug, name: d.name || slug.replace(/-/g, ' ') };
+    if (d.kind) it.kind = d.kind;
+    c.items.push(it);
+    where.set(slug, d.cat);
+  }
+}
 /** Draw a sprite; returns its canvas. */
 function paint(slug, d) {
   const c = kit.canvas(d.w, d.h);
