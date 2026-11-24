@@ -1,6 +1,6 @@
 /* The churchyard: those who bury, those who mourn, and those who were buried. */
 module.exports = (kit, U) => {
-  const { SKINS, HAIR, CLOTH, HAIRS, K, WHITE, BONE, BLOOD, GOLD, hex, mix, dark, lite, body, shoe } = kit;
+  const { SKINS, HAIR, CLOTH, HAIRS, K, WHITE, BONE, GOLD, hex, mix, dark, lite, body, shoe } = kit;
   const { P, C, sleeve, hand, trouser, glasses } = U;
   const { heads, torsos, arms, legs, H, S, T, A, L } = U.lists();
   const BLACK = hex('#1e1b24'),
@@ -21,10 +21,35 @@ module.exports = (kit, U) => {
     c.row(1, 5, 9, col);
     c.row(2, 3, 10, col);
     c.row(3, 2, 11, dark(col));
-    P(c, dark(col), [[11, 4], [12, 4]]);
-    P(c, lite(col), [[5, 1], [4, 2], [7, 2], [9, 2]]);
-    P(c, g, [[3, 8], [3, 9], [4, 9], [4, 10], [5, 10], [8, 10], [9, 9], [5, 11], [6, 11], [7, 11], [8, 11], [6, 10], [7, 10]]);
-    P(c, mix(s, 0.6), [[4, 7], [9, 5]]);
+    P(c, dark(col), [
+      [11, 4],
+      [12, 4],
+    ]);
+    P(c, lite(col), [
+      [5, 1],
+      [4, 2],
+      [7, 2],
+      [9, 2],
+    ]);
+    P(c, g, [
+      [3, 8],
+      [3, 9],
+      [4, 9],
+      [4, 10],
+      [5, 10],
+      [8, 10],
+      [9, 9],
+      [5, 11],
+      [6, 11],
+      [7, 11],
+      [8, 11],
+      [6, 10],
+      [7, 10],
+    ]);
+    P(c, mix(s, 0.6), [
+      [4, 7],
+      [9, 5],
+    ]);
     c.set(3, 4, g);
   });
   H('mourner black hat veil net over the face pale', 'pale', 'weeping', (c) => {
@@ -35,8 +60,19 @@ module.exports = (kit, U) => {
     c.set(4, 1, lite(lite(b)));
     c.row(2, 4, 9, CREPE);
     for (let y = 4; y <= 8; y++) for (let x = 3; x <= 10; x++) if ((x + y) % 2 === 0 && !(y === 6 && (x === 4 || x === 6))) c.set(x, y, CREPE);
-    P(c, CREPE, [[2, 4], [2, 6], [2, 8], [11, 5], [11, 7], [3, 9], [10, 9]]);
-    P(c, HAIR.black, [[3, 4], [10, 4]]);
+    P(c, CREPE, [
+      [2, 4],
+      [2, 6],
+      [2, 8],
+      [11, 5],
+      [11, 7],
+      [3, 9],
+      [10, 9],
+    ]);
+    P(c, HAIR.black, [
+      [3, 4],
+      [10, 4],
+    ]);
   });
   H('undertaker top hat crepe band ribbon grey whiskers pale', 'pale', 'hollow', (c, s) => {
     const b = hex('#17151c'),
@@ -45,19 +81,50 @@ module.exports = (kit, U) => {
     c.row(3, 2, 11, b);
     c.row(2, 4, 9, CREPE);
     c.set(4, 0, hex('#33303a'));
-    P(c, CREPE, [[11, 4], [11, 5], [12, 6], [12, 7], [11, 8], [12, 5]]);
-    P(c, h, [[3, 6], [3, 7], [3, 8], [10, 6]]);
-    P(c, dark(h), [[10, 7], [10, 8]]);
-    P(c, dark(s), [[4, 8], [9, 8], [4, 4], [9, 4]]);
+    P(c, CREPE, [
+      [11, 4],
+      [11, 5],
+      [12, 6],
+      [12, 7],
+      [11, 8],
+      [12, 5],
+    ]);
+    P(c, h, [
+      [3, 6],
+      [3, 7],
+      [3, 8],
+      [10, 6],
+    ]);
+    P(c, dark(h), [
+      [10, 7],
+      [10, 8],
+    ]);
+    P(c, dark(s), [
+      [4, 8],
+      [9, 8],
+      [4, 4],
+      [9, 4],
+    ]);
   });
   H('priest biretta black glasses white hair collar fair', 'fair', 'calm', (c) => {
     const b = BLACK,
       h = HAIR.white;
     c.row(3, 3, 10, h);
-    P(c, h, [[3, 4], [3, 5]]);
-    P(c, dark(h), [[10, 4], [10, 5]]);
+    P(c, h, [
+      [3, 4],
+      [3, 5],
+    ]);
+    P(c, dark(h), [
+      [10, 4],
+      [10, 5],
+    ]);
     c.rect(4, 1, 9, 2, b);
-    P(c, b, [[4, 0], [6, 0], [7, 0], [9, 0]]);
+    P(c, b, [
+      [4, 0],
+      [6, 0],
+      [7, 0],
+      [9, 0],
+    ]);
     c.set(4, 1, lite(lite(b)));
     c.set(6, 0, CREPE);
     glasses(c);
@@ -67,33 +134,73 @@ module.exports = (kit, U) => {
   H('sexton lantern jaw heavy brow balding black hair tan', 'tan', 'calm', (c, s) => {
     HAIRS.balding(c, HAIR.black);
     c.row(2, 5, 8, s);
-    P(c, s, [[2, 6], [2, 7]]);
-    P(c, dark(s), [[11, 6], [11, 7]]);
+    P(c, s, [
+      [2, 6],
+      [2, 7],
+    ]);
+    P(c, dark(s), [
+      [11, 6],
+      [11, 7],
+    ]);
     /* the jaw */
     c.row(10, 3, 10, s);
     c.row(11, 3, 10, s);
     c.row(12, 4, 9, dark(s));
-    P(c, dark(s), [[10, 9], [10, 10], [10, 11]]);
+    P(c, dark(s), [
+      [10, 9],
+      [10, 10],
+      [10, 11],
+    ]);
     c.set(3, 10, lite(s));
-    P(c, mix(s, 0.62), [[4, 5], [5, 5], [8, 5], [9, 5]]);
+    P(c, mix(s, 0.62), [
+      [4, 5],
+      [5, 5],
+      [8, 5],
+      [9, 5],
+    ]);
     c.row(9, 5, 8, dark(dark(s)));
     c.set(6, 11, dark(s));
     c.set(7, 11, dark(s));
   });
   H('fresh ghoul torn cheek teeth earth patchy brown hair rotten', 'rotten', 'hollow', (c, s) => {
     const h = HAIR.brown;
-    P(c, h, [[4, 2], [5, 2], [3, 3], [4, 3], [9, 3], [8, 2], [3, 4]]);
+    P(c, h, [
+      [4, 2],
+      [5, 2],
+      [3, 3],
+      [4, 3],
+      [9, 3],
+      [8, 2],
+      [3, 4],
+    ]);
     c.row(2, 6, 7, s);
     c.set(9, 2, s);
-    P(c, FLESH, [[8, 8], [9, 8], [10, 8], [10, 9], [8, 10]]);
-    P(c, BONE, [[8, 9], [9, 9]]);
+    P(c, FLESH, [
+      [8, 8],
+      [9, 8],
+      [10, 8],
+      [10, 9],
+      [8, 10],
+    ]);
+    P(c, BONE, [
+      [8, 9],
+      [9, 9],
+    ]);
     c.set(9, 10, K);
     c.set(8, 6, WHITE);
     c.set(9, 6, WHITE);
     c.set(8, 5, K);
     c.set(9, 5, K);
-    P(c, EARTH, [[5, 4], [4, 9], [6, 3], [5, 11]]);
-    P(c, WORM, [[2, 7], [3, 8]]);
+    P(c, EARTH, [
+      [5, 4],
+      [4, 9],
+      [6, 3],
+      [5, 11],
+    ]);
+    P(c, WORM, [
+      [2, 7],
+      [3, 8],
+    ]);
   });
   const skull = (c, b) => {
     c.row(1, 5, 8, b);
@@ -114,19 +221,38 @@ module.exports = (kit, U) => {
     const b = BONE;
     skull(c, b);
     c.row(9, 5, 8, b);
-    P(c, K, [[6, 9], [8, 9]]);
+    P(c, K, [
+      [6, 9],
+      [8, 9],
+    ]);
     c.row(10, 5, 8, K);
     c.row(11, 4, 9, b);
     c.row(12, 5, 8, dark(b));
-    P(c, K, [[5, 11], [7, 11]]);
+    P(c, K, [
+      [5, 11],
+      [7, 11],
+    ]);
     c.set(9, 11, dark(b));
     c.set(4, 9, K);
     c.set(4, 10, K);
     c.set(9, 9, K);
     c.set(9, 10, K);
-    P(c, EARTH, [[4, 6], [5, 6], [3, 3], [4, 2]]);
-    P(c, WORM, [[9, 6], [10, 7], [11, 7]]);
-    P(c, K, [[8, 2], [8, 3], [9, 4]]);
+    P(c, EARTH, [
+      [4, 6],
+      [5, 6],
+      [3, 3],
+      [4, 2],
+    ]);
+    P(c, WORM, [
+      [9, 6],
+      [10, 7],
+      [11, 7],
+    ]);
+    P(c, K, [
+      [8, 2],
+      [8, 3],
+      [9, 4],
+    ]);
   });
   S('skeleton old skull mossy gold tooth white hair strands', (c) => {
     const b = OLDBONE;
@@ -138,16 +264,40 @@ module.exports = (kit, U) => {
     for (const x of [4, 6, 8]) c.set(x, 10, K);
     c.set(6, 9, GOLD);
     c.rect(4, 4, 5, 6, K);
-    P(c, C.olive, [[3, 3], [4, 2], [4, 3], [5, 2], [3, 4], [6, 1], [9, 8]]);
-    P(c, lite(C.olive), [[5, 1], [4, 2]]);
-    P(c, HAIR.white, [[2, 4], [2, 5], [2, 6], [1, 7], [2, 8], [11, 4], [11, 5], [12, 6], [11, 7]]);
+    P(c, C.olive, [
+      [3, 3],
+      [4, 2],
+      [4, 3],
+      [5, 2],
+      [3, 4],
+      [6, 1],
+      [9, 8],
+    ]);
+    P(c, lite(C.olive), [
+      [5, 1],
+      [4, 2],
+    ]);
+    P(c, HAIR.white, [
+      [2, 4],
+      [2, 5],
+      [2, 6],
+      [1, 7],
+      [2, 8],
+      [11, 4],
+      [11, 5],
+      [12, 6],
+      [11, 7],
+    ]);
   });
   S('skeleton skull candle on top wax no jaw', (c) => {
     const b = mix(BONE, 0.9),
       wax = hex('#e8e2c8');
     skull(c, b);
     c.row(9, 5, 8, b);
-    P(c, K, [[5, 9], [7, 9]]);
+    P(c, K, [
+      [5, 9],
+      [7, 9],
+    ]);
     c.set(8, 9, dark(b));
     c.rect(6, 10, 7, 12, dark(b));
     c.set(6, 11, K);
@@ -155,7 +305,18 @@ module.exports = (kit, U) => {
     c.rect(6, 0, 7, 1, wax);
     c.set(6, 0, hex('#e8b04a'));
     c.set(7, 0, C.glow);
-    P(c, wax, [[5, 1], [5, 2], [6, 2], [7, 2], [8, 2], [8, 3], [4, 3], [5, 3], [8, 4], [3, 4]]);
+    P(c, wax, [
+      [5, 1],
+      [5, 2],
+      [6, 2],
+      [7, 2],
+      [8, 2],
+      [8, 3],
+      [4, 3],
+      [5, 3],
+      [8, 4],
+      [3, 4],
+    ]);
     c.set(7, 1, dark(wax));
     c.set(9, 5, hex('#c9762a'));
   });
@@ -167,12 +328,37 @@ module.exports = (kit, U) => {
     c.row(2, 3, 10, v);
     c.col(1, 3, 9, v);
     c.col(12, 3, 7, dark(v));
-    P(c, v, [[2, 3], [11, 3], [0, 6], [1, 11]]);
-    P(c, dark(v), [[5, 1], [8, 2], [1, 5], [1, 8]]);
+    P(c, v, [
+      [2, 3],
+      [11, 3],
+      [0, 6],
+      [1, 11],
+    ]);
+    P(c, dark(v), [
+      [5, 1],
+      [8, 2],
+      [1, 5],
+      [1, 8],
+    ]);
     c.clear(1, 7);
-    P(c, WEED, [[3, 4], [3, 5], [2, 6], [2, 7], [10, 3], [11, 4], [11, 5], [6, 2]]);
-    P(c, lite(WEED), [[3, 4], [10, 3]]);
-    P(c, C.tear, [[2, 12], [11, 12]]);
+    P(c, WEED, [
+      [3, 4],
+      [3, 5],
+      [2, 6],
+      [2, 7],
+      [10, 3],
+      [11, 4],
+      [11, 5],
+      [6, 2],
+    ]);
+    P(c, lite(WEED), [
+      [3, 4],
+      [10, 3],
+    ]);
+    P(c, C.tear, [
+      [2, 12],
+      [11, 12],
+    ]);
   });
   H('corpse laid out coins on the eyes jaw cloth grey hair ashen', 'ashen', 'calm', (c, s) => {
     const h = HAIR.grey,
@@ -187,11 +373,20 @@ module.exports = (kit, U) => {
     c.set(9, 10, dark(WHITE));
     c.col(6, 1, 3, WHITE);
     c.col(7, 1, 3, dark(WHITE));
-    P(c, WHITE, [[5, 0], [8, 0]]);
+    P(c, WHITE, [
+      [5, 0],
+      [8, 0],
+    ]);
     c.rect(4, 5, 5, 6, coin);
     c.rect(8, 5, 9, 6, coin);
-    P(c, lite(coin), [[4, 5], [8, 5]]);
-    P(c, dark(coin), [[5, 6], [9, 6]]);
+    P(c, lite(coin), [
+      [4, 5],
+      [8, 5],
+    ]);
+    P(c, dark(coin), [
+      [5, 6],
+      [9, 6],
+    ]);
     c.row(9, 6, 7, dark(dark(s)));
   });
 
@@ -199,8 +394,21 @@ module.exports = (kit, U) => {
   T('mourning dress black high collar lace jet buttons', (c) => {
     body(c, BLACK, true);
     c.row(1, 4, 7, BLACK);
-    P(c, mix(WHITE, 0.8), [[5, 1], [6, 1]]);
-    for (const [x, y] of [[2, 2], [4, 2], [7, 2], [9, 2], [3, 3], [8, 3], [4, 4], [7, 4]]) c.set(x, y, CREPE);
+    P(c, mix(WHITE, 0.8), [
+      [5, 1],
+      [6, 1],
+    ]);
+    for (const [x, y] of [
+      [2, 2],
+      [4, 2],
+      [7, 2],
+      [9, 2],
+      [3, 3],
+      [8, 3],
+      [4, 4],
+      [7, 4],
+    ])
+      c.set(x, y, CREPE);
     c.rect(5, 2, 6, 2, hex('#6a6a78'));
     for (const y of [4, 6, 8]) c.set(5, y, hex('#5a5a68'));
     c.row(5, 2, 9, K);
@@ -214,10 +422,27 @@ module.exports = (kit, U) => {
   T("undertaker's frock coat black grey waistcoat cravat", (c) => {
     body(c, BLACK, true);
     c.rect(5, 1, 6, 4, hex('#5a5a66'));
-    P(c, WHITE, [[5, 1], [6, 1]]);
-    P(c, K, [[5, 2], [6, 2]]);
+    P(c, WHITE, [
+      [5, 1],
+      [6, 1],
+    ]);
+    P(c, K, [
+      [5, 2],
+      [6, 2],
+    ]);
     c.set(6, 4, C.steel);
-    P(c, lite(lite(BLACK)), [[4, 1], [4, 2], [4, 3], [4, 4], [7, 1], [7, 2], [7, 3], [7, 4], [5, 5], [6, 5]]);
+    P(c, lite(lite(BLACK)), [
+      [4, 1],
+      [4, 2],
+      [4, 3],
+      [4, 4],
+      [7, 1],
+      [7, 2],
+      [7, 3],
+      [7, 4],
+      [5, 5],
+      [6, 5],
+    ]);
     for (const y of [6, 8]) {
       c.set(4, y, C.iron);
       c.set(7, y, C.iron);
@@ -231,20 +456,53 @@ module.exports = (kit, U) => {
     const s = SHROUD;
     body(c, s, true);
     c.row(1, 4, 7, dark(s));
-    for (const [x, y] of [[2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [5, 2], [6, 3], [7, 4], [8, 5], [9, 6], [1, 6], [2, 7], [3, 8], [4, 9]]) c.set(x, y, dark(s));
+    for (const [x, y] of [
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 6],
+      [6, 7],
+      [7, 8],
+      [8, 9],
+      [5, 2],
+      [6, 3],
+      [7, 4],
+      [8, 5],
+      [9, 6],
+      [1, 6],
+      [2, 7],
+      [3, 8],
+      [4, 9],
+    ])
+      c.set(x, y, dark(s));
     c.col(10, 6, 9, dark(s));
-    P(c, EARTH, [[2, 8], [2, 9], [3, 9], [8, 2], [9, 8]]);
+    P(c, EARTH, [
+      [2, 8],
+      [2, 9],
+      [3, 9],
+      [8, 2],
+      [9, 8],
+    ]);
     c.set(6, 5, mix(s, 0.86));
     c.set(1, 1, lite(s));
   });
   T('cassock black buttons purple stole gold crosses', (c) => {
     body(c, BLACK, true);
-    P(c, WHITE, [[5, 1], [6, 1]]);
+    P(c, WHITE, [
+      [5, 1],
+      [6, 1],
+    ]);
     for (let y = 2; y <= 9; y += 2) c.set(5, y, hex('#5a5a68'));
     c.col(3, 1, 8, STOLE);
     c.col(8, 1, 8, dark(STOLE));
-    P(c, GOLD, [[3, 5], [8, 5]]);
-    P(c, GOLD, [[3, 8], [8, 8]]);
+    P(c, GOLD, [
+      [3, 5],
+      [8, 5],
+    ]);
+    P(c, GOLD, [
+      [3, 8],
+      [8, 8],
+    ]);
     c.set(3, 1, lite(STOLE));
     c.col(10, 6, 9, dark(BLACK));
     c.set(1, 1, lite(lite(BLACK)));
@@ -257,13 +515,27 @@ module.exports = (kit, U) => {
     c.rect(2, 2, 3, 9, w);
     c.rect(8, 2, 9, 9, w);
     c.col(9, 2, 9, dark(w));
-    P(c, w, [[1, 1], [2, 1], [9, 1], [10, 1]]);
+    P(c, w, [
+      [1, 1],
+      [2, 1],
+      [9, 1],
+      [10, 1],
+    ]);
     c.set(1, 1, lite(w));
     c.row(1, 4, 7, n);
-    P(c, n, [[5, 2], [6, 2], [6, 3]]);
+    P(c, n, [
+      [5, 2],
+      [6, 2],
+      [6, 3],
+    ]);
     c.set(5, 2, dark(n));
     c.col(5, 4, 8, dark(sh));
-    P(c, C.mud, [[4, 7], [6, 8], [7, 5], [3, 8]]);
+    P(c, C.mud, [
+      [4, 7],
+      [6, 8],
+      [7, 5],
+      [3, 8],
+    ]);
     c.row(9, 2, 9, C.leather);
     c.set(5, 9, C.brass);
   });
@@ -283,12 +555,25 @@ module.exports = (kit, U) => {
     c.clear(6, 4);
     c.clear(6, 7);
     c.clear(7, 9);
-    P(c, WHITE, [[6, 2], [6, 3]]);
-    P(c, CLOTH.wine, [[6, 5], [6, 6]]);
+    P(c, WHITE, [
+      [6, 2],
+      [6, 3],
+    ]);
+    P(c, CLOTH.wine, [
+      [6, 5],
+      [6, 6],
+    ]);
     c.set(8, 5, C.iron);
     c.set(8, 7, C.iron);
-    P(c, lite(lite(su)), [[7, 1], [7, 2], [7, 3]]);
-    P(c, C.olive, [[2, 3], [4, 7]]);
+    P(c, lite(lite(su)), [
+      [7, 1],
+      [7, 2],
+      [7, 3],
+    ]);
+    P(c, C.olive, [
+      [2, 3],
+      [4, 7],
+    ]);
     c.set(1, 1, lite(b));
   });
   T('drowned bride wedding dress wet waterweed pearls', (c) => {
@@ -300,31 +585,81 @@ module.exports = (kit, U) => {
     c.clear(2, 5);
     c.clear(9, 5);
     c.row(6, 2, 9, dark(d));
-    P(c, lite(d), [[3, 2], [8, 2], [4, 3], [7, 3], [3, 4], [8, 4]]);
-    P(c, WHITE, [[5, 3], [6, 3]]);
-    P(c, WEED, [[1, 1], [2, 2], [2, 3], [3, 4], [3, 5], [8, 7], [8, 8], [9, 9]]);
+    P(c, lite(d), [
+      [3, 2],
+      [8, 2],
+      [4, 3],
+      [7, 3],
+      [3, 4],
+      [8, 4],
+    ]);
+    P(c, WHITE, [
+      [5, 3],
+      [6, 3],
+    ]);
+    P(c, WEED, [
+      [1, 1],
+      [2, 2],
+      [2, 3],
+      [3, 4],
+      [3, 5],
+      [8, 7],
+      [8, 8],
+      [9, 9],
+    ]);
     c.set(2, 2, lite(WEED));
     c.col(5, 7, 9, mix(d, 0.8));
     c.col(10, 7, 9, dark(d));
-    P(c, mix(d, 0.7), [[2, 9], [3, 9], [6, 9], [7, 9]]);
+    P(c, mix(d, 0.7), [
+      [2, 9],
+      [3, 9],
+      [6, 9],
+      [7, 9],
+    ]);
     c.set(4, 8, C.tear);
   });
   T('ghoul burial suit burst open rotten chest ribs earth', (c) => {
     const su = hex('#2a2a34'),
       r = SKINS.rotten;
     body(c, su);
-    P(c, WHITE, [[4, 1], [7, 1]]);
+    P(c, WHITE, [
+      [4, 1],
+      [7, 1],
+    ]);
     c.rect(4, 2, 7, 7, r);
-    P(c, r, [[5, 1], [6, 1], [3, 4], [8, 5], [5, 8]]);
+    P(c, r, [
+      [5, 1],
+      [6, 1],
+      [3, 4],
+      [8, 5],
+      [5, 8],
+    ]);
     c.col(7, 2, 7, dark(r));
-    P(c, FLESH, [[4, 7], [5, 7], [6, 7]]);
+    P(c, FLESH, [
+      [4, 7],
+      [5, 7],
+      [6, 7],
+    ]);
     c.row(3, 4, 6, BONE);
     c.row(5, 4, 6, BONE);
     c.set(6, 3, dark(BONE));
     c.set(6, 5, dark(BONE));
-    P(c, EARTH, [[2, 3], [3, 8], [8, 8], [9, 4]]);
-    P(c, WORM, [[5, 6], [6, 6]]);
-    P(c, lite(lite(su)), [[3, 2], [3, 3], [8, 2], [8, 3]]);
+    P(c, EARTH, [
+      [2, 3],
+      [3, 8],
+      [8, 8],
+      [9, 4],
+    ]);
+    P(c, WORM, [
+      [5, 6],
+      [6, 6],
+    ]);
+    P(c, lite(lite(su)), [
+      [3, 2],
+      [3, 3],
+      [8, 2],
+      [8, 3],
+    ]);
     c.set(8, 6, CLOTH.wine);
   });
 
@@ -356,7 +691,13 @@ module.exports = (kit, U) => {
     c.row(3, 0, 4, lite(sh));
     c.set(4, 3, sh);
     hand(c, s, 4);
-    P(c, C.mud, [[1, 9], [2, 10], [3, 10], [1, 10], [2, 7]]);
+    P(c, C.mud, [
+      [1, 9],
+      [2, 10],
+      [3, 10],
+      [1, 10],
+      [2, 7],
+    ]);
     c.set(3, 9, dark(C.mud));
   });
   A('bone arm rotting shroud rags', (c) => {
@@ -366,11 +707,21 @@ module.exports = (kit, U) => {
     c.col(1, 6, 8, b);
     c.col(3, 6, 8, dark(b));
     c.row(9, 1, 3, b);
-    P(c, b, [[1, 10], [2, 10], [3, 10], [1, 11], [3, 11]]);
+    P(c, b, [
+      [1, 10],
+      [2, 10],
+      [3, 10],
+      [1, 11],
+      [3, 11],
+    ]);
     c.set(3, 10, dark(b));
     c.set(3, 5, dark(b));
     c.rect(1, 0, 3, 1, SHROUD);
-    P(c, SHROUD, [[1, 2], [3, 2], [1, 3]]);
+    P(c, SHROUD, [
+      [1, 2],
+      [3, 2],
+      [1, 3],
+    ]);
     c.set(3, 0, dark(SHROUD));
     c.set(3, 1, dark(SHROUD));
     c.set(2, 7, FLESH);
@@ -408,14 +759,24 @@ module.exports = (kit, U) => {
     c.col(4, 7, 9, dark(C.leather));
     shoe(c, C.leather);
     c.row(11, 1, 5, C.mud);
-    P(c, C.mud, [[2, 10], [4, 10], [2, 8], [3, 6], [1, 9]]);
+    P(c, C.mud, [
+      [2, 10],
+      [4, 10],
+      [2, 8],
+      [3, 6],
+      [1, 9],
+    ]);
     c.set(5, 11, dark(C.mud));
   });
   L('bone legs tattered black trousers skeleton feet', (c) => {
     const b = BONE;
     c.rect(1, 0, 4, 2, BLACK);
     c.col(4, 0, 2, dark(BLACK));
-    P(c, BLACK, [[1, 3], [3, 3], [4, 3]]);
+    P(c, BLACK, [
+      [1, 3],
+      [3, 3],
+      [4, 3],
+    ]);
     c.col(2, 3, 4, b);
     c.col(3, 3, 4, dark(b));
     c.row(5, 1, 4, b);
@@ -424,7 +785,10 @@ module.exports = (kit, U) => {
     c.col(4, 6, 9, dark(b));
     c.row(10, 2, 4, b);
     c.row(11, 1, 5, b);
-    P(c, K, [[2, 11], [4, 11]]);
+    P(c, K, [
+      [2, 11],
+      [4, 11],
+    ]);
     c.set(3, 10, dark(b));
     c.set(2, 7, C.olive);
   });
@@ -432,15 +796,28 @@ module.exports = (kit, U) => {
     const s = SHROUD;
     c.rect(1, 0, 4, 9, s);
     c.col(4, 0, 9, dark(s));
-    for (const [x, y] of [[1, 1], [2, 2], [3, 3], [1, 4], [2, 5], [3, 6], [1, 7], [2, 8]]) c.set(x, y, dark(s));
+    for (const [x, y] of [
+      [1, 1],
+      [2, 2],
+      [3, 3],
+      [1, 4],
+      [2, 5],
+      [3, 6],
+      [1, 7],
+      [2, 8],
+    ])
+      c.set(x, y, dark(s));
     c.row(9, 0, 5, C.sack);
     c.set(5, 9, dark(C.sack));
     c.rect(1, 10, 5, 11, s);
     c.clear(5, 10);
     c.row(11, 1, 5, dark(s));
-    P(c, EARTH, [[2, 10], [3, 11], [3, 7]]);
+    P(c, EARTH, [
+      [2, 10],
+      [3, 11],
+      [3, 7],
+    ]);
     c.set(1, 0, lite(s));
   });
-  void BLOOD, sleeve;
   return { heads, torsos, arms, legs };
 };

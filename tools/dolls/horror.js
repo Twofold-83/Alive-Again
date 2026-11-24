@@ -78,7 +78,21 @@ module.exports = (kit) => {
     /** Stubble or a shadow on the jaw. */
     stubble(c, s, k = 0.8) {
       const st = kit.mix(s, k);
-      U.P(c, st, [[3, 8], [3, 9], [4, 9], [4, 10], [5, 10], [6, 10], [7, 10], [8, 10], [9, 9], [5, 11], [6, 11], [7, 11], [8, 11]]);
+      U.P(c, st, [
+        [3, 8],
+        [3, 9],
+        [4, 9],
+        [4, 10],
+        [5, 10],
+        [6, 10],
+        [7, 10],
+        [8, 10],
+        [9, 9],
+        [5, 11],
+        [6, 11],
+        [7, 11],
+        [8, 11],
+      ]);
     },
     /** The lists of one setting and the short ways of adding to them. */
     lists() {

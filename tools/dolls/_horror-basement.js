@@ -1,7 +1,7 @@
 /* The basement: the boiler, the pipes, the coal, and whoever has been living down there. */
 module.exports = (kit, U) => {
   const { SKINS, HAIR, CLOTH, HAIRS, K, WHITE, BONE, RED, GOLD, hex, mix, dark, lite, body, shoe } = kit;
-  const { P, C, sleeve, hand, trouser, shin, foot, glasses, stubble } = U;
+  const { P, C, sleeve, hand, trouser, foot, glasses, stubble } = U;
   const { heads, torsos, arms, legs, H, S, T, A, L } = U.lists();
   const SOOT = C.soot,
     BOILER = hex('#3a4660'),
@@ -15,11 +15,28 @@ module.exports = (kit, U) => {
     c.row(3, 3, 10, C.leather);
     c.rect(4, 2, 5, 3, C.glass);
     c.rect(8, 2, 9, 3, C.glass);
-    P(c, K, [[4, 3], [8, 3]]);
-    P(c, WHITE, [[5, 2], [9, 2]]);
+    P(c, K, [
+      [4, 3],
+      [8, 3],
+    ]);
+    P(c, WHITE, [
+      [5, 2],
+      [9, 2],
+    ]);
     const so = mix(s, 0.5);
-    P(c, so, [[3, 8], [4, 8], [4, 9], [9, 7], [9, 8], [7, 4], [8, 4]]);
-    P(c, SOOT, [[3, 9], [8, 4]]);
+    P(c, so, [
+      [3, 8],
+      [4, 8],
+      [4, 9],
+      [9, 7],
+      [9, 8],
+      [7, 4],
+      [8, 4],
+    ]);
+    P(c, SOOT, [
+      [3, 9],
+      [8, 4],
+    ]);
   });
   H('plumber peaked cap navy moustache brown hair tan', 'tan', 'calm', (c) => {
     const col = CLOTH.navy,
@@ -34,18 +51,31 @@ module.exports = (kit, U) => {
     c.set(3, 5, h);
     c.set(10, 5, dark(h));
     c.row(8, 4, 9, h);
-    P(c, h, [[4, 9], [9, 9]]);
+    P(c, h, [
+      [4, 9],
+      [9, 9],
+    ]);
   });
   H('hoarder wild grey hair long beard pale', 'pale', 'scared', (c) => {
     const h = HAIR.grey;
     HAIRS.wild(c, h);
-    P(c, h, [[3, 8], [10, 8], [2, 8], [11, 8]]);
+    P(c, h, [
+      [3, 8],
+      [10, 8],
+      [2, 8],
+      [11, 8],
+    ]);
     c.row(9, 2, 11, h);
     c.row(10, 3, 10, h);
     c.row(11, 3, 10, h);
     c.row(12, 5, 8, dark(h));
     c.rect(6, 9, 7, 10, K);
-    P(c, dark(h), [[4, 11], [7, 11], [9, 10], [11, 9]]);
+    P(c, dark(h), [
+      [4, 11],
+      [7, 11],
+      [9, 10],
+      [11, 9],
+    ]);
     c.set(5, 11, CLOTH.mustard);
     c.set(8, 10, BONE);
   });
@@ -57,13 +87,31 @@ module.exports = (kit, U) => {
     c.row(9, 4, 9, w);
     c.row(10, 5, 8, w);
     c.row(11, 6, 7, dark(w));
-    P(c, w, [[2, 5], [2, 6], [11, 5], [11, 6]]);
+    P(c, w, [
+      [2, 5],
+      [2, 6],
+      [11, 5],
+      [11, 6],
+    ]);
     c.col(10, 3, 8, mix(w, 0.85));
     c.rect(4, 5, 5, 7, K);
     c.rect(8, 5, 9, 7, K);
-    P(c, hex('#3a3f4a'), [[4, 5], [8, 5]]);
-    P(c, VEIN, [[4, 2], [3, 3], [9, 2], [9, 3], [10, 4], [3, 8]]);
-    P(c, dark(w), [[6, 8], [7, 8]]);
+    P(c, hex('#3a3f4a'), [
+      [4, 5],
+      [8, 5],
+    ]);
+    P(c, VEIN, [
+      [4, 2],
+      [3, 3],
+      [9, 2],
+      [9, 3],
+      [10, 4],
+      [3, 8],
+    ]);
+    P(c, dark(w), [
+      [6, 8],
+      [7, 8],
+    ]);
     c.row(10, 6, 7, hex('#6a5a5a'));
     c.set(5, 1, lite(w));
   });
@@ -78,7 +126,10 @@ module.exports = (kit, U) => {
     c.row(2, 4, 9, dark(col));
     stubble(c, s, 0.75);
     c.row(9, 5, 8, K);
-    P(c, WHITE, [[6, 9], [7, 9]]);
+    P(c, WHITE, [
+      [6, 9],
+      [7, 9],
+    ]);
     /* the rat on the brim */
     c.row(2, 9, 12, r);
     c.row(1, 10, 12, r);
@@ -86,7 +137,10 @@ module.exports = (kit, U) => {
     c.set(12, 1, K);
     c.set(11, 0, hex('#b08a84'));
     c.set(13, 2, hex('#b08a84'));
-    P(c, hex('#b08a84'), [[8, 1], [7, 0]]);
+    P(c, hex('#b08a84'), [
+      [8, 1],
+      [7, 0],
+    ]);
   });
   H('miner lamp helmet coal dust ashen', 'ashen', 'hollow', (c, s) => {
     const col = hex('#8a7a3a');
@@ -100,19 +154,44 @@ module.exports = (kit, U) => {
     c.set(5, 1, C.iron);
     c.set(8, 1, C.iron);
     const so = mix(s, 0.5);
-    P(c, so, [[3, 4], [4, 4], [9, 4], [10, 4], [3, 8], [4, 9], [9, 8], [8, 10], [5, 8]]);
+    P(c, so, [
+      [3, 4],
+      [4, 4],
+      [9, 4],
+      [10, 4],
+      [3, 8],
+      [4, 9],
+      [9, 8],
+      [8, 10],
+      [5, 8],
+    ]);
   });
   H('caretaker bald thick glasses grey moustache fair', 'fair', 'calm', (c, s) => {
     const h = HAIR.grey;
     HAIRS.balding(c, h);
     c.row(2, 5, 8, s);
-    P(c, h, [[3, 6], [10, 6], [2, 5]]);
+    P(c, h, [
+      [3, 6],
+      [10, 6],
+      [2, 5],
+    ]);
     c.set(11, 5, dark(h));
     glasses(c);
-    P(c, K, [[4, 5], [5, 5], [8, 5], [9, 5]]);
-    P(c, WHITE, [[4, 6], [9, 6]]);
+    P(c, K, [
+      [4, 5],
+      [5, 5],
+      [8, 5],
+      [9, 5],
+    ]);
+    P(c, WHITE, [
+      [4, 6],
+      [9, 6],
+    ]);
     c.row(8, 4, 9, h);
-    P(c, h, [[4, 9], [9, 9]]);
+    P(c, h, [
+      [4, 9],
+      [9, 9],
+    ]);
   });
   H('bag lady woolly hat bobble scarf grey hair tan', 'tan', 'calm', (c) => {
     const hat = CLOTH.plum,
@@ -123,14 +202,32 @@ module.exports = (kit, U) => {
     c.row(2, 3, 10, hat);
     c.row(3, 3, 10, dark(hat));
     c.set(4, 1, lite(hat));
-    P(c, lite(hat), [[4, 3], [6, 3], [8, 3]]);
-    P(c, h, [[2, 4], [2, 5], [2, 6], [3, 4], [11, 4], [11, 5]]);
+    P(c, lite(hat), [
+      [4, 3],
+      [6, 3],
+      [8, 3],
+    ]);
+    P(c, h, [
+      [2, 4],
+      [2, 5],
+      [2, 6],
+      [3, 4],
+      [11, 4],
+      [11, 5],
+    ]);
     c.set(11, 6, dark(h));
     c.row(10, 3, 10, sc);
     c.row(11, 3, 10, sc);
     c.row(12, 4, 9, dark(sc));
-    P(c, dark(sc), [[5, 10], [8, 11], [10, 11]]);
-    P(c, RED, [[4, 11], [7, 10]]);
+    P(c, dark(sc), [
+      [5, 10],
+      [8, 11],
+      [10, 11],
+    ]);
+    P(c, RED, [
+      [4, 11],
+      [7, 10],
+    ]);
   });
   S('welder mask iron dark green window', (c) => {
     const m = hex('#4a4640'),
@@ -147,19 +244,44 @@ module.exports = (kit, U) => {
     c.rect(5, 5, 8, 6, g);
     c.set(5, 5, hex('#5fae7a'));
     c.set(6, 5, hex('#2f6a48'));
-    P(c, lite(m), [[3, 8], [10, 4]]);
-    P(c, C.steel, [[3, 6], [10, 6]]);
-    P(c, SOOT, [[8, 3], [9, 4], [4, 9], [8, 9]]);
-    P(c, hex('#84482a'), [[7, 10], [4, 4]]);
+    P(c, lite(m), [
+      [3, 8],
+      [10, 4],
+    ]);
+    P(c, C.steel, [
+      [3, 6],
+      [10, 6],
+    ]);
+    P(c, SOOT, [
+      [8, 3],
+      [9, 4],
+      [4, 9],
+      [8, 9],
+    ]);
+    P(c, hex('#84482a'), [
+      [7, 10],
+      [4, 4],
+    ]);
   });
   H('cellar child dirty blond fringe grime pale', 'pale', 'hollow', (c, s) => {
     const h = mix(HAIR.blond, 0.8);
     HAIRS.fringe(c, h);
-    P(c, h, [[2, 4], [2, 5], [11, 4], [3, 6]]);
+    P(c, h, [
+      [2, 4],
+      [2, 5],
+      [11, 4],
+      [3, 6],
+    ]);
     c.set(11, 5, dark(h));
     c.set(6, 5, s);
     const g = mix(s, 0.62);
-    P(c, g, [[4, 8], [3, 8], [9, 9], [8, 10], [6, 8]]);
+    P(c, g, [
+      [4, 8],
+      [3, 8],
+      [9, 9],
+      [8, 10],
+      [6, 8],
+    ]);
     c.set(5, 1, h);
     c.set(8, 1, h);
   });
@@ -167,32 +289,76 @@ module.exports = (kit, U) => {
     c.row(2, 5, 8, s);
     const cap = hex('#9a4a34'),
       mo = hex('#4a5e3a');
-    P(c, BONE, [[4, 2], [5, 2], [10, 2]]);
+    P(c, BONE, [
+      [4, 2],
+      [5, 2],
+      [10, 2],
+    ]);
     c.row(0, 3, 6, cap);
     c.row(1, 2, 7, cap);
     c.set(7, 1, dark(cap));
-    P(c, WHITE, [[4, 0], [6, 1], [3, 1]]);
+    P(c, WHITE, [
+      [4, 0],
+      [6, 1],
+      [3, 1],
+    ]);
     c.row(1, 9, 11, cap);
     c.set(11, 1, dark(cap));
     c.set(10, 1, WHITE);
-    P(c, mo, [[4, 8], [9, 4], [3, 5], [8, 10], [4, 4], [9, 8]]);
-    P(c, lite(mo), [[4, 9], [10, 5]]);
+    P(c, mo, [
+      [4, 8],
+      [9, 4],
+      [3, 5],
+      [8, 10],
+      [4, 4],
+      [9, 8],
+    ]);
+    P(c, lite(mo), [
+      [4, 9],
+      [10, 5],
+    ]);
   });
 
   /* ---------- torsos ---------- */
   const boilerSuit = (col, dirty) => (c) => {
     body(c, col);
-    P(c, WHITE, [[5, 1], [6, 1]]);
-    P(c, lite(col), [[4, 1], [7, 1]]);
+    P(c, WHITE, [
+      [5, 1],
+      [6, 1],
+    ]);
+    P(c, lite(col), [
+      [4, 1],
+      [7, 1],
+    ]);
     c.col(5, 2, 9, dark(col));
     c.set(6, 2, C.steel);
     c.row(4, 2, 3, dark(col));
     c.row(4, 7, 8, dark(col));
     c.set(3, 5, C.brass);
-    P(c, WHITE, [[7, 3], [8, 3]]);
+    P(c, WHITE, [
+      [7, 3],
+      [8, 3],
+    ]);
     c.row(7, 2, 9, dark(col));
     c.set(6, 7, C.steel);
-    P(c, SOOT, dirty ? [[3, 6], [3, 8], [4, 8], [8, 6], [7, 9], [2, 3], [8, 5]] : [[3, 8], [8, 6]]);
+    P(
+      c,
+      SOOT,
+      dirty
+        ? [
+            [3, 6],
+            [3, 8],
+            [4, 8],
+            [8, 6],
+            [7, 9],
+            [2, 3],
+            [8, 5],
+          ]
+        : [
+            [3, 8],
+            [8, 6],
+          ],
+    );
   };
   T('boiler suit navy zip pockets', boilerSuit(BOILER));
   T('boiler suit rust sooty dirty', boilerSuit(mix(CLOTH.rust, 0.85), true));
@@ -202,34 +368,70 @@ module.exports = (kit, U) => {
     c.clear(1, 6);
     c.clear(10, 6);
     for (let y = 3; y <= 9; y++) for (let x = 2; x <= 9; x++) if ((x + y) % 2 === 0) c.set(x, y, WHITE);
-    P(c, WHITE, [[3, 1], [3, 2], [8, 1], [8, 2]]);
+    P(c, WHITE, [
+      [3, 1],
+      [3, 2],
+      [8, 1],
+      [8, 2],
+    ]);
     c.row(9, 2, 9, WHITE);
     c.col(9, 3, 9, dark(WHITE));
-    P(c, dark(s), [[5, 2], [6, 3], [9, 2]]);
-    P(c, hex('#a89858'), [[4, 6], [5, 7], [4, 7]]);
+    P(c, dark(s), [
+      [5, 2],
+      [6, 3],
+      [9, 2],
+    ]);
+    P(c, hex('#a89858'), [
+      [4, 6],
+      [5, 7],
+      [4, 7],
+    ]);
   });
   T('rubber apron dark green over grey shirt', (c) => {
     const r = C.rubber;
     body(c, CLOTH.ash);
-    P(c, SKINS.tan, [[5, 1], [6, 1]]);
+    P(c, SKINS.tan, [
+      [5, 1],
+      [6, 1],
+    ]);
     c.rect(3, 2, 8, 9, r);
-    P(c, r, [[4, 1], [7, 1], [2, 6], [9, 6]]);
+    P(c, r, [
+      [4, 1],
+      [7, 1],
+      [2, 6],
+      [9, 6],
+    ]);
     c.col(8, 2, 9, dark(r));
     c.col(4, 3, 6, lite(r));
     c.set(4, 3, C.glass);
     c.row(9, 3, 8, dark(r));
-    P(c, hex('#6a7a3a'), [[6, 6], [6, 7], [5, 7], [7, 8]]);
+    P(c, hex('#6a7a3a'), [
+      [6, 6],
+      [6, 7],
+      [5, 7],
+      [7, 8],
+    ]);
   });
   T('waders bib olive rubber braces mustard jumper', (c) => {
     const o = C.olive,
       j = mix(CLOTH.mustard, 0.85);
     body(c, j);
-    P(c, dark(j), [[5, 1], [6, 1], [4, 2], [7, 2], [5, 3], [6, 3]]);
+    P(c, dark(j), [
+      [5, 1],
+      [6, 1],
+      [4, 2],
+      [7, 2],
+      [5, 3],
+      [6, 3],
+    ]);
     c.rect(3, 4, 8, 9, o);
     c.rect(2, 6, 9, 9, o);
     c.col(3, 1, 3, o);
     c.col(8, 1, 3, dark(o));
-    P(c, C.brass, [[3, 4], [8, 4]]);
+    P(c, C.brass, [
+      [3, 4],
+      [8, 4],
+    ]);
     c.col(9, 6, 9, dark(o));
     c.set(4, 5, lite(o));
     c.row(8, 2, 9, dark(o));
@@ -275,8 +477,16 @@ module.exports = (kit, U) => {
     }
     c.col(5, 3, 6, d);
     c.set(6, 8, d);
-    P(c, VEIN, [[2, 3], [3, 5], [8, 8]]);
-    P(c, mix(w, 0.6), [[4, 9], [7, 9], [3, 8]]);
+    P(c, VEIN, [
+      [2, 3],
+      [3, 5],
+      [8, 8],
+    ]);
+    P(c, mix(w, 0.6), [
+      [4, 9],
+      [7, 9],
+      [3, 8],
+    ]);
     c.set(1, 1, lite(w));
   });
   T('donkey jacket black leather shoulders', (c) => {
@@ -285,10 +495,21 @@ module.exports = (kit, U) => {
     body(c, col);
     c.rect(1, 1, 10, 2, le);
     c.row(3, 2, 9, dark(le));
-    P(c, CLOTH.ash, [[5, 1], [6, 1]]);
-    P(c, col, [[4, 1], [7, 1], [4, 2], [7, 2]]);
+    P(c, CLOTH.ash, [
+      [5, 1],
+      [6, 1],
+    ]);
+    P(c, col, [
+      [4, 1],
+      [7, 1],
+      [4, 2],
+      [7, 2],
+    ]);
     c.col(5, 2, 9, K);
-    P(c, C.iron, [[6, 5], [6, 7]]);
+    P(c, C.iron, [
+      [6, 5],
+      [6, 7],
+    ]);
     c.row(7, 2, 3, lite(col));
     c.row(7, 8, 9, lite(col));
     c.set(1, 1, lite(le));
@@ -309,8 +530,20 @@ module.exports = (kit, U) => {
     const s = SKINS.fair;
     hand(c, s, 0);
     c.set(1, 0, lite(s));
-    P(c, hex('#44546e'), [[2, 2], [2, 3], [1, 3], [3, 3], [2, 4], [1, 5], [2, 5], [3, 5]]);
-    P(c, dark(s), [[1, 7], [2, 8]]);
+    P(c, hex('#44546e'), [
+      [2, 2],
+      [2, 3],
+      [1, 3],
+      [3, 3],
+      [2, 4],
+      [1, 5],
+      [2, 5],
+      [3, 5],
+    ]);
+    P(c, dark(s), [
+      [1, 7],
+      [2, 8],
+    ]);
   });
   A('rubber gauntlet dark green long glove earth sleeve', (c) => {
     const r = C.rubber;
@@ -332,7 +565,11 @@ module.exports = (kit, U) => {
     c.row(9, 1, 3, w);
     for (const x of [1, 3]) c.col(x, 10, 11, w);
     c.set(2, 10, w);
-    P(c, hex('#77726c'), [[1, 11], [3, 11], [2, 10]]);
+    P(c, hex('#77726c'), [
+      [1, 11],
+      [3, 11],
+      [2, 10],
+    ]);
   });
   A('hoarder layered sleeve plum fingerless glove tan', (c) => {
     sleeve(c, CLOTH.plum, 6);
