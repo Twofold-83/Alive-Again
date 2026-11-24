@@ -823,15 +823,13 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
               'WCcCcwwCcCcW',
               'WcCcCwwcCcCW',
               'WCcCcwwCcCcW',
-              'WcCcCwwcCcCW',
-              'WCgCgwwCgCgW',
-              'WgGgggwgggGW',
-              'eWWWWWWWWWWWWe',
+              'WcgcgwwcgcgW',
+              'WgGggwwgggGW',
+              'WggggwwgGggW',
             ], p);
-            c.row(8, 2, 13, p.w);
             c.row(9, 1, 14, p.W);
-            art(c, 2, 7, ['WCgCgwwCgCgW'], p);
             c.row(10, 1, 14, p.D);
+            c.col(14, 1, 8, p.z);
           },
         ],
         [
@@ -961,14 +959,13 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
     const fl = hex('#2f2325'),
       flL = hex('#3a2c2c'),
       flD = hex('#261b1e'),
-      jo = hex('#140c0e');
+      jo = hex('#1c1214');
     const wall = (c) => {
       fill(c, p.r);
       dots(c, p.R, [[2, 2], [3, 2], [4, 3], [9, 6], [10, 6], [11, 7], [13, 12], [14, 12], [5, 13], [6, 13], [15, 1], [0, 1]]);
       dots(c, p.q, [[6, 4], [7, 4], [7, 5], [12, 2], [13, 2], [1, 8], [2, 8], [2, 9], [10, 13], [11, 13], [11, 14], [15, 7], [0, 7], [8, 10], [5, 0]]);
       dots(c, p.u, [[7, 6], [13, 3], [3, 10], [11, 15]]);
-      dots(c, p.g, [[4, 6], [5, 6], [5, 7], [12, 9], [13, 10]]);
-      dots(c, p.e, [[6, 7]]);
+      dots(c, p.g, [[4, 6], [5, 7], [6, 7]]);
     };
     const floor = (c) => {
       fill(c, fl);
@@ -1155,7 +1152,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
       s: '#5f5e65', // castle stone
       S: '#6d6c72',
       t: '#525158',
-      m: '#34333a',
+      m: '#3b3a41',
       u: '#232228',
       g: '#465166', // sky in the slit
       G: '#63708a',
@@ -1196,24 +1193,21 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
         if (y === y0) return k === 1 ? p.s : p.S;
         return k === 0 ? p.s : k === 1 ? p.t : p.s;
       });
-      dots(c, p.t, [[2, 2], [3, 2], [9, 3], [13, 7], [14, 7], [5, 12], [6, 13], [12, 13]]);
-      dots(c, p.S, [[10, 1], [11, 2], [6, 6], [7, 7], [3, 12], [12, 11]]);
-      dots(c, p.m, [[13, 2], [8, 8], [4, 14]]);
+      dots(c, p.t, [[2, 2], [3, 2], [13, 7], [14, 7], [5, 13], [6, 13]]);
+      dots(c, p.S, [[10, 2], [11, 2], [6, 7], [12, 12]]);
+      dots(c, p.m, [[13, 3], [4, 14]]);
     };
     const floor = (c) => {
       fill(c, fs);
       c.row(15, 0, 15, fj);
-      c.row(6, 0, 15, fj);
-      c.col(9, 0, 5, fj);
-      c.col(15, 0, 5, fj);
-      c.col(4, 7, 14, fj);
-      c.col(12, 7, 14, fj);
-      c.row(10, 5, 11, fj);
-      c.rect(10, 0, 14, 5, fsD);
-      c.rect(5, 7, 11, 9, fsL);
-      dots(c, fsL, [[2, 1], [3, 1], [1, 9], [14, 12], [7, 13]]);
-      dots(c, fsD, [[5, 3], [6, 3], [7, 4], [0, 12], [1, 12], [8, 8], [9, 12], [13, 9]]);
-      dots(c, fs, [[11, 2], [12, 3], [6, 8]]);
+      c.row(5, 0, 15, fj);
+      c.col(11, 0, 4, fj);
+      c.col(4, 6, 14, fj);
+      c.col(12, 6, 14, fj);
+      c.row(0, 0, 10, fsL);
+      c.row(6, 5, 11, fsL);
+      dots(c, fsL, [[2, 2], [14, 9], [1, 12]]);
+      dots(c, fsD, [[5, 3], [6, 3], [13, 2], [0, 12], [1, 13], [8, 9], [9, 12], [10, 12], [14, 13]]);
     };
     const boards = (c) => {
       fill(c, ok);
@@ -1243,22 +1237,23 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
           'arrow-slit',
           'arrow slit loophole narrow window embrasure',
           (c) => {
-            art(c, 4, 1, [
-              '..mmmm..',
-              '.mtuutm.',
-              '.mtuGtm.',
-              '.mtuGtm.',
-              '.mtuGtm.',
-              'mtuuGGtm',
-              'mtuGGgtm',
-              'mtuugGtm',
-              '.mtugtm.',
-              '.mtugtm.',
-              '.mtugtm.',
-              '.mtugtm.',
-              'mttuuttm',
-              'mtttSttm',
-              'mmmmmmmm',
+            art(c, 3, 0, [
+              '...mmmm...',
+              '..mtuutm..',
+              '..mtuGum..',
+              '..mtGGum..',
+              '..mtGGum..',
+              '.mtuGGuum.',
+              '.mtGGGGum.',
+              '.mtuGguum.',
+              '..mtGgum..',
+              '..mtggum..',
+              '..mtggum..',
+              '..mtggum..',
+              '..mtgguum.',
+              '.mttuuutm.',
+              '.mtSSSStm.',
+              '.mmmmmmmm.',
             ], p);
           },
         ],
@@ -1266,22 +1261,25 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
           'torch',
           'wall torch bracket unlit iron sconce',
           (c) => {
-            tint(c, 5, 0, 10, 3, p.k, 0.25);
-            tint(c, 6, 0, 9, 2, p.k, 0.25);
-            art(c, 4, 3, [
-              '...ccc..',
-              '..cycc..',
-              '...cyc..',
-              '..IiiiI.',
-              '...iWi..',
-              '....W...',
-              '.ii.W...',
-              '.iiIWI..',
-              '.i..W...',
-              '....w...',
-              '....w...',
+            tint(c, 5, 0, 10, 2, p.k, 0.3);
+            tint(c, 6, 0, 9, 1, p.k, 0.3);
+            art(c, 4, 2, [
+              '..cccc..',
+              '.cycycc.',
+              '.ccyccc.',
+              '..cccc..',
+              '.IiiiiI.',
+              '..iWwi..',
+              '...Ww...',
+              'II.Ww...',
+              'iiIWwI..',
+              'ii.Ww...',
+              '...Ww...',
+              '...Ww...',
+              '...ww...',
             ], p);
-            c.col(9, 7, 13, p.t);
+            c.col(9, 8, 14, p.t);
+            c.col(10, 4, 5, p.t);
           },
         ],
         [
@@ -1383,17 +1381,10 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas, rows }) => {
           'cracked',
           'cracked flagstone broken slab',
           (c) => {
-            art(c, 1, 0, [
-              '....j.......',
-              '....j.......',
-              '.....j......',
-              '.....jj.....',
-              '......j.....',
-              '......j.....',
-            ], { j: fj });
-            art(c, 5, 10, ['......j', '....jj.', '..jj...', 'jj.....', 'j......'], { j: fj });
-            dots(c, fsL, [[6, 0], [6, 1], [7, 2], [8, 4]]);
-            dots(c, fj, [[13, 8], [14, 8], [13, 9]]);
+            art(c, 5, 6, ['...j...', '...j...', '..j....', '..jj...', '...j...', '....j..', '....jj.', '.....j.', '.....j.'], { j: fj });
+            dots(c, fsL, [[9, 6], [9, 7], [8, 8], [10, 11]]);
+            art(c, 0, 0, ['jj.', 'j..'], { j: fj });
+            dots(c, fj, [[14, 3], [15, 3], [15, 4]]);
           },
         ],
       ],

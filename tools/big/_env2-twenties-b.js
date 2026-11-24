@@ -527,8 +527,7 @@ module.exports = (kit, H) => {
       if (!u) {
         for (const [x0, x1, cx] of [[4, 12, 12], [13, 21, 13]]) {
           c.rect(x0, 6, x1, 22, mix(WAL, 1.12)); // the doors, a sunburst in lighter veneer
-          for (const [dx, dy] of [[-8, -7], [-8, -2], [-6, -8], [-3, -8]]) c.line(cx, 14, cx + (cx === 12 ? dx : -dx), 14 + dy, hex('#8a6a44'));
-          for (const [dx, dy] of [[-8, 7], [-8, 2], [-6, 8], [-3, 8]]) c.line(cx, 14, cx + (cx === 12 ? dx : -dx), 14 + dy, D(WAL));
+          for (const [dx, dy] of [[-8, -8], [-8, 0], [-8, 8], [-4, -8], [-4, 8], [0, -8], [0, 8]]) c.line(cx, 14, cx + (cx === 12 ? dx : -dx), 14 + dy, hex('#7d5e3e'));
         }
         c.col(12, 6, 22, D(WAL));
         c.col(13, 6, 22, L(WAL));
@@ -922,30 +921,35 @@ module.exports = (kit, H) => {
       c.line(11, b - 14, 11, b - 1, EB); // the umbrella
       c.set(11, b - 15, WAL);
       c.set(12, b - 16, WAL);
-      c.line(7, 8, 3, 6, WAL); // hooks
-      c.line(10, 8, 14, 6, WAL);
-      c.line(7, 11, 4, 10, WAL);
-      c.line(10, 11, 13, 10, WAL);
-      c.set(3, 5, WAL);
-      c.set(14, 5, WAL);
-      c.rect(1, 4, 6, 4, hex('#4a3a2c')); // a brown hat on the left hook
-      c.rect(2, 2, 5, 3, hex('#5e4a36'));
-      c.row(2, 2, 5, hex('#7a624a'));
+      c.line(7, 12, 3, 10, WAL); // hooks
+      c.line(10, 12, 14, 10, WAL);
+      c.line(7, 16, 4, 15, WAL);
+      c.line(10, 16, 13, 15, WAL);
+      c.set(3, 9, WAL);
+      c.set(14, 9, WAL);
+      c.rect(1, 9, 6, 9, hex('#4a3a2c')); // a brown hat on the left hook
+      c.rect(2, 7, 5, 8, hex('#5e4a36'));
+      c.row(7, 2, 5, hex('#7a624a'));
+      c.row(8, 2, 5, EB);
       if (!u) {
-        c.rect(5, 3, 12, 3, FELTHAT); // the grey fedora on top
-        c.rect(6, 1, 11, 2, FELTHAT);
+        c.rect(4, 4, 13, 4, FELTHAT); // the grey fedora on top
+        c.rect(6, 1, 11, 3, FELTHAT);
         c.row(1, 7, 10, L(FELTHAT));
-        c.row(2, 6, 11, EB);
-        c.poly([[11, 7], [15, 7], [16, 26], [10, 26]], TRENCH); // the trench coat
-        c.line(11, 7, 10, 26, L(TRENCH));
-        c.col(13, 9, 26, D(TRENCH));
-        c.row(15, 10, 16, D(TRENCH));
-        c.set(14, 15, BR);
-        c.poly([[15, 8], [16, 9], [16, 20], [15, 20]], D(TRENCH));
+        c.set(8, 1, D(FELTHAT));
+        c.row(3, 6, 11, EB);
+        c.poly([[11, 10], [15, 10], [16, 28], [10, 28]], TRENCH); // the trench coat
+        c.line(11, 10, 10, 28, L(TRENCH));
+        c.col(13, 12, 28, D(TRENCH));
+        c.row(18, 10, 16, D(TRENCH));
+        c.set(14, 18, BR);
+        c.poly([[15, 11], [16, 12], [16, 22], [15, 22]], D(TRENCH));
       } else {
         c.rect(7, 3, 10, 4, WAL); // coat and hat gone: whoever it was has left
         c.set(8, 2, WAL);
         c.set(9, 2, L(WAL));
+        c.rect(1, b - 1, 5, b, FELTHAT); // no: the grey hat lies by the feet
+        c.rect(2, b - 3, 4, b - 2, FELTHAT);
+        c.row(b - 1, 2, 4, EB);
       }
     },
   });
