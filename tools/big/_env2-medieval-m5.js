@@ -375,39 +375,39 @@ module.exports = (kit, H) => {
       dots(c, C.moss, [3, b, 7, b - 1, 4, 22]);
     },
   });
-  add('medieval-pewter-jug-goblets', 'pewter jug goblets wine cups tray flagon drink table', {
-    w: 14, h: 12,
+  add('medieval-pewter-jug-goblets', 'pewter jug goblets wine cups flagon drink table', {
+    w: 18, h: 14,
     f(c, u) {
       const b = c.h - 2;
-      c.row(b, 1, 12, PEWTER);
-      c.row(b, 1, 5, L(PEWTER));
-      c.rect(2, 4, 5, b - 1, PEWTER); // the jug
-      c.rect(3, 2, 4, 3, PEWTER);
+      c.rect(2, 5, 5, b, PEWTER); // the jug
+      c.rect(3, 2, 4, 4, PEWTER);
       c.set(2, 2, PEWTER);
-      c.col(2, 4, b - 1, L(PEWTER));
-      c.col(6, 4, 7, PEWTER);
-      c.set(5, 6, D(PEWTER));
-      c.row(6, 2, 5, D(PEWTER));
+      c.col(2, 5, b, L(PEWTER));
+      c.set(3, 2, L(PEWTER));
+      c.row(7, 2, 5, D(PEWTER));
+      c.row(b, 2, 5, D(PEWTER));
+      c.set(6, 5, PEWTER);
+      c.set(7, 6, PEWTER);
+      c.set(7, 7, PEWTER);
+      c.set(6, 8, PEWTER);
       const cup = (x) => {
-        c.rect(x, 5, x + 2, 6, PEWTER);
-        c.set(x, 5, L(PEWTER));
-        c.col(x + 1, 7, b - 1, PEWTER);
-        c.row(b - 1, x, x + 2, D(PEWTER));
+        c.rect(x, 6, x + 2, 8, PEWTER);
+        c.col(x, 6, 8, L(PEWTER));
+        c.row(6, x, x + 2, C.wine);
+        c.col(x + 1, 9, b - 1, PEWTER);
+        c.row(b, x, x + 2, D(PEWTER));
       };
-      cup(8);
-      if (!u) {
-        c.row(4, 8, 10, PEWTER);
-        c.row(4, 9, 9, C.wine);
-        c.rect(11, 6, 12, 7, PEWTER);
-        c.set(11, 8, PEWTER);
-        c.row(b - 1, 11, 12, D(PEWTER));
-      } else {
-        c.rect(11, b - 2, 13, b - 1, PEWTER); // one on its side
-        c.set(11, b - 2, L(PEWTER));
-        c.row(b, 9, 14, C.wine);
-        c.set(14, b + 1, C.wine);
-        c.set(12, b + 1, C.wine);
-        c.set(13, b, L(C.wine));
+      cup(9);
+      if (!u) cup(14);
+      else {
+        c.rect(13, b - 2, 15, b, PEWTER); // one on its side, the wine run out
+        c.col(13, b - 2, b, L(PEWTER));
+        c.row(b - 1, 16, 17, PEWTER);
+        c.col(18, b - 2, b, D(PEWTER));
+        c.row(b, 4, 12, C.wine);
+        c.set(8, b - 1, C.wine);
+        c.row(6, 9, 11, PEWTER);
+        dots(c, L(C.wine), [7, b, 11, b]);
       }
     },
     u: [0, 0, 2],

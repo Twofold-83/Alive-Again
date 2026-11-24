@@ -654,16 +654,15 @@ module.exports = (kit, H) => {
     sw: 22, sh: 24,
     s(c, u) {
       const b = c.h - 2; // bow on
-      c.poly([[3, 11], [18, 11], [17, 15], [13, 19], [8, 19], [4, 15]], HULL);
-      c.poly([[4, 16], [17, 16], [13, 19], [8, 19]], OX);
-      c.row(11, 3, 18, L(HULL));
-      c.row(13, 4, 17, D(HULL));
-      c.col(10, 9, 19, L(HULL)); // the stem
-      c.col(11, 9, 19, D(HULL));
-      c.rect(10, 20, 11, 20, C.woodDark);
+      c.poly([[2, 11], [19, 11], [18, 15], [13, 20], [8, 20], [3, 15]], HULL);
+      c.poly([[3, 16], [18, 16], [13, 20], [8, 20]], OX);
+      c.row(11, 2, 19, L(HULL));
+      c.row(13, 3, 18, D(HULL));
+      c.col(10, 8, 20, L(HULL)); // the stem
+      c.col(11, 8, 20, D(HULL));
       c.rect(6, 5, 15, 10, HULL);
       c.row(5, 5, 16, L(HULL));
-      c.rect(7, 6, 10, 8, GLASSD);
+      c.rect(7, 6, 9, 8, GLASSD);
       c.rect(12, 6, 14, 8, GLASSD);
       c.set(8, 7, C.glassLight);
       c.col(4, 3, 10, C.wood);
@@ -678,10 +677,11 @@ module.exports = (kit, H) => {
         c.poly([[16, 10], [16, 7], [19, 8], [19, 10]], TARP);
         c.row(7, 16, 18, L(TARP));
       }
-      c.line(5, 16, 2, b, C.wood); // props
-      c.line(16, 16, 19, b, C.wood);
-      c.rect(8, 20, 13, b, C.wood);
-      c.row(20, 8, 13, C.woodLight);
+      for (const x of [3, 15]) {
+        c.rect(x, 18, x + 3, b, C.wood); // chocks either side of the keel
+        c.row(18, x, x + 3, C.woodLight);
+        c.col(x + 3, 19, b, C.woodDark);
+      }
     },
   });
 };
