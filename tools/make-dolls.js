@@ -28,7 +28,7 @@ if (only && !outDir) throw new Error('--only needs --out=<folder>');
 const OUT = only ? outDir : path.join(__dirname, '..', 'public', 'doll');
 const BASE = 500; // the parts made in this file
 /** The modules in tools/dolls/, in the order their parts are numbered. Append new modules at the end. */
-const EXTRA = ['basics', 'modern', 'horror', 'old', 'country', 'other'];
+const EXTRA = ['basics', 'modern']; // a module joins the list when it is finished: horror, old, country and other are still being drawn
 
 /* ---------- a tiny PNG writer ---------- */
 const CRC = (() => {

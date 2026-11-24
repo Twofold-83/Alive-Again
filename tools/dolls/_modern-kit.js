@@ -19,7 +19,7 @@ module.exports = (kit, lists) => {
     khaki: hex('#8a7f55'),
     olive: hex('#535a36'),
     beige: hex('#b3a37c'),
-    hivis: hex('#c4b638'),
+    hivis: hex('#b0a43c'),
     orange: hex('#c06a2c'),
     silver: hex('#b4b8b8'),
     steel: hex('#6b7078'),

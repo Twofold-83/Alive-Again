@@ -87,8 +87,10 @@ module.exports = (m) => {
     c.row(0, 5, 9, w);
     c.rect(3, 1, 10, 3, w);
     P(c, w, [3, 4, 2, 2, 2, 3]);
-    P(c, dark(w), [10, 4, 11, 2, 11, 3, 10, 1, 4, 2, 5, 3, 7, 1, 8, 2]);
-    P(c, lite(w), [4, 1, 5, 0]);
+    P(c, dark(w), [10, 4, 11, 2, 11, 3, 10, 1, 10, 2, 10, 3]);
+    c.row(2, 4, 8, dark(w)); // one fold across
+    c.set(9, 1, dark(w));
+    P(c, lite(w), [4, 1, 5, 0, 5, 1]);
     P(c, w, [10, 0, 11, 0, 11, 1]); // the knot
     P(c, GOLD, [2, 8, 11, 8]);
     c.row(9, 6, 7, C.lip);
@@ -132,7 +134,7 @@ module.exports = (m) => {
     body(c, g);
     c.row(1, 3, 8, dark(g));
     P(c, dark(g), [4, 2, 7, 2]);
-    P(c, WHITE, [5, 3, 5, 4, 6, 3]);
+    P(c, WHITE, [5, 3, 5, 4, 6, 3, 6, 4, 6, 5]);
     c.row(6, 3, 8, dark(g));
     P(c, dark(g), [3, 7, 8, 7]);
     c.row(9, 2, 9, dark(g));
@@ -267,7 +269,6 @@ module.exports = (m) => {
     m.trousers(c, C.grey);
     c.row(9, 1, 4, dark(C.grey));
     c.set(2, 1, WHITE); // the cord
-    c.set(2, 2, WHITE);
     c.set(1, 4, lite(C.grey)); // a baggy knee
     c.set(1, 5, lite(C.grey));
     shoe(c, WHITE);
