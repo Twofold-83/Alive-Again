@@ -241,10 +241,16 @@ as icons, and what the Player did is read out like the log of an old adventure g
 
 Besides the ready-drawn sprites there is a **Character maker** (in the Director's menu,
 and for the Player as "Make my character"). A person is put together from a
-head, a torso, arms and legs — 500 parts in a muted old-home-computer palette (190 heads
-from tired faces to plague doctors and drowned girls, 130 torsos, 90 arms, 90 legs), made by
-`tools/make-dolls.js`.
+head, a torso, arms and legs — 1,504 parts in a muted old-home-computer palette (570 heads
+from tired faces to plague doctors and drowned girls, 417 torsos, 255 arms, 262 legs), made by
+`tools/make-dolls.js`. The first 500 are combinations of a few shapes; the other 1,004 are drawn one by one in
+`tools/dolls/*.js` for the settings of the game.
 
+- **By setting.** Every one of the 32 settings has heads, torsos, arms and legs that belong together — a nurse,
+  a knight, a flapper, a demon, a survivor in a gas mask. A drop-down in the character maker shows the parts of
+  one setting, and "Surprise me" then makes someone who belongs there.
+- **Bare skin.** A bare chest and bare legs in small white shorts, in all seven skin tones; the "Bare skin"
+  button undresses a figure to them, in the skin of its head.
 - **Posing.** Drag the head, an arm or a leg and it turns at the joint; or press a ready
   pose (Stand, Arms up, Wave, Point, Reach, Cower, Stride, Run, Kick, Shrug, Hang head,
   Sprawl). The Director poses anyone ("Pose" on a selected figure); the Player poses their

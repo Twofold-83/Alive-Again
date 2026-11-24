@@ -78,6 +78,11 @@ for (const skin of ['pale', 'fair', 'tan', 'brown', 'ashen', 'rotten', 'drowned'
   );
 }
 for (const x of parts) assert(!x.theme || x.theme === 'basic' || ENVIRONMENTS.some((e) => e.id === x.theme), `${x.id}: theme ${x.theme}`);
+/* every setting can dress a whole person of its own */
+for (const env of ENVIRONMENTS)
+  for (const k of ['heads', 'torsos', 'arms', 'legs']) assert(dolls[k].filter((x) => x.theme === env.id).length >= 4, `${env.id} has ${k}`);
+assert(parts.length >= 1500, 'a thousand new parts');
+for (const hd of dolls.heads) assert(fs.existsSync(`public/doll/f-${hd.id}.png`), 'feelings for ' + hd.id);
 for (const part of parts) assert(fs.existsSync(`public/doll/${part.id}.png`) && part.name, part.id);
 for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.length % 16 === 0, m.id);
 /* battle rules: the difficulty decides every number; a round is the hero's move and then each enemy's */
