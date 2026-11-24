@@ -470,11 +470,14 @@ module.exports = (H, O) => {
     h: 32,
     f(c, u) {
       c.stamp(rocker(false), 0, u ? 2 : 1);
-      if (u) {
+      return () => {
+        if (!u) return;
         // someone not quite there is sitting in it
-        for (let y = 6; y <= 18; y++) for (let x = 6; x <= 12; x++) if ((x + y) % 2 === 0 && (y > 10 || (x > 7 && x < 11))) c.set(x, y, SHADOW);
-        eyes(c, 8, 8, EYE, 2);
-      }
+        const G = hex('#2a2430');
+        for (let y = 5; y <= 19; y++) for (let x = 6; x <= 12; x++) if (y > 10 ? (x + y) % 2 === 0 || y < 14 : x > 7 && x < 11) c.set(x, y, G);
+        eyes(c, 8, 7, EYE, 2);
+        for (let y = 20; y <= 28; y += 2) dots(c, G, [7, y, 11, y]);
+      };
     },
     sw: 25,
     s(c, u) {
@@ -482,9 +485,14 @@ module.exports = (H, O) => {
       if (!u) return void c.stamp(t, 0, 1);
       // tipped back on its rockers
       for (let y = 0; y < t.h; y++) for (let x = 0; x < t.w; x++) if (t.get(x, y)) c.set(x + Math.round((y - 28) * 0.18) + 1, y + 1 + Math.round((x - 12) * 0.12), t.get(x, y));
-      for (let y = 7; y <= 18; y++) for (let x = 5; x <= 10; x++) if ((x + y) % 2 === 0 && y > 9) c.set(x, y, SHADOW);
-      c.rect(6, 5, 8, 8, SHADOW);
-      c.set(8, 6, EYE);
+      return () => {
+        const G = hex('#2a2430');
+        for (let y = 10; y <= 19; y++) for (let x = 5; x <= 11; x++) if ((x + y) % 2 === 0 || y < 13) c.set(x, y, G);
+        c.rect(6, 5, 9, 9, G);
+        c.set(9, 7, EYE);
+        for (let x = 12; x <= 15; x++) if (x % 2) c.set(x, 19, G);
+        for (let y = 20; y <= 26; y += 2) c.set(15, y, G);
+      };
     },
   });
 

@@ -281,12 +281,18 @@ module.exports = (H, O) => {
     });
     for (let x = 1; x <= 12; x += 2) c.set(x, 12, SH);
     thin(c, side ? 9 : 4, 12, side ? 9 : 4, 16, hex('#8a8474'));
-    if (u) {
-      // and by its light, someone standing there
-      const x = 13;
-      for (let y = 10; y <= b; y++) for (let xx = x; xx <= x + (y < 15 ? 3 : 5); xx++) if ((xx + y) % 2 === 0) c.set(xx + (y < 15 ? 1 : 0), y, SHADOW);
-    }
-    return () => u && dots(c, LAMP, [3, 14, 10, 14, 2, 17, 11, 18, 6, 2]);
+    return () => {
+      if (!u) return;
+      dots(c, LAMP, [3, 14, 10, 14, 2, 17, 11, 18, 6, 2]);
+      // and by its light, someone standing there: only a darkness in the air, no line round it
+      const G = hex('#2a2430');
+      for (let y = 9; y <= b; y++) {
+        const head = y < 14,
+          x0 = head ? 14 : y < 16 ? 15 : 13,
+          x1 = head ? 17 : y < 16 ? 16 : 18;
+        for (let x = x0; x <= x1; x++) if ((x + y) % 2 === 0 || (head && y > 9 && y < 13)) c.set(x, y, G);
+      }
+    };
   }
   O('nightmare-floor-lamp-shadow', 'standard lamp with a fringed shade tall floor lamp its light shows a shadow with nobody to cast it', {
     w: 14,
@@ -587,8 +593,6 @@ module.exports = (H, O) => {
       }
       if (u) {
         // someone is waiting after all, or the shape of someone
-        for (let y = 14; y <= 31; y++) for (let x = 18; x <= 24; x++) if ((x + y) % 2 === 0 && (y > 19 || (x > 19 && x < 23))) c.set(x, y, SHADOW);
-        for (let y = 34; y <= b; y++) for (const x of [19, 23]) if (y % 2) c.set(x, y, SHADOW);
         c.rect(26, 30, 28, 31, HAIR); // a hat put down beside
         c.row(31, 25, 29, HAIR);
       } else {
@@ -596,6 +600,13 @@ module.exports = (H, O) => {
         c.set(23, 19, HAIR);
         c.set(21, 32, W);
       }
+      return () => {
+        if (!u) return;
+        const G = hex('#2a2430');
+        for (let y = 14; y <= 31; y++) for (let x = 17; x <= 23; x++) if (y > 19 ? (x + y) % 2 === 0 || y < 23 : x > 18 && x < 22) c.set(x, y, G);
+        eyes(c, 19, 16, EYE, 2);
+        for (let y = 34; y <= b; y++) for (const x of [18, 22]) if (y % 2) c.set(x, y, G);
+      };
     },
     sw: 14,
     s(c, u) {
@@ -612,9 +623,13 @@ module.exports = (H, O) => {
       c.rect(8, 24, 9, 29, W);
       c.col(12, 34, b, IR);
       c.rect(7, b, 13, b, ID);
-      if (u) {
-        for (let y = 14; y <= 31; y++) for (let x = 9; x <= 12; x++) if ((x + y) % 2 === 0 && (y > 19 || x > 9)) c.set(x, y, SHADOW);
-      } else c.line(11, 20, 10, 31, HAIR);
+      if (!u) c.line(11, 20, 10, 31, HAIR);
+      return () => {
+        if (!u) return;
+        const G = hex('#2a2430');
+        for (let y = 14; y <= 31; y++) for (let x = 9; x <= 12; x++) if (y > 19 ? (x + y) % 2 === 0 || y < 23 : x > 9) c.set(x, y, G);
+        c.set(12, 16, EYE);
+      };
     },
   });
 
