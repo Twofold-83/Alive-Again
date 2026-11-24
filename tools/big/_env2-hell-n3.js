@@ -223,7 +223,11 @@ module.exports = (H, O) => {
       if (u) {
         c.row(b - 2, 8, 11, SKIN);
         dots(c, SKIN, [7, b - 1, 9, b, 11, b, 12, b - 1, 6, b]);
-      } else dots(c, SKIN, [9, 31, 11, 31, 10, 32, 9, 33, 11, 33]);
+      } else {
+        c.rect(9, 31, 11, 32, SKIN);
+        dots(c, SKIN, [9, 33, 11, 33, 9, 34, 10, 33]);
+        c.set(11, 32, D(SKIN));
+      }
       if (u) eyes(c, 5, 7, EYE, 2);
     },
     sw: 10,
@@ -239,7 +243,10 @@ module.exports = (H, O) => {
       if (u) {
         c.row(b - 2, 4, 7, SKIN);
         dots(c, SKIN, [8, b - 1, 8, b, 6, b]);
-      } else dots(c, SKIN, [4, 31, 6, 31, 5, 32]);
+      } else {
+        c.rect(4, 31, 6, 32, SKIN);
+        dots(c, SKIN, [4, 33, 6, 33, 5, 34]);
+      }
     },
   });
 
