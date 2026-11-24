@@ -7,8 +7,6 @@
  * Parts are numbered by their place in the lists, so the order of THEMES never changes and a new part goes at
  * the end of its list in the LAST theme file (or in a new file appended to THEMES).
  */
-const fs = require('fs');
-const path = require('path');
 const THEMES = ['hospital', 'basement', 'attic', 'toilet', 'horror', 'nightmare', 'graveyard'];
 
 module.exports = (kit) => {
@@ -105,7 +103,6 @@ module.exports = (kit) => {
   };
   const out = { heads: [], torsos: [], arms: [], legs: [] };
   for (const theme of THEMES) {
-    if (!fs.existsSync(path.join(__dirname, `_horror-${theme}.js`))) continue; // not drawn yet
     const part = require(`./_horror-${theme}.js`)(kit, U);
     for (const k of Object.keys(out)) for (const p of part[k]) out[k].push({ ...p, theme });
   }

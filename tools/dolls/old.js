@@ -1253,7 +1253,7 @@ module.exports = (kit) => {
       dots(c, HAIR.red, 3, 4, 3, 5, 4, 4, 10, 4);
       c.set(10, 5, dark(HAIR.red));
       const fr = mix(s, 0.78);
-      keeps(c, fr, 4, 7, 6, 7, 9, 7, 5, 8, 8, 8);
+      keeps(c, fr, 4, 7, 9, 7, 6, 7);
     },
   });
   heads.push({
@@ -3584,37 +3584,33 @@ module.exports = (kit) => {
     },
   });
   heads.push({
-    name: 'rocking horse head dapple grey black mane red bridle',
+    name: 'rocking horse head dapple grey black mane red noseband',
     theme: CH,
     special: true,
     draw(c) {
       const g = HORSE,
-        mz = mix(g, 0.78);
-      dots(c, g, 3, 0, 3, 1, 4, 1, 10, 0, 9, 1);
+        mz = mix(g, 0.75);
+      dots(c, g, 4, 0, 3, 1, 4, 1, 9, 0, 9, 1);
       dots(c, dark(g), 10, 1);
       c.row(2, 4, 9, g);
       c.rect(3, 3, 10, 6, g);
       c.row(7, 4, 9, g);
       c.rect(5, 8, 8, 11, g);
       c.col(10, 3, 6, dark(g));
-      c.set(9, 7, dark(g));
-      c.set(9, 2, dark(g));
-      dots(c, lite(g), 4, 2, 3, 3);
-      c.rect(5, 9, 8, 11, mz);
-      c.col(8, 8, 11, dark(mz));
+      dots(c, dark(g), 9, 7, 9, 2, 8, 9);
+      dots(c, lite(g), 4, 2, 3, 3, 3, 4);
+      c.rect(5, 10, 8, 11, mz);
+      c.set(8, 10, dark(mz));
+      c.set(8, 11, dark(mz));
       dots(c, K, 5, 10, 8, 10);
-      c.rect(6, 0, 7, 3, BLK);
-      dots(c, BLK, 5, 1, 8, 1, 5, 2, 6, 4);
-      dots(c, hi(BLK), 6, 0, 5, 1);
-      c.row(4, 3, 10, HOODRED);
-      c.set(6, 4, BLK);
+      c.rect(6, 1, 7, 3, BLK);
+      dots(c, BLK, 6, 4, 5, 2);
+      dots(c, hi(BLK), 6, 1);
+      dots(c, K, 4, 5, 9, 5);
       c.row(8, 5, 8, HOODRED);
-      dots(c, dark(HOODRED), 10, 4, 8, 8, 9, 5, 9, 6, 9, 7);
-      dots(c, HOODRED, 4, 5, 4, 6, 4, 7);
-      dots(c, GOLD, 3, 4, 4, 8);
-      dots(c, K, 5, 6, 8, 6);
-      dots(c, WHITE, 5, 5, 8, 5);
-      dots(c, STEEL, 6, 6, 7, 7, 3, 6);
+      c.set(8, 8, dark(HOODRED));
+      dots(c, GOLD, 5, 8);
+      dots(c, STEEL, 5, 6, 8, 4);
     },
   });
 
