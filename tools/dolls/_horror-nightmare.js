@@ -45,14 +45,13 @@ module.exports = (kit, U) => {
     };
     eye(5, 6);
     eye(8, 6, true);
-    eye(5, 4);
-    eye(8, 4, true);
-    eye(7, 3);
+    eye(6, 4);
+    eye(9, 4, true);
     eye(4, 8);
     eye(9, 8, true);
-    eye(7, 11);
-    eye(6, 5, true);
     c.set(7, 7, s);
+    c.set(6, 2, K);
+    c.set(7, 2, WHITE);
   });
   S('head like a hanging lightbulb glass filament cord', (c) => {
     const g = BULB,
@@ -225,10 +224,10 @@ module.exports = (kit, U) => {
   T('coat with far too many buttons grey blue', (c) => {
     body(c, COAT);
     c.row(1, 4, 7, dark(COAT));
-    for (let y = 2; y <= 9; y++) for (const x of [3, 5, 7]) c.set(x + (y % 2), y, y % 2 ? mix(GOLD, 0.75) : GOLD);
-    c.set(3, 2, lite(GOLD));
+    for (const y of [2, 4, 6, 8]) for (const x of [2, 4, 6, 8]) c.set(x, y, x === 8 ? mix(GOLD, 0.75) : GOLD);
+    for (const x of [3, 5, 7]) c.col(x, 2, 9, dark(COAT));
+    c.set(2, 2, lite(GOLD));
     c.col(9, 2, 9, dark(COAT));
-    c.set(2, 2, lite(COAT));
   });
   T('pyjamas dark blue moons and stars child', (c) => {
     body(c, NIGHT);

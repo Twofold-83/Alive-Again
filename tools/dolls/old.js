@@ -2890,11 +2890,11 @@ module.exports = (kit) => {
       dots(c, h, 3, 4, 4, 4, 2, 3, 4, 1, 6, 1, 9, 1, 7, 0, 3, 5);
       dots(c, dark(h), 10, 4, 10, 3, 9, 2);
       dots(c, lite(h), 5, 2);
-      keeps(c, mix(s, 0.78), 4, 7, 6, 7, 9, 7);
+      keeps(c, mix(s, 0.78), 4, 7, 9, 7);
       c.set(7, 9, K);
-      dots(c, WOOD, 11, 6, 13, 6, 11, 7, 13, 7, 12, 8, 12, 9, 12, 10);
-      dots(c, dark(WOOD), 13, 7, 12, 10);
-      dots(c, HOODRED, 12, 6);
+      dots(c, lite(WOOD), 11, 5, 13, 5, 11, 6, 12, 7, 12, 8);
+      dots(c, WOOD, 13, 6, 12, 9, 12, 10);
+      dots(c, HOODRED, 12, 5);
     },
   });
   heads.push({
@@ -2907,7 +2907,6 @@ module.exports = (kit) => {
       c.rect(3, 4, 10, 10, b);
       c.row(11, 4, 9, b);
       c.col(10, 4, 10, dark(b));
-      dots(c, dark(b), 4, 5, 8, 4, 5, 8, 9, 11);
       dots(c, lite(b), 3, 4, 4, 4);
       c.row(0, 7, 8, e);
       c.row(1, 5, 8, e);
@@ -2916,15 +2915,14 @@ module.exports = (kit) => {
       dots(c, dark(e), 8, 0, 8, 1, 9, 2, 10, 3, 11, 3, 12, 3);
       dots(c, lite(e), 5, 1, 4, 2);
       dots(c, CLOTH.mustard, 6, 2);
-      dots(c, K, 5, 6, 8, 5, 9, 6, 8, 7, 9, 5, 8, 6);
-      dots(c, b, 8, 6);
-      dots(c, K, 9, 7);
+      c.rect(4, 5, 5, 6, K);
+      dots(c, K, 8, 6, 9, 6);
       dots(c, CLOTH.rust, 6, 7, 7, 7, 7, 8);
       dots(c, K, 4, 9, 5, 10, 6, 9, 7, 10, 8, 9, 9, 10);
-      dots(c, STRAW, 2, 5, 1, 6, 2, 7, 11, 5, 12, 6, 11, 8, 2, 9);
-      dots(c, dark(STRAW), 12, 7, 1, 8);
+      dots(c, STRAW, 2, 6, 2, 7, 1, 8, 11, 6, 11, 7, 12, 8);
+      dots(c, dark(STRAW), 2, 8, 11, 8);
       c.row(12, 4, 9, BONE);
-      dots(c, STRAW, 3, 12, 10, 12, 6, 12);
+      dots(c, STRAW, 3, 12, 10, 12);
     },
   });
   heads.push({
@@ -3017,20 +3015,24 @@ module.exports = (kit) => {
     theme: GA,
     special: true,
     draw(c) {
-      const s = STONE;
+      const s = STONE,
+        d = mix(s, 0.82);
       kit.face(c, s);
       c.row(1, 4, 9, s);
       c.row(2, 3, 10, s);
       c.row(3, 3, 10, s);
-      dots(c, s, 2, 3, 2, 4, 11, 3, 11, 4, 2, 5, 11, 5);
-      dots(c, dark(s), 4, 2, 6, 1, 8, 2, 10, 3, 5, 3, 7, 3, 9, 1, 3, 4, 10, 4, 11, 5, 11, 4, 2, 5);
-      dots(c, lite(s), 5, 1, 3, 2, 7, 2);
-      dots(c, lite(s), 4, 6, 5, 6, 8, 6, 9, 6);
-      dots(c, dark(s), 4, 5, 5, 5, 8, 5, 9, 5, 6, 8, 7, 8);
-      dots(c, dark(dark(s)), 6, 9, 7, 9, 5, 7, 5, 8);
-      dots(c, K, 9, 2, 9, 3, 8, 4, 9, 7, 10, 8);
-      dots(c, LEAF, 3, 8, 3, 9, 4, 10, 2, 4, 5, 11, 4, 9);
-      dots(c, BILE, 3, 10, 10, 2);
+      dots(c, s, 2, 3, 2, 4, 11, 3, 11, 4);
+      dots(c, d, 4, 2, 6, 2, 8, 2, 5, 3, 7, 3, 9, 3, 3, 4, 10, 4, 11, 4, 9, 1);
+      dots(c, lite(s), 5, 1, 3, 2);
+      c.row(6, 4, 5, lite(s));
+      c.row(6, 8, 9, lite(s));
+      c.row(5, 4, 5, dark(s));
+      c.row(5, 8, 9, dark(s));
+      dots(c, dark(s), 7, 8, 6, 8);
+      dots(c, dark(dark(s)), 6, 9, 7, 9);
+      dots(c, K, 9, 2, 9, 3, 10, 4);
+      dots(c, LEAF, 3, 8, 3, 9, 4, 10, 2, 4);
+      dots(c, BILE, 3, 10);
       c.row(12, 5, 8, dark(s));
     },
   });
@@ -3105,20 +3107,20 @@ module.exports = (kit) => {
     draw(c) {
       const e = CLOTH.earth;
       body(c, e);
-      for (let x = 3; x <= 8; x++) c.set(x, 1, x % 2 ? STRAW : dark(STRAW));
-      dots(c, STRAW, 4, 2, 7, 2, 5, 2);
+      c.row(1, 4, 7, STRAW);
+      dots(c, dark(STRAW), 5, 1, 7, 1);
+      dots(c, STRAW, 5, 2);
       c.col(5, 3, 9, dark(e));
       c.rect(2, 4, 3, 5, CLOTH.wine);
       c.set(3, 5, dark(CLOTH.wine));
-      dots(c, K, 4, 4, 2, 6);
+      dots(c, K, 4, 4);
       c.rect(7, 3, 8, 4, CLOTH.forest);
-      dots(c, K, 6, 3, 8, 5);
+      dots(c, K, 8, 5);
       c.set(6, 5, BONE);
       c.row(7, 2, 9, BONE);
-      dots(c, dark(BONE), 9, 7, 3, 7, 6, 7);
+      dots(c, dark(BONE), 9, 7, 6, 7);
       dots(c, BONE, 4, 8);
-      dots(c, STRAW, 7, 8, 8, 9, 8, 8, 2, 9, 3, 9);
-      c.clear(6, 9);
+      dots(c, STRAW, 8, 9, 8, 8);
       c.set(2, 2, lite(e));
     },
   });
@@ -3181,11 +3183,10 @@ module.exports = (kit) => {
       c.row(1, 4, 7, HOODRED);
       dots(c, HOODRED, 5, 2, 6, 2, 5, 3);
       c.set(6, 2, dark(HOODRED));
-      dots(c, dark(s), 6, 5, 6, 7, 5, 9);
-      dots(c, MUD, 5, 6, 6, 8, 3, 8, 8, 9);
-      dots(c, STEEL, 8, 5);
+      dots(c, dark(s), 6, 5, 6, 7);
+      dots(c, MUD, 5, 8, 6, 9, 5, 9);
       dots(c, WOOD, 8, 6);
-      dots(c, BONE, 3, 5, 2, 6);
+      dots(c, STEEL, 8, 5);
     },
   });
   torsos.push({
@@ -3259,9 +3260,9 @@ module.exports = (kit) => {
       c.set(3, 3, K);
       c.row(7, 1, 3, BONE);
       c.set(3, 7, dark(BONE));
-      dots(c, STRAW, 1, 8, 2, 8, 3, 8, 0, 9, 2, 9, 4, 9, 1, 10, 3, 10, 2, 10);
-      dots(c, dark(STRAW), 3, 8, 2, 10, 4, 9);
-      c.clear(1, 6);
+      c.rect(1, 8, 3, 9, STRAW);
+      dots(c, STRAW, 0, 9, 4, 9, 1, 10, 3, 10);
+      dots(c, dark(STRAW), 2, 8, 3, 9, 3, 10);
     },
   });
   arms.push({
@@ -3327,14 +3328,14 @@ module.exports = (kit) => {
       c.col(4, 0, 8, dark(t));
       c.set(1, 0, lite(t));
       c.rect(2, 2, 3, 3, CLOTH.wine);
-      dots(c, K, 1, 2, 4, 3);
+      dots(c, K, 1, 2);
       c.rect(1, 5, 2, 6, CLOTH.mustard);
       c.set(3, 6, K);
       c.row(8, 1, 4, BONE);
       c.set(4, 8, dark(BONE));
-      dots(c, STRAW, 1, 9, 2, 9, 3, 9, 4, 9, 2, 10, 3, 10, 4, 10, 1, 11, 3, 11, 5, 11, 5, 10);
-      dots(c, dark(STRAW), 4, 9, 3, 10, 5, 11);
-      c.set(0, 9, STRAW);
+      c.rect(1, 9, 4, 10, STRAW);
+      dots(c, STRAW, 1, 11, 3, 11, 5, 11, 5, 10);
+      dots(c, dark(STRAW), 2, 9, 4, 10, 3, 11);
     },
   });
   legs.push({
@@ -3353,6 +3354,602 @@ module.exports = (kit) => {
       c.clear(1, 10);
       c.set(1, 11, K);
       c.set(3, 10, lite(LEATHER));
+    },
+  });
+
+  /* =====================================================================================
+   * 7. CHILDROOM — the nursery
+   * ===================================================================================== */
+  const CH = 'childroom';
+  const FUR = hex('#8a6238'),
+    MUZZLE = hex('#b89a6a'),
+    TINFACE = hex('#d9b08c'),
+    HORSE = hex('#b9b6a8'),
+    ROMPER = hex('#6f8598');
+
+  heads.push({
+    name: 'little girl pigtails wine bows brown hair fair',
+    theme: CH,
+    skin: 'fair',
+    draw(c) {
+      const h = HAIR.brown,
+        b = CLOTH.wine;
+      c.row(2, 4, 9, h);
+      c.row(3, 3, 10, h);
+      c.row(4, 3, 10, h);
+      c.set(10, 4, dark(h));
+      c.set(6, 2, lite(h));
+      dots(c, h, 1, 6, 1, 7, 2, 7, 1, 8);
+      dots(c, dark(h), 12, 6, 12, 7, 11, 7, 12, 8);
+      dots(c, b, 1, 4, 2, 5, 1, 5, 2, 4);
+      dots(c, lite(b), 1, 4);
+      dots(c, b, 12, 4, 11, 5, 12, 5, 11, 4);
+      dots(c, dark(b), 12, 5);
+    },
+  });
+  heads.push({
+    name: 'little boy cowlick freckles blond hair pale',
+    theme: CH,
+    skin: 'pale',
+    draw(c, s) {
+      const h = HAIR.blond;
+      c.row(2, 4, 9, h);
+      c.row(3, 3, 10, h);
+      c.row(4, 3, 6, h);
+      dots(c, h, 3, 5, 8, 1, 9, 0, 7, 1);
+      dots(c, dark(h), 10, 4, 9, 1, 10, 3);
+      dots(c, lite(h), 5, 2, 8, 0);
+      keeps(c, mix(s, 0.8), 4, 7, 9, 7, 6, 7);
+    },
+  });
+  heads.push({
+    name: 'nanny starched cap black band streamers black hair brown',
+    theme: CH,
+    skin: 'brown',
+    draw(c) {
+      c.rect(4, 0, 9, 1, WHITE);
+      c.row(2, 3, 10, BLK);
+      c.row(3, 3, 10, HAIR.black);
+      dots(c, dark(WHITE), 9, 0, 9, 1);
+      c.set(4, 0, lite(WHITE));
+      dots(c, WHITE, 11, 2, 12, 3, 12, 4, 12, 5, 12, 6);
+      dots(c, dark(WHITE), 12, 6, 12, 4);
+      hairSides(c, HAIR.black, 4);
+      c.row(12, 4, 9, WHITE);
+      c.set(9, 12, dark(WHITE));
+      dots(c, GOLD, 6, 12);
+    },
+  });
+  heads.push({
+    name: 'toddler frilly bonnet bow blond curl pale',
+    theme: CH,
+    skin: 'pale',
+    draw(c) {
+      c.row(1, 4, 9, WHITE);
+      c.row(2, 3, 10, WHITE);
+      for (let x = 2; x <= 11; x++) c.set(x, 3, x % 2 ? WHITE : dark(WHITE));
+      for (let y = 4; y <= 10; y++) {
+        c.set(2, y, y % 2 ? WHITE : dark(WHITE));
+        c.set(11, y, y % 2 ? dark(WHITE) : mix(WHITE, 0.55));
+      }
+      dots(c, WHITE, 3, 10, 4, 11);
+      dots(c, dark(WHITE), 10, 10, 9, 11, 9, 1, 10, 2);
+      dots(c, HAIR.blond, 6, 3, 7, 3, 6, 4);
+      keeps(c, ROUGE, 4, 8, 9, 8);
+      c.row(12, 5, 8, ROUGE);
+      dots(c, dark(ROUGE), 4, 12, 9, 12, 7, 12);
+    },
+  });
+  heads.push({
+    name: 'teddy bear head brown fur button eye stitched',
+    theme: CH,
+    special: true,
+    draw(c) {
+      const f = FUR;
+      c.rect(2, 1, 4, 3, f);
+      c.rect(9, 1, 11, 3, f);
+      dots(c, MUZZLE, 3, 2, 10, 2);
+      c.row(2, 4, 9, f);
+      c.rect(3, 3, 10, 10, f);
+      c.row(11, 4, 9, f);
+      c.col(2, 5, 8, f);
+      c.col(11, 5, 8, dark(f));
+      c.col(10, 4, 10, dark(f));
+      c.set(11, 2, dark(f));
+      dots(c, lite(f), 4, 3, 3, 4, 2, 1);
+      c.rect(5, 7, 8, 10, MUZZLE);
+      c.set(8, 10, dark(MUZZLE));
+      c.set(8, 9, dark(MUZZLE));
+      dots(c, K, 6, 7, 7, 7, 5, 5, 4, 9, 9, 9);
+      c.rect(8, 5, 9, 6, K);
+      c.set(8, 5, STEEL);
+      dots(c, dark(f), 6, 3, 6, 5, 7, 2, 7, 4);
+      dots(c, WHITE, 3, 9);
+    },
+  });
+  heads.push({
+    name: 'wind-up tin soldier head black shako painted face key',
+    theme: CH,
+    special: true,
+    draw(c) {
+      const p = TINFACE;
+      kit.face(c, p);
+      c.rect(4, 0, 9, 3, BLK);
+      c.row(4, 3, 10, BLK);
+      c.col(4, 0, 3, hi(BLK));
+      dots(c, GOLD, 6, 2, 7, 2, 6, 3);
+      dots(c, dark(GOLD), 7, 3);
+      dots(c, RED, 9, 0, 10, 0, 10, 1);
+      dots(c, GOLD, 3, 5, 3, 6, 3, 7, 3, 8);
+      dots(c, dark(GOLD), 10, 5, 10, 6, 10, 7, 10, 8);
+      dots(c, K, 5, 6, 8, 6);
+      dots(c, RED, 4, 8, 9, 8);
+      dots(c, K, 5, 8, 6, 8, 7, 8, 8, 8, 4, 7, 9, 7);
+      dots(c, mix(p, 0.6), 6, 9, 7, 9);
+      dots(c, STEEL, 9, 5, 4, 10);
+      dots(c, GOLD, 11, 7, 12, 7, 13, 6, 13, 8);
+      dots(c, dark(GOLD), 13, 7);
+    },
+  });
+  heads.push({
+    name: 'rag doll red yarn hair button eye stitched smile',
+    theme: CH,
+    special: true,
+    draw(c) {
+      const f = CLOTH.cream,
+        y = HOODRED;
+      kit.face(c, f);
+      c.row(1, 4, 9, y);
+      c.row(2, 3, 10, y);
+      c.row(3, 3, 10, y);
+      for (let r = 3; r <= 10; r++) {
+        c.set(1, r, r % 2 ? y : dark(y));
+        c.set(2, r, r % 2 ? dark(y) : y);
+        c.set(11, r, r % 2 ? dark(y) : y);
+        c.set(12, r, r % 2 ? mix(y, 0.5) : dark(y));
+      }
+      dots(c, dark(y), 5, 1, 7, 2, 9, 1, 4, 3, 8, 3);
+      dots(c, lite(y), 4, 1, 6, 2);
+      dots(c, K, 5, 6);
+      c.rect(8, 5, 9, 6, WOOL);
+      dots(c, K, 8, 5, 9, 6);
+      dots(c, ROUGE, 4, 8, 9, 8);
+      dots(c, HOODRED, 6, 7);
+      dots(c, K, 4, 9, 5, 10, 7, 10, 9, 9);
+      dots(c, dark(f), 6, 10, 8, 10, 6, 4, 6, 5);
+    },
+  });
+  heads.push({
+    name: 'jack-in-the-box jester face bells spring',
+    theme: CH,
+    special: true,
+    draw(c) {
+      const w = WHITE,
+        p = CLOTH.plum,
+        m = CLOTH.mustard;
+      kit.face(c, w);
+      c.row(3, 3, 10, p);
+      c.row(3, 7, 10, m);
+      dots(c, p, 4, 2, 5, 2, 3, 2, 3, 1, 2, 1, 2, 0, 1, 0);
+      dots(c, m, 8, 2, 9, 2, 10, 2, 10, 1, 11, 1, 11, 0, 12, 0);
+      dots(c, lite(p), 4, 2, 2, 0);
+      dots(c, dark(m), 10, 2, 11, 1, 10, 3);
+      dots(c, GOLD, 0, 1, 13, 1);
+      dots(c, K, 5, 6, 8, 6);
+      dots(c, CLOTH.teal, 5, 5, 5, 7, 8, 5, 8, 7);
+      dots(c, RED, 4, 8, 5, 9, 6, 9, 7, 9, 8, 9, 9, 8, 6, 7, 7, 7);
+      dots(c, K, 6, 10, 7, 10);
+      c.row(12, 5, 8, STEEL);
+      dots(c, dark(STEEL), 6, 12, 8, 12);
+      dots(c, STEEL, 5, 11, 8, 11);
+    },
+  });
+  heads.push({
+    name: 'boy white sailor cap navy ribbon black hair tan',
+    theme: CH,
+    skin: 'tan',
+    expr: 'grin',
+    draw(c) {
+      const n = CLOTH.navy;
+      c.rect(3, 1, 10, 2, WHITE);
+      c.row(0, 5, 8, WHITE);
+      c.row(3, 3, 10, n);
+      dots(c, dark(WHITE), 10, 1, 10, 2, 8, 0, 9, 2);
+      dots(c, GOLD, 6, 3);
+      dots(c, n, 11, 3, 12, 4, 12, 5, 11, 5);
+      dots(c, dark(n), 12, 5, 10, 3);
+      hairSides(c, HAIR.black, 4);
+    },
+  });
+  heads.push({
+    name: 'drowned girl wet black hair faded ribbon hollow eyes drowned',
+    theme: CH,
+    skin: 'drowned',
+    expr: 'hollow',
+    draw(c, s) {
+      const h = HAIR.black;
+      c.row(1, 4, 9, h);
+      c.row(2, 3, 10, h);
+      c.row(3, 2, 11, h);
+      c.col(2, 4, 11, h);
+      c.col(3, 4, 9, h);
+      c.col(11, 4, 11, h);
+      c.col(10, 4, 8, h);
+      dots(c, h, 4, 4, 4, 5, 9, 4, 6, 4, 12, 9, 1, 10);
+      dots(c, hi(h), 5, 1, 3, 3, 2, 6);
+      dots(c, ROUGE, 8, 1, 10, 1, 9, 2);
+      dots(c, dark(ROUGE), 10, 2);
+      keeps(c, dark(s), 4, 8, 9, 8);
+      dots(c, TEAR, 6, 12, 3, 12);
+    },
+  });
+  heads.push({
+    name: 'rocking horse head dapple grey black mane red bridle',
+    theme: CH,
+    special: true,
+    draw(c) {
+      const g = HORSE,
+        mz = mix(g, 0.78);
+      dots(c, g, 3, 0, 3, 1, 4, 1, 10, 0, 9, 1);
+      dots(c, dark(g), 10, 1);
+      c.row(2, 4, 9, g);
+      c.rect(3, 3, 10, 6, g);
+      c.row(7, 4, 9, g);
+      c.rect(5, 8, 8, 11, g);
+      c.col(10, 3, 6, dark(g));
+      c.set(9, 7, dark(g));
+      c.set(9, 2, dark(g));
+      dots(c, lite(g), 4, 2, 3, 3);
+      c.rect(5, 9, 8, 11, mz);
+      c.col(8, 8, 11, dark(mz));
+      dots(c, K, 5, 10, 8, 10);
+      c.rect(6, 0, 7, 3, BLK);
+      dots(c, BLK, 5, 1, 8, 1, 5, 2, 6, 4);
+      dots(c, hi(BLK), 6, 0, 5, 1);
+      c.row(4, 3, 10, HOODRED);
+      c.set(6, 4, BLK);
+      c.row(8, 5, 8, HOODRED);
+      dots(c, dark(HOODRED), 10, 4, 8, 8, 9, 5, 9, 6, 9, 7);
+      dots(c, HOODRED, 4, 5, 4, 6, 4, 7);
+      dots(c, GOLD, 3, 4, 4, 8);
+      dots(c, K, 5, 6, 8, 6);
+      dots(c, WHITE, 5, 5, 8, 5);
+      dots(c, STEEL, 6, 6, 7, 7, 3, 6);
+    },
+  });
+
+  torsos.push({
+    name: 'sailor suit navy white collar striped vest red knot',
+    theme: CH,
+    draw(c) {
+      const n = CLOTH.navy;
+      body(c, n);
+      c.row(1, 2, 9, WHITE);
+      dots(c, WHITE, 2, 2, 3, 2, 3, 3, 4, 3, 4, 4, 9, 2, 8, 2, 8, 3, 7, 3, 7, 4);
+      dots(c, dark(WHITE), 9, 1, 9, 2);
+      c.rect(5, 1, 6, 3, WHITE);
+      c.row(2, 5, 6, n);
+      dots(c, RED, 5, 4, 6, 4, 5, 5);
+      dots(c, dark(RED), 6, 5, 5, 6);
+      dots(c, GOLD, 4, 7, 7, 7);
+      c.row(9, 2, 9, dark(n));
+    },
+  });
+  torsos.push({
+    name: 'pinafore dress white frills grey blue flower pocket',
+    theme: CH,
+    draw(c) {
+      const d = WOOL;
+      body(c, d, true);
+      c.rect(3, 2, 8, 9, WHITE);
+      c.rect(2, 6, 9, 9, WHITE);
+      dots(c, WHITE, 1, 1, 2, 1, 3, 1, 8, 1, 9, 1, 10, 1, 1, 2, 10, 2);
+      dots(c, dark(WHITE), 10, 1, 10, 2, 2, 1);
+      c.col(8, 2, 5, dark(WHITE));
+      c.col(9, 6, 9, dark(WHITE));
+      c.row(5, 3, 8, dark(WHITE));
+      c.rect(5, 1, 6, 1, d);
+      c.rect(4, 7, 5, 8, dark(WHITE));
+      dots(c, ROUGE, 4, 7);
+      dots(c, LEAF, 5, 8);
+      for (let x = 2; x <= 9; x += 2) c.set(x, 9, dark(WHITE));
+      c.col(10, 6, 9, dark(d));
+    },
+  });
+  torsos.push({
+    name: 'romper grey blue white collar buttons duck',
+    theme: CH,
+    draw(c) {
+      const r = ROMPER;
+      body(c, r, true);
+      c.row(1, 3, 8, WHITE);
+      dots(c, WHITE, 3, 2, 4, 2, 7, 2, 8, 2);
+      dots(c, dark(WHITE), 8, 1, 8, 2);
+      c.rect(5, 1, 6, 1, SKINS.pale);
+      dots(c, BONE, 5, 3, 5, 5, 5, 7);
+      c.col(6, 3, 9, dark(r));
+      dots(c, CLOTH.mustard, 7, 5, 8, 5, 8, 4);
+      dots(c, CLOTH.rust, 9, 4);
+      dots(c, lite(r), 2, 3, 1, 6);
+      c.col(10, 6, 9, dark(r));
+      c.row(9, 1, 10, dark(r));
+    },
+  });
+  torsos.push({
+    name: 'nightgown white ruffle yoke pink ribbon',
+    theme: CH,
+    draw(c) {
+      const n = hex('#cfc8b4');
+      body(c, n, true);
+      c.rect(1, 4, 10, 9, n);
+      for (let x = 2; x <= 9; x++) c.set(x, 3, x % 2 ? dark(n) : WHITE);
+      c.row(1, 4, 7, WHITE);
+      dots(c, ROUGE, 5, 2, 6, 2, 5, 3);
+      dots(c, dark(ROUGE), 6, 3);
+      for (const x of [3, 5, 7]) c.col(x, 5, 9, dark(n));
+      c.col(10, 4, 9, dark(n));
+      dots(c, lite(n), 1, 4, 2, 2);
+      c.set(8, 7, mix(n, 0.85));
+    },
+  });
+  torsos.push({
+    name: 'tin soldier tunic red white cross belts gold epaulettes',
+    theme: CH,
+    draw(c) {
+      const r = RED;
+      body(c, r);
+      c.row(1, 4, 7, CLOTH.navy);
+      dots(c, GOLD, 1, 1, 2, 1, 9, 1, 10, 1);
+      dots(c, dark(GOLD), 10, 1);
+      for (let i = 0; i < 6; i++) {
+        c.set(2 + i, 2 + i, WHITE);
+        c.set(9 - i, 2 + i, WHITE);
+      }
+      dots(c, GOLD, 5, 4, 6, 4);
+      c.row(8, 2, 9, WHITE);
+      c.set(9, 8, dark(WHITE));
+      dots(c, GOLD, 5, 8, 6, 8);
+      dots(c, STEEL, 3, 6, 8, 9);
+      c.col(9, 2, 7, dark(r));
+    },
+  });
+  torsos.push({
+    name: 'teddy bear body brown fur pale belly wine bow stuffing',
+    theme: CH,
+    draw(c) {
+      const f = FUR;
+      body(c, f, true);
+      c.rect(1, 4, 10, 9, f);
+      c.col(10, 4, 9, dark(f));
+      c.col(9, 2, 3, dark(f));
+      c.rect(4, 4, 7, 8, MUZZLE);
+      c.col(7, 4, 8, dark(MUZZLE));
+      dots(c, lite(MUZZLE), 4, 4, 5, 5);
+      dots(c, CLOTH.wine, 4, 1, 4, 2, 7, 1, 7, 2, 5, 2, 6, 2, 3, 1, 8, 1);
+      dots(c, dark(CLOTH.wine), 6, 2, 7, 2, 8, 1);
+      dots(c, lite(f), 1, 4, 2, 2);
+      dots(c, WHITE, 8, 7, 9, 7);
+      dots(c, K, 8, 6, 9, 8);
+    },
+  });
+  torsos.push({
+    name: 'rag doll patchwork dress stitched heart white collar',
+    theme: CH,
+    draw(c) {
+      const m = CLOTH.mustard;
+      body(c, m, true);
+      c.row(1, 3, 8, WHITE);
+      dots(c, WHITE, 3, 2, 4, 2, 7, 2, 8, 2);
+      dots(c, dark(WHITE), 8, 1, 8, 2);
+      c.rect(2, 5, 4, 7, CLOTH.teal);
+      c.col(4, 5, 7, dark(CLOTH.teal));
+      c.rect(7, 6, 10, 9, CLOTH.wine);
+      c.col(10, 6, 9, dark(CLOTH.wine));
+      dots(c, K, 5, 6, 6, 7, 3, 8);
+      dots(c, RED, 6, 3, 8, 3, 6, 4, 7, 4, 8, 4, 7, 5);
+      dots(c, dark(m), 9, 2, 9, 3, 9, 4, 9, 5, 3, 9, 5, 9);
+      dots(c, lite(m), 2, 3, 1, 6);
+      dots(c, BONE, 8, 7, 3, 6);
+    },
+  });
+  torsos.push({
+    name: 'jack-in-the-box painted box teal star spring crank',
+    theme: CH,
+    draw(c) {
+      const t = CLOTH.teal;
+      c.rect(1, 3, 10, 9, t);
+      c.col(10, 3, 9, dark(t));
+      c.row(3, 1, 10, CLOTH.wine);
+      c.row(9, 1, 10, CLOTH.wine);
+      dots(c, dark(CLOTH.wine), 10, 3, 10, 9);
+      dots(c, lite(t), 1, 4, 2, 4);
+      dots(c, STEEL, 5, 0, 6, 0, 5, 2, 6, 2);
+      dots(c, dark(STEEL), 4, 1, 7, 1, 6, 1);
+      dots(c, STEEL, 5, 1);
+      dots(c, CLOTH.mustard, 5, 5, 4, 6, 5, 6, 6, 6, 5, 7, 6, 5, 6, 7, 7, 6);
+      dots(c, lite(CLOTH.mustard), 5, 5);
+      dots(c, GOLD, 8, 5);
+      dots(c, K, 2, 8, 9, 8, 2, 5);
+      dots(c, WOOD, 11, 6, 11, 5);
+    },
+  });
+
+  arms.push({
+    name: 'sailor sleeve navy white striped cuff tan hand',
+    theme: CH,
+    draw(c) {
+      const n = CLOTH.navy;
+      c.rect(1, 0, 3, 8, n);
+      c.col(3, 0, 6, dark(n));
+      c.set(1, 0, lite(n));
+      c.rect(1, 6, 3, 8, WHITE);
+      c.row(7, 1, 3, n);
+      c.set(3, 6, dark(WHITE));
+      c.set(3, 8, dark(WHITE));
+      c.rect(1, 9, 3, 10, SKINS.tan);
+      c.col(3, 9, 10, dark(SKINS.tan));
+    },
+  });
+  arms.push({
+    name: 'short puff sleeve white bare arm fair',
+    theme: CH,
+    draw(c) {
+      const k = SKINS.fair;
+      c.rect(0, 0, 4, 2, WHITE);
+      c.col(4, 0, 2, dark(WHITE));
+      c.row(3, 1, 3, dark(WHITE));
+      c.set(2, 1, dark(WHITE));
+      c.rect(1, 4, 3, 10, k);
+      c.col(3, 4, 10, dark(k));
+      c.set(1, 4, lite(k));
+      c.set(2, 7, ROUGE);
+    },
+  });
+  arms.push({
+    name: 'nightgown sleeve white frilled cuff pale hand',
+    theme: CH,
+    draw(c) {
+      const n = hex('#cfc8b4');
+      c.rect(1, 0, 3, 7, n);
+      c.col(3, 0, 7, dark(n));
+      c.set(1, 0, lite(n));
+      c.set(2, 4, dark(n));
+      c.row(7, 1, 3, ROUGE);
+      c.row(8, 0, 4, WHITE);
+      c.set(1, 8, dark(WHITE));
+      c.set(3, 8, dark(WHITE));
+      c.rect(1, 9, 3, 10, SKINS.pale);
+      c.col(3, 9, 10, dark(SKINS.pale));
+    },
+  });
+  arms.push({
+    name: 'tin soldier sleeve red gold cuff white glove rivet',
+    theme: CH,
+    draw(c) {
+      c.rect(1, 0, 3, 6, RED);
+      c.col(3, 0, 6, dark(RED));
+      c.set(2, 1, STEEL);
+      c.set(1, 0, lite(RED));
+      c.row(7, 1, 3, GOLD);
+      c.set(3, 7, dark(GOLD));
+      c.rect(1, 8, 3, 10, WHITE);
+      c.col(3, 8, 10, dark(WHITE));
+      c.set(2, 4, STEEL);
+    },
+  });
+  arms.push({
+    name: 'teddy bear arm brown fur paw pad stitches',
+    theme: CH,
+    draw(c) {
+      const f = FUR;
+      c.rect(1, 0, 3, 10, f);
+      c.rect(0, 7, 4, 9, f);
+      c.col(3, 0, 6, dark(f));
+      c.col(4, 7, 9, dark(f));
+      c.set(3, 10, dark(f));
+      c.set(1, 0, lite(f));
+      c.rect(1, 8, 2, 9, MUZZLE);
+      c.set(2, 9, dark(MUZZLE));
+      dots(c, K, 2, 2, 2, 4);
+    },
+  });
+
+  legs.push({
+    name: 'striped tights wine cream grey skirt hem black strap shoes',
+    theme: CH,
+    draw(c) {
+      c.rect(1, 0, 4, 0, WOOL);
+      c.rect(0, 1, 5, 2, WOOL);
+      c.col(5, 1, 2, dark(WOOL));
+      for (let x = 0; x <= 5; x++) c.set(x, 3, x % 2 ? WHITE : dark(WHITE));
+      c.rect(2, 4, 3, 9, CLOTH.cream);
+      for (const y of [4, 6, 8]) c.row(y, 2, 3, CLOTH.wine);
+      c.col(3, 4, 9, dark(CLOTH.cream));
+      for (const y of [4, 6, 8]) c.set(3, y, dark(CLOTH.wine));
+      shoe(c, BLK);
+      c.clear(1, 10);
+      c.set(2, 10, CLOTH.cream);
+      c.row(11, 2, 5, hex('#33323a'));
+      c.set(4, 10, hi(BLK));
+    },
+  });
+  legs.push({
+    name: 'navy shorts bare legs plaster sandals fair',
+    theme: CH,
+    draw(c) {
+      const k = SKINS.fair,
+        n = CLOTH.navy;
+      c.rect(1, 0, 4, 3, n);
+      c.rect(0, 2, 5, 3, n);
+      c.col(4, 0, 3, dark(n));
+      c.set(5, 2, dark(n));
+      c.set(5, 3, dark(n));
+      c.row(3, 0, 5, WHITE);
+      c.set(5, 3, dark(WHITE));
+      c.rect(2, 4, 3, 9, k);
+      c.col(3, 4, 9, dark(k));
+      c.set(2, 6, BONE);
+      c.set(3, 6, dark(BONE));
+      c.rect(2, 10, 5, 11, k);
+      c.clear(5, 10);
+      c.row(11, 2, 5, LEATHER);
+      dots(c, LEATHER, 2, 9, 3, 9, 3, 10);
+      c.set(1, 11, LEATHER);
+    },
+  });
+  legs.push({
+    name: 'toy soldier trousers navy red stripe glossy black boots',
+    theme: CH,
+    draw(c) {
+      const n = CLOTH.navy;
+      c.rect(1, 0, 4, 6, n);
+      c.col(4, 0, 6, RED);
+      c.col(1, 0, 6, lite(n));
+      c.rect(1, 7, 4, 9, BLK);
+      shoe(c, BLK);
+      c.row(7, 1, 4, hi(BLK));
+      c.set(2, 8, STEEL);
+      c.set(2, 10, STEEL);
+      c.row(11, 1, 5, hex('#33323a'));
+      c.set(3, 3, STEEL);
+    },
+  });
+  legs.push({
+    name: 'nightgown hem long white frill bare toes pale',
+    theme: CH,
+    draw(c) {
+      const n = hex('#cfc8b4'),
+        k = SKINS.pale;
+      c.rect(1, 0, 4, 1, n);
+      c.rect(0, 2, 5, 9, n);
+      c.col(5, 2, 9, dark(n));
+      c.col(2, 3, 8, dark(n));
+      c.set(1, 2, lite(n));
+      for (let x = 0; x <= 5; x++) c.set(x, 9, x % 2 ? WHITE : dark(n));
+      c.row(8, 0, 5, ROUGE);
+      c.set(5, 8, dark(ROUGE));
+      c.rect(3, 10, 5, 11, k);
+      c.clear(5, 10);
+      c.set(5, 11, dark(k));
+      c.set(2, 10, dark(k));
+      c.set(2, 11, k);
+    },
+  });
+  legs.push({
+    name: 'teddy bear leg brown fur paw pad',
+    theme: CH,
+    draw(c) {
+      const f = FUR;
+      c.rect(1, 0, 4, 9, f);
+      c.rect(0, 2, 0, 6, f);
+      c.col(4, 0, 9, dark(f));
+      c.set(1, 0, lite(f));
+      c.rect(1, 10, 5, 11, f);
+      c.set(5, 9, f);
+      c.row(11, 1, 5, dark(f));
+      c.rect(3, 10, 4, 10, MUZZLE);
+      c.set(5, 10, dark(f));
+      dots(c, K, 2, 3, 2, 5);
     },
   });
 

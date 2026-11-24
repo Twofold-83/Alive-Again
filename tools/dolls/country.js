@@ -1,24 +1,26 @@
 /*
  * People of the old country and the wild: the old village, lonely farmland, castle and town of the middle ages,
  * the dungeon adventure, cathedral and crypt, and the wild places. Six themes, each in a file of its own
- * (_country-<theme>.js), each with heads, torsos, arms and legs that belong together.
- * Parts are only ever ADDED AT THE END of a theme's lists... and themes at the end of THEMES: ids are places.
+ * (_country-<theme>.js), each with heads, torsos, arms and legs that belong together; the pictures are written
+ * as rows of characters (see _country-kit.js).
+ *
+ * A part's id is its place in the list, and the lists here are the theme files one after the other. So NEVER add a
+ * part to one of the six theme files (it would renumber every later theme): new parts go into a new file whose
+ * name is added at the END of MORE below; its parts name their own `theme`.
  */
 const THEMES = ['village', 'rural', 'medieval', 'castle', 'gothic', 'wilds'];
+/** later additions: files _country-<name>.js, in the order they were added */
+const MORE = [];
 module.exports = (kit) => {
   const h = require('./_country-kit.js')(kit);
   const out = { heads: [], torsos: [], arms: [], legs: [] };
-  /* every theme has a fixed number of parts, so a part added to one theme later cannot renumber the next theme:
-   * a theme that grows must first be given room at the very end (see the note in the report). */
   for (const theme of THEMES) {
-    let def;
-    try {
-      def = require(`./_country-${theme}.js`)(kit, h);
-    } catch (e) {
-      if (e.code === 'MODULE_NOT_FOUND' && String(e.message).includes(`_country-${theme}`)) continue;
-      throw e;
-    }
+    const def = require(`./_country-${theme}.js`)(kit, h);
     for (const k of Object.keys(out)) for (const p of def[k] || []) out[k].push({ ...p, theme });
+  }
+  for (const file of MORE) {
+    const def = require(`./_country-${file}.js`)(kit, h);
+    for (const k of Object.keys(out)) for (const p of def[k] || []) out[k].push(p);
   }
   return out;
 };
