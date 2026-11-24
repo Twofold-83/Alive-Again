@@ -21,7 +21,8 @@ mount a persistent disk there if stories should survive redeploys.
 
 1. Start a story. With a partner: share the invite link or 5-letter code. On your own:
    **Solo Player / Solo Director** (an AI takes the other seat) or **Play both sides**
-   (you take every turn yourself, handy for trying things out).
+   (you take every turn yourself, handy for trying things out). **Prepare a campaign**
+   opens a stage with no turns, for building ahead of time (see below).
 2. The Director sets the stage with no time limit, picks a story type, and taps
    **Begin the story**.
 3. Turns alternate, each on a clock (1 minute by default, changeable under ⚙️ More).
@@ -38,7 +39,9 @@ The other side watches a finished turn as a short film: black bars slide in with
 name of whose turn it was, things walk (bobbing, facing the way they go), newcomers
 pop in, each line is typed out while its speaker bounces and the camera leans in a
 little, earlier bubbles dim, narration appears as a subtitle, and at the end the bars
-slide away with a "Your turn" cue. A click skips it.
+slide away with a "Your turn" cue. A click skips it. A Director's turn opens on the scene as it
+was for a good two seconds — the room is still dark before the light comes on — and what the Player did is
+typed out for the Director line by line, with what clickable things answered.
 
 Speech bubbles are always placed fully on the stage, clear of the narration and of
 each other; long lines are set smaller and wider. `npm run sim` plays random turns
@@ -71,7 +74,8 @@ choice → narrower choices.
 | Moment and sound | Shake, flash, confetti; sound effects in five groups — click one to hear it. |
 | Mood | Light and dark (four levels of darkness, lamps that cut through it), weather, music (57 tunes), a title card, a surprise scene, story ideas. |
 | Draw on the stage | Freehand lines that draw themselves in playback. |
-| Build this room | Walls and floor in one press (68 themes in four shapes), paint single tiles, **Save room** for any story. |
+| Build this room | Walls and floor in one press (68 themes in four shapes), paint single tiles. |
+| Save room | Keeps the stage as a room on this device, for any story; brings a saved room back. |
 | Map & campaigns | The scenes kept for this story and the ways between them, see below. |
 | The Player's sheet | Items, stats, points. |
 | Ask the Player | Choices, a skill check, a picture to show, a place to go, a target to pick, a thing to give up. |
@@ -104,13 +108,20 @@ Everything is built on the stage itself; there is no separate building mode.
 
 - **Build this room** lays walls and floor for a theme and shape, and **Paint walls and floor** changes
   single tiles of the 16 × 12 grid. A tile is either floor (the hero can walk on it) or wall.
-- **Save room** keeps the stage as a room on this device, for any story; "My saved rooms" brings one back.
+- **Save room** (in the main menu) keeps the stage as a room on this device, for any story; "My saved rooms"
+  brings one back.
 - **Map & campaigns** holds the scenes of this story. "Add the stage as a scene" keeps what is on stage;
   on the map scenes are arranged, renamed, duplicated, deleted and **connected** (an exit in both scenes,
   lockable). "Edit" or a double-click moves the story there; "Save the stage into it" updates a scene.
   Ready-made places (several furnished, connected rooms) can be dropped in.
 - A **campaign** is the whole map — every scene, where it lies, the ways between them — kept on this device
   and usable in any story. The map can also be saved to a file and loaded elsewhere.
+
+**Prepare a campaign** (on the start screen) is the place to do all of this ahead of time: the Director has
+the stage and every tool, with no turns and no clock. The banner shows the campaign being worked on, with
+**Save** (over that campaign), and **Save as / Load** (a new name; or another campaign to work on). Saving puts
+the stage on the map and keeps the whole map on this device. **Test as Player** plays what is on the stage for
+real — as many turns as you like, as both sides — and **End test** puts everything back as it was.
 
 When the Player walks to an exit and the Director agrees, a "Traveling to…" card plays and the story
 continues in that scene. Where a level exists the hero can only stand on floor tiles, and the base of a solid
@@ -126,11 +137,13 @@ The Director chooses one of three modes under Story settings, and can change it 
 | Free will | walks, speaks, picks an emote, writes a **Free Action**, acts on things, strikes a pose. |
 | Limited will | must pick one of the options the Director offered, or do exactly what was asked; may also walk and speak. |
 
-- **Point and click (adventures).** A click on the stage opens a small menu — Walk here, Look at, Use, and
-  whatever else a clickable thing offers. Or pick one of ten **Actions** (walk, look at, push, pull, open, use,
-  pick up, give, talk to, attack) and then click what it is about: a thing ("Open old chest") or a spot
-  ("Push here"). If the Director prepared a reaction for that action, the Player sees it at once and plays
-  on; anything else is told to the Director with the turn.
+- **Point and click (adventures).** A turn holds **one walk and one action**. A click on the floor walks
+  there. For the action, pick one of ten **Actions** (walk, look at, push, pull, open, use, pick up, give,
+  talk to, attack) and click what it is about — a thing ("Open old chest") or a spot ("Push here") — or write
+  a **Free Action** instead; whichever came last counts.
+- **Clickable things** show the actions the Director offers on them. The hero has to stand close (about a tile
+  and a half; the Director can let a thing answer from anywhere) — otherwise "It's too far away." If the
+  Director prepared a reaction, the Player sees it at once, as often as they like: it is not the turn's action.
 - **Walking.** The hero finds its own way around walls and solid things; the same walk is replayed for the
   Director. One walk per turn (it can be taken back).
 - **Items.** Select an inventory item, then click something on stage: "uses the key on Old chest".
@@ -344,7 +357,7 @@ public/                   the browser
   shell/                  home.js (start screen), chrome.js (top bar, clock), device.js, display.js (filters), title.js
   css/                    style sheets by area; phone.css holds everything phone mode changes
   px/, doll/, packs/      the pixel-art library, the doll parts, art that replaces built-in pictures
-test/                     `npm test` (protocol, dungeon games, rooms and rules), `npm run test:e2e` (eight browser suites), `npm run sim`
+test/                     `npm test` (protocol, dungeon games, rooms and rules), `npm run test:e2e` (nine browser suites), `npm run sim`
 tools/                    make-big.js + big/ (the library, drawn in code), make-dolls.js, make-sprites.js
 ```
 

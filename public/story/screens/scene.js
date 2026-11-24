@@ -311,7 +311,7 @@ export function screenDraw(kit) {
 
 /* ================= build this room: walls and floor in one press, on the stage itself; rooms kept for every story ================= */
 export function screenRoom(kit) {
-  const { p, c, d, head, done } = kit;
+  const { p, c, d, head } = kit;
   head('Build this room', 'Everything happens on the stage: pick walls and a floor, then add things from “Add something”.');
   G.roomTheme ||= 'oldhouse';
   G.roomShape ||= 'room';
@@ -330,15 +330,6 @@ export function screenRoom(kit) {
     c.changedQuiet();
     c.rebuild();
   };
-  const name = h('input', {
-    id: 'roomName',
-    class: 'grow',
-    placeholder: 'Name of this room',
-    maxlength: 40,
-    value: G.roomName || '',
-    oninput: () => (G.roomName = name.value),
-  });
-  const rooms = kept.rooms.all();
   add(
     p,
     h(
@@ -363,6 +354,24 @@ export function screenRoom(kit) {
       ),
       h('div', { class: 'row' }, h('button', { class: 'grow', id: 'roomPaint', onclick: () => kit.enter('paint') }, 'Paint walls and floor by hand')),
     ),
+  );
+}
+
+/* ================= save room: keep what is on the stage for any story, bring a saved room back ================= */
+export function screenSaveRoom(kit) {
+  const { p, c, d, head, done } = kit;
+  head('Save room', 'Keeps everything on the stage — walls, floor, things, light — on this device, for any story.');
+  const name = h('input', {
+    id: 'roomName',
+    class: 'grow',
+    placeholder: 'Name of this room',
+    maxlength: 40,
+    value: G.roomName || '',
+    oninput: () => (G.roomName = name.value),
+  });
+  const rooms = kept.rooms.all();
+  add(
+    p,
     h(
       'div',
       { class: 'card', id: 'roomSaves' },

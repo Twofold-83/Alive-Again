@@ -58,7 +58,12 @@ function advance(room, timeout) {
   room.deadline = null;
   room.remaining =
     room.settings.turnSeconds > 0
-      ? room.settings.turnSeconds * 1000 + cutEstimate(room.scene, room.history.length > 1 ? room.history[room.history.length - 2].scene : null)
+      ? room.settings.turnSeconds * 1000 +
+        cutEstimate(
+          room.scene,
+          room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
+          room.history[room.history.length - 1].by,
+        )
       : null;
   syncClock(room);
   touch(room);
@@ -136,6 +141,7 @@ function submitPlayer(room, body) {
   if (sc.battle) throw fail(400, 'You are in a battle: fight, or try to escape');
   const hero = sc.entities.find((e) => e.id === sc.heroId);
   let action = str(body.action, mode === 'tell' ? 300 : 160);
+  const chosen = mode === 'limited' && sc.choices.length > 0; // then the action is one of the Director's options
   if (mode === 'limited' && sc.choices.length && !sc.choices.includes(action)) throw fail(400, 'Pick one of the Director’s options first');
   // the reply to what the Director asked
   const ask = sc.ask,
@@ -216,6 +222,11 @@ function submitPlayer(room, body) {
       sc.point = { verb, x: r3(num(body.point.x, 0, 1, 0.5)), y: r3(num(body.point.y, 0, 1, 0.5)) };
   }
   sc.action = action;
+  if (room.rules.type === 'adventure') {
+    /* an adventure turn holds one action: something aimed at the stage, an item used, or a free action in words */
+    if (sc.point) Object.assign(sc, { use: null, target: askTarget });
+    if ((sc.point || sc.use || (sc.target && !askTarget)) && !chosen) sc.action = '';
+  }
   sc.answer = answer;
   const roll = (ask && ask.kind === 'roll' && ask.rolled) || rollDie(askRoll || body.roll);
   sc.roll = roll ? { by: 'player', ...roll } : null;
@@ -239,6 +250,48 @@ function submitPlayer(room, body) {
     sc.card = 'Something happened!';
     sc.sfx = 'alarm';
   }
+}
+/**
+ * Preparing a campaign: keep the stage being worked on with the story (nothing is played, no turn passes).
+ */
+export function actKeepStage(room, body, who) {
+  directorOnly(who);
+  if (!room.prep || room.test || room.turn !== 0) throw fail(400, 'That is only possible while preparing a campaign');
+  room.scene = cleanScene(body.scene || {}, room.scene);
+  touch(room);
+  return { ok: true };
+}
+/**
+ * Preparing a campaign: try the stage out as the Player. The test is ordinary play, turn after turn — and when it
+ * stops, everything is as it was when it began: the stage the Director had built, no turns played, no story told.
+ */
+export function actTest(room, body, who) {
+  if (!room.prep) throw fail(400, 'That is only possible while preparing a campaign');
+  if (body.stop) {
+    if (!room.test || who.role === 'spectator') return { ok: true };
+    clearTimeout(timers.get(room.code));
+    Object.assign(room, {
+      scene: room.test.scene,
+      turn: 0,
+      whose: 'director',
+      history: [],
+      test: null,
+      liveBefore: null,
+      deadline: null,
+      remaining: null,
+      lastTimeout: false,
+      ended: false,
+    });
+    touch(room);
+    broadcast(room);
+    return { ok: true };
+  }
+  directorOnly(who);
+  if (room.test || room.turn !== 0) return { ok: true, stale: true };
+  const stage = cleanScene(body.scene || {}, room.scene);
+  room.scene = stage;
+  room.test = { scene: clone(stage) };
+  return actSubmit(room, { turn: 0, scene: stage }, who);
 }
 /**
  * The Player's command in a battle: carried out at once, and both sides watch the round. The turn stays with the

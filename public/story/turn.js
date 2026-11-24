@@ -116,6 +116,7 @@ export function onState(s) {
 /** A new draft for my turn, made from the committed scene. */
 function freshDraft() {
   const d = clone(app.S.scene);
+  if (app.S.prep && app.S.turn === 0) return Object.assign(d, { rollWant: 0 }); // preparing a campaign: the stage is exactly as it was left
   if (app.S.you === 'director') {
     // last turn's lines, narration and one-turn extras are over
     const me = hero(d);
@@ -285,7 +286,7 @@ export function gotoStep(i) {
   rebuild();
 }
 /** What is sent when the Director ends the turn. An untouched last step is dropped. */
-function finalScene() {
+export function finalScene() {
   const steps = clone(app.draft.steps),
     cur = asFrame(app.draft);
   if (steps.length && stepEmpty()) return { ...steps.pop(), steps, rollWant: app.draft.rollWant };
@@ -335,7 +336,24 @@ export async function submit() {
       render();
     }
   }
-} // where the hero stood when the Player's turn began
+}
+/** Preparing a campaign: try the stage out as the Player, or end the test — then everything is as it was before. */
+export async function testPlay(stop) {
+  if (app.cut) app.cut.skip();
+  if (!stop) {
+    if (app.submitting || !directing()) return;
+    app.submitting = true;
+    render();
+  }
+  try {
+    await act('test', stop ? { stop: true } : { scene: finalScene() }, 3);
+  } catch (e) {
+    app.submitting = false;
+    toast(e.message);
+    render();
+  }
+}
+// where the hero stood when the Player's turn began
 function stageOpts() {
   return {
     code: app.code,
@@ -366,7 +384,7 @@ export function previewCut() {
     stage,
     app.S.scene,
     finalScene(),
-    { ...stageOpts(), selId: null, camFrame: false, by: 'director', sfx: audio.sfx, who: '▶ Preview' },
+    { ...stageOpts(), selId: null, camFrame: false, by: 'director', sfx: audio.sfx, who: '▶ Preview', noLead: true },
     () => {
       app.cut = null;
       render();

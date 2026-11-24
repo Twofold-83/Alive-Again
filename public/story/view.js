@@ -13,6 +13,7 @@ import { myTurn, shown, directing, stage, heroTurn, mods, app } from '../core/st
 import { paint, changed, changedQuiet, saveDraft } from './turn.js';
 import { renderChrome, tick } from '../shell/chrome.js';
 import { buildFoot } from './player.js';
+import { oneAction } from './walk.js';
 import { act } from '../core/net.js';
 import { guidedCtx, showMap } from './director.js';
 
@@ -163,6 +164,7 @@ export function renderSheet() {
                 render();
               } else {
                 app.draft.use = app.draft.use === it.id ? null : it.id;
+                if (app.draft.use) oneAction('item'); // in an adventure this is the turn's one action
                 changed();
               }
             },
@@ -234,7 +236,7 @@ function playerTip() {
   if (rules.player === 'tell') return `Write what you want to do. ${names.director} will make it happen on the stage, and you will see it play out.`;
   if (rules.player === 'limited') return `Choose one of ${names.director}’s options. You can also walk once and add a line of speech.`;
   if (rules.type === 'adventure')
-    return 'Click anywhere on the stage to walk there, look at something or use it — or pick an action under “Actions” and click what it is about. You can speak, write a free action and strike a pose too. Then end your turn.';
+    return 'One walk and one action a turn. Click the floor to walk there. For your action, pick one under “Actions” and click what it is about — or write a Free Action instead. Things with a name can be clicked when you stand close: they answer at once, as often as you like. You can speak and strike a pose too.';
   return `Press “Walk” and click where your hero should go (once per turn).${mods().inventory ? ' Click a thing to reach for it, or an item to use it.' : ''} Clickable things show what you can do with them. Then say something, do something — or both — and end your turn.`;
 }
 function buildPanel() {

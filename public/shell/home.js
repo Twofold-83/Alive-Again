@@ -61,6 +61,7 @@ for (const b of document.querySelectorAll('#typePick button'))
   b.onclick = () => {
     storyType = b.dataset.type;
     for (const o of document.querySelectorAll('#typePick button')) o.classList.toggle('on', o === b);
+    $('#prepCampaign').hidden = storyType === 'rpg'; // a castle is built in Dungeon mode itself
     for (const o of document.querySelectorAll('#newBtns button')) {
       const l = (HOME_LABELS[storyType] || {})[o.id];
       if (l) o.replaceChildren(l[0], h('small', {}, l[1]));
@@ -95,6 +96,7 @@ $('#newPlayer').onclick = () => create('player', 'pair');
 $('#soloPlayer').onclick = () => create('player', 'bot');
 $('#soloDirector').onclick = () => create('director', 'bot');
 $('#hotseat').onclick = () => create('director', 'hotseat');
+$('#prepCampaign').onclick = () => create('director', 'prep');
 $('#joinBtn').onclick = () => join(codeEl.value);
 codeEl.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') join(codeEl.value);

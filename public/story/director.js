@@ -9,6 +9,7 @@ import { dropTrack, trackEnd, autoTrack } from './input.js';
 import { audio } from '../core/audio.js';
 import { pen, mods, hero, directing, app } from '../core/state.js';
 import { act } from '../core/net.js';
+import { kept, workingOn, workOn } from '../core/kept.js';
 import {
   canUndo,
   undo,
@@ -21,6 +22,9 @@ import {
   clearSteps,
   gotoStep,
   previewCut,
+  finalScene,
+  saveDraft,
+  testPlay,
   ONE_STEP,
   PLAYERS,
 } from './turn.js';
@@ -74,6 +78,10 @@ export const guidedCtx = {
   },
   pen,
   map: () => showMap(),
+  get campaign() {
+    return campaign; // preparing a campaign: save, save as, load
+  },
+  testPlay,
   useScene,
   travelTo: (id) => travelTo(id),
   rid,
@@ -212,6 +220,56 @@ export function showMap() {
     },
   });
 }
+
+/* ---------- preparing a campaign: the map and the stage being worked on, kept on this device under a name ---------- */
+/** The stage belongs on the map: its scene there is brought up to date, or it is added as a new one. */
+function stageOnMap() {
+  const scenes = clone(app.S.scenes || []),
+    scene = stageCopy();
+  let doc = scenes.find((s) => s.id === app.draft.sceneId);
+  if (doc) doc.scene = scene;
+  else scenes.push((doc = { id: rid(), name: `Scene ${scenes.length + 1}`, scene }));
+  app.draft.sceneId = scene.sceneId = doc.id;
+  return scenes;
+}
+function putScenes(scenes) {
+  app.S.scenes = scenes;
+  act('saveScenes', { scenes }, 3).catch((e) => toast(e.message));
+}
+const campaign = {
+  current: () => workingOn(app.code),
+  all: () => kept.campaigns.all(),
+  /** Save over the campaign being worked on; with a name, save as a new one (and work on that from now on). */
+  save(name) {
+    const cur = workingOn(app.code);
+    if (!name && !cur) return false;
+    const scenes = stageOnMap(),
+      c = { id: name ? rid() : cur.id, name: name || cur.name, at: Date.now(), scenes: clone(scenes) };
+    putScenes(scenes);
+    act('keepStage', { scene: finalScene() }, 3).catch(() => {}); // the story remembers the stage too
+    const ok = kept.campaigns.add(c, name ? 'name' : 'id');
+    if (ok) workOn(app.code, c.id);
+    toast(ok ? `Campaign “${c.name}” is saved: ${scenes.length} scene${scenes.length === 1 ? '' : 's'}` : 'This device has no room left to save it');
+    saveDraft();
+    rebuild();
+    return ok;
+  },
+  /** Work on a saved campaign: its scenes become the map, and the stage shows its first scene. */
+  load(c) {
+    const scenes = clone(c.scenes || [])
+      .filter((s) => s && s.scene && Array.isArray(s.scene.entities))
+      .map((s) => ({ ...s, scene: normScene(s.scene) }));
+    putScenes(scenes);
+    workOn(app.code, c.id);
+    if (scenes[0]) useScene(scenes[0]);
+    else rebuild();
+    toast(`Working on “${c.name}”`);
+  },
+  forget(c) {
+    kept.campaigns.remove(c.id);
+    rebuild();
+  },
+};
 
 /** The character maker, for a new person or (given a paper doll already on stage) to change how that one looks. */
 function showDollMaker(edit) {

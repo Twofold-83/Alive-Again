@@ -22,6 +22,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await p.click('[data-env=horror]'); // rooms are listed by setting
     await p.click('[data-room=horror]');
     assert.equal(await p.locator('#stage .level i').count(), 192, 'walls and floor are laid on the live stage');
+    await p.click('.gback');
+    await x.opt('Save room'); // in the main menu, not hidden behind building
     await p.fill('#roomName', 'My crypt');
     await p.click('#roomSave');
     assert.equal(await p.locator('#roomSaves .myroom').count(), 1);

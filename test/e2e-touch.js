@@ -77,16 +77,52 @@ const { setup } = require('./lib');
     await x.cutDone();
     /* the Player: a click brings up walk here / look at / use */
     assert.match(await p.getAttribute('#foot input[placeholder^="Free"]', 'placeholder'), /Free Action/);
-    await p.locator(`#stage .ent[data-id="${chestId}"]`).click({ force: true });
-    await p.waitForSelector('.clickmenu');
-    assert.match(await p.textContent('.clickmenu'), /Old chest.*Walk here.*Look at old chest|Old chest.*Walk here.*Look at Old chest/s);
-    await p.click('#cmLook');
+    const at = (id) =>
+      p.evaluate((i) => {
+        const s = document.querySelector(`#stage .ent[data-id="${i}"]`).style;
+        return [parseFloat(s.left) / 100, parseFloat(s.top) / 100];
+      }, id);
+    const look = async () => {
+      await p.locator(`#stage .ent[data-id="${chestId}"]`).click({ force: true });
+      await p.waitForSelector('.clickmenu');
+      assert.match(
+        await p.textContent('.clickmenu'),
+        /^Old chestLook atUseOpennever mind$/,
+        'a clickable thing offers its actions, and nothing else',
+      );
+      await p.click('.clickmenu button:has-text("Look at")');
+    };
+    /* a clickable thing answers only to someone standing close */
+    await p.evaluate((id) => {
+      window.__far = id;
+    }, chestId);
+    {
+      const [cx, cy] = await at(chestId),
+        [hx, hy] = await x.heroPos();
+      if (Math.hypot((cx - hx) * 16, (cy - hy) * 12) > 3) {
+        await look();
+        assert.match(await p.textContent('#reaction'), /too far away/, 'from across the room it is too far away');
+        await p.click('#reaction');
+        assert.equal(await p.locator(`#stage .ent[data-id="${chestId}"] img[src*=".used."]`).count(), 0);
+      }
+      const st = await p.locator('#stage').boundingBox();
+      await p.click('#walkBtn');
+      await p.mouse.click(st.x + st.width * cx, st.y + st.height * Math.min(0.97, cy + 0.06)); // walk up to it
+      await p.waitForFunction(() => /back/.test(document.querySelector('#walkBtn').textContent));
+      await p.waitForTimeout(3500);
+    }
+    await look();
     assert.match(await p.textContent('#reaction'), /Scratches all round the lock/, 'the thing answers at once');
     assert.match(await p.getAttribute(`#stage .ent[data-id="${chestId}"] img`, 'src'), /chest\.used\.png/, 'and now looks used');
     await p.click('#reaction');
     /* walking up to the crate springs the trap: the turn goes to the Director by itself */
-    await p.locator(`#stage .ent[data-id="${crateId}"]`).click({ force: true });
-    await p.click('#cmWalk');
+    await p.click('#walkBtn'); // take the walk back: one walk a turn
+    {
+      const [cx, cy] = await at(crateId),
+        st = await p.locator('#stage').boundingBox();
+      await p.click('#walkBtn');
+      await p.mouse.click(st.x + st.width * cx, st.y + st.height * Math.min(0.97, cy + 0.05));
+    }
     await side('Director');
     await x.cutDone();
     const sc = await x.last();

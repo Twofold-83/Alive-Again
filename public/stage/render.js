@@ -78,6 +78,29 @@ export function actionText(scene, names, pendingRoll) {
 
 const SVG = 'http://www.w3.org/2000/svg';
 
+/* Names are drawn in a layer above the floor, so a thing keeps its place among the others while it is pointed at. */
+function showNames(root, layer) {
+  const ids = new Set(root._hot || []);
+  if (root._hover) ids.add(root._hover);
+  const want = [...ids].map((id) => [id, root._named.get(id)]).filter(([, n]) => n),
+    key = JSON.stringify(want);
+  if (layer._key === key) return;
+  layer._key = key;
+  layer.replaceChildren(...want.map(([, n]) => h('span', { style: `left:${n.x * 100}%;top:${n.y * 100}%` }, n.name)));
+}
+function nameLayer(root) {
+  const over = (ev) => {
+    const el = ev.type === 'pointerleave' ? null : ev.target.closest && ev.target.closest('.ent.named'),
+      id = el ? el.dataset.id : null;
+    if (id === root._hover) return;
+    root._hover = id;
+    const layer = root.querySelector('.names');
+    if (layer && root._named) showNames(root, layer);
+  };
+  root.addEventListener('pointermove', over);
+  root.addEventListener('pointerleave', over);
+}
+
 /**
  * Draw `scene` into `root`. Options:
  *   code, names        story code (for custom asset urls) and player names
@@ -107,6 +130,7 @@ export function renderStage(root, scene, o = {}) {
         h('div', { class: 'weather' }),
         h('div', { class: 'dest' }),
         h('div', { class: 'camframe' }),
+        h('div', { class: 'names' }),
       ),
       h('div', { class: 'strip act' }),
       h('div', { class: 'strip narr' }),
@@ -116,13 +140,15 @@ export function renderStage(root, scene, o = {}) {
       h('div', { class: 'bar top' }),
       h('div', { class: 'bar bot' }),
       h('div', { class: 'bubbles' }),
+      h('div', { class: 'toldov', hidden: true }),
     );
+    nameLayer(root);
     const fit = () => root.style.setProperty('--u', root.clientWidth / 8 + 'px');
     new ResizeObserver(fit).observe(root);
     fit();
   }
-  const [world, actEl, narrEl, cardEl, diceEl, awardEl, , , bubbles] = root.children;
-  const [bg, level, draw, marks, ents, darkEl, glowEl, weather, destEl, camEl] = world.children;
+  const [world, actEl, narrEl, cardEl, diceEl, awardEl, , , bubbles, toldEl] = root.children;
+  const [bg, level, draw, marks, ents, darkEl, glowEl, weather, destEl, camEl, namesEl] = world.children;
   const code = o.code || '';
   const css = backdropCss(code, scene.backdrop);
   if (bg._css !== css) {
@@ -226,7 +252,8 @@ export function renderStage(root, scene, o = {}) {
     };
   };
   const live = new Set(),
-    floats = o.floats || [];
+    floats = o.floats || [],
+    named = new Map(); // where the name of each named thing goes
   for (const e of scene.entities) {
     live.add(e.id);
     let el = root._els.get(e.id);
@@ -272,7 +299,9 @@ export function renderStage(root, scene, o = {}) {
       (e.pop ? ' popin' : '');
     el.dataset.name = nameOf(e); // shown when the pointer is over it — only once the Director has named it
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '') + (o.playing && e.once ? ' once-' + e.once : '');
-    fxw.firstChild.style.transform = `rotate(${e.rot || 0}deg) scaleX(${faces(e) !== !!(at.held && faces(at.held)) ? -1 : 1})`;
+    fxw.firstChild.style.rotate = `${e.rot || 0}deg`;
+    fxw.firstChild.style.scale = faces(e) !== !!(at.held && faces(at.held)) ? '-1 1' : ''; // mirrored at once: nobody is seen turning round
+    if (nameOf(e)) named.set(e.id, { name: nameOf(e), x: at.x, y: at.y - (tallOf(e.asset) * e.scale * SPRITE) / 6 }); // just above its head
     if (emote.textContent !== (e.emote || '')) emote.textContent = e.emote || '';
     hp.style.display = e.hp == null ? 'none' : 'block';
     if (e.hp != null) hp.firstChild.style.width = clamp((e.hp / (e.maxHp || 1)) * 100, 0, 100) + '%';
@@ -287,6 +316,11 @@ export function renderStage(root, scene, o = {}) {
     el.style.fontSize = `calc(var(--u) * ${e.scale * SPRITE})`;
     el.style.zIndex = at.z;
   }
+  /* names: of whatever the pointer is over, and of everything the Player may choose from */
+  root._named = named;
+  root._hot = o.hot || null;
+  showNames(root, namesEl);
+
   /* light and dark: the dark lies over the room, every light source cuts a soft hole in it and adds its colour */
   const lights = scene.entities
     .filter((e) => e.glow && !e.gone)
@@ -364,6 +398,12 @@ export function renderStage(root, scene, o = {}) {
   const dice = o.dice ? (o.dice.rolling ? '' : String(o.dice.value)) : '';
   if (diceEl.textContent !== dice) diceEl.textContent = dice;
   diceEl.classList.toggle('rolling', !!(o.dice && o.dice.rolling));
+  const told = o.told ? o.told.who + '\n' + o.told.text : '';
+  if (toldEl._key !== told) {
+    toldEl._key = told;
+    toldEl.hidden = !o.told;
+    toldEl.replaceChildren(...(o.told ? [h('b', {}, o.told.who), h('p', {}, o.told.text)] : []));
+  }
   const award = o.award ? `${o.award.n >= 0 ? '+' : ''}${o.award.n} *${o.award.text ? '\n' + o.award.text : ''}` : '';
   if (awardEl.textContent !== award) awardEl.textContent = award;
 }

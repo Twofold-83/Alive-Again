@@ -26,11 +26,13 @@ export function newCode() {
   }
 }
 
-/** A new story. body: { token, name, role, mode: pair | bot | hotseat, type: free | adventure | rpg }. The kind of story is chosen once, here. */
+/** A new story. body: { token, name, role, mode: pair | bot | hotseat | prep, type: free | adventure | rpg }. The kind of story is chosen once, here.
+ * prep: one person prepares a campaign — the stage is theirs with no turns and no clock, and can be tried out as the Player. */
 export function createRoom(body) {
   if (rooms.size >= MAX_ROOMS) throw fail(503, 'Server is full, try again later');
-  const role = body.role === 'player' ? 'player' : 'director';
-  const mode = body.mode === 'hotseat' ? 'hotseat' : body.mode === 'bot' || body.bot ? 'bot' : 'pair';
+  const role = body.role === 'player' && body.mode !== 'prep' ? 'player' : 'director';
+  const prep = body.mode === 'prep' && body.type !== 'rpg';
+  const mode = prep || body.mode === 'hotseat' ? 'hotseat' : body.mode === 'bot' || body.bot ? 'bot' : 'pair';
   const dungeon = body.type === 'rpg';
   const type = dungeon ? 'rpg' : body.type === 'adventure' || (body.type == null && mode === 'bot' && role === 'player') ? 'adventure' : 'free';
   const names = () => (dungeon ? { director: 'Overlord', player: 'Hero' } : { director: 'Director', player: 'Player' });
@@ -59,6 +61,7 @@ export function createRoom(body) {
   if (mode === 'hotseat') {
     // one person, one device, both sides
     room.hotseat = true;
+    if (prep) Object.assign(room, { prep: true, settings: { turnSeconds: 0 } });
     room.tokens.director = room.tokens.player = body.token;
     room.names = names();
   } else if (mode === 'bot') {
@@ -122,6 +125,8 @@ function view(room, role) {
     rules: room.rules,
     info: room.info || { title: '', text: '' },
     hotseat: !!room.hotseat,
+    prep: !!room.prep, // a campaign is being prepared here
+    testing: !!room.test, // ...and tried out right now: all of it is undone when the test ends
     claude: directorAI.available(),
     scenes: role === 'director' || room.hotseat ? room.scenes || [] : undefined,
     historyLen: room.history.length,

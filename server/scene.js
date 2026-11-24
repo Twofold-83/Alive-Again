@@ -125,6 +125,7 @@ export function cleanScene(s, prev, inner) {
                 .filter(Boolean)
                 .slice(0, 6),
               re: cleanReactions(e.active.re), // what the Player is shown at once for an action, without the Director
+              far: !!e.active.far, // it answers from anywhere on the stage, not only to someone standing close
             }
           : null,
       tie:
@@ -214,12 +215,13 @@ export function cleanScene(s, prev, inner) {
 }
 
 /* How long the other side will be watching this turn play out, so it is not charged to their clock. */
-export function cutEstimate(scene, before) {
+export function cutEstimate(scene, before, by) {
   let total = 0,
     prev = before;
   for (const sc of [...(scene.steps || []), scene]) {
     const old = new Map((prev ? prev.entities : []).map((e) => [e.id, e.say]));
     let ms = 1500;
+    if (by === 'director' && before && prev === before) ms += 2200; // a Director's turn opens on the scene as it was
     for (const t of sc.tracks) ms = Math.max(ms, 900 + t.pts[t.pts.length - 3]);
     for (const e of sc.entities) if (e.say && old.get(e.id) !== e.say) ms += 900 + 45 * e.say.length;
     if (sc.narration && !(prev && prev.narration === sc.narration)) ms += Math.min(4500, 900 + 40 * sc.narration.length);
@@ -227,7 +229,14 @@ export function cutEstimate(scene, before) {
     if (sc.travel) ms += 2400;
     if (sc.award) ms += 1700;
     if (sc.roll && !(sc.answer && sc.answer.kind === 'roll')) ms += 1700; // a roll the Director asked for was shown to the Player as it fell
-    if (sc.action || sc.target || sc.use || sc.point) ms += 1300;
+    /* what the Player did is typed out for the Director, with what clickable things answered */
+    let told = (sc.action || '').length + (sc.point ? 24 : 0) + (sc.target || sc.use ? 24 : 0);
+    for (const r of sc.reacted || []) {
+      const e = sc.entities.find((x) => x.id === r.id),
+        re = e && e.active && e.active.re && e.active.re[r.verb];
+      told += 24 + (re && re.text ? re.text.length : 0);
+    }
+    if (told) ms += 1300 + 46 * told;
     total += ms;
     prev = sc;
   }

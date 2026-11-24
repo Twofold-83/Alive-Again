@@ -7,7 +7,7 @@ import { stage, pen, myTurn, hero, mods, directing, app } from '../core/state.js
 import { guidedPick, guidedMark, guidedTool } from './guided.js';
 import { rid, r3, toast, $ } from '../core/dom.js';
 import { changed, rebuild, paint, undo, submit } from './turn.js';
-import { walkHero, setReply, hideVerbs, showClickMenu, intend } from './walk.js';
+import { walkHero, setReply, hideVerbs, showThingMenu, intend, oneAction } from './walk.js';
 import { render } from './view.js';
 import { mapOpen } from '../build/map.js';
 import { removeEntity } from './director.js';
@@ -32,10 +32,18 @@ stage.addEventListener('pointerdown', (ev) => {
   if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) document.activeElement.blur();
   const p = stagePos(ev);
   const el = ev.target.closest('.ent');
-  const hit = el && app.draft.entities.find((x) => x.id === el.dataset.id);
+  let hit = el && app.draft.entities.find((x) => x.id === el.dataset.id);
   drag = null;
   if (app.S.you === 'player') {
     const me = hero(app.draft);
+    if (hit && hit === me) {
+      /* the Player clicks through their own hero: standing in front of a thing must not hide it */
+      const behind = document
+        .elementsFromPoint(ev.clientX, ev.clientY)
+        .map((n) => n.closest && n.closest('#stage .ent'))
+        .find((n) => n && n.dataset.id !== me.id);
+      hit = (behind && app.draft.entities.find((x) => x.id === behind.dataset.id)) || hit;
+    }
     if (app.verb) {
       // an action was picked: this click says what it is about
       const verb = app.verb;
@@ -76,14 +84,15 @@ stage.addEventListener('pointerdown', (ev) => {
       }
       const reach = () => {
         app.draft.target = app.draft.target === hit.id ? null : hit.id;
-        changed();
+        oneAction('item');
+        rebuild();
       };
       if (app.draft.use) return reach(); // use the chosen item ON this
-      if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev); // walk here, look at, use — and what a clickable thing offers
-      if (hit.active && hit.active.verbs.length) return showClickMenu(hit, p, ev); // a clickable thing: what to do with it?
+      if (hit.active && hit.active.verbs.length) return showThingMenu(hit, p, ev); // a clickable thing: what to do with it?
+      if (app.S.rules.type === 'adventure') return toast('Pick an action under “Actions” first, then click what it is about');
       if (mods().inventory && app.S.rules.player === 'free') return reach(); // reach for it
     }
-    if (app.S.rules.type === 'adventure') return showClickMenu(hit, p, ev);
+    if (app.S.rules.type === 'adventure') return intend('Walk', null, p); // point and click: a click on the floor is where the hero goes
     return toast(app.draft.walked ? 'You have already walked this turn' : 'Press “Walk”, then click where you want to go');
   } else if (guidedTool() === 'paint') {
     drag = { paint: true };

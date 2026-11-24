@@ -20,8 +20,9 @@
 .ent .float:not(:empty) { animation: floatup 1.3s ease-out forwards; }
 @keyframes floatup { from { transform: translate(-50%, .4em); opacity: 0; } 15% { opacity: 1; } to { transform: translate(-50%, -.9em); opacity: 0; } }
 .ent.active { cursor: pointer; }
-.ent.named:hover::after, .ent.hot.named::after { content: attr(data-name); position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); background: rgba(0, 0, 0, .8); color: #cfc9b6; padding: 1px 6px; font: 15px/1.2 var(--font); white-space: nowrap; pointer-events: none; z-index: 5; }
-.ent:hover, .ent.hot { z-index: 99990 !important; } /* its name is never hidden behind another thing */
+/* names float in a layer of their own, above everything on the floor: pointing at a thing never moves it in front of the others */
+.stage .names { position: absolute; inset: 0; pointer-events: none; z-index: 7000; }
+.stage .names span { position: absolute; transform: translate(-50%, -100%); background: rgba(0, 0, 0, .8); color: #cfc9b6; padding: 1px 6px; font: 15px/1.2 var(--font); white-space: nowrap; }
 .ent.active:hover .glyph, .ent.target .glyph { filter: drop-shadow(0 0 .05em rgba(0, 0, 0, .95)) drop-shadow(0 0 .12em rgba(0, 0, 0, .7)); } /* what is pointed at or chosen: a slight dark shadow, no more */
 /* one-shot animations, played once as the step plays */
 .once-swing { animation: oswing .55s ease-in-out; }
@@ -78,7 +79,7 @@
 .ent.sel { outline: 2px dashed #ffffff; outline-offset: 2px; border-radius: 0; }
 .stage.edit .ent { cursor: grab; }
 .stage.cut .ent { transition: left .85s ease-in-out, top .85s ease-in-out, font-size .85s ease-in-out, opacity .45s; }
-.stage.cut .ent .glyph { transition: transform .85s ease-in-out; }
+.stage.cut .ent .glyph { transition: rotate .85s ease-in-out; } /* a thing turns smoothly; it faces the other way at once */
 .stage.cut .ent.tracked { transition: opacity .45s; }
 .ent.fresh, .ent.gone { opacity: 0; }
 .stage::before { content: ""; position: absolute; inset: 0; background: #000000; opacity: 0; pointer-events: none; z-index: 9400; transition: opacity .36s; }
@@ -213,3 +214,9 @@
 @keyframes glowflick { 0%, 100% { opacity: 1; } 20% { opacity: .82; } 45% { opacity: .95; } 60% { opacity: .78; } 80% { opacity: .9; } }
 .stage .basebar { position: absolute; z-index: 5500; pointer-events: none; background: rgba(217, 164, 65, .18); border: 1px dashed rgba(217, 164, 65, .7); box-sizing: border-box; }
 .stage .basebar.on { background: rgba(217, 164, 65, .38); border: 2px solid #d9a441; }
+/* what the Player did, told to the Director like a line of an old adventure game */
+.stage .toldov { position: absolute; left: 6%; right: 6%; bottom: 7%; z-index: 9200; padding: .5em .8em .6em; background: rgba(8, 7, 12, .94); border: 2px solid; border-color: var(--hi) #000 #000 var(--hi); font-size: calc(var(--u) * .26); line-height: 1.15; pointer-events: none; }
+.stage .toldov[hidden] { display: none; }
+.stage .toldov b { display: block; color: var(--accent); font-weight: normal; text-transform: uppercase; letter-spacing: .06em; font-size: .8em; margin-bottom: .2em; }
+.stage .toldov p { margin: 0; white-space: pre-line; color: #e9e3d2; }
+.stage .toldov p::after { content: "_"; animation: caret 1s steps(2) infinite; }

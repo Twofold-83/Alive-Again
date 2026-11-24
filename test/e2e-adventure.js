@@ -54,6 +54,8 @@ const { setup } = require('./lib');
     await thing('clickable');
     await p.click('#activeToggle');
     await p.fill('#activeName', 'Old chest');
+    await p.click('#farToggle'); // this one answers from anywhere on the stage (reach is tried in e2e-touch)
+    assert.match(await p.textContent('#farToggle'), /anywhere/);
     await x.done();
     await x.done();
     assert.equal(await p.locator('#stage .ent').count(), 4, 'hero, tied sword, mage and chest are on stage');

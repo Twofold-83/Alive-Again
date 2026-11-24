@@ -49,7 +49,7 @@ export function newEntity(asset, props = {}) {
     fx: '',
     emote: '',
     solid: false,
-    active: null, // a thing the Player can click: { verbs: [...], re: { verb: { text, used } } } — what it answers to, and how
+    active: null, // a thing the Player can click: { verbs: [...], re: { verb: { text, used } }, far } — what it answers to, and how; far: from anywhere
     tie: null,
     hp: null,
     maxHp: null,
@@ -153,6 +153,22 @@ export function baseOf(e) {
     y = e.y + ((e.base && e.base.dy) || 0);
   return { x0: e.x - w / 2, x1: e.x + w / 2, y0: y - d, y1: y, y };
 }
+/**
+ * Can the hero reach this thing from where they stand? A clickable thing answers only to someone close by: about
+ * a tile and a half from the floor it stands on — unless the Director said it can be used from anywhere.
+ */
+export function withinReach(scene, e) {
+  if (e.active && e.active.far) return true;
+  const hero = scene.entities.find((x) => x.id === scene.heroId),
+    holder = e.tie && scene.entities.find((x) => x.id === e.tie.to);
+  if (!hero || holder === hero) return true; // what the hero holds is always at hand
+  const b = baseOf(holder ? { ...e, x: holder.x, y: holder.y, base: null } : e),
+    dx = Math.max(b.x0 - hero.x, 0, hero.x - b.x1),
+    dy = Math.max(b.y0 - hero.y, 0, hero.y - b.y1);
+  return (dx * LEVEL_W) ** 2 + (dy * LEVEL_H) ** 2 <= REACH * REACH;
+}
+export const REACH = 1.6; // in tiles
+
 /** May the hero stand here? Where a level exists only floor tiles will do; the base of a solid thing blocks. */
 export function walkable(scene, x, y) {
   if (scene.level) {

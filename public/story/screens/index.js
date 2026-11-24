@@ -1,5 +1,5 @@
 /* Every screen of the Director's question tree, by the name used in G.path. */
-import { screenRoot, screenRules, screenClaude } from './story.js';
+import { screenRoot, screenRules, screenClaude, screenCampaign } from './story.js';
 import {
   screenThing,
   screenSwap,
@@ -22,6 +22,7 @@ import {
   screenMoment,
   screenScene,
   screenRoom,
+  screenSaveRoom,
   screenSceneLight,
   screenPaint,
   screenScenePrepared,
@@ -45,6 +46,8 @@ export const SCREENS = {
   'move:drag': screenMoveDrag,
   'move:rec': screenMoveRec,
   room: screenRoom,
+  saveroom: screenSaveRoom,
+  campaign: screenCampaign,
   'scene:light': screenSceneLight,
   add: screenAdd,
   'add:char': screenAddChar,

@@ -56,6 +56,10 @@ export function guidedPick(id) {
     G.sel = id;
   }
 }
+/** Open one of the Director's screens from outside the menu (a button in the banner, say). */
+export function guidedOpen(screen) {
+  Object.assign(G, { path: [screen], sel: null });
+}
 /** A click on an exit marker opens that exit's tools. */
 export function guidedMark(exitId) {
   const top = G.path[G.path.length - 1] || '';

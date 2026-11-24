@@ -15,8 +15,8 @@ import { nameOf, pointText } from '../shared/scene-model.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
 import { myTurn, other, hero, mods, app } from '../core/state.js';
-import { saveDraft, changedQuiet, rebuild, submit } from './turn.js';
-import { walkHero, undoWalk, setReply } from './walk.js';
+import { saveDraft, changedQuiet, rebuild, submit, testPlay } from './turn.js';
+import { walkHero, undoWalk, setReply, oneAction } from './walk.js';
 import { render } from './view.js';
 import { openStory } from './viewer.js';
 import { leave } from '../shell/home.js';
@@ -165,14 +165,23 @@ function sayInput(me) {
   });
 }
 function freeAction() {
+  const adventure = app.S.rules.type === 'adventure';
   return h('input', {
-    placeholder: 'Free Action… (“open the drawer”)',
+    id: 'freeAction',
+    placeholder: adventure ? 'Free Action… (instead of an action)' : 'Free Action… (“open the drawer”)',
     maxlength: 160,
     value: app.draft.action,
     enterkeyhint: 'done',
     oninput: (ev) => {
-      app.draft.action = ev.target.value;
-      changedQuiet();
+      const d = app.draft,
+        other = adventure && ev.target.value.trim() && (d.point || d.use || d.target);
+      d.action = ev.target.value;
+      if (!other) return changedQuiet();
+      oneAction('words'); // one action a turn: these words take the place of what was picked before
+      rebuild();
+      const el = $('#freeAction');
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
     },
   });
 }
@@ -305,6 +314,19 @@ const whose = () => (app.S.hotseat ? (app.S.whose === 'director' ? 'Director' : 
 
 function directorFoot() {
   const ready = app.S.joined.player;
+  if (app.S.prep && !app.S.testing)
+    return [
+      h(
+        'button',
+        {
+          id: 'testStart',
+          class: 'go primary',
+          title: 'Try what is on the stage as the Player. Ending the test puts everything back.',
+          onclick: () => testPlay(),
+        },
+        '▶ Test as Player',
+      ),
+    ];
   return [
     h(
       'button',

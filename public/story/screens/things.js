@@ -639,6 +639,27 @@ export function screenActive(kit) {
           'Add',
         ),
       ),
+      /* how close the hero must stand for it to answer */
+      h(
+        'button',
+        {
+          id: 'farToggle',
+          class: sel.active.far ? '' : 'on',
+          onclick: () => {
+            sel.active.far = !sel.active.far;
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        sel.active.far ? 'Works from anywhere on the stage' : 'Must stand close ✓',
+      ),
+      h(
+        'small',
+        { class: 'dim' },
+        sel.active.far
+          ? `${S.names.player} can do these from wherever the hero stands.`
+          : `${S.names.player} has to walk up to it first — from further off it says “It’s too far away.”`,
+      ),
     );
   }
   /* a trap: works whether or not the thing is clickable */

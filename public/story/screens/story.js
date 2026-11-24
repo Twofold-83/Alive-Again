@@ -4,9 +4,89 @@ import { h, add } from '../../core/dom.js';
 import { glyphNode, actionParts } from '../../stage/render.js';
 import { G, short } from '../guided.js';
 
+/* ================= preparing a campaign: save, save as, load ================= */
+export function screenCampaign(kit) {
+  const { p, c, S, head } = kit,
+    cur = c.campaign.current(),
+    all = c.campaign.all();
+  head('Campaign', 'The whole map and the stage you are working on, kept on this device under a name.');
+  const name = h('input', { id: 'campAsName', class: 'grow', placeholder: 'Name for a new campaign', maxlength: 40 });
+  add(
+    p,
+    h(
+      'div',
+      { class: 'card' },
+      h('h3', {}, cur ? `Working on “${cur.name}”` : 'Not saved yet'),
+      h('p', { class: 'dim small' }, `${(S.scenes || []).length} scenes on the map. Saving puts the stage on the map too.`),
+      h(
+        'button',
+        { id: 'campSaveCur', class: 'primary', disabled: !cur, title: cur ? '' : 'Give it a name first: Save as', onclick: () => c.campaign.save() },
+        cur ? `Save “${short(cur.name, 22)}”` : 'Save',
+      ),
+      h(
+        'div',
+        { class: 'row' },
+        name,
+        h(
+          'button',
+          {
+            id: 'campSaveAs',
+            onclick: () => {
+              const n = name.value.trim().slice(0, 40);
+              if (!n) return c.toast('Type a name for the new campaign first');
+              if (all.some((x) => x.name === n) && !confirm(`There is a campaign “${n}” already. Save over it?`)) return;
+              c.campaign.save(n);
+            },
+          },
+          'Save as',
+        ),
+      ),
+    ),
+    h(
+      'div',
+      { class: 'card', id: 'campList' },
+      h('h3', {}, 'Load a campaign'),
+      all.length
+        ? all.map((x) =>
+            h(
+              'div',
+              { class: 'row myroom' },
+              h(
+                'button',
+                {
+                  class: 'grow' + (cur && cur.id === x.id ? ' on' : ''),
+                  title: 'Work on this campaign: its scenes become the map',
+                  onclick: () => {
+                    if ((S.scenes || []).length && !confirm(`Load “${x.name}”? The map of this story is replaced by it.`)) return;
+                    c.campaign.load(x);
+                  },
+                },
+                h('b', {}, x.name),
+                h('small', { class: 'dim' }, ` ${x.scenes.length} scenes`),
+              ),
+              h(
+                'button',
+                {
+                  title: 'Forget this campaign',
+                  onclick: () => {
+                    if (confirm(`Forget the campaign “${x.name}”?`)) c.campaign.forget(x);
+                  },
+                },
+                '✕',
+              ),
+            ),
+          )
+        : h('small', { class: 'dim' }, 'No campaigns on this device yet.'),
+    ),
+    h('p', { class: 'dim small' }, 'In a story, “Map & campaigns” puts a saved campaign on the map.'),
+  );
+}
+
 /* ================= root ================= */
 export function screenRoot(kit) {
   const { p, c, d, S, code, lab, setup, stepNo, enter, done, opt } = kit;
+  const prep = S.prep && !S.testing, // a campaign is being prepared: no turns, nothing is played
+    cur = prep ? c.campaign.current() : null;
   if (!setup) {
     /* what the Player just did: read out like the log of an old adventure game */
     const parts = actionParts(d),
@@ -33,14 +113,15 @@ export function screenRoot(kit) {
             ),
       ),
     );
-    const tgt = d.target && d.entities.find((e) => e.id === d.target);
+    const wants = d.target || (d.point && d.point.verb === 'Pick up' && d.point.id), // reached for, or picked up from the Actions list
+      tgt = wants && d.entities.find((e) => e.id === wants && e.id !== d.heroId);
     if (tgt && c.mods().inventory)
       add(
         p,
         h(
           'div',
           { class: 'card ask' },
-          h('b', {}, `${S.names.player} reaches for `, glyphNode(code, tgt.asset, 'mini'), ' — do they get it?'),
+          h('b', {}, `${S.names.player} ${d.target ? 'reaches for' : 'wants to pick up'} `, glyphNode(code, tgt.asset, 'mini'), ' — do they get it?'),
           h(
             'div',
             { class: 'row' },
@@ -62,6 +143,7 @@ export function screenRoot(kit) {
                 class: 'grow',
                 onclick: () => {
                   d.target = null;
+                  if (d.point && d.point.id === tgt.id) d.point = null;
                   c.rebuild();
                 },
               },
@@ -172,8 +254,16 @@ export function screenRoot(kit) {
     h(
       'div',
       { class: 'gtitle' },
-      h('b', {}, setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
-      h('small', { class: 'dim' }, setup ? 'Build the opening scene, then begin.' : 'All of it plays at the same time.'),
+      h('b', {}, prep ? 'Prepare your campaign' : setup ? 'Set the stage' : `Step ${stepNo} — what happens?`),
+      h(
+        'small',
+        { class: 'dim' },
+        prep
+          ? 'Build scenes, keep them on the map, save — and test them as the Player.'
+          : setup
+            ? 'Build the opening scene, then begin.'
+            : 'All of it plays at the same time.',
+      ),
     ),
   );
   if (setup)
@@ -184,6 +274,10 @@ export function screenRoot(kit) {
     h(
       'div',
       { class: 'gopts' },
+      prep &&
+        opt('book-red', 'Campaign', cur ? `Working on “${short(cur.name, 20)}” — save, save as, load` : 'Not saved yet — save, save as, load', () =>
+          enter('campaign'),
+        ),
       opt('plus', 'Add something', 'A character, a thing, an effect', () => enter('add')),
       opt('speech-bubble', 'Someone speaks', 'Give a character a line', () => enter('speak')),
       opt('boot', 'Move or animate', 'Walk, jump, record a path', () => enter('move')),
@@ -194,7 +288,8 @@ export function screenRoot(kit) {
       opt('explosion', 'Moment and sound', 'Shake, flash, boom, bell…', () => enter('moment')),
       opt('rain-cloud', 'Mood', 'Light and dark, weather, music, title', () => enter('scene')),
       opt('pencil', 'Draw on the stage', 'Freehand, in colour', () => enter('draw')),
-      opt('hammer', 'Build this room', 'Walls and floor in one press, save rooms', () => enter('room')),
+      opt('hammer', 'Build this room', 'Walls and floor in one press, paint tiles', () => enter('room')),
+      opt('floppy-disk', 'Save room', 'Keep this room for any story, bring a saved one back', () => enter('saveroom')),
       opt('map', 'Map & campaigns', `${(S.scenes || []).length} scenes — connect, copy, save the lot`, () => c.map()),
       sheet && opt('backpack', `${S.names.player}’s sheet`, 'Items, stats, dice', () => enter('sheet')),
       opt('question', `Ask ${S.names.player}`, 'Choices, a roll, a place, a target…', () => enter('ask')),

@@ -334,8 +334,9 @@ const { setup } = require('./lib');
     await x.done();
     await toPlayer();
     const sp = await stage(); // the stage is a little taller for the Player: the Director's shelf is gone
+    await p.click('#actionsBtn'); // point and click: pick the action, then the thing
+    await p.click('[data-verb="Pick up"]');
     await p.mouse.click(sp.x + sp.width * kx, sp.y + sp.height * ky - 10);
-    await p.click('#cmTake'); // the click menu: walk here, look at, use, reach for
     await p.waitForSelector('.ent.target');
     await toDirector();
     await p.click('.card.ask button.primary');

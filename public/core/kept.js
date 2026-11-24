@@ -48,6 +48,23 @@ export const kept = {
   objects: list('tf.objects', 400),
 };
 
+/* Which campaign a story is working on while it is being prepared: story code -> campaign id (localStorage tf.working). */
+function working() {
+  try {
+    return JSON.parse(localStorage.getItem('tf.working') || '{}') || {};
+  } catch {
+    return {};
+  }
+}
+export const workingOn = (code) => kept.campaigns.all().find((c) => c.id === working()[code]) || null;
+export function workOn(code, id) {
+  try {
+    localStorage.setItem('tf.working', JSON.stringify({ ...working(), [code]: id }));
+  } catch {
+    /* it is only a pointer: without it the next Save asks for a name again */
+  }
+}
+
 /** Keep a scene as a room for any story. A saved room stands alone: no steps, no ways out, nobody speaking. */
 export function keepRoom(name, scene) {
   const room = normScene(

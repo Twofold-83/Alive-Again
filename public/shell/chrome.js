@@ -7,7 +7,10 @@ import { other, roleName, myTurn, app } from '../core/state.js';
 import { openStory } from '../story/viewer.js';
 import { leave } from './home.js';
 import { setDevice, isPhone } from './device.js';
-import { submit } from '../story/turn.js';
+import { submit, testPlay, rebuild } from '../story/turn.js';
+import { workingOn } from '../core/kept.js';
+import { guidedCtx } from '../story/director.js';
+import { guidedOpen } from '../story/guided.js';
 
 export function shareLink() {
   const url = location.origin + location.pathname + '#' + app.code;
@@ -18,6 +21,11 @@ export function shareLink() {
       () => prompt('Copy this invite link', url),
     );
   else prompt('Copy this invite link', url);
+}
+/** Open one of the Director's screens from the banner. */
+function openScreen(name) {
+  guidedOpen(name);
+  rebuild();
 }
 export function renderChrome() {
   if (!app.S) return;
@@ -101,7 +109,33 @@ export function renderChrome() {
         ? 'Both sides: the pad moves the hero, the Overlord’s powers are below'
         : 'You play both sides — the keyboard moves the hero, the panel on the right is the Overlord',
     ];
-  else if (app.S.hotseat) content = [`You play both sides — now you are the ${app.S.whose === 'director' ? 'Director' : 'Player'}`];
+  else if (app.S.testing)
+    content = [
+      `Test play — now you are the ${app.S.whose === 'director' ? 'Director' : 'Player'}. Nothing you do here is kept.`,
+      h(
+        'button',
+        { id: 'testStop', class: 'primary', title: 'Back to preparing: the stage is as it was before the test', onclick: () => testPlay(true) },
+        '■ End test',
+      ),
+    ];
+  else if (app.S.prep) {
+    const cur = workingOn(app.code);
+    content = [
+      cur ? `Preparing the campaign “${cur.name}”` : 'Preparing a campaign — not saved yet',
+      h(
+        'button',
+        {
+          id: 'campQuickSave',
+          class: 'primary',
+          disabled: !cur,
+          title: cur ? 'Save over this campaign' : 'Give it a name first: Save as',
+          onclick: () => guidedCtx.campaign.save(),
+        },
+        'Save',
+      ),
+      h('button', { id: 'campOpen', onclick: () => openScreen('campaign') }, 'Save as / Load'),
+    ];
+  } else if (app.S.hotseat) content = [`You play both sides — now you are the ${app.S.whose === 'director' ? 'Director' : 'Player'}`];
   else if (app.S.you === 'spectator') content = ['You are watching this story.'];
   else if (!app.S.joined[other()])
     content = [`Invite your ${roleName(other())} — code ${app.code}`, h('button', { class: 'primary', onclick: shareLink }, 'Share link')];

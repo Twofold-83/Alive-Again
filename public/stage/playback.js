@@ -1,13 +1,15 @@
 /* Playing a finished turn as a small film: things glide, recorded moves replay, lines are typed out,
  * the camera leans in. A Director's turn plays its steps in order; a Player's turn plays in the order they acted. */
-import { playerFields } from '../shared/scene-model.js';
+import { playerFields, called } from '../shared/scene-model.js';
 import { clone, h } from '../core/dom.js';
-import { renderStage, burst } from './render.js';
+import { renderStage, burst, actionParts } from './render.js';
 import { sample } from './level.js';
 
 /** How a thing looks, as far as a step can change it: shown as before until the step plays, then as the step left it. */
 const LOOKS = ['scale', 'rot', 'flip', 'fx', 'pose', 'feel', 'view', 'used', 'glow'];
 const pick = (from, keys) => Object.fromEntries(keys.map((k) => [k, from[k]]));
+/** How long a Director's turn first shows the scene as it was. */
+const LEAD_MS = 2200;
 
 /**
  * Present the step from scene `before` to scene `after`: things glide, recorded
@@ -55,6 +57,7 @@ export function playCut(root, before, after, o, done) {
     frame.cam = before.cam;
     frame.exits = before.exits;
     frame.level = before.level;
+    frame.dark = before.dark; // the light changes when the step plays, not before
   }
 
   const view = { ...o, playing: true },
@@ -63,7 +66,9 @@ export function playCut(root, before, after, o, done) {
     types = []; // sp > 1 plays faster (used by the simulations); types: lines being typed out
   const autoCam = o.autoCam !== false && !after.cam && !(before && before.cam);
   const at = (ms, fn) => steps.push({ ms, fn });
-  let t = 0;
+  /* a Director's turn opens on the scene as the Player left it, for a moment: then it is clear what changes */
+  const lead = o.by === 'director' && before && !(o.frameNo > 1) && !o.noLead ? LEAD_MS : 0;
+  let t = lead;
   const swap = () => {
     frame.backdrop = after.backdrop;
     frame.level = after.level;
@@ -71,25 +76,25 @@ export function playCut(root, before, after, o, done) {
   };
   if (after.travel) {
     // "Traveling to ..." between two places
-    at(0, () => {
+    at(lead, () => {
       root.classList.add('fade');
       if (o.sfx) o.sfx('whoosh');
     });
-    at(380, () => {
+    at(lead + 380, () => {
       swap();
       view.travel = after.travel;
     });
-    at(2300, () => {
+    at(lead + 2300, () => {
       view.travel = '';
       root.classList.remove('fade');
     });
-    t = 2600;
+    t = lead + 2600;
   } else if (before && (before.backdrop !== after.backdrop || JSON.stringify(before.level) !== JSON.stringify(after.level))) {
     // fade through black
-    at(0, () => root.classList.add('fade'));
-    at(380, swap);
-    at(760, () => root.classList.remove('fade'));
-    t = 760;
+    at(lead, () => root.classList.add('fade'));
+    at(lead + 380, swap);
+    at(lead + 760, () => root.classList.remove('fade'));
+    t = lead + 760;
   } else swap();
   if (after.card) {
     at(t, () => {
@@ -111,6 +116,7 @@ export function playCut(root, before, after, o, done) {
     at(tM, () => {
       // everything starts moving
       frame.weather = after.weather;
+      frame.dark = after.dark;
       frame.drawing = after.drawing;
       view.newStrokes = newStrokes;
       frame.cam = after.cam;
@@ -203,18 +209,44 @@ export function playCut(root, before, after, o, done) {
   };
   const actDo = () => {
     /* what the Player did is told once, in the first picture of their turn (a battle adds one picture per enemy's blow) */
-    if (o.by === 'player' && !(o.frameNo > 1) && (after.action || after.target || after.point || after.use || after.exit || after.answer)) {
+    if (o.by !== 'player' || o.frameNo > 1) return;
+    const did = { action: after.action, target: after.target, point: after.point, use: after.use, exit: after.exit, answer: after.answer },
+      all = { ...did, reacted: after.reacted, tripped: after.tripped, felt: after.felt };
+    if (!Object.values(all).some((v) => (Array.isArray(v) ? v.length : v))) return;
+    const battle = after.answer && after.answer.kind === 'battle';
+    if (battle) {
+      // a round of a fight: its lines go up at once, the blows are the show
       at(t, () => {
         view.pop = null;
-        frame.action = after.action;
-        frame.target = after.target;
-        frame.point = after.point;
-        frame.use = after.use;
-        frame.exit = after.exit;
-        frame.answer = after.answer;
+        Object.assign(frame, did);
       });
       t += 1300;
+      return;
     }
+    /* typed out for the Director, line by line, the way the Player read it: what they did, and what a thing answered */
+    const lines = [];
+    for (const r of after.reacted || []) {
+      const e = fin.get(r.id),
+        re = e && e.active && e.active.re && e.active.re[r.verb];
+      if (!e) continue;
+      lines.push(`${r.verb}: ${called(e)}`); // a clickable thing that answered by itself: the Player read this
+      if (re && re.text) lines.push(`“${re.text}”`);
+    }
+    lines.push(...actionParts({ ...after, said: '', roll: null, reacted: [] }).map(([, text]) => text[0].toUpperCase() + text.slice(1)));
+    const text = lines.join('\n');
+    at(t, () => {
+      view.pop = null;
+      view.told = { who: (o.names && o.names.player) || 'Player', text: '' };
+      view.noAct = true; // the line at the top comes back once it has been told
+      Object.assign(frame, { target: after.target, point: after.point, exit: after.exit }); // what it is about is marked on the stage
+    });
+    types.push({ t0: t, told: true, text, n: 0 });
+    t += text.length * 24 + Math.min(4000, 1300 + 22 * text.length);
+    at(t, () => {
+      view.told = null;
+      view.noAct = o.noAct;
+      Object.assign(frame, all);
+    });
   };
   const acts = { walk: actMove, say: actSay, act: actDo };
   const order = o.by === 'player' ? [...new Set([...(after.order || []).filter((k) => acts[k]), 'walk', 'say', 'act'])] : ['walk', 'say', 'act'];
@@ -280,12 +312,14 @@ export function playCut(root, before, after, o, done) {
     for (const ty of types) {
       // typewriter, with a soft tick every few letters
       if (el < ty.t0 || ty.n >= ty.text.length) continue;
-      const n = Math.min(ty.text.length, Math.floor((el - ty.t0) / (ty.id ? 24 : 22)) + 1);
+      const n = Math.min(ty.text.length, Math.floor((el - ty.t0) / (ty.id || ty.told ? 24 : 22)) + 1);
       if (n === ty.n) continue;
       if (o.sfx && Math.floor(n / 3) !== Math.floor(ty.n / 3)) o.sfx(ty.id ? 'talk' : 'type');
       ty.n = n;
       dirty = true;
-      if (ty.id) {
+      if (ty.told) {
+        if (view.told) view.told = { ...view.told, text: ty.text.slice(0, n) };
+      } else if (ty.id) {
         const fe = frame.entities.find((x) => x.id === ty.id);
         if (fe) fe.say = ty.text.slice(0, n);
       } else frame.narration = ty.text.slice(0, n);
