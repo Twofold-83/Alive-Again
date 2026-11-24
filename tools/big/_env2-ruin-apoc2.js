@@ -77,10 +77,15 @@ module.exports = (X) => {
       c.row(b, 3, 30, D(CANVAS));
       if (u) {
         /* lit from inside: a shape sitting up */
-        for (let y = 8; y <= b - 1; y++) for (let x = 5; x <= 28; x++) if ((x + y) % 2 === 0 && c.get(x, y) && Math.hypot((x - 13) / 9, (y - 16) / 9) < 1) c.set(x, y, blend(CANVAS, WARM, 0.75));
-        c.rect(11, 14, 14, b - 1, mix(CANVAS, 0.55));
-        c.rect(11, 11, 13, 13, mix(CANVAS, 0.55));
-        c.row(b - 1, 11, 19, mix(CANVAS, 0.55));
+        for (let y = 7; y <= b - 1; y++)
+          for (let x = 5; x <= 28; x++) {
+            const d = Math.hypot((x - 13) / 10, (y - 17) / 10);
+            if (c.get(x, y) && d < 1) c.set(x, y, blend(CANVAS, WARM, d < 0.6 ? 0.6 : 0.3));
+          }
+        c.rect(11, 15, 14, b - 1, mix(CANVAS, 0.6));
+        c.rect(11, 11, 13, 14, mix(CANVAS, 0.6));
+        c.row(b - 1, 11, 20, mix(CANVAS, 0.6));
+        c.row(b - 2, 15, 19, mix(CANVAS, 0.6));
       }
       dots(c, C.wood, [1, b, 32, b]);
       grass(c, 24, 31, b, 3, WEED, 2);
@@ -528,8 +533,8 @@ module.exports = (X) => {
       const b = c.h - 2,
         col = hex('#5a4a44');
       drum(c, 3, b, 10, 15, col, { open: true });
-      rust(c, 3, b - 14, 12, b, 5, 3);
-      soot(c, 3, b - 14, 12, b - 9, 4, 6);
+      rust(c, 3, b - 14, 12, b, 10, 3);
+      soot(c, 3, b - 14, 12, b - 9, 5, 6);
       for (const [x, y] of [[5, b - 4], [8, b - 5], [10, b - 3], [6, b - 8], [9, b - 9]]) c.set(x, y, u ? C.flame : DARK);
       /* scrap wood sticking out */
       c.line(5, b - 14, 3, b - 18, C.wood);
@@ -772,11 +777,11 @@ module.exports = (X) => {
     f(c, u) {
       const b = c.h - 2;
       drum(c, 13, b - 1, 10, 15, mix(HAZ, 0.85));
+      rust(c, 13, b - 15, 22, b - 1, 14, 2);
       trefoil(c, 16, b - 11, DARK);
-      rust(c, 13, b - 15, 22, b - 1, 8, 2);
       drum(c, 2, b, 10, 15, HAZ, { open: u });
+      rust(c, 2, b - 14, 11, b, 18, 6);
       trefoil(c, 5, b - 10, DARK);
-      rust(c, 2, b - 14, 11, b, 12, 6);
       if (u) {
         c.row(b - 14, 3, 10, TOXIC);
         dots(c, L(TOXIC), [5, b - 14, 8, b - 14]);
@@ -797,8 +802,8 @@ module.exports = (X) => {
     s(c, u) {
       const b = c.h - 2;
       drum(c, 2, b, 10, 15, HAZ, { open: u });
+      rust(c, 2, b - 14, 11, b, 18, 6);
       trefoil(c, 5, b - 10, DARK);
-      rust(c, 2, b - 14, 11, b, 12, 6);
       if (u) {
         c.row(b - 14, 3, 10, TOXIC);
         drip(c, 11, b - 13, 9, TOXIC);
@@ -947,9 +952,9 @@ module.exports = (X) => {
         for (const x of [4, 13]) for (let y = 5; y <= 9; y += 2) c.row(y, x, x + 4, D(LOCK));
         c.rect(9, 18, 12, 19, C.iron);
         c.rect(10, 20, 11, 22, C.brass);
+        rust(c, 2, 2, 19, b, 30, 4);
         trefoil(c, 13, 13, hex('#3a3e34'));
-        txt(c, 4, 26, 'ARMS', hex('#3a3e34'), { sp: 0 });
-        rust(c, 2, 2, 19, b, 16, 4);
+        txt(c, 4, 26, 'ARMS', hex('#2e3228'), { sp: 0 });
         c.line(14, 30, 17, 33, D(LOCK));
       }
     },
@@ -958,7 +963,7 @@ module.exports = (X) => {
       const b = c.h - 2;
       sideBox(c, 2, 2, 9, b, LOCK);
       c.rect(2, b - 1, 9, b, D(LOCK));
-      rust(c, 2, 2, 9, b, 16, 4);
+      rust(c, 2, 2, 9, b, 30, 4);
       if (u) {
         c.rect(10, 3, 17, b - 1, mix(LOCK, 0.82));
         c.frame(10, 3, 17, b - 1, D(LOCK));

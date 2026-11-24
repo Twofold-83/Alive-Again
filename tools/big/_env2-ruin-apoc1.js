@@ -794,7 +794,6 @@ module.exports = (X) => {
       leaf(23, 40);
       c.rect(24, 12, 40, 26, C.white);
       c.rect(24, 12, 40, 13, hex('#8a2a26'));
-      rust(c, 24, 14, 40, 26, 22, 3);
       txt(c, 25, 15, 'KEEP', hex('#8a2a26'));
       txt(c, 27, 21, 'OUT', DARK);
       dots(c, WEED, [1, b, 5, b, 30, b, 44, b, 43, b - 1]);

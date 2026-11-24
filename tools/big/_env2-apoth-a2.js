@@ -917,45 +917,47 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-crutch-rack', 'apothecary rack of crutches wooden leg peg leg walking sticks surgical appliances', {
-    w: 15, h: 36, solid: true,
+    w: 17, h: 36, solid: true,
     f(c, u) {
       const b = c.h - 2;
-      board(c, 1, 5, 13, 6, MAH);
-      face(c, 1, b - 3, 13, b, MAH);
-      c.col(1, 7, b - 4, D(MAH));
-      c.col(13, 7, b - 4, D(MAH));
+      face(c, 1, b - 3, 15, b, MAH);
+      c.row(b - 4, 1, 15, L(MAH));
       const crutch = (x) => {
-        c.col(x, 4, b - 4, PINE);
-        c.row(3, x - 1, x + 1, LEATHER);
-        c.set(x + 1, 14, D(PINE));
-        c.set(x, 4, L(PINE));
+        c.rect(x, 3, x + 3, 4, LEATHER);
+        c.row(3, x, x + 3, L(LEATHER));
+        c.col(x, 5, 17, PINE);
+        c.col(x + 3, 5, 17, D(PINE));
+        c.row(12, x + 1, x + 2, D(PINE));
+        c.rect(x + 1, 18, x + 2, b - 5, PINE);
+        c.col(x + 2, 18, b - 5, D(PINE));
+        c.set(x, 5, L(PINE));
       };
-      crutch(4);
+      crutch(2);
       if (!u) crutch(7);
-      c.rect(10, 18, 11, 22, LEATHER); // a wooden leg
-      c.row(18, 9, 12, L(LEATHER));
-      dots(c, BR, [10, 20, 11, 21]);
-      c.col(10, 23, b - 4, PINE);
-      c.col(11, 23, 26, PINE);
+      c.rect(12, 16, 14, 21, LEATHER); // a wooden leg
+      c.row(16, 12, 14, L(LEATHER));
+      dots(c, BR, [12, 18, 14, 20]);
+      c.rect(13, 22, 13, b - 5, PINE);
+      c.rect(12, 22, 14, 23, PINE);
       if (u) {
-        c.row(b + 1 - 1, 2, 12, PINE); // the other crutch thrown down
-        c.rect(13, b - 1, 13, b, LEATHER);
+        c.row(b - 1, 3, 13, PINE); // the other crutch thrown down in front
+        c.row(b, 4, 13, D(PINE));
+        c.rect(1, b - 2, 2, b, LEATHER);
+        dots(c, C.blood, [8, b - 5, 9, b - 5]);
       }
     },
-    sw: 8, sh: 36,
+    sw: 9, sh: 36,
     s(c, u) {
       const b = c.h - 2;
-      c.rect(2, 5, 4, 6, MAH);
-      c.set(2, 5, L(MAH));
-      face(c, 2, b - 3, 5, b, MAH);
-      c.col(2, 7, b - 4, D(MAH));
-      c.col(4, 4, b - 4, PINE);
-      c.rect(3, 3, 5, 3, LEATHER);
-      c.set(5, 14, D(PINE));
+      face(c, 2, b - 3, 6, b, MAH);
+      c.row(b - 4, 2, 6, L(MAH));
+      c.rect(3, 3, 5, 4, LEATHER);
+      c.row(3, 3, 5, L(LEATHER));
+      c.rect(4, 5, 4, b - 5, PINE);
+      c.rect(3, 11, 5, 12, D(PINE));
       if (u) {
-        c.rect(6, b - 1, 7, b, LEATHER);
-        c.set(6, b - 2, LEATHER);
-        c.row(b, 8, 9, PINE);
+        c.rect(7, b - 2, 8, b, LEATHER);
+        c.row(b, 9, 10, PINE);
       }
     },
     su: [0, 0, 3],

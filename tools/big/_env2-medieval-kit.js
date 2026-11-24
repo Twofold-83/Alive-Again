@@ -428,5 +428,72 @@ module.exports = (kit) => {
     for (let y = y0 + 3; y < y1; y += 3) c.row(y, x0 + 1, x1 - 1, D(col));
     for (const x of [x0 + 1, x0 + 4, x1 - 4, x1 - 1]) c.col(x, x === x0 + 1 || x === x1 - 1 ? y0 + 1 : y0, x === x0 + 1 || x === x1 - 1 ? y1 - 1 : y1, hoop);
   }
-  return { out, reg, MED, archPt, archRd, chain, rope, candle, skull, wheelEdge, beam, post, straps, barrel, barrelEnd, barrelSide, doorOut, opened, mk, D, L, dots, board, face, panel, drawer, legs, tleg, planksV, planksH, cabSide, hollow, pane, flame, fire, wisp, pot, bottle, bush, hedge, stones, bricks, wheel, cloth, heap, blood, shards };
+
+  /** The striped pavilion: with its door (front) or without (side); lit: flaps open, or the lamp shining through. */
+  function tent(c, u, door) {
+    const { CANVAS, RED, DOAK, HEMP, PINE, SOOT } = MED,
+      b = c.h - 2;
+    c.col(19, 1, 5, DOAK);
+    c.rect(20, 1, 24, 2, RED);
+    c.set(25, 2, RED);
+    c.set(20, 3, RED);
+    c.row(1, 20, 24, L(RED));
+    const xs = [3, 9, 14, 20, 25, 31, 37];
+    for (let i = 0; i < 6; i++) c.poly([[19, 5], [20, 5], [xs[i + 1] - 1, 18], [xs[i], 18]], i % 2 ? CANVAS : RED);
+    c.line(19, 5, 3, 18, L(RED));
+    for (let i = 1; i < 6; i++) c.line(i < 3 ? 19 : 20, 6, xs[i] - (i > 3 ? 1 : 0), 18, D(i % 2 ? RED : CANVAS));
+    for (let x = 3; x <= 36; x++) {
+      const k = ((x - 3) / 5.67) | 0,
+        col = k % 2 ? RED : CANVAS;
+      c.col(x, 19, 20, col);
+      c.set(x, 19, D(col));
+      if (x % 3) c.set(x, 21, col);
+    }
+    for (let x = 5; x <= 34; x++) {
+      const col = (((x - 5) / 5) | 0) % 2 ? CANVAS : RED;
+      c.col(x, 21, b, x % 5 === 4 ? D(col) : col);
+    }
+    c.col(5, 21, b, L(RED));
+    c.row(b, 5, 34, D(CANVAS));
+    c.line(4, 21, 1, b, HEMP);
+    c.line(35, 21, 38, b, HEMP);
+    c.set(1, b, DOAK);
+    c.set(38, b, DOAK);
+    if (door) {
+      if (!u) {
+        c.rect(16, 25, 23, b, D(CANVAS));
+        c.col(19, 25, b, mix(CANVAS, 0.5));
+        c.col(20, 25, b, CANVAS);
+        dots(c, HEMP, [19, 28, 20, 32, 19, 36]);
+        c.row(24, 16, 23, DOAK);
+      } else {
+        c.rect(16, 25, 23, b, mix(SOOT, 1.3));
+        c.row(24, 16, 23, DOAK);
+        c.poly([[16, 25], [18, 25], [16, 36]], L(CANVAS));
+        c.poly([[23, 25], [21, 25], [23, 36]], CANVAS);
+        c.set(20, 28, C.iron); // a lamp burning, a camp bed
+        c.set(20, 29, C.flameLight);
+        c.set(20, 30, C.flame);
+        c.rect(17, b - 3, 22, b - 2, PINE);
+        c.rect(17, b - 5, 19, b - 4, C.white);
+        c.rect(20, b - 4, 22, b - 4, C.wine);
+        dots(c, hex('#4a3a30'), [18, 31, 21, 33, 19, 34]);
+      }
+    } else if (u) {
+      for (let y = 23; y <= b; y++)
+        for (let x = 11; x <= 28; x++) {
+          const p = c.get(x, y);
+          if (p && ((x - 19.5) / 9) ** 2 + ((y - 34) / 12) ** 2 <= 1) c.set(x, y, blend(p, C.glow, 0.5));
+        }
+      const sh = (x0, x1, y0, y1) => {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (c.get(x, y)) c.set(x, y, mix(c.get(x, y), 0.5));
+      };
+      sh(18, 21, 28, 31); // somebody is in there
+      sh(19, 20, 27, 27);
+      sh(16, 23, 32, b);
+      sh(15, 15, 34, b);
+      sh(24, 26, 33, 34);
+    }
+  }
+  return { out, reg, MED, tent, archPt, archRd, chain, rope, candle, skull, wheelEdge, beam, post, straps, barrel, barrelEnd, barrelSide, doorOut, opened, mk, D, L, dots, board, face, panel, drawer, legs, tleg, planksV, planksH, cabSide, hollow, pane, flame, fire, wisp, pot, bottle, bush, hedge, stones, bricks, wheel, cloth, heap, blood, shards };
 };

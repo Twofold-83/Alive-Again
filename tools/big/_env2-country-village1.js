@@ -3,12 +3,12 @@
 module.exports = (kit, H) => {
   const { C, K, hex, mix, blend, rnd } = kit;
   const { P, D, L, dots, board, face, panel, post, legs, planksV, planksH, boards, boardsH, hollow, pane, flame, fire, wisp, stones, bricks } = H;
-  const { wheel, wheelEdge, barrel, barrelLying, barrelEnd, sack, crate, thatch, hay, heap, blood, puddle, shards, grass, crow, tankard, loaf, rope, chain, lantern, shape } = H;
+  const { wheel, wheelEdge, barrel, barrelLying, barrelEnd, sack, crate, thatch, hay, heap, blood, puddle, drip, shards, grass, crow, tankard, loaf, rope, chain, lantern, shape } = H;
   const add = H.reg('env-village', 'Village');
   const { OAK, GREYW, PALEW, TAR, THATCH, HAY, BRICK, LIME, STONE, SOIL, SOOT, TIN, WAT, ROPE, CANVAS, SACK, BREAD, PEWTER, FGREEN, LAMP } = P;
   const AWN = hex('#7a4038'),
     BACK = hex('#2e2826'),
-    ALE = hex('#8a6a2a'),
+    ALE = hex('#7c5c28'),
     WINE = hex('#5e1f2c'),
     WICK = hex('#8a6a3a'), // wicker
     CABB = hex('#5f7a48'),
@@ -147,8 +147,8 @@ module.exports = (kit, H) => {
       c.row(19, 9, 40, D(OAK));
       c.line(5, 18, 0, 21, OAK); // the pole
       c.line(5, 19, 1, 22, D(OAK));
-      wheel(c, 11, b - 6, 6, OAK, C.iron);
-      wheel(c, 36, b - 7, 7, OAK, C.iron);
+      wheel(c, 11, b - 6, 6, hex('#4a372a'), C.iron, hex('#2e2a2e'));
+      wheel(c, 36, b - 7, 7, hex('#4a372a'), C.iron, hex('#2e2a2e'));
       if (u) {
         c.rect(12, 11, 35, 14, SHROUD); // what lay under the hay: something long, sewn into a sheet
         c.row(11, 13, 34, L(SHROUD));
@@ -209,7 +209,7 @@ module.exports = (kit, H) => {
       c.line(13, 17, 1, 20, D(OAK));
       c.col(4, 20, b, D(OAK)); // propped on a stick
       c.col(42, 18, b, D(OAK));
-      wheel(c, 29, b - 9, 9, OAK, C.iron, hex('#4f4238'));
+      wheel(c, 29, b - 9, 9, hex('#3a2c22'), C.iron, hex('#2e2a2e'));
       c.col(11, 3, 9, C.iron); // the lantern on its rod
       c.row(3, 8, 11, C.iron);
       lantern(c, 6, 4, u);
@@ -265,8 +265,9 @@ module.exports = (kit, H) => {
         c.set(34, 11, C.brass); // the tap left running
         c.set(33, 11, C.brass);
         c.col(33, 12, 14, ALE);
-        c.col(33, 18, b, ALE);
-        puddle(c, 28, 36, b, ALE);
+        drip(c, 33, 18, b - 1, ALE);
+        puddle(c, 27, 36, b, ALE);
+        c.row(b - 1, 31, 34, ALE);
         dots(c, D(ALE), [32, 16, 33, 17]);
         dots(c, ROPE, [24, 14, 25, 14, 30, 14, 31, 13, 23, 18, 23, 19]);
       }
@@ -285,9 +286,9 @@ module.exports = (kit, H) => {
       if (u) {
         c.rect(16, 11, 17, 11, C.brass);
         c.col(16, 12, 14, ALE);
-        c.col(16, 18, b, ALE);
-        puddle(c, 12, 20, b, ALE);
-        tankard(c, 6, 14 - 12 + 0);
+        drip(c, 16, 18, b - 1, ALE);
+        puddle(c, 11, 20, b, ALE);
+        c.row(b - 1, 14, 18, ALE);
         dots(c, ROPE, [4, 15, 4, 18, 5, 19]);
       }
     },
@@ -785,7 +786,7 @@ module.exports = (kit, H) => {
         c.rect(6, 13, 6, 23, C.flame);
         dots(c, C.flameLight, [6, 18, 6, 21]);
         dots(c, hex('#7a4a2a'), [4, 24, 5, 24, 6, 24, 3, 24]);
-        loaf(c, 1, 23 - 12 + 12 - 0, 4);
+        loaf(c, 1, 23, 4);
         wisp(c, 8, 1, 3);
       }
       c.col(18, 4, b, PALEW);
@@ -941,12 +942,7 @@ module.exports = (kit, H) => {
       } else {
         chain(c, 10, 7, 10, 9); // one chain gone: it hangs by a corner
         c.set(21, 7, C.iron);
-        const o = kit.canvas(14, 15);
-        const cc = { ...c, rect: o.rect, row: o.row, col: o.col, oval: o.oval, set: o.set };
-        void cc;
-        // draw the board on a canvas of its own and put it on turned
-        const s2 = kit.canvas(14, 15);
-        const keep = c.rect;
+        const s2 = kit.canvas(14, 15); // the board drawn on a canvas of its own and put on turned
         (function (cv) {
           cv.rect(0, 0, 13, 14, OAK);
           cv.rect(1, 1, 12, 13, hex('#33423a'));
@@ -959,7 +955,6 @@ module.exports = (kit, H) => {
           cv.col(5, 11, 12, SOOT);
           cv.row(13, 2, 11, C.mustard);
         })(s2);
-        void keep;
         for (let j = 0; j < 15; j++) for (let i = 0; i < 14; i++) if (s2.get(i, j)) c.set(10 + i * 0.86 - j * 0.42, 10 + j * 0.9 + i * 0.45, s2.get(i, j));
         dots(c, C.iron, [16, b, 17, b, 19, b - 1]);
       }
@@ -1014,9 +1009,8 @@ module.exports = (kit, H) => {
         c.rect(25, 5, 28, 6, PEWTER); // a tankard on its side
         c.col(28, 5, 6, hex('#d0c8b0'));
         c.row(6, 29, 33, ALE);
-        c.col(34, 7, 12, ALE);
-        c.set(34, 15, ALE);
-        puddle(c, 32, 37, b, ALE);
+        drip(c, 34, 7, 14, ALE);
+        puddle(c, 31, 37, b, ALE);
         c.line(16, 6, 17, 3, C.steel); // a knife stuck in the board
         c.set(17, 2, OAK);
         c.set(18, 1, OAK);
@@ -1044,7 +1038,7 @@ module.exports = (kit, H) => {
       if (u) {
         flame(c, 15, 4);
         c.rect(17, 5, 19, 6, PEWTER);
-        c.col(20, 7, 12, ALE);
+        drip(c, 20, 7, 14, ALE);
         puddle(c, 18, 23, b, ALE);
         c.col(12, 2, 6, C.steel);
         c.set(12, 1, OAK);
@@ -1072,13 +1066,13 @@ module.exports = (kit, H) => {
         tankard(c, 15, 10);
         tankard(c, 20, 10);
       } else {
-        c.col(8, 9, b, ALE); // the tap left open
-        c.col(9, 12, 13, ALE);
-        puddle(c, 4, 13, b, ALE);
+        drip(c, 8, 9, b - 1, ALE); // the tap left open
+        c.row(12, 7, 10, ALE);
+        c.row(b - 1, 6, 10, ALE);
+        puddle(c, 3, 14, b, ALE);
         c.rect(15, 9, 18, 10, PEWTER);
         c.col(18, 9, 10, hex('#d0c8b0'));
-        c.row(10, 19, 22, ALE);
-        c.col(22, 11, 14, ALE);
+        c.row(10, 19, 21, ALE);
         dots(c, C.steel, [17, 6, 19, 5]); // coins left lying
         dots(c, C.brass, [24, 10, 25, 10]);
       }
@@ -1095,11 +1089,11 @@ module.exports = (kit, H) => {
       barrelLying(c, 3, 2, 12, 8);
       c.set(2, 6, C.brass);
       c.set(1, 6, C.brass);
-      if (!u) tankard(c, 6, 10 - 0 + 0 - 9 + 9 - 0);
+      if (!u) c.rect(6, 9, 8, 10, D(OAK));
       else {
-        c.col(1, 7, 10, ALE);
-        c.col(2, 13, b, ALE);
-        puddle(c, 0, 4, b, ALE);
+        drip(c, 1, 7, 10, ALE);
+        drip(c, 2, 13, b - 1, ALE);
+        puddle(c, 0, 5, b, ALE);
       }
     },
   });

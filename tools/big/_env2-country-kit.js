@@ -410,6 +410,10 @@ module.exports = (kit) => {
     c.row(y, x0, x1, col);
     c.set(x0 + 1, y, L(col));
   }
+  /** A thin broken trickle running down from x, y0 to y1. */
+  function drip(c, x, y0, y1, col) {
+    for (let y = y0; y <= y1; y++) if ((y - y0) % 3 !== 2) c.set(x, y, col);
+  }
   /** Broken bits on the floor. */
   function shards(c, x0, x1, y, col, seed = 2) {
     const r = rnd(seed);
@@ -491,6 +495,6 @@ module.exports = (kit) => {
   }
   return {
     out, reg, mk, P, D, L, dots, board, face, panel, post, legs, planksV, planksH, boards, boardsH, hollow, pane, flame, fire, wisp, bush, stones, rubble, bricks,
-    wheel, wheelEdge, tyre, tyreEdge, barrel, barrelLying, barrelEnd, sack, crate, churn, thatch, hay, heap, blood, puddle, shards, grass, crow, tankard, loaf, fish, rope, chain, lantern, shape,
+    wheel, wheelEdge, tyre, tyreEdge, barrel, barrelLying, barrelEnd, sack, crate, churn, thatch, hay, heap, blood, puddle, drip, shards, grass, crow, tankard, loaf, fish, rope, chain, lantern, shape,
   };
 };

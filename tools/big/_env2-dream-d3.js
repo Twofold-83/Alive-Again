@@ -541,11 +541,12 @@ module.exports = (H, O) => {
         if (c.get(x, y) === LEAF) c.set(x, y, r() < 0.5 ? L(LEAF) : D(LEAF));
       }
       // the boat, wedged
-      const BT = hex('#8f8f86');
-      c.poly([[5, 12], [33, 9], [30, 17], [10, 19]], BT);
-      c.line(5, 12, 33, 9, L(BT));
-      c.line(7, 15, 31, 12, D(BT));
-      c.line(10, 19, 30, 17, D(BT));
+      const BT = hex('#a9b0a8');
+      c.poly([[3, 12], [35, 8], [32, 14], [28, 17], [11, 19], [6, 16]], BT);
+      c.line(3, 12, 35, 8, WL);
+      c.line(4, 13, 34, 9, C.blood);
+      c.line(8, 17, 30, 15, D(BT));
+      c.line(11, 19, 28, 17, D(BT));
       c.line(12, 8, 6, 22, WP); // an oar hanging out
       c.rect(5, 22, 7, 25, WP);
       if (u) {
@@ -574,10 +575,11 @@ module.exports = (H, O) => {
           y = 1 + ((r() * 20) | 0);
         if (c.get(x, y) === LEAF) c.set(x, y, r() < 0.5 ? L(LEAF) : D(LEAF));
       }
-      const BT = hex('#8f8f86');
+      const BT = hex('#a9b0a8');
       c.poly([[8, 9], [19, 9], [17, 18], [10, 18]], BT); // the stern towards you
-      c.row(9, 8, 19, L(BT));
-      c.row(13, 9, 18, D(BT));
+      c.row(9, 8, 19, WL);
+      c.row(10, 8, 19, C.blood);
+      c.row(14, 9, 18, D(BT));
       c.col(13, 14, 18, D(BT));
       c.line(20, 8, 23, 22, WP);
       if (u) {
