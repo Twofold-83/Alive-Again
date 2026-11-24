@@ -1,8 +1,16 @@
 /*
- * Draws the body parts for paper-doll characters: 500 small sprites in a muted, eerie, old-home-computer
- * palette. A character is one head, one torso, one arm sprite (used for both arms) and one leg sprite (both legs).
+ * Draws the body parts for paper-doll characters: small sprites in a muted, eerie, old-home-computer palette.
+ * A character is one head, one torso, one arm sprite (used for both arms) and one leg sprite (both legs).
  *
  *   node tools/make-dolls.js        writes public/doll/<id>.png and public/doll/index.json
+ *   node tools/make-dolls.js --only=<module> --out=<dir>
+ *                                   draws just tools/dolls/<module>.js into that folder (numbered from 001 there,
+ *                                   with an index.json), touching nothing else: for looking at work in progress
+ *
+ * The first 500 parts are made here from a few shapes and many combinations. More come from the modules in
+ * tools/dolls/ (see EXTRA below): parts drawn one by one for the settings of the game, each with a `theme`.
+ * A part's id is its place in the list, and stories keep ids — so parts are only ever ADDED AT THE END of a
+ * module, never reordered or removed, and the order of EXTRA never changes.
  *
  * Everything is drawn in code from a few shapes and many combinations, so the set stays consistent and can be
  * regenerated. An art pack can replace any part later: same file names, any resolution of the same proportions.
@@ -14,8 +22,13 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
-const OUT = path.join(__dirname, '..', 'public', 'doll');
-const EXPECT = 500;
+const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7),
+  outDir = (process.argv.find((a) => a.startsWith('--out=')) || '').slice(6);
+if (only && !outDir) throw new Error('--only needs --out=<folder>');
+const OUT = only ? outDir : path.join(__dirname, '..', 'public', 'doll');
+const BASE = 500; // the parts made in this file
+/** The modules in tools/dolls/, in the order their parts are numbered. Append new modules at the end. */
+const EXTRA = ['basics', 'modern', 'horror', 'old', 'country', 'other'];
 
 /* ---------- a tiny PNG writer ---------- */
 const CRC = (() => {
@@ -98,9 +111,10 @@ const CLOTH = {
 for (const o of [SKINS, HAIR, CLOTH]) for (const k of Object.keys(o)) o[k] = hex(o[k]);
 
 /* ---------- a canvas with an automatic dark outline ---------- */
+let lastCanvas = null;
 function canvas(w, h) {
   const px = new Array(w * h).fill(null);
-  const c = {
+  const c = (lastCanvas = {
     w,
     h,
     px,
@@ -139,13 +153,14 @@ function canvas(w, h) {
         for (let x = 0; x < w; x++) if (!c.get(x, y) && (c.get(x - 1, y) || c.get(x + 1, y) || c.get(x, y - 1) || c.get(x, y + 1))) add.push([x, y]);
       for (const [x, y] of add) px[y * w + x] = K;
     },
-  };
+  });
   return c;
 }
 const parts = { h: [], t: [], a: [], l: [] };
-function emit(kind, name, c, faces) {
+function emit(kind, name, c, faces, theme) {
   const id = kind + String(parts[kind].length + 1).padStart(3, '0');
-  parts[kind].push({ id, name });
+  if (parts[kind].length >= 999) throw new Error('more than 999 parts of one kind: the ids have three digits');
+  parts[kind].push(theme ? { id, name, theme } : { id, name });
   fs.writeFileSync(path.join(OUT, id + '.png'), png(c.w, c.h, c.px));
   if (faces) {
     /* the same head with each feeling on its face, side by side in one strip: f-<id>.png */
@@ -1390,19 +1405,75 @@ function makeLegs() {
     }
 }
 
+/* =====================================================================================
+ * MORE PARTS: tools/dolls/<module>.js
+ *
+ *   module.exports = (kit) => ({ heads: [...], torsos: [...], arms: [...], legs: [...] })
+ *
+ * Every entry is { name, theme, draw } — name: lower-case search words; theme: the id of a setting of the game
+ * (public/shared/environments.js) or 'basic'.
+ *   torsos, arms, legs   draw(c): draw on an empty canvas (12 x 11, 5 x 12, 6 x 12). Outlined afterwards
+ *                        (shade: true also darkens the right edge; outline: false keeps it as drawn).
+ *   heads, a person      { skin, expr, draw(c, s) }: the ordinary face in that skin (see face()), its expression
+ *                        (EXPR, 'calm' if not given), then draw(c, s) on top — hair, hat, beard, glasses, mask.
+ *                        Whatever draw puts over the eyes or the mouth also covers the feelings.
+ *   heads, anything else { special: true, draw(c) }: the whole head is drawn by draw (a skull, a helmet, a
+ *                        lampshade); feelings are marked on it as brows and a mouth where there is room.
+ * ===================================================================================== */
+const kit = { canvas, face, body, shoe, rnd, hex, mix, dark, lite, K, WHITE, BONE, BLOOD, RED, GOLD, SKINS, HAIR, CLOTH, HAIRS, HATS, EXPR, TORSOS, ARMS, LEGS };
+const SIZE = { h: [14, 13], t: [12, 11], a: [5, 12], l: [6, 12] };
+function makeExtra(mod) {
+  const file = path.join(__dirname, 'dolls', mod + '.js');
+  if (!fs.existsSync(file)) return console.log(`(tools/dolls/${mod}.js is not there yet)`);
+  const def = require(file)(kit),
+    feels = Object.keys(FEELS);
+  for (const [kind, list] of [
+    ['h', def.heads || []],
+    ['t', def.torsos || []],
+    ['a', def.arms || []],
+    ['l', def.legs || []],
+  ])
+    list.forEach((d, n) => {
+      const where = `${mod} ${kind} #${n + 1} (${d.name})`;
+      if (!d.name || !d.theme || typeof d.draw !== 'function') throw new Error(`${where}: needs name, theme and draw`);
+      const finish = (c) => {
+        if (c.px.some((p, i) => p && !Array.isArray(p))) throw new Error(`${where}: a colour is not [r, g, b]`);
+        if (!c.px.some(Boolean)) throw new Error(`${where}: nothing was drawn`);
+        return d.outline === false ? c : done(c, kind === 'h' ? d.shade !== false : !!d.shade);
+      };
+      if (kind !== 'h') return emit(kind, d.name, finish((d.draw(canvas(...SIZE[kind])), lastCanvas)), null, d.theme);
+      if (d.special) {
+        const head = finish((d.draw(canvas(...SIZE.h)), lastCanvas));
+        return emit('h', d.name, head, feels.map((f) => feelMark(head, f)), d.theme);
+      }
+      const skin = SKINS[d.skin];
+      if (!skin) throw new Error(`${where}: skin must be one of ${Object.keys(SKINS).join(', ')}`);
+      const person = (expr) => {
+        const c = canvas(...SIZE.h);
+        face(c, skin);
+        expr(c, skin);
+        d.draw(c, skin);
+        return finish(c);
+      };
+      if (d.expr && !EXPR[d.expr]) throw new Error(`${where}: expr must be one of ${Object.keys(EXPR).join(', ')}`);
+      emit('h', d.name, person(EXPR[d.expr || 'calm']), feels.map((f) => person((c, s) => feelFace(c, s, f))), d.theme);
+    });
+}
+
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
-makeHeads();
-makeTorsos();
-makeArms();
-makeLegs();
+if (only) makeExtra(only);
+else {
+  makeHeads();
+  makeTorsos();
+  makeArms();
+  makeLegs();
+  if (Object.values(parts).reduce((n, l) => n + l.length, 0) !== BASE) throw new Error(`the first ${BASE} parts must stay as they are`);
+  for (const mod of EXTRA) makeExtra(mod);
+}
 const total = Object.values(parts).reduce((n, l) => n + l.length, 0);
 fs.writeFileSync(
   path.join(OUT, 'index.json'),
-  JSON.stringify({ size: { h: [14, 13], t: [12, 11], a: [5, 12], l: [6, 12] }, feels: Object.keys(FEELS), heads: parts.h, torsos: parts.t, arms: parts.a, legs: parts.l }),
+  JSON.stringify({ size: SIZE, feels: Object.keys(FEELS), heads: parts.h, torsos: parts.t, arms: parts.a, legs: parts.l }),
 );
-console.log(`doll parts: ${parts.h.length} heads, ${parts.t.length} torsos, ${parts.a.length} arms, ${parts.l.length} legs = ${total}`);
-if (total !== EXPECT) {
-  console.error(`expected ${EXPECT}`);
-  process.exit(1);
-}
+console.log(`doll parts${only ? ' of ' + only : ''}: ${parts.h.length} heads, ${parts.t.length} torsos, ${parts.a.length} arms, ${parts.l.length} legs = ${total}`);
