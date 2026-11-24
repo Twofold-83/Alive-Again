@@ -21,7 +21,7 @@ module.exports = (kit, H) => {
     LIT = hex('#e0c868');
 
   add('oldtime-brass-bed-double', 'old time brass bed double bedstead knobs rails quilt feather mattress bedroom', {
-    w: 40, h: 26, solid: true,
+    w: 40, h: 27, solid: true,
     f(c, u) {
       const b = c.h - 2;
       for (const [x, top] of [[2, b - 22], [36, b - 15]]) {
@@ -245,7 +245,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-oil-lamp-table', 'old time oil lamp on a round table fringed cloth glass chimney parlour light', {
-    w: 16, h: 28, solid: true,
+    w: 16, h: 29, solid: true,
     f(c, u) {
       const b = c.h - 2;
       c.col(7, b - 8, b - 1, WAL);
@@ -373,7 +373,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-magic-lantern-stand', 'old time magic lantern projector on a stand slides brass lens phantasmagoria show', {
-    w: 22, h: 26, solid: true,
+    w: 22, h: 27, solid: true,
     f(c, u) {
       const b = c.h - 2;
       c.line(9, b - 10, 5, b, WAL);
@@ -401,7 +401,7 @@ module.exports = (kit, H) => {
       }
     },
     u: [0, 3, 3],
-    sw: 14, sh: 26,
+    sw: 14, sh: 27,
     s(c, u) {
       const b = c.h - 2;
       c.line(6, b - 10, 2, b, WAL);
@@ -530,7 +530,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-rocking-horse-dapple', 'old time rocking horse dapple grey wooden toy nursery bow rockers horsehair mane', {
-    w: 28, h: 24, solid: true,
+    w: 28, h: 26, solid: true,
     f(c, u) {
       const b = c.h - 2;
       const GREY = hex('#a8a498'),
@@ -569,7 +569,7 @@ module.exports = (kit, H) => {
         c.set(23, b - 21, hex('#8f1d1d'));
       }
     },
-    sw: 12, sh: 24,
+    sw: 12, sh: 26,
     s(c, u) {
       const b = c.h - 2;
       const GREY = hex('#a8a498');

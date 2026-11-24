@@ -107,7 +107,7 @@ module.exports = (kit, H) => {
         c.set(16, b - 1, C.blood);
       }
     },
-    u: [0, 3, 1],
+    u: [0, 4, 1],
     sw: 14, sh: 30,
     s(c, u) {
       const b = c.h - 2;
@@ -125,11 +125,11 @@ module.exports = (kit, H) => {
         c.line(13, b - 20, 12, b - 2, hex('#b08a4a'));
       }
     },
-    su: [0, 3, 1],
+    su: [0, 4, 1],
   });
 
   add('oldtime-globe-stand-school', 'old time terrestrial globe on a stand brass meridian schoolroom world map study', {
-    w: 14, h: 26, solid: true,
+    w: 15, h: 26, solid: true,
     f(c, u) {
       const b = c.h - 2;
       c.rect(6, b - 8, 7, b - 2, WAL);
@@ -183,7 +183,7 @@ module.exports = (kit, H) => {
 
   /* ---------- church ---------- */
   add('oldtime-church-pew-bench', 'old time church pew bench oak carved ends hymn books kneeler chapel seat', {
-    w: 36, h: 22, solid: true,
+    w: 36, h: 23, solid: true,
     f(c, u) {
       const b = c.h - 2;
       face(c, 3, b - 16, 32, b - 8, OAK);
@@ -215,7 +215,7 @@ module.exports = (kit, H) => {
         c.set(27, b - 6, C.blood);
       }
     },
-    sw: 13, sh: 22,
+    sw: 13, sh: 23,
     s(c, u) {
       const b = c.h - 2;
       face(c, 2, b - 17, 10, b, OAK);
@@ -395,7 +395,7 @@ module.exports = (kit, H) => {
         c.set(20, b - 2, hex('#3a3440'));
       }
     },
-    sw: 10, sh: 40,
+    sw: 11, sh: 40,
     s(c, u) {
       const b = c.h - 2;
       board(c, 1, 1, 8, 2, PINE);
@@ -493,7 +493,7 @@ module.exports = (kit, H) => {
 
   /* ---------- places of work ---------- */
   add('oldtime-telegraph-desk', 'old time telegraph desk morse key sounder battery jars pigeon holes operator railway office', {
-    w: 26, h: 28, solid: true,
+    w: 26, h: 29, solid: true,
     f(c, u) {
       const b = c.h - 2;
       face(c, 2, b - 25, 23, b - 15, WAL); // pigeon holes
@@ -528,7 +528,7 @@ module.exports = (kit, H) => {
         c.set(9, b - 16, C.flameLight);
       }
     },
-    sw: 14, sh: 28,
+    sw: 14, sh: 29,
     s(c, u) {
       const b = c.h - 2;
       cabSide(c, 2, b - 25, 6, b - 15, WAL, false);
@@ -582,6 +582,7 @@ module.exports = (kit, H) => {
         dots(c, hex('#2a2428'), [8, b - 11, 9, b - 10, 10, b]);
       }
     },
+    u: [0, 0, 1],
     sw: 14, sh: 34,
     s(c, u) {
       const b = c.h - 2;

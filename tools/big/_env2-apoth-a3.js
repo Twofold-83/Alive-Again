@@ -270,7 +270,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-herb-cart', 'apothecary large herb cart hand barrow market herbs bundles baskets simples seller wheels', {
-    w: 47, h: 30, solid: true,
+    w: 47, h: 31, solid: true,
     f(c, u) {
       const b = c.h - 2;
       for (const x of [7, 37]) c.col(x, b - 27, b - 13, OAK);
@@ -312,7 +312,7 @@ module.exports = (kit, H) => {
       }
       cartWheel(c, 22, b - 7, 7, OAK);
     },
-    sw: 28, sh: 30,
+    sw: 28, sh: 31,
     s(c, u) {
       const b = c.h - 2;
       wheelEdge(c, 2, b - 14, b, OAK, 2);

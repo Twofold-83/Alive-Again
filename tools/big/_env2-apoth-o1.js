@@ -655,7 +655,7 @@ module.exports = (kit, H) => {
       dots(c, C.slate, [14, 15, 16, 15]);
       dots(c, IRONB, [13, 6, 13, 12]);
     },
-    sw: 7, sh: 32,
+    sw: 8, sh: 32,
     s(c, u) {
       const b = c.h - 2;
       c.rect(2, 3, 4, b, OAK);

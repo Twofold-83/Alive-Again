@@ -182,7 +182,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-carboy-stand-coloured', 'apothecary carboys show globes coloured water red green blue window stand chemist', {
-    w: 30, h: 26, solid: true,
+    w: 30, h: 28, solid: true,
     f(c, u) {
       const b = c.h - 2;
       face(c, 2, b - 5, 27, b, MAH);
@@ -207,7 +207,7 @@ module.exports = (kit, H) => {
         shards(c, 8, 22, b - 8, C.glassLight, 7);
       }
     },
-    sw: 13, sh: 26,
+    sw: 13, sh: 28,
     s(c, u) {
       const b = c.h - 2;
       cabSide(c, 2, b - 5, 10, b, MAH, false);
@@ -399,7 +399,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-specimen-jars-shelf', 'apothecary specimen jars pickled hand snake foetus preserved bench shelf curiosities', {
-    w: 26, h: 24, solid: true,
+    w: 26, h: 25, solid: true,
     f(c, u) {
       const b = c.h - 2;
       board(c, 1, b - 8, 24, b - 7, OAK);
@@ -434,7 +434,7 @@ module.exports = (kit, H) => {
       dots(c, PALE, [20, b - 14, 21, b - 14, 20, b - 13, 21, b - 13, 22, b - 13, 20, b - 12, 21, b - 12, 21, b - 11, 20, b - 11]); // something curled up
       c.set(21, b - 14, K);
     },
-    sw: 11, sh: 24,
+    sw: 11, sh: 25,
     s(c, u) {
       const b = c.h - 2;
       board(c, 1, b - 8, 9, b - 7, OAK);

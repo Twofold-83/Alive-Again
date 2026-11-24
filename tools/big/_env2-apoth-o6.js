@@ -21,7 +21,7 @@ module.exports = (kit, H) => {
     SLATE = hex('#3a3f48');
 
   add('oldtime-carpet-bag', 'old time carpet bag travelling bag tapestry leather handles luggage traveller', {
-    w: 16, h: 13,
+    w: 16, h: 14,
     f(c, u) {
       const b = c.h - 2;
       const CARPET = hex('#5a5236');
@@ -50,7 +50,7 @@ module.exports = (kit, H) => {
       }
     },
     u: [0, 1, 2],
-    sw: 10, sh: 13,
+    sw: 10, sh: 14,
     s(c, u) {
       const b = c.h - 2;
       const CARPET = hex('#5a5236');
@@ -196,7 +196,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-hat-boxes-stack', 'old time hat boxes stack round band boxes striped bonnet milliner ribbon', {
-    w: 14, h: 16,
+    w: 14, h: 17,
     f(c, u) {
       const b = c.h - 2;
       const A = hex('#a89868'),
@@ -270,7 +270,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-railway-lantern', 'old time railway hand lantern guard signal lamp red glass tin handle', {
-    w: 9, h: 14,
+    w: 9, h: 15,
     f(c, u) {
       const b = c.h - 2;
       c.rect(1, b - 7, 6, b - 1, IRONB);
@@ -288,7 +288,7 @@ module.exports = (kit, H) => {
       c.set(2, b - 11, C.iron);
       c.set(5, b - 11, C.iron);
     },
-    sw: 9, sh: 14,
+    sw: 9, sh: 15,
     s(c, u) {
       const b = c.h - 2;
       c.rect(1, b - 7, 6, b - 1, IRONB);
@@ -407,7 +407,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-top-hat-cane-gloves', 'old time top hat cane and gloves gentleman silk hat walking stick left behind', {
-    w: 16, h: 12,
+    w: 16, h: 13,
     f(c, u) {
       const b = c.h - 2;
       if (!u) {

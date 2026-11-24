@@ -22,7 +22,7 @@ module.exports = (kit, H) => {
     BONE = C.bone;
 
   add('apoth-pestle-mortar-brass', 'apothecary pestle and mortar brass grinding bowl small powder', {
-    w: 10, h: 11,
+    w: 10, h: 12,
     f(c, u) {
       const b = c.h - 2;
       c.rect(2, b - 5, 7, b - 1, BR);
@@ -47,7 +47,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-mortar-stone-block', 'apothecary great stone mortar on a wooden block long pestle pounding drugs', {
-    w: 14, h: 26, solid: true,
+    w: 14, h: 27, solid: true,
     f(c, u) {
       const b = c.h - 2;
       face(c, 3, b - 8, 10, b, OAK); // the block, a sawn trunk
@@ -248,7 +248,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-doctor-bag-leather', 'apothecary doctor bag leather gladstone physician black case instruments', {
-    w: 15, h: 12,
+    w: 15, h: 13,
     f(c, u) {
       const b = c.h - 2;
       c.rect(1, b - 6, 12, b, LEATHER);
@@ -276,7 +276,7 @@ module.exports = (kit, H) => {
         c.set(14, b - 1, C.blood);
       }
     },
-    sw: 9, sh: 12,
+    sw: 9, sh: 13,
     s(c, u) {
       const b = c.h - 2;
       c.rect(1, b - 6, 6, b, LEATHER);
@@ -343,7 +343,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-horn-lantern', 'apothecary horn lantern tin candle lantern night visit handle small', {
-    w: 8, h: 13,
+    w: 8, h: 14,
     f(c, u) {
       const b = c.h - 2;
       c.rect(1, b - 7, 6, b - 1, hex('#5a5a62'));
@@ -361,7 +361,7 @@ module.exports = (kit, H) => {
   });
 
   add('apoth-recipe-scroll-inkwell', 'apothecary recipe scroll parchment inkwell quill formula receipt writing small', {
-    w: 14, h: 10,
+    w: 14, h: 11,
     f(c, u) {
       const b = c.h - 2;
       c.rect(10, b - 2, 12, b, EB); // inkwell

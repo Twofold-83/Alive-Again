@@ -372,7 +372,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-kitchen-range-iron', 'old time kitchen range cast iron black lead oven hob kettle coal fire cooking', {
-    w: 30, h: 34, solid: true,
+    w: 30, h: 36, solid: true,
     f(c, u) {
       const b = c.h - 2;
       face(c, 2, b - 30, 27, b - 17, IRONB); // the back plate and its shelf
@@ -410,7 +410,7 @@ module.exports = (kit, H) => {
         dots(c, C.flame, [11, b - 8, 19, b - 9]);
       }
     },
-    sw: 12, sh: 34,
+    sw: 12, sh: 36,
     s(c, u) {
       const b = c.h - 2;
       c.rect(2, b - 30, 3, b - 17, IRONB);
@@ -488,7 +488,7 @@ module.exports = (kit, H) => {
   });
 
   add('oldtime-mangle-wringer', 'old time mangle wringer cast iron wooden rollers laundry wash day big wheel', {
-    w: 20, h: 30, solid: true,
+    w: 20, h: 31, solid: true,
     f(c, u) {
       const b = c.h - 2;
       for (const x of [2, 13]) {
@@ -521,7 +521,7 @@ module.exports = (kit, H) => {
         puddle(c, 5, 11, b, WAT);
       }
     },
-    sw: 17, sh: 30,
+    sw: 17, sh: 31,
     s(c, u) {
       const b = c.h - 2;
       c.rect(6, b - 24, 8, b, IRONB);
