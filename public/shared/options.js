@@ -29,14 +29,39 @@ export const FEELS = [
 /** Light sources: [id, label, colour, reach in stage units (an eighth of the width), flickers] */
 export const LIGHTS = [
   ['lamp', 'Lamp — warm orange', '#ffb45a', 1.7, false],
+  ['lantern', 'Lantern — soft yellow', '#ffe08a', 1.3, false],
+  ['gas', 'Gas lamp — pale and hissing', '#d9ffcf', 1.6, true],
+  ['candle', 'Candle — small and warm', '#ffc66a', 0.9, true],
+  ['torch', 'Torch — smoky orange', '#ff9a3c', 1.5, true],
+  ['fire', 'Fire — flickering', '#ff7a2a', 1.9, true],
+  ['ember', 'Embers — deep red', '#c8341c', 1.0, true],
+  ['hellfire', 'Hellfire — blood red', '#ff2a12', 2.4, true],
   ['fluoro', 'Fluorescent — sharp white', '#e6f3ff', 2.5, false],
+  ['spot', 'Spotlight — hard white', '#ffffff', 1.2, false],
+  ['day', 'Daylight — through a window', '#fff2c8', 3.2, false],
+  ['dawn', 'Dawn — rose', '#ffb0a0', 3.0, false],
+  ['moon', 'Moonlight — pale blue', '#8fb0ff', 2.8, false],
+  ['deep', 'Deep water — blue-green', '#2fbfae', 2.2, false],
+  ['ghost', 'Ghost light — pale cyan', '#aef5ff', 1.3, true],
+  ['magic', 'Magic — violet', '#b46cff', 1.6, true],
+  ['toxic', 'Toxic — sickly green', '#9dff3c', 1.6, true],
+  ['gold', 'Gold — a treasure glow', '#ffd24a', 1.2, false],
+  ['screen', 'Screen — green', '#7dff9a', 1.1, true],
+  ['tv', 'Television — cold flicker', '#bcd0ff', 1.4, true],
   ['neon', 'Neon — pink', '#ff4fd8', 1.4, false],
   ['neonblue', 'Neon — blue', '#4fd8ff', 1.4, false],
-  ['fire', 'Fire — flickering', '#ff7a2a', 1.9, true],
-  ['candle', 'Candle — small and warm', '#ffc66a', 0.9, true],
-  ['moon', 'Moonlight — pale blue', '#8fb0ff', 2.8, false],
-  ['screen', 'Screen — green', '#7dff9a', 1.1, true],
+  ['neongreen', 'Neon — green', '#5cff8a', 1.4, false],
+  ['neonyellow', 'Neon — yellow', '#fff04f', 1.4, false],
+  ['blacklight', 'Black light — ultraviolet', '#6a3cff', 2.0, false],
   ['red', 'Alarm — red', '#ff3b3b', 1.6, false],
+];
+/** How strongly a light shines: it reaches further and colours more. A light source keeps its own (entity.shine). */
+export const SHINE = [
+  [0.45, 'Faint'],
+  [0.7, 'Dim'],
+  [1, 'Normal'],
+  [1.4, 'Bright'],
+  [2, 'Blazing'],
 ];
 /** How dark the room is: nothing shows the light sources better than the dark around them. */
 export const DARKNESS = [

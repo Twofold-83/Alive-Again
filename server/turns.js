@@ -180,8 +180,7 @@ function submitPlayer(room, body) {
   if (hero && mode !== 'tell') {
     hero.say = str(body.say, 160);
     hero.emote = str(body.emote, 16);
-    /* a paper-doll hero: the Player may strike a pose, and choose how their own character looks */
-    if (/^d:h\d{3}\.t\d{3}\.a\d{3}\.l\d{3}(~[hal]\d{3},-?\d{1,2},-?\d{1,2},-?\d{1,3},[01]){0,6}$/.test(body.look)) hero.asset = body.look;
+    /* a paper-doll hero: the Player may strike a pose (how the hero looks is the Director's to decide) */
     if (hero.asset.startsWith('d:') && cleanPose(body.pose)) hero.pose = cleanPose(body.pose);
     if (hero.asset.startsWith('d:') && typeof body.feel === 'string' && cleanFeel(body.feel) !== (hero.feel || '')) {
       hero.feel = cleanFeel(body.feel);
@@ -228,7 +227,7 @@ function submitPlayer(room, body) {
     if ((sc.point || sc.use || (sc.target && !askTarget)) && !chosen) sc.action = '';
   }
   sc.answer = answer;
-  const roll = (ask && ask.kind === 'roll' && ask.rolled) || rollDie(askRoll || body.roll);
+  const roll = (ask && ask.kind === 'roll' && ask.rolled) || rollDie(askRoll || (room.bot === 'player' ? body.roll : 0)); // the Player rolls only when the Director asks
   sc.roll = roll ? { by: 'player', ...roll } : null;
   sc.choices = [];
   sc.ask = null;

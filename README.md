@@ -69,10 +69,10 @@ choice → narrower choices.
 | --- | --- |
 | Add something | The library by **Environment** (hospital, school, attic, street …), **Objects** and **Beings**, level pieces, effects, a search by name, your own drawings and uploads. The list stays open while you place things. |
 | Someone speaks | A line for any character. |
-| Move or animate | Glide, record a path (up to 10 seconds per step), walk to the hero, enter from outside the screen, jump, tremble. Different things move together; one thing's moves follow each other. |
+| Move or animate | Pose a character (head, arms, legs, a feeling), glide, record a path (up to 10 seconds per step), walk to the hero, enter from outside the screen, jump, tremble. Different things move together; one thing's moves follow each other. |
 | Narrate | One narration per step. |
 | Moment and sound | Shake, flash, confetti; sound effects in five groups — click one to hear it. |
-| Mood | Light and dark (four levels of darkness, lamps that cut through it), weather, music (57 tunes), a title card, a surprise scene, story ideas. |
+| Mood | Light and dark (four levels of darkness, 26 kinds of light that cut through it, each with its own strength), weather, music (57 tunes), a title card, a surprise scene, story ideas. |
 | Draw on the stage | Freehand lines that draw themselves in playback. |
 | Build this room | Walls and floor in one press (68 themes in four shapes), paint single tiles. |
 | Save room | Keeps the stage as a room on this device, for any story; brings a saved room back. |
@@ -92,7 +92,7 @@ choice → narrower choices.
   hand-drawn pictures per library sprite;
 - a **base point**: the strip of floor it stands on. It decides what is drawn in front of what, and — if the
   thing is **solid** — where nobody can walk. It can be moved and made deeper;
-- a **light** it carries (the light follows the thing), an effect, an emote, a layer, a size;
+- a **light** it carries (the light follows the thing) and how strongly it shines, an effect, an emote, a layer, a size;
 - **clickable**: the actions the Player is offered on it, and for each a **reaction** the Player sees at once
   ("If the Player looks at it, show this text", optionally switching the thing to its used picture) — and a
   **trap**: if the hero walks close, "Something happened!" and the turn goes straight to the Director;
@@ -134,7 +134,7 @@ The Director chooses one of three modes under Story settings, and can change it 
 | Mode | The Player… |
 | --- | --- |
 | Narration | only writes what they want to do. Nothing on stage moves until the Director stages it. |
-| Free will | walks, speaks, picks an emote, writes a **Free Action**, acts on things, strikes a pose. |
+| Free will | walks, speaks, picks an emote, writes a **Free Action**, acts on things, strikes a pose. How the hero looks is the Director's to decide. |
 | Limited will | must pick one of the options the Director offered, or do exactly what was asked; may also walk and speak. |
 
 - **Point and click (adventures).** A turn holds **one walk and one action**. A click on the floor walks
@@ -167,7 +167,7 @@ A story type is a preset of **layers**; the Director can also switch each layer 
 | --- | --- |
 | Inventory | The Player can reach for things on stage; the Director decides whether they get them. |
 | Stats | Named counters (Health, Gold, anything) that the Director adjusts. |
-| Dice | Either side can attach a d6 or d20 roll to a turn; the server rolls it. |
+| Dice | The Director can roll with a step and ask the Player for a skill check; the Player rolls only when asked. The server rolls. |
 | Points | The Director awards points with a reason, shown as the step plays. |
 
 Types: **Free play** and **Adventure** (see `public/shared/rules.js`). On a computer the stage sits on the
@@ -202,7 +202,7 @@ as icons, and what the Player did is read out like the log of an old adventure g
   an unmade bed, a lit lamp) — all drawn by hand next to the sprite itself (`views` in `tools/big/*.js`, see
   `tools/make-big.js`; `--dump=<slug>` prints a sprite as text). A View row on each thing switches between them.
 - **Sprite editor.** Draws all four pictures of a thing. An edited library thing is saved as a campaign sprite
-  with its views, or permanently alters the asset on this device; a new object (at most 2 x 2 tiles) goes into
+  with its views, or permanently alters the asset on this device; a new object (up to 3 x 2 tiles: a car, a wagon) goes into
   "My objects" or any category. Own objects are kept in the browser and sent into the story when used, so the
   other player sees them. The character maker has mutations: more heads, arms and legs.
 - **Environments.** Things, beings and rooms are grouped by setting (`public/shared/environments.js`): Victorian,

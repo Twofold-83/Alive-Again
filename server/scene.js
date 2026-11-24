@@ -145,6 +145,7 @@ export function cleanScene(s, prev, inner) {
       name: str(e.name, 40) || str(e.active && e.active.name, 40), // older clients kept a clickable thing's name with its actions
       base: e.base && typeof e.base === 'object' ? { dy: r3(num(e.base.dy, -1, 1, 0)), d: Math.round(num(e.base.d, 0.25, 6, 0.5) * 4) / 4 } : null,
       glow: LIGHTS.some((l) => l[0] === e.glow) ? e.glow : '',
+      shine: Math.round(num(e.shine, 0.2, 3, 1) * 100) / 100,
     });
   }
   const drawing = [];

@@ -5,7 +5,6 @@
  * Which of these are offered depends on the story's rules (rules.player: 'free', 'limited' or 'tell').
  */
 import { isDoll, poseEditor } from '../core/dolls.js';
-import { openDollMaker } from '../build/dollmaker.js';
 import { assetUrl } from '../core/catalog.js';
 import { h } from '../core/dom.js';
 import { openCheck } from './dice.js';
@@ -14,7 +13,7 @@ import { glyphNode } from '../stage/render.js';
 import { nameOf, pointText } from '../shared/scene-model.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
-import { myTurn, other, hero, mods, app } from '../core/state.js';
+import { myTurn, other, hero, app } from '../core/state.js';
 import { saveDraft, changedQuiet, rebuild, submit, testPlay } from './turn.js';
 import { walkHero, undoWalk, setReply, oneAction } from './walk.js';
 import { render } from './view.js';
@@ -265,31 +264,13 @@ function walkButton() {
     app.walkMode ? 'Click on the stage where to go…' : 'Walk',
   );
 }
-/** A paper-doll hero: "Act" opens the poses and feelings; the look of the hero is the Player's own to decide. */
+/** A paper-doll hero: "Act" opens the poses and feelings. How the hero looks is the Director's to decide. */
 function dollRow(me) {
-  const doll = isDoll(me.asset);
-  const changeLook = () =>
-    openDollMaker({
-      title: 'Your character',
-      asset: doll ? me.asset : null,
-      pose: me.pose,
-      actions: [
-        {
-          label: 'This is me',
-          primary: true,
-          run: (asset, pose) => {
-            Object.assign(me, { asset, pose });
-            app.draft.look = asset;
-            rebuild();
-          },
-        },
-      ],
-    });
+  if (!isDoll(me.asset)) return null;
   return h(
     'div',
     { class: 'row', id: 'dollRow' },
-    doll && toggle({ id: 'poseBtn', class: 'grow' + (app.poseOpen ? ' on' : '') }, 'Act', () => (app.poseOpen = !app.poseOpen)),
-    h('button', { id: 'lookBtn', class: 'grow', onclick: changeLook }, doll ? 'Change my look' : 'Make my character'),
+    toggle({ id: 'poseBtn', class: 'grow' + (app.poseOpen ? ' on' : '') }, 'Act', () => (app.poseOpen = !app.poseOpen)),
   );
 }
 function poser(me) {
@@ -300,13 +281,6 @@ function poser(me) {
   };
   return poseEditor(me.asset, me.pose, set('pose'), { feel: me.feel, onFeel: set('feel') });
 }
-function dieButton() {
-  const want = app.draft.rollWant;
-  return toggle({ class: 'dice' + (want ? ' on' : ''), title: 'Roll a die with this turn' }, want ? `d${want}` : 'Die', () => {
-    app.draft.rollWant = want === 0 ? 6 : want === 6 ? 20 : 0;
-  });
-}
-
 /* ---------- the footer ---------- */
 const turnClock = () => h('span', { id: 'tlabel' });
 const status = (...kids) => h('div', { class: 'status' }, ...kids);
@@ -343,12 +317,7 @@ function playerFoot() {
     must = mode === 'limited' && !ask.answered, // limited will: first do what was asked
     choices = app.draft.choices.length > 0;
   const end = (off) =>
-    h(
-      'div',
-      { class: 'row' },
-      mods().dice && dieButton(),
-      h('button', { class: 'go primary grow', disabled: !!off, onclick: submit }, `End ${whose()}turn ▶`, turnClock()),
-    );
+    h('div', { class: 'row' }, h('button', { class: 'go primary grow', disabled: !!off, onclick: submit }, `End ${whose()}turn ▶`, turnClock()));
   const walk = me && walkButton(),
     doll = me && [dollRow(me), poser(me)],
     aim = app.S.rules.type === 'adventure' && actionBar();

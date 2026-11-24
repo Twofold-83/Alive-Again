@@ -65,6 +65,13 @@ const { setup } = require('./lib');
       /radial-gradient/,
       'the fire cuts a hole in the dark',
     );
+    /* every light has a strength of its own; there are many kinds of light */
+    assert((await p.locator('#lightGrid button').count()) >= 24, 'lamps, torches, neon, daylight, hellfire…');
+    const glow = () => p.evaluate(() => document.querySelector('#stage .glowov').style.background);
+    const normal = await glow();
+    await p.selectOption('#panel select.shine', '2');
+    assert.notEqual(await glow(), normal, 'a blazing fire reaches further and colours more');
+    assert.equal(await p.inputValue('#panel select.shine'), '2');
     await x.done();
     await x.add('crate');
     await p.click('.thingbtns button:has-text("clickable"), .thingbtns button:has-text("Clickable")');

@@ -5,6 +5,7 @@ import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES, LIGHTS } from '../../shared/options.js';
 import { ENVIRONMENTS, OBJECT_CATS, environmentItems } from '../../shared/environments.js';
 import { G, buildGuided, short } from '../guided.js';
+import { shineSelect } from './scene.js';
 import { glyphNode } from '../../stage/render.js';
 import { openSpriteEditor, forgetOwn } from '../../build/spriteed.js';
 import { dollDataUrl } from '../../core/dolls.js';
@@ -88,7 +89,25 @@ export function screenThing(kit) {
     lookRow(),
     !sel.tie &&
       h('div', { class: 'row' }, h('span', { class: 'dim small' }, 'Layer'), lay(-1, 'Behind all'), lay(0, 'By position'), lay(1, 'In front')),
-    h('div', { class: 'row' }, pickSel([['', 'No light'], ...LIGHTS.map((l) => [l[0], l[1]])], 'glow', 'Light')),
+    h(
+      'div',
+      { class: 'row', id: 'lightRow' },
+      h(
+        'select',
+        {
+          class: 'grow',
+          title: 'Light',
+          'aria-label': 'Light',
+          onchange: (ev) => {
+            sel.glow = ev.target.value;
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        [['', 'No light'], ...LIGHTS].map(([v, l]) => h('option', { value: v, selected: sel.glow === v ? '' : null }, l)),
+      ),
+      sel.glow && shineSelect(sel.shine || 1, (v) => (sel.shine = v), c),
+    ),
     h('div', { class: 'row' }, pickSel(FX, 'fx', 'Effect'), pickSel([['', 'No emote'], ...EMOTES.map((e) => [e, e])], 'emote', 'Emote')),
     viewRow(),
     h(
@@ -252,7 +271,10 @@ export function screenSpeak(kit) {
 export function screenMove(kit) {
   const { p, c, sel, me, lab, enter, done, head, opt, picker, walk, comeIn } = kit;
   if (!sel) return picker('Who or what moves?');
-  head(`How does ${lab(sel)} move?`, 'Different things move at the same time; one thing’s moves follow each other.');
+  head(
+    `How does ${lab(sel)} move?`,
+    'Different things move at the same time; one thing’s moves follow each other. A character swings into a new pose as the step plays.',
+  );
   const far = sel.x < 0.5 ? 0.92 : 0.08,
     edge = sel.x < 0.5 ? 0 : 1,
     moving = c.trackEnd(sel.id);
@@ -261,6 +283,7 @@ export function screenMove(kit) {
     h(
       'div',
       { class: 'gopts' },
+      isDoll(sel.asset) && opt('doll', 'Pose it', 'Turn the head, arms and legs; pick a feeling', () => enter('pose')),
       opt('waving-hand', 'Put it somewhere', 'Drag it; it glides there', () => enter('move:drag')),
       opt('button-pressed', 'Record a path', 'Drag it, your timing is kept', () => enter('move:rec')),
       me &&

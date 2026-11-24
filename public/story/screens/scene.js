@@ -1,7 +1,7 @@
 /* Director screens about the scene as a whole: moments and sounds, place, weather, music, title cards, narration, drawing, camera. */
 import { SFX, SFX_GROUPS, MOODS } from '../../core/audio.js';
 import { h, clamp, add } from '../../core/dom.js';
-import { BURSTS, WEATHER, LIGHTS, DARKNESS } from '../../shared/options.js';
+import { BURSTS, WEATHER, LIGHTS, DARKNESS, SHINE } from '../../shared/options.js';
 import { newEntity, freeSpot } from '../../shared/scene-model.js';
 import { G, short } from '../guided.js';
 import { PIXEL, pixelInfo } from '../../core/catalog.js';
@@ -434,6 +434,37 @@ export function screenSaveRoom(kit) {
 }
 
 /* ================= light and dark: how dark the place is, and what shines in it ================= */
+/** What a new light source looks like on the stage, where a bare bulb would be wrong. */
+const LIGHT_THING = {
+  candle: 'candle-stub',
+  fire: 'campfire',
+  torch: 'campfire',
+  ember: 'campfire',
+  hellfire: 'campfire',
+  screen: 'monitor-text',
+  tv: 'monitor-text',
+  moon: 'window-frame-dark',
+  day: 'window-frame-dark',
+  dawn: 'window-frame-dark',
+};
+/** How strongly a light shines: a select of the SHINE levels. `now` null means "they differ". */
+export function shineSelect(now, set, c) {
+  return h(
+    'select',
+    {
+      class: 'shine',
+      title: 'How strongly it shines',
+      'aria-label': 'How strongly it shines',
+      onchange: (ev) => {
+        set(Number(ev.target.value));
+        c.changedQuiet();
+        c.rebuild();
+      },
+    },
+    now == null && h('option', { value: '1', selected: '' }, 'Mixed'),
+    SHINE.map(([v, label]) => h('option', { value: v, selected: now === v ? '' : null }, label)),
+  );
+}
 export function screenSceneLight(kit) {
   const { p, c, d, head, lab, doneBtn } = kit;
   head('Light and dark', 'Darken the place, then put light sources into it. Any thing can shine: press it on the stage and choose its light.');
@@ -470,18 +501,7 @@ export function screenSceneLight(kit) {
           {
             'data-light': id,
             onclick: () => {
-              const e = c.addEntity(
-                'p:' +
-                  (id === 'candle'
-                    ? 'candle-stub'
-                    : id === 'fire'
-                      ? 'campfire'
-                      : id === 'screen'
-                        ? 'monitor-text'
-                        : id === 'moon'
-                          ? 'window-frame-dark'
-                          : 'lamp-bare-bulb'),
-              );
+              const e = c.addEntity('p:' + (LIGHT_THING[id] || 'lamp-bare-bulb'));
               if (e) {
                 e.glow = id;
                 Object.assign(e, freeSpot(d));
@@ -496,11 +516,25 @@ export function screenSceneLight(kit) {
       ),
     ),
     lit.length > 0 && h('small', { class: 'dim' }, 'Shining now (drag them on the stage)'),
+    lit.length > 1 &&
+      h(
+        'div',
+        { class: 'row', id: 'shineAll' },
+        h('span', { class: 'grow' }, 'All lights'),
+        shineSelect(
+          lit.every((e) => (e.shine || 1) === (lit[0].shine || 1)) ? lit[0].shine || 1 : null,
+          (v) => {
+            for (const e of lit) e.shine = v;
+          },
+          c,
+        ),
+      ),
     lit.map((e) =>
       h(
         'div',
         { class: 'row' },
         h('span', { class: 'grow' }, lab(e), h('small', { class: 'dim' }, ' — ' + (LIGHTS.find((l) => l[0] === e.glow) || [0, ''])[1])),
+        shineSelect(e.shine || 1, (v) => (e.shine = v), c),
         h(
           'button',
           {

@@ -318,7 +318,6 @@ export async function submit() {
           feel: me ? me.feel || '' : '',
           reacted: app.draft.reacted || [],
           tripped: app.draft.tripped || '',
-          look: app.draft.look,
           action: app.draft.action,
           target: app.draft.target,
           point: app.draft.point,

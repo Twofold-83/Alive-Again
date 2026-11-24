@@ -6,7 +6,7 @@ import { renderStage, burst, actionParts } from './render.js';
 import { sample } from './level.js';
 
 /** How a thing looks, as far as a step can change it: shown as before until the step plays, then as the step left it. */
-const LOOKS = ['scale', 'rot', 'flip', 'fx', 'pose', 'feel', 'view', 'used', 'glow'];
+const LOOKS = ['scale', 'rot', 'flip', 'fx', 'pose', 'feel', 'view', 'used', 'glow', 'shine'];
 const pick = (from, keys) => Object.fromEntries(keys.map((k) => [k, from[k]]));
 /** How long a Director's turn first shows the scene as it was. */
 const LEAD_MS = 2200;

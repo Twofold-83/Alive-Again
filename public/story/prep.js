@@ -12,7 +12,7 @@ import { spriteTitle, OWN } from '../core/catalog.js';
 import { useOwn } from '../build/spriteed.js';
 
 /** What the shelf remembers of a thing, so that it comes back the way it was prepared. */
-const PREPARED = ['name', 'pose', 'feel', 'scale', 'flip', 'solid', 'active', 'near', 'view', 'used', 'glow', 'base', 'hp', 'maxHp'];
+const PREPARED = ['name', 'pose', 'feel', 'scale', 'flip', 'solid', 'active', 'near', 'view', 'used', 'glow', 'shine', 'base', 'hp', 'maxHp'];
 
 async function put(item) {
   let asset = item.asset;

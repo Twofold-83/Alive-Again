@@ -62,6 +62,7 @@ export function newEntity(asset, props = {}) {
     base: null, // where it stands, if not at its own feet: { dy, d } — dy moves the base line (stage fraction), d is its depth in tiles
     name: '', // what it is called, once the Director has named it; shown to the Player. Unnamed, it is just "this"
     glow: '', // a light source (see LIGHTS in options.js): it shines where the thing stands
+    shine: 1, // how strongly it shines (see SHINE): 1 is the light as it comes
     feel: '', // what a paper-doll character feels (see FEELS): it shows on the face
     pose: null, // a paper-doll character's joints: [head, left arm, right arm, left leg, right leg] in degrees
     ...props,

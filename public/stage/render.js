@@ -77,6 +77,11 @@ export function actionText(scene, names, pendingRoll) {
 }
 
 const SVG = 'http://www.w3.org/2000/svg';
+/** 0..1 as the two hex digits of a colour's alpha. */
+const hex2 = (a) =>
+  Math.round(Math.max(0, Math.min(1, a)) * 255)
+    .toString(16)
+    .padStart(2, '0');
 
 /* Names are drawn in a layer above the floor, so a thing keeps its place among the others while it is pointed at. */
 function showNames(root, layer) {
@@ -327,10 +332,21 @@ export function renderStage(root, scene, o = {}) {
     .map((e) => {
       const L = LIGHTS.find((l) => l[0] === e.glow),
         at = spot(e); // where it is drawn: a light that is carried goes along
-      return L && { x: at.x * 100, y: (at.y - 0.07 * e.scale) * 100, col: L[2], r: L[3] * Math.max(0.6, e.scale), flick: L[4] };
+      const shine = e.shine || 1; // a stronger light reaches further and colours more
+      return (
+        L && {
+          x: at.x * 100,
+          y: (at.y - 0.07 * e.scale) * 100,
+          col: L[2],
+          r: L[3] * Math.max(0.6, e.scale) * Math.sqrt(shine),
+          a: Math.min(1, 0.4 * shine),
+          flick: L[4],
+        }
+      );
     })
     .filter(Boolean);
-  const sig = (scene.dark || 0) + '|' + lights.map((l) => `${l.x.toFixed(1)},${l.y.toFixed(1)},${l.col},${l.r}`).join(';');
+  const sig =
+    (scene.dark || 0) + '|' + lights.map((l) => `${l.x.toFixed(1)},${l.y.toFixed(1)},${l.col},${l.r.toFixed(2)},${l.a.toFixed(2)}`).join(';');
   if (root._light !== sig) {
     root._light = sig;
     const dark = [0, 0.45, 0.72, 0.93][scene.dark || 0];
@@ -342,7 +358,10 @@ export function renderStage(root, scene, o = {}) {
     darkEl.style.maskComposite = 'intersect';
     darkEl.style.webkitMaskComposite = 'source-in';
     glowEl.style.background = lights
-      .map((l) => `radial-gradient(circle calc(var(--u) * ${l.r * 0.9}) at ${l.x}% ${l.y}%, ${l.col}66 0, ${l.col}22 45%, transparent 100%)`)
+      .map(
+        (l) =>
+          `radial-gradient(circle calc(var(--u) * ${l.r * 0.9}) at ${l.x}% ${l.y}%, ${l.col}${hex2(l.a)} 0, ${l.col}${hex2(l.a / 3)} 45%, transparent 100%)`,
+      )
       .join(',');
     glowEl.className = 'glowov' + (lights.some((l) => l.flick) ? ' flicker' : '');
   }

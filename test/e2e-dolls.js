@@ -109,28 +109,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await p.waitForSelector('.thingbtns');
     assert.equal(await p.locator('#stage .ent .doll').count(), 1, 'the figure is on stage');
     assert.equal(await angle('#stage .ent .doll .dpart.ar'), turned, 'in the pose it was given');
-    // pose it from the Director's menu
-    await p.click('.thingbtns button:has-text("Act")');
+    // pose it from the Director's menu: under Move / animate
+    await p.click('.thingbtns button:has-text("Move / animate")');
+    await x.opt('Pose it');
     await p.click('#panel [data-pose="Arms up"]');
     await p.click('#panel [data-feel="scared"]');
     assert.equal(await p.locator('#stage .ent .doll .dpart.h .face').count(), 1, 'the feeling shows on the face');
     await x.done();
+    // how the hero looks is the Director's to decide: the character from the cast becomes the Player's hero
+    for (let i = 0; i < 3 && !(await p.locator('.gopt:has-text("Character maker")').count()); i++) await p.click('.gback');
+    await x.opt('Character maker');
+    await p.waitForSelector('.castitem');
+    await p.click('.castitem button >> nth=0');
+    await p.click('#dollAct1');
+    await p.waitForSelector('#stage .ent.hero .doll');
     await p.click('#foot button.go');
     await sleep(400);
     let sc = await last();
-    const doll = sc.entities.find((e) => e.asset.startsWith('d:'));
+    const doll = sc.entities.find((e) => e.asset.startsWith('d:') && e.id !== sc.heroId);
     assert.match(doll.asset, /^d:h\d{3}\.t\d{3}\.a\d{3}\.l\d{3}(~[hal]\d{3},-?\d+,-?\d+,-?\d+,[01]){2}$/, 'the mutations are part of who it is');
     assert.deepEqual(doll.pose, [0, 160, -160, 0, 0], 'the server keeps the pose');
     assert.equal(doll.feel, 'scared', 'and the feeling');
 
-    /* the Player: make my own character, strike a pose */
+    /* the Player strikes a pose — how the hero looks is the Director's to decide */
     await p.waitForFunction(() => /Player/.test(document.querySelector('#banner').textContent));
     await x.cutDone();
-    assert.equal(await p.locator('#poseBtn').count(), 0, 'no pose tool for a hero who is not a paper doll');
-    await p.click('#lookBtn');
-    await p.waitForSelector('.castitem');
-    await p.click('.castitem button >> nth=0');
-    await p.click('#dollAct0');
+    assert.equal(await p.locator('#lookBtn').count(), 0, 'the Player cannot change how the hero looks');
+    assert.equal(await p.locator('#foot .dice').count(), 0, 'and rolls only when the Director asks');
     await p.waitForSelector('#stage .ent.hero .doll');
     await p.click('#poseBtn');
     await p.click('#foot [data-pose="Wave"]');
@@ -142,7 +147,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     sc = await last();
     const me = sc.entities.find((e) => e.id === sc.heroId);
     assert.equal(me.asset, doll.asset.replace(/./g, (ch) => ch) && me.asset);
-    assert.match(me.asset, /^d:/, 'the Player chose their own look');
+    assert.match(me.asset, /^d:/, 'the hero is the character the Director made');
     assert.equal(me.feel, 'happy');
     assert.equal(sc.felt, 'happy', 'the Director is told what the hero feels');
     assert.deepEqual(me.pose, [8, 6, -150, 0, 0]);

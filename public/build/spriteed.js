@@ -68,7 +68,16 @@ const PALETTE = [
   '#aebfc4',
 ];
 const VIEWS = ['', 'side', 'used', 'sideUsed'];
-const NEW_MAX = 32; // a new object is at most two tiles by two
+const NEW_MAX = 48; // a new object is at most three tiles each way: a car is 3 × 2 (48 × 32)
+/** Ready sizes for a new object, in tiles. */
+const PRESETS = [
+  [1, 1],
+  [1, 2],
+  [2, 1],
+  [2, 2],
+  [3, 2],
+  [2, 3],
+];
 const E = {
   o: null,
   pics: {},
@@ -311,7 +320,7 @@ function draw() {
         h(
           'span',
           { class: 'dim small' },
-          E.from ? `Editing “${E.from.name}”` : E.edit ? `Editing “${E.edit.name}”` : 'A new object — at most 2 × 2 tiles',
+          E.from ? `Editing “${E.from.name}”` : E.edit ? `Editing “${E.edit.name}”` : 'A new object — up to 3 × 2 tiles (a car, a wagon)',
         ),
         h('span', { class: 'grow' }),
         h('button', { id: 'spriteClose', onclick: close }, 'Close'),
@@ -362,6 +371,28 @@ function draw() {
             sizes('h'),
             h('span', { class: 'dim small' }, '(a tile is 16, a person 16 × 33)'),
           ),
+          E.max === NEW_MAX &&
+            h(
+              'div',
+              { class: 'row', id: 'sizePresets' },
+              h('span', { class: 'dim small' }, 'Tiles'),
+              PRESETS.map(([tw, th]) =>
+                h(
+                  'button',
+                  {
+                    'data-tiles': `${tw}x${th}`,
+                    class: p.w === tw * 16 && p.h === th * 16 ? 'on' : '',
+                    title: tw === 3 ? 'Large: a car, a cart, a wagon' : '',
+                    onclick: () => {
+                      snap();
+                      resize(p, tw * 16, th * 16);
+                      draw();
+                    },
+                  },
+                  `${tw} × ${th}`,
+                ),
+              ),
+            ),
           h(
             'div',
             { class: 'row' },
