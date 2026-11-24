@@ -77,7 +77,19 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     /* the character maker */
     await x.opt('Character maker');
     await p.waitForSelector('.dollgrid button');
-    assert.equal(await p.locator('.dollgrid button').count(), 190, 'all the heads');
+    assert((await p.locator('.dollgrid button').count()) >= 190, 'all the heads');
+    /* bare skin: a body in small white shorts, in the skin of the head */
+    await p.click('#dollBare');
+    assert.match(await p.getAttribute('[data-dtab=t] img', 'src'), /doll\/t13[1-7]\.png/, 'a bare chest');
+    assert.match(await p.getAttribute('[data-dtab=l] img', 'src'), /doll\/l09[1-7]\.png/, 'bare legs in white shorts');
+    /* parts are sorted by the setting they were made for; "Classic" is the first 500 */
+    await p.click('[data-dtab=t]');
+    assert((await p.locator('#dollTheme option').count()) >= 3);
+    await p.selectOption('#dollTheme', 'basic');
+    assert.equal(await p.locator('.dollgrid button').count(), 7, 'a bare chest in every skin');
+    await p.click('[data-dtab=h]');
+    await p.selectOption('#dollTheme', 'classic');
+    assert.equal(await p.locator('.dollgrid button').count(), 190, 'the first heads');
     await p.fill('#dollSearch', 'skull');
     assert((await p.locator('.dollgrid button').count()) < 12, 'search narrows the parts');
     await p.click('.dollgrid button >> nth=0');

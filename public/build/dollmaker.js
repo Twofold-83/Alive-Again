@@ -7,6 +7,7 @@
  * "My cast" is kept in this browser, so favourite characters are there in every story. */
 import { h, fill, toast } from '../core/dom.js';
 import { kept } from '../core/kept.js';
+import { ENVIRONMENTS } from '../shared/environments.js';
 import { DOLLS, dollNode, dollParts, dollAsset, randomDoll, poseEditor, REST, MAX_EXTRA, DOLL_W, dollDataUrl } from '../core/dolls.js';
 import { openSpriteEditor } from './spriteed.js';
 import { audio } from '../core/audio.js';
@@ -17,7 +18,7 @@ const TABS = [
   ['a', 'Arms', 'arms'],
   ['l', 'Legs', 'legs'],
 ];
-const M = { o: null, parts: null, pose: REST, tab: 'h', q: '' };
+const M = { o: null, parts: null, pose: REST, tab: 'h', q: '', theme: '' }; // theme: only the parts made for one setting
 const root = () => document.querySelector('#dollmaker');
 
 export function openDollMaker(o) {
@@ -105,11 +106,30 @@ function dragMutations() {
   fig.addEventListener('pointerup', () => (cur = null));
 }
 
+const inThemeOf = (theme) => (p) => !theme || (theme === 'classic' ? !p.theme : p.theme === theme);
+/** Undress the figure: bare chest, bare arms, bare legs in small white shorts — in the skin of the head it has. */
+function bare() {
+  const head = DOLLS.heads.find((p) => p.id === M.parts.h),
+    skin = SKIN_WORDS.find((s) => head && new RegExp(`\\b${s}\\b`).test(head.name)) || 'pale';
+  const find = (list, re) => (list.find((p) => re.test(p.name) && p.name.endsWith(skin)) || list.find((p) => re.test(p.name)) || {}).id;
+  M.parts.t = find(DOLLS.torsos, /^bare skin chest/) || M.parts.t;
+  M.parts.l = find(DOLLS.legs, /^bare skin legs white shorts/) || M.parts.l;
+  M.parts.a = (DOLLS.arms.find((p) => p.name === `bare ${skin} hand`) || {}).id || M.parts.a;
+  audio.sfx('pop');
+  draw();
+}
+const SKIN_WORDS = ['pale', 'fair', 'tan', 'brown', 'ashen', 'rotten', 'drowned'];
+
 function draw() {
   const asset = dollAsset(M.parts),
     [, , listName] = TABS.find((t) => t[0] === M.tab);
   const q = M.q.trim().toLowerCase(),
-    list = DOLLS[listName].filter((p) => !q || p.name.includes(q));
+    inTheme = (p) => !M.theme || (M.theme === 'classic' ? !p.theme : p.theme === M.theme),
+    list = DOLLS[listName].filter((p) => inTheme(p) && (!q || p.name.includes(q)));
+  /* the settings that have parts of this kind, with how many */
+  const counts = new Map();
+  for (const p of DOLLS[listName]) counts.set(p.theme || 'classic', (counts.get(p.theme || 'classic') || 0) + 1);
+  const themes = [['classic', 'Classic'], ['basic', 'Bare skin'], ...ENVIRONMENTS.map((e) => [e.id, e.name])].filter(([id]) => counts.has(id));
   const mine = kept.cast.all();
   const grid = h(
     'div',
@@ -128,7 +148,7 @@ function draw() {
             draw();
           },
         },
-        h('img', { src: `doll/${p.id}.png`, alt: '' }),
+        h('img', { src: `doll/${p.id}.png`, alt: '', loading: 'lazy' }),
       ),
     ),
     !list.length && h('p', { class: 'dim' }, DOLLS.heads.length ? 'Nothing by that name.' : 'The body parts are missing (run tools/make-dolls.js).'),
@@ -146,15 +166,23 @@ function draw() {
         'button',
         {
           id: 'dollRandom',
+          title: M.theme ? 'Someone of the chosen setting' : 'Anyone at all',
           onclick: () => {
             M.parts = dollParts(randomDoll());
-            if (Math.random() < 0.25) M.parts.x = [{ id: M.parts.h, x: 8, y: -5, r: 16, f: true }];
+            /* with a setting chosen, the surprise is someone who belongs there */
+            const one = (name) => {
+              const l = DOLLS[name].filter(inThemeOf(M.theme));
+              return l.length ? l[Math.floor(Math.random() * l.length)].id : null;
+            };
+            if (M.theme) for (const [k, , name] of TABS) M.parts[k] = one(name) || M.parts[k];
+            else if (Math.random() < 0.25) M.parts.x = [{ id: M.parts.h, x: 8, y: -5, r: 16, f: true }];
             audio.sfx('dice');
             draw();
           },
         },
         'Surprise me',
       ),
+      h('button', { id: 'dollBare', title: 'Undress: bare skin and small white shorts, in the skin of this head', onclick: bare }, 'Bare skin'),
       h('button', { id: 'dollClose', onclick: close }, 'Close'),
     ),
     h(
@@ -232,6 +260,20 @@ function draw() {
               h('small', {}, `${label} (${DOLLS[name].length})`),
             ),
           ),
+        ),
+        h(
+          'select',
+          {
+            id: 'dollTheme',
+            title: 'Parts made for one setting',
+            'aria-label': 'Setting',
+            onchange: (ev) => {
+              M.theme = ev.target.value;
+              draw();
+            },
+          },
+          h('option', { value: '' }, `All settings (${DOLLS[listName].length})`),
+          themes.map(([id, name]) => h('option', { value: id, selected: M.theme === id ? '' : null }, `${name} (${counts.get(id)})`)),
         ),
         h('input', {
           type: 'search',

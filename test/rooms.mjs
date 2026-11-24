@@ -57,11 +57,27 @@ for (const sc of SCENARIOS) {
   }
   for (const [a, b] of sc.links) assert(keys.has(a) && keys.has(b));
 }
-/* paper-doll parts: 500 of them, every one a file */
+/* paper-doll parts: the first 500 and the themed ones after them, every one a file; ids never change */
 const dolls = JSON.parse(fs.readFileSync('public/doll/index.json', 'utf8'));
 const parts = [...dolls.heads, ...dolls.torsos, ...dolls.arms, ...dolls.legs];
-assert.equal(parts.length, 500);
-assert.equal(new Set(parts.map((x) => x.id)).size, 500);
+assert(parts.length >= 514);
+assert.equal(new Set(parts.map((x) => x.id)).size, parts.length);
+assert.equal(parts.filter((x) => !x.theme).length, 500, 'the first 500 parts are as they were');
+assert.deepEqual(
+  [dolls.heads[0].name, dolls.torsos[129].id, dolls.arms[89].id, dolls.legs[89].id],
+  ['bald red hair pale calm', 't130', 'a090', 'l090'],
+);
+for (const skin of ['pale', 'fair', 'tan', 'brown', 'ashen', 'rotten', 'drowned']) {
+  assert(
+    dolls.torsos.some((x) => x.name === `bare skin chest naked body ${skin}`),
+    'a bare chest in ' + skin,
+  );
+  assert(
+    dolls.legs.some((x) => x.name === `bare skin legs white shorts tiny underwear ${skin}`),
+    'white shorts in ' + skin,
+  );
+}
+for (const x of parts) assert(!x.theme || x.theme === 'basic' || ENVIRONMENTS.some((e) => e.id === x.theme), `${x.id}: theme ${x.theme}`);
 for (const part of parts) assert(fs.existsSync(`public/doll/${part.id}.png`) && part.name, part.id);
 for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.length % 16 === 0, m.id);
 /* battle rules: the difficulty decides every number; a round is the hero's move and then each enemy's */
