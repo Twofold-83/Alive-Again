@@ -5,6 +5,7 @@ import { ROOM_THEMES, ROOM_SHAPES, buildRoom, roomScene, roomArea } from '../pub
 import { newScene, walkable, LEVEL_W, LEVEL_H } from '../public/shared/scene-model.js';
 import { SCENARIOS } from '../public/build/scenarios.js';
 import { MOODS } from '../public/shared/sounds.js';
+import { ENVIRONMENTS } from '../public/shared/environments.js';
 
 const sprite = (s) => assert(fs.existsSync(`public/px/${s}.png`), 'sprite ' + s);
 for (const t of ROOM_THEMES) {
@@ -24,6 +25,23 @@ for (const t of ROOM_THEMES) {
     assert(walkable(sc, a.x0, a.y0) && walkable(sc, a.x1, a.y1), 'the corners of the floor can be walked on');
     assert(!walkable(sc, 0.5, 0.02) || t.outdoor === undefined || sh.id === 'corridor', 'there is a wall at the back');
   }
+}
+/* every setting names rooms and library categories that exist, and has things of its own */
+{
+  const cats = new Map(JSON.parse(fs.readFileSync('public/px/index.json', 'utf8')).categories.map((c) => [c.id, c]));
+  for (const env of ENVIRONMENTS) {
+    for (const r of env.rooms)
+      assert(
+        ROOM_THEMES.some((t) => t.id === r),
+        `${env.id}: room ${r}`,
+      );
+    for (const c of [...env.cats, ...Object.keys(env.pick || {}), ...Object.keys(env.beings || {})]) assert(cats.has(c), `${env.id}: category ${c}`);
+    assert(env.cats.reduce((n, c) => n + cats.get(c).items.length, 0) >= 10, `${env.id} has things`);
+  }
+  /* large things: a car is three tiles wide, and has its other pictures like everything else */
+  const large = [...cats.values()].flatMap((c) => c.items).filter((i) => i.w >= 44 && /\blarge\b/.test(i.name));
+  assert(large.length >= 30, `large things: ${large.length}`);
+  for (const i of large.slice(0, 40)) assert(i.v && i.v.side && fs.existsSync(`public/px/${i.slug}.side.png`), `${i.slug} seen from the other side`);
 }
 for (const sc of SCENARIOS) {
   const keys = new Set(sc.rooms.map((r) => r[0]));
@@ -117,4 +135,4 @@ for (const m of MOODS) if (m.seq) assert(m.seq.some((n) => n != null) && m.seq.l
   bed.base = { dy: 0.1, d: 0.5 };
   assert.equal(Math.round(baseOf(bed).y * 100), 60, 'a base line of its own');
 }
-console.log(`ROOMS OK (${ROOM_THEMES.length} themes, ${SCENARIOS.length} places, ${MOODS.length - 1} tunes)`);
+console.log(`ROOMS OK (${ROOM_THEMES.length} themes, ${ENVIRONMENTS.length} settings, ${SCENARIOS.length} places, ${MOODS.length - 1} tunes)`);

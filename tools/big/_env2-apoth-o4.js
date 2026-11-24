@@ -337,12 +337,12 @@ module.exports = (kit, H) => {
       c.set(9, 15, C.white);
       if (!u) {
         dots(c, hex('#3a3024'), [7, 11, 10, 11]);
-        c.poly([[2, 5], [15, 5], [16, 14], [13, 10], [9, 8], [5, 10], [2, 16]], CREPE); // the crepe
-        c.line(2, 5, 15, 5, hex('#3a3640'));
-        c.col(2, 6, 18, CREPE);
-        c.col(15, 6, 16, CREPE);
-        c.set(8, 4, CREPE);
-        c.set(9, 4, CREPE);
+        c.rect(2, 5, 15, 7, CREPE); // the crepe over the top and down both sides
+        c.row(5, 2, 15, hex('#3a3640'));
+        c.rect(2, 8, 4, 19, CREPE);
+        c.rect(13, 8, 15, 15, CREPE);
+        c.col(2, 8, 19, hex('#3a3640'));
+        dots(c, CREPE, [5, 8, 12, 8, 3, 20, 14, 16, 8, 4, 9, 4]);
       } else {
         c.rect(7, 10, 10, 12, hex('#17151c')); // the crepe is off, and the eyes have been scratched out
         dots(c, hex('#e4dfd0'), [6, 9, 11, 13, 6, 12, 11, 10]);

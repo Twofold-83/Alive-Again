@@ -4,7 +4,7 @@
  * way an object is registered in _env2-apoth-kit.js. */
 module.exports = (kit) => {
   const H = require('./_env2-apoth-kit.js')(kit);
-  for (const part of ['a1', 'a2', 'a3', 'a4', 'a5', 'o1', 'o2', 'o3', 'o4', 'o5']) {
+  for (const part of ['a1', 'a2', 'a3', 'a4', 'a5', 'o1', 'o2', 'o3', 'o4', 'o5', 'o6']) {
     let mod;
     try {
       mod = require('./_env2-apoth-' + part + '.js');

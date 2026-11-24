@@ -36,6 +36,7 @@ module.exports = (kit) => {
    *   uw, uh, udx, udy          another canvas size for the used picture; the drawing is moved by udx, udy
    *                             (by default it stays on the bottom row, left)
    *   suw, suh, sudx, sudy      the same for the other perspective
+   *   dy, sdy                   the drawing (main / other perspective) is moved down by so many rows in all its pictures
    *   base: 'side'              the main picture is the long side
    *   solid: false, shade: false, outline: false }
    */
@@ -54,16 +55,18 @@ module.exports = (kit) => {
       uh = o.uh || o.h,
       suw = o.suw || (o.s === 'same' ? uw : sw),
       suh = o.suh || (o.s === 'same' ? uh : sh);
-    const views = {};
+    const views = {},
+      dy = o.dy || 0,
+      sdy = o.s === 'same' ? dy : o.sdy || 0;
     if (o.base) views.base = o.base;
-    if (s) views.side = { w: sw, h: sh, draw: wrap(s, false, 0, 0) };
-    views.used = { w: uw, h: uh, draw: wrap(o.f, true, o.udx || 0, o.udy == null ? uh - o.h : o.udy) };
+    if (s) views.side = { w: sw, h: sh, draw: wrap(s, false, 0, sdy) };
+    views.used = { w: uw, h: uh, draw: wrap(o.f, true, o.udx || 0, o.udy == null ? uh - o.h + dy : o.udy) };
     if (s) {
       const dx = o.s === 'same' ? o.udx || 0 : o.sudx || 0,
-        dy = o.s === 'same' ? (o.udy == null ? uh - o.h : o.udy) : o.sudy == null ? suh - sh : o.sudy;
-      views.sideUsed = { w: suw, h: suh, draw: wrap(s, true, dx, dy) };
+        y = o.s === 'same' ? (o.udy == null ? uh - o.h + dy : o.udy) : o.sudy == null ? suh - sh + sdy : o.sudy;
+      views.sideUsed = { w: suw, h: suh, draw: wrap(s, true, dx, y) };
     }
-    add(slug, cat, label, name, { w: o.w, h: o.h, solid: o.solid !== false, draw: wrap(o.f, false, 0, 0), views });
+    add(slug, cat, label, name, { w: o.w, h: o.h, solid: o.solid !== false, draw: wrap(o.f, false, 0, dy), views });
   };
 
   /* ---------- shared helpers ---------- */
