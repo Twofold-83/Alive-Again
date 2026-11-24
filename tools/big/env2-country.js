@@ -4,7 +4,7 @@
  * object is registered in _env2-country-kit.js. */
 module.exports = (kit) => {
   const H = require('./_env2-country-kit.js')(kit);
-  for (const part of ['village1', 'village2', 'village3', 'rural1', 'rural2', 'rural3']) {
+  for (const part of ['village1', 'village2', 'village3', 'rural1', 'rural2', 'rural3', 'rural4']) {
     let mod;
     try {
       mod = require('./_env2-country-' + part + '.js');

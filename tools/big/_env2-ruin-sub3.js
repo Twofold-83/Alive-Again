@@ -405,9 +405,9 @@ module.exports = (X) => {
       chair(1, false);
       if (u) {
         /* the other chair on its back */
-        c.rect(26, b - 1, 33, b, VINYL);
-        c.col(28, b - 6, b - 2, VINYL);
-        c.col(33, b - 5, b - 2, D(VINYL));
+        c.rect(25, b - 1, 32, b, VINYL);
+        c.col(27, b - 6, b - 2, VINYL);
+        c.col(32, b - 5, b - 2, D(VINYL));
         c.rect(19, 27, 21, 27, hex('#9ebcc2'));
         drip(c, 23, 30, 4, hex('#b08a4a'));
         c.row(27, 22, 24, hex('#b08a4a'));
@@ -593,7 +593,7 @@ module.exports = (X) => {
       }
       c.row(b, 1, 36, D(ALU));
     },
-    sw: 8,
+    sw: 10,
     s(c, u) {
       const b = c.h - 2;
       sideBox(c, 2, 1, 5, b, ALU);
@@ -716,18 +716,16 @@ module.exports = (X) => {
       c.poly([[2, 5], [8, 1], [9, 1], [15, 5]], hex('#5a4a3a'));
       c.line(2, 5, 8, 1, hex('#73604c'));
       for (const x of [4, 13]) c.col(x, 6, 9, C.wood);
-      c.line(14, 11, 16, 13, C.steel);
-      mesh(c, 15, 14, 17, 20, C.steel);
+      c.line(13, 11, 15, 13, C.steel);
+      mesh(c, 14, 14, 16, 20, C.steel);
       if (u) {
-        c.rect(15, 14, 17, 20, null);
-        mesh(c, 15, 14, 17, 20, C.steel);
         dots(c, hex('#8a7a66'), [5, 9, 11, 13, 3, 15, 12, 22, 6, 26]);
         dots(c, hex('#b8a47a'), [4, b, 6, b, 11, b, 13, b - 1, 12, b]);
         c.rect(2, b - 1, 4, b, hex('#6a5a48'));
         c.set(5, b, hex('#b8963a'));
       } else {
-        c.rect(15, 16, 17, 20, hex('#8a6a40'));
-        mesh(c, 15, 14, 17, 20, C.steel);
+        c.rect(14, 16, 16, 20, hex('#8a6a40'));
+        mesh(c, 14, 14, 16, 20, C.steel);
         c.row(9, 5, 12, hex('#b8a47a'));
         c.rect(6, 7, 8, 8, hex('#6a5a48'));
         c.set(9, 7, hex('#6a5a48'));

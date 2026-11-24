@@ -549,7 +549,7 @@ module.exports = (X) => {
   {
     const dummy = (c, u, side) => {
       const b = c.h - 2,
-        m = side ? 4 : 7;
+        m = side ? 5 : 7;
       c.rect(m - 2, b, m + 2, b, C.iron);
       c.col(m, 22, b, C.steel);
       /* a greatcoat on a shop dummy */

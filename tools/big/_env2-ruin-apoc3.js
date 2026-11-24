@@ -99,7 +99,7 @@ module.exports = (X) => {
       } else board(1, 2);
       dots(c, WEED, [6, b, 9, b, 10, b - 1]);
     },
-    sw: 8,
+    sw: 10,
     s(c, u) {
       const b = c.h - 2;
       c.rect(3, 4, 4, b, C.iron);
@@ -182,7 +182,7 @@ module.exports = (X) => {
         dots(c, WEED, [10, b, 13, b, 14, b - 1]);
       }
     },
-    sw: 8, sum: [0, 0, 0],
+    sw: 10, sum: [0, 0, 0],
     s(c, u) {
       const b = c.h - 2;
       if (u) {

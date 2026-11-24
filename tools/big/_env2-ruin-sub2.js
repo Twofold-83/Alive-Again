@@ -211,15 +211,15 @@ module.exports = (X) => {
         /* eyes open now, the rod dropped */
         dots(c, RED, [5, 8, 7, 8]);
         c.row(10, 5, 7, hex('#8a2a26'));
-        c.row(b, 10, 13, C.woodLight);
+        c.row(b, 10, 12, C.woodLight);
         c.set(10, 14, C.flesh);
       } else {
         c.row(8, 5, 5, DARK);
         c.row(8, 7, 7, DARK);
         c.set(6, 9, hex('#b08a6a'));
-        c.line(10, 13, 13, 5, C.woodLight);
-        c.col(13, 6, 12, hex('#8a8a80'));
-        c.set(13, 13, RED);
+        c.line(10, 13, 12, 5, C.woodLight);
+        c.col(12, 6, 12, hex('#8a8a80'));
+        c.set(12, 13, RED);
       }
     },
     sw: 12,
@@ -860,8 +860,8 @@ module.exports = (X) => {
       c.line(m - 3, 22, m - 10, 14, BARK);
       c.line(m + 2, 22, m + 10, 13, BARK);
       leaves(c, 2, 1, w - 3, 18, hex('#3a5a38'), 3);
-      leaves(c, 0, 8, m - 4, 22, hex('#33503a'), 5);
-      leaves(c, m + 5, 9, w - 1, 22, hex('#33503a'), 8);
+      leaves(c, 1, 8, m - 4, 22, hex('#33503a'), 5);
+      leaves(c, m + 5, 9, w - 2, 22, hex('#33503a'), 8);
       /* the house in the fork */
       const x0 = m - 9,
         x1 = m + 8;

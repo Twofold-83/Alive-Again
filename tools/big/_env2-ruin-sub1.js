@@ -95,7 +95,7 @@ module.exports = (X) => {
   });
 
   T('suburban-station-wagon-woodgrain', 'large station wagon estate car wood panel sides roof rack tailgate luggage holiday', {
-    w: 26, h: 23, solid: true, base: 'side', um: [0, 6, 0], sum: [5, 6, 0],
+    w: 26, h: 24, solid: true, base: 'side', um: [0, 6, 0], sum: [5, 6, 0],
     sw: 50,
     s(c, u) {
       const g = carSide(c, { col: WAGON, est: true, cab: [3, 36], lit: u, hub: C.bone });
@@ -724,7 +724,7 @@ module.exports = (X) => {
   }
 
   T('suburban-hedge-clipped', 'clipped privet hedge box hedge neat garden boundary hole torn through', {
-    w: 36, h: 22, solid: true,
+    w: 36, h: 22, solid: true, m: [0, 2, 0], um: [0, 2, 0], sm: [0, 2, 0], sum: [0, 2, 0],
     f(c, u) {
       const b = c.h - 2;
       hedge(c, 1, 3, 34, b, HEDGE, 3);
