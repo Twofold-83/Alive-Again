@@ -74,7 +74,7 @@ choice → narrower choices.
 | Moment and sound | Shake, flash, confetti; sound effects in five groups — click one to hear it. |
 | Mood | Light and dark (four levels of darkness, 26 kinds of light that cut through it, each with its own strength), weather, music (57 tunes), a title card, a surprise scene, story ideas. |
 | Draw on the stage | Freehand lines that draw themselves in playback. |
-| Build this room | Walls and floor in one press (68 themes in four shapes), paint single tiles. |
+| Build this room | Walls and floor in one press (81 themes in four shapes), paint single tiles. |
 | Save room | Keeps the stage as a room on this device, for any story; brings a saved room back. |
 | Map & campaigns | The scenes kept for this story and the ways between them, see below. |
 | The Player's sheet | Items, stats, points. |
@@ -183,7 +183,7 @@ are no emoji anywhere: the stage uses the pixel-art library only, menus use spri
 as icons, and what the Player did is read out like the log of an old adventure game
 (`SAYS`, `DOES`, `GOES`, `ROLLS`), with a `> command line` on the stage during the replay.
 
-- **Rooms in one press.** "Build this room" has 68 themes — old-house rooms, institutions (asylum, morgue,
+- **Rooms in one press.** "Build this room" has 81 themes — old-house rooms, institutions (asylum, morgue,
   hospital, school, prison, station, factory), modern homes and streets, and bleak outdoors (dead wood, marsh,
   moor, cemetery, catacomb, shipwreck, carnival …) — in four shapes; one press lays walls, floor and a few
   details. A new story opens in such a room.
@@ -207,8 +207,12 @@ as icons, and what the Player did is read out like the log of an old adventure g
   other player sees them. The character maker has mutations: more heads, arms and legs.
 - **Environments.** Things, beings and rooms are grouped by setting (`public/shared/environments.js`): Victorian,
   Modern home, Apartment complex, Child's room, Attic, Basement, Toilet, Cottage, Garden, School, Hospital,
-  Electronics, Street, Urban, Horror, Graveyard, Dream world, Weird, Castle and dungeon, Wild places. "Add
-  something" offers Environment, Objects and Beings; every setting has rooms of its own (68 room themes).
+  Electronics, Street, Urban, Horror, Graveyard, Dream world, Weird, Castle and dungeon, Wild places, Apocalypse,
+  Suburban, Village, Rural, Medieval, Gothic, Apothecary, Old time, 1920's, Hell, Nightmare, Surreal. "Add
+  something" offers Environment, Objects and Beings; every setting has rooms of its own (81 room themes).
+- **Large things.** Each of the newer settings has things three tiles wide and two high — cars, trucks, wagons, a
+  streetcar, a tank, a stagecoach, a pipe organ — with their four pictures like everything else. The sprite editor
+  makes objects of that size too.
 - **Mood.** Light and dark with light sources that glow (lamp, fluorescent, neon, fire, candle, moonlight, screen,
   alarm), weather and music. Any thing can be a light.
 - **Adventure controls.** A click on the stage offers Walk here / Look at / Use; clickable things can answer by
