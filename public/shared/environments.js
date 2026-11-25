@@ -4,7 +4,8 @@
  *
  *   cats     library categories that belong here whole (ids as in public/px/index.json)
  *   pick     { category: /words/ }  only the things of that category whose name matches
- *   beings   the same for characters: { category: true | /words/ }
+ *   beings   the same for characters: { category: true | /words/ } — the category be-<id>, the creatures drawn for
+ *            this setting, always belongs to it and need not be named
  *   rooms    room themes (public/shared/rooms.js) in this setting
  *
  * A thing may show up in more than one environment. What fits none is found under Objects; people, animals and
@@ -281,8 +282,10 @@ export function environmentItems(env, cats, what = 'things') {
       out.push(it);
     }
   };
-  if (what === 'beings') for (const [id, test] of Object.entries(env.beings || {})) take(id, test);
-  else {
+  if (what === 'beings') {
+    take('be-' + env.id, true); // the creatures drawn for this very setting come first
+    for (const [id, test] of Object.entries(env.beings || {})) take(id, test);
+  } else {
     for (const id of env.cats || []) take(id, true);
     for (const [id, test] of Object.entries(env.pick || {})) take(id, test);
   }

@@ -1,6 +1,6 @@
 /* Director screens about one character or thing: its tools, speaking, moving, adding, tying, active objects, exits. */
 import { isDoll, poseEditor } from '../../core/dolls.js';
-import { PIXEL, picturesOf, catsWithOwn, OWN } from '../../core/catalog.js';
+import { PIXEL, pixelInfo, picturesOf, catsWithOwn, OWN } from '../../core/catalog.js';
 import { h, clone, clamp, add } from '../../core/dom.js';
 import { FX, EMOTES, LIGHTS } from '../../shared/options.js';
 import { ENVIRONMENTS, OBJECT_CATS, environmentItems } from '../../shared/environments.js';
@@ -46,7 +46,8 @@ export function screenThing(kit) {
     const all = picturesOf(kit.code, sel.asset),
       has = all ? all.pics : {};
     if (!(has.side || has.used)) return null;
-    const names = all.base === 'side' ? ['Side', 'Front'] : ['Front', 'Side'];
+    const names = all.base === 'side' ? ['Side', 'Front'] : ['Front', 'Side'],
+      creature = pixelInfo(sel.asset).group === 'char'; // a being's other picture shows it roused: jaws open, eyes lit
     const btn = (attr, label, on, fn) =>
       h(
         'button',
@@ -67,7 +68,7 @@ export function screenThing(kit) {
       h('span', { class: 'dim small' }, 'View'),
       has.side && btn('drawn', names[0], !sel.view, () => (sel.view = '')),
       has.side && btn('side', names[1], sel.view === 'side', () => (sel.view = 'side')),
-      (has.used || has.sideUsed) && btn('used', sel.used ? 'Used ✓' : 'Used', !!sel.used, () => (sel.used = !sel.used)),
+      (has.used || has.sideUsed) && btn('used', (creature ? 'Roused' : 'Used') + (sel.used ? ' ✓' : ''), !!sel.used, () => (sel.used = !sel.used)),
     );
   };
   const lay = (v, label) =>

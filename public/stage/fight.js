@@ -30,7 +30,7 @@ export function playFight(root, before, events, o, done) {
     steps = [],
     extras = new Set(); // bursts and thrown things: elements of our own on the stage
   const ent = (id) => frame.entities.find((e) => e.id === id),
-    home = new Map(frame.entities.map((e) => [e.id, { x: e.x, y: e.y, pose: e.pose, flip: e.flip }])),
+    home = new Map(frame.entities.map((e) => [e.id, { x: e.x, y: e.y, pose: e.pose, flip: e.flip, used: e.used }])),
     hp = heroHealth(frame);
   Object.assign(frame, { narration: '', action: '', point: null, target: null, answer: null, reacted: [], cam: null, ask: null });
   for (const e of frame.entities) Object.assign(e, { say: '', once: '', emote: '' });
@@ -50,7 +50,7 @@ export function playFight(root, before, events, o, done) {
     },
     back = (e) => {
       const was = e && home.get(e.id);
-      if (was) Object.assign(e, { x: was.x, y: was.y, pose: was.pose, face: 0, once: '' });
+      if (was) Object.assign(e, { x: was.x, y: was.y, pose: was.pose, used: was.used, face: 0, once: '' });
     };
   /** A burst where a blow lands. */
   const impact = (e, big) => {
@@ -108,7 +108,7 @@ export function playFight(root, before, events, o, done) {
         });
         at(T + 420, () => {
           pose(A(), STRIKE);
-          if (!isDoll(A().asset)) A().once = 'roar'; // a creature rears up as it strikes
+          if (!isDoll(A().asset)) Object.assign(A(), { once: 'roar', used: true }); // a creature rears up as it strikes, and shows itself roused
           const w = ev.weapon && ent(ev.weapon);
           if (w) w.once = 'swing';
         });
