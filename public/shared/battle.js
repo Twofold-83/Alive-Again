@@ -1,17 +1,29 @@
 /*
- * The battle: one simple, classic turn-based fight. Shared by the browser and the server.
+ * The battle: a classic turn-based fight. Shared by the browser and the server.
  *
- * The Director picks the enemies and how hard it is — nothing else. From then on the fight belongs to the Player:
- * Attack, Defend, Item or Escape, round after round, each carried out at once while both sides watch, until the
- * enemies are beaten, the hero is, or the hero gets away. Only then does the turn go back to the Director — unless
- * the Director pauses the battle to stage something, and then gives it back.
+ * The Director picks the enemies and how hard it is. From then on the fight is the Player's: each round they
+ * choose Attack, Defend, Item or Escape; the hero acts, then every enemy still standing acts in turn. The server
+ * works a round out at once and tells it as a list of EVENTS, in the order they happen; both screens play that
+ * list step by step (stage/fight.js) — a wind-up, a blow, the impact, the health draining, a fall — so nothing is
+ * ever shown before it has happened on the stage. When one side is beaten or the hero gets away, the turn goes to
+ * the Director.
  *
- *   scene.battle = { level, round, atk, hit, foeAtk, foeHit, flee, guard, log, paused }
+ * While the fight lasts the Director can pause it, give anyone a line (it is spoken at once, as an event of its
+ * own), and decide what an enemy does next (FOE_MOVES) instead of leaving it to chance.
+ *
+ *   scene.battle = { level, round, atk, hit, foeAtk, foeHit, flee, guard, paused, plan, wards, log }
  *     level    one of BATTLE_LEVELS; it decides every number below
  *     atk      the hero's strength (a thing tied to the hero is a weapon and adds WEAPON)
  *     hit      the hero's chance to hit, in percent        foeAtk, foeHit   the same for an enemy
- *     flee     the chance that Escape works
- *     guard    the hero defended last round                 paused           the Director has stepped in
+ *     flee     the chance that Escape works                 paused           the Director holds the fight
+ *     guard    the hero defended this round                 wards            { enemy id: true } enemies on guard
+ *     plan     { enemy id: move } what the Director decided for the coming round
+ *
+ *   an event = { t, who, text, ... }                                         text: the line for the message window
+ *     attack   { who, target, heavy, thrown (asset), hit, crit, dmg, guard, hp, max, down }
+ *     defend   { who }                heal   { who, amount, hp, max }        wait   { who }
+ *     escape   { who, ok }            leave  { who }  an enemy runs          say    { who, text }
+ *     end      { result }  'won' | 'lost' | 'fled' | 'stopped'
  * One blow never takes more than half of the hero's full health — except when the fight is meant to be impossible.
  */
 export const BATTLE_LEVELS = [
@@ -29,6 +41,15 @@ export const BATTLE_CMDS = [
   ['item', 'Item'],
   ['escape', 'Escape'],
 ];
+/** What the Director can make an enemy do in the coming round ('' leaves it to chance). */
+export const FOE_MOVES = [
+  ['', 'As it comes'],
+  ['attack', 'Attack'],
+  ['heavy', 'Heavy blow'],
+  ['guard', 'Guard'],
+  ['wait', 'Hold back'],
+  ['flee', 'Run away'],
+];
 export const WEAPON = 2;
 const HERO_ATK = 2,
   HERO_HEALTH = 10;
@@ -39,6 +60,17 @@ export const weaponOf = (scene) => scene.entities.find((e) => e.tie && e.tie.to 
 export const itemHeals = (it) => HEALS.test(it.name || '') || HEALS.test(it.asset || '');
 const nameOf = (e, label) => e.name || label(e); // in a fight a nameless thing goes by what it looks like
 
+/** In a fight the two sides face each other: id -> -1 (looks left) or 1 (looks right). */
+export function facing(scene) {
+  const hero = scene.entities.find((e) => e.id === scene.heroId),
+    foes = livingFoes(scene),
+    out = new Map();
+  if (!hero || !foes.length) return out;
+  const near = foes.reduce((a, b) => (Math.abs(b.x - hero.x) < Math.abs(a.x - hero.x) ? b : a));
+  out.set(hero.id, Math.sign(near.x - hero.x) || 1);
+  for (const f of foes) out.set(f.id, Math.sign(hero.x - f.x) || -1);
+  return out;
+}
 /** The hero's health lives in a "Health" stat if the story has one, else on the hero. */
 export function heroHealth(scene) {
   const stat = scene.sheet.stats.find((s) => /health|hp|life/i.test(s.name)),
@@ -96,6 +128,12 @@ export function planBattle(level, who) {
 export function cleanBattle(b) {
   if (!b || typeof b !== 'object' || !BATTLE_LEVELS.some((l) => l[0] === b.level)) return null;
   const n = (v, lo, hi, d) => (Number.isFinite(+v) ? Math.min(hi, Math.max(lo, Math.round(+v))) : d);
+  const ids = (o, ok) =>
+    Object.fromEntries(
+      Object.entries(o && typeof o === 'object' ? o : {})
+        .filter(([id, v]) => /^[\w-]{1,24}$/.test(id) && ok(v))
+        .slice(0, 40),
+    );
   return {
     level: b.level,
     round: n(b.round, 1, 999, 1),
@@ -106,119 +144,160 @@ export function cleanBattle(b) {
     flee: n(b.flee, 0, 100, 50),
     guard: !!b.guard,
     paused: !!b.paused,
+    plan: ids(b.plan, (v) => FOE_MOVES.some((m) => m[0] && m[0] === v)),
+    wards: ids(b.wards, (v) => v === true),
     log: (Array.isArray(b.log) ? b.log : []).slice(-8).map((l) => String(l).slice(0, 90)),
   };
 }
 
 /**
- * One round: the hero's command, then every enemy still standing strikes back — each as a picture of its own
- * (scene.steps), so the blows are shown one after the other.
+ * One round: the hero's command, then every enemy still standing.
  * move = { move: 'attack' | 'defend' | 'item' | 'escape', id (target), item (inventory id) }
- * Changes the scene; returns { lines, over }: over is '' | 'won' | 'lost' | 'fled'.
+ * Changes the scene to how it stands after the round; returns { events, lines, over } — the events in the order
+ * they happen (see the top of this file), their lines, and over: '' | 'won' | 'lost' | 'fled'.
  */
 export function fightRound(scene, move, names, label, rnd = Math.random) {
   const b = scene.battle,
-    hero = scene.entities.find((e) => e.id === scene.heroId),
     hp = heroHealth(scene),
-    lines = [],
-    floats = new Map();
+    heroId = scene.heroId,
+    events = [];
   let over = '';
-  const float = (id, n, heal) => floats.set(id, (floats.get(id) || 0) + (heal ? n : -n));
-  const showFloats = () => {
-    scene.floats = [...floats]
-      .filter(([, n]) => n)
-      .map(([id, n]) => ({ id, text: (n > 0 ? '+' : '') + n, c: n > 0 ? '#a7d68c' : id === scene.heroId ? '#e0766a' : '#ffffff' }));
-    floats.clear();
-  };
-  const nextStep = () => {
-    showFloats();
-    const { steps, ...now } = scene;
-    scene.steps = [...(steps || []), JSON.parse(JSON.stringify({ ...now, steps: [] }))];
-    scene.floats = [];
-    scene.sfx = '';
-    for (const e of scene.entities) e.once = '';
-  };
-  const foes = livingFoes(scene),
+  const hero = names.player,
+    foes = livingFoes(scene),
     target = foes.find((e) => e.id === move.id) || foes[0],
     weapon = weaponOf(scene);
-  const hurt = (foe, dmg, how) => {
+  b.plan = b.plan || {};
+  b.wards = b.wards || {};
+  /** The hero's blow lands on an enemy: its guard halves it once. */
+  const strike = (foe, dmg, ev) => {
+    const warded = !!b.wards[foe.id];
+    if (warded) dmg = Math.max(1, Math.ceil(dmg / 2));
+    delete b.wards[foe.id];
     foe.hp = Math.max(0, foe.hp - dmg);
-    foe.once = 'hit';
-    float(foe.id, dmg);
-    lines.push(`${names.player} ${how} ${nameOf(foe, label)}: ${dmg}`);
-    if (foe.hp === 0) {
-      foe.temp = true; // it stays for this round's picture, then it is gone
-      foe.fx = 'dark';
-      foe.once = 'die';
-      lines.push(`${nameOf(foe, label)} is beaten`);
-    }
+    const down = foe.hp === 0;
+    events.push({ ...ev, t: 'attack', who: heroId, target: foe.id, hit: true, dmg, guard: warded, hp: foe.hp, max: foe.maxHp, down });
+    return down;
   };
   b.guard = false;
   if (move.move === 'attack' && target) {
     const r = rnd(),
-      dmg = Math.max(1, b.atk + (weapon ? WEAPON : 0) + Math.floor(rnd() * 3)) * (r > 0.92 ? 2 : 1);
-    if (hero) hero.once = 'lunge';
-    if (weapon) weapon.once = 'swing';
-    scene.sfx = 'hit';
-    if (r < 1 - b.hit / 100) lines.push(`${names.player} misses ${nameOf(target, label)}`);
-    else hurt(target, dmg, r > 0.92 ? 'lands a terrible blow on' : weapon ? `strikes with the ${nameOf(weapon, label).toLowerCase()} at` : 'hits');
+      crit = r > 0.92,
+      dmg = Math.max(1, b.atk + (weapon ? WEAPON : 0) + Math.floor(rnd() * 3)) * (crit ? 2 : 1),
+      who = nameOf(target, label);
+    if (r < 1 - b.hit / 100) events.push({ t: 'attack', who: heroId, target: target.id, hit: false, text: `${hero} attacks ${who} — and misses` });
+    else
+      strike(target, dmg, {
+        crit,
+        weapon: weapon ? weapon.id : undefined,
+        text: crit
+          ? `${hero} lands a terrible blow on ${who}`
+          : weapon
+            ? `${hero} strikes ${who} with the ${nameOf(weapon, label).toLowerCase()}`
+            : `${hero} hits ${who}`,
+      });
   } else if (move.move === 'defend') {
     b.guard = true;
-    lines.push(`${names.player} defends`);
+    events.push({ t: 'defend', who: heroId, text: `${hero} defends` });
   } else if (move.move === 'item') {
     const it = scene.sheet.inv.find((i) => i.id === move.item);
-    if (!it) lines.push(`${names.player} fumbles for something to use`);
+    if (!it) events.push({ t: 'wait', who: heroId, text: `${hero} fumbles for something to use` });
     else {
       scene.sheet.inv = scene.sheet.inv.filter((i) => i !== it);
       const what = it.name || label({ asset: it.asset });
-      if (itemHeals(it)) {
+      if (itemHeals(it) || !target) {
         const before = hp.get();
         hp.set(before + Math.max(3, Math.round(hp.max * 0.4)));
-        float(scene.heroId, hp.get() - before, true);
-        lines.push(`${names.player} uses ${what}: +${hp.get() - before} health`);
-      } else if (target) hurt(target, 3 + Math.floor(rnd() * 3), `throws ${what} at`);
+        events.push({ t: 'heal', who: heroId, item: it.asset, amount: hp.get() - before, hp: hp.get(), max: hp.max, text: `${hero} uses ${what}` });
+      } else strike(target, 3 + Math.floor(rnd() * 3), { thrown: it.asset, text: `${hero} throws ${what} at ${nameOf(target, label)}` });
     }
   } else if (move.move === 'escape') {
-    if (rnd() * 100 < b.flee) {
-      over = 'fled';
-      lines.push(`${names.player} gets away`);
-    } else lines.push(`${names.player} tries to escape — no way out`);
-  }
-  const left = livingFoes(scene);
-  if (!over && !left.length) over = 'won';
-  if (!over) {
-    for (const foe of left) {
-      nextStep(); // the hero's move first, then each enemy in turn
+    const ok = rnd() * 100 < b.flee;
+    events.push({ t: 'escape', who: heroId, ok, text: ok ? `${hero} gets away` : `${hero} tries to escape — no way out` });
+    if (ok) over = 'fled';
+  } else events.push({ t: 'wait', who: heroId, text: `${hero} hesitates` });
+  for (const e of events) if (e.down) events.push({ t: 'down', who: e.target, text: `${nameOf(byId(scene, e.target), label)} is beaten` });
+
+  /* the enemies, each in turn: what the Director planned, or what chance brings */
+  if (!over)
+    for (const foe of livingFoes(scene)) {
       const who = nameOf(foe, label),
         r = rnd(),
-        heavy = r > 0.88; // now and then a heavy blow: double, but it misses more
-      if (r < 0.08) {
-        lines.push(`${who} hesitates`);
-        continue;
-      }
-      foe.once = 'lunge';
-      if (rnd() >= (b.foeHit / 100) * (heavy ? 0.7 : 1)) {
-        lines.push(`${who} ${heavy ? 'swings wildly and misses' : 'misses'}`);
-        continue;
-      }
-      let dmg = (b.foeAtk + Math.floor(rnd() * 3)) * (heavy ? 2 : 1);
-      if (b.guard) dmg = Math.floor(dmg / 2);
-      if (b.level !== 'impossible') dmg = Math.min(dmg, Math.max(1, Math.ceil(hp.max / 2))); // no single blow ends a fair fight
-      if (dmg > 0) {
-        hp.set(hp.get() - dmg);
-        float(scene.heroId, dmg);
-        if (hero) hero.once = 'hit';
-        scene.sfx = 'hit';
-      }
-      lines.push(`${who} ${heavy ? 'lands a heavy blow on' : 'hits'} ${names.player}: ${dmg}${b.guard ? ' (defended)' : ''}`);
-      if (hp.get() <= 0) {
-        over = 'lost';
-        break;
+        planned = b.plan[foe.id],
+        act = planned || (r < 0.08 ? 'wait' : r > 0.88 ? 'heavy' : 'attack');
+      delete b.wards[foe.id]; // a guard lasts until the enemy acts again
+      if (act === 'wait') events.push({ t: 'wait', who: foe.id, text: `${who} holds back` });
+      else if (act === 'guard') {
+        b.wards[foe.id] = true;
+        events.push({ t: 'defend', who: foe.id, text: `${who} is on guard` });
+      } else if (act === 'flee') {
+        foe.hp = 0;
+        events.push({ t: 'leave', who: foe.id, text: `${who} runs away` });
+      } else {
+        const heavy = act === 'heavy'; // a heavy blow: double, but it misses more
+        if (rnd() >= (b.foeHit / 100) * (heavy ? 0.7 : 1))
+          events.push({
+            t: 'attack',
+            who: foe.id,
+            target: heroId,
+            heavy,
+            hit: false,
+            text: `${who} ${heavy ? 'swings wildly and misses' : 'attacks — and misses'}`,
+          });
+        else {
+          let dmg = (b.foeAtk + Math.floor(rnd() * 3)) * (heavy ? 2 : 1);
+          if (b.guard) dmg = Math.floor(dmg / 2);
+          if (b.level !== 'impossible') dmg = Math.min(dmg, Math.max(1, Math.ceil(hp.max / 2))); // no single blow ends a fair fight
+          hp.set(hp.get() - dmg);
+          const down = hp.get() <= 0;
+          events.push({
+            t: 'attack',
+            who: foe.id,
+            target: heroId,
+            heavy,
+            hit: true,
+            dmg,
+            guard: b.guard,
+            hp: hp.get(),
+            max: hp.max,
+            down,
+            text: `${who} ${heavy ? 'lands a heavy blow on' : 'hits'} ${hero}${b.guard ? ' (defended)' : ''}`,
+          });
+          if (down) {
+            over = 'lost';
+            break;
+          }
+        }
       }
     }
-  }
-  showFloats();
+  if (!over && !livingFoes(scene).length) over = 'won';
+  if (over) events.push({ t: 'end', result: over, text: over === 'won' ? 'Victory!' : over === 'fled' ? 'Got away!' : `${hero} is defeated…` });
+  scene.entities = scene.entities.filter((e) => e.id === heroId || e.hp == null || e.hp > 0); // the beaten and the fled are gone
+  for (const id of Object.keys(b.wards)) if (!byId(scene, id)) delete b.wards[id];
+  b.plan = {}; // a plan is for one round
+  const lines = events.filter((e) => e.t !== 'say').map(lineOf);
   b.log = [...(b.log || []), ...lines].slice(-8);
   b.round++;
-  return { lines, over };
+  return { events, lines, over };
 }
+const byId = (scene, id) => scene.entities.find((e) => e.id === id) || { asset: '' };
+/** An event as one line of the battle's log. */
+export function lineOf(e) {
+  if (e.t === 'attack' && e.hit) return `${e.text}: ${e.dmg}`;
+  if (e.t === 'heal') return `${e.text}: +${e.amount} health`;
+  return e.text;
+}
+
+/** How long an event takes on the stage, in milliseconds (stage/fight.js keeps to it; the server's clock allows for it). */
+export function eventTime(e) {
+  if (e.t === 'attack') return e.thrown ? 1300 : 1350;
+  if (e.t === 'down') return 900;
+  if (e.t === 'defend') return 900;
+  if (e.t === 'heal') return 1300;
+  if (e.t === 'wait') return 900;
+  if (e.t === 'escape') return 1600;
+  if (e.t === 'leave') return 1200;
+  if (e.t === 'say') return Math.min(7000, 1300 + 55 * String(e.text || '').length);
+  if (e.t === 'end') return 2400;
+  return 600;
+}
+export const fightTime = (events) => events.reduce((n, e) => n + eventTime(e), 300);

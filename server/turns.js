@@ -2,7 +2,17 @@
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
 import { timers, online, broadcast, touch, rooms } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
-import { fightRound, livingFoes, heroHealth, BATTLE_CMDS } from '../public/shared/battle.js';
+import {
+  fightRound,
+  fightTime,
+  livingFoes,
+  heroHealth,
+  weaponOf,
+  planBattle,
+  BATTLE_CMDS,
+  BATTLE_LEVELS,
+  FOE_MOVES,
+} from '../public/shared/battle.js';
 import { cutEstimate, rollDie, cleanScene, cleanTrackPts, cleanPose, cleanFeel } from './scene.js';
 import { cleanRules } from '../public/shared/rules.js';
 import { walkable, stepFields, playerFields } from '../public/shared/scene-model.js';
@@ -43,7 +53,7 @@ export function syncClock(room) {
 }
 
 /* Commit the current scene as a finished turn and hand over to the other side. */
-function advance(room, timeout) {
+function advance(room, timeout, watching = 0) {
   if (timeout) {
     // nothing new was submitted: drop every one-turn extra so it does not play twice
     Object.assign(room.scene, stepFields(), playerFields(), { roll: null, steps: [] });
@@ -63,7 +73,8 @@ function advance(room, timeout) {
           room.scene,
           room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
           room.history[room.history.length - 1].by,
-        )
+        ) +
+        watching // a battle's last round is watched before the turn begins
       : null;
   syncClock(room);
   touch(room);
@@ -77,10 +88,22 @@ export function maybeBot(room) {
   if (!room.bot || room.ended || room.whose !== room.bot || botBusy.has(room.code)) return;
   botBusy.add(room.code);
   const turn = room.turn;
-  const delay = BOT_DELAY_MS != null ? BOT_DELAY_MS : room.turn === 0 ? 1200 : 2500 + Math.random() * 3500;
+  const fighting = room.bot === 'player' && !!room.scene.battle, // a computer hero fights on, round after round
+    seen = fighting && room.fight ? fightTime(room.fight.events) : 0; // ...once the last round has been watched
+  const delay = BOT_DELAY_MS != null ? BOT_DELAY_MS : room.turn === 0 ? 1200 : seen + 2500 + Math.random() * (fighting ? 1000 : 3500);
   setTimeout(async () => {
     try {
       if (room.turn !== turn || room.ended || rooms.get(room.code) !== room) return;
+      if (fighting) {
+        botBusy.delete(room.code);
+        const b = room.scene.battle,
+          foes = b ? livingFoes(room.scene) : [];
+        if (!b || b.paused) return void setTimeout(() => maybeBot(room), 3000); // the Director holds the fight: look again later
+        const hp = heroHealth(room.scene),
+          heal = room.scene.sheet.inv.find((i) => /potion|bandage|medicine|food|heal/i.test(i.name || i.asset || ''));
+        const move = hp.get() <= hp.max * 0.3 && heal ? { move: 'item', item: heal.id } : { move: 'attack', id: foes[0] && foes[0].id };
+        return void (await act(room, room.tokens[room.bot], { ...move, type: 'battle', turn }));
+      }
       room.botMemory = room.botMemory || {};
       const move = await botMove({
         rules: room.rules,
@@ -275,7 +298,6 @@ export function actTest(room, body, who) {
       whose: 'director',
       history: [],
       test: null,
-      liveBefore: null,
       deadline: null,
       remaining: null,
       lastTimeout: false,
@@ -293,48 +315,92 @@ export function actTest(room, body, who) {
   return actSubmit(room, { turn: 0, scene: stage }, who);
 }
 /**
- * The Player's command in a battle: carried out at once, and both sides watch the round. The turn stays with the
- * Player until the battle is over — then it goes to the Director, with the outcome on a card.
+ * The Player's command in a battle: the round is worked out at once and told as a list of events, which both
+ * sides watch (room.fight: where the stage stood, and what happens on it, in order). The turn stays with the
+ * Player until the battle is over — then it goes to the Director.
  */
 export function actBattle(room, body, who) {
   const sc = room.scene,
     b = sc.battle;
   if (room.ended || body.turn !== room.turn || who.role !== room.whose || room.whose !== 'player') return { ok: true, stale: true };
   if (!b) throw fail(400, 'There is no battle');
+  if (b.paused) throw fail(409, 'The Director has paused the battle');
   if (!BATTLE_CMDS.some((c) => c[0] === body.move)) throw fail(400, 'That is not possible in a battle');
-  room.liveBefore = clone(sc); // the round is shown from here
-  room.liveN = (room.liveN || 0) + 1;
   Object.assign(sc, stepFields(), playerFields(), { steps: [] });
   sc.entities = sc.entities.filter((e) => !e.temp);
-  for (const e of sc.entities) {
-    e.once = '';
-    e.say = '';
-  }
+  for (const e of sc.entities) Object.assign(e, { once: '', say: '' }); // what was said before the round is not left hanging over it
+  const before = clone(sc);
   const foe = livingFoes(sc).find((e) => e.id === body.id);
-  if (foe && body.move === 'attack') sc.target = foe.id;
-  const { lines, over } = fightRound(
+  const { events, lines, over } = fightRound(
     sc,
     { move: body.move, id: foe ? foe.id : null, item: typeof body.item === 'string' ? body.item : '' },
     room.names,
     (e) => assetName(e.asset),
   );
+  showFight(room, before, events);
   sc.answer = { kind: 'battle', move: body.move, lines: lines.slice(0, 8), over };
   if (!over) {
     sc.ask = battleAsk(sc);
     touch(room);
     broadcast(room);
+    maybeBot(room);
     return { ok: true };
   }
-  /* over: the enemies' health bars go, the outcome is told, and the Director takes it from here */
-  for (const e of sc.entities) if (e.id !== sc.heroId && !e.temp) e.hp = e.maxHp = null;
-  sc.card = over === 'won' ? 'Victory!' : over === 'fled' ? 'Got away!' : 'Defeated…';
-  sc.sfx = over === 'won' ? 'fanfare' : over === 'fled' ? 'teleport' : 'fail';
-  sc.battle = null;
-  sc.ask = null;
-  advance(room, false);
+  endBattle(room, over === 'won' ? 'Victory!' : over === 'fled' ? 'Got away!' : 'Defeated…');
   return { ok: true };
 }
-/** The Director pauses the battle: the turn comes over at once, with all the usual tools. Ending that turn gives the fight back. */
+/** Both sides are shown these events, played on the stage as it stood in `before`. */
+function showFight(room, before, events) {
+  room.fight = { n: ((room.fight && room.fight.n) || 0) + 1, before, events };
+}
+/** The battle is over: the health bars go, and the Director takes it from here. */
+function endBattle(room, card) {
+  const sc = room.scene;
+  for (const e of sc.entities) if (e.id !== sc.heroId) e.hp = e.maxHp = null;
+  Object.assign(sc, { battle: null, ask: null, card });
+  advance(room, false, fightTime(room.fight.events));
+}
+/**
+ * The Director's hand on a running battle, while the fight is the Player's:
+ *   pause / resume   hold the fight (the Player cannot give a command meanwhile) and let it go on
+ *   say              { id, text }   someone speaks, at once: an event of its own, shown to both
+ *   plan             { id, move }   what an enemy does in the coming round (FOE_MOVES; '' leaves it to chance)
+ *   level            { level }      make the rest of the fight easier or harder
+ *   stop                            call the battle off: nobody wins, the turn comes to the Director
+ */
+export function actBattleDirect(room, body, who) {
+  const sc = room.scene,
+    b = sc.battle;
+  if (who.role !== 'director' && !room.hotseat) throw fail(403, 'Only the Director can do that');
+  if (room.ended || room.whose !== 'player' || !b) return { ok: true, stale: true };
+  const foe = livingFoes(sc).find((e) => e.id === body.id);
+  if (body.op === 'pause' || body.op === 'resume') b.paused = body.op === 'pause';
+  else if (body.op === 'say') {
+    const e = sc.entities.find((x) => x.id === body.id),
+      text = str(body.text, 160);
+    if (!e || !text) throw fail(400, 'Who says what?');
+    showFight(room, clone(sc), [{ t: 'say', who: e.id, text }]);
+  } else if (body.op === 'plan') {
+    if (!foe) throw fail(400, 'That one is not in the fight');
+    b.plan = b.plan || {};
+    if (FOE_MOVES.some((m) => m[0] && m[0] === body.move)) b.plan[foe.id] = body.move;
+    else delete b.plan[foe.id];
+  } else if (body.op === 'level') {
+    if (!BATTLE_LEVELS.some((l) => l[0] === body.level)) throw fail(400, 'No such difficulty');
+    const p = planBattle(body.level, { heroHp: heroHealth(sc).max, weapon: !!weaponOf(sc), foes: livingFoes(sc).length });
+    Object.assign(b, { level: p.level, atk: p.atk, hit: p.hit, foeAtk: p.foeAtk, foeHit: p.foeHit, flee: p.flee });
+  } else if (body.op === 'stop') {
+    showFight(room, clone(sc), [{ t: 'end', result: 'stopped', text: 'The battle is called off' }]);
+    Object.assign(sc, stepFields(), playerFields(), { steps: [] });
+    sc.answer = { kind: 'battle', move: '', lines: ['The battle is called off'], over: 'stopped' };
+    endBattle(room, '');
+    return { ok: true };
+  } else throw fail(400, 'Unknown battle command');
+  touch(room);
+  broadcast(room);
+  return { ok: true };
+}
+/** The Director steps into the battle with every tool: the turn comes over at once. Ending that turn gives the fight back. */
 export function actBattlePause(room, body, who) {
   const sc = room.scene;
   if (who.role !== 'director' && !room.hotseat) throw fail(403, 'Only the Director can do that');
@@ -342,7 +408,6 @@ export function actBattlePause(room, body, who) {
   Object.assign(sc, stepFields(), playerFields(), { steps: [] }); // the last round was already seen
   sc.battle.paused = true;
   sc.ask = null;
-  room.liveBefore = null;
   advance(room, false);
   return { ok: true };
 }
@@ -363,7 +428,6 @@ export function actRoll(room, body, who) {
 }
 export async function actSubmit(room, body, who) {
   if (room.ended || body.turn !== room.turn || who.role !== room.whose) return { ok: true, stale: true };
-  room.liveBefore = null; // a live battle's last round was shown; from here on turns are told as usual
   if (who.role === 'director') submitDirector(room, body);
   else submitPlayer(room, body);
   advance(room, false);

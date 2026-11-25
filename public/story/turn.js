@@ -5,6 +5,9 @@ import { audio } from '../core/audio.js';
 import { rpgState } from '../dungeon/screen.js';
 import { renderStage } from '../stage/render.js';
 import { playTurn } from '../stage/playback.js';
+import { playFight } from '../stage/fight.js';
+import { syncBattle } from './battle-ui.js';
+import { facing, livingFoes } from '../shared/battle.js';
 import { clone } from '../core/dom.js';
 import { History } from '../core/history.js';
 import { normScene, stepFields, playerFields } from '../shared/scene-model.js';
@@ -33,6 +36,7 @@ export function onState(s) {
   setCustomAssets(s.assets);
   app.localDeadline = s.remainingMs != null ? performance.now() + s.remainingMs : 0;
   const newTurn = !prev || prev.turn !== s.turn || prev.you !== s.you || prev.ended !== s.ended;
+  const fought = !!prev && !!s.fight && s.fight.n > ((prev.fight && prev.fight.n) || 0); // new events of a battle came with this state
   if (newTurn) {
     app.submitting = false;
     app.selId = null;
@@ -55,7 +59,7 @@ export function onState(s) {
     if (prev && s.lastTimeout && prev.turn !== s.turn && prev.you === prev.whose && !s.hotseat) toast('Time ran out — your turn was sent as it was');
     if (app.cut) app.cut.skip();
     if (prev && !prev.ended && s.ended) audio.sfx('theend');
-    if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended) {
+    if (prev && prev.turn !== s.turn && s.turn > 0 && !s.ended && !fought) {
       // present what just happened before handing over control
       const by = s.whose === 'director' ? 'player' : 'director';
       if (s.turn === 1 && s.info.title) {
@@ -88,29 +92,48 @@ export function onState(s) {
       );
     }
   }
-  /* a live battle: the turn has not changed, but a round was fought — both sides watch it */
-  if (!newTurn && prev && (s.liveN || 0) > (prev.liveN || 0) && s.before) {
-    if (app.cut) app.cut.skip();
-    if (myTurn()) {
+  /* a battle: a round was fought (or a line spoken in it) — both sides watch it, event by event */
+  if (fought) {
+    if (!newTurn && myTurn()) {
       sessionStorage.removeItem('tf.draft'); // the command that was just carried out must not come back with the saved draft
       initDraft();
       history.reset();
       noteChange();
     }
-    app.liveBusy = false;
-    app.uiKey = '';
-    app.cut = playTurn(
-      stage,
-      s.before,
-      s.scene,
-      { ...stageOpts(), selId: null, pendingRoll: 0, dest: null, camFrame: false, by: 'player', sfx: audio.sfx, who: s.names.player, stinger: '' },
-      () => {
-        app.cut = null;
-        render();
-      },
-    );
+    app.fightQueue.push({ before: s.fight.before, events: s.fight.events, mine: prev.you === 'player' || !!prev.hotseat });
+    playFights();
   }
   render();
+}
+
+/** Play the battle events that have come in, one batch after the other; the panels follow the stage (app.fight). */
+function playFights() {
+  if (app.cut || !app.fightQueue.length) return;
+  const f = app.fightQueue.shift();
+  app.fight = { frame: null, msg: '', mine: f.mine };
+  app.uiKey = '';
+  app.cut = playFight(
+    stage,
+    normScene(f.before),
+    f.events,
+    {
+      ...stageOpts(),
+      sfx: audio.sfx,
+      onChange(frame, msg) {
+        Object.assign(app.fight, { frame, msg });
+        syncBattle();
+      },
+    },
+    () => {
+      app.cut = null;
+      app.fight = null;
+      app.liveBusy = false;
+      app.uiKey = '';
+      if (app.fightQueue.length) return playFights();
+      if (myTurn() && !app.S.scene.battle) audio.blip(); // the fight is over and the turn is mine
+      render();
+    },
+  );
 }
 
 /** A new draft for my turn, made from the committed scene. */
@@ -364,7 +387,9 @@ function stageOpts() {
       ? app.draft.rollWant || (app.draft.reply && app.draft.reply.roll && !(app.draft.ask && app.draft.ask.rolled) ? app.draft.ask.sides : 0)
       : 0,
     dice: app.rollShow || undefined,
-    noAct: heroTurn() && app.S.rules.player === 'tell',
+    noAct: (heroTurn() && app.S.rules.player === 'tell') || !!app.S.scene.battle,
+    facing: app.S.scene.battle && app.S.whose === 'player' ? facing(app.S.scene) : null, // in a fight the two sides face each other
+    hot: app.S.scene.battle && app.battleMenu === 'attack' ? new Set(livingFoes(app.S.scene).map((e) => e.id)) : null, // who can be attacked
     camFrame: directing(),
     pickId: heroTurn() && app.draft.reply ? app.draft.reply.id : null,
     pickPlace: heroTurn() && app.draft.reply ? app.draft.reply.index : null,

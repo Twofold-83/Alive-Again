@@ -346,6 +346,10 @@ export function buildFoot() {
       h('button', { class: 'link', onclick: () => leave() }, 'Start a new story'),
     ];
   else if (S.you === 'spectator') kids = [status(`${S.names[S.whose]}'s turn`, turnClock())];
+  else if (app.fight && app.fight.mine)
+    [kids, tight] = [[battleBox(rebuild)], true]; // a round of my battle is playing (the last one, too, when the turn has already moved on)
+  else if (app.fight)
+    kids = [status('The battle…')]; // watching a round: nothing to press until it has been played
   else if (!myTurn()) kids = [status(`Waiting for ${S.joined[other()] ? S.names[other()] : 'your partner'}`, turnClock())];
   else if (app.submitting) kids = [status('Sending…')];
   else if (S.you === 'player' && S.scene.battle)

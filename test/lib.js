@@ -42,7 +42,7 @@ exports.setup = async (port, env = {}) => {
         await x.side('Director');
         await x.cutDone();
       },
-      cutDone: () => p.waitForFunction(() => !/\b(cut|cine)\b/.test(document.querySelector('#stage').className), null, { timeout: 90000 }),
+      cutDone: () => p.waitForFunction(() => !/\b(cut|cine|fight)\b/.test(document.querySelector('#stage').className), null, { timeout: 90000 }),
       shot: async (n) => {
         if (t.shots) await p.screenshot({ path: path.join(t.shots, n + '.png') });
       },

@@ -3,6 +3,8 @@
 import { rid, $ } from './dom.js';
 
 export const app = {
+  fight: null, // a battle round being played right now: { frame, msg, mine } (see story/battle-ui.js)
+  fightQueue: [], // rounds that came in while one was still playing
   token: localStorage.getItem('tf.token'), // who I am to the server; made once, kept in this browser
   code: null, // the story I am in
   S: null, // the last state the server sent: the committed scene, whose turn it is, rules, names...

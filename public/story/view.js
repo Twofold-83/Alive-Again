@@ -72,7 +72,9 @@ export function render() {
     myTurn() && app.draft.use,
     myTurn() && JSON.stringify([app.draft.reply, app.draft.exit]),
     myTurn() && app.draft.steps.length,
-    app.S.scene.battle ? JSON.stringify([app.S.scene.battle.round, app.S.scene.battle.paused, app.S.liveN, app.battleMenu, app.liveBusy]) : '',
+    app.S.scene.battle || app.fight
+      ? JSON.stringify([app.S.scene.battle, app.S.fight && app.S.fight.n, app.battleMenu, app.liveBusy, !!app.fight, app.S.scene.entities.length])
+      : '',
     guidedKey(),
   ].join('|');
   if (mapOpen()) return; // the map covers the tools while it is open
@@ -248,6 +250,9 @@ function buildPanel() {
       h('div', { class: 'card' }, h('h3', {}, 'The story has ended'), h('p', { class: 'dim' }, 'Flip through it together, or start a new one.')),
       recap(app.S.scene) || '',
     );
+  /* a round of a battle is playing — the last one, perhaps, with the turn already the Director's: the Director watches
+     it to the end before the tools (and the outcome) come up */
+  if (app.fight && app.S.you === 'director') return void add(p, watchCard());
   if (!myTurn() || app.S.you !== 'director') {
     const tips =
       app.S.you === 'spectator'
@@ -263,7 +268,8 @@ function buildPanel() {
                 `${app.S.names.player} is making a move…`,
                 'When they finish you can change anything: the cast, the place, the music, what everybody says.',
               ];
-    if (app.S.scene.battle && app.S.whose === 'player' && app.S.you === 'director') add(p, watchCard());
+    /* a battle is on: the Director watches it and keeps a hand on it (one person playing both sides gets that hand too) */
+    if ((app.S.scene.battle || app.fight) && app.S.whose === 'player' && (app.S.you === 'director' || app.S.hotseat)) add(p, watchCard());
     if (app.S.info.text && app.S.you !== 'director')
       add(
         p,

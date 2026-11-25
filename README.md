@@ -150,11 +150,15 @@ The Director chooses one of three modes under Story settings, and can change it 
 - **A skill check.** The Director writes what the check is for and what number is needed. The Player's turn
   opens on the card: Roll or Back out. The die tumbles, the result stands for three seconds, and the turn
   goes back to the Director.
-- **A battle.** The Director sets only the enemies and the difficulty (very easy to basically impossible);
-  the difficulty decides every number, and an estimate says what to expect. From then on the Player is locked
-  into the fight — Attack, Defend, Item, Escape — round after round, each carried out at once while the
-  Director watches, until one side is beaten or the hero gets away. The Director can pause it, stage
-  something, and give it back.
+- **A battle** is a classic turn-based fight. The Director sets only the enemies and the difficulty (very easy
+  to basically impossible); the difficulty decides every number, and an estimate says what to expect. From then
+  on the Player is locked into the fight — Attack, Defend, Item, Escape — and each round is *played* on both
+  screens, blow by blow: the attacker winds up and darts in, the blow lands with a burst, the number flies up and
+  the health bar drains at that moment, the beaten fall, and only after the last blow comes "Victory!". Nothing
+  is shown before it has happened on the stage.
+- **The Director's hand on a fight.** While it lasts the Director can pause it, give anyone a line (spoken at
+  once, then taken down again), decide an enemy's next move (attack, heavy blow, guard, hold back, run away),
+  change how hard it is, step in with every tool, or call it off.
 
 Speech bubbles belong to the step they were said in: a new step starts without them, and no line survives
 into the other side's turn.
@@ -218,10 +222,9 @@ as icons, and what the Player did is read out like the log of an old adventure g
 - **Adventure controls.** A click on the stage offers Walk here / Look at / Use; clickable things can answer by
   themselves and change to their used picture; a thing can be a trap; the Director can show a picture; a roll
   hands straight back to the Director. The Director's shelf under the stage holds the cast and prepared things.
-- **Battles.** The Director picks the enemies and one of six levels (very easy to basically impossible); the
-  level sets every number, the chance to escape included. The whole fight is then the Player's — Attack, Defend,
-  Item, Escape, carried out at once while both watch — until it is over. The Director can pause it, stage
-  something with the usual tools, and give it back (`public/shared/battle.js`, `public/story/battle-ui.js`).
+- **Battles.** A round is worked out on the server and told as a list of events (`public/shared/battle.js`);
+  `public/stage/fight.js` plays them on the stage one after the other, and the battle's panels
+  (`public/story/battle-ui.js`) follow the stage, not the outcome the server already knows.
 - **Save room.** "Build this room → Save room" keeps the stage as a room on the device; "My saved rooms" brings
   it on stage in any story, or puts a copy on the map.
 - **Rolls at once.** When the Director asks for a roll (with the number to reach), the Player presses Roll,

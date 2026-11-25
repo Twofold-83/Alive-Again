@@ -220,3 +220,19 @@
 .stage .toldov b { display: block; color: var(--accent); font-weight: normal; text-transform: uppercase; letter-spacing: .06em; font-size: .8em; margin-bottom: .2em; }
 .stage .toldov p { margin: 0; white-space: pre-line; color: #e9e3d2; }
 .stage .toldov p::after { content: "_"; animation: caret 1s steps(2) infinite; }
+
+/* ---- a battle on the stage (stage/fight.js): quick moves, a burst where a blow lands, a message window ---- */
+.stage.fight .ent { transition: left .2s ease-out, top .2s ease-out, opacity .3s; }
+.stage.fight .ent.walk { transition: left .65s linear, top .65s linear; }
+.stage.fight .dpart { transition: transform .13s ease-out; }
+.stage.fight .ent .glyph { transition: rotate .35s ease-in; }
+.stage .fightmsg { position: absolute; left: 50%; top: 3%; transform: translateX(-50%); max-width: 92%; z-index: 9200; padding: .25em .9em .3em; background: rgba(8, 7, 12, .94); border: 2px solid; border-color: var(--hi) #000 #000 var(--hi); color: #e9e3d2; font-size: calc(var(--u) * .3); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.stage .fightmsg[hidden], .stage .fightend[hidden] { display: none; }
+.stage .fightend { position: absolute; inset: 0; z-index: 9250; display: flex; align-items: center; justify-content: center; pointer-events: none; font: 800 calc(var(--u) * 1.1)/1 var(--font); color: #ffffff; text-shadow: 0 .05em 0 #000, 0 0 .3em #000; letter-spacing: .04em; animation: fightend .5s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes fightend { from { transform: scale(.3); opacity: 0; } }
+.stage .impact { position: absolute; width: calc(var(--u) * 1.1); aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 5600; pointer-events: none; background: radial-gradient(circle, #ffffff 0 22%, #ffe08a 23% 46%, #ff9a3c 47% 60%, transparent 61%); clip-path: polygon(50% 0, 59% 32%, 85% 15%, 68% 41%, 100% 50%, 68% 59%, 85% 85%, 59% 68%, 50% 100%, 41% 68%, 15% 85%, 32% 59%, 0 50%, 32% 41%, 15% 15%, 41% 32%); animation: impact .36s ease-out forwards; }
+.stage .impact.big { width: calc(var(--u) * 1.7); background: radial-gradient(circle, #ffffff 0 22%, #ffb45a 23% 46%, #e0442a 47% 60%, transparent 61%); }
+@keyframes impact { from { transform: translate(-50%, -50%) scale(.25) rotate(-20deg); opacity: 1; } 60% { opacity: 1; } to { transform: translate(-50%, -50%) scale(1.25) rotate(25deg); opacity: 0; } }
+.stage .thrown { position: absolute; width: calc(var(--u) * .5); transform: translate(-50%, -50%) rotate(0); z-index: 5600; image-rendering: pixelated; pointer-events: none; transition: left .3s linear, top .3s linear; animation: thrown .3s linear; }
+@keyframes thrown { to { rotate: 540deg; } }
+.ent.hot { cursor: crosshair; } .ent.hot .glyph { filter: drop-shadow(0 0 .06em #ffe08a) drop-shadow(0 0 .14em rgba(255, 224, 138, .6)); } /* in a fight: who can be attacked */

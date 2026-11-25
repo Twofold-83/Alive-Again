@@ -146,13 +146,15 @@ export function renderStage(root, scene, o = {}) {
       h('div', { class: 'bar bot' }),
       h('div', { class: 'bubbles' }),
       h('div', { class: 'toldov', hidden: true }),
+      h('div', { class: 'fightmsg', hidden: true }),
+      h('div', { class: 'fightend', hidden: true }),
     );
     nameLayer(root);
     const fit = () => root.style.setProperty('--u', root.clientWidth / 8 + 'px');
     new ResizeObserver(fit).observe(root);
     fit();
   }
-  const [world, actEl, narrEl, cardEl, diceEl, awardEl, , , bubbles, toldEl] = root.children;
+  const [world, actEl, narrEl, cardEl, diceEl, awardEl, , , bubbles, toldEl, fightEl, endEl] = root.children;
   const [bg, level, draw, marks, ents, darkEl, glowEl, weather, destEl, camEl, namesEl] = world.children;
   const code = o.code || '';
   const css = backdropCss(code, scene.backdrop);
@@ -242,7 +244,7 @@ export function renderStage(root, scene, o = {}) {
   }
 
   const byId = new Map(scene.entities.map((e) => [e.id, e]));
-  const faces = (e) => e.flip !== e.face < 0; // mirrored: flipped by the Director, or walking to the left right now
+  const faces = (e) => e.flip !== (e.face || (o.facing && o.facing.get(e.id)) || 0) < 0; // mirrored: flipped by the Director, walking to the left right now, or facing an opponent
   /** Where a thing is drawn: a tied thing follows whatever it is tied to, in front of or behind it. */
   const spot = (e) => {
     const p = e.tie && byId.get(e.tie.to);
@@ -422,6 +424,15 @@ export function renderStage(root, scene, o = {}) {
     toldEl._key = told;
     toldEl.hidden = !o.told;
     toldEl.replaceChildren(...(o.told ? [h('b', {}, o.told.who), h('p', {}, o.told.text)] : []));
+  }
+  /* a battle: the message window, and the word that ends it */
+  if (fightEl && fightEl.textContent !== (o.fightMsg || '')) {
+    fightEl.textContent = o.fightMsg || '';
+    fightEl.hidden = !o.fightMsg;
+  }
+  if (endEl && endEl.textContent !== (o.fightEnd || '')) {
+    endEl.textContent = o.fightEnd || '';
+    endEl.hidden = !o.fightEnd;
   }
   const award = o.award ? `${o.award.n >= 0 ? '+' : ''}${o.award.n} *${o.award.text ? '\n' + o.award.text : ''}` : '';
   if (awardEl.textContent !== award) awardEl.textContent = award;
