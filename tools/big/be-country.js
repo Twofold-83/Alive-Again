@@ -24,7 +24,7 @@ module.exports = (kit) => {
       w,
       h,
       draw: (c) => draw(k.G(c), 0),
-      views: { used: { w: uw, h: uh, draw: (c) => draw(k.G(c).at(-ux, -uy), 1) } },
+      views: { used: { w: uw, h: uh, draw: (c) => draw(k.G(c).at(ux, uy), 1) } },
     };
   };
   require('./_be-country-cottage.js')(k, maker('be-cottage', 'Cottage creatures'));
