@@ -121,6 +121,38 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }) => {
         pass(col, -0.5, -0.5, 0.5);
         return p;
       },
+      /** Dark rings across a tube drawn with tube(): p the points it returned, r its radius. */
+      rings(p, r, every, col, from = 0, to = p.length - 1) {
+        for (let i = Math.max(1, from); i < to; i += every) {
+          const tx0 = p[i + 1][0] - p[i - 1][0],
+            ty0 = p[i + 1][1] - p[i - 1][1],
+            l = Math.hypot(tx0, ty0) || 1,
+            nx = -ty0 / l,
+            ny = tx0 / l;
+          for (let k = -r; k <= r; k += 0.5) g.over(Math.round(p[i][0] + nx * k), Math.round(p[i][1] + ny * k), col);
+        }
+      },
+      /** Chain-link: a diamond mesh over what is drawn in the box. */
+      mesh(x0, y0, x1, y1, wire, gap) {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (g.get(x, y)) g.set(x, y, (x + y) % 4 === 0 || (x - y + 400) % 4 === 0 ? wire : gap);
+      },
+      /** A truss (crane jib, scaffold): two chords wd apart with zigzag bracing between them. */
+      lattice(x0, y0, x1, y1, wd, col) {
+        const len = Math.hypot(x1 - x0, y1 - y0) || 1,
+          nx = (-(y1 - y0) / len) * wd,
+          ny = ((x1 - x0) / len) * wd,
+          n = Math.max(1, Math.round(len / Math.abs(wd)));
+        for (let i = 0; i < n; i++) {
+          const ax = x0 + ((x1 - x0) * i) / n,
+            ay = y0 + ((y1 - y0) * i) / n,
+            bx = x0 + ((x1 - x0) * (i + 1)) / n,
+            by = y0 + ((y1 - y0) * (i + 1)) / n;
+          if (i % 2) g.line(ax, ay, bx + nx, by + ny, dark(col));
+          else g.line(ax + nx, ay + ny, bx, by, dark(col));
+        }
+        g.line(x0, y0, x1, y1, col);
+        g.line(x0 + nx, y0 + ny, x1 + nx, y1 + ny, col);
+      },
       /** A tentacle: a tube with a row of suckers. */
       tentacle(pts, r0, col, suck) {
         const p = g.tube(pts, r0, 0.6, col);

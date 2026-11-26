@@ -198,6 +198,41 @@ module.exports = (kit) => {
       if (o.bot !== false && y1 > y0) g.teeth(x0 + 1 - (o.off || 0), x1, y1, col, st);
       if (o.tongue) g.rect(R((x0 + x1) / 2) - 1, y1 - 1, R((x0 + x1) / 2) + 1, y1 - 1, o.tongue);
     };
+    /**
+     * A mouth of any shape: shape(v) draws the hole on v; it is filled dark, with gums along its upper and lower
+     * edge and teeth on every other column (len: how long they are).
+     */
+    g.jaws = (shape, o = {}) => {
+      const cells = new Map();
+      const rec = view(
+        (x, y, col) => {
+          if (!col) return;
+          x = R(x);
+          y = R(y);
+          const e = cells.get(x);
+          if (!e) cells.set(x, [y, y]);
+          else {
+            e[0] = Math.min(e[0], y);
+            e[1] = Math.max(e[1], y);
+          }
+        },
+        () => null,
+        () => {},
+      );
+      shape(rec);
+      const col = o.col || TOOTH,
+        len = o.len || 1,
+        st = o.step || 2;
+      for (const [x, [a, b]] of cells) {
+        g.col(x, a, b, o.deep || K);
+        set(x, a, o.in || GUM);
+        set(x, b, o.in || GUM);
+        if (b - a < 2) continue;
+        const m = ((x % st) + st) % st;
+        if (o.top !== false && m === 0) g.col(x, a, Math.min(b - 1, a + len - 1), col);
+        if (o.bot !== false && m === (st > 1 ? 1 : 0)) g.col(x, Math.max(a + 1, b - len + 1), b, col);
+      }
+    };
     /** A hand: the wrist at x, y, the fingers pointing 'd', 'u', 'l' or 'r'; len: how long the fingers are. */
     g.hand = (x, y, dir, col, len = 2) => {
       const v = { d: [0, 1], u: [0, -1], l: [-1, 0], r: [1, 0] }[dir],
@@ -635,7 +670,7 @@ module.exports = (kit) => {
       return false;
     };
     return (slug, name, w, h, draw, u = {}) => {
-      const large = w > 32 || h > 36;
+      const large = w >= 36 || h >= 40;
       if (large && !/\blarge\b/.test(name)) name += ' large';
       const uw = u.w || w,
         uh = u.h || h;

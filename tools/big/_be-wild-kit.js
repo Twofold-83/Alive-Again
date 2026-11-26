@@ -382,6 +382,29 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
       }
       return { yT, yL, yH, sl: [cx - 4, yT + 2], sr: [cx + 5, yT + 2] };
     };
+    /**
+     * A dog's head looking right: the skull 5 x 5 at x, y, then a muzzle o.len long. o.open: how far the jaw drops;
+     * o.eye: its colour (null for none); o.bare: the teeth show though the mouth is shut.
+     */
+    g.doghead = (x, y, col, o = {}) => {
+      const len = o.len || 4,
+        open = o.open || 0;
+      g.rect(x, y, x + 4, y + 4, col);
+      g.rect(x + 5, y + 2, x + 4 + len, y + 3, col);
+      set(x + 5, y + 1, col);
+      set(x + 4 + len, y + 2, o.nose || K);
+      if (o.ear !== false) g.pts([[x + 1, y - 1], [x + 1, y - 2], [x + 2, y - 1]], o.earc || col);
+      if (!open) {
+        g.row(y + 4, x + 4, x + 3 + len, dark(col));
+        if (o.bare) g.teeth(y + 4, x + 5, x + 3 + len, C.white);
+      } else {
+        g.rect(x + 4, y + 4, x + 3 + len, y + 3 + open, P.maw);
+        g.row(y + 4 + open, x + 3, x + 2 + len, col);
+        g.teeth(y + 4, x + 5, x + 3 + len, C.white);
+        if (open >= 2) g.teeth(y + 3 + open, x + 4, x + 2 + len, C.white, 1);
+      }
+      if (o.eye !== null) set(x + 3, y + 1, o.eye || K);
+    };
     g.chain = (x0, y0, x1, y1, a = C.steel, b = C.iron) => {
       const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1;
       for (let i = 0; i <= n; i++) set(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, i % 2 ? b : a);
@@ -422,26 +445,33 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd, canvas }) => {
     wrap(c, (x, y, col) => c.set(x + dx, y + dy, col), (x, y) => c.get(x + dx, y + dy), (x, y) => c.clear(x + dx, y + dy));
 
   /**
-   * The maker for one setting: mk(slug, name, w, h, fn, used) adds a creature whose two pictures are drawn by
-   * fn(g, r) — r is 0 for the main picture and 1 for the roused one. used: { w, h, dx, dy } gives the roused
-   * picture a canvas of its own size; the creature's coordinates are moved by dx, dy on it (by default it stays
-   * left and stands on the bottom row).
+   * The maker for one setting: mk(slug, name, fn) adds a creature whose two pictures are drawn by fn(g, r) — r is
+   * 0 for the main picture and 1 for the roused one. fn draws in coordinates of its own (any, also negative); each
+   * picture is measured and gets a canvas that fits it, with a free pixel all round for the outline. (Numbers
+   * between name and fn are the sizes the creature was planned at, and are not used.)
    */
-  const maker = (out, prefix, cat, catLabel) => (slug, name, w, h, fn, u = {}) => {
-    const W = u.w || w,
-      H = u.h || h,
-      dx = u.dx || 0,
-      dy = u.dy == null ? H - h : u.dy;
-    out[prefix + slug] = {
-      cat,
-      catLabel,
-      group: 'char',
-      name,
-      w,
-      h,
-      draw: (c) => fn(surface(c), 0),
-      views: { used: { w: W, h: H, draw: (c) => fn(surface(c, dx, dy), 1) } },
-    };
+  const O = 40;
+  const fit = (fn, r) => {
+    const big = canvas(160, 160),
+      res = fn(surface(big, O, O), r);
+    let x0 = 1e9,
+      y0 = 1e9,
+      x1 = -1,
+      y1 = -1;
+    for (let y = 0; y < big.h; y++)
+      for (let x = 0; x < big.w; x++)
+        if (big.get(x, y)) {
+          x0 = Math.min(x0, x);
+          x1 = Math.max(x1, x);
+          y0 = Math.min(y0, y);
+          y1 = Math.max(y1, y);
+        }
+    const pad = res === false ? 0 : 1;
+    return { w: x1 - x0 + 1 + 2 * pad, h: y1 - y0 + 1 + 2 * pad, draw: (c) => fn(surface(c, pad + O - x0, pad + O - y0), r) };
+  };
+  const maker = (out, prefix, cat, catLabel) => (slug, name, ...rest) => {
+    const fn = rest.find((a) => typeof a === 'function');
+    out[prefix + slug] = { cat, catLabel, group: 'char', name, ...fit(fn, 0), views: { used: fit(fn, 1) } };
   };
   return { P, vd, curve, surface, maker, wrap };
 };

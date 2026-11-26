@@ -504,35 +504,48 @@ module.exports = (kit) => {
   }
 
   /**
-   * Register creatures of one setting. mk(slug, name, w, h, draw(g, roused), u) draws the main picture with
-   * draw(g, false) and the roused one with draw(g, true) on a fresh canvas: u = { w, h, dx, dy } gives it a larger
-   * canvas, the main picture's coordinates moved by dx, dy (dy by default keeps the feet on the bottom row).
+   * Register creatures of one setting. mk(slug, name, draw(g, roused)) draws the main picture with draw(g, false)
+   * and the roused one with draw(g, true), each on a canvas cut to fit what was drawn (one empty pixel all round, the
+   * lowest pixel on the bottom row): the drawing may use any coordinates it likes, also negative ones.
+   * (mk(slug, name, w, h, draw) is the same: the sizes are worked out, not taken.) A last argument
+   * { outline: false, shade: false } leaves the outline or the shading off both pictures.
    */
-  const setting = (out, prefix, cat, catLabel) => (slug, name, w, h, draw, u = {}) => {
-    const uw = u.w || w,
-      uh = u.h || h,
-      full = prefix + slug;
-    if (out[full]) throw new Error(full + ' twice');
-    out[full] = {
-      cat,
-      catLabel,
-      group: 'char',
-      name,
+  const fit = (slug, draw, roused) => {
+    const OX = 60,
+      OY = 70,
+      big = kit.canvas(200, 200);
+    draw(V(big, OX, OY), roused);
+    let x0 = 999,
+      x1 = -1,
+      y0 = 999,
+      y1 = -1;
+    for (let y = 0; y < 200; y++)
+      for (let x = 0; x < 200; x++)
+        if (big.px[y * 200 + x]) {
+          x0 = Math.min(x0, x);
+          x1 = Math.max(x1, x);
+          y0 = Math.min(y0, y);
+          y1 = Math.max(y1, y);
+        }
+    if (x1 < 0) throw new Error(slug + ' is empty');
+    if (x0 === 0 || y0 === 0 || x1 === 199 || y1 === 199) throw new Error(slug + ' runs off the drawing board');
+    const w = x1 - x0 + 3,
+      h = y1 - y0 + 3;
+    if (w > 64 || h > 64) throw new Error(`${slug}${roused ? ' (roused)' : ''} is ${w} x ${h}: larger than 64 x 64`);
+    return {
       w,
       h,
       draw(c) {
-        draw(V(c), false);
-      },
-      views: {
-        used: {
-          w: uw,
-          h: uh,
-          draw(c) {
-            draw(V(c, u.dx || 0, u.dy == null ? uh - h : u.dy), true);
-          },
-        },
+        draw(V(c, OX - x0 + 1, OY - y0 + 1), roused);
       },
     };
+  };
+  const setting = (out, prefix, cat, catLabel) => (slug, name, ...rest) => {
+    const draw = rest.find((a) => typeof a === 'function'),
+      full = prefix + slug;
+    if (out[full]) throw new Error(full + ' twice');
+    const o = rest.find((a) => a && typeof a === 'object') || {}; // { outline: false, shade: false } for swarms and mists
+    out[full] = { cat, catLabel, group: 'char', name, ...fit(full, draw, false), ...o, views: { used: { ...fit(full, draw, true), ...o } } };
   };
 
   return { V, P, vd, curve, setting, FACES, HAIRS };

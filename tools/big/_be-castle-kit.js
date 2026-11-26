@@ -142,9 +142,10 @@ module.exports = (kit) => {
             [x1, y1] = pts[i],
             flat = Math.abs(x1 - x0) > Math.abs(y1 - y0);
           for (let k = 0; k < w; k++) {
-            const cc = k === w - 1 && w > 1 ? dk || dark(col) : col;
+            const far = flat ? k === w - 1 : sx > 0 ? k === w - 1 : k === 0,
+              cc = far && w > 1 ? dk || dark(col) : col;
             if (flat) g.line(x0, y0 + k, x1, y1 + k, cc);
-            else g.line(x0 + k * sx, y0, x1 + k * sx, y1, cc);
+            else g.line(x0 + k, y0, x1 + k, y1, cc);
           }
         }
       },
@@ -247,6 +248,22 @@ module.exports = (kit) => {
           g.col(x, Math.min(y, y + dir * (h - 1)), Math.max(y, y + dir * (h - 1)), col);
           if (h > 2) g.set(x + 1, y, dark(col));
         }
+      },
+      /** Bristles or spines standing on the top edge of whatever is drawn between x0 and x1. */
+      ridge(x0, x1, len, col, step = 2, seed = 5) {
+        const r = rnd(seed);
+        for (let x = x0; x <= x1; x += step)
+          for (let y = -40; y < 70; y++)
+            if (g.get(x, y)) {
+              const n = Math.max(1, Math.round(len * (0.6 + r() * 0.5)));
+              g.col(x, y - n, y - 1, col);
+              break;
+            }
+      },
+      /** The lowest drawn row in column x (to hang things from an edge), or null. */
+      under(x) {
+        for (let y = 70; y > -40; y--) if (g.get(x, y)) return y;
+        return null;
       },
       /** A lumpy mass: several ovals about a centre. */
       blob(cx, cy, rx, ry, col, seed = 1, n = 5) {

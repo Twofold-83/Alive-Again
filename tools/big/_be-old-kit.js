@@ -566,29 +566,50 @@ module.exports = (kit) => {
 
   /**
    * maker(out, cat, catLabel, prefix) returns mk(slug, name, w, h, fn, o):
-   *   fn(g, roused, c)   draws the creature; the same coordinates in both pictures
-   *   o.u  [w, h, dx, dy] the roused picture's canvas and where the main picture's origin lies on it
-   *                       (by default the same size; dx centred, dy so that both stand on the bottom row)
+   *   fn(g, roused, c)   draws the creature, in the same coordinates for both pictures; it is drawn on a large
+   *                      sheet and cut out, so the canvas fits the drawing (one free pixel all round for the
+   *                      outline) whatever w and h say — they are only the size aimed at
    *   o.L  'tall' | 'long' a large creature (adds the word to its name)
    *   o.def               more for the definition (shade: false, outline: false)
    */
+  const cut = (fn, r) => {
+    const big = canvas(160, 160),
+      ret = fn(at(big, 56, 56), r, big);
+    let x0 = 999,
+      x1 = -1,
+      y0 = 999,
+      y1 = -1;
+    for (let y = 0; y < big.h; y++)
+      for (let x = 0; x < big.w; x++)
+        if (big.get(x, y)) {
+          if (x < x0) x0 = x;
+          if (x > x1) x1 = x;
+          if (y < y0) y0 = y;
+          if (y > y1) y1 = y;
+        }
+    if (x1 < 0) throw new Error('nothing drawn');
+    const pad = ret === false ? 0 : 1,
+      w = x1 - x0 + 1 + 2 * pad,
+      h = y1 - y0 + 1 + 2 * pad;
+    return {
+      w,
+      h,
+      draw(c) {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (big.get(x, y)) c.set(x - x0 + pad, y - y0 + pad, big.get(x, y));
+        return ret;
+      },
+    };
+  };
   const maker = (out, cat, catLabel, prefix) => (slug, name, w, h, fn, o = {}) => {
-    const u = o.u || [w, h],
-      uw = u[0],
-      uh = u[1],
-      udx = u[2] == null ? (uw - w) >> 1 : u[2],
-      udy = u[3] == null ? uh - h : u[3];
     if (out[prefix + slug]) throw new Error('twice: ' + prefix + slug);
     out[prefix + slug] = {
       cat,
       catLabel,
       group: 'char',
       name: name + (o.L ? ' large ' + o.L : ''),
-      w,
-      h,
       ...(o.def || {}),
-      draw: (c) => fn(at(c, 0, 0), false, c),
-      views: { used: { w: uw, h: uh, ...(o.def || {}), draw: (c) => fn(at(c, udx, udy), true, c) } },
+      ...cut(fn, false),
+      views: { used: { ...(o.def || {}), ...cut(fn, true) } },
     };
   };
 
