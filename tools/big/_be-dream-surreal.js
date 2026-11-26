@@ -47,7 +47,7 @@ module.exports = (kit, H, mk) => {
       g.rect(32, 1, 34, 2, GUM);
       g.pts([[32, 0], [34, 0], [33, 3]], TOOTH); // a mouth in the end of the trunk
     }
-  }, { w: 40, dx: 1 });
+  }, { w: 40, h: 50, dx: 1 });
 
   mk('burning-giraffe', 'giraffe on fire burning tall flames along its neck spotted animal', 28, 48, (g, r) => {
     const CH = blend(GIR, K, 0.55);
@@ -61,7 +61,7 @@ module.exports = (kit, H, mk) => {
     g.oval(3, 24, 19, 32, GIR);
     const p = g.tube([[16, 27], [19, 17], [22, 8]], 2.6, 1.8, GIR);
     g.oval(20, 3, 26, 8, GIR);
-    g.rect(24, 5, 27, 8, GIR);
+    g.rect(24, 5, 26, 8, GIR);
     g.col(21, 1, 2, GIR);
     g.col(23, 1, 2, GIR);
     g.bevel();
@@ -69,12 +69,12 @@ module.exports = (kit, H, mk) => {
     if (r) {
       g.over(3, 22, 22, 46, CH, (x, y) => y > 27 || (x + y) % 2 === 0); // charring
       for (const x of [7, 10, 13]) g.col(x, 25, 30, C.bone); // ribs
-      g.rect(24, 9, 27, 9, GIR); // the jaw drops
-      g.row(8, 24, 27, K);
+      g.rect(24, 9, 26, 9, GIR); // the jaw drops
+      g.row(8, 24, 26, K);
       g.pts([[24, 8], [26, 8]], TOOTH);
     }
     g.set(24, 5, r ? RED : K);
-    g.set(27, 6, vd(GIR));
+    g.set(26, 6, vd(GIR));
     const n = r ? 9 : 4;
     for (let i = 3; i < p.length - 2; i += r ? 3 : 5) g.flame(p[i][0] - 3, p[i][1], n + (i % 3), r ? 4 : 2, i); // the mane burns
     for (const x of r ? [5, 9, 13] : [7, 12]) g.flame(x, 23, n + (x % 3), r ? 5 : 3, x);
@@ -154,7 +154,7 @@ module.exports = (kit, H, mk) => {
       g.limb([[14, 18], [16, 22], [21, 24]], 1, C.bone);
       g.hand(22, 24, 'r', C.bone, 1);
       g.after(() => {
-        for (const [x, y] of [[-2, 30], [30, 20], [29, 36], [-3, 14]]) {
+        for (const [x, y] of [[-2, 30], [28, 20], [28, 36], [-3, 14]]) {
           g.pts([[x, y], [x + 1, y - 1], [x + 2, y], [x + 3, y - 1], [x + 4, y]], C.white); // the geese
           g.set(x + 2, y + 1, C.flame);
         }
@@ -244,7 +244,7 @@ module.exports = (kit, H, mk) => {
         g.rect(x, 10, x + 2, 12, C.white);
         g.set(x + 2, 5, dark(C.white));
       }
-      g.tube([[22, 11], [28, 15], [36, 20], [44, 21]], 3, 2, hex('#b0606a')); // the tongue rolls out
+      g.tube([[22, 11], [28, 15], [36, 19], [44, 19]], 3, 2, hex('#b0606a')); // the tongue rolls out
     }
   }, { h: 35, w: 50 });
 
@@ -256,9 +256,9 @@ module.exports = (kit, H, mk) => {
     g.oval(3, 6, 31, 27, BOIL);
     g.rect(12, 3, 18, 7, BOIL); // a turret
     g.rect(13, 1, 17, 2, dark(BOIL));
-    const pts = r ? [[26, 9], [33, 2], [40, -4], [44, 2]] : [[26, 9], [34, 4], [40, 8], [40, 15]];
+    const pts = r ? [[26, 9], [33, 2], [40, -4], [44, 2]] : [[26, 9], [33, 4], [38, 8], [38, 15]];
     const p = g.tube(pts, 2.6, 2, BOIL);
-    const [hx, hy] = r ? [41, 3] : [37, 16];
+    const [hx, hy] = r ? [41, 3] : [34, 16];
     g.rect(hx, hy, hx + 6, hy + (r ? 4 : 6), C.bone); // the head on the end of it
     g.pts([[hx - 1, hy - 1], [hx - 2, hy - 2], [hx + 7, hy - 1], [hx + 8, hy - 2]], C.bone); // horns
     g.bevel();
@@ -295,8 +295,8 @@ module.exports = (kit, H, mk) => {
       g.rect(36, 8, 48, 15, TIG); // the tiger, half out
       g.oval(46, 4, 56, 15, TIG);
       g.pts([[47, 3], [48, 3], [54, 3], [55, 3]], TIG);
-      g.limb([[42, 14], [50, 18], [58, 17]], 3, TIG);
-      g.limb([[40, 15], [47, 20], [54, 21]], 3, dark(TIG));
+      g.limb([[42, 14], [50, 17], [58, 15]], 3, TIG);
+      g.limb([[40, 15], [47, 19], [54, 19]], 3, dark(TIG));
     }
     g.bevel();
     g.over(9, 6, 28, 19, dark(FO), (x, y) => (x + (y >> 1) * 2) % 4 === 0 && y % 2 === 0); // scales
@@ -321,8 +321,8 @@ module.exports = (kit, H, mk) => {
       g.pts([[50, 11], [53, 11], [50, 14], [53, 14]], C.white);
       g.pts([[48, 7], [54, 7]], hex('#d9c04a'));
       g.pts([[47, 5], [50, 4], [53, 5], [46, 9], [56, 9]], K);
-      for (const [x, y] of [[59, 17], [55, 22]]) g.pts([[x + 1, y], [x + 1, y + 2], [x + 2, y + 1]], C.white); // claws
-      g.pts([[45, 16], [49, 18], [44, 19], [50, 21]], K);
+      for (const [x, y] of [[59, 15], [55, 19]]) g.pts([[x + 1, y], [x + 1, y + 2], [x + 2, y + 1]], C.white); // claws
+      g.pts([[45, 16], [49, 17], [44, 18], [50, 20]], K);
     }
   }, { w: 64, h: 26 });
 
@@ -375,14 +375,14 @@ module.exports = (kit, H, mk) => {
     f.row(8, 3, 12, lite(C.brass));
     f.row(21, 3, 12, dark(C.brass));
     f.row(14, 3, r ? 10 : 12, dark(C.brass));
-  }, { w: 30, dx: 6 });
+  }, { w: 34, dx: 6 });
 
   mk('herring-man', 'fish with human legs standing upright scaled body bare legs gasping', 16, 31, (g, r) => {
     g.hleg(4, 17, 28, PALE, -1, PALE);
     g.hleg(9, 17, 28, PALE, 1, PALE);
     g.poly([[5, 1], [10, 1], [13, 8], [12, 18], [3, 18], [2, 8]], FISH);
-    g.poly([[2, 9], [0, 13], [3, 14]], dark(FISH)); // fins for arms
-    g.poly([[13, 9], [15, 13], [12, 14]], dark(FISH));
+    g.poly([[2, 9], [1, 13], [3, 14]], dark(FISH)); // fins for arms
+    g.poly([[13, 9], [14, 13], [12, 14]], dark(FISH));
     g.bevel();
     g.over(3, 6, 12, 17, dark(FISH), (x, y) => (x + y) % 3 === 0 && y % 2 === 0);
     g.rect(3, 17, 12, 18, PALE);
@@ -398,9 +398,9 @@ module.exports = (kit, H, mk) => {
       g.hand(9, -6, 'u', PALE, 1);
       g.pts([[4, 5], [11, 5]], RED);
     }
-  }, { h: 40 });
+  }, { h: 42 });
 
-  mk('bird-superior', 'bird headed man in a dark suit great beak painter demon', 16, 35, (g, r) => {
+  mk('bird-superior', 'bird headed man in a dark suit great beak painter demon', 18, 35, (g, r) => {
     const f = g.at(0, 2);
     const FE = hex('#5a6a78');
     if (r) {
@@ -424,7 +424,7 @@ module.exports = (kit, H, mk) => {
       f.rect(10, 7, 12, 9, GUM);
       f.pts([[11, 8], [13, 8], [14, 9]], hex('#b0606a')); // a human tongue
     }
-  }, { w: 36, dx: 10 });
+  }, { w: 38, dx: 10 });
 
   mk('wheel-woman', 'woman on a single wheel instead of legs cloak pale face rolling', 16, 32, (g, r) => {
     const CLK = hex('#6a5a3e');
@@ -438,7 +438,6 @@ module.exports = (kit, H, mk) => {
     g.row(1, 5, 10, C.rust); // hair drawn up
     g.rect(4, 2, 4, 6, C.rust);
     g.rect(11, 2, 11, 6, dark(C.rust));
-    g.rect(7, -1 + 1, 8, 0, C.rust);
     if (r) {
       g.limb([[4, 12], [-2, 9], [-5, 3]], 1, PALE);
       g.limb([[11, 12], [17, 9], [20, 3]], 1, PALE);
@@ -458,10 +457,11 @@ module.exports = (kit, H, mk) => {
       g.hand(-5, 2, 'u', PALE, 1);
       g.hand(20, 2, 'u', PALE, 1);
     }
-  }, { w: 30, dx: 7 });
+  }, { w: 30, h: 36, dx: 7 });
 
-  mk('ball-joint-doll', 'ball jointed doll with legs at both ends and no head two pairs of legs', 18, 30, (g, r) => {
-    const D = hex('#d0b8a0');
+  mk('ball-joint-doll', 'ball jointed doll with legs at both ends and no head two pairs of legs', 18, 32, (g0, r) => {
+    const D = hex('#d0b8a0'),
+      g = g0.at(0, 1);
     const legPair = (v, up) => {
       // v: a view where the legs hang down from y 0
       for (const [x, d] of [[5, -1], [10, 1]]) {
@@ -477,7 +477,7 @@ module.exports = (kit, H, mk) => {
     const upv = { set: (x, y, c) => g.set(x, 14 - y, c), get: (x, y) => g.get(x, 14 - y), clear: (x, y) => g.clear(x, 14 - y) };
     legPair(H.view(upv.set, upv.get, upv.clear), r);
     g.disc(8.5, 14.5, 4.5, D); // the belly they all turn in
-    g.bevel();
+    g0.bevel();
     g.path([[5, 13], [8, 12], [12, 13]], dark(D));
     if (!r) g.set(8, 15, vd(D));
     else {
@@ -525,11 +525,11 @@ module.exports = (kit, H, mk) => {
       g.pts([[24, 8], [27, 8]], K);
       g.rect(24, 10, 26, 12, K);
     }
-  });
+  }, { w: 34, dx: 2 });
 
   mk('knife-ears', 'two huge ears with a knife blade between them creeping arrow through', 26, 18, (g, r) => {
     const EA = hex('#c0977e');
-    const blade = r ? [[12, 6], [24, -2], [25, 0], [15, 9]] : [[12, 8], [24, 6], [25, 8], [14, 11]];
+    const blade = r ? [[12, 6], [24, -2], [25, 0], [15, 9]] : [[12, 8], [23, 6], [24, 8], [14, 11]];
     g.poly(blade, C.steel);
     g.oval(10, 3, 19, 15, dark(EA)); // the far ear
     g.oval(2, 2, 13, 16, EA);
@@ -540,16 +540,16 @@ module.exports = (kit, H, mk) => {
     g.path([[14, 6], [17, 7], [17, 11]], vd(EA));
     g.rect(7, 8, 8, 10, r ? EYE : vd(EA)); // the ear hole
     if (r) g.set(8, 9, RED);
-    g.line(1, 9, 22, 12, C.woodDark); // the arrow through both
-    g.pts([[0, 8], [0, 10]], C.bone);
+    g.line(2, 9, 22, 12, C.woodDark); // the arrow through both
+    g.pts([[1, 8], [1, 10]], C.bone);
     g.line(blade[0][0], blade[0][1], blade[1][0], blade[1][1], lite(C.steel));
-    if (r) g.pts([[4, 16], [6, 17], [14, 17], [16, 16]], EA);
+    if (r) g.pts([[3, 16], [10, 16], [12, 16], [17, 16]], EA);
   }, { h: 22, w: 28 });
 
   mk('sunflower-creeper', 'giant torn sunflower creeping on its stems teeth in its face plant', 20, 24, (g, r) => {
     const PT = hex('#c0a23c'),
       ST = C.leafLight;
-    g.tube(r ? [[9, 12], [7, 17], [9, 22]] : [[11, 10], [8, 16], [9, 22]], 1.4, 1.2, ST);
+    g.tube(r ? [[9, 12], [7, 17], [9, 21]] : [[11, 10], [8, 16], [9, 21]], 1.4, 1.2, ST);
     g.path([[9, 21], [5, 20], [2, 22]], ST); // runners it pulls itself along by
     g.path([[9, 21], [13, 19], [17, 22]], ST);
     g.path([[8, 16], [4, 15], [3, 17]], C.leaf);
@@ -570,8 +570,8 @@ module.exports = (kit, H, mk) => {
       g.disc(cx, cy, 3, K);
       g.pts([[cx - 2, cy - 2], [cx, cy - 3], [cx + 2, cy - 2], [cx - 3, cy], [cx + 3, cy], [cx - 2, cy + 2], [cx, cy + 3], [cx + 2, cy + 2]], TOOTH);
       g.set(cx, cy, RED);
-      g.hand(2, 22, 'l', ST, 1);
-      g.hand(17, 22, 'r', ST, 1);
+      g.hand(2, 20, 'l', ST, 1);
+      g.hand(17, 20, 'r', ST, 1);
     }
   }, { w: 24, h: 26, dx: 2 });
 
@@ -612,7 +612,7 @@ module.exports = (kit, H, mk) => {
     g.rect(13, 12, 14, 13, C.brass); // a tap in its side
     g.set(14, 14, C.brass);
     g.poly([[3, 6], [12, 6], [9, 2], [6, 2]], C.steel); // the funnel
-    g.rect(7, 0, 8, 2, C.steel);
+    g.rect(7, 1, 8, 2, C.steel);
     g.rect(4, 6, 11, 10, hex('#9a9a7e')); // the face under it
     if (!r) g.poly([[9, 8], [14, 9], [9, 10]], C.straw);
     else {
@@ -648,32 +648,33 @@ module.exports = (kit, H, mk) => {
       g.pts([[17, 1], [19, 1]], EYE);
       g.pts([[17, 2], [19, 2]], K);
     } else {
-      g.disc(10, 8, 7, AR); // rolled into a wheel
+      const cy = 2;
+      g.disc(10, cy, 7, AR); // rolled into a wheel
       for (let i = 0; i < 8; i++) {
         const a = (i * Math.PI) / 4;
-        g.thick(10 + Math.round(Math.cos(a) * 7), 8 + Math.round(Math.sin(a) * 7), 10 + Math.round(Math.cos(a) * 9), 8 + Math.round(Math.sin(a) * 9), 2, PALE); // feet outwards
+        g.thick(10 + Math.round(Math.cos(a) * 7), cy + Math.round(Math.sin(a) * 7), 10 + Math.round(Math.cos(a) * 9), cy + Math.round(Math.sin(a) * 9), 2, PALE); // feet outwards
       }
       g.bevel();
       for (let i = 0; i < 8; i++) {
         const a = (i * Math.PI) / 4 + 0.4;
-        g.line(10 + Math.round(Math.cos(a) * 3), 8 + Math.round(Math.sin(a) * 3), 10 + Math.round(Math.cos(a) * 7), 8 + Math.round(Math.sin(a) * 7), dark(AR));
+        g.line(10 + Math.round(Math.cos(a) * 3), cy + Math.round(Math.sin(a) * 3), 10 + Math.round(Math.cos(a) * 7), cy + Math.round(Math.sin(a) * 7), dark(AR));
       }
-      g.disc(10, 8, 2.5, K);
-      g.eye(10, 8, 1, RED);
-      g.pts([[8, 6], [12, 6], [8, 10], [12, 10]], C.bone);
+      g.disc(10, cy, 2.5, K);
+      g.eye(10, cy, 1, RED);
+      g.pts([[8, cy - 2], [12, cy - 2], [8, cy + 2], [12, cy + 2]], C.bone);
     }
-  }, { w: 24, h: 22, dx: 2 });
+  }, { w: 24, h: 24, dx: 2 });
 
   mk('receiver-lobster', 'lobster with a telephone body receiver on its back claws cord tail ringing', 24, 18, (g, r) => {
     for (const x of [6, 9, 12, 15]) g.line(x, 13, x - 1 + (x > 10 ? 2 : 0), 16, LOB);
-    g.path([[3, 12], [1, 13], [2, 15], [0, 16]], BAKE); // the cord
+    g.path([[3, 12], [1, 13], [2, 15], [1, 16]], BAKE); // the cord
     g.rect(4, 9, 17, 13, BAKE);
     g.rect(5, 7, 16, 9, BAKE);
     const hy = r ? -4 : 0;
     g.rect(3, 4 + hy, 18, 5 + hy, BAKE); // the receiver
     g.rect(2, 4 + hy, 5, 7 + hy, BAKE);
     g.rect(16, 4 + hy, 19, 7 + hy, BAKE);
-    for (const [x, y, up] of r ? [[18, 9, 1], [18, 12, 1]] : [[18, 10, 0], [18, 12, 0]]) {
+    for (const [x, y, up] of r ? [[17, 9, 1], [17, 12, 1]] : [[17, 10, 0], [17, 12, 0]]) {
       const cy = up ? y - 6 : y;
       g.limb([[x, y], [x + 2, cy]], 2, LOB);
       g.oval(x + 1, cy - 2, x + 5, cy + 1, LOB); // claws
@@ -699,7 +700,7 @@ module.exports = (kit, H, mk) => {
     const WG = hex('#6a5a66');
     g.path([[9, 11], [8, 15], [10, 18], [9, 21]], hex('#a0626a')); // the nerve it trails
     for (const v of [g, g.flip(17)]) {
-      if (!r) v.poly([[5, 6], [1, 3], [0, 7], [2, 10], [5, 9]], WG);
+      if (!r) v.poly([[5, 6], [2, 3], [1, 7], [2, 10], [5, 9]], WG);
       else {
         v.poly([[5, 6], [-3, -2], [-5, 4], [-3, 10], [5, 9]], WG);
         v.line(4, 7, -3, 0, vd(WG));
@@ -717,7 +718,7 @@ module.exports = (kit, H, mk) => {
     g.pts([[5, 5], [12, 10], [6, 10]], hex('#b0626a')); // veins
     g.set(7, 5, C.white);
     g.shadow(5, 12, 22);
-  }, { w: 28, dx: 5 });
+  }, { w: 28, h: 27, dx: 5 });
 
   mk('walking-hand', 'hand that walks on its fingers with a mouth in its back severed', 14, 12, (g, r) => {
     const HD = hex('#c9a688');
@@ -729,7 +730,7 @@ module.exports = (kit, H, mk) => {
     }
     g.rect(3, yb, 10, yb + 4, HD);
     g.rect(5, yb - 3, 8, yb, HD); // the wrist
-    g.path([[10, yb + 2], [12, yb + 1], [13, yb + 3]], HD); // thumb
+    g.path([[10, yb + 2], [12, yb + 1], [12, yb + 3]], HD); // thumb
     g.bevel();
     g.row(yb - 3, 5, 8, C.blood);
     if (!r) {
@@ -744,7 +745,7 @@ module.exports = (kit, H, mk) => {
   }, { h: 14 });
 
   mk('bowler-swarm', 'swarm of bowler hats flying like bats nobody under them teeth', 22, 24, (g, r) => {
-    const hats = r ? [[2, 3], [12, 1], [7, 8], [15, 9], [1, 13], [10, 15]] : [[3, 2], [12, 4], [6, 10], [14, 12]];
+    const hats = r ? [[2, 3], [12, 2], [7, 8], [14, 9], [2, 13], [10, 15]] : [[3, 2], [12, 4], [6, 10], [14, 12]];
     hats.forEach(([x, y], i) => {
       g.rect(x + 1, y, x + 4, y + 2, SUIT);
       g.row(y - 1, x + 2, x + 3, SUIT);
@@ -766,7 +767,7 @@ module.exports = (kit, H, mk) => {
     g.row(11, 1, 3, C.earth);
     g.row(11, 6, 8, C.earth);
     g.rect(2, 3, 7, 9, PALE);
-    g.poly([[1, 4], [4, 0], [5, 0], [8, 4]], C.wine); // hood
+    g.poly([[1, 4], [4, 1], [5, 1], [8, 4]], C.wine); // hood
     g.col(1, 4, 7, C.wine);
     g.col(8, 4, 7, C.wine);
     g.bevel();
@@ -802,7 +803,7 @@ module.exports = (kit, H, mk) => {
       g.line(6, 3, 12, 5, hex('#b0606a'));
       g.pts([[4, 6], [7, 6]], EYE);
     }
-  }, { h: 13 });
+  }, { h: 14 });
 
   mk('egg-crawler', 'fried egg that crawls its yolk an eye small flat', 14, 8, (g, r) => {
     const W = hex('#d9d6c8');
@@ -833,10 +834,10 @@ module.exports = (kit, H, mk) => {
     g.oval(2, 2, 11, 6, C.brass);
     g.rect(9, 5, 11, 7, C.brass); // sagging
     for (const v of [g, g.flip(13)]) {
-      if (!r) v.line(2, 3, 0, 1, C.ironDark);
+      if (!r) v.line(2, 3, 1, 1, C.ironDark);
       else {
-        v.line(2, 3, 0, -2, C.ironDark);
-        v.pts([[-1, -3], [1, -3]], C.steel);
+        v.line(2, 3, 1, -2, C.ironDark);
+        v.pts([[0, -3], [2, -3]], C.steel);
       }
     }
     g.bevel();
@@ -869,12 +870,12 @@ module.exports = (kit, H, mk) => {
       g.pts([[3, 10], [5, 10]], C.white);
       g.pts([[0, 6], [9, 6]], N);
     }
-  });
+  }, { w: 12, dx: 1 });
 
   mk('moustache-moth', 'waxed moustache flapping like a moth small flying lips', 14, 10, (g, r) => {
     const M = hex('#2a2228');
     for (const v of [g, g.flip(13)]) {
-      if (!r) v.path([[6, 4], [3, 5], [1, 4], [0, 2]], M);
+      if (!r) v.path([[6, 4], [3, 5], [2, 4], [1, 2]], M);
       else v.path([[6, 4], [3, 3], [1, 0], [0, -3]], M);
       v.row(4, 2, 5, M);
       v.row(r ? 3 : 5, 3, 5, M);

@@ -229,7 +229,7 @@ module.exports = (kit) => {
         }
       },
       speckle(x0, y0, x1, y1, col, every = 5, seed = 1) {
-        const r = rnd(seed + x0 * 7 + y0 * 13);
+        const r = rnd(Math.abs(seed + x0 * 7 + y0 * 13) + 1);
         for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (g.get(x, y) && g.get(x, y) !== K && r() < 1 / every) g.set(x, y, col);
       },
       dither(x0, y0, x1, y1, col) {

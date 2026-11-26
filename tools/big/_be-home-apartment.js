@@ -36,9 +36,11 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, { P, vd, curve }, 
     } else {
       g.ball(2, 11, 10, 19, SK);
       g.row(11, 3, 9, HAIR);
-      g.strands(1, 10, 12, 10, HAIR, 4, 0.4); // its hair sweeps the steps
-      g.rect(4, 15, 5, 16, K);
-      g.set(4, 15, YEL);
+      g.strands(6, 11, 12, 10, HAIR, 4, 0.5); // its hair sweeps the steps
+      g.rect(3, 14, 4, 15, K);
+      g.set(3, 14, YEL);
+      g.row(17, 2, 5, K);
+      g.pts([[2, 17], [4, 17]], TOOTH);
     }
   });
 
@@ -169,7 +171,7 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, { P, vd, curve }, 
       g.rect(5, 10, 6, 13, SL); // fingers of it over the lip
       g.rect(14, 10, 15, 14, SL);
     }
-    g.speckle(-9, -1, 19, 30, dark(SL), 9, 4);
+    g.each(-10, -2, 20, 30, (p, x, y) => (p === SL && (x * 7 + y * 3) % 11 === 0 ? dark(SL) : null));
     g.pts([[6, 27], [7, 27], [8, 27], [7, 26], [7, 28]], C.bone); // a fish bone
     g.rect(12, 26, 14, 28, C.rust); // a tin
     g.row(26, 12, 14, C.steel);
@@ -187,25 +189,29 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, { P, vd, curve }, 
       g.set(d > 0 ? x + 3 : x - 1, y - 1, dark(PG));
       g.set(d > 0 ? x - 1 : x + 3, y + 1, dark(PG));
     };
-    const ry = r ? 15 : 11,
+    const ry = r ? 15 : 12,
       cy = 13;
-    const hole = (x, y) =>
-      (x - 8) ** 2 + (y - (cy - 3)) ** 2 < 7 || (x - 19) ** 2 + (y - (cy - 3)) ** 2 < 7 || (r ? ((x - 13.5) / 6) ** 2 + ((y - (cy + 8)) / 5) ** 2 < 1 : y >= cy + 5 && y <= cy + 6 && x > 7 && x < 20);
-    for (let y = cy - ry; y <= cy + ry; y += 3)
-      for (let x = 0; x <= 26; x += 5) {
-        const jx = x + Math.floor(R() * 3) - 1 + (((y / 3) | 0) % 2 ? 2 : 0),
+    const eyeL = (x, y) => (x - 7.5) ** 2 + (y - (cy - 3)) ** 2 < 9,
+      eyeR = (x, y) => (x - 19.5) ** 2 + (y - (cy - 3)) ** 2 < 9,
+      mouth = (x, y) => (r ? ((x - 13.5) / 6) ** 2 + ((y - (cy + 8)) / 5) ** 2 < 1 : y >= cy + 5 && y <= cy + 7 && x > 6 && x < 21),
+      hole = (x, y) => eyeL(x, y) || eyeR(x, y) || mouth(x, y);
+    for (let y = cy - ry; y <= cy + ry; y++) for (let x = -2; x <= 29; x++) if (hole(x, y)) g.set(x, y, mouth(x, y) ? MOUTH : K); // where there are no birds, there is a face
+    for (let y = cy - ry; y <= cy + ry; y += 2)
+      for (let x = 0; x <= 26; x += 4) {
+        const jx = x + Math.floor(R() * 3) - 1 + (((y / 2) | 0) % 2 ? 2 : 0),
           jy = y + Math.floor(R() * 2);
         if (((jx + 1 - 13.5) / 13) ** 2 + ((jy - cy) / ry) ** 2 > 1) continue;
-        if (hole(jx, jy) || hole(jx + 2, jy + 1) || hole(jx + 3, jy)) continue;
+        if (hole(jx, jy) || hole(jx + 2, jy + 1) || hole(jx + 3, jy) || hole(jx - 1, jy + 1)) continue;
         pigeon(jx, jy, R() < 0.5 ? 1 : -1);
       }
+    g.set(8, cy - 3, r ? REDEYE : YEL);
+    g.set(19, cy - 3, r ? REDEYE : YEL);
     if (r) {
-      g.rect(8, cy - 3, 8, cy - 3, REDEYE);
-      g.rect(19, cy - 3, 19, cy - 3, REDEYE);
-      g.pts([[-2, 2], [29, 5], [-3, 20], [30, 22], [5, 30], [22, 31]], dark(PG)); // feathers fly
+      g.teeth(10, 17, cy + 4, 1, TOOTH, 2);
+      for (const [x, y] of [[-4, 2], [31, 5], [-5, 20], [32, 22], [5, 31], [22, 32]]) pigeon(x, y, x < 13 ? -1 : 1); // some break away
     }
-    g.shadow(6, 21, r ? 36 : 31);
-  }, { outline: false });
+    g.shadow(6, 21, r ? 38 : 32);
+  });
 
   /* ---------- the caretaker's dog ---------- */
   mk('caretaker-dog-teeth', "caretaker's dog mostly teeth hound jaws grin chain mangy animal monster", (g, r) => {
@@ -857,19 +863,19 @@ module.exports = ({ C, K, hex, mix, blend, dark, lite, rnd }, { P, vd, curve }, 
       if (R() < 0.3) g.set(x + 1, y - 1, hex('#8a94a0'));
     };
     if (r) {
-      const sk = ['..xxxxxx..', '.xxxxxxxx.', 'xxxxxxxxxx', 'xx..xx..xx', 'xx..xx..xx', 'xxxx..xxxx', '.xxxxxxxx.', '..x.xx.x..', '..xxxxxx..', '...x..x...'];
-      sk.forEach((row, j) => [...row].forEach((ch, i) => ch === 'x' && (i + j) % 5 !== 4 && fly(i + 2, j + 1)));
-      for (let i = 0; i < 9; i++) fly(Math.floor(R() * 16) - 1, Math.floor(R() * 14) - 1);
-      g.set(5, 5, REDEYE);
-      g.set(9, 5, REDEYE);
+      const sk = ['...xxxxxxx...', '.xxxxxxxxxxx.', 'xxxxxxxxxxxxx', 'xxxxxxxxxxxxx', 'xx...xxx...xx', 'xx...xxx...xx', 'xxx..xxx..xxx', 'xxxxxx.xxxxxx', '.xxxxx.xxxxx.', '..xxxxxxxxx..', '..x.x.x.x.x..', '..xxxxxxxxx..', '...xxxxxxx...'];
+      sk.forEach((row, j) => [...row].forEach((ch, i) => ch === 'x' && fly(i, j - 4)));
+      for (let i = 0; i < 10; i++) fly(Math.floor(R() * 19) - 3, Math.floor(R() * 17) - 6);
+      g.set(3, 1, REDEYE);
+      g.set(9, 1, REDEYE);
     } else {
-      for (let i = 0; i < 34; i++) {
+      for (let i = 0; i < 40; i++) {
         const a = R() * 6.3,
           d = Math.sqrt(R()) * 6;
-        fly(7 + Math.cos(a) * d, 6 + Math.sin(a) * d * 0.8);
+        fly(6 + Math.cos(a) * d, 4 + Math.sin(a) * d * 0.8);
       }
     }
-    g.shadow(3, 11, 17);
+    g.shadow(2, 10, 15);
   }, { outline: false, shade: false });
 
   /* ---------- the sleepwalker ---------- */
