@@ -544,7 +544,9 @@ module.exports = (kit) => {
     const draw = rest.find((a) => typeof a === 'function'),
       full = prefix + slug;
     if (out[full]) throw new Error(full + ' twice');
-    const o = rest.find((a) => a && typeof a === 'object') || {}; // { outline: false, shade: false } for swarms and mists
+    const given = rest.find((a) => a && typeof a === 'object') || {},
+      o = {}; // { outline: false, shade: false } for swarms and mists; nothing else is taken from it
+    for (const k of ['outline', 'shade']) if (k in given) o[k] = given[k];
     out[full] = { cat, catLabel, group: 'char', name, ...fit(full, draw, false), ...o, views: { used: { ...fit(full, draw, true), ...o } } };
   };
 

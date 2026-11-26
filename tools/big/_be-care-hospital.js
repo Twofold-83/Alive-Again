@@ -25,8 +25,8 @@ module.exports = (kit, H, mk) => {
       ? [[[10, 19], [3, 13], [0, 5], 'u'], [[10, 21], [2, 22], [-3, 18], 'l'], [[10, 23], [4, 30], [-1, 34], 'l']]
       : [[[10, 19], [5, 23], [4, 29], 'd'], [[10, 21], [6, 27], [7, 33], 'd'], [[10, 23], [8, 30], [11, 35], 'd']];
     both(c, 29, (v) => A.forEach(([a, b, e, d]) => armL(v, [a, b, e], SL, GLOVE, d)));
-    fig(c, 7, 5, { tl: 14, ll: 14, robe: SCRUB, top: SCRUB, arms: 'none', skin: PALE, hair: 'cap', hairCol: SCRUB, face: r ? 'stare' : 'calm', eye: r ? RED : K });
-    c.rect(12, 20, 17, 34, lite(SCRUB)); // the apron
+    fig(c, 7, 5, { tl: 16, ll: 16, robe: SCRUB, top: SCRUB, arms: 'none', skin: PALE, hair: 'cap', hairCol: SCRUB, face: r ? 'stare' : 'calm', eye: r ? RED : K });
+    c.rect(12, 20, 17, 38, lite(SCRUB)); // the apron
     pts(c, [[13, 27], [14, 28], [16, 31], [14, 32]], C.blood);
     if (r) {
       maw(c, 11, 13, 18, 15, { long: true });

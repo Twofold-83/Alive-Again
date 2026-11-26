@@ -67,8 +67,8 @@ module.exports = (kit, T) => {
       const H = HIDE,
         leg = (x, k, far) => {
           const col = far ? dark(H) : H;
-          g.limb([[x, 18], [x + k, 24], [x, 30]], col, 2);
-          g.rect(x, 30, x + 2, 31, K);
+          g.limb([[x, 18], [x + k, 23], [x, 28]], col, 2);
+          g.rect(x, 28, x + 2, 29, K);
         };
       leg(11, 1, true);
       leg(27, -1, true);
@@ -318,9 +318,9 @@ module.exports = (kit, T) => {
     18,
     35,
     (g, r) => {
-      const A = hex('#7a7040'),
-        B = hex('#a09454'),
-        D = hex('#3e3a24'),
+      const A = hex('#8f8448'),
+        B = hex('#b8aa60'),
+        D = hex('#4a4428'),
         rr = rnd(21);
       const s = sub(30, 40, (q) => {
         q.at(7, 2).man({ skin: A, top: A, legs: A, shoe: A, hand: A, face: 'none', arms: r ? { l: 'reach', r: 'down' } : 'down', neck: false });
@@ -329,7 +329,7 @@ module.exports = (kit, T) => {
         for (let x = 0; x < s.w; x++) {
           if (!s.get(x, y)) continue;
           const v = rr();
-          if (v < (r ? 0.2 : 0.08)) continue;
+          if (v < (r ? 0.14 : 0.04)) continue;
           g.set(x - 6, y - 1, v < 0.5 ? A : v < 0.8 ? B : D);
         }
       for (let i = 0; i < (r ? 40 : 12); i++) {
@@ -601,7 +601,7 @@ module.exports = (kit, T) => {
       g.pts([[14, 11], [17, 12], [22, 12]], HIDE);
       // skull
       const hy = r ? -4 : 3,
-        hx = 33;
+        hx = 32;
       g.limb([[32, 8], [hx + 3, hy + 6]], B, 2);
       for (const s of [-1, 1]) g.limb([[hx + 4 + s * 3, hy + 3], [hx + 4 + s * 7, hy + 1], [hx + 4 + s * 9, hy - 3]], hex('#b8a070'), 2);
       g.rect(hx + 1, hy + 2, hx + 8, hy + 7, B);
@@ -820,14 +820,14 @@ module.exports = (kit, T) => {
       g.rect(43, 9, 44, 10, C.brass);
       g.set(44, 9, r ? C.white : C.flameLight);
       if (!r) {
-        g.poly([[44, 13], [47, 17], [42, 17]], IRON);
+        g.poly([[44, 13], [46, 17], [42, 17]], IRON);
         g.pts([[44, 15], [45, 16], [43, 16]], C.steel);
         g.pts([[40, 0], [42, -1]], C.ash);
       } else {
-        g.poly([[41, 11], [47, 10], [47, 16], [41, 15]], C.blood); // the firebox jaw
+        g.poly([[41, 11], [46, 10], [46, 16], [41, 15]], C.blood); // the firebox jaw
         g.rect(43, 12, 46, 14, C.flame);
         g.set(45, 13, C.flameLight);
-        for (let x = 42; x <= 47; x += 2) g.set(x, 11, C.steel), g.set(x, 16, C.steel);
+        for (let x = 42; x <= 46; x += 2) g.set(x, 11, C.steel), g.set(x, 16, C.steel);
         g.ball(37, -6, 45, 0, C.ash, { dark: hex('#5a5852') });
         g.pts([[39, -4], [42, -4]], K);
         g.row(-2, 40, 42, K);
@@ -894,10 +894,6 @@ module.exports = (kit, T) => {
     26,
     (g, r) => {
       const ST = C.stone;
-      if (r) {
-        g.rect(8, 2, 13, 14, hex('#b9b6a8')); // her shift
-        g.oval(7, -6, 14, 2, P.PALE);
-      }
       g.rect(2, 12, 19, 24, ST);
       g.oval(2, 9, 19, 15, C.stoneLight);
       g.oval(4, 10, 17, 14, P.NIGHT);
@@ -910,14 +906,16 @@ module.exports = (kit, T) => {
         g.pts([[5, 13], [6, 13], [7, 13], [14, 13], [15, 13], [16, 13]], P.PALE);
         g.pts([[5, 14], [7, 14], [14, 14], [16, 14]], P.PALE);
       } else {
-        g.rect(8, 2, 13, 13, hex('#b9b6a8'));
+        g.rect(9, 2, 12, 13, hex('#8f8c84'));
         g.oval(7, -6, 14, 2, P.PALE);
-        g.rect(7, -6, 14, -4, H);
-        g.hairs([[7, -5, 16], [8, -5, 14], [9, -4, 9], [11, -4, 11], [12, -4, 8], [13, -5, 15], [14, -5, 17], [10, -5, 6]], H);
-        g.set(10, -1, P.EYE);
+        g.rect(7, -6, 14, -5, H);
+        g.hairs([[7, -5, 14], [8, -5, 9], [13, -5, 10], [14, -5, 15], [9, -4, 3], [12, -4, 2]], H);
+        g.pts([[9, -2], [12, -2]], K);
+        g.set(12, -2, P.EYE);
+        g.rect(10, 0, 11, 1, K);
         for (const v of [g, g.flip(21)]) {
-          v.limb([[7, 4], [3, 8], [2, 18], [3, 23]], P.PALE, 2);
-          v.fingers(3, 23, 'd', P.PALE, 1);
+          v.limb([[8, 3], [3, 5], [2, 12], [3, 17]], P.PALE, 2);
+          v.fingers(3, 17, 'd', P.PALE, 1);
         }
       }
     },
