@@ -457,7 +457,7 @@ module.exports = (kit, H, mk) => {
       g.hand(-5, 2, 'u', PALE, 1);
       g.hand(20, 2, 'u', PALE, 1);
     }
-  }, { w: 30, h: 36, dx: 7 });
+  }, { w: 32, h: 36, dx: 8 });
 
   mk('ball-joint-doll', 'ball jointed doll with legs at both ends and no head two pairs of legs', 18, 32, (g0, r) => {
     const D = hex('#d0b8a0'),
@@ -718,7 +718,7 @@ module.exports = (kit, H, mk) => {
     g.pts([[5, 5], [12, 10], [6, 10]], hex('#b0626a')); // veins
     g.set(7, 5, C.white);
     g.shadow(5, 12, 22);
-  }, { w: 28, h: 27, dx: 5 });
+  }, { w: 30, h: 27, dx: 6 });
 
   mk('walking-hand', 'hand that walks on its fingers with a mouth in its back severed', 14, 12, (g, r) => {
     const HD = hex('#c9a688');
@@ -782,8 +782,9 @@ module.exports = (kit, H, mk) => {
     }
   });
 
-  mk('fur-cup-beast', 'fur covered teacup with teeth saucer spoon tongue small', 14, 11, (g, r) => {
-    const FR = hex('#8a6e4a');
+  mk('fur-cup-beast', 'fur covered teacup with teeth saucer spoon tongue small', 14, 11, (g0, r) => {
+    const FR = hex('#8a6e4a'),
+      g = r ? g0.at(0, -2) : g0;
     g.oval(1, 7, 11, 9, FR); // saucer
     g.rect(3, 3, 9, 7, FR);
     g.rect(10, 4, 11, 6, FR); // handle
@@ -791,7 +792,7 @@ module.exports = (kit, H, mk) => {
       g.col(3, 9, 10, PALE);
       g.col(8, 9, 10, PALE);
     }
-    g.bevel();
+    g0.bevel();
     g.speckle(1, 3, 11, 9, dark(FR), 3, 4);
     g.speckle(1, 3, 11, 9, lite(FR), 5, 9);
     g.row(3, 3, 9, K);

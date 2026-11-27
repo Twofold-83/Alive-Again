@@ -129,6 +129,21 @@ module.exports = (kit) => {
       },
       /** A smooth tapering tube through the points: tentacles, worms, tails, necks. */
       worm: (pts, r0, r1, col, under) => g.tube(curve(pts, 6), r0, r1, col, under),
+      /** A worm in rings: a smooth tube with a dark ring every few steps. */
+      segworm(pts, r0, r1, col, every = 4, ring) {
+        const p = curve(pts, 6);
+        g.tube(p, r0, r1, col);
+        for (let i = every; i < p.length - 2; i += every) {
+          const t = i / (p.length - 1),
+            rr = r0 + (r1 - r0) * t,
+            ddx = p[i + 1][0] - p[i - 1][0],
+            ddy = p[i + 1][1] - p[i - 1][1],
+            l = Math.hypot(ddx, ddy) || 1,
+            nx = -ddy / l,
+            ny = ddx / l;
+          for (let q = -rr; q <= rr; q += 0.5) if (g.get(p[i][0] + nx * q, p[i][1] + ny * q)) g.set(p[i][0] + nx * q, p[i][1] + ny * q, ring || dark(col));
+        }
+      },
       /** A tentacle with suckers. */
       tent(pts, r0, col, suck) {
         const p = curve(pts, 6);

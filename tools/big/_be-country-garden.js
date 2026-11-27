@@ -75,11 +75,11 @@ module.exports = (k, be) => {
         v.claws(-5, 28, -1, 1, dark(C.straw), 2, 3);
       }
     } else {
-      g.row(15, -5, 24, PO);
-      g.rect(-2, 14, 5, 17, COAT);
-      g.rect(14, 14, 21, 17, dark(COAT));
-      g.claws(-3, 16, -1, 0, C.straw, 3, 3);
-      g.claws(22, 16, 1, 0, C.straw, 3, 3);
+      g.row(15, -3, 22, PO);
+      g.rect(-1, 14, 5, 17, COAT);
+      g.rect(14, 14, 20, 17, dark(COAT));
+      g.claws(-2, 16, -1, 0, C.straw, 3, 2);
+      g.claws(21, 16, 1, 0, C.straw, 3, 2);
     }
     g.ball(5, 2, 14, 13, SACK); // the sack head
     g.row(13, 7, 12, C.rust);
@@ -181,8 +181,7 @@ module.exports = (k, be) => {
     const B = hex('#6a5a48'),
       U = hex('#a39478'),
       M = hex('#55473a');
-    g.row(17, -2, 6, C.glassLight); // the slime it leaves
-    g.pts([[-4, 17], [8, 17]], C.glassLight);
+    g.row(17, 1, 4, C.glassLight); // the slime it leaves
     g.tube([[3, 14], [12, 12], [22, 11]], 1.5, 5, B);
     if (r) {
       g.tube([[22, 11], [30, 11], [36, 5], [37, -5]], 5, 4, B); // it rears, and shows what is under it
@@ -198,8 +197,8 @@ module.exports = (k, be) => {
     } else {
       g.tube([[22, 11], [32, 11], [40, 12]], 5, 3.6, B);
       g.path([[41, 9], [43, 5], [44, 3]], B); // the eye stalks
-      g.path([[43, 10], [46, 7], [47, 6]], B);
-      g.pts([[44, 2], [47, 5]], P.EYE);
+      g.path([[43, 10], [45, 7], [46, 6]], B);
+      g.pts([[44, 2], [46, 5]], P.EYE);
       g.pts([[44, 13], [45, 15]], dark(B));
     }
     g.row(16, 5, r ? 30 : 42, U); // the foot
@@ -213,18 +212,17 @@ module.exports = (k, be) => {
   be('garden-vine-strangler', 'vine strangler large long greenhouse creeper coils wrapped body boots thorns plant monster', (g, r) => {
     const V = hex('#4a6238'),
       VD = hex('#2e4028');
-    g.rect(0, 19, 3, 24, C.black); // somebody's boots
-    g.rect(-2, 22, 0, 24, C.black);
+    g.rect(1, 19, 3, 24, C.black); // somebody's boots
     g.rect(1, 13, 4, 18, dark(C.black));
     g.limb([[4, 21], [12, 22], [22, 22], [34, 22], [42, 21]], 3.2, 2.6, hex('#6a6a5c'), hex('#4a4a40')); // the gardener, wound round
-    g.limb([[2, 24], [10, 13], [20, 21], [30, 12], [40, 21], [47, 24]], 2.4, 1.6, V, VD);
+    g.limb([[2, 24], [10, 13], [20, 21], [30, 12], [40, 21], [45, 24]], 2.4, 1.6, V, VD);
     g.limb([[6, 24], [16, 16], [25, 24], [35, 17], [44, 24]], 2, 1.4, hex('#587242'), VD);
     for (const [x, y] of [[9, 12], [19, 17], [29, 10], [37, 15], [14, 21], [44, 19]]) {
       g.rect(x, y, x + 2, y + 1, LEAFL);
       g.set(x + 3, y, LEAF);
     }
-    g.rect(44, 22, 47, 23, P.PALE); // a hand
-    g.claws(48, 23, 1, 0, P.PALE, 3, 2);
+    g.rect(42, 22, 44, 23, P.PALE); // a hand
+    g.claws(45, 23, 1, 0, P.PALE, 3, 2);
     if (r) {
       g.limb([[12, 16], [8, 4], [14, -6], [10, -13]], 1.8, 0.8, V, VD); // the runners come up
       g.limb([[38, 16], [45, 6], [40, -4], [44, -10]], 1.8, 0.8, V, VD);
