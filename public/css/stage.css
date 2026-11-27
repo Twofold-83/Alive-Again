@@ -240,3 +240,7 @@
 .titleprev { aspect-ratio: 4 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px; text-align: center; background: radial-gradient(ellipse at 50% 40%, #231a2d, #08070b); border: 2px solid; border-color: #000 var(--hi) var(--hi) #000; background-size: cover; background-position: center; overflow: hidden; }
 .titleprev b { font: 700 28px/1.1 var(--font); color: #f1ecf9; text-shadow: 0 2px 0 #000; }
 .titleprev p { margin: 0; font-size: 14px; line-height: 1.3; color: #dbd8e2; white-space: pre-line; max-height: 5.2em; overflow: hidden; text-shadow: 0 1px 2px #000; }
+/* invisible to the Player: the Director still sees it, faintly */
+.ent.unseen { opacity: .32; } .ent.unseen.sel { opacity: .45; }
+.exit.unseen { opacity: .38; border-style: dashed; }
+.stage .startmark { position: absolute; transform: translate(-50%, -20%); padding: 0 .35em; font: 700 calc(var(--u) * .2)/1.4 var(--font); color: #0b0a10; background: #87c196; border: 1px solid #000; letter-spacing: .08em; pointer-events: none; }

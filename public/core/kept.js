@@ -8,6 +8,7 @@
  *   kept.rooms      saved rooms, for any story                  { id, name, scene, at }
  *   kept.campaigns  whole maps: scenes and the ways between     { id, name, scenes, at }
  *   kept.objects    drawings from the sprite editor             (see catalog.js)
+ *   kept.games      saved games of a running story              { id, name, at, save } (see server/rooms.js snapshot)
  *
  * Every write answers true or false: a device can be full, or refuse to keep anything at all.
  */
@@ -46,6 +47,7 @@ export const kept = {
   rooms: list('tf.savedRooms', 60),
   campaigns: list('tf.campaigns', 20),
   objects: list('tf.objects', 400),
+  games: list('tf.games', 12), // saved games: a story as it stood, to go on with another day
 };
 
 /* Which campaign a story is working on while it is being prepared: story code -> campaign id (localStorage tf.working). */

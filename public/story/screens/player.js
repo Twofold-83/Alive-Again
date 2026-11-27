@@ -14,6 +14,8 @@ export function screenAsk(kit) {
     kind: k,
     image: '',
     back: false,
+    over: 'black',
+    narr: '',
     text: d.ask ? d.ask.text : '',
     sides: 6,
     dc: 0,
@@ -112,6 +114,32 @@ export function screenAsk(kit) {
       c.maker('backdrop', (id) => {
         a.image = 'c:' + id;
         c.rebuild();
+      }),
+      h('small', { class: 'dim' }, 'Where it is shown'),
+      h(
+        'div',
+        { class: 'row' },
+        h(
+          'button',
+          { id: 'picBlack', class: 'grow' + (a.over !== 'stage' ? ' on' : ''), onclick: () => ((a.over = 'black'), c.rebuild()) },
+          'On black',
+        ),
+        h(
+          'button',
+          { id: 'picOver', class: 'grow' + (a.over === 'stage' ? ' on' : ''), onclick: () => ((a.over = 'stage'), c.rebuild()) },
+          'Over the stage',
+        ),
+      ),
+      h('textarea', {
+        id: 'picNarr',
+        rows: 3,
+        maxlength: 400,
+        placeholder: 'Narration under the picture (optional) — typed out as they look',
+        value: a.narr || '',
+        oninput: (ev) => {
+          a.narr = ev.target.value;
+          c.changedQuiet();
+        },
       }),
       h('small', { class: 'dim' }, 'After they click it'),
       h(

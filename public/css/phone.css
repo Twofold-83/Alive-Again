@@ -146,6 +146,7 @@ body.phone #rpgPad:not([hidden]) { display: flex; align-items: center; justify-c
 body.phone .gtitle small { display: none; }
 body.phone #undoBtn { min-height: 36px; }
 body.phone #sheet button, body.phone #sheet .chip { min-height: 34px; }
+body.phone #sheet { min-height: 0; } body.phone #sheet button.chip.item { min-height: 40px; min-width: 40px; font-size: 26px; } body.phone #sheet button.chip.item img { height: 30px; }
 body.phone .gopt { min-height: 78px; }
 body.phone #top button { font-size: 17px; white-space: nowrap; padding: 0 6px; min-width: 0; }
 body.phone #top .who { font-size: 17px; }

@@ -225,6 +225,16 @@ as icons, and what the Player did is read out like the log of an old adventure g
 - **Battles.** A round is worked out on the server and told as a list of events (`public/shared/battle.js`);
   `public/stage/fight.js` plays them on the stage one after the other, and the battle's panels
   (`public/story/battle-ui.js`) follow the stage, not the outcome the server already knows.
+- **Invisible things.** Any thing — and any exit sign — can be made invisible to the Player: it is not drawn for
+  them, not sent to them, not in their way and nothing to click; the Director sees it faintly.
+- **Starting point.** The hero's panel sets where the hero stands when the story comes into a scene (a green
+  START mark), whichever way they came.
+- **Saved stage-sets** (Story settings): every place of the map keeps what happened in it — a fridge left open is
+  still open when the story comes back.
+- **Save the game** (Story settings): the Director saves a running game, on the device or as a file, and goes on
+  with it another day from the start screen ("Continue a saved game") — as Director with a Player, or on one screen.
+- **Pictures** the Director shows can lie on black or over the stage, with a narration typed out under them; the
+  orange line of what the Player did can be switched off.
 - **Title screens.** A story's title screen (a title, a few lines for the Player and a picture of your own) is
   set under Story settings. A campaign keeps its own: it is chosen on the Campaign screen while preparing, saved
   with the campaign (the picture too), and comes back when the campaign is loaded or put on a story's map.
@@ -373,7 +383,7 @@ public/                   the browser
   shell/                  home.js (start screen), chrome.js (top bar, clock), device.js, display.js (filters)
   css/                    style sheets by area; phone.css holds everything phone mode changes
   px/, doll/, packs/      the pixel-art library, the doll parts, art that replaces built-in pictures
-test/                     `npm test` (protocol, dungeon games, rooms and rules), `npm run test:e2e` (nine browser suites), `npm run sim`
+test/                     `npm test` (protocol, dungeon games, rooms and rules), `npm run test:e2e` (ten browser suites), `npm run sim`
 tools/                    make-big.js + big/ (the library, drawn in code), make-dolls.js, make-sprites.js
 ```
 

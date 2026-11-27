@@ -13,6 +13,7 @@ import { glyphNode } from '../stage/render.js';
 import { nameOf, pointText } from '../shared/scene-model.js';
 import { EMOTES } from '../shared/options.js';
 import { $ } from '../core/dom.js';
+import { audio } from '../core/audio.js';
 import { myTurn, other, hero, app } from '../core/state.js';
 import { saveDraft, changedQuiet, rebuild, submit, testPlay } from './turn.js';
 import { walkHero, undoWalk, setReply, oneAction } from './walk.js';
@@ -24,14 +25,34 @@ import { leave } from '../shell/home.js';
 /** A picture the Director shows: over the whole stage; a click closes it — and, if the Director said so, ends the turn. */
 function showPicture(ask) {
   let el = document.querySelector('#picture');
-  if (!el) document.body.append((el = h('div', { id: 'picture' })));
-  el.hidden = false;
+  if (el) el.remove();
+  const over = ask.over === 'stage'; // over the stage, which shows through; or alone on black, over everything
+  el = h('div', { id: 'picture', class: over ? 'over' : '' });
+  (over ? $('#stageWrap') : document.body).append(el);
+  const narr = h('p', { class: 'picnarr' });
   el.replaceChildren(
     h('img', { src: assetUrl(app.code, ask.image), alt: '' }),
     ask.text ? h('p', {}, ask.text) : '',
+    ask.narr ? narr : '',
     h('small', {}, 'Click to go on'),
   );
+  /* the narration is typed out, as on the stage */
+  const text = ask.narr || '';
+  let n = 0;
+  const type = () => {
+    if (!el.isConnected || n >= text.length) return;
+    n = Math.min(text.length, n + 2);
+    narr.textContent = text.slice(0, n);
+    if (n % 6 < 2) audio.sfx('type');
+    setTimeout(type, 45);
+  };
+  if (text) setTimeout(type, 500);
   el.onclick = () => {
+    if (n < text.length) {
+      n = text.length; // a first click shows the whole narration at once
+      narr.textContent = text;
+      return;
+    }
     el.hidden = true;
     el.replaceChildren();
     setReply({ seen: true });

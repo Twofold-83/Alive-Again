@@ -158,6 +158,47 @@ export function screenThing(kit) {
         isHero,
       ),
       !isHero &&
+        h(
+          'button',
+          {
+            id: 'visibleToggle',
+            class: sel.hidden ? 'on' : '',
+            title: 'Invisible: the Player does not see it, cannot click it and is not stopped by it — you see it faintly',
+            onclick: () => {
+              sel.hidden = !sel.hidden;
+              c.changedQuiet();
+              c.rebuild();
+            },
+          },
+          sel.hidden ? 'Invisible to the Player' : 'Visible',
+        ),
+      isHero &&
+        h(
+          'button',
+          {
+            id: 'startToggle',
+            class: d.start ? 'on' : '',
+            title: 'When the story comes into this scene, the hero stands here — whichever way they came',
+            onclick: () => {
+              d.start = d.start && Math.abs(d.start.x - sel.x) < 0.004 && Math.abs(d.start.y - sel.y) < 0.004 ? null : { x: sel.x, y: sel.y };
+              c.changedQuiet();
+              c.rebuild();
+            },
+          },
+          d.start
+            ? Math.abs(d.start.x - sel.x) < 0.004 && Math.abs(d.start.y - sel.y) < 0.004
+              ? 'Starting point ✓'
+              : 'Starting point: move it here'
+            : 'Starting point on stage',
+        ),
+      isHero &&
+        d.start &&
+        b('', 'No starting point', () => {
+          d.start = null;
+          c.changedQuiet();
+          c.rebuild();
+        }),
+      !isHero &&
         b(
           '',
           'Solid',
@@ -191,6 +232,8 @@ export function screenThing(kit) {
       }),
     ),
     sel.solid && h('p', { class: 'dim small' }, 'Solid: the Player’s hero cannot walk through it.'),
+    sel.hidden && h('p', { class: 'dim small' }, 'Invisible: the Player does not see it and cannot touch it. You see it faintly.'),
+    isHero && d.start && h('p', { class: 'dim small' }, 'When the story comes into this scene, the hero starts at the green START mark.'),
     doneBtn(''),
   );
   return;
@@ -873,6 +916,20 @@ export function screenExit(kit) {
           },
         },
         ex.locked ? 'Locked — click to unlock' : 'Open — click to lock',
+      ),
+      h(
+        'button',
+        {
+          id: 'exitVisible',
+          class: 'grow' + (ex.hidden ? ' on' : ''),
+          title: 'An invisible way out: the Player does not see the sign and cannot use it',
+          onclick: () => {
+            ex.hidden = !ex.hidden;
+            c.changedQuiet();
+            c.rebuild();
+          },
+        },
+        ex.hidden ? 'Invisible to the Player' : 'Sign visible',
       ),
       h(
         'button',

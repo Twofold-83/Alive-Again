@@ -454,6 +454,76 @@ export function screenRules(kit) {
     titleCard(kit),
     h(
       'div',
+      { class: 'card', id: 'playCard' },
+      h('h3', {}, 'While you play'),
+      h(
+        'label',
+        { class: 'row' },
+        h('input', {
+          type: 'checkbox',
+          id: 'keepSets',
+          checked: !!S.settings.keepSets,
+          onchange: (ev) => {
+            S.settings.keepSets = ev.target.checked;
+            c.act('settings', { keepSets: ev.target.checked }, 3).catch((e) => c.toast(e.message));
+          },
+        }),
+        h(
+          'span',
+          {},
+          h('b', {}, 'Saved stage-sets'),
+          ' — every place keeps what happened in it: a fridge left open is still open when the story comes back',
+        ),
+      ),
+      h(
+        'label',
+        { class: 'row' },
+        h('input', {
+          type: 'checkbox',
+          id: 'actLine',
+          checked: S.settings.actLine !== false,
+          onchange: (ev) => {
+            S.settings.actLine = ev.target.checked;
+            c.act('settings', { actLine: ev.target.checked }, 3).catch((e) => c.toast(e.message));
+            c.rebuild();
+          },
+        }),
+        h('span', {}, h('b', {}, 'The orange line on top'), ` — what ${S.names.player} did, written across the top of the stage`),
+      ),
+    ),
+    h(
+      'div',
+      { class: 'card', id: 'saveGameCard' },
+      h('h3', {}, 'Save the game'),
+      h(
+        'p',
+        { class: 'dim small' },
+        'Taking a break? Save the game as it stands — the stage, the map, the sheet, the title, every picture of your own — and go on with it another day from the start screen. (This is not the same as saving a prepared campaign.)',
+      ),
+      (() => {
+        const name = h('input', {
+          id: 'saveGameName',
+          class: 'grow',
+          maxlength: 40,
+          placeholder: S.info.title || 'Name of the save',
+          value: S.info.title || '',
+        });
+        const go = (toFile) => c.saveGame(name.value.trim() || S.info.title || 'Saved game', toFile).catch((e) => c.toast(e.message));
+        return h(
+          'div',
+          { class: 'col' },
+          name,
+          h(
+            'div',
+            { class: 'row' },
+            h('button', { id: 'saveGameBtn', class: 'primary grow', onclick: () => go(false) }, 'Save on this device'),
+            h('button', { id: 'saveGameFile', class: 'grow', onclick: () => go(true) }, 'Save as a file'),
+          ),
+        );
+      })(),
+    ),
+    h(
+      'div',
       { class: 'card' },
       h('h3', {}, 'Time per turn'),
       time,

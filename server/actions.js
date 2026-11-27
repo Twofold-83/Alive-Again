@@ -1,7 +1,7 @@
 /* Everything a client may ask for, by name. Each handler takes (room, body, who) with who = { role, token }. */
 import { fail } from './util.js';
 import { roleOf } from './rooms.js';
-import { actSubmit, actSettings, actEnd, actRoll, actBattle, actBattlePause, actBattleDirect, actTest, actKeepStage } from './turns.js';
+import { actSubmit, actSettings, actEnd, actRoll, actBattle, actBattlePause, actBattleDirect, actSaveGame, actTest, actKeepStage } from './turns.js';
 import { actClaude, actSaveScenes, actRandomScene, actAddAsset, actGenerate } from './director.js';
 import { actRpgDef, actRpgStart, actRpgAgain, actRpgCmd, actRpgSnap } from './dungeon.js';
 
@@ -16,6 +16,7 @@ const ACTIONS = {
   battle: actBattle,
   battlePause: actBattlePause,
   battleDirect: actBattleDirect,
+  saveGame: actSaveGame,
   test: actTest,
   keepStage: actKeepStage,
   addAsset: actAddAsset,

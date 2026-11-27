@@ -61,6 +61,7 @@ export function newEntity(asset, props = {}) {
     near: false, // a trap: if the hero walks close, "something happened" and the turn goes to the Director
     base: null, // where it stands, if not at its own feet: { dy, d } — dy moves the base line (stage fraction), d is its depth in tiles
     name: '', // what it is called, once the Director has named it; shown to the Player. Unnamed, it is just "this"
+    hidden: false, // invisible to the Player: not drawn for them, not in their way, nothing to click; the Director sees it faintly
     glow: '', // a light source (see LIGHTS in options.js): it shines where the thing stands
     shine: 1, // how strongly it shines (see SHINE): 1 is the light as it comes
     feel: '', // what a paper-doll character feels (see FEELS): it shows on the face
@@ -76,7 +77,8 @@ export function newScene() {
     dark: 0, // how dark the place is, 0 (lit) to 3 (pitch black): light sources cut through it
     drawing: [],
     level: null,
-    exits: [],
+    exits: [], // ways to other scenes: { id, to, label, x, y, locked, hidden }
+    start: null, // where the Player's hero stands when the story comes into this scene: { x, y } (else by the way they came)
     sceneId: '',
     entities: [newEntity(HERO_ASSET, { id: 'hero' })],
     heroId: 'hero',
@@ -122,6 +124,22 @@ export function normScene(sc) {
   for (const f of sc.steps) normScene(f);
   return sc;
 }
+/**
+ * The scene as the Player may know it: no invisible things, no invisible ways out — in the steps of a turn neither.
+ * (The Director's own copy keeps them; the server sends the Player only this.)
+ */
+export function playerView(sc) {
+  if (!sc) return sc;
+  const hid = new Set((sc.entities || []).filter((e) => e.hidden).map((e) => e.id));
+  if (!hid.size && !(sc.exits || []).some((x) => x.hidden) && !(sc.steps || []).length) return sc;
+  const out = { ...sc };
+  out.entities = sc.entities.filter((e) => !e.hidden && !(e.tie && hid.has(e.tie.to)));
+  if (sc.exits) out.exits = sc.exits.filter((x) => !x.hidden);
+  if (sc.tracks) out.tracks = sc.tracks.filter((t) => !hid.has(t.id));
+  if (sc.steps) out.steps = sc.steps.map(playerView);
+  return out;
+}
+
 /** What a thing is called: the name the Director gave it. Until then it has none, and everybody calls it "this". */
 export const nameOf = (e) => (e && e.name) || '';
 export const called = (e) => nameOf(e) || 'this';
@@ -177,7 +195,7 @@ export function walkable(scene, x, y) {
     if (!t || t.k !== 'f') return false;
   }
   for (const e of scene.entities) {
-    if (!e.solid || e.id === scene.heroId) continue;
+    if (!e.solid || e.hidden || e.id === scene.heroId) continue; // an invisible thing is not in the Player's way
     const b = baseOf(e);
     if (x > b.x0 - 0.014 && x < b.x1 + 0.014 && y > b.y0 - 0.008 && y < b.y1 + 0.012) return false; // a little room for the hero's own width
   }

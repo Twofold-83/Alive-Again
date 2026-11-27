@@ -23,7 +23,9 @@ h1 { margin: 0; font-size: 45px; letter-spacing: -.5px; }
 #newBtns > .row { display: contents; }
 button.big { padding: 12px 14px; font-size: 20px; font-weight: 600; text-align: left; }
 button.big small { display: block; font-weight: 400; font-size: 16px; opacity: .8; margin-top: 2px; }
-#hotseat { grid-column: 1 / -1; }
+#hotseat, #continueGame, .savedgames { grid-column: 1 / -1; }
+.savedgames { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #000; border: 1px solid var(--line); }
+.savedgames .row { gap: 6px; align-items: center; } .savedgames b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .or { grid-column: 1 / -1; color: var(--dim); font-size: 16px; text-transform: uppercase; letter-spacing: .08em; margin-top: 8px; }
 .homebox > .row { max-width: 300px; }
 #joinCode { text-transform: uppercase; letter-spacing: 5px; text-align: center; font-weight: 700; }

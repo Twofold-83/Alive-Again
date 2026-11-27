@@ -78,6 +78,7 @@ export const guidedCtx = {
   },
   pen,
   map: () => showMap(),
+  saveGame,
   get campaign() {
     return campaign; // preparing a campaign: save, save as, load
   },
@@ -130,6 +131,7 @@ function blankHero() {
 }
 /** Bring a scene from the map on the stage, as part of the current step. The hero stays who they are, with what they hold. */
 function useScene(doc) {
+  keepPlace(doc.id);
   const src = doc.scene,
     me = hero(app.draft),
     at = src.entities.find((e) => e.id === src.heroId),
@@ -153,7 +155,10 @@ function useScene(doc) {
     .map((e) => ({ ...clone(e), id: ids.get(e.id), say: '', tie: e.tie && ids.has(e.tie.to) ? { ...e.tie, to: ids.get(e.tie.to) } : null }));
   if (me) {
     const door = cameFrom && app.draft.exits.find((x) => x.to === cameFrom); // arrive at the way back to where they came from
-    if (door) {
+    if (src.start) {
+      me.x = src.start.x; // the scene's own starting point comes first
+      me.y = src.start.y;
+    } else if (door) {
       me.x = clamp(door.x + (door.x < 0.5 ? 0.08 : -0.08), 0.04, 0.96);
       me.y = clamp(door.y + (door.y < 0.3 ? 0.14 : 0.05), 0.1, 1);
     } else if (at) {
@@ -164,6 +169,25 @@ function useScene(doc) {
   }
   app.selId = null;
   rebuild();
+}
+/**
+ * Saved stage-sets (Story settings): when the story leaves a scene of the map, the scene is kept as it stands —
+ * an opened fridge is still open when the story comes back. The hero and what they hold go with the story.
+ */
+function keepPlace(nextId) {
+  const id = app.draft.sceneId;
+  if (!app.S.settings.keepSets || !id || id === nextId) return;
+  const scenes = clone(app.S.scenes || []),
+    doc = scenes.find((s) => s.id === id);
+  if (!doc) return;
+  const now = stageCopy(),
+    me = hero(now);
+  if (me && doc.scene) {
+    const was = hero(normScene(clone(doc.scene)));
+    if (was) Object.assign(me, { x: was.x, y: was.y }); // where the hero stood in the place, not where they left it
+  }
+  doc.scene = Object.assign(now, { sceneId: id, exits: now.exits, start: now.start });
+  putScenes(scenes);
 }
 /** The Player goes through an exit: bring in the scene behind it with a "Traveling to" moment. */
 function travelTo(sceneId) {
@@ -215,6 +239,12 @@ export function showMap() {
     titleToKeep,
     useTitle: can ? useTitle : null,
     hasStoryTitle: () => !!(app.S.info.title || app.S.info.text || app.S.info.image),
+    here: can
+      ? (id) => {
+          app.draft.sceneId = id;
+          saveDraft();
+        }
+      : null,
     closed: () => {
       resetGuided();
       if (directing()) guidedStart(app.draft);
@@ -272,6 +302,25 @@ async function useTitle(t) {
   guidedCtx.setInfo({ title: t.title || '', text: t.text || '', image, onTop: !!t.onTop && !!image });
 }
 const hasTitle = (t) => !!(t && (t.title || t.text || t.picture));
+
+/* A running game, saved to be gone on with another day: kept on this device, or as a file. */
+async function saveGame(name, toFile) {
+  const { save } = await act('saveGame', { name }, 2);
+  if (toFile) {
+    h('a', {
+      href: URL.createObjectURL(new Blob([JSON.stringify(save)], { type: 'application/json' })),
+      download: `${save.name.replace(/[^\w -]+/g, '') || 'twofold'}.twofold.json`,
+    }).click();
+    return toast('The save file is downloading — open it from the start screen, under “Continue a saved game”');
+  }
+  const ok = kept.games.add({ id: rid(), name: save.name, at: save.at, save }, 'name');
+  toast(
+    ok
+      ? `“${save.name}” is saved on this device — continue it from the start screen`
+      : 'This device has no room left for this game (its pictures are large): save it as a file instead',
+  );
+  return ok;
+}
 
 const campaign = {
   current: () => workingOn(app.code),

@@ -11,6 +11,7 @@ export const PUBLIC = path.join(ROOT, 'public');
 
 export const GRACE_MS = 4000; // slack after the deadline for a client's auto-submit to arrive
 export const MAX_BODY = 2 * 1024 * 1024;
+export const MAX_RESTORE = 24 * 1024 * 1024; // a saved game, with every picture of its own
 export const MAX_ASSET_BYTES = 400 * 1024;
 export const MAX_ASSETS = 400; // a thing drawn in the sprite editor is up to four small pictures
 export const MAX_HISTORY = 1000;

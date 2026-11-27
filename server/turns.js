@@ -1,6 +1,6 @@
 /* Turns: the clock, ending a turn (Director or Player), handing over, and the computer partner taking its turn. */
 import { GRACE_MS, MAX_HISTORY, BOT_DELAY_MS } from './config.js';
-import { timers, online, broadcast, touch, rooms } from './rooms.js';
+import { timers, online, broadcast, touch, rooms, snapshot } from './rooms.js';
 import { clone, fail, str, num, r3, arr } from './util.js';
 import {
   fightRound,
@@ -436,6 +436,8 @@ export async function actSubmit(room, body, who) {
 export async function actSettings(room, body, who) {
   directorOnly(who);
   room.settings.turnSeconds = Math.round(num(body.turnSeconds, 0, 600, room.settings.turnSeconds));
+  if (typeof body.keepSets === 'boolean') room.settings.keepSets = body.keepSets; // a place is kept as it was left
+  if (typeof body.actLine === 'boolean') room.settings.actLine = body.actLine; // the line of what the Player did, at the top of the stage
   if (body.rules && typeof body.rules === 'object') room.rules = cleanRules({ ...body.rules, type: room.rules.type }); // layers can change, the story type cannot
   if (body.info && typeof body.info === 'object')
     room.info = {
@@ -453,6 +455,12 @@ export async function actSettings(room, body, who) {
   touch(room);
   broadcast(room);
   return { ok: true };
+}
+/** The Director saves the game as it stands, to go on with it another day (see rooms.js snapshot). */
+export function actSaveGame(room, body, who) {
+  directorOnly(who);
+  if (room.rpg) throw fail(400, 'Dungeon mode keeps its own game');
+  return { ok: true, save: snapshot(room, body.name) };
 }
 export async function actEnd(room, body, who) {
   directorOnly(who);

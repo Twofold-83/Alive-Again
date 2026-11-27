@@ -25,7 +25,7 @@ export function walkHero(x, y) {
   }
   /* a trap on the way: the walk stops there and something happens */
   let sprung = null;
-  const traps = app.draft.entities.filter((e) => e.near && e.id !== me.id);
+  const traps = app.draft.entities.filter((e) => e.near && !e.hidden && e.id !== me.id);
   if (traps.length)
     for (let t = 0, last = track[track.length - 3]; t <= last && !sprung; t += 40) {
       const pt = sample(track, t);

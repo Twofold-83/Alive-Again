@@ -9,17 +9,17 @@ import http from 'node:http';
 import { syncClock, maybeBot } from './turns.js';
 import { fail } from './util.js';
 import { act } from './actions.js';
-import { streams, broadcast, rooms, createRoom, joinRoom, loadRooms, saveDirty, sweep, dirty } from './rooms.js';
-import { MAX_BODY, PUBLIC, MIME, DATA_DIR, PORT } from './config.js';
-import { SPRITE_WIDTH } from '../public/shared/scene-model.js';
+import { streams, broadcast, rooms, createRoom, joinRoom, loadRooms, saveDirty, sweep, dirty, roleOf } from './rooms.js';
+import { MAX_BODY, MAX_RESTORE, PUBLIC, MIME, DATA_DIR, PORT } from './config.js';
+import { SPRITE_WIDTH, playerView } from '../public/shared/scene-model.js';
 
-function readBody(req) {
+function readBody(req, max = MAX_BODY) {
   return new Promise((resolve, reject) => {
     let n = 0;
     const chunks = [];
     req.on('data', (c) => {
       n += c.length;
-      if (n > MAX_BODY) {
+      if (n > max) {
         reject(fail(413, 'Request too large'));
         req.destroy();
       } else chunks.push(c);
@@ -111,7 +111,7 @@ async function handle(req, res) {
   if (p === '/api/health') return json(res, 200, { ok: true, rooms: rooms.size });
 
   if (p === '/api/rooms' && req.method === 'POST') {
-    const body = await readBody(req);
+    const body = await readBody(req, MAX_RESTORE); // a saved game brings its pictures along
     if (!validToken(body.token)) throw fail(400, 'Bad token');
     const { room, role } = createRoom(body);
     maybeBot(room);
@@ -137,7 +137,13 @@ async function handle(req, res) {
     return json(res, 200, await act(room, body.token, body));
   }
   if (what === 'history' && req.method === 'GET') {
-    return json(res, 200, { code: room.code, names: room.names, ended: room.ended, history: room.history });
+    const director = roleOf(room, url.searchParams.get('token')) === 'director' || room.hotseat;
+    return json(res, 200, {
+      code: room.code,
+      names: room.names,
+      ended: room.ended,
+      history: director ? room.history : room.history.map((h) => ({ ...h, scene: playerView(h.scene) })),
+    });
   }
   if (what === 'assets' && req.method === 'GET' && m[3]) {
     const a = room.assets.find((x) => x.id === m[3]);

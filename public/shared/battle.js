@@ -55,7 +55,7 @@ const HERO_ATK = 2,
   HERO_HEALTH = 10;
 const HEALS = /potion|bandage|medicine|food|bread|apple|laudanum|pill|herb|elixir|water|wine|tea|soup|heal|meat|cheese|bottle/i;
 
-export const livingFoes = (scene) => scene.entities.filter((e) => e.hp != null && e.hp > 0 && e.id !== scene.heroId && !e.temp);
+export const livingFoes = (scene) => scene.entities.filter((e) => e.hp != null && e.hp > 0 && e.id !== scene.heroId && !e.temp && !e.hidden);
 export const weaponOf = (scene) => scene.entities.find((e) => e.tie && e.tie.to === scene.heroId);
 export const itemHeals = (it) => HEALS.test(it.name || '') || HEALS.test(it.asset || '');
 const nameOf = (e, label) => e.name || label(e); // in a fight a nameless thing goes by what it looks like

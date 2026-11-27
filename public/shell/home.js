@@ -5,6 +5,7 @@ import { connect, api } from '../core/net.js';
 import { audio } from '../core/audio.js';
 import { rpgStop } from '../dungeon/screen.js';
 import { h } from '../core/dom.js';
+import { kept } from '../core/kept.js';
 
 const nameEl = $('#name'),
   codeEl = $('#joinCode'),
@@ -97,6 +98,65 @@ $('#soloPlayer').onclick = () => create('player', 'bot');
 $('#soloDirector').onclick = () => create('director', 'bot');
 $('#hotseat').onclick = () => create('director', 'hotseat');
 $('#prepCampaign').onclick = () => create('director', 'prep');
+
+/* ---- a saved game: a new story takes it up where it was left (see server/rooms.js snapshot) ---- */
+async function resume(save, mode) {
+  errEl.textContent = '';
+  try {
+    const type = (save.rules && save.rules.type) || 'free';
+    enter((await api('/api/rooms', { token: app.token, name: myName(), role: 'director', mode, type, restore: save })).code);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+function savedGames() {
+  const box = $('#savedGames'),
+    games = kept.games.all();
+  const row = (name, at, save, forget) =>
+    h(
+      'div',
+      { class: 'row' },
+      h('b', { title: name }, name, h('small', { class: 'dim' }, at ? '  ' + new Date(at).toLocaleDateString() : '')),
+      h('button', { title: 'Your Player joins with the link', onclick: () => resume(save, 'pair') }, 'As Director'),
+      h('button', { title: 'You take every turn yourself', onclick: () => resume(save, 'hotseat') }, 'Both sides'),
+      forget &&
+        h(
+          'button',
+          {
+            title: 'Forget this saved game',
+            onclick: () => {
+              if (!confirm(`Forget “${name}”?`)) return;
+              forget();
+              savedGames();
+            },
+          },
+          '✕',
+        ),
+    );
+  const file = h('input', {
+    type: 'file',
+    accept: '.json,application/json',
+    hidden: true,
+    onchange: async () => {
+      try {
+        const save = JSON.parse(await file.files[0].text());
+        if (!save || save.twofoldSave !== 1) throw new Error('That is not a saved game');
+        box.replaceChildren(row(save.name || 'Saved game', save.at, save), h('small', { class: 'dim' }, 'How do you want to go on?'));
+      } catch (e) {
+        errEl.textContent = 'Could not read that file: ' + e.message;
+      }
+    },
+  });
+  box.replaceChildren(
+    ...(games.length
+      ? games.map((g) => row(g.name, g.at, g.save, () => kept.games.remove(g.id)))
+      : [h('small', { class: 'dim' }, 'No saved games on this device.')]),
+    h('button', { onclick: () => file.click() }, 'Load a save file…'),
+    file,
+  );
+  box.hidden = false;
+}
+$('#continueGame').onclick = () => ($('#savedGames').hidden ? savedGames() : ($('#savedGames').hidden = true));
 $('#joinBtn').onclick = () => join(codeEl.value);
 codeEl.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') join(codeEl.value);

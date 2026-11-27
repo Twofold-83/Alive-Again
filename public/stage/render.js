@@ -202,19 +202,33 @@ export function renderStage(root, scene, o = {}) {
   // exits to other scenes, and places the Director marked for the Player to choose from
   const places = scene.ask && scene.ask.kind === 'place' ? scene.ask.places : [];
   const ptSpot = scene.point && scene.point.id == null ? scene.point : null;
-  const mkey = JSON.stringify([scene.exits, places, scene.exit, o.pickPlace, ptSpot]);
+  const exits = scene.exits.filter((x) => o.seeHidden || !x.hidden), // a hidden way out is the Director's alone
+    start = o.showStart && scene.start;
+  const mkey = JSON.stringify([exits, places, scene.exit, o.pickPlace, ptSpot, start, !!o.seeHidden]);
   if (marks._key !== mkey) {
     marks._key = mkey;
     marks.replaceChildren(
-      ...scene.exits.map((x) => {
+      ...exits.map((x) => {
         const d = h(
           'div',
-          { class: 'exit' + (x.locked ? ' locked' : '') + (scene.exit === x.id ? ' on' : ''), style: `left:${x.x * 100}%;top:${x.y * 100}%` },
+          {
+            class: 'exit' + (x.locked ? ' locked' : '') + (x.hidden ? ' unseen' : '') + (scene.exit === x.id ? ' on' : ''),
+            style: `left:${x.x * 100}%;top:${x.y * 100}%`,
+          },
           (x.locked ? '' : '') + x.label,
         );
         d.dataset.exit = x.id;
         return d;
       }),
+      ...(start
+        ? [
+            h(
+              'div',
+              { class: 'startmark', title: 'Where the Player starts in this scene', style: `left:${start.x * 100}%;top:${start.y * 100}%` },
+              'START',
+            ),
+          ]
+        : []),
       ...(ptSpot ? [h('div', { class: 'pointmark', style: `left:${ptSpot.x * 100}%;top:${ptSpot.y * 100}%` }, '→')] : []),
       ...places.map((pl, i) => {
         const d = h('div', { class: 'place' + (o.pickPlace === i ? ' on' : ''), style: `left:${pl.x * 100}%;top:${pl.y * 100}%` }, '' + pl.label);
@@ -261,7 +275,9 @@ export function renderStage(root, scene, o = {}) {
   const live = new Set(),
     floats = o.floats || [],
     named = new Map(); // where the name of each named thing goes
+  const unseen = new Set(scene.entities.filter((e) => e.hidden).map((e) => e.id)); // invisible to the Player
   for (const e of scene.entities) {
+    if (!o.seeHidden && (unseen.has(e.id) || (e.tie && unseen.has(e.tie.to)))) continue; // not there at all for the Player
     live.add(e.id);
     let el = root._els.get(e.id);
     if (!el) {
@@ -303,7 +319,8 @@ export function renderStage(root, scene, o = {}) {
       (o.hot && o.hot.has(e.id) ? ' hot' : '') +
       (o.speaker === e.id ? ' speaking' : '') +
       (e.walk && !e.fx ? ' walk' : '') +
-      (e.pop ? ' popin' : '');
+      (e.pop ? ' popin' : '') +
+      (unseen.has(e.id) ? ' unseen' : ''); // the Director sees it faintly
     el.dataset.name = nameOf(e); // shown when the pointer is over it — only once the Director has named it
     fxw.className = 'fxw' + (e.fx ? ' fx-' + e.fx : '') + (o.playing && e.once ? ' once-' + e.once : '');
     fxw.firstChild.style.rotate = `${e.rot || 0}deg`;

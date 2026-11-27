@@ -13,7 +13,7 @@ let story = null,
   storyCut = null,
   playing = false;
 function storyOpts() {
-  return { code: app.code, names: story.names };
+  return { code: app.code, names: story.names, seeHidden: app.S && app.S.you === 'director' };
 }
 function caption(i) {
   const fr = story.history[i];
@@ -21,7 +21,7 @@ function caption(i) {
 }
 export async function openStory() {
   try {
-    story = await api(`/api/rooms/${app.code}/history`);
+    story = await api(`/api/rooms/${app.code}/history?token=${encodeURIComponent(app.token || '')}`);
   } catch (e) {
     return toast(e.message);
   }

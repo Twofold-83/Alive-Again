@@ -60,6 +60,8 @@ function cleanAsk(a, ids) {
     kind: a.kind,
     image: a.kind === 'image' && /^c:[A-Za-z0-9_-]{1,40}$/.test(a.image) ? a.image : '', // a picture shown to the Player: all they can do is click it
     back: a.kind === 'image' && !!a.back, // ... and then the turn goes straight back to the Director
+    over: a.kind === 'image' && a.over === 'stage' ? 'stage' : 'black', // the picture lies over the stage, or alone on black
+    narr: a.kind === 'image' ? str(a.narr, 400) : '', // a few lines told under the picture, typed out
     text: str(a.text, 120),
     sides: a.sides === 20 ? 20 : 6,
     dc: Math.round(num(a.dc, 0, 20, 0)),
@@ -145,6 +147,7 @@ export function cleanScene(s, prev, inner) {
       name: str(e.name, 40) || str(e.active && e.active.name, 40), // older clients kept a clickable thing's name with its actions
       base: e.base && typeof e.base === 'object' ? { dy: r3(num(e.base.dy, -1, 1, 0)), d: Math.round(num(e.base.d, 0.25, 6, 0.5) * 4) / 4 } : null,
       glow: LIGHTS.some((l) => l[0] === e.glow) ? e.glow : '',
+      hidden: !!e.hidden, // invisible to the Player
       shine: Math.round(num(e.shine, 0.2, 3, 1) * 100) / 100,
     });
   }
@@ -193,7 +196,9 @@ export function cleanScene(s, prev, inner) {
         x: r3(num(x.x, 0, 1, 0.5)),
         y: r3(num(x.y, 0, 1, 0.5)),
         locked: !!x.locked,
+        hidden: !!x.hidden, // a way out the Player does not see
       })),
+    start: s.start && typeof s.start === 'object' ? { x: r3(num(s.start.x, 0, 1, 0.5)), y: r3(num(s.start.y, 0.05, 1, 0.8)) } : null,
     sceneId: str(s.sceneId, 24),
     cam:
       s.cam && typeof s.cam === 'object' && num(s.cam.z, 1, 4, 1) > 1

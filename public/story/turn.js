@@ -387,7 +387,9 @@ function stageOpts() {
       ? app.draft.rollWant || (app.draft.reply && app.draft.reply.roll && !(app.draft.ask && app.draft.ask.rolled) ? app.draft.ask.sides : 0)
       : 0,
     dice: app.rollShow || undefined,
-    noAct: (heroTurn() && app.S.rules.player === 'tell') || !!app.S.scene.battle,
+    noAct: (heroTurn() && app.S.rules.player === 'tell') || !!app.S.scene.battle || app.S.settings.actLine === false, // the line of what the Player did can be switched off
+    seeHidden: app.S.you === 'director', // invisible things: faint for the Director, not there for the Player
+    showStart: directing(),
     facing: app.S.scene.battle && app.S.whose === 'player' ? facing(app.S.scene) : null, // in a fight the two sides face each other
     hot: app.S.scene.battle && app.battleMenu === 'attack' ? new Set(livingFoes(app.S.scene).map((e) => e.id)) : null, // who can be attacked
     camFrame: directing(),

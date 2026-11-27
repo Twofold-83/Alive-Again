@@ -1,6 +1,7 @@
 /* Stories ("rooms"): who is in them, what each side gets to see, keeping them on disk.
  * The server owns the committed scene, whose turn it is, the clock, the history and custom art;
  * browsers only edit a local draft and send it when the turn ends. */
+import { playerView } from '../public/shared/scene-model.js';
 import crypto from 'node:crypto';
 import * as directorAI from './director-ai.js';
 import fs from 'node:fs';
@@ -9,6 +10,7 @@ import { DATA_DIR, ROOM_TTL_MS, MAX_ROOMS } from './config.js';
 import { fail, str } from './util.js';
 import { botName } from './bots.js';
 import { cleanRules } from '../public/shared/rules.js';
+import { cleanScene } from './scene.js';
 import { normScene, newScene } from '../public/shared/scene-model.js';
 import { roomScene } from '../public/shared/rooms.js';
 
@@ -70,10 +72,78 @@ export function createRoom(body) {
     room.tokens[room.bot] = 'bot-' + crypto.randomBytes(16).toString('hex');
     room.names[room.bot] = botName();
   }
+  if (body.restore && !dungeon) restoreGame(room, body.restore);
   rooms.set(room.code, room);
   touch(room);
   return { room, role };
 }
+/**
+ * A saved game, to go on with later in a new story: everything the story is — the stage, the map, the title,
+ * the rules and every picture of its own — but not the turns already played.
+ */
+export function snapshot(room, name) {
+  return {
+    twofoldSave: 1,
+    name: str(name, 40) || room.info.title || 'Saved game',
+    at: Date.now(),
+    turn: room.turn,
+    names: room.names,
+    rules: room.rules,
+    settings: room.settings,
+    info: room.info,
+    scene: room.scene,
+    scenes: room.scenes || [],
+    assets: room.assets,
+  };
+}
+/** A new story takes up a saved game where it was left: it is the Director's turn. */
+function restoreGame(room, g) {
+  if (!g || typeof g !== 'object' || g.twofoldSave !== 1) throw fail(400, 'That is not a saved game');
+  const ok = (a) =>
+    a &&
+    typeof a === 'object' &&
+    /^[a-f0-9]{12}$/.test(a.id) &&
+    /^image\/(png|jpeg|webp)$/.test(a.mime) &&
+    typeof a.data === 'string' &&
+    a.data.length < 600000;
+  room.assets = (Array.isArray(g.assets) ? g.assets : [])
+    .filter(ok)
+    .slice(0, 400)
+    .map((a) => ({
+      id: a.id,
+      kind: a.kind === 'backdrop' ? 'backdrop' : 'sprite',
+      name: str(a.name, 40) || 'custom',
+      mime: a.mime,
+      data: a.data,
+      ...(a.part ? { part: true } : {}),
+      ...(a.views && typeof a.views === 'object' ? { views: a.views } : {}),
+      ...(a.base === 'side' ? { base: 'side' } : {}),
+    }));
+  room.rules = cleanRules({ ...(g.rules || {}), type: room.rules.type });
+  room.scene = cleanScene(g.scene || {}, room.scene);
+  room.scenes = (Array.isArray(g.scenes) ? g.scenes : [])
+    .slice(0, 60)
+    .filter((d) => d && d.scene && typeof d.id === 'string')
+    .map((d) => ({
+      id: str(d.id, 24),
+      name: str(d.name, 40) || 'Scene',
+      mx: Number(d.mx) || 0.5,
+      my: Number(d.my) || 0.5,
+      scene: cleanScene(d.scene, {}),
+    }));
+  const i = g.info || {};
+  room.info = { title: str(i.title, 60), text: str(i.text, 800), image: /^c:[A-Za-z0-9_-]{1,40}$/.test(i.image) ? i.image : '', onTop: !!i.onTop };
+  const st = g.settings || {};
+  room.settings = {
+    turnSeconds: Math.max(0, Math.min(600, Math.round(Number(st.turnSeconds) || 0))),
+    keepSets: !!st.keepSets,
+    actLine: st.actLine !== false,
+  };
+  room.turn = Math.max(0, Math.min(100000, Math.round(Number(g.turn) || 0)));
+  room.whose = 'director';
+  room.restored = true;
+}
+
 /** Take the free seat of a story (or come back to your own). Returns the role: director, player or spectator. */
 export function joinRoom(room, body) {
   let role = roleOf(room, body.token);
@@ -105,7 +175,8 @@ export function online(room, role) {
 }
 
 function view(room, role) {
-  const timed = room.deadline != null || room.remaining != null;
+  const timed = room.deadline != null || room.remaining != null,
+    seen = role === 'director' || room.hotseat ? (sc) => sc : playerView; // invisible things are the Director's alone
   return {
     code: room.code,
     you: role,
@@ -118,10 +189,10 @@ function view(room, role) {
     ended: room.ended,
     remainingMs: room.deadline != null ? Math.max(0, room.deadline - Date.now()) : room.remaining,
     paused: timed && room.deadline == null,
-    scene: room.scene,
+    scene: seen(room.scene),
     assets: room.assets.map((a) => ({ id: a.id, kind: a.kind, name: a.name, part: a.part || undefined, views: a.views, base: a.base })),
-    before: room.history.length > 1 ? room.history[room.history.length - 2].scene : null,
-    fight: room.fight || null, // the latest round of a battle (or a line spoken in it): { n, before, events } — both sides play it as it happens
+    before: seen(room.history.length > 1 ? room.history[room.history.length - 2].scene : null),
+    fight: room.fight ? { ...room.fight, before: seen(room.fight.before) } : null, // the latest round of a battle (or a line spoken in it): { n, before, events } — both sides play it as it happens
     rules: room.rules,
     info: room.info || { title: '', text: '' },
     hotseat: !!room.hotseat,

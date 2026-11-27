@@ -17,6 +17,7 @@
  *   titleToKeep()      the story's title screen, as a campaign keeps it
  *   useTitle(t)        make a campaign's title screen the story's (null when it is not the Director's turn)
  *   hasStoryTitle()    whether the story has a title screen already
+ *   here(id)           the stage was kept as this scene: the story is in it now
  *   toast(text), closed()
  */
 import { backdropCss, pixelInfo, spriteTitle } from '../core/catalog.js';
@@ -129,7 +130,9 @@ function keys(ev) {
 function addStage() {
   if (!M.c.stage) return;
   const scene = M.c.stage();
-  show(place(newName(), scene, { exits: scene.exits }), 'The stage is on the map'); // its ways out still lead where they led
+  const doc = place(newName(), scene, { exits: scene.exits }); // its ways out still lead where they led
+  if (M.c.here) M.c.here(doc.id); // and the story is in that scene now
+  show(doc, 'The stage is on the map');
 }
 function goThere(doc) {
   if (!M.c.use) return;
@@ -287,7 +290,7 @@ function drawBar() {
 /** A small picture of a scene. */
 function thumb(doc) {
   const el = h('div', { class: 'stage thumb' });
-  renderStage(el, { ...doc.scene, narration: '', action: '', ask: null }, { code: M.c.code, names: M.c.names });
+  renderStage(el, { ...doc.scene, narration: '', action: '', ask: null }, { code: M.c.code, names: M.c.names, seeHidden: true, showStart: true });
   return el;
 }
 function line(a, b) {
