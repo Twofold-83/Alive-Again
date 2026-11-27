@@ -32,7 +32,7 @@ small.grp { display: block; margin-top: 6px; text-transform: uppercase; letter-s
 }
 
 /* ---- screen filters: how the picture looks on this device (shell/display.js) ---- */
-#rpgCanvas, #titleArt { filter: var(--picture, none); }
+#rpgCanvas { filter: var(--picture, none); }
 body.look-clean { --picture: none; }
 body.look-clean .stage .bubbles { box-shadow: none; }
 body.look-green { --picture: grayscale(1) sepia(1) hue-rotate(62deg) saturate(2.6) brightness(.95) contrast(1.18); }

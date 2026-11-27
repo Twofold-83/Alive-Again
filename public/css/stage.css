@@ -236,3 +236,7 @@
 .stage .thrown { position: absolute; width: calc(var(--u) * .5); transform: translate(-50%, -50%) rotate(0); z-index: 5600; image-rendering: pixelated; pointer-events: none; transition: left .3s linear, top .3s linear; animation: thrown .3s linear; }
 @keyframes thrown { to { rotate: 540deg; } }
 .ent.hot { cursor: crosshair; } .ent.hot .glyph { filter: drop-shadow(0 0 .06em #ffe08a) drop-shadow(0 0 .14em rgba(255, 224, 138, .6)); } /* in a fight: who can be attacked */
+/* a small picture of the title screen, where it is chosen */
+.titleprev { aspect-ratio: 4 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px; text-align: center; background: radial-gradient(ellipse at 50% 40%, #231a2d, #08070b); border: 2px solid; border-color: #000 var(--hi) var(--hi) #000; background-size: cover; background-position: center; overflow: hidden; }
+.titleprev b { font: 700 28px/1.1 var(--font); color: #f1ecf9; text-shadow: 0 2px 0 #000; }
+.titleprev p { margin: 0; font-size: 14px; line-height: 1.3; color: #dbd8e2; white-space: pre-line; max-height: 5.2em; overflow: hidden; text-shadow: 0 1px 2px #000; }

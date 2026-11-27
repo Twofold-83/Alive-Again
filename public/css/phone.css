@@ -14,11 +14,9 @@ body.phone ::-webkit-scrollbar { width: 0; height: 0; }
 /* start screen */
 body.phone #home { flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom)); }
 body.phone .titlecol, body.phone .homebox { flex: none; max-width: none; }
-body.phone #titleArt { max-width: 210px; }
 body.phone .titlecol { gap: 2px; }
 body.phone .titlecol .tag { display: none; }
 body.phone .gametitle { font-size: 45px; letter-spacing: 4px; margin-top: 6px; }
-body.phone .subtitle { font-size: 18px; margin-bottom: 2px; }
 body.phone .tag { font-size: 17px; }
 body.phone .homebox { padding: 14px; gap: 10px; }
 body.phone .devpick { align-self: stretch; }

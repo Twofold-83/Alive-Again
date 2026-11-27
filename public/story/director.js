@@ -3,7 +3,7 @@
 import { isDoll } from '../core/dolls.js';
 import { openDollMaker } from '../build/dollmaker.js';
 import { normScene, newEntity, freeSpot, HERO_ASSET, MAX_ENTITIES } from '../shared/scene-model.js';
-import { assetName } from '../core/catalog.js';
+import { assetName, assetUrl } from '../core/catalog.js';
 import { rid, toast, $ } from '../core/dom.js';
 import { dropTrack, trackEnd, autoTrack } from './input.js';
 import { audio } from '../core/audio.js';
@@ -212,6 +212,9 @@ export function showMap() {
       return act('saveScenes', { scenes }, 3).catch((e) => toast(e.message));
     },
     use: can ? useScene : null,
+    titleToKeep,
+    useTitle: can ? useTitle : null,
+    hasStoryTitle: () => !!(app.S.info.title || app.S.info.text || app.S.info.image),
     closed: () => {
       resetGuided();
       if (directing()) guidedStart(app.draft);
@@ -236,15 +239,49 @@ function putScenes(scenes) {
   app.S.scenes = scenes;
   act('saveScenes', { scenes }, 3).catch((e) => toast(e.message));
 }
+/* A campaign keeps its own title screen. The picture goes along as data, so the campaign can open any story. */
+const blobToDataUrl = (b) =>
+  new Promise((ok, no) => {
+    const r = new FileReader();
+    r.onload = () => ok(r.result);
+    r.onerror = no;
+    r.readAsDataURL(b);
+  });
+/** The story's title screen as a campaign keeps it: { title, text, onTop, picture (a data URL or '') }. */
+async function titleToKeep() {
+  const i = app.S.info || {};
+  let picture = '';
+  if (i.image)
+    try {
+      picture = await blobToDataUrl(await (await fetch(assetUrl(app.code, i.image))).blob());
+    } catch {
+      /* the picture could not be read: the campaign keeps the words */
+    }
+  return { title: i.title || '', text: i.text || '', onTop: !!i.onTop && !!picture, picture };
+}
+/** A campaign's title screen becomes this story's: its picture is sent to the story first. */
+async function useTitle(t) {
+  if (!t) return;
+  let image = '';
+  if (t.picture)
+    try {
+      image = 'c:' + (await act('addAsset', { kind: 'backdrop', name: 'Title picture', dataUrl: t.picture }, 2)).asset.id;
+    } catch (e) {
+      toast('The title picture could not be used: ' + e.message);
+    }
+  guidedCtx.setInfo({ title: t.title || '', text: t.text || '', image, onTop: !!t.onTop && !!image });
+}
+const hasTitle = (t) => !!(t && (t.title || t.text || t.picture));
+
 const campaign = {
   current: () => workingOn(app.code),
   all: () => kept.campaigns.all(),
   /** Save over the campaign being worked on; with a name, save as a new one (and work on that from now on). */
-  save(name) {
+  async save(name) {
     const cur = workingOn(app.code);
     if (!name && !cur) return false;
     const scenes = stageOnMap(),
-      c = { id: name ? rid() : cur.id, name: name || cur.name, at: Date.now(), scenes: clone(scenes) };
+      c = { id: name ? rid() : cur.id, name: name || cur.name, at: Date.now(), scenes: clone(scenes), title: await titleToKeep() };
     putScenes(scenes);
     act('keepStage', { scene: finalScene() }, 3).catch(() => {}); // the story remembers the stage too
     const ok = kept.campaigns.add(c, name ? 'name' : 'id');
@@ -255,7 +292,8 @@ const campaign = {
     return ok;
   },
   /** Work on a saved campaign: its scenes become the map, and the stage shows its first scene. */
-  load(c) {
+  async load(c) {
+    if (hasTitle(c.title)) await useTitle(c.title); // its own title screen comes with it
     const scenes = clone(c.scenes || [])
       .filter((s) => s && s.scene && Array.isArray(s.scene.entities))
       .map((s) => ({ ...s, scene: normScene(s.scene) }));
@@ -265,6 +303,7 @@ const campaign = {
     else rebuild();
     toast(`Working on “${c.name}”`);
   },
+  hasTitle,
   forget(c) {
     kept.campaigns.remove(c.id);
     rebuild();

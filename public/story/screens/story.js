@@ -4,6 +4,114 @@ import { h, add } from '../../core/dom.js';
 import { glyphNode, actionParts } from '../../stage/render.js';
 import { G, short } from '../guided.js';
 
+/* ================= the title screen: what the Player sees before the story begins ================= */
+/** A small picture of the title screen as the Player will see it. */
+function titlePreview(code, info) {
+  const has = info.title || info.text || info.image;
+  return h(
+    'div',
+    {
+      class: 'titleprev' + (info.image ? ' pic' : ''),
+      id: 'titlePreview',
+      style: info.image ? `background-image:linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.6)), url("${assetUrl(code, info.image)}")` : '',
+    },
+    has
+      ? [!(info.image && info.onTop) && h('b', {}, info.title || 'A new story'), info.text && h('p', {}, info.text)]
+      : h('small', { class: 'dim' }, 'No title screen: the story opens straight on the stage.'),
+  );
+}
+/** Title, instructions, a picture of your own: for the story, and kept with a campaign when it is saved. */
+export function titleCard(kit, heading = 'Title screen and instructions', note = '') {
+  const { c, S, code } = kit;
+  const info = { title: S.info.title, text: S.info.text, image: S.info.image || '', onTop: !!S.info.onTop };
+  let infoT = 0;
+  const saveInfo = (now) => {
+    clearTimeout(infoT);
+    if (now) return c.setInfo({ ...info });
+    infoT = setTimeout(() => c.setInfo({ ...info }), 500);
+  };
+  let preview = titlePreview(code, info);
+  const typed = () => {
+    const now = titlePreview(code, info); // the preview follows every letter
+    preview.replaceWith(now);
+    preview = now;
+    saveInfo();
+  };
+  const pick = (image) => {
+    info.image = image;
+    if (!image) info.onTop = false;
+    saveInfo(true);
+    c.rebuild();
+  };
+  return h(
+    'div',
+    { class: 'card', id: 'titleCard' },
+    h('h3', {}, heading),
+    preview,
+    h('input', {
+      id: 'infoTitle',
+      placeholder: 'Title of your story',
+      maxlength: 60,
+      value: info.title,
+      oninput: (ev) => {
+        info.title = ev.target.value;
+        typed();
+      },
+    }),
+    h(
+      'textarea',
+      {
+        id: 'infoText',
+        rows: 4,
+        maxlength: 800,
+        placeholder: 'A few lines for the Player: what the story is about, how to play, what the goal is…',
+        oninput: (ev) => {
+          info.text = ev.target.value;
+          typed();
+        },
+      },
+      info.text,
+    ),
+    h(
+      'p',
+      { class: 'dim small' },
+      note || 'The Player sees this while you set the stage, the story opens on the title, and the instructions stay in their side panel.',
+    ),
+    /* a title card of your own: any picture you upload or draw fills the title screen */
+    h('b', { class: 'actlab' }, 'Title picture'),
+    h(
+      'div',
+      { class: 'grid', id: 'titlePics' },
+      h('button', { class: info.image ? '' : 'on', onclick: () => pick('') }, 'None'),
+      S.assets
+        .filter((a) => !a.part)
+        .map((a) =>
+          h(
+            'button',
+            { class: info.image === 'c:' + a.id ? 'on' : '', title: a.name, onclick: () => pick('c:' + a.id) },
+            h('img', { src: assetUrl(code, 'c:' + a.id), alt: a.name, class: 'ownimg' }),
+          ),
+        ),
+    ),
+    c.maker('backdrop', (id) => pick('c:' + id)),
+    info.image &&
+      h(
+        'label',
+        { class: 'row' },
+        h('input', {
+          type: 'checkbox',
+          checked: info.onTop,
+          onchange: (ev) => {
+            info.onTop = ev.target.checked;
+            saveInfo(true);
+            c.rebuild();
+          },
+        }),
+        h('span', {}, 'The picture already holds the title: do not write it over the picture'),
+      ),
+  );
+}
+
 /* ================= preparing a campaign: save, save as, load ================= */
 export function screenCampaign(kit) {
   const { p, c, S, head } = kit,
@@ -62,7 +170,7 @@ export function screenCampaign(kit) {
                   },
                 },
                 h('b', {}, x.name),
-                h('small', { class: 'dim' }, ` ${x.scenes.length} scenes`),
+                h('small', { class: 'dim' }, ` ${x.scenes.length} scenes${c.campaign.hasTitle(x.title) ? ' · title screen' : ''}`),
               ),
               h(
                 'button',
@@ -78,7 +186,12 @@ export function screenCampaign(kit) {
           )
         : h('small', { class: 'dim' }, 'No campaigns on this device yet.'),
     ),
-    h('p', { class: 'dim small' }, 'In a story, “Map & campaigns” puts a saved campaign on the map.'),
+    titleCard(
+      kit,
+      'Title screen of this campaign',
+      'Saved with the campaign. A story that opens with this campaign opens on this title, and the Player keeps the instructions in their side panel.',
+    ),
+    h('p', { class: 'dim small' }, 'In a story, “Map & campaigns” puts a saved campaign on the map — and offers its title screen.'),
   );
 }
 
@@ -335,102 +448,10 @@ export function screenRules(kit) {
       [600, '10 minutes'],
     ].map(([v, l]) => h('option', { value: v, selected: S.settings.turnSeconds === v }, l)),
   );
-  const info = { title: S.info.title, text: S.info.text, image: S.info.image || '', onTop: !!S.info.onTop };
-  let infoT = 0;
-  const saveInfo = () => {
-    clearTimeout(infoT);
-    infoT = setTimeout(() => c.setInfo({ ...info }), 500);
-  };
   add(
     p,
     c.typeCard(),
-    h(
-      'div',
-      { class: 'card' },
-      h('h3', {}, 'Title screen and instructions'),
-      h('input', {
-        id: 'infoTitle',
-        placeholder: 'Title of your story',
-        maxlength: 60,
-        value: info.title,
-        oninput: (ev) => {
-          info.title = ev.target.value;
-          saveInfo();
-        },
-      }),
-      h(
-        'textarea',
-        {
-          id: 'infoText',
-          rows: 4,
-          maxlength: 800,
-          placeholder: 'A few lines for the Player: what the story is about, how to play, what the goal is…',
-          oninput: (ev) => {
-            info.text = ev.target.value;
-            saveInfo();
-          },
-        },
-        info.text,
-      ),
-      h(
-        'p',
-        { class: 'dim small' },
-        'The Player sees this while you set the stage, the story opens on the title, and the instructions stay in their side panel.',
-      ),
-      /* a title card of your own: any picture you upload or draw fills the title screen */
-      h('b', { class: 'actlab' }, 'Title picture'),
-      h(
-        'div',
-        { class: 'grid', id: 'titlePics' },
-        h(
-          'button',
-          {
-            class: info.image ? '' : 'on',
-            onclick: () => {
-              info.image = '';
-              saveInfo();
-              c.rebuild();
-            },
-          },
-          'None',
-        ),
-        S.assets
-          .filter((a) => !a.part)
-          .map((a) =>
-            h(
-              'button',
-              {
-                class: info.image === 'c:' + a.id ? 'on' : '',
-                title: a.name,
-                onclick: () => {
-                  info.image = 'c:' + a.id;
-                  saveInfo();
-                  c.rebuild();
-                },
-              },
-              h('img', { src: assetUrl(code, 'c:' + a.id), alt: a.name, class: 'ownimg' }),
-            ),
-          ),
-      ),
-      c.maker('backdrop', (id) => {
-        info.image = 'c:' + id;
-        saveInfo();
-        c.rebuild();
-      }),
-      h(
-        'label',
-        { class: 'row' },
-        h('input', {
-          type: 'checkbox',
-          checked: info.onTop,
-          onchange: (ev) => {
-            info.onTop = ev.target.checked;
-            saveInfo();
-          },
-        }),
-        h('span', {}, 'The picture already holds the title: do not write it over the picture'),
-      ),
-    ),
+    titleCard(kit),
     h(
       'div',
       { class: 'card' },

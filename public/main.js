@@ -5,10 +5,8 @@ import { loadDolls } from './core/dolls.js';
 import { audio } from './core/audio.js';
 import { $ } from './core/dom.js';
 import { rpgInit } from './dungeon/screen.js';
-import { startTitle } from './shell/title.js';
 import { loadPack, loadPixel, loadOwn } from './core/catalog.js';
 import { boot } from './shell/home.js';
-import { app } from './core/state.js';
 
 document.addEventListener(
   'pointerdown',
@@ -29,8 +27,5 @@ document.addEventListener(
 );
 rpgInit();
 initDisplay();
-startTitle($('#titleArt'), () => {
-  if (!app.code) audio.sfx('thunder');
-});
 loadOwn();
 Promise.all([loadPack(), loadPixel(), loadDolls()]).then(boot);

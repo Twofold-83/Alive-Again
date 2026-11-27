@@ -7,6 +7,7 @@ const { setup } = require('./lib');
     const D = await t.open(),
       P = await t.open();
     await D.p.goto(t.base);
+    assert.equal(await D.p.locator('#titleArt, .subtitle').count(), 0, 'the start screen has no four-armed boy any more');
     await D.p.fill('#name', 'Mia');
     await D.p.click('#newDirector');
     await D.p.waitForSelector('.gopts');

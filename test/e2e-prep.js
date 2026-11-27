@@ -66,18 +66,41 @@ const { setup } = require('./lib');
     assert(Math.abs(hx1 - hx0) < 0.005 && Math.abs(hy1 - hy0) < 0.005, 'the hero stands where they stood');
     assert.match(await p.textContent('#foot'), /Test as Player/);
 
-    /* Save as a second campaign, then load the first again */
+    /* every campaign has a title screen of its own: chosen here, saved with it, back when it is loaded */
+    await x.opt('Campaign');
+    assert.match(await p.textContent('#titleCard'), /Title screen of this campaign/);
+    await p.fill('#infoTitle', 'The Night Shift');
+    await p.fill('#infoText', 'Nobody leaves before dawn.');
+    await p.waitForFunction(() => /The Night Shift/.test(document.querySelector('#titlePreview').textContent));
+    await p.waitForTimeout(700);
+    await p.click('#campSaveCur');
+    await p.waitForFunction(() => (JSON.parse(localStorage.getItem('tf.campaigns'))[0].title || {}).title === 'The Night Shift');
+    assert.equal((await campaigns())[0].title.text, 'Nobody leaves before dawn.');
+    await p.click('.gback');
+
+    /* Save as a second campaign with a title of its own, then load the first again */
     await x.add('lantern');
     await x.done();
     await x.opt('Campaign');
+    await p.fill('#infoTitle', 'Day Shift');
+    await p.fill('#infoText', '');
+    await p.waitForTimeout(700);
     await p.fill('#campAsName', 'Day shift');
     await p.click('#campSaveAs');
     await p.waitForFunction(() => /Day shift/.test(document.querySelector('#banner').textContent));
     assert.equal((await campaigns()).length, 2);
+    assert.equal((await campaigns()).find((c) => c.name === 'Day shift').title.title, 'Day Shift');
     assert.equal(await things(), 4);
     await p.click('#campList .myroom:has-text("Night shift") button.grow');
     await p.waitForFunction(() => /Night shift/.test(document.querySelector('#banner').textContent));
     assert.equal(await things(), 3, 'the stage shows the loaded campaign');
+    await p.waitForFunction(() => document.querySelector('#infoTitle').value === 'The Night Shift');
+    for (let i = 0; i < 20 && (await x.state()).info.title !== 'The Night Shift'; i++) await p.waitForTimeout(100);
+    assert.deepEqual(
+      [(await x.state()).info.title, (await x.state()).info.text],
+      ['The Night Shift', 'Nobody leaves before dawn.'],
+      'and its title screen',
+    );
 
     /* the story remembers the stage as it was saved, even in a new browser tab */
     await p.click('#campQuickSave');

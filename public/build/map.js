@@ -14,6 +14,9 @@
  *   stage()            a copy of what is on the stage now (null when it is not the Director's turn)
  *   use(doc)           move the story to a scene (null when it is not the Director's turn)
  *   sceneId()          the scene the story is in
+ *   titleToKeep()      the story's title screen, as a campaign keeps it
+ *   useTitle(t)        make a campaign's title screen the story's (null when it is not the Director's turn)
+ *   hasStoryTitle()    whether the story has a title screen already
  *   toast(text), closed()
  */
 import { backdropCss, pixelInfo, spriteTitle } from '../core/catalog.js';
@@ -195,11 +198,11 @@ function addScenario(sc) {
 }
 
 /* ---------- campaigns and files: a whole map, to use again ---------- */
-function saveCampaign() {
+async function saveCampaign() {
   if (M.saveT) saveNow();
   const name = (document.querySelector('#campName').value || 'My campaign').trim().slice(0, 40) || 'My campaign';
   M.c.toast(
-    kept.campaigns.add({ id: rid(), name, at: Date.now(), scenes: clone(library()) }, 'name')
+    kept.campaigns.add({ id: rid(), name, at: Date.now(), scenes: clone(library()), title: await M.c.titleToKeep() }, 'name')
       ? `Campaign “${name}” is saved: ${M.list.length} scenes with their connections`
       : 'This device has no room left to save it',
   );
@@ -557,7 +560,19 @@ function campaignsCard() {
     keptRows(
       kept.campaigns.all(),
       (c) => `${c.scenes.length} scenes`,
-      (c) => addScenes(c.scenes, 60) && M.c.toast(`“${c.name}” is on the map`),
+      (c) => {
+        if (!addScenes(c.scenes, 60)) return;
+        M.c.toast(`“${c.name}” is on the map`);
+        /* its title screen too: at once for a story without one, after asking for one that has its own */
+        const t = c.title;
+        if (
+          M.c.useTitle &&
+          t &&
+          (t.title || t.text || t.picture) &&
+          (!M.c.hasStoryTitle() || confirm(`Use the title screen of “${c.name}” for this story?`))
+        )
+          M.c.useTitle(t);
+      },
       'Put this campaign on the map',
       (c) => kept.campaigns.remove(c.id),
     ),

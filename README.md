@@ -225,6 +225,9 @@ as icons, and what the Player did is read out like the log of an old adventure g
 - **Battles.** A round is worked out on the server and told as a list of events (`public/shared/battle.js`);
   `public/stage/fight.js` plays them on the stage one after the other, and the battle's panels
   (`public/story/battle-ui.js`) follow the stage, not the outcome the server already knows.
+- **Title screens.** A story's title screen (a title, a few lines for the Player and a picture of your own) is
+  set under Story settings. A campaign keeps its own: it is chosen on the Campaign screen while preparing, saved
+  with the campaign (the picture too), and comes back when the campaign is loaded or put on a story's map.
 - **Save room.** "Build this room → Save room" keeps the stage as a room on the device; "My saved rooms" brings
   it on stage in any story, or puts a copy on the map.
 - **Rolls at once.** When the Director asks for a roll (with the number to reach), the Player presses Roll,
@@ -367,7 +370,7 @@ public/                   the browser
     dollmaker.js          the character maker
     spriteed.js           the sprite editor: all four pictures of a thing
   dungeon/screen.js       Dungeon mode: editor, game canvas, controls, Overlord panel
-  shell/                  home.js (start screen), chrome.js (top bar, clock), device.js, display.js (filters), title.js
+  shell/                  home.js (start screen), chrome.js (top bar, clock), device.js, display.js (filters)
   css/                    style sheets by area; phone.css holds everything phone mode changes
   px/, doll/, packs/      the pixel-art library, the doll parts, art that replaces built-in pictures
 test/                     `npm test` (protocol, dungeon games, rooms and rules), `npm run test:e2e` (nine browser suites), `npm run sim`
